@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Restore
+        run: dotnet restore NT.QAMS.sln
+
+      - name: Build
+        run: dotnet build NT.QAMS.sln --configuration Release --no-restore
+
+      # Architecture tests are a merge gate: a layer/module boundary violation
+      # fails the pipeline, not code review.
+      - name: Test
+        run: dotnet test NT.QAMS.sln --configuration Release --no-build --verbosity normal

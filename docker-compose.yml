@@ -1,0 +1,22 @@
+# Local development stack. Credentials here are development-only by design;
+# real environments inject secrets via environment/secret stores — never this file.
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: ntqams-postgres
+    environment:
+      POSTGRES_DB: ntqams
+      POSTGRES_USER: qams_app
+      POSTGRES_PASSWORD: dev-only-local
+    ports:
+      - "5432:5432"
+    volumes:
+      - ntqams-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U qams_app -d ntqams"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  ntqams-pgdata:

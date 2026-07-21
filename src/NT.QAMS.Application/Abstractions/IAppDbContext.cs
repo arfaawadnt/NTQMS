@@ -1,0 +1,57 @@
+﻿using Microsoft.EntityFrameworkCore;
+using NT.QAMS.Domain.AnalyticalQuality;
+using NT.QAMS.Domain.AuditManagement;
+using NT.QAMS.Domain.Competency;
+using NT.QAMS.Domain.DocumentControl;
+using NT.QAMS.Domain.Equipment;
+using NT.QAMS.Domain.Files;
+using NT.QAMS.Domain.IdentityAccess;
+using NT.QAMS.Domain.Improvement;
+using NT.QAMS.Domain.Notifications;
+using NT.QAMS.Domain.Organization;
+using NT.QAMS.Domain.Records;
+using NT.QAMS.Domain.Sla;
+using NT.QAMS.Domain.RiskGovernance;
+using NT.QAMS.Domain.SupplierQuality;
+using NT.QAMS.Domain.Tenancy;
+
+namespace NT.QAMS.Application.Abstractions;
+
+/// <summary>
+/// Persistence port for application handlers. Grows one DbSet per aggregate as
+/// modules land; Infrastructure implements it. Handlers call SaveChangesAsync —
+/// the interceptors (audit stamp, tenant stamp, outbox) run inside it.
+/// </summary>
+public interface IAppDbContext
+{
+    DbSet<Tenant> Tenants { get; }
+    DbSet<UserAccount> Users { get; }
+    DbSet<Nonconformance> Nonconformances { get; }
+    DbSet<ControlledDocument> Documents { get; }
+    DbSet<FileReference> Files { get; }
+    DbSet<Audit> Audits { get; }
+    DbSet<EquipmentItem> EquipmentItems { get; }
+    DbSet<CompetencyRecord> Competencies { get; }
+    DbSet<TrainingAssignment> TrainingAssignments { get; }
+    DbSet<RiskItem> Risks { get; }
+    DbSet<ChangeRequest> ChangeRequests { get; }
+    DbSet<ManagementReview> ManagementReviews { get; }
+    DbSet<Supplier> Suppliers { get; }
+    DbSet<SupplierEvaluation> SupplierEvaluations { get; }
+    DbSet<Branch> Branches { get; }
+    DbSet<Department> Departments { get; }
+    DbSet<TestCatalogItem> TestCatalogItems { get; }
+    DbSet<LovEntry> LovEntries { get; }
+    DbSet<NotificationRule> NotificationRules { get; }
+    DbSet<NotificationDispatch> NotificationDispatches { get; }
+    DbSet<QcProfile> QcProfiles { get; }
+    DbSet<QcRun> QcRuns { get; }
+    DbSet<ValidationStudy> ValidationStudies { get; }
+    DbSet<PtEnrollment> PtEnrollments { get; }
+    DbSet<ArchiveEntry> ArchiveEntries { get; }
+    DbSet<SlaDefinition> SlaDefinitions { get; }
+    DbSet<WorkTask> WorkTasks { get; }
+    DbSet<EscalationTimer> EscalationTimers { get; }
+
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+}
