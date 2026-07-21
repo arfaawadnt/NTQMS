@@ -1,0 +1,16 @@
+# Normalize text line endings in the repo; check out native on each platform.
+* text=auto
+
+*.cs      text
+*.csproj  text
+*.sln     text eol=crlf
+*.json    text
+*.md      text
+*.yml     text
+*.sql     text
+*.ps1     text eol=crlf
+Dockerfile text
+
+# Binary
+*.png binary
+*.zip binary
