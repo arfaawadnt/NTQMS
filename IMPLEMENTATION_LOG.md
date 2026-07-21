@@ -276,7 +276,26 @@ signing points, SignalR push, Angular frontend.
   (`.gitignore` covers deploy/publish-win-x64 + zips + data/); `.gitattributes`
   normalizes line endings. 184 source files tracked. Local only — not pushed.
 
-## Phase 1 — Identity & Access + Tenancy completion (next)
+## Frontend v1 (2026-07-22) ✅ — Angular 18 foundation + auth/shell/NC slice
+
+- Node 20.18.1 installed user-locally (`%LOCALAPPDATA%\nodejs-portable`). Angular
+  18 standalone app scaffolded by hand (package.json, angular.json, tsconfig,
+  application builder). `npm install` (852 pkgs) + `ng build` (strict templates)
+  both green; ~84 kB initial transfer, per-feature lazy chunks.
+- **Foundation:** app.config (router + HttpClient + interceptor), AppComponent
+  syncs document dir/lang, AuthService (signals, session persistence, login/MFA/
+  PIN flows), authInterceptor (bearer + 401→login), authGuard, I18nService
+  (EN/AR/FR dictionary + RTL), QamsApiService typed client.
+- **Slice:** login (with the MFA-required step revealing the code field), shell
+  (navy sidebar, language switcher, sign-out), dashboard (live KPI cards),
+  NC list (raise + submit + list), notifications feed (mark-read).
+- **Verified in a real browser** (ng serve :4210 + browser pane): login form
+  renders with all fields; selecting Arabic flips document.dir→rtl, lang→ar, and
+  translates labels (تسجيل الدخول / معرّف المختبر).
+- `frontend/README.md` documents run/deploy + the remaining ~25 module screens
+  (same list+form shape as the NC feature). Frontend node_modules/dist gitignored.
+
+## Backend Phase 1 items still open (non-blocking)
 
 Per architecture §11: JWT + refresh + MFA(TOTP), UserAccount/Role/Privilege aggregates,
 privilege catalog + authorization behavior, session registry, provisioning saga

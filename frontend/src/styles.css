@@ -1,0 +1,80 @@
+/* NT.QAMS design system — navy #1E3A5F, blue #0077c2, teal #00b2a9 (per the design PDF). */
+:root {
+  --nt-navy: #1E3A5F;
+  --nt-blue: #0077c2;
+  --nt-teal: #00b2a9;
+  --nt-bg: #f4f6f9;
+  --nt-surface: #ffffff;
+  --nt-border: #dce3ec;
+  --nt-text: #1f2b3a;
+  --nt-muted: #6b7a8d;
+  --nt-danger: #c0392b;
+  --nt-warn: #e08a00;
+  --nt-ok: #1e8e5a;
+  --nt-radius: 8px;
+  --nt-shadow: 0 1px 3px rgba(30, 58, 95, .12), 0 1px 2px rgba(30, 58, 95, .08);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  font-family: "Segoe UI", "Encode Sans", "Cairo", system-ui, sans-serif;
+  color: var(--nt-text);
+  background: var(--nt-bg);
+  font-size: 14px;
+}
+
+/* Acronyms stay uppercase; general labels use Title Case, not ALL CAPS. */
+h1, h2, h3 { text-transform: none; color: var(--nt-navy); margin: 0 0 .5rem; }
+
+[dir="rtl"] { direction: rtl; }
+[dir="rtl"] .qams-sidebar { border-right: none; border-left: 1px solid var(--nt-border); }
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: var(--nt-radius);
+  padding: .5rem .9rem;
+  background: var(--nt-blue);
+  color: #fff;
+}
+button.secondary { background: var(--nt-surface); color: var(--nt-navy); border-color: var(--nt-border); }
+button.ghost { background: transparent; color: var(--nt-blue); }
+button:disabled { opacity: .5; cursor: not-allowed; }
+
+input, select, textarea {
+  font: inherit;
+  padding: .5rem .6rem;
+  border: 1px solid var(--nt-border);
+  border-radius: var(--nt-radius);
+  background: #fff;
+  width: 100%;
+}
+
+label { display: block; font-weight: 600; margin: .75rem 0 .25rem; color: var(--nt-navy); }
+
+.card {
+  background: var(--nt-surface);
+  border: 1px solid var(--nt-border);
+  border-radius: var(--nt-radius);
+  box-shadow: var(--nt-shadow);
+  padding: 1.25rem;
+}
+
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: start; padding: .6rem .75rem; border-bottom: 1px solid var(--nt-border); }
+th { color: var(--nt-muted); font-weight: 600; font-size: .82rem; }
+
+.pill {
+  display: inline-block; padding: .15rem .55rem; border-radius: 999px;
+  font-size: .78rem; font-weight: 600; background: #eef3f8; color: var(--nt-navy);
+}
+.pill.ok { background: #e4f5ec; color: var(--nt-ok); }
+.pill.warn { background: #fdf1de; color: var(--nt-warn); }
+.pill.danger { background: #fbe7e4; color: var(--nt-danger); }
+
+.error { color: var(--nt-danger); font-size: .85rem; margin-top: .5rem; }
+.muted { color: var(--nt-muted); }
