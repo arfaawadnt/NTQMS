@@ -265,6 +265,17 @@ PINs), SignalR push, Angular frontend.
 privilege matrix (role gates in place today), e-sign ceremonies on remaining
 signing points, SignalR push, Angular frontend.
 
+## v1.0 release consolidation (2026-07-22) ✅
+
+- Release-config build clean (0 warnings) + all 114 tests green as the release checkpoint.
+- Solution-level `README.md` (architecture, module map, build/run/deploy, increment history).
+- `scripts/verify-e2e.ps1` — automates the DEPLOY.md happy path against a live
+  instance (login → provision → NC → file upload → signed document publish →
+  audit trail → hash-chain verification), pass/fail per step, exit code.
+- **Git repository initialized**; two commits; build/publish artifacts excluded
+  (`.gitignore` covers deploy/publish-win-x64 + zips + data/); `.gitattributes`
+  normalizes line endings. 184 source files tracked. Local only — not pushed.
+
 ## Phase 1 — Identity & Access + Tenancy completion (next)
 
 Per architecture §11: JWT + refresh + MFA(TOTP), UserAccount/Role/Privilege aggregates,
