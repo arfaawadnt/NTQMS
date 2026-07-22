@@ -61,6 +61,14 @@ export const routes: Routes = [
         loadComponent: () => import('./features/competency/training-queue.component').then((m) => m.TrainingQueueComponent),
       },
       {
+        path: 'risks',
+        loadComponent: () => import('./features/risk/risk-list.component').then((m) => m.RiskListComponent),
+      },
+      {
+        path: 'risks/:id',
+        loadComponent: () => import('./features/risk/risk-detail.component').then((m) => m.RiskDetailComponent),
+      },
+      {
         path: 'users',
         loadComponent: () => import('./features/users/users.component').then((m) => m.UsersComponent),
       },

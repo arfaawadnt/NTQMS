@@ -331,3 +331,49 @@ export interface TrainingAssignment {
 }
 
 export interface AssignTrainingRequest { traineeId: string; subject: string; documentId: string | null; dueDate: string; }
+
+// ── Risk & Governance ────────────────────────────────────────────────────────
+
+/** Common risk categories (backend accepts any string; these avoid magic-string drift). */
+export const RISK_CATEGORIES = ['Operational', 'Technical', 'Compliance', 'Safety', 'Financial', 'Strategic'] as const;
+export type RiskCategory = (typeof RISK_CATEGORIES)[number];
+
+/** Residual RPN above this threshold is flagged high-risk (mirrors RiskItem.HighResidualThreshold). */
+export const HIGH_RESIDUAL_RPN_THRESHOLD = 12;
+
+export interface MitigationAction {
+  id: string;
+  description: string;
+  ownerId: string;
+  dueDate: string;
+  completed: boolean;
+}
+
+export interface RiskListItem {
+  id: string;
+  riskRef: string;
+  title: string;
+  category: string;
+  status: string;
+  rpn: number;
+  residualRpn: number | null;
+}
+
+export interface RiskDetail {
+  id: string;
+  riskRef: string;
+  title: string;
+  category: string;
+  status: string;
+  likelihood: number;
+  impact: number;
+  rpn: number;
+  residualLikelihood: number | null;
+  residualImpact: number | null;
+  residualRpn: number | null;
+  actions: MitigationAction[];
+}
+
+export interface AssessRiskRequest { title: string; category: string; likelihood: number; impact: number; }
+export interface AddMitigationRequest { description: string; ownerId: string; dueDate: string; }
+export interface ResidualAssessmentRequest { likelihood: number; impact: number; }
