@@ -33,6 +33,14 @@ export const routes: Routes = [
         loadComponent: () => import('./features/documents/document-detail.component').then((m) => m.DocumentDetailComponent),
       },
       {
+        path: 'audits',
+        loadComponent: () => import('./features/audits/audit-list.component').then((m) => m.AuditListComponent),
+      },
+      {
+        path: 'audits/:id',
+        loadComponent: () => import('./features/audits/audit-detail.component').then((m) => m.AuditDetailComponent),
+      },
+      {
         path: 'users',
         loadComponent: () => import('./features/users/users.component').then((m) => m.UsersComponent),
       },

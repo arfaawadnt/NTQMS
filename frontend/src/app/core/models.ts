@@ -181,3 +181,65 @@ export interface RegisterUserRequest {
 
 export interface ChangeUserRoleRequest { role: TenantRole; }
 export interface ResetUserPasswordRequest { newPassword: string; }
+
+// ── Audit Management ─────────────────────────────────────────────────────────
+
+export const AUDIT_TYPES = ['Internal', 'ExternalHosted'] as const;
+export type AuditType = (typeof AUDIT_TYPES)[number];
+
+export const CHECKLIST_VERDICTS = ['Conform', 'Ofi', 'NonConform'] as const;
+export type ChecklistVerdict = (typeof CHECKLIST_VERDICTS)[number];
+
+export const FINDING_GRADES = ['Ofi', 'MinorNc', 'MajorNc'] as const;
+export type FindingGrade = (typeof FINDING_GRADES)[number];
+
+export interface ChecklistItem {
+  id: string;
+  isoClause: string;
+  question: string;
+  verdict: string;
+  evidence: string | null;
+}
+
+export interface AuditFinding {
+  id: string;
+  grade: string;
+  description: string;
+  ncId: string | null;
+}
+
+export interface AuditListItem {
+  id: string;
+  auditRef: string;
+  title: string;
+  type: string;
+  status: string;
+  leadAuditorId: string;
+  plannedDate: string;
+  createdAtUtc: string;
+}
+
+export interface AuditDetail {
+  id: string;
+  auditRef: string;
+  title: string;
+  type: string;
+  status: string;
+  leadAuditorId: string;
+  plannedDate: string;
+  signedOffBy: string | null;
+  signedOffAtUtc: string | null;
+  checklist: ChecklistItem[];
+  findings: AuditFinding[];
+}
+
+export interface ChecklistItemRequest { isoClause: string; question: string; }
+export interface ScheduleAuditRequest {
+  title: string;
+  type: AuditType;
+  leadAuditorId: string;
+  plannedDate: string;
+  checklist: ChecklistItemRequest[];
+}
+export interface AnswerChecklistItemRequest { verdict: ChecklistVerdict; evidence: string | null; }
+export interface RaiseFindingRequest { grade: FindingGrade; description: string; }
