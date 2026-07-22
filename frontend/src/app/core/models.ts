@@ -290,3 +290,44 @@ export interface RegisterEquipmentRequest {
 }
 export interface LogCalibrationRequest { performedAt: string; provider: string; result: string; certificateFileId: string | null; }
 export interface LogMaintenanceRequest { performedAt: string; workDescription: string; }
+
+// ── Competency & Training ────────────────────────────────────────────────────
+
+export interface AssessmentResult { id: string; score: number; assessorId: string; assessedAtUtc: string; }
+
+export interface CompetencyListItem {
+  id: string;
+  traineeId: string;
+  subject: string;
+  status: string;
+  expiresAt: string | null;
+}
+
+export interface CompetencyDetail {
+  id: string;
+  traineeId: string;
+  subject: string;
+  documentId: string | null;
+  status: string;
+  validityMonths: number;
+  expiresAt: string | null;
+  authorizedBy: string | null;
+  revocationReason: string | null;
+  assessments: AssessmentResult[];
+}
+
+export interface AssignCompetencyRequest { traineeId: string; subject: string; documentId: string | null; validityMonths: number; }
+export interface ScoreAssessmentRequest { score: number; }
+export interface RevokeCompetencyRequest { reason: string; }
+
+export interface TrainingAssignment {
+  id: string;
+  traineeId: string;
+  subject: string;
+  documentId: string | null;
+  dueDate: string;
+  completed: boolean;
+  completedAtUtc: string | null;
+}
+
+export interface AssignTrainingRequest { traineeId: string; subject: string; documentId: string | null; dueDate: string; }

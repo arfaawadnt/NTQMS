@@ -18,6 +18,8 @@ import { PermissionsService } from '../core/permissions.service';
           <a routerLink="/documents" routerLinkActive="active">{{ i18n.t('nav.documents') }}</a>
           <a routerLink="/audits" routerLinkActive="active">{{ i18n.t('nav.audits') }}</a>
           <a routerLink="/equipment" routerLinkActive="active">{{ i18n.t('nav.equipment') }}</a>
+          <a routerLink="/competencies" routerLinkActive="active">{{ i18n.t('nav.competency') }}</a>
+          <a routerLink="/training" routerLinkActive="active">{{ i18n.t('nav.training') }}</a>
           <a routerLink="/notifications" routerLinkActive="active">{{ i18n.t('nav.notifications') }}</a>
           @if (perms.isTenantAdmin()) {
             <a routerLink="/users" routerLinkActive="active">{{ i18n.t('nav.users') }}</a>

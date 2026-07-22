@@ -49,6 +49,18 @@ export const routes: Routes = [
         loadComponent: () => import('./features/equipment/equipment-detail.component').then((m) => m.EquipmentDetailComponent),
       },
       {
+        path: 'competencies',
+        loadComponent: () => import('./features/competency/competency-list.component').then((m) => m.CompetencyListComponent),
+      },
+      {
+        path: 'competencies/:id',
+        loadComponent: () => import('./features/competency/competency-detail.component').then((m) => m.CompetencyDetailComponent),
+      },
+      {
+        path: 'training',
+        loadComponent: () => import('./features/competency/training-queue.component').then((m) => m.TrainingQueueComponent),
+      },
+      {
         path: 'users',
         loadComponent: () => import('./features/users/users.component').then((m) => m.UsersComponent),
       },

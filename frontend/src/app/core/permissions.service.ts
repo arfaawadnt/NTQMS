@@ -13,6 +13,9 @@ export class PermissionsService {
   /** True for Quality Managers and Tenant Administrators (the approval roles). */
   readonly canApprove = computed(() => this.isInRole('QualityManager', 'TenantAdmin'));
 
+  /** True for roles that may assign competencies and training (QM, department heads, tenant admins). */
+  readonly canAssignTraining = computed(() => this.isInRole('QualityManager', 'DepartmentHead', 'TenantAdmin'));
+
   /** True for administrators managing configuration (tenant admins). */
   readonly isTenantAdmin = computed(() => this.isInRole('TenantAdmin'));
 
