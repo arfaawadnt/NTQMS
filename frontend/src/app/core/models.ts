@@ -243,3 +243,50 @@ export interface ScheduleAuditRequest {
 }
 export interface AnswerChecklistItemRequest { verdict: ChecklistVerdict; evidence: string | null; }
 export interface RaiseFindingRequest { grade: FindingGrade; description: string; }
+
+// ── Equipment & Calibration ──────────────────────────────────────────────────
+
+export interface CalibrationRecord {
+  id: string;
+  performedAt: string;
+  provider: string;
+  result: string;
+  certificateFileId: string | null;
+}
+
+export interface MaintenanceRecord { id: string; performedAt: string; workDescription: string; }
+
+export interface EquipmentListItem {
+  id: string;
+  code: string;
+  name: string;
+  serialNumber: string;
+  location: string | null;
+  status: string;
+  nextCalibrationDue: string | null;
+}
+
+export interface EquipmentDetail {
+  id: string;
+  code: string;
+  name: string;
+  serialNumber: string;
+  location: string | null;
+  status: string;
+  calibrationIntervalDays: number;
+  gracePeriodDays: number;
+  lastCalibrationAt: string | null;
+  nextCalibrationDue: string | null;
+  calibrations: CalibrationRecord[];
+  maintenance: MaintenanceRecord[];
+}
+
+export interface RegisterEquipmentRequest {
+  name: string;
+  serialNumber: string;
+  location: string | null;
+  calibrationIntervalDays: number;
+  gracePeriodDays: number;
+}
+export interface LogCalibrationRequest { performedAt: string; provider: string; result: string; certificateFileId: string | null; }
+export interface LogMaintenanceRequest { performedAt: string; workDescription: string; }

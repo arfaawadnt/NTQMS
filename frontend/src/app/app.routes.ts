@@ -41,6 +41,14 @@ export const routes: Routes = [
         loadComponent: () => import('./features/audits/audit-detail.component').then((m) => m.AuditDetailComponent),
       },
       {
+        path: 'equipment',
+        loadComponent: () => import('./features/equipment/equipment-list.component').then((m) => m.EquipmentListComponent),
+      },
+      {
+        path: 'equipment/:id',
+        loadComponent: () => import('./features/equipment/equipment-detail.component').then((m) => m.EquipmentDetailComponent),
+      },
+      {
         path: 'users',
         loadComponent: () => import('./features/users/users.component').then((m) => m.UsersComponent),
       },
