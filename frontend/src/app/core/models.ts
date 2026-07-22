@@ -96,3 +96,63 @@ export interface NotificationFeedItem {
 
 /** Server identifier envelope returned by create endpoints (e.g. { id }). */
 export interface CreatedResource { id: string; }
+
+// ── Document Control ─────────────────────────────────────────────────────────
+
+/** Semantic-version bump kinds accepted by the backend for a new document version. */
+export const VERSION_BUMPS = ['Minor', 'Major'] as const;
+export type VersionBump = (typeof VERSION_BUMPS)[number];
+
+export interface DocumentVersion {
+  id: string;
+  version: string;
+  state: string;
+  fileId: string;
+  changeSummary: string;
+  authorId: string;
+  recommendedBy: string | null;
+  recommendedAtUtc: string | null;
+  approvedBy: string | null;
+  approvedAtUtc: string | null;
+  rejectionReason: string | null;
+}
+
+export interface DocumentListItem {
+  id: string;
+  code: string;
+  title: string;
+  category: string;
+  status: string;
+  publishedVersion: string | null;
+  createdAtUtc: string;
+}
+
+export interface DocumentDetail {
+  id: string;
+  code: string;
+  title: string;
+  category: string;
+  status: string;
+  createdAtUtc: string;
+  versions: DocumentVersion[];
+}
+
+/** Metadata returned after a file is uploaded to object storage. */
+export interface FileUploaded {
+  id: string;
+  fileName: string;
+  sha256: string;
+  sizeBytes: number;
+}
+
+export interface CreateDocumentRequest {
+  code: string;
+  title: string;
+  category: string;
+  fileId: string;
+  changeSummary: string;
+}
+
+export interface DraftNewVersionRequest { fileId: string; changeSummary: string; bump: VersionBump; }
+export interface RejectVersionRequest { reason: string; }
+export interface PublishDocumentRequest { pin: string; }

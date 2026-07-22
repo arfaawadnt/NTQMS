@@ -25,6 +25,14 @@ export const routes: Routes = [
         loadComponent: () => import('./features/nc/nc-detail.component').then((m) => m.NcDetailComponent),
       },
       {
+        path: 'documents',
+        loadComponent: () => import('./features/documents/document-list.component').then((m) => m.DocumentListComponent),
+      },
+      {
+        path: 'documents/:id',
+        loadComponent: () => import('./features/documents/document-detail.component').then((m) => m.DocumentDetailComponent),
+      },
+      {
         path: 'notifications',
         loadComponent: () => import('./features/notifications/notifications.component').then((m) => m.NotificationsComponent),
       },

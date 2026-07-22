@@ -14,6 +14,7 @@ import { I18nService, Lang } from '../core/i18n.service';
         <nav>
           <a routerLink="/dashboard" routerLinkActive="active">{{ i18n.t('nav.dashboard') }}</a>
           <a routerLink="/nonconformances" routerLinkActive="active">{{ i18n.t('nav.nc') }}</a>
+          <a routerLink="/documents" routerLinkActive="active">{{ i18n.t('nav.documents') }}</a>
           <a routerLink="/notifications" routerLinkActive="active">{{ i18n.t('nav.notifications') }}</a>
         </nav>
       </aside>
