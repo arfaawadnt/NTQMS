@@ -22,6 +22,10 @@ export type CapaActionType = (typeof CAPA_ACTION_TYPES)[number];
 export const RCA_METHODS = ['FiveWhys', 'Fishbone', 'Other'] as const;
 export type RcaMethod = (typeof RCA_METHODS)[number];
 
+/** Assignable tenant roles (platform-admin is not a tenant role). */
+export const TENANT_ROLES = ['TenantAdmin', 'QualityManager', 'DepartmentHead', 'Analyst', 'ExternalAuditor'] as const;
+export type TenantRole = (typeof TENANT_ROLES)[number];
+
 export interface NcListItem {
   id: string;
   ncRef: string;
@@ -156,3 +160,24 @@ export interface CreateDocumentRequest {
 export interface DraftNewVersionRequest { fileId: string; changeSummary: string; bump: VersionBump; }
 export interface RejectVersionRequest { reason: string; }
 export interface PublishDocumentRequest { pin: string; }
+
+// ── User Management ──────────────────────────────────────────────────────────
+
+export interface UserAccount {
+  id: string;
+  email: string;
+  displayName: string;
+  role: string;
+  isActive: boolean;
+  mfaEnabled: boolean;
+}
+
+export interface RegisterUserRequest {
+  email: string;
+  displayName: string;
+  role: TenantRole;
+  initialPassword: string;
+}
+
+export interface ChangeUserRoleRequest { role: TenantRole; }
+export interface ResetUserPasswordRequest { newPassword: string; }

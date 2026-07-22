@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../core/auth.service';
 import { I18nService, Lang } from '../core/i18n.service';
+import { PermissionsService } from '../core/permissions.service';
 
 @Component({
   selector: 'qams-shell',
@@ -16,6 +17,9 @@ import { I18nService, Lang } from '../core/i18n.service';
           <a routerLink="/nonconformances" routerLinkActive="active">{{ i18n.t('nav.nc') }}</a>
           <a routerLink="/documents" routerLinkActive="active">{{ i18n.t('nav.documents') }}</a>
           <a routerLink="/notifications" routerLinkActive="active">{{ i18n.t('nav.notifications') }}</a>
+          @if (perms.isTenantAdmin()) {
+            <a routerLink="/users" routerLinkActive="active">{{ i18n.t('nav.users') }}</a>
+          }
         </nav>
       </aside>
 
@@ -67,6 +71,7 @@ import { I18nService, Lang } from '../core/i18n.service';
 export class ShellComponent {
   readonly auth = inject(AuthService);
   readonly i18n = inject(I18nService);
+  readonly perms = inject(PermissionsService);
   private readonly router = inject(Router);
 
   onLang(event: Event): void {

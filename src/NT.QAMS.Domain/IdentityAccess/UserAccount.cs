@@ -89,6 +89,32 @@ public sealed class UserAccount : AggregateRoot
 
     public void Deactivate() => IsActive = false;
 
+    public void Reactivate() => IsActive = true;
+
+    /// <summary>Changes the user's role. Platform-admin is not assignable to a tenant user.</summary>
+    public void ChangeRole(UserRole role)
+    {
+        if (role == UserRole.PlatformAdmin && TenantId is not null)
+        {
+            throw new DomainException("USER-005", "A tenant user cannot be made a platform administrator.");
+        }
+
+        Role = role;
+    }
+
+    /// <summary>Replaces the password hash (administrative reset) and clears any lockout.</summary>
+    public void ResetPassword(string passwordHash)
+    {
+        if (string.IsNullOrWhiteSpace(passwordHash))
+        {
+            throw new DomainException("USER-006", "A password hash is required.");
+        }
+
+        PasswordHash = passwordHash;
+        FailedLoginAttempts = 0;
+        LockedUntilUtc = null;
+    }
+
     public bool IsLockedOut(DateTimeOffset now) => LockedUntilUtc is { } until && until > now;
 
     /// <summary>Records a failed authentication factor; locks the account at the threshold.</summary>
