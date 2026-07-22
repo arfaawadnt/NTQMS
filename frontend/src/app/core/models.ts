@@ -1,5 +1,6 @@
-// API contracts mirrored from NT.QAMS.Contracts (kept intentionally thin).
+// API contracts mirrored from NT.QAMS.Contracts (kept intentionally thin, strongly typed).
 
+/** Authentication result returned by POST /api/auth/login. */
 export interface AuthResponse {
   accessToken: string;
   expiresAtUtc: string;
@@ -8,6 +9,18 @@ export interface AuthResponse {
   tenantId: string | null;
   mfaRequired: boolean;
 }
+
+/** Nonconformance source classifications accepted by the backend. */
+export const NC_SOURCE_TYPES = ['Internal', 'Complaint', 'Audit', 'Supplier', 'ProficiencyTest'] as const;
+export type NcSourceType = (typeof NC_SOURCE_TYPES)[number];
+
+/** CAPA action types accepted by the backend. */
+export const CAPA_ACTION_TYPES = ['Corrective', 'Preventive'] as const;
+export type CapaActionType = (typeof CAPA_ACTION_TYPES)[number];
+
+/** Root-cause-analysis methods accepted by the backend. */
+export const RCA_METHODS = ['FiveWhys', 'Fishbone', 'Other'] as const;
+export type RcaMethod = (typeof RCA_METHODS)[number];
 
 export interface NcListItem {
   id: string;
@@ -55,6 +68,22 @@ export interface NcDetail {
   rcaRecords: RcaRecord[];
 }
 
+/** Request payload for raising a nonconformance. */
+export interface RaiseNcRequest {
+  title: string;
+  description: string;
+  severity: number;
+  likelihood: number;
+  sourceType: NcSourceType;
+}
+
+export interface TriageNcRequest { assigneeId: string; }
+export interface RejectNcRequest { reason: string; }
+export interface RecordRcaRequest { method: RcaMethod; analysis: string; }
+export interface PlanCapaActionRequest { type: CapaActionType; details: string; ownerId: string; dueDate: string; }
+export interface VerifyNcRequest { passed: boolean; }
+export interface ConfirmEffectivenessRequest { effective: boolean; }
+
 export interface NotificationFeedItem {
   id: string;
   eventKey: string;
@@ -64,3 +93,6 @@ export interface NotificationFeedItem {
   emailStatus: string;
   createdAtUtc: string;
 }
+
+/** Server identifier envelope returned by create endpoints (e.g. { id }). */
+export interface CreatedResource { id: string; }

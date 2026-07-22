@@ -1,15 +1,19 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { QamsApiService } from '../../core/qams-api.service';
+import { firstValueFrom } from 'rxjs';
+import { NotificationsApiService } from '../../core/api/notifications-api.service';
 import { I18nService } from '../../core/i18n.service';
 import { NotificationFeedItem } from '../../core/models';
+import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 
+/** The signed-in user's in-app notification feed with mark-as-read. */
 @Component({
   selector: 'qams-notifications',
   standalone: true,
-  imports: [DatePipe],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [DatePipe, PageHeaderComponent],
   template: `
-    <h1>{{ i18n.t('notif.title') }}</h1>
+    <qams-page-header [title]="i18n.t('notif.title')" />
     @if (loading()) {
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     } @else if (items().length === 0) {
@@ -27,7 +31,7 @@ import { NotificationFeedItem } from '../../core/models';
               </div>
             </div>
             @if (!n.read) {
-              <button class="ghost" (click)="markRead(n)">{{ i18n.t('notif.markRead') }}</button>
+              <button class="ghost" (click)="markRead(n.id)">{{ i18n.t('notif.markRead') }}</button>
             }
           </div>
         }
@@ -44,24 +48,26 @@ import { NotificationFeedItem } from '../../core/models';
 })
 export class NotificationsComponent implements OnInit {
   readonly i18n = inject(I18nService);
-  private readonly api = inject(QamsApiService);
+  private readonly api = inject(NotificationsApiService);
 
   readonly items = signal<NotificationFeedItem[]>([]);
   readonly loading = signal(true);
 
   ngOnInit(): void {
-    this.load();
+    void this.load();
   }
 
-  private load(): void {
+  private async load(): Promise<void> {
     this.loading.set(true);
-    this.api.myNotifications().subscribe({
-      next: (items) => { this.items.set(items); this.loading.set(false); },
-      error: () => this.loading.set(false),
-    });
+    try {
+      this.items.set(await firstValueFrom(this.api.mine()));
+    } finally {
+      this.loading.set(false);
+    }
   }
 
-  markRead(n: NotificationFeedItem): void {
-    this.api.markNotificationRead(n.id).subscribe({ next: () => this.load() });
+  async markRead(id: string): Promise<void> {
+    await firstValueFrom(this.api.markRead(id));
+    await this.load();
   }
 }

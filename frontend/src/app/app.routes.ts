@@ -21,6 +21,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/nc/nc-list.component').then((m) => m.NcListComponent),
       },
       {
+        path: 'nonconformances/:id',
+        loadComponent: () => import('./features/nc/nc-detail.component').then((m) => m.NcDetailComponent),
+      },
+      {
         path: 'notifications',
         loadComponent: () => import('./features/notifications/notifications.component').then((m) => m.NotificationsComponent),
       },

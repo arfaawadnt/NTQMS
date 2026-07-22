@@ -1,0 +1,94 @@
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+import { NcApiService } from '../../core/api/nc-api.service';
+import {
+  ConfirmEffectivenessRequest, NcDetail, NcListItem, PlanCapaActionRequest,
+  RaiseNcRequest, RecordRcaRequest, RejectNcRequest, TriageNcRequest, VerifyNcRequest,
+} from '../../core/models';
+
+/**
+ * Signal-based facade (state store) for the NC/CAPA module. Components stay
+ * presentational: they read the exposed signals and call intent methods; all
+ * API orchestration, loading/error state and refresh-after-write live here.
+ */
+@Injectable({ providedIn: 'root' })
+export class NcFacade {
+  private readonly api = inject(NcApiService);
+
+  private readonly _list = signal<NcListItem[]>([]);
+  private readonly _selected = signal<NcDetail | null>(null);
+  private readonly _loading = signal(false);
+  private readonly _error = signal('');
+
+  /** Current nonconformance list (filtered server-side). */
+  readonly list = this._list.asReadonly();
+  /** Currently loaded detail, or null. */
+  readonly selected = this._selected.asReadonly();
+  /** True while any request is in flight. */
+  readonly loading = this._loading.asReadonly();
+  /** Last user-facing error message, or empty. */
+  readonly error = this._error.asReadonly();
+
+  /** Open (non-terminal) nonconformance count, for dashboards. */
+  readonly openCount = computed(() =>
+    this._list().filter((n) => n.status !== 'Closed' && n.status !== 'Rejected').length);
+  /** High-risk (RPN > 12) count, for dashboards. */
+  readonly highRpnCount = computed(() => this._list().filter((n) => n.rpn > 12).length);
+
+  /** Loads the list, optionally filtered by status/search text. */
+  async loadList(status?: string, search?: string): Promise<void> {
+    await this.run(async () => this._list.set(await firstValueFrom(this.api.list(status, search))));
+  }
+
+  /** Loads a single nonconformance into `selected`. */
+  async loadDetail(id: string): Promise<void> {
+    await this.run(async () => this._selected.set(await firstValueFrom(this.api.getById(id))));
+  }
+
+  /** Raises a new draft nonconformance; returns its id on success or null on failure. */
+  async raise(request: RaiseNcRequest): Promise<string | null> {
+    return this.run(async () => (await firstValueFrom(this.api.raise(request))).id);
+  }
+
+  async submit(id: string): Promise<void> { await this.mutate(id, () => this.api.submit(id)); }
+  async triage(id: string, r: TriageNcRequest): Promise<void> { await this.mutate(id, () => this.api.triage(id, r)); }
+  async reject(id: string, r: RejectNcRequest): Promise<void> { await this.mutate(id, () => this.api.reject(id, r)); }
+  async recordRca(id: string, r: RecordRcaRequest): Promise<void> { await this.mutate(id, () => this.api.recordRca(id, r)); }
+  async planAction(id: string, r: PlanCapaActionRequest): Promise<void> { await this.mutate(id, () => this.api.planAction(id, r)); }
+  async completeAction(id: string, actionId: string): Promise<void> { await this.mutate(id, () => this.api.completeAction(id, actionId)); }
+  async submitForVerification(id: string): Promise<void> { await this.mutate(id, () => this.api.submitForVerification(id)); }
+  async verify(id: string, r: VerifyNcRequest): Promise<void> { await this.mutate(id, () => this.api.verify(id, r)); }
+  async confirmEffectiveness(id: string, r: ConfirmEffectivenessRequest): Promise<void> {
+    await this.mutate(id, () => this.api.confirmEffectiveness(id, r));
+  }
+
+  /** Runs a state-changing call then reloads the detail so the UI reflects the new state. */
+  private async mutate<T>(id: string, call: () => import('rxjs').Observable<T>): Promise<void> {
+    await this.run(async () => {
+      await firstValueFrom(call());
+      this._selected.set(await firstValueFrom(this.api.getById(id)));
+    });
+  }
+
+  /** Shared loading/error wrapper; returns the operation result or null on error. */
+  private async run<T>(operation: () => Promise<T>): Promise<T | null> {
+    this._loading.set(true);
+    this._error.set('');
+    try {
+      return await operation();
+    } catch (err) {
+      this._error.set(this.describe(err));
+      return null;
+    } finally {
+      this._loading.set(false);
+    }
+  }
+
+  private describe(err: unknown): string {
+    if (err instanceof HttpErrorResponse) {
+      return (err.error as { title?: string } | null)?.title ?? `Request failed (${err.status}).`;
+    }
+    return 'Unexpected error.';
+  }
+}

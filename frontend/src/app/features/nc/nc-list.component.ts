@@ -1,89 +1,83 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { HttpErrorResponse } from '@angular/common/http';
-import { QamsApiService } from '../../core/qams-api.service';
+import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { signal } from '@angular/core';
+import { NcFacade } from './nc.facade';
 import { I18nService } from '../../core/i18n.service';
-import { NcListItem } from '../../core/models';
+import { NC_SOURCE_TYPES, NcSourceType } from '../../core/models';
+import { PageHeaderComponent } from '../../shared/ui/page-header.component';
+import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 
+/** Nonconformance register: filterable list + a reactive "raise NC" form. */
 @Component({
   selector: 'qams-nc-list',
   standalone: true,
-  imports: [FormsModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [ReactiveFormsModule, PageHeaderComponent, StatusPillComponent],
   template: `
-    <div class="head">
-      <h1>{{ i18n.t('nc.title') }}</h1>
+    <qams-page-header [title]="i18n.t('nc.title')">
+      <select [value]="statusFilter()" (change)="onFilter($event)" aria-label="Status filter">
+        <option value="">{{ i18n.t('nc.allStatuses') }}</option>
+        @for (s of statuses; track s) { <option [value]="s">{{ s }}</option> }
+      </select>
       <button (click)="showForm.set(!showForm())">{{ i18n.t('nc.new') }}</button>
-    </div>
+    </qams-page-header>
 
     @if (showForm()) {
-      <div class="card form">
+      <form class="card form" [formGroup]="form" (ngSubmit)="create()">
         <div class="grid">
-          <div>
+          <div class="col-2">
             <label>{{ i18n.t('nc.subject') }}</label>
-            <input [(ngModel)]="title" />
+            <input formControlName="title" />
           </div>
           <div>
             <label>{{ i18n.t('nc.source') }}</label>
-            <select [(ngModel)]="sourceType">
-              <option value="Internal">Internal</option>
-              <option value="Complaint">Complaint</option>
-              <option value="Audit">Audit</option>
-              <option value="Supplier">Supplier</option>
-              <option value="ProficiencyTest">ProficiencyTest</option>
+            <select formControlName="sourceType">
+              @for (s of sources; track s) { <option [value]="s">{{ s }}</option> }
             </select>
           </div>
           <div>
             <label>{{ i18n.t('nc.severity') }} (1-5)</label>
-            <input type="number" min="1" max="5" [(ngModel)]="severity" />
+            <input type="number" min="1" max="5" formControlName="severity" />
           </div>
           <div>
             <label>{{ i18n.t('nc.likelihood') }} (1-5)</label>
-            <input type="number" min="1" max="5" [(ngModel)]="likelihood" />
+            <input type="number" min="1" max="5" formControlName="likelihood" />
           </div>
         </div>
         <label>{{ i18n.t('nc.description') }}</label>
-        <textarea rows="3" [(ngModel)]="description"></textarea>
+        <textarea rows="3" formControlName="description"></textarea>
         <div class="row">
-          <button (click)="create()" [disabled]="busy()">{{ i18n.t('nc.create') }}</button>
-          <button class="secondary" (click)="showForm.set(false)">{{ i18n.t('nc.cancel') }}</button>
+          <button type="submit" [disabled]="form.invalid || facade.loading()">{{ i18n.t('nc.create') }}</button>
+          <button type="button" class="secondary" (click)="showForm.set(false)">{{ i18n.t('nc.cancel') }}</button>
         </div>
-        @if (error()) { <div class="error">{{ error() }}</div> }
-      </div>
+        @if (facade.error()) { <div class="error">{{ facade.error() }}</div> }
+      </form>
     }
 
-    @if (loading()) {
+    @if (facade.loading() && facade.list().length === 0) {
       <p class="muted">{{ i18n.t('common.loading') }}</p>
-    } @else if (items().length === 0) {
+    } @else if (facade.list().length === 0) {
       <p class="muted">{{ i18n.t('nc.empty') }}</p>
     } @else {
       <div class="card">
         <table>
           <thead>
             <tr>
-              <th>{{ i18n.t('nc.ref') }}</th>
-              <th>{{ i18n.t('nc.subject') }}</th>
-              <th>{{ i18n.t('nc.status') }}</th>
-              <th>{{ i18n.t('nc.severity') }}</th>
-              <th>{{ i18n.t('nc.rpn') }}</th>
-              <th>{{ i18n.t('nc.source') }}</th>
-              <th></th>
+              <th>{{ i18n.t('nc.ref') }}</th><th>{{ i18n.t('nc.subject') }}</th>
+              <th>{{ i18n.t('nc.status') }}</th><th>{{ i18n.t('nc.severity') }}</th>
+              <th>{{ i18n.t('nc.rpn') }}</th><th>{{ i18n.t('nc.source') }}</th>
             </tr>
           </thead>
           <tbody>
-            @for (nc of items(); track nc.id) {
-              <tr>
+            @for (nc of facade.list(); track nc.id) {
+              <tr class="clickable" (click)="open(nc.id)">
                 <td>{{ nc.ncRef }}</td>
                 <td>{{ nc.title }}</td>
-                <td><span class="pill" [class.warn]="nc.status !== 'Closed' && nc.status !== 'Rejected'"
-                                       [class.ok]="nc.status === 'Closed'">{{ nc.status }}</span></td>
+                <td><qams-status-pill [status]="nc.status" /></td>
                 <td>{{ nc.severity }}</td>
-                <td><span [class.danger-text]="nc.rpn > 12">{{ nc.rpn }}</span></td>
+                <td [class.danger-text]="nc.rpn > 12">{{ nc.rpn }}</td>
                 <td>{{ nc.sourceType }}</td>
-                <td>
-                  @if (nc.status === 'Draft') {
-                    <button class="ghost" (click)="submit(nc)">{{ i18n.t('nc.submit') }}</button>
-                  }
-                </td>
               </tr>
             }
           </tbody>
@@ -92,65 +86,55 @@ import { NcListItem } from '../../core/models';
     }
   `,
   styles: [`
-    .head { display: flex; align-items: center; justify-content: space-between; }
     .form { margin-bottom: 1rem; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: .5rem 1rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .5rem 1rem; }
+    .col-2 { grid-column: span 2; }
     .row { display: flex; gap: .6rem; margin-top: 1rem; }
+    .clickable { cursor: pointer; }
+    .clickable:hover { background: #f4f6f9; }
     .danger-text { color: var(--nt-danger); font-weight: 700; }
+    select, button { width: auto; }
   `],
 })
 export class NcListComponent implements OnInit {
+  readonly facade = inject(NcFacade);
   readonly i18n = inject(I18nService);
-  private readonly api = inject(QamsApiService);
+  private readonly fb = inject(FormBuilder);
+  private readonly router = inject(Router);
 
-  readonly items = signal<NcListItem[]>([]);
-  readonly loading = signal(true);
+  readonly sources = NC_SOURCE_TYPES;
+  readonly statuses = ['Draft', 'Raised', 'Assigned', 'Rca', 'ActionPlan', 'PendingVerification', 'EffectivenessCheck', 'Closed', 'Rejected'];
   readonly showForm = signal(false);
-  readonly busy = signal(false);
-  readonly error = signal('');
+  readonly statusFilter = signal('');
 
-  title = '';
-  description = '';
-  severity = 3;
-  likelihood = 3;
-  sourceType = 'Internal';
+  readonly form = this.fb.nonNullable.group({
+    title: ['', [Validators.required, Validators.maxLength(300)]],
+    description: ['', [Validators.maxLength(4000)]],
+    severity: [3, [Validators.required, Validators.min(1), Validators.max(5)]],
+    likelihood: [3, [Validators.required, Validators.min(1), Validators.max(5)]],
+    sourceType: ['Internal' as NcSourceType, [Validators.required]],
+  });
 
   ngOnInit(): void {
-    this.load();
+    void this.facade.loadList();
   }
 
-  private load(): void {
-    this.loading.set(true);
-    this.api.listNcs().subscribe({
-      next: (items) => { this.items.set(items); this.loading.set(false); },
-      error: () => this.loading.set(false),
-    });
+  onFilter(event: Event): void {
+    this.statusFilter.set((event.target as HTMLSelectElement).value);
+    void this.facade.loadList(this.statusFilter() || undefined);
   }
 
-  create(): void {
-    this.error.set('');
-    this.busy.set(true);
-    this.api.raiseNc({
-      title: this.title.trim(),
-      description: this.description.trim(),
-      severity: Number(this.severity),
-      likelihood: Number(this.likelihood),
-      sourceType: this.sourceType,
-    }).subscribe({
-      next: () => {
-        this.busy.set(false);
-        this.showForm.set(false);
-        this.title = ''; this.description = '';
-        this.load();
-      },
-      error: (err: HttpErrorResponse) => {
-        this.busy.set(false);
-        this.error.set(err.error?.title ?? 'Could not raise the nonconformance.');
-      },
-    });
+  async create(): Promise<void> {
+    if (this.form.invalid) { return; }
+    const id = await this.facade.raise(this.form.getRawValue());
+    if (id) {
+      this.showForm.set(false);
+      this.form.reset({ severity: 3, likelihood: 3, sourceType: 'Internal' });
+      void this.router.navigate(['/nonconformances', id]);
+    }
   }
 
-  submit(nc: NcListItem): void {
-    this.api.submitNc(nc.id).subscribe({ next: () => this.load() });
+  open(id: string): void {
+    void this.router.navigate(['/nonconformances', id]);
   }
 }
