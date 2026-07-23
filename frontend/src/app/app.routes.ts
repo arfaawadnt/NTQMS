@@ -77,6 +77,14 @@ export const routes: Routes = [
         loadComponent: () => import('./features/change/change-detail.component').then((m) => m.ChangeDetailComponent),
       },
       {
+        path: 'management-reviews',
+        loadComponent: () => import('./features/review/review-list.component').then((m) => m.ReviewListComponent),
+      },
+      {
+        path: 'management-reviews/:id',
+        loadComponent: () => import('./features/review/review-detail.component').then((m) => m.ReviewDetailComponent),
+      },
+      {
         path: 'users',
         loadComponent: () => import('./features/users/users.component').then((m) => m.UsersComponent),
       },

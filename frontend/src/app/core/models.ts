@@ -406,3 +406,37 @@ export interface ProposeChangeRequest { title: string; impactAnalysis: string; }
 export interface LinkRiskRequest { riskItemId: string; }
 export interface RejectChangeRequest { reason: string; }
 export interface CloseChangeRequest { implementationNotes: string; }
+
+// ── Management Review ────────────────────────────────────────────────────────
+
+export interface ReviewDecision {
+  id: string;
+  description: string;
+  ownerId: string;
+  dueDate: string;
+}
+
+export interface ReviewListItem {
+  id: string;
+  reviewRef: string;
+  title: string;
+  reviewDate: string;
+  status: string;
+  decisionCount: number;
+}
+
+export interface ReviewDetail {
+  id: string;
+  reviewRef: string;
+  title: string;
+  reviewDate: string;
+  participants: string;
+  status: string;
+  minutes: string | null;
+  closedBy: string | null;
+  decisions: ReviewDecision[];
+}
+
+export interface ScheduleReviewRequest { title: string; reviewDate: string; participants: string; }
+export interface AddDecisionRequest { description: string; ownerId: string; dueDate: string; }
+export interface CloseReviewRequest { minutes: string; }
