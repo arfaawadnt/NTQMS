@@ -377,3 +377,32 @@ export interface RiskDetail {
 export interface AssessRiskRequest { title: string; category: string; likelihood: number; impact: number; }
 export interface AddMitigationRequest { description: string; ownerId: string; dueDate: string; }
 export interface ResidualAssessmentRequest { likelihood: number; impact: number; }
+
+// ── Change Control ───────────────────────────────────────────────────────────
+
+export interface ChangeListItem {
+  id: string;
+  changeRef: string;
+  title: string;
+  status: string;
+  riskItemId: string | null;
+}
+
+export interface ChangeDetail {
+  id: string;
+  changeRef: string;
+  title: string;
+  impactAnalysis: string;
+  status: string;
+  proposedBy: string;
+  riskItemId: string | null;
+  approvedBy: string | null;
+  approvedAtUtc: string | null;
+  rejectionReason: string | null;
+  implementationNotes: string | null;
+}
+
+export interface ProposeChangeRequest { title: string; impactAnalysis: string; }
+export interface LinkRiskRequest { riskItemId: string; }
+export interface RejectChangeRequest { reason: string; }
+export interface CloseChangeRequest { implementationNotes: string; }

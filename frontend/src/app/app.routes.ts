@@ -69,6 +69,14 @@ export const routes: Routes = [
         loadComponent: () => import('./features/risk/risk-detail.component').then((m) => m.RiskDetailComponent),
       },
       {
+        path: 'changes',
+        loadComponent: () => import('./features/change/change-list.component').then((m) => m.ChangeListComponent),
+      },
+      {
+        path: 'changes/:id',
+        loadComponent: () => import('./features/change/change-detail.component').then((m) => m.ChangeDetailComponent),
+      },
+      {
         path: 'users',
         loadComponent: () => import('./features/users/users.component').then((m) => m.UsersComponent),
       },
