@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { ReviewFacade } from './review.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
@@ -14,7 +14,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
   selector: 'qams-review-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent],
+  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent],
   template: `
     <qams-page-header [title]="i18n.t('mrv.title')">
       @if (perms.canApprove()) {
@@ -61,6 +61,11 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
         </table>
       </div>
     }
+
+    <!-- Record workspace: the routed detail renders in a wide drawer over the list. -->
+    <qams-drawer [open]="detailOpen()" [title]="i18n.t('mrv.title')" width="920px" (closed)="closeDetail()">
+      <router-outlet (activate)="detailOpen.set(true)" (deactivate)="detailOpen.set(false)" />
+    </qams-drawer>
   `,
   styles: [`
     .form { margin-bottom: 1rem; }
@@ -80,6 +85,8 @@ export class ReviewListComponent implements OnInit {
   private readonly router = inject(Router);
 
   readonly showForm = signal(false);
+  /** Whether the record-workspace drawer (child route) is active. */
+  readonly detailOpen = signal(false);
 
   readonly form = this.fb.nonNullable.group({
     title: ['', [Validators.required, Validators.maxLength(200)]],
@@ -101,4 +108,7 @@ export class ReviewListComponent implements OnInit {
   }
 
   open(id: string): void { void this.router.navigate(['/management-reviews', id]); }
+
+  /** Dismissing the workspace drawer returns to the plain list route. */
+  closeDetail(): void { void this.router.navigate(['/management-reviews']); }
 }

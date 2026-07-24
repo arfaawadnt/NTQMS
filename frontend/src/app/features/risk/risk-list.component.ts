@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { RiskFacade } from './risk.facade';
 import { I18nService } from '../../core/i18n.service';
 import { HIGH_RESIDUAL_RPN_THRESHOLD, RISK_CATEGORIES } from '../../core/models';
@@ -13,7 +13,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
   selector: 'qams-risk-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, StatusPillComponent],
+  imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent],
   template: `
     <qams-page-header [title]="i18n.t('risk.title')">
       <select [value]="statusFilter()" (change)="onFilter($event)" aria-label="Status filter">
@@ -72,6 +72,11 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
         </table>
       </div>
     }
+
+    <!-- Record workspace: the routed detail renders in a wide drawer over the list. -->
+    <qams-drawer [open]="detailOpen()" [title]="i18n.t('risk.title')" width="920px" (closed)="closeDetail()">
+      <router-outlet (activate)="detailOpen.set(true)" (deactivate)="detailOpen.set(false)" />
+    </qams-drawer>
   `,
   styles: [`
     .form { margin-bottom: 1rem; }
@@ -94,6 +99,8 @@ export class RiskListComponent implements OnInit {
   readonly categories = RISK_CATEGORIES;
   readonly threshold = HIGH_RESIDUAL_RPN_THRESHOLD;
   readonly showForm = signal(false);
+  /** Whether the record-workspace drawer (child route) is active. */
+  readonly detailOpen = signal(false);
   readonly statusFilter = signal('');
 
   readonly form = this.fb.nonNullable.group({
@@ -122,4 +129,7 @@ export class RiskListComponent implements OnInit {
   }
 
   open(id: string): void { void this.router.navigate(['/risks', id]); }
+
+  /** Dismissing the workspace drawer returns to the plain list route. */
+  closeDetail(): void { void this.router.navigate(['/risks']); }
 }

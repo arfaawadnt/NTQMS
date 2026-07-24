@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { DocumentsFacade } from './documents.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
@@ -13,7 +13,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
   selector: 'qams-document-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent],
+  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent],
   template: `
     <qams-page-header [title]="i18n.t('doc.title')">
       <button (click)="showForm.set(!showForm())">{{ i18n.t('doc.new') }}</button>
@@ -74,6 +74,11 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
         </table>
       </div>
     }
+
+    <!-- Record workspace: the routed detail renders in a wide drawer over the list. -->
+    <qams-drawer [open]="detailOpen()" [title]="i18n.t('doc.title')" width="920px" (closed)="closeDetail()">
+      <router-outlet (activate)="detailOpen.set(true)" (deactivate)="detailOpen.set(false)" />
+    </qams-drawer>
   `,
   styles: [`
     .form { margin-bottom: 1rem; }
@@ -91,6 +96,8 @@ export class DocumentListComponent implements OnInit {
   private readonly router = inject(Router);
 
   readonly showForm = signal(false);
+  /** Whether the record-workspace drawer (child route) is active. */
+  readonly detailOpen = signal(false);
   readonly file = signal<File | null>(null);
 
   readonly form = this.fb.nonNullable.group({
@@ -124,4 +131,7 @@ export class DocumentListComponent implements OnInit {
   }
 
   open(id: string): void { void this.router.navigate(['/documents', id]); }
+
+  /** Dismissing the workspace drawer returns to the plain list route. */
+  closeDetail(): void { void this.router.navigate(['/documents']); }
 }

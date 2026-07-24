@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { AuditsFacade } from './audits.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
@@ -15,7 +15,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
   selector: 'qams-audit-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent],
+  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent],
   template: `
     <qams-page-header [title]="i18n.t('audit.title')">
       @if (perms.canApprove()) { <button (click)="showForm.set(!showForm())">{{ i18n.t('audit.new') }}</button> }
@@ -77,6 +77,11 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
         </table>
       </div>
     }
+
+    <!-- Record workspace: the routed detail renders in a wide drawer over the list. -->
+    <qams-drawer [open]="detailOpen()" [title]="i18n.t('audit.title')" width="920px" (closed)="closeDetail()">
+      <router-outlet (activate)="detailOpen.set(true)" (deactivate)="detailOpen.set(false)" />
+    </qams-drawer>
   `,
   styles: [`
     .form { margin-bottom: 1rem; }
@@ -99,6 +104,8 @@ export class AuditListComponent implements OnInit {
 
   readonly types = AUDIT_TYPES;
   readonly showForm = signal(false);
+  /** Whether the record-workspace drawer (child route) is active. */
+  readonly detailOpen = signal(false);
 
   readonly form = this.fb.nonNullable.group({
     title: ['', [Validators.required, Validators.maxLength(300)]],
@@ -141,4 +148,7 @@ export class AuditListComponent implements OnInit {
   }
 
   open(id: string): void { void this.router.navigate(['/audits', id]); }
+
+  /** Dismissing the workspace drawer returns to the plain list route. */
+  closeDetail(): void { void this.router.navigate(['/audits']); }
 }

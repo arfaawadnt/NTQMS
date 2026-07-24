@@ -31,42 +31,52 @@ export const routes: Routes = [
           {
             path: 'nonconformances',
             loadComponent: () => import('./features/nc/nc-list.component').then((m) => m.NcListComponent),
-          },
-          {
-            path: 'nonconformances/:id',
-            loadComponent: () => import('./features/nc/nc-detail.component').then((m) => m.NcDetailComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/nc/nc-detail.component').then((m) => m.NcDetailComponent),
+              },
+            ],
           },
           {
             path: 'documents',
             loadComponent: () => import('./features/documents/document-list.component').then((m) => m.DocumentListComponent),
-          },
-          {
-            path: 'documents/:id',
-            loadComponent: () => import('./features/documents/document-detail.component').then((m) => m.DocumentDetailComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/documents/document-detail.component').then((m) => m.DocumentDetailComponent),
+              },
+            ],
           },
           {
             path: 'audits',
             loadComponent: () => import('./features/audits/audit-list.component').then((m) => m.AuditListComponent),
-          },
-          {
-            path: 'audits/:id',
-            loadComponent: () => import('./features/audits/audit-detail.component').then((m) => m.AuditDetailComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/audits/audit-detail.component').then((m) => m.AuditDetailComponent),
+              },
+            ],
           },
           {
             path: 'equipment',
             loadComponent: () => import('./features/equipment/equipment-list.component').then((m) => m.EquipmentListComponent),
-          },
-          {
-            path: 'equipment/:id',
-            loadComponent: () => import('./features/equipment/equipment-detail.component').then((m) => m.EquipmentDetailComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/equipment/equipment-detail.component').then((m) => m.EquipmentDetailComponent),
+              },
+            ],
           },
           {
             path: 'competencies',
             loadComponent: () => import('./features/competency/competency-list.component').then((m) => m.CompetencyListComponent),
-          },
-          {
-            path: 'competencies/:id',
-            loadComponent: () => import('./features/competency/competency-detail.component').then((m) => m.CompetencyDetailComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/competency/competency-detail.component').then((m) => m.CompetencyDetailComponent),
+              },
+            ],
           },
           {
             path: 'training',
@@ -75,42 +85,52 @@ export const routes: Routes = [
           {
             path: 'risks',
             loadComponent: () => import('./features/risk/risk-list.component').then((m) => m.RiskListComponent),
-          },
-          {
-            path: 'risks/:id',
-            loadComponent: () => import('./features/risk/risk-detail.component').then((m) => m.RiskDetailComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/risk/risk-detail.component').then((m) => m.RiskDetailComponent),
+              },
+            ],
           },
           {
             path: 'changes',
             loadComponent: () => import('./features/change/change-list.component').then((m) => m.ChangeListComponent),
-          },
-          {
-            path: 'changes/:id',
-            loadComponent: () => import('./features/change/change-detail.component').then((m) => m.ChangeDetailComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/change/change-detail.component').then((m) => m.ChangeDetailComponent),
+              },
+            ],
           },
           {
             path: 'management-reviews',
             loadComponent: () => import('./features/review/review-list.component').then((m) => m.ReviewListComponent),
-          },
-          {
-            path: 'management-reviews/:id',
-            loadComponent: () => import('./features/review/review-detail.component').then((m) => m.ReviewDetailComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/review/review-detail.component').then((m) => m.ReviewDetailComponent),
+              },
+            ],
           },
           {
             path: 'qc',
             loadComponent: () => import('./features/analytical/qc-profiles.component').then((m) => m.QcProfilesComponent),
-          },
-          {
-            path: 'qc/:id',
-            loadComponent: () => import('./features/analytical/qc-profile-detail.component').then((m) => m.QcProfileDetailComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/analytical/qc-profile-detail.component').then((m) => m.QcProfileDetailComponent),
+              },
+            ],
           },
           {
             path: 'validation-studies',
             loadComponent: () => import('./features/analytical/study-list.component').then((m) => m.StudyListComponent),
-          },
-          {
-            path: 'validation-studies/:id',
-            loadComponent: () => import('./features/analytical/study-detail.component').then((m) => m.StudyDetailComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/analytical/study-detail.component').then((m) => m.StudyDetailComponent),
+              },
+            ],
           },
           {
             path: 'proficiency-tests',
@@ -119,10 +139,12 @@ export const routes: Routes = [
           {
             path: 'suppliers',
             loadComponent: () => import('./features/supplier/supplier-list.component').then((m) => m.SupplierListComponent),
-          },
-          {
-            path: 'suppliers/:id',
-            loadComponent: () => import('./features/supplier/supplier-detail.component').then((m) => m.SupplierDetailComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/supplier/supplier-detail.component').then((m) => m.SupplierDetailComponent),
+              },
+            ],
           },
           {
             path: 'users',

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { EquipmentFacade } from './equipment.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
@@ -13,7 +13,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
   selector: 'qams-equipment-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent],
+  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent],
   template: `
     <qams-page-header [title]="i18n.t('equip.title')">
       <select [value]="statusFilter()" (change)="onFilter($event)" aria-label="Status filter">
@@ -63,6 +63,11 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
         </table>
       </div>
     }
+
+    <!-- Record workspace: the routed detail renders in a wide drawer over the list. -->
+    <qams-drawer [open]="detailOpen()" [title]="i18n.t('equip.title')" width="920px" (closed)="closeDetail()">
+      <router-outlet (activate)="detailOpen.set(true)" (deactivate)="detailOpen.set(false)" />
+    </qams-drawer>
   `,
   styles: [`
     .form { margin-bottom: 1rem; }
@@ -81,6 +86,8 @@ export class EquipmentListComponent implements OnInit {
 
   readonly statuses = ['NeedsCalibration', 'Active', 'OutOfService', 'Retired'];
   readonly showForm = signal(false);
+  /** Whether the record-workspace drawer (child route) is active. */
+  readonly detailOpen = signal(false);
   readonly statusFilter = signal('');
 
   readonly form = this.fb.nonNullable.group({
@@ -111,4 +118,7 @@ export class EquipmentListComponent implements OnInit {
   }
 
   open(id: string): void { void this.router.navigate(['/equipment', id]); }
+
+  /** Dismissing the workspace drawer returns to the plain list route. */
+  closeDetail(): void { void this.router.navigate(['/equipment']); }
 }
