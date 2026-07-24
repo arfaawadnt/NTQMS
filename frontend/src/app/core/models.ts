@@ -614,6 +614,56 @@ export interface ArchiveRecordRequest {
   retentionClass: RetentionClass;
 }
 
+// ── Organization & Reference Data ────────────────────────────────────────────
+
+export interface Branch {
+  id: string;
+  code: string;
+  name: string;
+  city: string | null;
+  isActive: boolean;
+}
+
+export interface Department {
+  id: string;
+  branchId: string;
+  code: string;
+  name: string;
+  isActive: boolean;
+}
+
+export interface TestCatalogItem {
+  id: string;
+  testCode: string;
+  testName: string;
+  methodology: string;
+  turnaroundHours: number;
+  isActive: boolean;
+}
+
+export interface LovEntry {
+  id: string;
+  category: string;
+  code: string;
+  nameEn: string;
+  nameAr: string | null;
+  nameFr: string | null;
+  sortOrder: number;
+  isActive: boolean;
+}
+
+export interface CreateBranchRequest { code: string; name: string; city: string | null; }
+export interface CreateDepartmentRequest { branchId: string; code: string; name: string; }
+export interface CreateTestRequest { testCode: string; testName: string; methodology: string; turnaroundHours: number; }
+export interface UpsertLovRequest {
+  category: string;
+  code: string;
+  nameEn: string;
+  nameAr: string | null;
+  nameFr: string | null;
+  sortOrder: number;
+}
+
 // ── Notifications administration ─────────────────────────────────────────────
 
 /** Event keys the backend dispatcher raises (NotificationPolicies constants). */

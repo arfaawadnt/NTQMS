@@ -67,6 +67,7 @@ import { PermissionsService } from '../core/permissions.service';
             <a class="item" routerLink="/proficiency-tests" routerLinkActive="active">{{ i18n.t('nav.pt') }}</a>
 
             <div class="grouplabel">{{ i18n.t('nav.groupAdmin') }}</div>
+            <a class="item" routerLink="/reference-data" routerLinkActive="active">{{ i18n.t('nav.reference') }}</a>
             <a class="item" routerLink="/records" routerLinkActive="active">{{ i18n.t('nav.records') }}</a>
             <a class="item" routerLink="/notifications" routerLinkActive="active">{{ i18n.t('nav.notifications') }}</a>
             @if (perms.canViewCompliance()) {

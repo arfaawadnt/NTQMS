@@ -163,6 +163,10 @@ export const routes: Routes = [
             loadComponent: () => import('./features/notifications/notifications.component').then((m) => m.NotificationsComponent),
           },
           {
+            path: 'reference-data',
+            loadComponent: () => import('./features/reference/reference-data.component').then((m) => m.ReferenceDataComponent),
+          },
+          {
             path: 'compliance',
             loadComponent: () => import('./features/compliance/compliance.component').then((m) => m.ComplianceComponent),
           },
