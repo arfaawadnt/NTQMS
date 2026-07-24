@@ -97,6 +97,26 @@ export const routes: Routes = [
             loadComponent: () => import('./features/review/review-detail.component').then((m) => m.ReviewDetailComponent),
           },
           {
+            path: 'qc',
+            loadComponent: () => import('./features/analytical/qc-profiles.component').then((m) => m.QcProfilesComponent),
+          },
+          {
+            path: 'qc/:id',
+            loadComponent: () => import('./features/analytical/qc-profile-detail.component').then((m) => m.QcProfileDetailComponent),
+          },
+          {
+            path: 'validation-studies',
+            loadComponent: () => import('./features/analytical/study-list.component').then((m) => m.StudyListComponent),
+          },
+          {
+            path: 'validation-studies/:id',
+            loadComponent: () => import('./features/analytical/study-detail.component').then((m) => m.StudyDetailComponent),
+          },
+          {
+            path: 'proficiency-tests',
+            loadComponent: () => import('./features/analytical/pt-list.component').then((m) => m.PtListComponent),
+          },
+          {
             path: 'suppliers',
             loadComponent: () => import('./features/supplier/supplier-list.component').then((m) => m.SupplierListComponent),
           },

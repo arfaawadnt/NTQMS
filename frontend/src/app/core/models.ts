@@ -508,3 +508,79 @@ export interface AddCertificateRequest { certificateType: string; expiresAt: str
 export interface SuspendSupplierRequest { reason: string; }
 export interface EvaluationCriterion { criterion: string; weight: number; score: number; }
 export interface RecordEvaluationRequest { periodStart: string; periodEnd: string; criteria: EvaluationCriterion[]; }
+
+// ── Analytical Quality: QC / Westgard ────────────────────────────────────────
+
+export interface QcProfile {
+  id: string;
+  analyte: string;
+  instrument: string;
+  controlLot: string;
+  targetMean: number;
+  targetSd: number;
+  isActive: boolean;
+}
+
+export interface QcRun {
+  id: string;
+  profileId: string;
+  value: number;
+  zScore: number;
+  outcome: string;
+  violatedRules: string;
+  operator: string;
+  measuredAtUtc: string;
+  troubleshootingNote: string | null;
+}
+
+export interface CreateQcProfileRequest { analyte: string; instrument: string; controlLot: string; targetMean: number; targetSd: number; }
+export interface RecordQcRunRequest { value: number; operator: string; }
+export interface QcTroubleshootRequest { note: string; }
+
+// ── Analytical Quality: Method Validation ────────────────────────────────────
+
+export interface StudyReplicate { id: string; level: string; measured: number; reference: number | null; }
+
+export interface ValidationStudyListItem {
+  id: string;
+  studyRef: string;
+  analyte: string;
+  protocol: string;
+  state: string;
+  passed: boolean | null;
+}
+
+export interface ValidationStudyDetail {
+  id: string;
+  studyRef: string;
+  analyte: string;
+  protocol: string;
+  totalAllowableError: number;
+  state: string;
+  meanBias: number | null;
+  cv: number | null;
+  passed: boolean | null;
+  signedOffBy: string | null;
+  signedOffAtUtc: string | null;
+  replicates: StudyReplicate[];
+}
+
+export interface ConfigureStudyRequest { analyte: string; protocol: string; totalAllowableError: number; }
+export interface EnterReplicateRequest { level: string; measured: number; reference: number | null; }
+
+// ── Analytical Quality: Proficiency Testing ──────────────────────────────────
+
+export interface PtEnrollment {
+  id: string;
+  ptRef: string;
+  scheme: string;
+  analyte: string;
+  cycle: string;
+  submittedValue: number | null;
+  assignedValue: number | null;
+  zScore: number | null;
+  performance: string;
+}
+
+export interface EnrollPtRequest { scheme: string; analyte: string; cycle: string; }
+export interface RecordPtResultRequest { submitted: number; assigned: number; standardDeviation: number; }
