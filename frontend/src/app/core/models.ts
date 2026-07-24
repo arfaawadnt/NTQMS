@@ -614,6 +614,37 @@ export interface ArchiveRecordRequest {
   retentionClass: RetentionClass;
 }
 
+// ── Tasks & SLA ──────────────────────────────────────────────────────────────
+
+export interface WorkTask {
+  id: string;
+  subject: string;
+  subjectRef: string | null;
+  assigneeUserId: string | null;
+  assigneeRole: string | null;
+  dueDate: string;
+  status: string;
+  overdue: boolean;
+}
+
+/** A task must name a user or a role (TASK-002). */
+export interface CreateTaskRequest {
+  subject: string;
+  subjectRef: string | null;
+  assigneeUserId: string | null;
+  assigneeRole: string | null;
+  dueDate: string;
+}
+
+export interface SlaDefinition {
+  id: string;
+  module: string;
+  severity: string;
+  targetHours: number;
+}
+
+export interface UpsertSlaRequest { module: string; severity: string; targetHours: number; }
+
 // ── Compliance Ledger ────────────────────────────────────────────────────────
 
 /** One hash-chained, append-only audit-trail entry. */
