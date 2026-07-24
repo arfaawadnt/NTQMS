@@ -4,6 +4,7 @@ import { UsersFacade } from './users.facade';
 import { I18nService } from '../../core/i18n.service';
 import { TENANT_ROLES, TenantRole, UserAccount } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
+import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 
 /**
@@ -15,14 +16,14 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
   selector: 'qams-users',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, PageHeaderComponent, StatusPillComponent],
+  imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, StatusPillComponent],
   template: `
     <qams-page-header [title]="i18n.t('users.title')">
       <button (click)="showForm.set(!showForm())">{{ i18n.t('users.new') }}</button>
     </qams-page-header>
 
-    @if (showForm()) {
-      <form class="card form" [formGroup]="form" (ngSubmit)="register()">
+    <qams-drawer [open]="showForm()" [title]="i18n.t('users.new')" (closed)="cancel()">
+      <form class="drawer-form" [formGroup]="form" (ngSubmit)="register()">
         <div class="grid">
           <div>
             <label>{{ i18n.t('login.email') }}</label>
@@ -47,7 +48,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
         </div>
         @if (facade.error()) { <div class="error">{{ facade.error() }}</div> }
       </form>
-    }
+    </qams-drawer>
 
     @if (facade.loading() && facade.users().length === 0) {
       <p class="muted">{{ i18n.t('common.loading') }}</p>

@@ -6,6 +6,7 @@ import { QcFacade } from './qc.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
+import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 
 /** QC control profiles register + a create form (QM-gated). */
@@ -13,7 +14,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
   selector: 'qams-qc-profiles',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DecimalPipe, PageHeaderComponent, StatusPillComponent],
+  imports: [ReactiveFormsModule, DecimalPipe, PageHeaderComponent, DrawerComponent, StatusPillComponent],
   template: `
     <qams-page-header [title]="i18n.t('qc.title')" [subtitle]="i18n.t('qc.subtitle')">
       @if (perms.canApprove()) {
@@ -21,8 +22,8 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
       }
     </qams-page-header>
 
-    @if (showForm()) {
-      <form class="card form" [formGroup]="form" (ngSubmit)="create()">
+    <qams-drawer [open]="showForm()" [title]="i18n.t('qc.new')" (closed)="cancel()">
+      <form class="drawer-form" [formGroup]="form" (ngSubmit)="create()">
         <div class="grid">
           <div><label>{{ i18n.t('qc.analyte') }}</label><input formControlName="analyte" /></div>
           <div><label>{{ i18n.t('qc.instrument') }}</label><input formControlName="instrument" /></div>
@@ -36,7 +37,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
         </div>
         @if (facade.error()) { <div class="error">{{ facade.error() }}</div> }
       </form>
-    }
+    </qams-drawer>
 
     @if (facade.loading() && facade.profiles().length === 0) {
       <p class="muted">{{ i18n.t('common.loading') }}</p>

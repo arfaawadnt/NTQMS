@@ -4,6 +4,7 @@ import { DecimalPipe } from '@angular/common';
 import { PtFacade } from './pt.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
+import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 
 /**
@@ -15,7 +16,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
   selector: 'qams-pt-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DecimalPipe, PageHeaderComponent, StatusPillComponent],
+  imports: [ReactiveFormsModule, DecimalPipe, PageHeaderComponent, DrawerComponent, StatusPillComponent],
   template: `
     <qams-page-header [title]="i18n.t('pt.title')" [subtitle]="i18n.t('pt.sagaNote')">
       <select [value]="performanceFilter()" (change)="onFilter($event)" aria-label="Performance filter">
@@ -25,8 +26,8 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
       <button (click)="showForm.set(!showForm())">{{ i18n.t('pt.new') }}</button>
     </qams-page-header>
 
-    @if (showForm()) {
-      <form class="card form" [formGroup]="enrollForm" (ngSubmit)="enroll()">
+    <qams-drawer [open]="showForm()" [title]="i18n.t('pt.new')" (closed)="cancel()">
+      <form class="drawer-form" [formGroup]="enrollForm" (ngSubmit)="enroll()">
         <div class="grid">
           <div><label>{{ i18n.t('pt.scheme') }}</label><input formControlName="scheme" [placeholder]="i18n.t('pt.schemeHint')" /></div>
           <div><label>{{ i18n.t('qc.analyte') }}</label><input formControlName="analyte" /></div>
@@ -38,7 +39,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
         </div>
         @if (facade.error()) { <div class="error">{{ facade.error() }}</div> }
       </form>
-    }
+    </qams-drawer>
 
     @if (facade.loading() && facade.list().length === 0) {
       <p class="muted">{{ i18n.t('common.loading') }}</p>

@@ -5,13 +5,14 @@ import { CompetencyFacade } from './competency.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
+import { DrawerComponent } from '../../shared/ui/drawer.component';
 
 /** Training queue: assign training (role-gated), toggle completed, and mark items complete. */
 @Component({
   selector: 'qams-training-queue',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent],
+  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent],
   template: `
     <qams-page-header [title]="i18n.t('train.title')">
       <label class="inline"><input type="checkbox" [checked]="includeCompleted()" (change)="onToggle($event)" /> {{ i18n.t('train.showCompleted') }}</label>
@@ -20,8 +21,8 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
       }
     </qams-page-header>
 
-    @if (showForm()) {
-      <form class="card form" [formGroup]="form" (ngSubmit)="assign()">
+    <qams-drawer [open]="showForm()" [title]="i18n.t('train.new')" (closed)="cancel()">
+      <form class="drawer-form" [formGroup]="form" (ngSubmit)="assign()">
         <div class="grid">
           <div class="col-2"><label>{{ i18n.t('comp.subject') }}</label><input formControlName="subject" /></div>
           <div><label>{{ i18n.t('comp.trainee') }}</label><input formControlName="traineeId" [placeholder]="i18n.t('comp.userId')" /></div>
@@ -34,7 +35,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
         </div>
         @if (facade.error()) { <div class="error">{{ facade.error() }}</div> }
       </form>
-    }
+    </qams-drawer>
 
     @if (facade.loading() && facade.training().length === 0) {
       <p class="muted">{{ i18n.t('common.loading') }}</p>

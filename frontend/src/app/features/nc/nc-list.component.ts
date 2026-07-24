@@ -6,6 +6,7 @@ import { NcFacade } from './nc.facade';
 import { I18nService } from '../../core/i18n.service';
 import { NC_SOURCE_TYPES, NcSourceType } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
+import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 
 /** Nonconformance register: filterable list + a reactive "raise NC" form. */
@@ -13,7 +14,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
   selector: 'qams-nc-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, PageHeaderComponent, StatusPillComponent],
+  imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, StatusPillComponent],
   template: `
     <qams-page-header [title]="i18n.t('nc.title')">
       <select [value]="statusFilter()" (change)="onFilter($event)" aria-label="Status filter">
@@ -23,8 +24,8 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
       <button (click)="showForm.set(!showForm())">{{ i18n.t('nc.new') }}</button>
     </qams-page-header>
 
-    @if (showForm()) {
-      <form class="card form" [formGroup]="form" (ngSubmit)="create()">
+    <qams-drawer [open]="showForm()" [title]="i18n.t('nc.new')" (closed)="showForm.set(false)">
+      <form class="drawer-form" [formGroup]="form" (ngSubmit)="create()">
         <div class="grid">
           <div class="col-2">
             <label>{{ i18n.t('nc.subject') }}</label>
@@ -53,7 +54,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
         </div>
         @if (facade.error()) { <div class="error">{{ facade.error() }}</div> }
       </form>
-    }
+    </qams-drawer>
 
     @if (facade.loading() && facade.list().length === 0) {
       <p class="muted">{{ i18n.t('common.loading') }}</p>

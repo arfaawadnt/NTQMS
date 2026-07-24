@@ -7,6 +7,7 @@ import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
 import { AUDIT_TYPES, AuditType, ChecklistItemRequest } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
+import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 
 /** Audit register + a schedule form with a dynamic ISO-clause checklist (FormArray). */
@@ -14,14 +15,14 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
   selector: 'qams-audit-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, StatusPillComponent],
+  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent],
   template: `
     <qams-page-header [title]="i18n.t('audit.title')">
       @if (perms.canApprove()) { <button (click)="showForm.set(!showForm())">{{ i18n.t('audit.new') }}</button> }
     </qams-page-header>
 
-    @if (showForm()) {
-      <form class="card form" [formGroup]="form" (ngSubmit)="schedule()">
+    <qams-drawer [open]="showForm()" [title]="i18n.t('audit.new')" (closed)="cancel()">
+      <form class="drawer-form" [formGroup]="form" (ngSubmit)="schedule()">
         <div class="grid">
           <div class="col-2"><label>{{ i18n.t('audit.auditTitle') }}</label><input formControlName="title" /></div>
           <div><label>{{ i18n.t('audit.type') }}</label>
@@ -51,7 +52,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
         </div>
         @if (facade.error()) { <div class="error">{{ facade.error() }}</div> }
       </form>
-    }
+    </qams-drawer>
 
     @if (facade.loading() && facade.list().length === 0) {
       <p class="muted">{{ i18n.t('common.loading') }}</p>

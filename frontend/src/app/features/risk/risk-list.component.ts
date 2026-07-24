@@ -5,6 +5,7 @@ import { RiskFacade } from './risk.facade';
 import { I18nService } from '../../core/i18n.service';
 import { HIGH_RESIDUAL_RPN_THRESHOLD, RISK_CATEGORIES } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
+import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 
 /** Risk register: status-filterable list + an assess form (1-5 likelihood/impact). */
@@ -12,7 +13,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
   selector: 'qams-risk-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, PageHeaderComponent, StatusPillComponent],
+  imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, StatusPillComponent],
   template: `
     <qams-page-header [title]="i18n.t('risk.title')">
       <select [value]="statusFilter()" (change)="onFilter($event)" aria-label="Status filter">
@@ -22,8 +23,8 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
       <button (click)="showForm.set(!showForm())">{{ i18n.t('risk.new') }}</button>
     </qams-page-header>
 
-    @if (showForm()) {
-      <form class="card form" [formGroup]="form" (ngSubmit)="assess()">
+    <qams-drawer [open]="showForm()" [title]="i18n.t('risk.new')" (closed)="cancel()">
+      <form class="drawer-form" [formGroup]="form" (ngSubmit)="assess()">
         <div class="grid">
           <div class="col-2"><label>{{ i18n.t('risk.riskTitle') }}</label><input formControlName="title" /></div>
           <div>
@@ -41,7 +42,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
         </div>
         @if (facade.error()) { <div class="error">{{ facade.error() }}</div> }
       </form>
-    }
+    </qams-drawer>
 
     @if (facade.loading() && facade.list().length === 0) {
       <p class="muted">{{ i18n.t('common.loading') }}</p>

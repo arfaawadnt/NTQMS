@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { ChangeFacade } from './change.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
+import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 
 /** Change Control register: status-filterable list + a propose form. */
@@ -11,7 +12,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
   selector: 'qams-change-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, PageHeaderComponent, StatusPillComponent],
+  imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, StatusPillComponent],
   template: `
     <qams-page-header [title]="i18n.t('chg.title')">
       <select [value]="statusFilter()" (change)="onFilter($event)" aria-label="Status filter">
@@ -21,8 +22,8 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
       <button (click)="showForm.set(!showForm())">{{ i18n.t('chg.new') }}</button>
     </qams-page-header>
 
-    @if (showForm()) {
-      <form class="card form" [formGroup]="form" (ngSubmit)="propose()">
+    <qams-drawer [open]="showForm()" [title]="i18n.t('chg.new')" (closed)="cancel()">
+      <form class="drawer-form" [formGroup]="form" (ngSubmit)="propose()">
         <label>{{ i18n.t('chg.changeTitle') }}</label>
         <input formControlName="title" />
         <label>{{ i18n.t('chg.impact') }}</label>
@@ -33,7 +34,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
         </div>
         @if (facade.error()) { <div class="error">{{ facade.error() }}</div> }
       </form>
-    }
+    </qams-drawer>
 
     @if (facade.loading() && facade.list().length === 0) {
       <p class="muted">{{ i18n.t('common.loading') }}</p>

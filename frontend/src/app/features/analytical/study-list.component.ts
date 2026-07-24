@@ -5,6 +5,7 @@ import { ValidationFacade } from './validation.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
+import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 
 /** Method-validation study register: state-filterable list + configure form. */
@@ -12,7 +13,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
   selector: 'qams-study-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, PageHeaderComponent, StatusPillComponent],
+  imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, StatusPillComponent],
   template: `
     <qams-page-header [title]="i18n.t('val.title')">
       <select [value]="stateFilter()" (change)="onFilter($event)" aria-label="State filter">
@@ -24,8 +25,8 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
       }
     </qams-page-header>
 
-    @if (showForm()) {
-      <form class="card form" [formGroup]="form" (ngSubmit)="configure()">
+    <qams-drawer [open]="showForm()" [title]="i18n.t('val.new')" (closed)="cancel()">
+      <form class="drawer-form" [formGroup]="form" (ngSubmit)="configure()">
         <div class="grid">
           <div><label>{{ i18n.t('qc.analyte') }}</label><input formControlName="analyte" /></div>
           <div><label>{{ i18n.t('val.protocol') }}</label><input formControlName="protocol" [placeholder]="i18n.t('val.protocolHint')" /></div>
@@ -37,7 +38,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
         </div>
         @if (facade.error()) { <div class="error">{{ facade.error() }}</div> }
       </form>
-    }
+    </qams-drawer>
 
     @if (facade.loading() && facade.list().length === 0) {
       <p class="muted">{{ i18n.t('common.loading') }}</p>

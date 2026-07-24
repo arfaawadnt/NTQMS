@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { EquipmentFacade } from './equipment.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
+import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 
 /** Equipment register: status-filterable list + a register form. */
@@ -12,7 +13,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
   selector: 'qams-equipment-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, StatusPillComponent],
+  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent],
   template: `
     <qams-page-header [title]="i18n.t('equip.title')">
       <select [value]="statusFilter()" (change)="onFilter($event)" aria-label="Status filter">
@@ -22,8 +23,8 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
       <button (click)="showForm.set(!showForm())">{{ i18n.t('equip.new') }}</button>
     </qams-page-header>
 
-    @if (showForm()) {
-      <form class="card form" [formGroup]="form" (ngSubmit)="register()">
+    <qams-drawer [open]="showForm()" [title]="i18n.t('equip.new')" (closed)="cancel()">
+      <form class="drawer-form" [formGroup]="form" (ngSubmit)="register()">
         <div class="grid">
           <div class="col-2"><label>{{ i18n.t('equip.name') }}</label><input formControlName="name" /></div>
           <div><label>{{ i18n.t('equip.serial') }}</label><input formControlName="serialNumber" /></div>
@@ -37,7 +38,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
         </div>
         @if (facade.error()) { <div class="error">{{ facade.error() }}</div> }
       </form>
-    }
+    </qams-drawer>
 
     @if (facade.loading() && facade.list().length === 0) {
       <p class="muted">{{ i18n.t('common.loading') }}</p>

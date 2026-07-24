@@ -6,6 +6,7 @@ import { ReviewFacade } from './review.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
+import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 
 /** Management review list + a schedule form (QM-gated). */
@@ -13,7 +14,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
   selector: 'qams-review-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, StatusPillComponent],
+  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent],
   template: `
     <qams-page-header [title]="i18n.t('mrv.title')">
       @if (perms.canApprove()) {
@@ -21,8 +22,8 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
       }
     </qams-page-header>
 
-    @if (showForm()) {
-      <form class="card form" [formGroup]="form" (ngSubmit)="schedule()">
+    <qams-drawer [open]="showForm()" [title]="i18n.t('mrv.new')" (closed)="cancel()">
+      <form class="drawer-form" [formGroup]="form" (ngSubmit)="schedule()">
         <div class="grid">
           <div class="col-2"><label>{{ i18n.t('mrv.reviewTitle') }}</label><input formControlName="title" /></div>
           <div><label>{{ i18n.t('mrv.reviewDate') }}</label><input type="date" formControlName="reviewDate" /></div>
@@ -35,7 +36,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
         </div>
         @if (facade.error()) { <div class="error">{{ facade.error() }}</div> }
       </form>
-    }
+    </qams-drawer>
 
     @if (facade.loading() && facade.list().length === 0) {
       <p class="muted">{{ i18n.t('common.loading') }}</p>

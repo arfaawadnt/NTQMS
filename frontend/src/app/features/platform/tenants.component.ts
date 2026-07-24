@@ -7,6 +7,7 @@ import { TenantsApiService } from '../../core/api/tenants-api.service';
 import { I18nService } from '../../core/i18n.service';
 import { Tenant } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
+import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 
 /**
@@ -19,14 +20,14 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
   selector: 'qams-tenants',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, StatusPillComponent],
+  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent],
   template: `
     <qams-page-header [title]="i18n.t('tenants.title')" [subtitle]="i18n.t('tenants.subtitle')">
       <button (click)="showForm.set(!showForm())">{{ i18n.t('tenants.new') }}</button>
     </qams-page-header>
 
-    @if (showForm()) {
-      <form class="card form" [formGroup]="form" (ngSubmit)="provision()">
+    <qams-drawer [open]="showForm()" [title]="i18n.t('tenants.new')" (closed)="cancel()">
+      <form class="drawer-form" [formGroup]="form" (ngSubmit)="provision()">
         <div class="grid">
           <div>
             <label>{{ i18n.t('tenants.identifier') }}</label>
@@ -56,7 +57,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
         </div>
         @if (error()) { <div class="error">{{ error() }}</div> }
       </form>
-    }
+    </qams-drawer>
 
     @if (provisioned()) {
       <div class="card ok-note">
