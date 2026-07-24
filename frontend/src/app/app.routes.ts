@@ -163,6 +163,10 @@ export const routes: Routes = [
             loadComponent: () => import('./features/notifications/notifications.component').then((m) => m.NotificationsComponent),
           },
           {
+            path: 'compliance',
+            loadComponent: () => import('./features/compliance/compliance.component').then((m) => m.ComplianceComponent),
+          },
+          {
             path: 'notification-rules',
             loadComponent: () => import('./features/notifications/notification-admin.component').then((m) => m.NotificationAdminComponent),
           },

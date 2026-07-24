@@ -697,3 +697,33 @@ export interface AuditTrailEntry {
   prevHash: string;
   entryHash: string;
 }
+
+/** A 21 CFR Part 11 electronic-signature record (§11.50/§11.70). */
+export interface SignatureRecord {
+  id: string;
+  tenantId: string;
+  signerId: string;
+  signerDisplay: string;
+  meaning: string;
+  subjectRef: string;
+  contentHash: string;
+  signedAtUtc: string;
+}
+
+/** A security-relevant event (logins, lockouts, MFA challenges…). */
+export interface SecurityEvent {
+  id: string;
+  tenantId: string | null;
+  eventType: string;
+  actor: string | null;
+  ipAddress: string | null;
+  detail: string | null;
+  occurredAtUtc: string;
+}
+
+/** Result of on-demand hash-chain verification over the tenant's audit trail. */
+export interface ChainVerification {
+  ok: boolean;
+  verifiedEntries: number;
+  brokenAtSequence: number | null;
+}
