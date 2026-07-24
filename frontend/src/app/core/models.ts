@@ -459,3 +459,52 @@ export interface ReviewDetail {
 export interface ScheduleReviewRequest { title: string; reviewDate: string; participants: string; }
 export interface AddDecisionRequest { description: string; ownerId: string; dueDate: string; }
 export interface CloseReviewRequest { minutes: string; }
+
+// ── Supplier Quality ─────────────────────────────────────────────────────────
+
+/** Common supplier classifications (backend accepts any string; kept for consistency). */
+export const SUPPLIER_TYPES = ['Reagents', 'Consumables', 'Equipment', 'Calibration', 'ReferenceMaterials', 'Services'] as const;
+export type SupplierType = (typeof SUPPLIER_TYPES)[number];
+
+export interface SupplierCertificate {
+  id: string;
+  certificateType: string;
+  expiresAt: string;
+  fileId: string | null;
+}
+
+export interface SupplierListItem {
+  id: string;
+  supplierRef: string;
+  name: string;
+  supplierType: string;
+  status: string;
+}
+
+export interface SupplierDetail {
+  id: string;
+  supplierRef: string;
+  name: string;
+  supplierType: string;
+  status: string;
+  registeredBy: string;
+  approvedBy: string | null;
+  suspensionReason: string | null;
+  certificates: SupplierCertificate[];
+}
+
+export interface SupplierEvaluation {
+  id: string;
+  supplierId: string;
+  periodStart: string;
+  periodEnd: string;
+  weightedTotal: number;
+  evaluatedBy: string;
+  criteriaJson: string;
+}
+
+export interface RegisterSupplierRequest { name: string; supplierType: string; }
+export interface AddCertificateRequest { certificateType: string; expiresAt: string; fileId: string | null; }
+export interface SuspendSupplierRequest { reason: string; }
+export interface EvaluationCriterion { criterion: string; weight: number; score: number; }
+export interface RecordEvaluationRequest { periodStart: string; periodEnd: string; criteria: EvaluationCriterion[]; }

@@ -97,6 +97,14 @@ export const routes: Routes = [
             loadComponent: () => import('./features/review/review-detail.component').then((m) => m.ReviewDetailComponent),
           },
           {
+            path: 'suppliers',
+            loadComponent: () => import('./features/supplier/supplier-list.component').then((m) => m.SupplierListComponent),
+          },
+          {
+            path: 'suppliers/:id',
+            loadComponent: () => import('./features/supplier/supplier-detail.component').then((m) => m.SupplierDetailComponent),
+          },
+          {
             path: 'users',
             loadComponent: () => import('./features/users/users.component').then((m) => m.UsersComponent),
           },
