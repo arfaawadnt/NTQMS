@@ -63,7 +63,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
     .form { margin-bottom: 1rem; }
     .form textarea { width: 100%; }
     .row { display: flex; gap: .6rem; margin-top: 1rem; }
-    .clickable { cursor: pointer; } .clickable:hover { background: #f4f6f9; }
+    .clickable { cursor: pointer; }
     button, select { width: auto; }
   `],
 })

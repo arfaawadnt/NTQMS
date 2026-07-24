@@ -18,28 +18,35 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     } @else {
       <div class="kpis">
-        <a class="card kpi" routerLink="/nonconformances">
-          <div class="value">{{ facade.openCount() }}</div>
-          <div class="label">{{ i18n.t('dash.openNc') }}</div>
+        <a class="kpi blue" routerLink="/nonconformances">
+          <div class="n">{{ facade.openCount() }}</div>
+          <div class="l">{{ i18n.t('dash.openNc') }}</div>
         </a>
-        <a class="card kpi" routerLink="/nonconformances">
-          <div class="value danger">{{ facade.highRpnCount() }}</div>
-          <div class="label">{{ i18n.t('dash.highRpn') }}</div>
+        <a class="kpi red" routerLink="/nonconformances">
+          <div class="n">{{ facade.highRpnCount() }}</div>
+          <div class="l">{{ i18n.t('dash.highRpn') }}</div>
         </a>
-        <a class="card kpi" routerLink="/notifications">
-          <div class="value">{{ unread() }}</div>
-          <div class="label">{{ i18n.t('dash.unread') }}</div>
+        <a class="kpi teal" routerLink="/notifications">
+          <div class="n">{{ unread() }}</div>
+          <div class="l">{{ i18n.t('dash.unread') }}</div>
         </a>
       </div>
     }
   `,
   styles: [`
-    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
-    .kpi { text-decoration: none; color: inherit; display: block; }
-    .kpi:hover { border-color: var(--nt-blue); }
-    .value { font-size: 2.4rem; font-weight: 700; color: var(--nt-navy); }
-    .value.danger { color: var(--nt-danger); }
-    .label { color: var(--nt-muted); margin-top: .25rem; }
+    /* KPI tiles per the design system: solid semantic fills, tabular numerals. */
+    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+    .kpi {
+      border-radius: var(--nt-radius-card); padding: 14px 16px; color: #fff;
+      box-shadow: var(--nt-shadow-xs); text-decoration: none; display: block;
+      transition: filter .12s;
+    }
+    .kpi:hover { filter: brightness(1.06); }
+    .kpi.blue { background: var(--nt-blue); }
+    .kpi.red { background: var(--nt-red); }
+    .kpi.teal { background: var(--nt-teal); }
+    .n { font-size: 26px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+    .l { font-size: 12px; font-weight: 600; margin-top: 7px; opacity: .96; }
   `],
 })
 export class DashboardComponent implements OnInit {

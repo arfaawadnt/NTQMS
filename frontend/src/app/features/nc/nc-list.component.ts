@@ -91,7 +91,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
     .col-2 { grid-column: span 2; }
     .row { display: flex; gap: .6rem; margin-top: 1rem; }
     .clickable { cursor: pointer; }
-    .clickable:hover { background: #f4f6f9; }
+   
     .danger-text { color: var(--nt-danger); font-weight: 700; }
     select, button { width: auto; }
   `],

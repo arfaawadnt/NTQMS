@@ -85,7 +85,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
     .item { display: flex; gap: .5rem; margin-bottom: .4rem; }
     .item .clause { max-width: 120px; }
     .row { display: flex; gap: .6rem; margin-top: 1rem; }
-    .clickable { cursor: pointer; } .clickable:hover { background: #f4f6f9; }
+    .clickable { cursor: pointer; }
     button { width: auto; }
   `],
 })

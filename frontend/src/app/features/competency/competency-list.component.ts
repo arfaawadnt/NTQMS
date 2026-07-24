@@ -70,7 +70,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .5rem 1rem; }
     .col-2 { grid-column: span 2; }
     .row { display: flex; gap: .6rem; margin-top: 1rem; }
-    .clickable { cursor: pointer; } .clickable:hover { background: #f4f6f9; }
+    .clickable { cursor: pointer; }
     .mono { font-family: var(--nt-mono, monospace); font-size: .82rem; }
     button, select { width: auto; }
   `],

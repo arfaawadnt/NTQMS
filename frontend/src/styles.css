@@ -1,18 +1,66 @@
-/* NT.QAMS design system — navy #1E3A5F, blue #0077c2, teal #00b2a9 (per the design PDF). */
+/* ============================================================
+   NT.QAMS Design System — global stylesheet
+   Blue/teal family per the QAMS Design System (National Technology).
+   Primary face: Encode Sans (sanctioned substitute for Neo Sans Pro).
+   Arabic/RTL: Cairo. Flat, clinical surfaces; compact business type.
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Encode+Sans:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700&display=swap');
+
 :root {
-  --nt-navy: #1E3A5F;
-  --nt-blue: #0077c2;
-  --nt-teal: #00b2a9;
-  --nt-bg: #f4f6f9;
-  --nt-surface: #ffffff;
-  --nt-border: #dce3ec;
-  --nt-text: #1f2b3a;
-  --nt-muted: #6b7a8d;
-  --nt-danger: #c0392b;
-  --nt-warn: #e08a00;
-  --nt-ok: #1e8e5a;
-  --nt-radius: 8px;
-  --nt-shadow: 0 1px 3px rgba(30, 58, 95, .12), 0 1px 2px rgba(30, 58, 95, .08);
+  /* ---------- Brand (blue/teal family) ---------- */
+  --nt-blue:        #0077C2;   /* primary electric blue                    */
+  --nt-navy:        #1E3A5F;   /* emphasis, hover, titles                  */
+  --nt-navy-deep:   #1B365D;   /* record codes, links, footer              */
+  --nt-teal:        #00B2A9;   /* accent — icons, verified                 */
+  --nt-brand-soft:  #E0F2FE;   /* active/hover soft-blue background        */
+
+  /* ---------- Text / neutrals ---------- */
+  --nt-slate:       #3B4658;   /* body text, table headers                 */
+  --nt-text:        #3B4658;
+  --nt-title:       #1E3A5F;
+  --nt-grey-d:      #666666;   /* secondary text                           */
+  --nt-grey-m:      #797979;   /* muted text                               */
+  --nt-grey:        #999999;   /* tertiary / disabled                      */
+  --nt-muted:       #797979;
+  --nt-border:      #C1C1C6;
+  --nt-bg:          #F7F7F7;   /* app background                           */
+  --nt-bg-grey:     #F7F7F7;
+  --nt-filter-grey: #EDEFF3;
+  --nt-summary-blue:#E3F2FD;
+  --nt-surface:     #FFFFFF;
+
+  /* ---------- Semantic ---------- */
+  --nt-green:   #188038;
+  --nt-green-2: #70B54D;
+  --nt-gold:    #ECB71E;
+  --nt-orange:  #F15A29;
+  --nt-red:     #DC3545;
+  --nt-ok:      #188038;
+  --nt-warn:    #F15A29;
+  --nt-danger:  #DC3545;
+
+  /* ---------- Signature gradient ---------- */
+  --nt-header-grad: linear-gradient(90deg, #1E3A5F 0%, #0077C2 55%, #00B2A9 100%);
+
+  /* ---------- Radii ---------- */
+  --nt-radius-btn:   5px;
+  --nt-radius-input: 10px;
+  --nt-radius-card:  4px;
+  --nt-radius-login: 15px;
+  --nt-radius-chip:  999px;
+  --nt-radius:       4px;      /* legacy alias (cards)                     */
+
+  /* ---------- Elevation (cool, slate-tinted) ---------- */
+  --nt-shadow-xs:  0 1px 2px rgba(59, 70, 88, .06);
+  --nt-shadow-sm:  0 1px 3px rgba(59, 70, 88, .10);
+  --nt-shadow-md:  0 4px 12px rgba(59, 70, 88, .12);
+  --nt-shadow-pop: 0 8px 26px rgba(59, 70, 88, .20);
+  --nt-shadow:     0 1px 2px rgba(59, 70, 88, .06);
+
+  /* ---------- Type ---------- */
+  --nt-font:    'Encode Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --nt-font-ar: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+  --nt-mono:    ui-monospace, 'Cascadia Mono', Consolas, monospace;
 }
 
 * { box-sizing: border-box; }
@@ -20,61 +68,167 @@
 html, body {
   margin: 0;
   height: 100%;
-  font-family: "Segoe UI", "Encode Sans", "Cairo", system-ui, sans-serif;
-  color: var(--nt-text);
+  font-family: var(--nt-font);
+  color: var(--nt-slate);
   background: var(--nt-bg);
   font-size: 14px;
+  font-weight: 500;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Acronyms stay uppercase; general labels use Title Case, not ALL CAPS. */
-h1, h2, h3 { text-transform: none; color: var(--nt-navy); margin: 0 0 .5rem; }
+/* Trilingual: Arabic mirrors RTL and switches the whole app to Cairo. */
+[dir="rtl"] body, [dir="rtl"] { direction: rtl; }
+[dir="rtl"] body { font-family: var(--nt-font-ar); }
 
-[dir="rtl"] { direction: rtl; }
-[dir="rtl"] .qams-sidebar { border-right: none; border-left: 1px solid var(--nt-border); }
+/* Title Case only — global uppercase is deliberately disabled. */
+h1, h2, h3 { text-transform: none; color: var(--nt-slate); margin: 0 0 .5rem; }
+h1 { font-size: 18px; font-weight: 700; line-height: 1.3; }
+h2 { font-size: 15px; font-weight: 700; }
+h3 { font-size: 13px; font-weight: 600; letter-spacing: .01em; }
 
+a { color: var(--nt-navy-deep); }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #d4cfca; border-radius: 6px; border: 2px solid var(--nt-bg); }
+
+/* ---------- Buttons (hot / secondary / ghost) ---------- */
 button {
-  font: inherit;
-  cursor: pointer;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: var(--nt-radius-btn);
+  padding: 9px 16px;
   border: 1px solid transparent;
-  border-radius: var(--nt-radius);
-  padding: .5rem .9rem;
+  cursor: pointer;
+  line-height: 1;
+  white-space: nowrap;
   background: var(--nt-blue);
   color: #fff;
+  transition: background .12s, color .12s, filter .12s;
 }
-button.secondary { background: var(--nt-surface); color: var(--nt-navy); border-color: var(--nt-border); }
+button:hover { background: var(--nt-navy-deep); }
+button.secondary { background: #fff; color: var(--nt-blue); border-color: var(--nt-blue); }
+button.secondary:hover { background: var(--nt-brand-soft); }
 button.ghost { background: transparent; color: var(--nt-blue); }
+button.ghost:hover { background: var(--nt-brand-soft); }
+button.danger { background: var(--nt-red); }
+button.danger:hover { filter: brightness(.93); background: var(--nt-red); }
 button:disabled { opacity: .5; cursor: not-allowed; }
+button.link { background: none; color: var(--nt-blue); padding: 5px; border-radius: 4px; }
+button.link:hover { background: var(--nt-brand-soft); }
 
+/* ---------- Form controls ---------- */
 input, select, textarea {
-  font: inherit;
-  padding: .5rem .6rem;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--nt-slate);
   border: 1px solid var(--nt-border);
-  border-radius: var(--nt-radius);
+  border-radius: var(--nt-radius-input);
+  padding: 9px 11px;
   background: #fff;
   width: 100%;
 }
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--nt-blue);
+  box-shadow: 0 0 0 2px rgba(0, 119, 194, .15);
+}
+input:disabled, select:disabled, textarea:disabled { background: var(--nt-bg-grey); color: var(--nt-grey-m); }
+textarea { resize: vertical; min-height: 74px; line-height: 1.5; }
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%230077c2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 11px center;
+  padding-right: 32px;
+  cursor: pointer;
+}
+[dir="rtl"] select { background-position: left 11px center; padding-right: 11px; padding-left: 32px; }
+input[type="checkbox"], input[type="radio"] { width: auto; accent-color: var(--nt-blue); }
+input[type="file"] { padding: 6px; border-radius: var(--nt-radius-input); font-size: 12.5px; }
 
-label { display: block; font-weight: 600; margin: .75rem 0 .25rem; color: var(--nt-navy); }
+label { display: block; font-size: 13px; font-weight: 500; color: var(--nt-slate); margin: 12px 0 5px; }
 
+/* ---------- Cards / regions (flat & clinical) ---------- */
 .card {
   background: var(--nt-surface);
   border: 1px solid var(--nt-border);
-  border-radius: var(--nt-radius);
-  box-shadow: var(--nt-shadow);
-  padding: 1.25rem;
+  border-radius: var(--nt-radius-card);
+  box-shadow: var(--nt-shadow-xs);
+  padding: 16px;
 }
+.card h3 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: -16px -16px 12px;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--nt-border);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--nt-slate);
+}
+.card h3::before { content: ""; width: 8px; height: 8px; border-radius: 2px; background: var(--nt-teal); flex-shrink: 0; }
 
-table { width: 100%; border-collapse: collapse; }
-th, td { text-align: start; padding: .6rem .75rem; border-bottom: 1px solid var(--nt-border); }
-th { color: var(--nt-muted); font-weight: 600; font-size: .82rem; }
+/* ---------- Data grid (slate header, zebra, hover) ---------- */
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th, td { text-align: start; padding: 9px 13px; }
+thead th {
+  background: var(--nt-slate);
+  color: #fff;
+  font-weight: 600;
+  white-space: nowrap;
+  font-size: 12px;
+}
+td { border-bottom: 1px solid var(--nt-border); color: var(--nt-slate); vertical-align: middle; }
+tbody tr:nth-child(even) { background: var(--nt-bg-grey); }
+tbody tr:hover { background: var(--nt-brand-soft); }
+.card table { margin: -16px; width: calc(100% + 32px); }
 
+/* Record codes: navy, semibold, tabular. */
+.code, td:first-child { font-variant-numeric: tabular-nums; }
+.code { font-weight: 600; color: var(--nt-navy-deep); }
+
+/* ---------- Status chips (dot + tint) ---------- */
 .pill {
-  display: inline-block; padding: .15rem .55rem; border-radius: 999px;
-  font-size: .78rem; font-weight: 600; background: #eef3f8; color: var(--nt-navy);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 10px;
+  border-radius: var(--nt-radius-chip);
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  background: rgba(121, 121, 121, .16);
+  color: #666;
 }
-.pill.ok { background: #e4f5ec; color: var(--nt-ok); }
-.pill.warn { background: #fdf1de; color: var(--nt-warn); }
-.pill.danger { background: #fbe7e4; color: var(--nt-danger); }
+.pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.pill.ok { background: rgba(24, 128, 56, .14); color: var(--nt-green); }
+.pill.warn { background: rgba(236, 183, 30, .18); color: #9a7510; }
+.pill.danger { background: rgba(220, 53, 69, .14); color: var(--nt-red); }
+.pill.teal { background: rgba(0, 167, 157, .16); color: #00837b; }
+.pill.blue { background: var(--nt-summary-blue); color: #1565a0; }
 
-.error { color: var(--nt-danger); font-size: .85rem; margin-top: .5rem; }
-.muted { color: var(--nt-muted); }
+/* ---------- Messaging ---------- */
+.error {
+  color: var(--nt-red);
+  font-size: 12.5px;
+  font-weight: 500;
+  margin-top: 8px;
+  background: rgba(220, 53, 69, .08);
+  border: 1px solid rgba(220, 53, 69, .25);
+  border-radius: var(--nt-radius-card);
+  padding: 8px 12px;
+}
+.muted { color: var(--nt-grey-m); }
+.helper, .hint { font-size: 11px; font-weight: 400; color: var(--nt-grey-d); }
+
+/* Numbers always tabular so codes, versions and KPIs align. */
+td, .rpn, .kpi-n { font-variant-numeric: tabular-nums; }

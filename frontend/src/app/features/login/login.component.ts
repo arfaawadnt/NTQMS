@@ -11,15 +11,18 @@ import { I18nService, Lang } from '../../core/i18n.service';
   imports: [FormsModule],
   template: `
     <div class="wrap">
-      <div class="card panel">
+      <div class="panel">
+        <div class="brandstrip"></div>
+        <div class="inner">
         <div class="head">
-          <h1>{{ i18n.t('app.title') }}</h1>
+          <img class="logo" src="assets/nt-qams-logo.png" alt="NT.QAMS" />
           <select [value]="i18n.lang()" (change)="onLang($event)" aria-label="Language">
             <option value="en">EN</option>
             <option value="ar">AR</option>
             <option value="fr">FR</option>
           </select>
         </div>
+        <div class="subtitle">{{ i18n.t('app.subtitle') }}</div>
         <h2>{{ i18n.t('login.title') }}</h2>
 
         <form (ngSubmit)="submit()">
@@ -39,22 +42,40 @@ import { I18nService, Lang } from '../../core/i18n.service';
             <div class="muted hint">{{ i18n.t('login.mfaPrompt') }}</div>
           }
 
-          <button type="submit" [disabled]="busy()" style="margin-top:1rem;width:100%">
+          <button type="submit" class="signin" [disabled]="busy()">
             {{ busy() ? i18n.t('common.loading') : i18n.t('login.submit') }}
           </button>
 
           @if (error()) { <div class="error">{{ error() }}</div> }
         </form>
+        </div>
+        <div class="foot">National Technology · NT.QAMS</div>
       </div>
     </div>
   `,
   styles: [`
     .wrap { min-height: 100vh; display: grid; place-items: center; padding: 1rem;
-            background: linear-gradient(135deg, var(--nt-navy), #0a1826); }
-    .panel { width: 380px; max-width: 100%; }
-    .head { display: flex; align-items: center; justify-content: space-between; }
+            background: linear-gradient(135deg, #1E3A5F 0%, #16314f 60%, #0f2338 100%); }
+    .panel {
+      width: 400px; max-width: 100%; background: var(--nt-surface);
+      border-radius: 8px; box-shadow: var(--nt-shadow-pop); overflow: hidden;
+    }
+    .brandstrip { height: 6px; background: var(--nt-header-grad); }
+    .inner { padding: 24px 28px 20px; }
+    .head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
     .head select { width: auto; }
-    .hint { font-size: .8rem; margin-top: .2rem; }
+    .logo { height: 42px; }
+    .subtitle { font-size: 12px; color: var(--nt-grey-d); margin: 8px 0 16px; }
+    h2 { font-size: 15px; font-weight: 700; color: var(--nt-slate); margin: 0 0 4px; }
+    .hint { margin-top: 3px; }
+    .signin {
+      margin-top: 20px; width: 100%; border-radius: var(--nt-radius-login);
+      padding: 11px 16px; font-size: 14px; font-weight: 700;
+    }
+    .foot {
+      text-align: center; font-size: 12px; font-weight: 700; color: var(--nt-navy-deep);
+      border-top: 1px solid var(--nt-filter-grey); padding: 12px;
+    }
   `],
 })
 export class LoginComponent {
