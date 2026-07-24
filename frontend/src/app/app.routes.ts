@@ -147,6 +147,10 @@ export const routes: Routes = [
             ],
           },
           {
+            path: 'records',
+            loadComponent: () => import('./features/records/records.component').then((m) => m.RecordsComponent),
+          },
+          {
             path: 'users',
             loadComponent: () => import('./features/users/users.component').then((m) => m.UsersComponent),
           },

@@ -585,6 +585,35 @@ export interface PtEnrollment {
 export interface EnrollPtRequest { scheme: string; analyte: string; cycle: string; }
 export interface RecordPtResultRequest { submitted: number; assigned: number; standardDeviation: number; }
 
+// ── Records & Retention ──────────────────────────────────────────────────────
+
+export const RETENTION_CLASSES = ['FiveYears', 'TenYears', 'Permanent'] as const;
+export type RetentionClass = (typeof RETENTION_CLASSES)[number];
+
+/** Modules whose records are archived (informative options for the archive form). */
+export const ARCHIVE_SOURCE_MODULES = [
+  'Nonconformance', 'Audit', 'Document', 'Equipment', 'Competency',
+  'Risk', 'Change', 'ManagementReview', 'Supplier', 'ValidationStudy',
+] as const;
+
+export interface ArchiveListItem {
+  id: string;
+  archiveRef: string;
+  sourceModule: string;
+  sourceRef: string;
+  retentionClass: string;
+  archivedOn: string;
+  retentionExpiry: string | null;
+  state: string;
+}
+
+export interface ArchiveRecordRequest {
+  sourceModule: string;
+  sourceRef: string;
+  snapshotFileId: string | null;
+  retentionClass: RetentionClass;
+}
+
 // ── Compliance Ledger ────────────────────────────────────────────────────────
 
 /** One hash-chained, append-only audit-trail entry. */
