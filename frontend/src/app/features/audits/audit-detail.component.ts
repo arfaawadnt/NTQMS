@@ -10,6 +10,8 @@ import {
 } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
+import { WorkflowStepperComponent } from '../../shared/ui/workflow-stepper.component';
+import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 
 /**
  * Audit workspace: start the audit, run the checklist (answer each item),
@@ -21,12 +23,14 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
   selector: 'qams-audit-detail',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent],
+  imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
   template: `
     @if (audit(); as a) {
       <qams-page-header [title]="a.auditRef + ' — ' + a.title" [subtitle]="a.type">
         <a routerLink="/audits" class="ghost-link">← {{ i18n.t('audit.backToList') }}</a>
       </qams-page-header>
+
+      <qams-workflow-stepper [steps]="flowSteps" [current]="a.status" />
 
       <div class="meta card">
         <div><span class="muted">{{ i18n.t('nc.status') }}</span><qams-status-pill [status]="a.status" /></div>
@@ -91,6 +95,8 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
           }
         </section>
       </div>
+    
+      <qams-audit-trail [subject]="a.id" />
     } @else {
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
@@ -116,6 +122,9 @@ export class AuditDetailComponent implements OnInit {
 
   /** Route-bound audit id. */
   readonly id = input.required<string>();
+
+  /** Canonical workflow path for the stepper (off-path states render as terminal). */
+  readonly flowSteps = ['Scheduled', 'InProgress', 'SignedOff'] as const;
 
   readonly audit = this.facade.selected;
   readonly verdicts = CHECKLIST_VERDICTS;

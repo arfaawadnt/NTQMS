@@ -8,6 +8,8 @@ import { PermissionsService } from '../../core/permissions.service';
 import { VERSION_BUMPS, VersionBump } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
+import { WorkflowStepperComponent } from '../../shared/ui/workflow-stepper.component';
+import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 
 /**
  * Controlled-document workspace: version history + the state-appropriate action
@@ -19,12 +21,14 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
   selector: 'qams-document-detail',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent],
+  imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
   template: `
     @if (doc(); as d) {
       <qams-page-header [title]="d.code + ' — ' + d.title" [subtitle]="d.category">
         <a routerLink="/documents" class="ghost-link">← {{ i18n.t('doc.backToList') }}</a>
       </qams-page-header>
+
+      <qams-workflow-stepper [steps]="flowSteps" [current]="d.status" />
 
       <div class="grid">
         <section class="card">
@@ -93,6 +97,8 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
           @if (d.status === 'Obsolete') { <p class="muted">{{ i18n.t('doc.obsolete') }}</p> }
         </section>
       </div>
+    
+      <qams-audit-trail [subject]="d.id" />
     } @else {
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
@@ -116,6 +122,9 @@ export class DocumentDetailComponent implements OnInit {
 
   /** Route-bound document id. */
   readonly id = input.required<string>();
+
+  /** Canonical workflow path for the stepper (off-path states render as terminal). */
+  readonly flowSteps = ['Draft', 'Published', 'Obsolete'] as const;
 
   readonly doc = this.facade.selected;
   readonly bumps = VERSION_BUMPS;

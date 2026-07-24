@@ -584,3 +584,18 @@ export interface PtEnrollment {
 
 export interface EnrollPtRequest { scheme: string; analyte: string; cycle: string; }
 export interface RecordPtResultRequest { submitted: number; assigned: number; standardDeviation: number; }
+
+// ── Compliance Ledger ────────────────────────────────────────────────────────
+
+/** One hash-chained, append-only audit-trail entry. */
+export interface AuditTrailEntry {
+  id: string;
+  tenantId: string;
+  sequence: number;
+  eventId: string;
+  eventType: string;
+  payload: string;
+  occurredAtUtc: string;
+  prevHash: string;
+  entryHash: string;
+}

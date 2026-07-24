@@ -7,6 +7,8 @@ import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
+import { WorkflowStepperComponent } from '../../shared/ui/workflow-stepper.component';
+import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 
 /**
  * Equipment workspace: calibration status + logs (with certificate upload +
@@ -17,12 +19,14 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
   selector: 'qams-equipment-detail',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent],
+  imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
   template: `
     @if (item(); as e) {
       <qams-page-header [title]="e.code + ' — ' + e.name" [subtitle]="e.serialNumber">
         <a routerLink="/equipment" class="ghost-link">← {{ i18n.t('equip.backToList') }}</a>
       </qams-page-header>
+
+      <qams-workflow-stepper [steps]="flowSteps" [current]="e.status" />
 
       <div class="meta card">
         <div><span class="muted">{{ i18n.t('nc.status') }}</span><qams-status-pill [status]="e.status" /></div>
@@ -71,6 +75,8 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
           }
         </section>
       </div>
+    
+      <qams-audit-trail [subject]="e.id" />
     } @else {
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
@@ -95,6 +101,9 @@ export class EquipmentDetailComponent implements OnInit {
 
   /** Route-bound equipment id. */
   readonly id = input.required<string>();
+
+  /** Canonical workflow path for the stepper (off-path states render as terminal). */
+  readonly flowSteps = ['NeedsCalibration', 'Active', 'Retired'] as const;
 
   readonly item = this.facade.selected;
   readonly certificate = signal<File | null>(null);

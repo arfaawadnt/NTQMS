@@ -7,6 +7,8 @@ import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
+import { WorkflowStepperComponent } from '../../shared/ui/workflow-stepper.component';
+import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 
 /**
  * Competency workspace: profile, assessment history, and the authorize/revoke
@@ -18,12 +20,14 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
   selector: 'qams-competency-detail',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent],
+  imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
   template: `
     @if (item(); as c) {
       <qams-page-header [title]="c.subject" [subtitle]="i18n.t('comp.trainee') + ': ' + c.traineeId">
         <a routerLink="/competencies" class="ghost-link">← {{ i18n.t('comp.backToList') }}</a>
       </qams-page-header>
+
+      <qams-workflow-stepper [steps]="flowSteps" [current]="c.status" />
 
       <div class="meta card">
         <div><span class="muted">{{ i18n.t('nc.status') }}</span><qams-status-pill [status]="c.status" /></div>
@@ -78,6 +82,8 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
           }
         </section>
       </div>
+    
+      <qams-audit-trail [subject]="c.id" />
     } @else {
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
@@ -103,6 +109,9 @@ export class CompetencyDetailComponent implements OnInit {
 
   /** Route-bound competency id. */
   readonly id = input.required<string>();
+
+  /** Canonical workflow path for the stepper (off-path states render as terminal). */
+  readonly flowSteps = ['PendingTraining', 'Evaluated', 'Authorized'] as const;
 
   readonly item = this.facade.selected;
 

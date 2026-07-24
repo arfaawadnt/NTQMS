@@ -7,6 +7,8 @@ import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
+import { WorkflowStepperComponent } from '../../shared/ui/workflow-stepper.component';
+import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 
 /**
  * Change Control workspace. Enforces (client-side, matching the domain) the core
@@ -18,12 +20,14 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
   selector: 'qams-change-detail',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent],
+  imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
   template: `
     @if (item(); as c) {
       <qams-page-header [title]="c.changeRef + ' — ' + c.title" [subtitle]="i18n.t('chg.proposedBy') + ': ' + c.proposedBy">
         <a routerLink="/changes" class="ghost-link">← {{ i18n.t('chg.backToList') }}</a>
       </qams-page-header>
+
+      <qams-workflow-stepper [steps]="flowSteps" [current]="c.status" />
 
       <div class="meta card">
         <div><span class="muted">{{ i18n.t('nc.status') }}</span><qams-status-pill [status]="c.status" /></div>
@@ -87,6 +91,8 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
           </form>
         </section>
       }
+    
+      <qams-audit-trail [subject]="c.id" />
     } @else {
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
@@ -112,6 +118,9 @@ export class ChangeDetailComponent implements OnInit {
 
   /** Route-bound change id. */
   readonly id = input.required<string>();
+
+  /** Canonical workflow path for the stepper (off-path states render as terminal). */
+  readonly flowSteps = ['Proposed', 'Approved', 'Closed'] as const;
 
   readonly item = this.facade.selected;
 

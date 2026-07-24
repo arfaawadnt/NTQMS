@@ -8,6 +8,8 @@ import { PermissionsService } from '../../core/permissions.service';
 import { CAPA_ACTION_TYPES, CapaActionType, RCA_METHODS, RcaMethod } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
+import { WorkflowStepperComponent } from '../../shared/ui/workflow-stepper.component';
+import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 
 /**
  * Full nonconformance workspace: header + details, and the context-appropriate
@@ -19,12 +21,14 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
   selector: 'qams-nc-detail',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, NgTemplateOutlet, RouterLink, PageHeaderComponent, StatusPillComponent],
+  imports: [ReactiveFormsModule, DatePipe, NgTemplateOutlet, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
   template: `
     @if (nc(); as n) {
       <qams-page-header [title]="n.ncRef + ' — ' + n.title">
         <a routerLink="/nonconformances" class="ghost-link">← {{ i18n.t('nc.backToList') }}</a>
       </qams-page-header>
+
+      <qams-workflow-stepper [steps]="flowSteps" [current]="n.status" />
 
       <div class="grid">
         <section class="card">
@@ -131,6 +135,8 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
           </ng-template>
         </section>
       </div>
+    
+      <qams-audit-trail [subject]="n.id" />
     } @else {
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
@@ -156,6 +162,9 @@ export class NcDetailComponent implements OnInit {
 
   /** Route-bound nonconformance id (provided via withComponentInputBinding). */
   readonly id = input.required<string>();
+
+  /** Canonical workflow path for the stepper (off-path states render as terminal). */
+  readonly flowSteps = ['Draft', 'Raised', 'Assigned', 'Rca', 'ActionPlan', 'PendingVerification', 'EffectivenessCheck', 'Closed'] as const;
 
   readonly nc = this.facade.selected;
   readonly rcaMethods = RCA_METHODS;

@@ -7,6 +7,8 @@ import { I18nService } from '../../core/i18n.service';
 import { AuthService } from '../../core/auth.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
+import { WorkflowStepperComponent } from '../../shared/ui/workflow-stepper.component';
+import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 import { LeveyJenningsChartComponent } from './levey-jennings-chart.component';
 
 /**
@@ -18,12 +20,14 @@ import { LeveyJenningsChartComponent } from './levey-jennings-chart.component';
   selector: 'qams-qc-profile-detail',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, LeveyJenningsChartComponent],
+  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, LeveyJenningsChartComponent],
   template: `
     @if (facade.selected(); as p) {
       <qams-page-header [title]="p.analyte + ' — ' + p.instrument" [subtitle]="i18n.t('qc.lot') + ': ' + p.controlLot + ' · μ=' + p.targetMean + ' σ=' + p.targetSd">
         <a routerLink="/qc" class="ghost-link">← {{ i18n.t('qc.backToList') }}</a>
       </qams-page-header>
+
+      <qams-workflow-stepper [steps]="flowSteps" [current]="p.isActive ? 'Active' : 'Retired'" />
       @if (facade.error()) { <div class="error">{{ facade.error() }}</div> }
 
       <section class="card">
@@ -82,6 +86,8 @@ import { LeveyJenningsChartComponent } from './levey-jennings-chart.component';
           </table>
         }
       </section>
+    
+      <qams-audit-trail [subject]="p.id" />
     } @else {
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
@@ -105,6 +111,9 @@ export class QcProfileDetailComponent implements OnInit {
 
   /** Route-bound QC profile id. */
   readonly id = input.required<string>();
+
+  /** Canonical workflow path for the stepper (off-path states render as terminal). */
+  readonly flowSteps = ['Active', 'Retired'] as const;
 
   /** Run id whose troubleshooting form is open ('' = none). */
   readonly troubleshootId = signal('');

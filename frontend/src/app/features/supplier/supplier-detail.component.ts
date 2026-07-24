@@ -7,6 +7,8 @@ import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
+import { WorkflowStepperComponent } from '../../shared/ui/workflow-stepper.component';
+import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 
 /** Typed shape of one evaluation-criterion row in the form array. */
 interface CriterionForm {
@@ -26,12 +28,14 @@ interface CriterionForm {
   selector: 'qams-supplier-detail',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent],
+  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
   template: `
     @if (item(); as s) {
       <qams-page-header [title]="s.supplierRef + ' — ' + s.name" [subtitle]="s.supplierType">
         <a routerLink="/suppliers" class="ghost-link">← {{ i18n.t('sup.backToList') }}</a>
       </qams-page-header>
+
+      <qams-workflow-stepper [steps]="flowSteps" [current]="s.status" />
 
       <div class="meta card">
         <div><span class="muted">{{ i18n.t('nc.status') }}</span><qams-status-pill [status]="s.status" /></div>
@@ -118,6 +122,8 @@ interface CriterionForm {
           </form>
         }
       </section>
+    
+      <qams-audit-trail [subject]="s.id" />
     } @else {
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
@@ -147,6 +153,9 @@ export class SupplierDetailComponent implements OnInit {
 
   /** Route-bound supplier id. */
   readonly id = input.required<string>();
+
+  /** Canonical workflow path for the stepper (off-path states render as terminal). */
+  readonly flowSteps = ['PendingEvaluation', 'Approved'] as const;
 
   readonly item = this.facade.selected;
   readonly certFile = signal<File | null>(null);
