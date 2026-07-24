@@ -40,24 +40,30 @@ import { PermissionsService } from '../core/permissions.service';
 
       <div class="body">
         <nav class="nav">
-          <div class="grouplabel">{{ i18n.t('nav.groupQuality') }}</div>
-          <a class="item" routerLink="/dashboard" routerLinkActive="active">{{ i18n.t('nav.dashboard') }}</a>
-          <a class="item" routerLink="/nonconformances" routerLinkActive="active">{{ i18n.t('nav.nc') }}</a>
-          <a class="item" routerLink="/audits" routerLinkActive="active">{{ i18n.t('nav.audits') }}</a>
-          <a class="item" routerLink="/risks" routerLinkActive="active">{{ i18n.t('nav.risks') }}</a>
-          <a class="item" routerLink="/changes" routerLinkActive="active">{{ i18n.t('nav.changes') }}</a>
-          <a class="item" routerLink="/management-reviews" routerLinkActive="active">{{ i18n.t('nav.reviews') }}</a>
+          @if (perms.isPlatformAdmin()) {
+            <!-- Control plane: platform administrators manage tenants, not lab records. -->
+            <div class="grouplabel">{{ i18n.t('nav.groupPlatform') }}</div>
+            <a class="item" routerLink="/platform/tenants" routerLinkActive="active">{{ i18n.t('nav.tenants') }}</a>
+          } @else {
+            <div class="grouplabel">{{ i18n.t('nav.groupQuality') }}</div>
+            <a class="item" routerLink="/dashboard" routerLinkActive="active">{{ i18n.t('nav.dashboard') }}</a>
+            <a class="item" routerLink="/nonconformances" routerLinkActive="active">{{ i18n.t('nav.nc') }}</a>
+            <a class="item" routerLink="/audits" routerLinkActive="active">{{ i18n.t('nav.audits') }}</a>
+            <a class="item" routerLink="/risks" routerLinkActive="active">{{ i18n.t('nav.risks') }}</a>
+            <a class="item" routerLink="/changes" routerLinkActive="active">{{ i18n.t('nav.changes') }}</a>
+            <a class="item" routerLink="/management-reviews" routerLinkActive="active">{{ i18n.t('nav.reviews') }}</a>
 
-          <div class="grouplabel">{{ i18n.t('nav.groupResources') }}</div>
-          <a class="item" routerLink="/documents" routerLinkActive="active">{{ i18n.t('nav.documents') }}</a>
-          <a class="item" routerLink="/equipment" routerLinkActive="active">{{ i18n.t('nav.equipment') }}</a>
-          <a class="item" routerLink="/competencies" routerLinkActive="active">{{ i18n.t('nav.competency') }}</a>
-          <a class="item" routerLink="/training" routerLinkActive="active">{{ i18n.t('nav.training') }}</a>
+            <div class="grouplabel">{{ i18n.t('nav.groupResources') }}</div>
+            <a class="item" routerLink="/documents" routerLinkActive="active">{{ i18n.t('nav.documents') }}</a>
+            <a class="item" routerLink="/equipment" routerLinkActive="active">{{ i18n.t('nav.equipment') }}</a>
+            <a class="item" routerLink="/competencies" routerLinkActive="active">{{ i18n.t('nav.competency') }}</a>
+            <a class="item" routerLink="/training" routerLinkActive="active">{{ i18n.t('nav.training') }}</a>
 
-          <div class="grouplabel">{{ i18n.t('nav.groupAdmin') }}</div>
-          <a class="item" routerLink="/notifications" routerLinkActive="active">{{ i18n.t('nav.notifications') }}</a>
-          @if (perms.isTenantAdmin()) {
-            <a class="item" routerLink="/users" routerLinkActive="active">{{ i18n.t('nav.users') }}</a>
+            <div class="grouplabel">{{ i18n.t('nav.groupAdmin') }}</div>
+            <a class="item" routerLink="/notifications" routerLinkActive="active">{{ i18n.t('nav.notifications') }}</a>
+            @if (perms.isTenantAdmin()) {
+              <a class="item" routerLink="/users" routerLinkActive="active">{{ i18n.t('nav.users') }}</a>
+            }
           }
         </nav>
 

@@ -109,7 +109,8 @@ export class LoginComponent {
           this.mfaRequired.set(true);
           return;
         }
-        void this.router.navigate(['/dashboard']);
+        // Platform administrators land on the control plane; lab users on the dashboard.
+        void this.router.navigate([res.role === 'PlatformAdmin' ? '/platform/tenants' : '/dashboard']);
       },
       error: (err: HttpErrorResponse) => {
         this.busy.set(false);

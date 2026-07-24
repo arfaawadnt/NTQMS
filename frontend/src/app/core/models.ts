@@ -182,6 +182,25 @@ export interface RegisterUserRequest {
 export interface ChangeUserRoleRequest { role: TenantRole; }
 export interface ResetUserPasswordRequest { newPassword: string; }
 
+// ── Platform administration (control plane) ─────────────────────────────────
+
+export interface Tenant {
+  id: string;
+  identifier: string;
+  name: string;
+  status: string;
+  createdAtUtc: string;
+}
+
+/** Provisions a tenant together with its first tenant administrator (atomic). */
+export interface ProvisionTenantRequest {
+  identifier: string;
+  name: string;
+  adminEmail: string;
+  adminDisplayName: string;
+  adminPassword: string;
+}
+
 // ── Audit Management ─────────────────────────────────────────────────────────
 
 export const AUDIT_TYPES = ['Internal', 'ExternalHosted'] as const;
