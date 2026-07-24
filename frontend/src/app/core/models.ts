@@ -88,6 +88,53 @@ export interface PlanCapaActionRequest { type: CapaActionType; details: string; 
 export interface VerifyNcRequest { passed: boolean; }
 export interface ConfirmEffectivenessRequest { effective: boolean; }
 
+// ── Complaints ───────────────────────────────────────────────────────────────
+
+export const COMPLAINT_CHANNELS = ['Phone', 'Email', 'Portal', 'InPerson', 'Letter'] as const;
+export type ComplaintChannel = (typeof COMPLAINT_CHANNELS)[number];
+
+export interface ComplaintListItem {
+  id: string;
+  complaintRef: string;
+  subject: string;
+  channel: string;
+  status: string;
+  confidential: boolean;
+  complainantName: string;
+  loggedAtUtc: string;
+}
+
+export interface ComplaintDetail {
+  id: string;
+  complaintRef: string;
+  channel: string;
+  complainantName: string;
+  complainantContact: string | null;
+  confidential: boolean;
+  subject: string;
+  description: string;
+  status: string;
+  loggedAtUtc: string;
+  acknowledgedAtUtc: string | null;
+  validationVerdict: string | null;
+  investigationOutcome: string | null;
+  resolution: string | null;
+  linkedNcId: string | null;
+}
+
+export interface LogComplaintRequest {
+  channel: ComplaintChannel;
+  complainantName: string;
+  complainantContact: string | null;
+  confidential: boolean;
+  subject: string;
+  description: string;
+}
+
+export interface ValidateComplaintRequest { justified: boolean; reason: string; }
+export interface LogComplaintOutcomeRequest { outcome: string; }
+export interface ResolveComplaintRequest { resolution: string; }
+
 export interface NotificationFeedItem {
   id: string;
   eventKey: string;

@@ -72,3 +72,27 @@ public sealed class RefCounterConfiguration : IEntityTypeConfiguration<RefCounte
         builder.Property(c => c.RefType).HasMaxLength(10);
     }
 }
+
+/// <summary>Customer complaint (Improvement context) — tenant-scoped, ref unique per tenant.</summary>
+public sealed class ComplaintConfiguration : IEntityTypeConfiguration<Complaint>
+{
+    public void Configure(EntityTypeBuilder<Complaint> builder)
+    {
+        builder.ToTable("complaint", "qams");
+        builder.HasKey(c => c.Id);
+
+        builder.Property(c => c.ComplaintRef).HasMaxLength(30);
+        builder.Property(c => c.Channel).HasConversion<string>().HasMaxLength(20);
+        builder.Property(c => c.ComplainantName).HasMaxLength(300);
+        builder.Property(c => c.ComplainantContact).HasMaxLength(300);
+        builder.Property(c => c.Subject).HasMaxLength(300);
+        builder.Property(c => c.Description).HasMaxLength(4000);
+        builder.Property(c => c.Status).HasConversion<string>().HasMaxLength(20);
+        builder.Property(c => c.ValidationVerdict).HasMaxLength(2000);
+        builder.Property(c => c.InvestigationOutcome).HasMaxLength(4000);
+        builder.Property(c => c.Resolution).HasMaxLength(4000);
+
+        builder.HasIndex(c => new { c.TenantId, c.ComplaintRef }).IsUnique();
+        builder.HasIndex(c => new { c.TenantId, c.Status });
+    }
+}

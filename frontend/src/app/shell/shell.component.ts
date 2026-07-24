@@ -49,6 +49,7 @@ import { PermissionsService } from '../core/permissions.service';
             <a class="item" routerLink="/dashboard" routerLinkActive="active">{{ i18n.t('nav.dashboard') }}</a>
             <a class="item" routerLink="/tasks" routerLinkActive="active">{{ i18n.t('nav.tasks') }}</a>
             <a class="item" routerLink="/nonconformances" routerLinkActive="active">{{ i18n.t('nav.nc') }}</a>
+            <a class="item" routerLink="/complaints" routerLinkActive="active">{{ i18n.t('nav.complaints') }}</a>
             <a class="item" routerLink="/audits" routerLinkActive="active">{{ i18n.t('nav.audits') }}</a>
             <a class="item" routerLink="/risks" routerLinkActive="active">{{ i18n.t('nav.risks') }}</a>
             <a class="item" routerLink="/changes" routerLinkActive="active">{{ i18n.t('nav.changes') }}</a>

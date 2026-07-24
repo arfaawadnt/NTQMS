@@ -35,6 +35,7 @@ public sealed class AppDbContext(
     public DbSet<Tenant> Tenants => Set<Tenant>();
     public DbSet<UserAccount> Users => Set<UserAccount>();
     public DbSet<Nonconformance> Nonconformances => Set<Nonconformance>();
+    public DbSet<Complaint> Complaints => Set<Complaint>();
     public DbSet<ControlledDocument> Documents => Set<ControlledDocument>();
     public DbSet<FileReference> Files => Set<FileReference>();
     public DbSet<Audit> Audits => Set<Audit>();

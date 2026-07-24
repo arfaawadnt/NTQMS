@@ -27,6 +27,7 @@ public interface IAppDbContext
     DbSet<Tenant> Tenants { get; }
     DbSet<UserAccount> Users { get; }
     DbSet<Nonconformance> Nonconformances { get; }
+    DbSet<Complaint> Complaints { get; }
     DbSet<ControlledDocument> Documents { get; }
     DbSet<FileReference> Files { get; }
     DbSet<Audit> Audits { get; }

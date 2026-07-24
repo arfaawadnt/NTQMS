@@ -49,6 +49,16 @@ export const routes: Routes = [
             ],
           },
           {
+            path: 'complaints',
+            loadComponent: () => import('./features/complaints/complaint-list.component').then((m) => m.ComplaintListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/complaints/complaint-detail.component').then((m) => m.ComplaintDetailComponent),
+              },
+            ],
+          },
+          {
             path: 'audits',
             loadComponent: () => import('./features/audits/audit-list.component').then((m) => m.AuditListComponent),
             children: [
