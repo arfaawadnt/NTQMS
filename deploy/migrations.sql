@@ -1604,11 +1604,11 @@ BEGIN
                     CREATE POLICY tenant_isolation ON audit.electronic_signature
                         USING (tenant_id = current_setting('app.current_tenant', true)::uuid);
 
-                    CREATE OR REPLACE FUNCTION audit.reject_mutation() RETURNS trigger AS $
+                    CREATE OR REPLACE FUNCTION audit.reject_mutation() RETURNS trigger AS $$
                     BEGIN
                         RAISE EXCEPTION 'audit ledgers are append-only';
                     END;
-                    $ LANGUAGE plpgsql;
+                    $$ LANGUAGE plpgsql;
 
                     CREATE TRIGGER audit_trail_append_only BEFORE UPDATE OR DELETE ON audit.audit_trail
                         FOR EACH ROW EXECUTE FUNCTION audit.reject_mutation();

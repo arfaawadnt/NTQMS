@@ -25,7 +25,11 @@ public sealed class PostgresReferenceNumberGenerator(AppDbContext db, IClock clo
     {
         var year = clock.UtcNow.Year;
 
-        var next = await db.Database
+        // Enumerated without LINQ composition: operators such as SingleAsync make
+        // EF wrap the SQL in an outer SELECT, and INSERT … RETURNING is not
+        // composable as a subquery on PostgreSQL (runtime failure invisible to
+        // the InMemory test provider). ToListAsync executes the statement verbatim.
+        var next = (await db.Database
             .SqlQuery<long>($"""
                 INSERT INTO qams.ref_counter (tenant_id, ref_type, year, last_value)
                 VALUES ({tenantId}, {refType}, {year}, 1)
@@ -33,7 +37,8 @@ public sealed class PostgresReferenceNumberGenerator(AppDbContext db, IClock clo
                 DO UPDATE SET last_value = qams.ref_counter.last_value + 1
                 RETURNING last_value AS "Value"
                 """)
-            .SingleAsync(cancellationToken);
+            .ToListAsync(cancellationToken))
+            .Single();
 
         return $"{refType}-{year}-{next:0000}";
     }
