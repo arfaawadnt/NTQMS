@@ -10,6 +10,7 @@ using NT.QAMS.Domain.Improvement;
 using NT.QAMS.Domain.Notifications;
 using NT.QAMS.Domain.Organization;
 using NT.QAMS.Domain.Records;
+using NT.QAMS.Domain.Reporting;
 using NT.QAMS.Domain.Sla;
 using NT.QAMS.Domain.RiskGovernance;
 using NT.QAMS.Domain.SupplierQuality;
@@ -53,6 +54,7 @@ public interface IAppDbContext
     DbSet<SlaDefinition> SlaDefinitions { get; }
     DbSet<WorkTask> WorkTasks { get; }
     DbSet<EscalationTimer> EscalationTimers { get; }
+    DbSet<KpiSnapshot> KpiSnapshots { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

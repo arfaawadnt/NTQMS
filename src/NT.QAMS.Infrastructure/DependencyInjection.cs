@@ -60,6 +60,7 @@ public static class DependencyInjection
 
         services.AddHostedService<OutboxProcessor>();
         services.AddHostedService<Jobs.ScheduledSweepService>();
+        services.AddHostedService<Jobs.KpiSnapshotService>();
 
         return services;
     }

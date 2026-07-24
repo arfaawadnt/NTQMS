@@ -88,6 +88,45 @@ export interface PlanCapaActionRequest { type: CapaActionType; details: string; 
 export interface VerifyNcRequest { passed: boolean; }
 export interface ConfirmEffectivenessRequest { effective: boolean; }
 
+// ── Reporting (read models — real data only) ─────────────────────────────────
+
+export interface DashboardKpis {
+  openNcs: number;
+  overdueCapaActions: number;
+  openComplaints: number;
+  auditsInProgress: number;
+  equipmentOutOfService: number;
+  equipmentNeedsCalibration: number;
+  highResidualRisks: number;
+  overdueTasks: number;
+  ptUnsatisfactory: number;
+  pendingTrainingAssignments: number;
+  suspendedSuppliers: number;
+  publishedDocuments: number;
+  computedAtUtc: string;
+}
+
+export interface KpiHistoryPoint {
+  date: string;
+  openNcs: number;
+  overdueCapaActions: number;
+  openComplaints: number;
+  equipmentOutOfService: number;
+  highResidualRisks: number;
+  overdueTasks: number;
+}
+
+export interface NcParetoBucket { sourceType: string; count: number; }
+
+export interface SlaCompliance {
+  completedTotal: number;
+  completedOnTime: number;
+  onTimePercent: number;
+  openTotal: number;
+  openOverdue: number;
+  computedAtUtc: string;
+}
+
 // ── Complaints ───────────────────────────────────────────────────────────────
 
 export const COMPLAINT_CHANNELS = ['Phone', 'Email', 'Portal', 'InPerson', 'Letter'] as const;
