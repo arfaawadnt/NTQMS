@@ -69,6 +69,9 @@ import { PermissionsService } from '../core/permissions.service';
             <div class="grouplabel">{{ i18n.t('nav.groupAdmin') }}</div>
             <a class="item" routerLink="/records" routerLinkActive="active">{{ i18n.t('nav.records') }}</a>
             <a class="item" routerLink="/notifications" routerLinkActive="active">{{ i18n.t('nav.notifications') }}</a>
+            @if (perms.canApprove()) {
+              <a class="item" routerLink="/notification-rules" routerLinkActive="active">{{ i18n.t('nav.notificationRules') }}</a>
+            }
             @if (perms.isTenantAdmin()) {
               <a class="item" routerLink="/users" routerLinkActive="active">{{ i18n.t('nav.users') }}</a>
             }

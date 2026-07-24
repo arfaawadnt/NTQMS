@@ -614,6 +614,44 @@ export interface ArchiveRecordRequest {
   retentionClass: RetentionClass;
 }
 
+// ── Notifications administration ─────────────────────────────────────────────
+
+/** Event keys the backend dispatcher raises (NotificationPolicies constants). */
+export const NOTIFICATION_EVENT_KEYS = [
+  'NC_RAISED', 'DOC_PUBLISHED', 'EQUIP_CALIB_DUE', 'EQUIP_LOCKED_OUT',
+  'COMP_EXPIRED', 'RISK_HIGH_RESIDUAL', 'SUP_SUSPENDED', 'SLA_ESCALATED',
+] as const;
+export type NotificationEventKey = (typeof NOTIFICATION_EVENT_KEYS)[number];
+
+export interface NotificationRule {
+  id: string;
+  eventKey: string;
+  recipientRoles: string;
+  emailEnabled: boolean;
+  subjectTemplate: string;
+  bodyTemplate: string;
+  isActive: boolean;
+}
+
+export interface UpsertNotificationRuleRequest {
+  eventKey: string;
+  recipientRoles: string;
+  emailEnabled: boolean;
+  subjectTemplate: string;
+  bodyTemplate: string;
+}
+
+export interface DispatchMonitorItem {
+  id: string;
+  eventKey: string;
+  recipientUserId: string;
+  recipientEmail: string | null;
+  subject: string;
+  emailStatus: string;
+  error: string | null;
+  createdAtUtc: string;
+}
+
 // ── Tasks & SLA ──────────────────────────────────────────────────────────────
 
 export interface WorkTask {
