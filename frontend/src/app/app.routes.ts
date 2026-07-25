@@ -242,6 +242,16 @@ export const routes: Routes = [
             ],
           },
           {
+            path: 'reference-intervals',
+            loadComponent: () => import('./features/analytical/reference-interval-list.component').then((m) => m.ReferenceIntervalListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/analytical/reference-interval-detail.component').then((m) => m.ReferenceIntervalDetailComponent),
+              },
+            ],
+          },
+          {
             path: 'uncertainty',
             loadComponent: () => import('./features/analytical/uncertainty-list.component').then((m) => m.UncertaintyListComponent),
             children: [

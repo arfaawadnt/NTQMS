@@ -839,6 +839,56 @@ export interface CreateDetectionLimitStudyRequest {
   loqCvTargetPct: number;
 }
 
+// ── Reference-Interval Verification (CLSI EP28) ─────────────────────────────
+
+export interface ReferenceSample {
+  id: string;
+  value: number;
+  subjectRef: string | null;
+  outside: boolean;
+}
+
+export interface ReferenceIntervalListItem {
+  id: string;
+  studyRef: string;
+  analyte: string;
+  population: string;
+  claimedLower: number;
+  claimedUpper: number;
+  state: string;
+  outsideCount: number | null;
+  allowedOutside: number | null;
+  verdict: string | null;
+}
+
+export interface ReferenceIntervalDetail {
+  id: string;
+  studyRef: string;
+  analyte: string;
+  unit: string;
+  population: string;
+  source: string;
+  claimedLower: number;
+  claimedUpper: number;
+  state: string;
+  sampleCount: number | null;
+  outsideCount: number | null;
+  allowedOutside: number | null;
+  verdict: string | null;
+  signedOffBy: string | null;
+  signedOffAtUtc: string | null;
+  samples: ReferenceSample[];
+}
+
+export interface CreateReferenceIntervalStudyRequest {
+  analyte: string;
+  unit: string;
+  population: string;
+  source: string;
+  claimedLower: number;
+  claimedUpper: number;
+}
+
 // ── Personnel Authorization Matrix (ISO 17025 §6.2.6) ───────────────────────
 
 export const AUTHORIZATION_SCOPES = ['Perform', 'ReviewAndRelease', 'Train'] as const;

@@ -63,6 +63,7 @@ public interface IAppDbContext
     DbSet<MethodComparisonStudy> MethodComparisons { get; }
     DbSet<LinearityStudy> LinearityStudies { get; }
     DbSet<DetectionLimitStudy> DetectionLimitStudies { get; }
+    DbSet<ReferenceIntervalStudy> ReferenceIntervalStudies { get; }
     DbSet<PtEnrollment> PtEnrollments { get; }
     DbSet<PtPlan> PtPlans { get; }
     DbSet<AuditTrailReview> AuditTrailReviews { get; }

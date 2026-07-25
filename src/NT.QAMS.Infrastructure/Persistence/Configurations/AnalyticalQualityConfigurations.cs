@@ -221,3 +221,31 @@ public sealed class DetectionLimitStudyConfiguration : IEntityTypeConfiguration<
         builder.Ignore(s => s.DomainEvents);
     }
 }
+
+public sealed class ReferenceIntervalStudyConfiguration : IEntityTypeConfiguration<ReferenceIntervalStudy>
+{
+    public void Configure(EntityTypeBuilder<ReferenceIntervalStudy> builder)
+    {
+        builder.ToTable("reference_interval_study", "qams");
+        builder.HasKey(s => s.Id);
+        builder.Property(s => s.StudyRef).HasMaxLength(30);
+        builder.Property(s => s.Analyte).HasMaxLength(200);
+        builder.Property(s => s.Unit).HasMaxLength(50);
+        builder.Property(s => s.Population).HasMaxLength(150);
+        builder.Property(s => s.Source).HasMaxLength(300);
+        builder.Property(s => s.State).HasConversion<string>().HasMaxLength(20);
+        builder.Property(s => s.Verdict).HasConversion<string>().HasMaxLength(20);
+        builder.HasIndex(s => new { s.TenantId, s.StudyRef }).IsUnique();
+        builder.HasIndex(s => new { s.TenantId, s.State });
+
+        builder.OwnsMany(s => s.Samples, x =>
+        {
+            x.ToTable("reference_sample", "qams");
+            x.WithOwner().HasForeignKey("study_id");
+            x.HasKey(p => p.Id);
+            x.Property(p => p.SubjectRef).HasMaxLength(100);
+        });
+
+        builder.Ignore(s => s.DomainEvents);
+    }
+}

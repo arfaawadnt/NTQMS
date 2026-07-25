@@ -109,6 +109,28 @@ public sealed record DetectionLimitDetailDto(
     IReadOnlyList<DetectionMeasurementDto> Measurements,
     IReadOnlyList<LowLevelAssessmentDto> LowLevels);
 
+// ── Reference-Interval Verification (CLSI EP28) ─────────────────────────────
+
+public sealed record CreateReferenceIntervalStudyRequest(
+    string Analyte, string Unit, string Population, string Source,
+    decimal ClaimedLower, decimal ClaimedUpper);
+
+public sealed record AddReferenceSampleRequest(decimal Value, string? SubjectRef);
+
+public sealed record ReferenceSampleDto(Guid Id, decimal Value, string? SubjectRef, bool Outside);
+
+public sealed record ReferenceIntervalListItemDto(
+    Guid Id, string StudyRef, string Analyte, string Population,
+    decimal ClaimedLower, decimal ClaimedUpper, string State,
+    int? OutsideCount, int? AllowedOutside, string? Verdict);
+
+public sealed record ReferenceIntervalDetailDto(
+    Guid Id, string StudyRef, string Analyte, string Unit, string Population, string Source,
+    decimal ClaimedLower, decimal ClaimedUpper, string State,
+    int? SampleCount, int? OutsideCount, int? AllowedOutside, string? Verdict,
+    Guid? SignedOffBy, DateTimeOffset? SignedOffAtUtc,
+    IReadOnlyList<ReferenceSampleDto> Samples);
+
 // ── PT/EQA Annual Plan (ISO 17025 §7.7.2) ───────────────────────────────────
 
 public sealed record CreatePtPlanRequest(int Year);
