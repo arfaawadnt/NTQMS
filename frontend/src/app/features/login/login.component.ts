@@ -36,6 +36,13 @@ import { I18nService, Lang } from '../../core/i18n.service';
           <label>{{ i18n.t('login.password') }}</label>
           <input name="password" type="password" [(ngModel)]="password" autocomplete="current-password" required />
 
+          @if (passwordExpired()) {
+            <div class="error">{{ i18n.t('login.expired') }}</div>
+            <label>{{ i18n.t('login.newPassword') }}</label>
+            <input name="newPassword" type="password" [(ngModel)]="newPassword" autocomplete="new-password" />
+            <div class="muted hint">{{ i18n.t('login.newPasswordHint') }}</div>
+          }
+
           @if (mfaRequired()) {
             <label>{{ i18n.t('login.mfa') }}</label>
             <input name="mfa" inputmode="numeric" [(ngModel)]="mfaCode" autocomplete="one-time-code" />
@@ -91,6 +98,8 @@ export class LoginComponent {
   readonly busy = signal(false);
   readonly error = signal('');
   readonly mfaRequired = signal(false);
+  readonly passwordExpired = signal(false);
+  newPassword = '';
 
   onLang(event: Event): void {
     this.i18n.setLang((event.target as HTMLSelectElement).value as Lang);
@@ -100,6 +109,24 @@ export class LoginComponent {
     this.error.set('');
     this.busy.set(true);
     const tenant = this.tenant.trim() || null;
+
+    if (this.passwordExpired()) {
+      this.auth.changePassword(tenant, this.email.trim(), this.password, this.newPassword).subscribe({
+        next: () => {
+          this.busy.set(false);
+          this.passwordExpired.set(false);
+          this.password = this.newPassword;
+          this.newPassword = '';
+          this.submit(); // Sign in with the freshly rotated password.
+        },
+        error: (err: HttpErrorResponse) => {
+          this.busy.set(false);
+          this.error.set(err.error?.title ?? 'Password change failed.');
+        },
+      });
+      return;
+    }
+
     const mfa = this.mfaRequired() ? (this.mfaCode.trim() || null) : null;
 
     this.auth.login(tenant, this.email.trim(), this.password, mfa).subscribe({
@@ -114,6 +141,10 @@ export class LoginComponent {
       },
       error: (err: HttpErrorResponse) => {
         this.busy.set(false);
+        if (err.error?.code === 'AUTH-101') {
+          this.passwordExpired.set(true);
+          return;
+        }
         this.error.set(err.error?.title ?? 'Sign-in failed.');
       },
     });

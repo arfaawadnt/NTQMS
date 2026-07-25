@@ -73,3 +73,18 @@ public sealed class GetFieldChangesHandler(IAppDbContext db, ICurrentTenant tena
             .ToListAsync(ct);
     }
 }
+
+/// <summary>
+/// Signature manifest for one record (Part 11 §11.50: signature information
+/// must be shown on the signed record) — readable by any user who can open
+/// the record, unlike the ledger-wide queries.
+/// </summary>
+public sealed record GetSignaturesForSubjectQuery(string SubjectRef)
+    : IQuery<IReadOnlyList<SignatureRecord>>;
+
+public sealed class GetSignaturesForSubjectHandler(IComplianceLedgerStore store)
+    : IQueryHandler<GetSignaturesForSubjectQuery, IReadOnlyList<SignatureRecord>>
+{
+    public Task<IReadOnlyList<SignatureRecord>> Handle(GetSignaturesForSubjectQuery q, CancellationToken ct) =>
+        store.GetSignaturesForSubjectAsync(q.SubjectRef, ct);
+}

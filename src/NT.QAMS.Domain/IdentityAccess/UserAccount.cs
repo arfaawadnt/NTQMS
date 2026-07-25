@@ -39,6 +39,9 @@ public sealed class UserAccount : AggregateRoot
     public string Email { get; private set; }
     public string DisplayName { get; private set; }
     public string PasswordHash { get; private set; }
+
+    /// <summary>When the password was last set; null forces no aging until first rotation is stamped.</summary>
+    public DateTimeOffset? PasswordChangedAtUtc { get; private set; }
     public UserRole Role { get; private set; }
     public bool IsActive { get; private set; }
 
@@ -103,7 +106,7 @@ public sealed class UserAccount : AggregateRoot
     }
 
     /// <summary>Replaces the password hash (administrative reset) and clears any lockout.</summary>
-    public void ResetPassword(string passwordHash)
+    public void ResetPassword(string passwordHash, DateTimeOffset? at = null)
     {
         if (string.IsNullOrWhiteSpace(passwordHash))
         {
@@ -111,6 +114,21 @@ public sealed class UserAccount : AggregateRoot
         }
 
         PasswordHash = passwordHash;
+        PasswordChangedAtUtc = at;
+        FailedLoginAttempts = 0;
+        LockedUntilUtc = null;
+    }
+
+    /// <summary>Self-service password change (Part 11 §11.300(b) aging compliance) — stamps the rotation instant.</summary>
+    public void ChangePassword(string newPasswordHash, DateTimeOffset at)
+    {
+        if (string.IsNullOrWhiteSpace(newPasswordHash))
+        {
+            throw new DomainException("USER-006", "A password hash is required.");
+        }
+
+        PasswordHash = newPasswordHash;
+        PasswordChangedAtUtc = at;
         FailedLoginAttempts = 0;
         LockedUntilUtc = null;
     }

@@ -149,6 +149,11 @@ import { PermissionsService } from '../core/permissions.service';
 })
 export class ShellComponent {
   readonly auth = inject(AuthService);
+
+  constructor() {
+    // Part 11-friendly idle lockout for every authenticated session.
+    this.auth.startIdleWatch();
+  }
   readonly i18n = inject(I18nService);
   readonly perms = inject(PermissionsService);
   private readonly router = inject(Router);

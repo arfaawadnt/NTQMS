@@ -139,22 +139,32 @@ public class ESignatureServiceTests
     }
 
     [Fact]
-    public async Task Correct_pin_mints_a_signature_wrong_pin_is_rejected()
+    public async Task Signing_demands_both_components_and_rejects_either_wrong_one()
     {
         var (db, tenant) = NewContext();
         var hasher = new IdentityPasswordHasher();
-        var user = UserAccount.Create(TenantId, "qm@lab.test", "QM", "pwd", UserRole.QualityManager);
+        var user = UserAccount.Create(
+            TenantId, "qm@lab.test", "QM", hasher.Hash("Sign-Pass-123"), UserRole.QualityManager);
         user.SetPin(hasher.Hash("2468"));
         db.Users.Add(user);
         await db.SaveChangesAsync();
 
         var service = new ESignatureService(db, tenant, hasher, new FixedClock(Now));
 
-        var wrong = () => service.SignAsync(user.Id, "0000", "Approve X", "DOC:1", "abc123", CancellationToken.None);
-        (await wrong.Should().ThrowAsync<SharedKernel.Primitives.DomainException>())
+        // Part 11 §11.200(a)(1): wrong password is refused even with the right PIN…
+        var wrongPassword = () => service.SignAsync(
+            user.Id, "not-the-password", "2468", "Approve X", "DOC:1", "abc123", CancellationToken.None);
+        (await wrongPassword.Should().ThrowAsync<SharedKernel.Primitives.DomainException>())
+            .Which.Code.Should().Be("SIG-002");
+
+        // …and the wrong PIN is refused even with the right password.
+        var wrongPin = () => service.SignAsync(
+            user.Id, "Sign-Pass-123", "0000", "Approve X", "DOC:1", "abc123", CancellationToken.None);
+        (await wrongPin.Should().ThrowAsync<SharedKernel.Primitives.DomainException>())
             .Which.Code.Should().Be("SIG-001");
 
-        var record = await service.SignAsync(user.Id, "2468", "Approve X", "DOC:1", "abc123", CancellationToken.None);
+        var record = await service.SignAsync(
+            user.Id, "Sign-Pass-123", "2468", "Approve X", "DOC:1", "abc123", CancellationToken.None);
         record.SignerDisplay.Should().Be("QM");
         record.Meaning.Should().Be("Approve X");
         record.ContentHash.Should().Be("abc123");

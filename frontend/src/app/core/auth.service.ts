@@ -59,6 +59,13 @@ export class AuthService {
     return this.http.post<void>(`${this.base}/signature-pin`, { pin });
   }
 
+  /** Self-service rotation — anonymous endpoint; works while the password is expired. */
+  changePassword(tenantIdentifier: string | null, email: string, currentPassword: string, newPassword: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/change-password`, {
+      tenantIdentifier, email, currentPassword, newPassword,
+    });
+  }
+
   logout(): void {
     localStorage.removeItem(STORAGE_KEY);
     this.session.set(null);
@@ -91,5 +98,25 @@ export class AuthService {
     } catch {
       return null;
     }
+  }
+
+  /** Part 11-friendly idle lockout: sign out after 30 minutes without interaction. */
+  private static readonly IDLE_LIMIT_MS = 30 * 60 * 1000;
+  private idleTimer: ReturnType<typeof setTimeout> | null = null;
+
+  /** Arms the idle timer and resets it on user activity (call once at app start). */
+  startIdleWatch(): void {
+    const reset = (): void => {
+      if (this.idleTimer) { clearTimeout(this.idleTimer); }
+      if (!this.isAuthenticated()) { return; }
+      this.idleTimer = setTimeout(() => {
+        this.logout();
+        location.assign('/login');
+      }, AuthService.IDLE_LIMIT_MS);
+    };
+    for (const evt of ['click', 'keydown', 'visibilitychange']) {
+      document.addEventListener(evt, reset, { passive: true });
+    }
+    reset();
   }
 }

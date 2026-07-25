@@ -96,3 +96,15 @@ public sealed class ComplaintConfiguration : IEntityTypeConfiguration<Complaint>
         builder.HasIndex(c => new { c.TenantId, c.Status });
     }
 }
+
+/// <summary>Retired password hashes for the reuse ban (saas schema, per-user).</summary>
+public sealed class PasswordHistoryConfiguration : IEntityTypeConfiguration<PasswordHistoryEntry>
+{
+    public void Configure(EntityTypeBuilder<PasswordHistoryEntry> builder)
+    {
+        builder.ToTable("password_history", "saas");
+        builder.HasKey(h => h.Id);
+        builder.Property(h => h.PasswordHash).HasMaxLength(500);
+        builder.HasIndex(h => new { h.UserId, h.SetAtUtc });
+    }
+}

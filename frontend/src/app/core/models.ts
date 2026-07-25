@@ -253,7 +253,7 @@ export interface CreateDocumentRequest {
 
 export interface DraftNewVersionRequest { fileId: string; changeSummary: string; bump: VersionBump; }
 export interface RejectVersionRequest { reason: string; }
-export interface PublishDocumentRequest { pin: string; }
+export interface PublishDocumentRequest { password: string; pin: string; }
 
 // ── User Management ──────────────────────────────────────────────────────────
 

@@ -8,7 +8,7 @@ public sealed record DraftNewVersionRequest(Guid FileId, string ChangeSummary, s
 public sealed record RejectVersionRequest(string Reason);
 
 /// <summary>Publishing requires the approver's 4-digit e-signature PIN.</summary>
-public sealed record PublishDocumentRequest(string Pin);
+public sealed record PublishDocumentRequest(string Password, string Pin);
 
 public sealed record DocumentVersionDto(
     Guid Id, string Version, string State, Guid FileId, string ChangeSummary,

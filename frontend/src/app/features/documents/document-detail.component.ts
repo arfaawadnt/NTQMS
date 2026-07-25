@@ -2,10 +2,12 @@ import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, si
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { DocumentsFacade } from './documents.facade';
+import { DocumentsApiService } from '../../core/api/documents-api.service';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
-import { VERSION_BUMPS, VersionBump } from '../../core/models';
+import { VERSION_BUMPS, VersionBump , SignatureRecord } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { WorkflowStepperComponent } from '../../shared/ui/workflow-stepper.component';
@@ -76,8 +78,11 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
           @if (inFlightState() === 'Approved') {
             @if (perms.canApprove()) {
               <form [formGroup]="publishForm" (ngSubmit)="facade.publish(d.id, publishForm.getRawValue())">
+                <label>{{ i18n.t('doc.signPassword') }}</label>
+                <input formControlName="password" type="password" autocomplete="current-password" />
                 <label>{{ i18n.t('doc.pin') }}</label>
                 <input formControlName="pin" inputmode="numeric" maxlength="4" [placeholder]="i18n.t('doc.pinHint')" />
+                <div class="hint">{{ i18n.t('doc.twoComponentHint') }}</div>
                 <button type="submit" [disabled]="publishForm.invalid">{{ i18n.t('doc.publish') }}</button>
               </form>
             } @else { <p class="muted">{{ i18n.t('doc.awaitPublish') }}</p> }
@@ -98,6 +103,20 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
         </section>
       </div>
     
+      @if (signatures().length > 0) {
+        <section class="card">
+          <h3>{{ i18n.t('doc.signatures') }}</h3>
+          @for (s of signatures(); track s.id) {
+            <div class="sig-row">
+              <b>{{ s.signerDisplay }}</b>
+              <span>{{ s.meaning }}</span>
+              <span class="muted">{{ s.signedAtUtc | date:'medium' }}</span>
+              <span class="mono" [title]="s.contentHash">{{ s.contentHash.slice(0, 12) }}…</span>
+            </div>
+          }
+        </section>
+      }
+
       <qams-audit-trail [subject]="d.id" />
     } @else {
       <p class="muted">{{ i18n.t('common.loading') }}</p>
@@ -110,6 +129,8 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
     .actions form { border-top: 1px solid var(--nt-border); padding-top: .75rem; margin-top: .75rem; }
     .actions button { margin-top: .5rem; margin-inline-end: .5rem; width: auto; }
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
+    .sig-row { display: flex; gap: 14px; align-items: baseline; padding: 6px 0; border-bottom: 1px solid var(--nt-border); font-size: 12.5px; flex-wrap: wrap; }
+    .mono { font-family: var(--nt-mono); font-size: 10.5px; color: var(--nt-grey-m); }
     h3 { margin-top: 1rem; }
     @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
   `],
@@ -119,6 +140,7 @@ export class DocumentDetailComponent implements OnInit {
   readonly i18n = inject(I18nService);
   readonly perms = inject(PermissionsService);
   private readonly fb = inject(FormBuilder);
+  private readonly docsApi = inject(DocumentsApiService);
 
   /** Route-bound document id. */
   readonly id = input.required<string>();
@@ -129,6 +151,8 @@ export class DocumentDetailComponent implements OnInit {
   readonly doc = this.facade.selected;
   readonly bumps = VERSION_BUMPS;
   readonly file = signal<File | null>(null);
+  /** Part 11 §11.50 signature manifest for this document. */
+  readonly signatures = signal<SignatureRecord[]>([]);
 
   /** The state of the single in-flight (non-published, non-obsolete) version, if any. */
   readonly inFlightState = computed<string | null>(() => {
@@ -138,13 +162,27 @@ export class DocumentDetailComponent implements OnInit {
   });
 
   readonly rejectForm = this.fb.nonNullable.group({ reason: ['', [Validators.required, Validators.maxLength(1000)]] });
-  readonly publishForm = this.fb.nonNullable.group({ pin: ['', [Validators.required, Validators.pattern(/^\d{4}$/)]] });
+  readonly publishForm = this.fb.nonNullable.group({
+    password: ['', [Validators.required]],
+    pin: ['', [Validators.required, Validators.pattern(/^\d{4}$/)]],
+  });
   readonly versionForm = this.fb.nonNullable.group({
     bump: ['Minor' as VersionBump, [Validators.required]],
     changeSummary: ['', [Validators.required, Validators.maxLength(1000)]],
   });
 
-  ngOnInit(): void { void this.facade.loadDetail(this.id()); }
+  ngOnInit(): void {
+    void this.facade.loadDetail(this.id());
+    void this.loadSignatures();
+  }
+
+  private async loadSignatures(): Promise<void> {
+    try {
+      this.signatures.set(await firstValueFrom(this.docsApi.signatures(this.id())));
+    } catch {
+      this.signatures.set([]); // Manifest is additive — never block the workspace.
+    }
+  }
 
   onFile(event: Event): void {
     this.file.set((event.target as HTMLInputElement).files?.[0] ?? null);

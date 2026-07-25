@@ -18,6 +18,19 @@ public sealed class AuthController(ISender sender) : ControllerBase
         Ok(await sender.Send(new LoginCommand(
             request.TenantIdentifier, request.Email, request.Password, request.MfaCode), ct));
 
+    /// <summary>
+    /// Self-service password rotation — anonymous by design so an EXPIRED
+    /// password can still be changed; the handler verifies full credentials.
+    /// </summary>
+    [HttpPost("change-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ChangePassword(ChangePasswordRequest request, CancellationToken ct)
+    {
+        await sender.Send(new ChangePasswordCommand(
+            request.TenantIdentifier, request.Email, request.CurrentPassword, request.NewPassword), ct);
+        return NoContent();
+    }
+
     /// <summary>Begin MFA enrollment — returns the secret + otpauth URI for the authenticator app.</summary>
     [HttpPost("mfa/enroll")]
     [Authorize]

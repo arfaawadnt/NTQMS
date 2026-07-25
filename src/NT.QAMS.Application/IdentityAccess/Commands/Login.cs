@@ -28,7 +28,7 @@ public sealed class LoginValidator : AbstractValidator<LoginCommand>
 
 public sealed class LoginHandler(
     IAppDbContext db, IPasswordHasher hasher, IJwtTokenService jwt,
-    ITotpService totp, ISecurityEventLog security, IClock clock)
+    ITotpService totp, ISecurityEventLog security, IClock clock, PasswordPolicyOptions passwordPolicy)
     : ICommandHandler<LoginCommand, AuthResponse>
 {
     private const string InvalidCredentials = "Invalid credentials.";
@@ -72,6 +72,15 @@ public sealed class LoginHandler(
             throw await FailAsync("AUTH-001", InvalidCredentials, tenantId, email, "bad-password", ct);
         }
 
+        // Part 11 §11.300(b): force rotation once the password exceeds its maximum age.
+        if (passwordPolicy.MaxAgeDays > 0
+            && user.PasswordChangedAtUtc is { } changed
+            && changed.AddDays(passwordPolicy.MaxAgeDays) < clock.UtcNow)
+        {
+            throw await FailAsync(
+                "AUTH-101", "Password has expired and must be changed.", tenantId, email, "password-expired", ct);
+        }
+
         if (user.MfaEnabled)
         {
             if (string.IsNullOrWhiteSpace(command.MfaCode))
@@ -102,5 +111,84 @@ public sealed class LoginHandler(
     {
         await security.WriteAsync("LOGIN_FAILED", tenantId, email, reason, ct);
         return new DomainException(code, message);
+    }
+}
+
+
+// ── Self-service password change (works while the password is expired) ──────
+
+public sealed record ChangePasswordCommand(
+    string? TenantIdentifier, string Email, string CurrentPassword, string NewPassword) : ICommand;
+
+public sealed class ChangePasswordValidator : AbstractValidator<ChangePasswordCommand>
+{
+    public ChangePasswordValidator()
+    {
+        RuleFor(x => x.Email).NotEmpty().MaximumLength(320);
+        RuleFor(x => x.CurrentPassword).NotEmpty();
+        RuleFor(x => x.NewPassword).NotEmpty().MinimumLength(10).MaximumLength(200);
+    }
+}
+
+/// <summary>
+/// Rotates a password after verifying the full current credentials (usable
+/// pre-login, so an expired password can be changed). Enforces the reuse ban
+/// against the current hash plus the configured history depth, retires the
+/// old hash into the history, and logs a PASSWORD_CHANGED security event.
+/// </summary>
+public sealed class ChangePasswordHandler(
+    IAppDbContext db, IPasswordHasher hasher, ISecurityEventLog security,
+    IClock clock, PasswordPolicyOptions passwordPolicy)
+    : ICommandHandler<ChangePasswordCommand>
+{
+    public async Task Handle(ChangePasswordCommand command, CancellationToken ct)
+    {
+        Guid? tenantId = null;
+        if (!string.IsNullOrWhiteSpace(command.TenantIdentifier))
+        {
+            var slug = TenantSlug.Create(command.TenantIdentifier);
+            tenantId = (await db.Tenants.AsNoTracking().SingleOrDefaultAsync(t => t.Slug == slug, ct)
+                ?? throw new DomainException("AUTH-001", "Invalid credentials.")).Id;
+        }
+
+        var email = command.Email.Trim().ToLowerInvariant();
+        var user = await db.Users.SingleOrDefaultAsync(u => u.TenantId == tenantId && u.Email == email, ct);
+        if (user is null || !user.IsActive || user.IsLockedOut(clock.UtcNow)
+            || !hasher.Verify(user.PasswordHash, command.CurrentPassword))
+        {
+            throw new DomainException("AUTH-001", "Invalid credentials.");
+        }
+
+        // Reuse ban: the new password may not match the current hash or any retired one in scope.
+        var history = await db.PasswordHistory
+            .Where(h => h.UserId == user.Id)
+            .OrderByDescending(h => h.SetAtUtc)
+            .Take(Math.Max(passwordPolicy.HistoryDepth, 0))
+            .ToListAsync(ct);
+        if (hasher.Verify(user.PasswordHash, command.NewPassword)
+            || history.Any(h => hasher.Verify(h.PasswordHash, command.NewPassword)))
+        {
+            throw new DomainException(
+                "AUTH-102", $"The new password must differ from the last {passwordPolicy.HistoryDepth + 1} passwords.");
+        }
+
+        db.PasswordHistory.Add(new PasswordHistoryEntry
+        {
+            UserId = user.Id,
+            PasswordHash = user.PasswordHash,
+            SetAtUtc = clock.UtcNow,
+        });
+        user.ChangePassword(hasher.Hash(command.NewPassword), clock.UtcNow);
+
+        // Prune history beyond the configured depth.
+        var stale = await db.PasswordHistory
+            .Where(h => h.UserId == user.Id)
+            .OrderByDescending(h => h.SetAtUtc)
+            .Skip(Math.Max(passwordPolicy.HistoryDepth, 0))
+            .ToListAsync(ct);
+        db.PasswordHistory.RemoveRange(stale);
+
+        await security.WriteAsync("PASSWORD_CHANGED", tenantId, email, null, ct);
+        await db.SaveChangesAsync(ct);
     }
 }

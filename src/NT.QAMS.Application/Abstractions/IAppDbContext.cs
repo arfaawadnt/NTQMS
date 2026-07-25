@@ -28,6 +28,7 @@ public interface IAppDbContext
 {
     DbSet<Tenant> Tenants { get; }
     DbSet<UserAccount> Users { get; }
+    DbSet<PasswordHistoryEntry> PasswordHistory { get; }
     DbSet<Nonconformance> Nonconformances { get; }
     DbSet<Complaint> Complaints { get; }
     DbSet<ControlledDocument> Documents { get; }

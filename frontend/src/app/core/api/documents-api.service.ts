@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   CreateDocumentRequest, CreatedResource, DocumentDetail, DocumentListItem,
-  DraftNewVersionRequest, PublishDocumentRequest, RejectVersionRequest,
+  DraftNewVersionRequest, PublishDocumentRequest, RejectVersionRequest, SignatureRecord,
 } from '../models';
 
 /** Typed client for the Document Control API (one method per backend endpoint). */
@@ -32,6 +32,11 @@ export class DocumentsApiService {
   submit(id: string): Observable<void> { return this.http.post<void>(`${this.base}/${id}/submit`, {}); }
   recommend(id: string): Observable<void> { return this.http.post<void>(`${this.base}/${id}/recommend`, {}); }
   reject(id: string, body: RejectVersionRequest): Observable<void> { return this.http.post<void>(`${this.base}/${id}/reject`, body); }
+  /** Part 11 §11.50 signature manifest for this document (any viewer of the record). */
+  signatures(id: string): Observable<SignatureRecord[]> {
+    return this.http.get<SignatureRecord[]>(`${this.base}/${id}/signatures`);
+  }
+
   publish(id: string, body: PublishDocumentRequest): Observable<void> { return this.http.post<void>(`${this.base}/${id}/publish`, body); }
   draftNewVersion(id: string, body: DraftNewVersionRequest): Observable<void> { return this.http.post<void>(`${this.base}/${id}/versions`, body); }
   retire(id: string): Observable<void> { return this.http.post<void>(`${this.base}/${id}/retire`, {}); }

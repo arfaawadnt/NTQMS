@@ -13,3 +13,7 @@ public sealed record ResetUserPasswordRequest(string NewPassword);
 
 /// <summary>Lightweight directory entry for user pickers (no email, no security fields).</summary>
 public sealed record UserDirectoryEntryDto(Guid Id, string DisplayName, string Role);
+
+/// <summary>Self-service password rotation (usable while the password is expired).</summary>
+public sealed record ChangePasswordRequest(
+    string? TenantIdentifier, string Email, string CurrentPassword, string NewPassword);

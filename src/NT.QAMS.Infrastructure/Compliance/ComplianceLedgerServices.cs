@@ -88,10 +88,16 @@ public sealed class ESignatureService(
     : IESignatureService
 {
     public async Task<SignatureRecord> SignAsync(
-        Guid signerId, string pin, string meaning, string subjectRef, string contentHash, CancellationToken ct)
+        Guid signerId, string password, string pin, string meaning, string subjectRef, string contentHash, CancellationToken ct)
     {
         var signer = await db.Users.SingleOrDefaultAsync(u => u.Id == signerId, ct)
             ?? throw new DomainException("SIG-404", "Signer not found.");
+
+        // Part 11 §11.200(a)(1): a signing demands both identification components.
+        if (!hasher.Verify(signer.PasswordHash, password))
+        {
+            throw new DomainException("SIG-002", "Account password is incorrect.");
+        }
 
         if (string.IsNullOrWhiteSpace(signer.PinHash) || !hasher.Verify(signer.PinHash, pin))
         {
@@ -144,6 +150,12 @@ public sealed class ComplianceLedgerStore(AppDbContext db, ICurrentTenant tenant
 
         return await query.OrderByDescending(s => s.SignedAtUtc).Take(take).ToListAsync(ct);
     }
+
+    public async Task<IReadOnlyList<SignatureRecord>> GetSignaturesForSubjectAsync(string subjectRef, CancellationToken ct) =>
+        await db.Set<SignatureRecord>().AsNoTracking()
+            .Where(s => s.TenantId == tenant.TenantId && s.SubjectRef == subjectRef)
+            .OrderBy(s => s.SignedAtUtc)
+            .ToListAsync(ct);
 
     public async Task<IReadOnlyList<SecurityEvent>> GetSecurityEventsAsync(int take, CancellationToken ct) =>
         await db.Set<SecurityEvent>().AsNoTracking()

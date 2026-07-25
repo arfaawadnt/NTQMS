@@ -27,6 +27,11 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct) =>
         Ok(await sender.Send(new GetDocumentByIdQuery(id), ct));
 
+    /// <summary>Part 11 §11.50 signature manifest for this document, visible to any viewer of the record.</summary>
+    [HttpGet("{id:guid}/signatures")]
+    public async Task<IActionResult> Signatures(Guid id, CancellationToken ct) =>
+        Ok(await sender.Send(new NT.QAMS.Application.ComplianceLedger.GetSignaturesForSubjectQuery($"DOC:{id:N}"), ct));
+
     [HttpPost]
     public async Task<IActionResult> Create(CreateDocumentRequest request, CancellationToken ct)
     {
@@ -62,7 +67,7 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
     [Authorize(Roles = "QualityManager,TenantAdmin")]
     public async Task<IActionResult> Publish(Guid id, PublishDocumentRequest request, CancellationToken ct)
     {
-        await sender.Send(new PublishDocumentCommand(id, request.Pin), ct);
+        await sender.Send(new PublishDocumentCommand(id, request.Password, request.Pin), ct);
         return NoContent();
     }
 

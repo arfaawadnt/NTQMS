@@ -56,7 +56,7 @@ public sealed record SubmitDocumentForReviewCommand(Guid DocumentId) : ICommand;
 public sealed record RecommendDocumentCommand(Guid DocumentId) : ICommand;
 public sealed record RejectDocumentVersionCommand(Guid DocumentId, string Reason) : ICommand;
 /// <summary>Publishing is a Part 11 signing ceremony: it requires the approver's e-signature PIN.</summary>
-public sealed record PublishDocumentCommand(Guid DocumentId, string Pin) : ICommand;
+public sealed record PublishDocumentCommand(Guid DocumentId, string Password, string Pin) : ICommand;
 public sealed record DraftNewVersionCommand(
     Guid DocumentId, Guid FileId, string ChangeSummary, VersionBump Bump) : ICommand;
 public sealed record RetireDocumentCommand(Guid DocumentId) : ICommand;
@@ -126,7 +126,7 @@ public sealed class PublishDocumentHandler(
 
         // Verify the PIN and mint the immutable signature BEFORE the state change.
         await signatures.SignAsync(
-            actor, c.Pin,
+            actor, c.Password, c.Pin,
             $"Approved and published {doc.Code} v{approving.VersionLabel}",
             $"DOC:{doc.Id:N}", contentHash, ct);
 

@@ -42,6 +42,9 @@ public static class DependencyInjection
         services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());
 
         services.AddSingleton<IPasswordHasher, Security.IdentityPasswordHasher>();
+        services.AddSingleton(new PasswordPolicyOptions(
+            int.TryParse(configuration["PasswordPolicy:MaxAgeDays"], out var maxAge) ? maxAge : 90,
+            int.TryParse(configuration["PasswordPolicy:HistoryDepth"], out var depth) ? depth : 5));
         services.AddSingleton<IJwtTokenService, Security.JwtTokenService>();
         services.AddSingleton<ITotpService, Security.TotpService>();
         services.AddScoped<IReferenceNumberGenerator, PostgresReferenceNumberGenerator>();
