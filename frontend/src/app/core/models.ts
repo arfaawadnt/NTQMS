@@ -722,6 +722,64 @@ export interface CreateMethodComparisonRequest {
   testMethod: string;
 }
 
+// ── Linearity / AMR (CLSI EP06) ─────────────────────────────────────────────
+
+export interface LinearityMeasurement {
+  id: string;
+  assignedValue: number;
+  measuredValue: number;
+}
+
+export interface LinearityLevel {
+  assignedValue: number;
+  replicateCount: number;
+  meanMeasured: number;
+  fittedValue: number;
+  deviationPct: number;
+  recoveryPct: number;
+  passes: boolean;
+}
+
+export interface LinearityListItem {
+  id: string;
+  studyRef: string;
+  analyte: string;
+  method: string;
+  state: string;
+  isLinear: boolean | null;
+  amrLow: number | null;
+  amrHigh: number | null;
+  slope: number | null;
+  correlationR: number | null;
+}
+
+export interface LinearityDetail {
+  id: string;
+  studyRef: string;
+  analyte: string;
+  unit: string;
+  method: string;
+  allowableDeviationPct: number;
+  state: string;
+  slope: number | null;
+  intercept: number | null;
+  correlationR: number | null;
+  isLinear: boolean | null;
+  amrLow: number | null;
+  amrHigh: number | null;
+  signedOffBy: string | null;
+  signedOffAtUtc: string | null;
+  measurements: LinearityMeasurement[];
+  levels: LinearityLevel[];
+}
+
+export interface CreateLinearityStudyRequest {
+  analyte: string;
+  unit: string;
+  method: string;
+  allowableDeviationPct: number;
+}
+
 // ── Personnel Authorization Matrix (ISO 17025 §6.2.6) ───────────────────────
 
 export const AUTHORIZATION_SCOPES = ['Perform', 'ReviewAndRelease', 'Train'] as const;

@@ -69,6 +69,7 @@ public sealed class AppDbContext(
     public DbSet<QcRun> QcRuns => Set<QcRun>();
     public DbSet<ValidationStudy> ValidationStudies => Set<ValidationStudy>();
     public DbSet<MethodComparisonStudy> MethodComparisons => Set<MethodComparisonStudy>();
+    public DbSet<LinearityStudy> LinearityStudies => Set<LinearityStudy>();
     public DbSet<PtEnrollment> PtEnrollments => Set<PtEnrollment>();
     public DbSet<PtPlan> PtPlans => Set<PtPlan>();
     public DbSet<AuditTrailReview> AuditTrailReviews => Set<AuditTrailReview>();

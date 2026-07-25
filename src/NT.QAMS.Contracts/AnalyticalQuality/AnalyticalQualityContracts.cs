@@ -59,6 +59,31 @@ public sealed record MethodComparisonDetailDto(
     bool MeetsRecommendedPower, Guid? SignedOffBy, DateTimeOffset? SignedOffAtUtc,
     IReadOnlyList<MeasurementPairDto> Pairs);
 
+// ── Linearity / AMR (CLSI EP06) ─────────────────────────────────────────────
+
+public sealed record CreateLinearityStudyRequest(
+    string Analyte, string Unit, string Method, decimal AllowableDeviationPct);
+
+public sealed record AddLinearityMeasurementRequest(decimal AssignedValue, decimal MeasuredValue);
+
+public sealed record LinearityMeasurementDto(Guid Id, decimal AssignedValue, decimal MeasuredValue);
+
+public sealed record LinearityLevelDto(
+    decimal AssignedValue, int ReplicateCount, decimal MeanMeasured, decimal FittedValue,
+    decimal DeviationPct, decimal RecoveryPct, bool Passes);
+
+public sealed record LinearityListItemDto(
+    Guid Id, string StudyRef, string Analyte, string Method, string State,
+    bool? IsLinear, decimal? AmrLow, decimal? AmrHigh, decimal? Slope, decimal? CorrelationR);
+
+public sealed record LinearityDetailDto(
+    Guid Id, string StudyRef, string Analyte, string Unit, string Method,
+    decimal AllowableDeviationPct, string State,
+    decimal? Slope, decimal? Intercept, decimal? CorrelationR, bool? IsLinear,
+    decimal? AmrLow, decimal? AmrHigh, Guid? SignedOffBy, DateTimeOffset? SignedOffAtUtc,
+    IReadOnlyList<LinearityMeasurementDto> Measurements,
+    IReadOnlyList<LinearityLevelDto> Levels);
+
 // ── PT/EQA Annual Plan (ISO 17025 §7.7.2) ───────────────────────────────────
 
 public sealed record CreatePtPlanRequest(int Year);

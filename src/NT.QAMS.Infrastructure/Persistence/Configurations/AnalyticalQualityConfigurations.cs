@@ -170,3 +170,28 @@ public sealed class MethodComparisonStudyConfiguration : IEntityTypeConfiguratio
         builder.Ignore(s => s.DomainEvents);
     }
 }
+
+public sealed class LinearityStudyConfiguration : IEntityTypeConfiguration<LinearityStudy>
+{
+    public void Configure(EntityTypeBuilder<LinearityStudy> builder)
+    {
+        builder.ToTable("linearity_study", "qams");
+        builder.HasKey(s => s.Id);
+        builder.Property(s => s.StudyRef).HasMaxLength(30);
+        builder.Property(s => s.Analyte).HasMaxLength(200);
+        builder.Property(s => s.Unit).HasMaxLength(50);
+        builder.Property(s => s.Method).HasMaxLength(300);
+        builder.Property(s => s.State).HasConversion<string>().HasMaxLength(20);
+        builder.HasIndex(s => new { s.TenantId, s.StudyRef }).IsUnique();
+        builder.HasIndex(s => new { s.TenantId, s.State });
+
+        builder.OwnsMany(s => s.Measurements, m =>
+        {
+            m.ToTable("linearity_measurement", "qams");
+            m.WithOwner().HasForeignKey("study_id");
+            m.HasKey(x => x.Id);
+        });
+
+        builder.Ignore(s => s.DomainEvents);
+    }
+}

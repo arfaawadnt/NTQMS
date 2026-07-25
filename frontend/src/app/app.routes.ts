@@ -222,6 +222,16 @@ export const routes: Routes = [
             ],
           },
           {
+            path: 'linearity-studies',
+            loadComponent: () => import('./features/analytical/linearity-list.component').then((m) => m.LinearityListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/analytical/linearity-detail.component').then((m) => m.LinearityDetailComponent),
+              },
+            ],
+          },
+          {
             path: 'uncertainty',
             loadComponent: () => import('./features/analytical/uncertainty-list.component').then((m) => m.UncertaintyListComponent),
             children: [
