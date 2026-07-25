@@ -153,6 +153,20 @@ export const routes: Routes = [
             ],
           },
           {
+            path: 'conflicts',
+            loadComponent: () => import('./features/risk/conflict-list.component').then((m) => m.ConflictListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/risk/conflict-detail.component').then((m) => m.ConflictDetailComponent),
+              },
+            ],
+          },
+          {
+            path: 'org-context',
+            loadComponent: () => import('./features/organization/org-context.component').then((m) => m.OrgContextComponent),
+          },
+          {
             path: 'changes',
             loadComponent: () => import('./features/change/change-list.component').then((m) => m.ChangeListComponent),
             children: [

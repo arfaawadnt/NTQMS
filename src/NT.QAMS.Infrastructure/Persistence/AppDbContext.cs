@@ -52,6 +52,9 @@ public sealed class AppDbContext(
     public DbSet<MonitoringPoint> MonitoringPoints => Set<MonitoringPoint>();
     public DbSet<TrainingAssignment> TrainingAssignments => Set<TrainingAssignment>();
     public DbSet<RiskItem> Risks => Set<RiskItem>();
+    public DbSet<ConflictDeclaration> ConflictDeclarations => Set<ConflictDeclaration>();
+    public DbSet<InterestedParty> InterestedParties => Set<InterestedParty>();
+    public DbSet<ContextIssue> ContextIssues => Set<ContextIssue>();
     public DbSet<ChangeRequest> ChangeRequests => Set<ChangeRequest>();
     public DbSet<ManagementReview> ManagementReviews => Set<ManagementReview>();
     public DbSet<Supplier> Suppliers => Set<Supplier>();

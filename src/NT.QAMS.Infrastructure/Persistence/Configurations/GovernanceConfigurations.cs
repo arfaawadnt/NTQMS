@@ -110,3 +110,23 @@ public sealed class SupplierEvaluationConfiguration : IEntityTypeConfiguration<S
         builder.Ignore(e => e.DomainEvents);
     }
 }
+
+public sealed class ConflictDeclarationConfiguration : IEntityTypeConfiguration<ConflictDeclaration>
+{
+    public void Configure(EntityTypeBuilder<ConflictDeclaration> builder)
+    {
+        builder.ToTable("conflict_declaration", "qams");
+        builder.HasKey(c => c.Id);
+        builder.Property(c => c.ConflictRef).HasMaxLength(30);
+        builder.Property(c => c.Description).HasMaxLength(2000);
+        builder.Property(c => c.RelatedParty).HasMaxLength(300);
+        builder.Property(c => c.Status).HasConversion<string>().HasMaxLength(20);
+        builder.Property(c => c.RiskLevel).HasConversion<string>().HasMaxLength(10);
+        builder.Property(c => c.Outcome).HasConversion<string>().HasMaxLength(20);
+        builder.Property(c => c.Mitigation).HasMaxLength(2000);
+        builder.Property(c => c.ClosureNote).HasMaxLength(2000);
+        builder.HasIndex(c => new { c.TenantId, c.ConflictRef }).IsUnique();
+        builder.HasIndex(c => new { c.TenantId, c.Status });
+        builder.Ignore(c => c.DomainEvents);
+    }
+}

@@ -44,6 +44,9 @@ public interface IAppDbContext
     DbSet<CompetencyRecord> Competencies { get; }
     DbSet<TrainingAssignment> TrainingAssignments { get; }
     DbSet<RiskItem> Risks { get; }
+    DbSet<ConflictDeclaration> ConflictDeclarations { get; }
+    DbSet<InterestedParty> InterestedParties { get; }
+    DbSet<ContextIssue> ContextIssues { get; }
     DbSet<ChangeRequest> ChangeRequests { get; }
     DbSet<ManagementReview> ManagementReviews { get; }
     DbSet<Supplier> Suppliers { get; }

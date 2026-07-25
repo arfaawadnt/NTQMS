@@ -103,3 +103,38 @@ public sealed class NotificationDispatchConfiguration : IEntityTypeConfiguration
         builder.Ignore(d => d.DomainEvents);
     }
 }
+
+public sealed class InterestedPartyConfiguration : IEntityTypeConfiguration<InterestedParty>
+{
+    public void Configure(EntityTypeBuilder<InterestedParty> builder)
+    {
+        builder.ToTable("interested_party", "qams");
+        builder.HasKey(p => p.Id);
+        builder.Property(p => p.PartyRef).HasMaxLength(30);
+        builder.Property(p => p.Name).HasMaxLength(200);
+        builder.Property(p => p.Category).HasMaxLength(100);
+        builder.Property(p => p.NeedsAndExpectations).HasMaxLength(4000);
+        builder.Property(p => p.RelevantRequirements).HasMaxLength(4000);
+        builder.Property(p => p.Status).HasConversion<string>().HasMaxLength(20);
+        builder.HasIndex(p => new { p.TenantId, p.PartyRef }).IsUnique();
+        builder.Ignore(p => p.DomainEvents);
+    }
+}
+
+public sealed class ContextIssueConfiguration : IEntityTypeConfiguration<ContextIssue>
+{
+    public void Configure(EntityTypeBuilder<ContextIssue> builder)
+    {
+        builder.ToTable("context_issue", "qams");
+        builder.HasKey(i => i.Id);
+        builder.Property(i => i.IssueRef).HasMaxLength(30);
+        builder.Property(i => i.Type).HasConversion<string>().HasMaxLength(10);
+        builder.Property(i => i.Category).HasMaxLength(100);
+        builder.Property(i => i.Description).HasMaxLength(4000);
+        builder.Property(i => i.Impact).HasMaxLength(4000);
+        builder.Property(i => i.Status).HasConversion<string>().HasMaxLength(20);
+        builder.Property(i => i.Resolution).HasMaxLength(4000);
+        builder.HasIndex(i => new { i.TenantId, i.IssueRef }).IsUnique();
+        builder.Ignore(i => i.DomainEvents);
+    }
+}

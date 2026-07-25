@@ -34,3 +34,31 @@ public sealed record NotificationFeedItemDto(
 public sealed record DispatchMonitorItemDto(
     Guid Id, string EventKey, Guid RecipientUserId, string? RecipientEmail,
     string Subject, string EmailStatus, string? Error, DateTimeOffset CreatedAtUtc);
+
+// ── Context & Interested Parties (ISO 9001 §4.1/§4.2) ───────────────────────
+
+public sealed record RegisterInterestedPartyRequest(
+    string Name, string Category, string NeedsAndExpectations,
+    string? RelevantRequirements, DateOnly ReviewedOn);
+
+public sealed record ReviseInterestedPartyRequest(
+    string Name, string Category, string NeedsAndExpectations,
+    string? RelevantRequirements, DateOnly ReviewedOn);
+
+public sealed record InterestedPartyDto(
+    Guid Id, string PartyRef, string Name, string Category, string NeedsAndExpectations,
+    string? RelevantRequirements, DateOnly ReviewedOn, string Status);
+
+public sealed record RegisterContextIssueRequest(
+    string Type, string Category, string Description, string Impact);
+
+public sealed record ReviseContextIssueRequest(
+    string Type, string Category, string Description, string Impact);
+
+public sealed record LinkContextIssueRiskRequest(Guid RiskId);
+
+public sealed record CloseContextIssueRequest(string Resolution);
+
+public sealed record ContextIssueDto(
+    Guid Id, string IssueRef, string Type, string Category, string Description, string Impact,
+    Guid? LinkedRiskId, string Status, string? Resolution);

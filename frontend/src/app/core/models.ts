@@ -425,6 +425,54 @@ export interface RecordIntermediateCheckRequest {
   remarks: string | null;
 }
 
+// ── Impartiality / COI Register (ISO 17025 §4.1) ────────────────────────────
+
+export const CONFLICT_RISK_LEVELS = ['Low', 'Medium', 'High'] as const;
+export const CONFLICT_OUTCOMES = ['Accepted', 'Mitigated', 'Withdrawn'] as const;
+
+export interface ConflictListItem {
+  id: string;
+  conflictRef: string;
+  declarantId: string;
+  relatedParty: string;
+  declaredOn: string;
+  status: string;
+  riskLevel: string | null;
+  outcome: string | null;
+}
+
+export interface ConflictDetail extends ConflictListItem {
+  description: string;
+  mitigation: string | null;
+  assessedBy: string | null;
+  closureNote: string | null;
+}
+
+// ── Context & Interested Parties (ISO 9001 §4.1/§4.2) ───────────────────────
+
+export interface InterestedParty {
+  id: string;
+  partyRef: string;
+  name: string;
+  category: string;
+  needsAndExpectations: string;
+  relevantRequirements: string | null;
+  reviewedOn: string;
+  status: string;
+}
+
+export interface ContextIssue {
+  id: string;
+  issueRef: string;
+  type: string;
+  category: string;
+  description: string;
+  impact: string;
+  linkedRiskId: string | null;
+  status: string;
+  resolution: string | null;
+}
+
 // ── Quality Objectives & Targets (ISO 9001 §6.2 / ISO 17025 §8.2) ───────────
 
 export const OBJECTIVE_DIRECTIONS = ['AtLeast', 'AtMost'] as const;

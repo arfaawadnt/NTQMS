@@ -70,3 +70,21 @@ public sealed record SupplierDetailDto(
 public sealed record SupplierEvaluationDto(
     Guid Id, Guid SupplierId, DateOnly PeriodStart, DateOnly PeriodEnd,
     decimal WeightedTotal, Guid EvaluatedBy, string CriteriaJson);
+
+// ── Impartiality / Conflict-of-Interest Register (ISO 17025 §4.1) ───────────
+
+public sealed record DeclareConflictRequest(
+    Guid DeclarantId, string Description, string RelatedParty, DateOnly DeclaredOn);
+
+public sealed record AssessConflictRequest(string RiskLevel, string Mitigation);
+
+public sealed record CloseConflictRequest(string Outcome, string ClosureNote);
+
+public sealed record ConflictListItemDto(
+    Guid Id, string ConflictRef, Guid DeclarantId, string RelatedParty, DateOnly DeclaredOn,
+    string Status, string? RiskLevel, string? Outcome);
+
+public sealed record ConflictDetailDto(
+    Guid Id, string ConflictRef, Guid DeclarantId, string Description, string RelatedParty,
+    DateOnly DeclaredOn, string Status, string? RiskLevel, string? Mitigation, Guid? AssessedBy,
+    string? Outcome, string? ClosureNote);
