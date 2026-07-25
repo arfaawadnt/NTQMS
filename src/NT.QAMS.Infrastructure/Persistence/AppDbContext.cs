@@ -40,6 +40,8 @@ public sealed class AppDbContext(
     public DbSet<PasswordHistoryEntry> PasswordHistory => Set<PasswordHistoryEntry>();
     public DbSet<Nonconformance> Nonconformances => Set<Nonconformance>();
     public DbSet<Complaint> Complaints => Set<Complaint>();
+    public DbSet<QualityObjective> QualityObjectives => Set<QualityObjective>();
+    public DbSet<FeedbackEntry> FeedbackEntries => Set<FeedbackEntry>();
     public DbSet<ControlledDocument> Documents => Set<ControlledDocument>();
     public DbSet<FileReference> Files => Set<FileReference>();
     public DbSet<Audit> Audits => Set<Audit>();

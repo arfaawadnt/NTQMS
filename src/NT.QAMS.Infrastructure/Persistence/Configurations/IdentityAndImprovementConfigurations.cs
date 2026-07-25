@@ -108,3 +108,55 @@ public sealed class PasswordHistoryConfiguration : IEntityTypeConfiguration<Pass
         builder.HasIndex(h => new { h.UserId, h.SetAtUtc });
     }
 }
+
+public sealed class QualityObjectiveConfiguration : IEntityTypeConfiguration<QualityObjective>
+{
+    public void Configure(EntityTypeBuilder<QualityObjective> builder)
+    {
+        builder.ToTable("quality_objective", "qams");
+        builder.HasKey(o => o.Id);
+        builder.Property(o => o.ObjectiveRef).HasMaxLength(30);
+        builder.Property(o => o.Title).HasMaxLength(300);
+        builder.Property(o => o.Description).HasMaxLength(2000);
+        builder.Property(o => o.Metric).HasMaxLength(300);
+        builder.Property(o => o.Unit).HasMaxLength(30);
+        builder.Property(o => o.Direction).HasConversion<string>().HasMaxLength(10);
+        builder.Property(o => o.Status).HasConversion<string>().HasMaxLength(20);
+        builder.Property(o => o.ClosureNote).HasMaxLength(2000);
+        builder.HasIndex(o => new { o.TenantId, o.ObjectiveRef }).IsUnique();
+        builder.HasIndex(o => new { o.TenantId, o.Status });
+        builder.Ignore(o => o.CurrentValue);
+        builder.Ignore(o => o.OnTarget);
+
+        builder.OwnsMany(o => o.Updates, update =>
+        {
+            update.ToTable("objective_progress", "qams");
+            update.WithOwner().HasForeignKey("objective_id");
+            update.HasKey(u => u.Id);
+            update.Property(u => u.Comment).HasMaxLength(1000);
+        });
+
+        builder.Ignore(o => o.DomainEvents);
+    }
+}
+
+public sealed class FeedbackEntryConfiguration : IEntityTypeConfiguration<FeedbackEntry>
+{
+    public void Configure(EntityTypeBuilder<FeedbackEntry> builder)
+    {
+        builder.ToTable("feedback_entry", "qams");
+        builder.HasKey(f => f.Id);
+        builder.Property(f => f.FeedbackRef).HasMaxLength(30);
+        builder.Property(f => f.Source).HasMaxLength(100);
+        builder.Property(f => f.Channel).HasMaxLength(100);
+        builder.Property(f => f.Type).HasConversion<string>().HasMaxLength(20);
+        builder.Property(f => f.Subject).HasMaxLength(300);
+        builder.Property(f => f.Details).HasMaxLength(4000);
+        builder.Property(f => f.Status).HasConversion<string>().HasMaxLength(20);
+        builder.Property(f => f.ReviewNotes).HasMaxLength(2000);
+        builder.Property(f => f.ActionSummary).HasMaxLength(2000);
+        builder.HasIndex(f => new { f.TenantId, f.FeedbackRef }).IsUnique();
+        builder.HasIndex(f => new { f.TenantId, f.Status });
+        builder.Ignore(f => f.DomainEvents);
+    }
+}

@@ -425,6 +425,96 @@ export interface RecordIntermediateCheckRequest {
   remarks: string | null;
 }
 
+// ── Quality Objectives & Targets (ISO 9001 §6.2 / ISO 17025 §8.2) ───────────
+
+export const OBJECTIVE_DIRECTIONS = ['AtLeast', 'AtMost'] as const;
+export type ObjectiveDirection = (typeof OBJECTIVE_DIRECTIONS)[number];
+
+export interface ObjectiveProgress {
+  id: string;
+  measuredOn: string;
+  value: number;
+  recordedById: string;
+  comment: string | null;
+}
+
+export interface QualityObjectiveListItem {
+  id: string;
+  objectiveRef: string;
+  title: string;
+  metric: string;
+  unit: string;
+  targetValue: number;
+  direction: string;
+  ownerId: string;
+  periodStart: string;
+  periodEnd: string;
+  status: string;
+  currentValue: number | null;
+  onTarget: boolean | null;
+  branchId: string | null;
+  departmentId: string | null;
+}
+
+export interface QualityObjectiveDetail extends QualityObjectiveListItem {
+  description: string | null;
+  closureNote: string | null;
+  updates: ObjectiveProgress[];
+}
+
+export interface DefineQualityObjectiveRequest {
+  title: string;
+  description: string | null;
+  metric: string;
+  unit: string;
+  targetValue: number;
+  direction: ObjectiveDirection;
+  ownerId: string;
+  periodStart: string;
+  periodEnd: string;
+  branchId: string | null;
+  departmentId: string | null;
+}
+
+// ── General Feedback & Satisfaction (ISO 17025 §8.6.2) ──────────────────────
+
+export const FEEDBACK_TYPES = ['Compliment', 'Suggestion', 'Dissatisfaction'] as const;
+export type FeedbackType = (typeof FEEDBACK_TYPES)[number];
+
+export interface FeedbackListItem {
+  id: string;
+  feedbackRef: string;
+  source: string;
+  channel: string;
+  type: string;
+  subject: string;
+  satisfactionScore: number | null;
+  receivedOn: string;
+  status: string;
+  branchId: string | null;
+  departmentId: string | null;
+}
+
+export interface FeedbackDetail extends FeedbackListItem {
+  details: string;
+  loggedBy: string;
+  reviewNotes: string | null;
+  actionSummary: string | null;
+  complaintId: string | null;
+}
+
+export interface LogFeedbackRequest {
+  source: string;
+  channel: string;
+  type: FeedbackType;
+  subject: string;
+  details: string;
+  satisfactionScore: number | null;
+  receivedOn: string;
+  branchId: string | null;
+  departmentId: string | null;
+}
+
 // ── Periodic Audit-Trail Review (21 CFR Part 11 §11.10(e)) ──────────────────
 
 export interface AuditTrailReview {

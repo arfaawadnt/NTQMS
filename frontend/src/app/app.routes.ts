@@ -49,6 +49,26 @@ export const routes: Routes = [
             ],
           },
           {
+            path: 'quality-objectives',
+            loadComponent: () => import('./features/objectives/objective-list.component').then((m) => m.ObjectiveListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/objectives/objective-detail.component').then((m) => m.ObjectiveDetailComponent),
+              },
+            ],
+          },
+          {
+            path: 'feedback',
+            loadComponent: () => import('./features/feedback/feedback-list.component').then((m) => m.FeedbackListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/feedback/feedback-detail.component').then((m) => m.FeedbackDetailComponent),
+              },
+            ],
+          },
+          {
             path: 'complaints',
             loadComponent: () => import('./features/complaints/complaint-list.component').then((m) => m.ComplaintListComponent),
             children: [

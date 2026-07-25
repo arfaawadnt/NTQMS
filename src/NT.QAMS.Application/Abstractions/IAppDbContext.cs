@@ -32,6 +32,8 @@ public interface IAppDbContext
     DbSet<PasswordHistoryEntry> PasswordHistory { get; }
     DbSet<Nonconformance> Nonconformances { get; }
     DbSet<Complaint> Complaints { get; }
+    DbSet<QualityObjective> QualityObjectives { get; }
+    DbSet<FeedbackEntry> FeedbackEntries { get; }
     DbSet<ControlledDocument> Documents { get; }
     DbSet<FileReference> Files { get; }
     DbSet<Audit> Audits { get; }
