@@ -37,6 +37,10 @@ public sealed class MethodComparisonsController(ISender sender) : ControllerBase
                 id, request.ReferenceValue, request.TestValue, request.SampleId), ct),
         });
 
+    [HttpPost("{id:guid}/pairs/import")]
+    public async Task<IActionResult> ImportPairs(Guid id, ImportMeasurementPairsRequest request, CancellationToken ct) =>
+        Ok(await sender.Send(new ImportMeasurementPairsCommand(id, request.Rows), ct));
+
     [HttpDelete("{id:guid}/pairs/{pairId:guid}")]
     public async Task<IActionResult> RemovePair(Guid id, Guid pairId, CancellationToken ct)
     {

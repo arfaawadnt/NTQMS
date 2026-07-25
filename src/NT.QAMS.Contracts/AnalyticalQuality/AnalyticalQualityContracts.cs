@@ -38,6 +38,16 @@ public sealed record PtEnrollmentDto(
 
 // ── Measurement uncertainty (ISO 17025 §7.6) ─────────────────────────────────
 
+// ── Bulk import (LIS / analyzer CSV) ────────────────────────────────────────
+
+public sealed record BulkRejectDto(int Row, string Reason);
+
+public sealed record BulkImportResultDto(int Imported, IReadOnlyList<BulkRejectDto> Rejected);
+
+public sealed record ImportMeasurementPairsRequest(IReadOnlyList<AddMeasurementPairRequest> Rows);
+
+public sealed record ImportPrecisionMeasurementsRequest(IReadOnlyList<AddPrecisionMeasurementRequest> Rows);
+
 // ── Method Comparison (CLSI EP09) ───────────────────────────────────────────
 
 public sealed record CreateMethodComparisonRequest(

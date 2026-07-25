@@ -88,6 +88,48 @@ public sealed class PrecisionWorkflowHandlers(IAppDbContext db, ICurrentUser use
             ?? throw new DomainException("PR-404", "Precision study not found.");
 }
 
+public sealed record ImportPrecisionMeasurementsCommand(
+    Guid StudyId, IReadOnlyList<AddPrecisionMeasurementRequest> Rows) : ICommand<BulkImportResultDto>;
+
+/// <summary>
+/// Bulk import of run-grouped replicates (analyzer/LIS export). Each row is
+/// validated and added independently — a bad row is reported and skipped while
+/// the rest import; the batch commits once.
+/// </summary>
+public sealed class ImportPrecisionMeasurementsHandler(IAppDbContext db)
+    : ICommandHandler<ImportPrecisionMeasurementsCommand, BulkImportResultDto>
+{
+    public async Task<BulkImportResultDto> Handle(ImportPrecisionMeasurementsCommand c, CancellationToken ct)
+    {
+        var study = await db.PrecisionStudies.Include(s => s.Measurements)
+            .FirstOrDefaultAsync(s => s.Id == c.StudyId, ct)
+            ?? throw new DomainException("PR-404", "Precision study not found.");
+
+        var imported = 0;
+        var rejected = new List<BulkRejectDto>();
+        for (var i = 0; i < c.Rows.Count; i++)
+        {
+            var row = c.Rows[i];
+            try
+            {
+                study.AddMeasurement(row.RunLabel, row.Value);
+                imported++;
+            }
+            catch (DomainException ex)
+            {
+                rejected.Add(new BulkRejectDto(i + 1, ex.Message));
+            }
+        }
+
+        if (imported > 0)
+        {
+            await db.SaveChangesAsync(ct);
+        }
+
+        return new BulkImportResultDto(imported, rejected);
+    }
+}
+
 // ── Queries ──────────────────────────────────────────────────────────────────
 
 public sealed record GetPrecisionStudiesQuery(string? State)

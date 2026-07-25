@@ -88,6 +88,49 @@ public sealed class MethodComparisonWorkflowHandlers(IAppDbContext db, ICurrentU
             ?? throw new DomainException("MC-404", "Method-comparison study not found.");
 }
 
+public sealed record ImportMeasurementPairsCommand(
+    Guid StudyId, IReadOnlyList<AddMeasurementPairRequest> Rows) : ICommand<BulkImportResultDto>;
+
+/// <summary>
+/// Bulk import of paired results (analyzer/LIS export). Each row is validated
+/// and added independently: a bad row is reported with a reason and skipped,
+/// the rest still import (partial import with an integrity report). The whole
+/// batch commits once.
+/// </summary>
+public sealed class ImportMeasurementPairsHandler(IAppDbContext db)
+    : ICommandHandler<ImportMeasurementPairsCommand, BulkImportResultDto>
+{
+    public async Task<BulkImportResultDto> Handle(ImportMeasurementPairsCommand c, CancellationToken ct)
+    {
+        var study = await db.MethodComparisons.Include(s => s.Pairs)
+            .FirstOrDefaultAsync(s => s.Id == c.StudyId, ct)
+            ?? throw new DomainException("MC-404", "Method-comparison study not found.");
+
+        var imported = 0;
+        var rejected = new List<BulkRejectDto>();
+        for (var i = 0; i < c.Rows.Count; i++)
+        {
+            var row = c.Rows[i];
+            try
+            {
+                study.AddPair(row.ReferenceValue, row.TestValue, row.SampleId);
+                imported++;
+            }
+            catch (DomainException ex)
+            {
+                rejected.Add(new BulkRejectDto(i + 1, ex.Message));
+            }
+        }
+
+        if (imported > 0)
+        {
+            await db.SaveChangesAsync(ct);
+        }
+
+        return new BulkImportResultDto(imported, rejected);
+    }
+}
+
 // ── Queries ──────────────────────────────────────────────────────────────────
 
 public sealed record GetMethodComparisonsQuery(string? State)

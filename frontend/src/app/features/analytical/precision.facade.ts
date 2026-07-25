@@ -2,7 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, firstValueFrom } from 'rxjs';
 import { PrecisionApiService } from '../../core/api/precision-api.service';
-import { CreatePrecisionStudyRequest, PrecisionDetail, PrecisionListItem } from '../../core/models';
+import { BulkImportResult, CreatePrecisionStudyRequest, PrecisionDetail, PrecisionListItem } from '../../core/models';
 
 /** Signal-based facade for imprecision studies (CLSI EP05). */
 @Injectable({ providedIn: 'root' })
@@ -39,6 +39,15 @@ export class PrecisionFacade {
 
   async removeMeasurement(id: string, measurementId: string): Promise<void> {
     await this.mutate(id, () => this.api.removeMeasurement(id, measurementId));
+  }
+
+  async importMeasurements(id: string, rows: { runLabel: string; value: number }[]): Promise<BulkImportResult | null> {
+    const result = await this.run(async () => {
+      const r = await firstValueFrom(this.api.importMeasurements(id, rows));
+      this._selected.set(await firstValueFrom(this.api.getById(id)));
+      return r;
+    });
+    return result;
   }
 
   async calculate(id: string): Promise<void> { await this.mutate(id, () => this.api.calculate(id)); }

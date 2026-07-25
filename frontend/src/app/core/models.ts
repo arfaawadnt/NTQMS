@@ -668,6 +668,11 @@ export interface RegisterMonitoringPointRequest {
   departmentId: string | null;
 }
 
+// ── Bulk import (LIS / analyzer CSV) ────────────────────────────────────────
+
+export interface BulkReject { row: number; reason: string; }
+export interface BulkImportResult { imported: number; rejected: BulkReject[]; }
+
 // ── Method Comparison (CLSI EP09) ───────────────────────────────────────────
 
 export interface MeasurementPair {

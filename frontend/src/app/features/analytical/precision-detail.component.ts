@@ -1,14 +1,16 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { PrecisionFacade } from './precision.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
+import { BulkImportResult } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { WorkflowStepperComponent } from '../../shared/ui/workflow-stepper.component';
 import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
+import { CsvColumn, CsvImportComponent } from '../../shared/ui/csv-import.component';
 
 /**
  * Imprecision workspace (CLSI EP05): run-grouped replicate entry, the derived
@@ -20,7 +22,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
   selector: 'qams-precision-detail',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, CsvImportComponent],
   template: `
     @if (item(); as s) {
       <qams-page-header [title]="s.studyRef + ' — ' + s.analyte" [subtitle]="s.level">
@@ -106,6 +108,13 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
             <div class="hint">{{ i18n.t('prc.entryHint') }}</div>
             <button type="submit" [disabled]="entryForm.invalid">{{ i18n.t('prc.addReplicate') }}</button>
           </form>
+
+          <button type="button" class="link toggle" (click)="showImport.set(!showImport())">
+            {{ showImport() ? i18n.t('csv.hide') : i18n.t('csv.show') }}
+          </button>
+          @if (showImport()) {
+            <qams-csv-import [columns]="importColumns" [result]="importResult()" [busy]="facade.loading()" (import)="importRows(s.id, $event)" />
+          }
         }
         @if (s.measurements.length > 0) {
           <table class="mtable">
@@ -193,6 +202,19 @@ export class PrecisionDetailComponent implements OnInit {
 
   readonly runCount = computed(() =>
     new Set((this.item()?.measurements ?? []).map((m) => m.runLabel)).size);
+
+  /** CSV importer state: run label, value. */
+  readonly showImport = signal(false);
+  readonly importResult = signal<BulkImportResult | null>(null);
+  readonly importColumns: CsvColumn[] = [
+    { label: this.i18n.t('prc.run'), numeric: false },
+    { label: this.i18n.t('lin.measured'), numeric: true },
+  ];
+
+  async importRows(id: string, rows: string[][]): Promise<void> {
+    const parsed = rows.map((r) => ({ runLabel: (r[0] ?? '').trim(), value: Number(r[1]) }));
+    this.importResult.set(await this.facade.importMeasurements(id, parsed));
+  }
 
   /** Variance shares (SD² proportions) for the stacked bar. */
   readonly repShare = computed(() => this.share((this.item()?.repeatabilitySd ?? 0)));

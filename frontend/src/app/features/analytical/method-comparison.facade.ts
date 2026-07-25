@@ -3,7 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, firstValueFrom } from 'rxjs';
 import { MethodComparisonApiService } from '../../core/api/method-comparison-api.service';
 import {
-  CreateMethodComparisonRequest, MethodComparisonDetail, MethodComparisonListItem,
+  BulkImportResult, CreateMethodComparisonRequest, MethodComparisonDetail, MethodComparisonListItem,
 } from '../../core/models';
 
 /** Signal-based facade for method-comparison studies (CLSI EP09). */
@@ -41,6 +41,15 @@ export class MethodComparisonFacade {
 
   async removePair(id: string, pairId: string): Promise<void> {
     await this.mutate(id, () => this.api.removePair(id, pairId));
+  }
+
+  async importPairs(id: string, rows: { referenceValue: number; testValue: number; sampleId: string | null }[]): Promise<BulkImportResult | null> {
+    const result = await this.run(async () => {
+      const r = await firstValueFrom(this.api.importPairs(id, rows));
+      this._selected.set(await firstValueFrom(this.api.getById(id)));
+      return r;
+    });
+    return result;
   }
 
   async calculate(id: string): Promise<void> { await this.mutate(id, () => this.api.calculate(id)); }

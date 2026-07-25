@@ -1,15 +1,16 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MethodComparisonFacade } from './method-comparison.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
-import { MethodComparisonDetail } from '../../core/models';
+import { BulkImportResult, MethodComparisonDetail } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { WorkflowStepperComponent } from '../../shared/ui/workflow-stepper.component';
 import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
+import { CsvColumn, CsvImportComponent } from '../../shared/ui/csv-import.component';
 
 interface Pt { x: number; y: number; }
 
@@ -23,7 +24,7 @@ interface Pt { x: number; y: number; }
   selector: 'qams-method-comparison-detail',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, CsvImportComponent],
   template: `
     @if (item(); as s) {
       <qams-page-header [title]="s.studyRef + ' — ' + s.analyte" [subtitle]="s.testMethod + ' vs ' + s.referenceMethod">
@@ -134,6 +135,13 @@ interface Pt { x: number; y: number; }
             </div>
             <button type="submit" [disabled]="pairForm.invalid">{{ i18n.t('mc.addPair') }}</button>
           </form>
+
+          <button type="button" class="link toggle" (click)="showImport.set(!showImport())">
+            {{ showImport() ? i18n.t('csv.hide') : i18n.t('csv.show') }}
+          </button>
+          @if (showImport()) {
+            <qams-csv-import [columns]="importColumns" [result]="importResult()" [busy]="facade.loading()" (import)="importPairs(s.id, $event)" />
+          }
         }
       </section>
 
@@ -208,6 +216,24 @@ export class MethodComparisonDetailComponent implements OnInit {
     referenceValue: [null as number | null, [Validators.required, Validators.min(0.0001)]],
     testValue: [null as number | null, [Validators.required, Validators.min(0.0001)]],
   });
+
+  /** CSV importer state: X, Y, optional sample id. */
+  readonly showImport = signal(false);
+  readonly importResult = signal<BulkImportResult | null>(null);
+  readonly importColumns: CsvColumn[] = [
+    { label: this.i18n.t('mc.referenceMethod'), numeric: true },
+    { label: this.i18n.t('mc.testMethod'), numeric: true },
+    { label: this.i18n.t('mc.sample'), numeric: false, optional: true },
+  ];
+
+  async importPairs(id: string, rows: string[][]): Promise<void> {
+    const parsed = rows.map((r) => ({
+      referenceValue: Number(r[0]),
+      testValue: Number(r[1]),
+      sampleId: (r[2] ?? '').trim() || null,
+    }));
+    this.importResult.set(await this.facade.importPairs(id, parsed));
+  }
 
   // Scatter axis range (shared X/Y so the identity line is a true diagonal).
   readonly scatterMin = computed(() => {

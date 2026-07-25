@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
-  CreatePrecisionStudyRequest, CreatedResource, PrecisionDetail, PrecisionListItem,
+  BulkImportResult, CreatePrecisionStudyRequest, CreatedResource, PrecisionDetail, PrecisionListItem,
 } from '../models';
 
 /** Typed client for the imprecision-study API (CLSI EP05). */
@@ -27,6 +27,10 @@ export class PrecisionApiService {
 
   addMeasurement(id: string, runLabel: string, value: number): Observable<void> {
     return this.http.post<void>(`${this.base}/${id}/measurements`, { runLabel, value });
+  }
+
+  importMeasurements(id: string, rows: { runLabel: string; value: number }[]): Observable<BulkImportResult> {
+    return this.http.post<BulkImportResult>(`${this.base}/${id}/measurements/import`, { rows });
   }
 
   removeMeasurement(id: string, measurementId: string): Observable<void> {

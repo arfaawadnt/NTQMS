@@ -37,6 +37,10 @@ public sealed class PrecisionStudiesController(ISender sender) : ControllerBase
             measurementId = await sender.Send(new AddPrecisionMeasurementCommand(id, request.RunLabel, request.Value), ct),
         });
 
+    [HttpPost("{id:guid}/measurements/import")]
+    public async Task<IActionResult> ImportMeasurements(Guid id, ImportPrecisionMeasurementsRequest request, CancellationToken ct) =>
+        Ok(await sender.Send(new ImportPrecisionMeasurementsCommand(id, request.Rows), ct));
+
     [HttpDelete("{id:guid}/measurements/{measurementId:guid}")]
     public async Task<IActionResult> RemoveMeasurement(Guid id, Guid measurementId, CancellationToken ct)
     {
