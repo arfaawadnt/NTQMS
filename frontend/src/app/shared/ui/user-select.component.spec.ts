@@ -4,12 +4,13 @@ import { UserSelectComponent } from './user-select.component';
 import { OrgDataService } from '../../core/org-data.service';
 import { UserDirectoryEntry } from '../../core/models';
 
-describe('UserSelectComponent', () => {
+describe('UserSelectComponent (searchable combobox)', () => {
   let fixture: ComponentFixture<UserSelectComponent>;
 
   const directory = signal<UserDirectoryEntry[]>([
     { id: 'u1', displayName: 'Amina QM', role: 'QualityManager' },
     { id: 'u2', displayName: 'Omar Analyst', role: 'Analyst' },
+    { id: 'u3', displayName: 'Sara Head', role: 'DepartmentHead' },
   ]);
 
   beforeEach(async () => {
@@ -17,48 +18,82 @@ describe('UserSelectComponent', () => {
       imports: [UserSelectComponent],
       providers: [{
         provide: OrgDataService,
-        useValue: { directory: directory.asReadonly(), ensureDirectory: () => Promise.resolve() },
+        useValue: {
+          directory: directory.asReadonly(),
+          ensureDirectory: () => Promise.resolve(),
+          userName: (id: string | null) => directory().find((u) => u.id === id)?.displayName ?? '',
+        },
       }],
     }).compileComponents();
     fixture = TestBed.createComponent(UserSelectComponent);
   });
 
-  it('renders directory names, not GUIDs, in single mode', () => {
+  function openPanel(): void {
     fixture.detectChanges();
-    const options = fixture.nativeElement.querySelectorAll('option');
-    expect(options.length).toBe(3); // empty + 2 users
-    expect(options[1].textContent).toContain('Amina QM');
+    (fixture.nativeElement.querySelector('.trigger') as HTMLButtonElement).click();
+    fixture.detectChanges();
+  }
+
+  it('filters the directory as the user types (scales past 100 users)', () => {
+    openPanel();
+    fixture.componentInstance.query.set('omar');
+    fixture.detectChanges();
+    const rows = fixture.nativeElement.querySelectorAll('.opt .nm');
+    expect(rows.length).toBe(1);
+    expect(rows[0].textContent).toContain('Omar Analyst');
   });
 
-  it('propagates the picked user id through the ControlValueAccessor', () => {
-    fixture.detectChanges();
+  it('single mode: picking an option emits the id and closes the panel', () => {
     let emitted: string | string[] = '';
     fixture.componentInstance.registerOnChange((v) => { emitted = v; });
+    openPanel();
 
-    const select: HTMLSelectElement = fixture.nativeElement.querySelector('select');
-    select.value = 'u2';
-    select.dispatchEvent(new Event('change'));
+    (fixture.nativeElement.querySelectorAll('.opt')[1] as HTMLElement).click();
+    fixture.detectChanges();
 
     expect(emitted).toBe('u2');
+    expect(fixture.componentInstance.open()).toBeFalse();
+    expect(fixture.nativeElement.querySelector('.trigger').textContent).toContain('Omar Analyst');
   });
 
-  it('collects multiple ids as an array in multi mode', () => {
+  it('multi mode: toggling options accumulates ids and renders removable tags', () => {
     fixture.componentRef.setInput('multiple', true);
-    fixture.detectChanges();
     let emitted: string | string[] = [];
     fixture.componentInstance.registerOnChange((v) => { emitted = v; });
+    openPanel();
 
-    fixture.componentInstance.toggle('u1');
-    fixture.componentInstance.toggle('u2');
-    expect(emitted).toEqual(['u1', 'u2']);
+    const options = fixture.nativeElement.querySelectorAll('.opt');
+    (options[0] as HTMLElement).click();
+    (options[2] as HTMLElement).click();
+    fixture.detectChanges();
 
-    fixture.componentInstance.toggle('u1');
-    expect(emitted).toEqual(['u2']);
+    expect(emitted).toEqual(['u1', 'u3']);
+    expect(fixture.componentInstance.open()).toBeTrue(); // multi stays open
+    const tags = fixture.nativeElement.querySelectorAll('.tag:not(.more)');
+    expect(tags.length).toBe(2);
+    expect(tags[0].textContent).toContain('Amina QM');
+
+    // removing via the tag's ✕
+    (tags[0].querySelector('.x') as HTMLElement).click();
+    expect(emitted).toEqual(['u3']);
   });
 
-  it('restores form values via writeValue', () => {
+  it('collapses overflowing selections into a +N counter', () => {
+    fixture.componentRef.setInput('multiple', true);
+    fixture.componentInstance.writeValue(['u1', 'u2', 'u3', 'u1x', 'u2x', 'u3x']);
+    fixture.detectChanges();
+    const more = fixture.nativeElement.querySelector('.tag.more');
+    expect(more).toBeTruthy();
+    expect(more.textContent.trim()).toBe('+2'); // 6 selected, 4 shown
+  });
+
+  it('restores form values via writeValue in both modes', () => {
     fixture.detectChanges();
     fixture.componentInstance.writeValue('u1');
     expect(fixture.componentInstance.single()).toBe('u1');
+
+    fixture.componentRef.setInput('multiple', true);
+    fixture.componentInstance.writeValue(['u1', 'u2']);
+    expect(fixture.componentInstance.selected()).toEqual(['u1', 'u2']);
   });
 });
