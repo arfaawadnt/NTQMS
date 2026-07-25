@@ -60,6 +60,7 @@ import { PermissionsService } from '../core/permissions.service';
             <a class="item" routerLink="/equipment" routerLinkActive="active">{{ i18n.t('nav.equipment') }}</a>
             <a class="item" routerLink="/reference-standards" routerLinkActive="active">{{ i18n.t('nav.standards') }}</a>
             <a class="item" routerLink="/competencies" routerLinkActive="active">{{ i18n.t('nav.competency') }}</a>
+            <a class="item" routerLink="/authorizations" routerLinkActive="active">{{ i18n.t('nav.authz') }}</a>
             <a class="item" routerLink="/training" routerLinkActive="active">{{ i18n.t('nav.training') }}</a>
             <a class="item" routerLink="/suppliers" routerLinkActive="active">{{ i18n.t('nav.suppliers') }}</a>
 

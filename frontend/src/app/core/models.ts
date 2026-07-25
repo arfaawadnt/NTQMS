@@ -425,6 +425,47 @@ export interface RecordIntermediateCheckRequest {
   remarks: string | null;
 }
 
+// ── Personnel Authorization Matrix (ISO 17025 §6.2.6) ───────────────────────
+
+export const AUTHORIZATION_SCOPES = ['Perform', 'ReviewAndRelease', 'Train'] as const;
+export type AuthorizationScope = (typeof AUTHORIZATION_SCOPES)[number];
+
+export interface TestAuthorizationListItem {
+  id: string;
+  userId: string;
+  testCatalogItemId: string;
+  testCode: string;
+  testName: string;
+  scope: string;
+  status: string;
+  grantedOn: string;
+  expiresOn: string;
+}
+
+export interface TestAuthorizationDetail {
+  id: string;
+  userId: string;
+  testCatalogItemId: string;
+  testCode: string;
+  testName: string;
+  competencyRecordId: string;
+  competencySubject: string | null;
+  scope: string;
+  status: string;
+  grantedBy: string;
+  grantedOn: string;
+  expiresOn: string;
+  suspensionReason: string | null;
+  revocationReason: string | null;
+}
+
+export interface GrantTestAuthorizationRequest {
+  userId: string;
+  testCatalogItemId: string;
+  competencyRecordId: string;
+  scope: AuthorizationScope;
+}
+
 // ── Metrological Traceability (ISO 17025 §6.5) ──────────────────────────────
 
 export const REFERENCE_STANDARD_TYPES = ['CertifiedReferenceMaterial', 'ReferenceStandard', 'WorkingStandard'] as const;

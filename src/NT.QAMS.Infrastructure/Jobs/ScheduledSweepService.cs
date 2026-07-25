@@ -82,6 +82,14 @@ public sealed partial class ScheduledSweepService(
             .ToListAsync(ct);
         expiryCandidates.ForEach(c => c.ExpireIfDue(today));
 
+        var authorizationCandidates = await db.TestAuthorizations
+            .IgnoreQueryFilters()
+            .Where(a => (a.Status == TestAuthorizationStatus.Active
+                         || a.Status == TestAuthorizationStatus.Suspended)
+                        && a.ExpiresOn <= today)
+            .ToListAsync(ct);
+        authorizationCandidates.ForEach(a => a.ExpireIfDue(today));
+
         var supplierCandidates = await db.Suppliers
             .IgnoreQueryFilters()
             .Include(s => s.Certificates)

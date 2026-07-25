@@ -34,7 +34,10 @@ public sealed class DomainExceptionHandler : IExceptionHandler
                 Title = transition.Message,
                 Extensions = { ["code"] = transition.Code },
             },
-            DomainException auth when auth.Code.StartsWith("AUTH", StringComparison.Ordinal) => new ProblemDetails
+            // Exact "AUTH-" prefix: authentication failures only. Authorization-matrix
+            // codes (AUTHZ-*) are business errors and must NOT masquerade as 401s —
+            // the SPA treats 401 as a session problem.
+            DomainException auth when auth.Code.StartsWith("AUTH-", StringComparison.Ordinal) => new ProblemDetails
             {
                 Status = StatusCodes.Status401Unauthorized,
                 Title = auth.Message,

@@ -78,6 +78,27 @@ public sealed class ReferenceStandardConfiguration : IEntityTypeConfiguration<Re
     }
 }
 
+public sealed class TestAuthorizationConfiguration : IEntityTypeConfiguration<TestAuthorization>
+{
+    public void Configure(EntityTypeBuilder<TestAuthorization> builder)
+    {
+        builder.ToTable("test_authorization", "qams");
+        builder.HasKey(a => a.Id);
+
+        builder.Property(a => a.Scope).HasConversion<string>().HasMaxLength(20);
+        builder.Property(a => a.Status).HasConversion<string>().HasMaxLength(20);
+        builder.Property(a => a.SuspensionReason).HasMaxLength(1000);
+        builder.Property(a => a.RevocationReason).HasMaxLength(1000);
+
+        builder.HasIndex(a => new { a.TenantId, a.UserId });
+        builder.HasIndex(a => new { a.TenantId, a.TestCatalogItemId });
+        builder.HasIndex(a => new { a.TenantId, a.Status });
+        builder.HasIndex(a => a.CompetencyRecordId);
+
+        builder.Ignore(a => a.DomainEvents);
+    }
+}
+
 public sealed class CompetencyRecordConfiguration : IEntityTypeConfiguration<CompetencyRecord>
 {
     public void Configure(EntityTypeBuilder<CompetencyRecord> builder)

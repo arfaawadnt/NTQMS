@@ -45,6 +45,7 @@ public sealed class AppDbContext(
     public DbSet<EquipmentItem> EquipmentItems => Set<EquipmentItem>();
     public DbSet<ReferenceStandard> ReferenceStandards => Set<ReferenceStandard>();
     public DbSet<CompetencyRecord> Competencies => Set<CompetencyRecord>();
+    public DbSet<TestAuthorization> TestAuthorizations => Set<TestAuthorization>();
     public DbSet<TrainingAssignment> TrainingAssignments => Set<TrainingAssignment>();
     public DbSet<RiskItem> Risks => Set<RiskItem>();
     public DbSet<ChangeRequest> ChangeRequests => Set<ChangeRequest>();

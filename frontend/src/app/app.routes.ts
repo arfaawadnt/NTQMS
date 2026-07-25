@@ -99,6 +99,16 @@ export const routes: Routes = [
             ],
           },
           {
+            path: 'authorizations',
+            loadComponent: () => import('./features/competency/authorization-matrix.component').then((m) => m.AuthorizationMatrixComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/competency/authorization-detail.component').then((m) => m.AuthorizationDetailComponent),
+              },
+            ],
+          },
+          {
             path: 'training',
             loadComponent: () => import('./features/competency/training-queue.component').then((m) => m.TrainingQueueComponent),
           },

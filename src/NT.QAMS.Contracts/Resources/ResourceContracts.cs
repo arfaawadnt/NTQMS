@@ -75,6 +75,25 @@ public sealed record CompetencyDetailDto(
     int ValidityMonths, DateOnly? ExpiresAt, Guid? AuthorizedBy, string? RevocationReason,
     IReadOnlyList<AssessmentResultDto> Assessments);
 
+// ── Personnel Authorization Matrix (ISO 17025 §6.2.6) ───────────────────────
+
+public sealed record GrantTestAuthorizationRequest(
+    Guid UserId, Guid TestCatalogItemId, Guid CompetencyRecordId, string Scope);
+
+public sealed record SuspendTestAuthorizationRequest(string Reason);
+
+public sealed record RevokeTestAuthorizationRequest(string Reason);
+
+public sealed record TestAuthorizationListItemDto(
+    Guid Id, Guid UserId, Guid TestCatalogItemId, string TestCode, string TestName,
+    string Scope, string Status, DateOnly GrantedOn, DateOnly ExpiresOn);
+
+public sealed record TestAuthorizationDetailDto(
+    Guid Id, Guid UserId, Guid TestCatalogItemId, string TestCode, string TestName,
+    Guid CompetencyRecordId, string? CompetencySubject, string Scope, string Status,
+    Guid GrantedBy, DateOnly GrantedOn, DateOnly ExpiresOn,
+    string? SuspensionReason, string? RevocationReason);
+
 public sealed record AssignTrainingRequest(
     Guid TraineeId, string Subject, Guid? DocumentId, DateOnly DueDate);
 
