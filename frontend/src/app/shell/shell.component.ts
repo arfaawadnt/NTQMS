@@ -58,6 +58,7 @@ import { PermissionsService } from '../core/permissions.service';
             <div class="grouplabel">{{ i18n.t('nav.groupResources') }}</div>
             <a class="item" routerLink="/documents" routerLinkActive="active">{{ i18n.t('nav.documents') }}</a>
             <a class="item" routerLink="/equipment" routerLinkActive="active">{{ i18n.t('nav.equipment') }}</a>
+            <a class="item" routerLink="/monitoring" routerLinkActive="active">{{ i18n.t('nav.env') }}</a>
             <a class="item" routerLink="/reference-standards" routerLinkActive="active">{{ i18n.t('nav.standards') }}</a>
             <a class="item" routerLink="/competencies" routerLinkActive="active">{{ i18n.t('nav.competency') }}</a>
             <a class="item" routerLink="/authorizations" routerLinkActive="active">{{ i18n.t('nav.authz') }}</a>

@@ -425,6 +425,61 @@ export interface RecordIntermediateCheckRequest {
   remarks: string | null;
 }
 
+// ── Environmental & Facility Monitoring (ISO 17025 §6.3) ────────────────────
+
+export interface EnvironmentalReading {
+  id: string;
+  value: number;
+  recordedAtUtc: string;
+  recordedById: string;
+  inLimit: boolean;
+  remark: string | null;
+}
+
+export interface MonitoringPointListItem {
+  id: string;
+  pointRef: string;
+  name: string;
+  location: string | null;
+  parameter: string;
+  unit: string;
+  lowLimit: number | null;
+  highLimit: number | null;
+  status: string;
+  lastValue: number | null;
+  lastRecordedAtUtc: string | null;
+  lastInLimit: boolean | null;
+  excursionCount: number;
+  branchId: string | null;
+  departmentId: string | null;
+}
+
+export interface MonitoringPointDetail {
+  id: string;
+  pointRef: string;
+  name: string;
+  location: string | null;
+  parameter: string;
+  unit: string;
+  lowLimit: number | null;
+  highLimit: number | null;
+  status: string;
+  branchId: string | null;
+  departmentId: string | null;
+  readings: EnvironmentalReading[];
+}
+
+export interface RegisterMonitoringPointRequest {
+  name: string;
+  location: string | null;
+  parameter: string;
+  unit: string;
+  lowLimit: number | null;
+  highLimit: number | null;
+  branchId: string | null;
+  departmentId: string | null;
+}
+
 // ── Personnel Authorization Matrix (ISO 17025 §6.2.6) ───────────────────────
 
 export const AUTHORIZATION_SCOPES = ['Perform', 'ReviewAndRelease', 'Train'] as const;

@@ -79,6 +79,16 @@ export const routes: Routes = [
             ],
           },
           {
+            path: 'monitoring',
+            loadComponent: () => import('./features/facility/monitoring-list.component').then((m) => m.MonitoringListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/facility/monitoring-detail.component').then((m) => m.MonitoringDetailComponent),
+              },
+            ],
+          },
+          {
             path: 'reference-standards',
             loadComponent: () => import('./features/equipment/standards-list.component').then((m) => m.StandardsListComponent),
             children: [

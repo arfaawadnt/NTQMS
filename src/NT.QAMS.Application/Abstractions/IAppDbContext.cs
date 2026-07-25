@@ -4,6 +4,7 @@ using NT.QAMS.Domain.AuditManagement;
 using NT.QAMS.Domain.Competency;
 using NT.QAMS.Domain.DocumentControl;
 using NT.QAMS.Domain.Equipment;
+using NT.QAMS.Domain.Facility;
 using NT.QAMS.Domain.Files;
 using NT.QAMS.Domain.IdentityAccess;
 using NT.QAMS.Domain.Improvement;
@@ -37,6 +38,7 @@ public interface IAppDbContext
     DbSet<EquipmentItem> EquipmentItems { get; }
     DbSet<ReferenceStandard> ReferenceStandards { get; }
     DbSet<TestAuthorization> TestAuthorizations { get; }
+    DbSet<MonitoringPoint> MonitoringPoints { get; }
     DbSet<CompetencyRecord> Competencies { get; }
     DbSet<TrainingAssignment> TrainingAssignments { get; }
     DbSet<RiskItem> Risks { get; }

@@ -5,6 +5,7 @@ using NT.QAMS.Domain.AuditManagement;
 using NT.QAMS.Domain.Competency;
 using NT.QAMS.Domain.DocumentControl;
 using NT.QAMS.Domain.Equipment;
+using NT.QAMS.Domain.Facility;
 using NT.QAMS.Domain.Files;
 using NT.QAMS.Domain.IdentityAccess;
 using NT.QAMS.Domain.Improvement;
@@ -46,6 +47,7 @@ public sealed class AppDbContext(
     public DbSet<ReferenceStandard> ReferenceStandards => Set<ReferenceStandard>();
     public DbSet<CompetencyRecord> Competencies => Set<CompetencyRecord>();
     public DbSet<TestAuthorization> TestAuthorizations => Set<TestAuthorization>();
+    public DbSet<MonitoringPoint> MonitoringPoints => Set<MonitoringPoint>();
     public DbSet<TrainingAssignment> TrainingAssignments => Set<TrainingAssignment>();
     public DbSet<RiskItem> Risks => Set<RiskItem>();
     public DbSet<ChangeRequest> ChangeRequests => Set<ChangeRequest>();
