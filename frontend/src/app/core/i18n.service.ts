@@ -1134,6 +1134,17 @@ export class I18nService {
     'notif.empty': { en: 'No notifications.', ar: 'لا توجد إشعارات.', fr: 'Aucune notification.' },
     'notif.markRead': { en: 'Mark read', ar: 'وضع كمقروء', fr: 'Marquer comme lu' },
 
+    // ── Help & User Manual ──
+    'nav.manual': { en: 'User Manual', ar: 'دليل المستخدم', fr: 'Manuel utilisateur' },
+    'help.title': { en: 'Page Help', ar: 'مساعدة الصفحة', fr: 'Aide de la page' },
+    'help.workflow': { en: 'Workflow', ar: 'سير العمل', fr: 'Flux de travail' },
+    'help.howto': { en: 'How to use this page', ar: 'كيفية استخدام هذه الصفحة', fr: 'Comment utiliser cette page' },
+    'help.openManual': { en: 'Open the full User Manual', ar: 'افتح دليل المستخدم الكامل', fr: 'Ouvrir le manuel complet' },
+    'manual.subtitle': { en: 'Every page’s workflow, described step by step — search or browse by area.', ar: 'سير عمل كل صفحة موصوفًا خطوة بخطوة — ابحث أو تصفّح حسب المجال.', fr: 'Le flux de chaque page, décrit étape par étape — recherchez ou parcourez par domaine.' },
+    'manual.search': { en: 'Search the manual…', ar: 'ابحث في الدليل…', fr: 'Rechercher dans le manuel…' },
+    'manual.noMatch': { en: 'No pages match your search.', ar: 'لا توجد صفحات تطابق بحثك.', fr: 'Aucune page ne correspond à votre recherche.' },
+    'manual.goToPage': { en: 'Go to page', ar: 'اذهب إلى الصفحة', fr: 'Aller à la page' },
+
     // ── Outlier detection & normalisation ──
     'out.title': { en: 'Outlier Screening', ar: 'فحص القيم الشاذة', fr: 'Dépistage des valeurs aberrantes' },
     'out.subtitle': { en: 'Automated outlier detection on a dataset using Tukey fences (1.5·IQR) and the MAD-based modified z-score (threshold 3.5) before statistics are trusted.', ar: 'كشف تلقائي للقيم الشاذة في مجموعة بيانات باستخدام أسوار توكي (1.5·IQR) ودرجة z المعدلة القائمة على MAD (عتبة 3.5) قبل الوثوق بالإحصاءات.', fr: 'Détection automatique des valeurs aberrantes d’un jeu de données via les bornes de Tukey (1,5·IQR) et le score z modifié fondé sur le MAD (seuil 3,5) avant de valider les statistiques.' },

@@ -34,6 +34,10 @@ export const routes: Routes = [
             loadComponent: () => import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent),
           },
           {
+            path: 'manual',
+            loadComponent: () => import('./features/manual/manual.component').then((m) => m.ManualComponent),
+          },
+          {
             path: 'nonconformances',
             loadComponent: () => import('./features/nc/nc-list.component').then((m) => m.NcListComponent),
             children: [
