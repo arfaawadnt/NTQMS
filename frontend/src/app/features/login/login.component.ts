@@ -106,8 +106,9 @@ import { I18nService, Lang } from '../../core/i18n.service';
     }
     .logocard { background: #fff; border-radius: 10px; padding: 12px 18px; }
     .logocard img { height: 54px; display: block; }
-    .brand h1 { font-size: 19px; font-weight: 800; margin: 26px 0 0; letter-spacing: .01em; }
-    .tagline { font-size: 13px; opacity: .92; margin: 10px 0 0; line-height: 1.6; }
+    /* Explicit white: the global heading palette must not bleed into the gradient panel. */
+    .brand h1 { font-size: 20px; font-weight: 800; margin: 26px 0 0; letter-spacing: .01em; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.18); }
+    .tagline { font-size: 13px; color: #fff; opacity: .95; margin: 10px 0 0; line-height: 1.6; }
     .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
     .chip {
       font-size: 11px; font-weight: 700; letter-spacing: .03em;

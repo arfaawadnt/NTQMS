@@ -15,7 +15,7 @@ export class I18nService {
 
   private readonly dict: Dict = {
     'app.title': { en: 'NT.QAMS', ar: 'NT.QAMS', fr: 'NT.QAMS' },
-    'app.subtitle': { en: 'Quality Assurance Management System', ar: 'نظام إدارة ضمان الجودة', fr: 'Système de management de la qualité' },
+    'app.subtitle': { en: 'Quality Management System', ar: 'نظام إدارة الجودة', fr: 'Système de management de la qualité' },
     'nav.groupQuality': { en: 'Quality', ar: 'الجودة', fr: 'Qualité' },
     'nav.groupResources': { en: 'Resources', ar: 'الموارد', fr: 'Ressources' },
     'nav.groupAdmin': { en: 'Administration', ar: 'الإدارة', fr: 'Administration' },
