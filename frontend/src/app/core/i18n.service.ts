@@ -166,6 +166,7 @@ export class I18nService {
     'mrv.reviewDate': { en: 'Review date', ar: 'تاريخ المراجعة', fr: 'Date de revue' },
     'mrv.participants': { en: 'Participants', ar: 'المشاركون', fr: 'Participants' },
     'mrv.participantsHint': { en: 'Names or roles attending the review.', ar: 'أسماء أو أدوار الحاضرين.', fr: 'Noms ou rôles des participants.' },
+    'mrv.participantsPick': { en: 'Select every attendee — at least one is required.', ar: 'اختر جميع الحاضرين — واحد على الأقل مطلوب.', fr: 'Sélectionnez tous les participants — au moins un est requis.' },
     'mrv.schedule': { en: 'Schedule', ar: 'جدولة', fr: 'Planifier' },
     'mrv.empty': { en: 'No management reviews yet.', ar: 'لا توجد مراجعات إدارة.', fr: 'Aucune revue de direction.' },
     'mrv.ref': { en: 'Ref', ar: 'المرجع', fr: 'Réf' },

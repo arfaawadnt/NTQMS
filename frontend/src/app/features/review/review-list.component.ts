@@ -9,6 +9,7 @@ import { PermissionsService } from '../../core/permissions.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
+import { UserSelectComponent } from '../../shared/ui/user-select.component';
 import { AllocationPickerComponent } from '../../shared/ui/allocation-picker.component';
 import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
 
@@ -17,7 +18,7 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
   selector: 'qams-review-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent],
+  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent, UserSelectComponent],
   template: `
     <qams-page-header [title]="i18n.t('mrv.title')">
       @if (perms.canApprove()) {
@@ -42,7 +43,8 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
           <div><label>{{ i18n.t('mrv.reviewDate') }}</label><input type="date" formControlName="reviewDate" /></div>
         </div>
         <label>{{ i18n.t('mrv.participants') }}</label>
-        <textarea formControlName="participants" rows="2" [placeholder]="i18n.t('mrv.participantsHint')"></textarea>
+        <qams-user-select formControlName="participantIds" [multiple]="true" />
+        <div class="hint">{{ i18n.t('mrv.participantsPick') }}</div>
         <qams-allocation-picker [branchCtrl]="form.controls.branchId" [departmentCtrl]="form.controls.departmentId" />
         <div class="row">
           <button type="submit" [disabled]="form.invalid || facade.loading()">{{ i18n.t('mrv.schedule') }}</button>
@@ -131,7 +133,7 @@ export class ReviewListComponent implements OnInit {
   readonly form = this.fb.nonNullable.group({
     title: ['', [Validators.required, Validators.maxLength(200)]],
     reviewDate: ['', [Validators.required]],
-    participants: ['', [Validators.maxLength(2000)]],
+    participantIds: [[] as string[], [Validators.required]],
     branchId: [''],
     departmentId: [''],
   });
@@ -145,7 +147,11 @@ export class ReviewListComponent implements OnInit {
     if (this.form.invalid) { return; }
     const raw = this.form.getRawValue();
     const id = await this.facade.schedule({
-      ...raw,
+      title: raw.title,
+      reviewDate: raw.reviewDate,
+      // The domain stores participants as the human-readable minutes string —
+      // resolve the picked users to their display names.
+      participants: raw.participantIds.map((uid) => this.org.userName(uid)).filter(Boolean).join(', '),
       branchId: raw.branchId || null,
       departmentId: raw.departmentId || null,
     });
