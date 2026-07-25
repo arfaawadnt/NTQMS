@@ -849,6 +849,64 @@ export interface SlaDefinition {
 
 export interface UpsertSlaRequest { module: string; severity: string; targetHours: number; }
 
+// ── Measurement Uncertainty (ISO 17025 §7.6) ─────────────────────────────────
+
+export const UNCERTAINTY_COMPONENT_TYPES = ['TypeA', 'TypeB'] as const;
+export type UncertaintyComponentType = (typeof UNCERTAINTY_COMPONENT_TYPES)[number];
+
+export interface UncertaintyComponent {
+  id: string;
+  name: string;
+  type: string;
+  relativeStandardUncertainty: number;
+  source: string | null;
+}
+
+export interface UncertaintyBudgetListItem {
+  id: string;
+  budgetRef: string;
+  analyte: string;
+  method: string;
+  level: string;
+  status: string;
+  expandedUncertainty: number | null;
+  meetsTarget: boolean | null;
+}
+
+export interface UncertaintyBudgetDetail {
+  id: string;
+  budgetRef: string;
+  analyte: string;
+  method: string;
+  unit: string;
+  level: string;
+  coverageFactor: number;
+  targetExpandedUncertainty: number | null;
+  status: string;
+  combinedStandardUncertainty: number | null;
+  expandedUncertainty: number | null;
+  meetsTarget: boolean | null;
+  approvedBy: string | null;
+  approvedAtUtc: string | null;
+  components: UncertaintyComponent[];
+}
+
+export interface CreateUncertaintyBudgetRequest {
+  analyte: string;
+  method: string;
+  unit: string;
+  level: string;
+  coverageFactor: number;
+  targetExpandedUncertainty: number | null;
+}
+
+export interface AddUncertaintyComponentRequest {
+  name: string;
+  type: UncertaintyComponentType;
+  relativeStandardUncertainty: number;
+  source: string | null;
+}
+
 // ── Compliance Ledger ────────────────────────────────────────────────────────
 
 /** One hash-chained, append-only audit-trail entry. */

@@ -143,6 +143,16 @@ export const routes: Routes = [
             ],
           },
           {
+            path: 'uncertainty',
+            loadComponent: () => import('./features/analytical/uncertainty-list.component').then((m) => m.UncertaintyListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/analytical/uncertainty-detail.component').then((m) => m.UncertaintyDetailComponent),
+              },
+            ],
+          },
+          {
             path: 'proficiency-tests',
             loadComponent: () => import('./features/analytical/pt-list.component').then((m) => m.PtListComponent),
           },

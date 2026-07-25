@@ -60,6 +60,7 @@ public sealed class AppDbContext(
     public DbSet<QcRun> QcRuns => Set<QcRun>();
     public DbSet<ValidationStudy> ValidationStudies => Set<ValidationStudy>();
     public DbSet<PtEnrollment> PtEnrollments => Set<PtEnrollment>();
+    public DbSet<UncertaintyBudget> UncertaintyBudgets => Set<UncertaintyBudget>();
     public DbSet<ArchiveEntry> ArchiveEntries => Set<ArchiveEntry>();
     public DbSet<SlaDefinition> SlaDefinitions => Set<SlaDefinition>();
     public DbSet<WorkTask> WorkTasks => Set<WorkTask>();
@@ -75,6 +76,21 @@ public sealed class AppDbContext(
         // entity, applied by convention so it is structurally unforgettable.
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
+            // Every identifier is minted by the domain (UUIDv7 in constructors or
+            // at the creation site), never by EF or the database. Without this,
+            // EF's Guid-key convention (ValueGeneratedOnAdd) makes change
+            // detection treat a child added to an already-loaded aggregate as an
+            // EXISTING row (key is set → assume persisted → Modified), issuing an
+            // UPDATE that affects 0 rows and throws DbUpdateConcurrencyException.
+            var primaryKey = entityType.FindPrimaryKey();
+            if (primaryKey is not null)
+            {
+                foreach (var keyProperty in primaryKey.Properties.Where(p => p.ClrType == typeof(Guid)))
+                {
+                    keyProperty.ValueGenerated = Microsoft.EntityFrameworkCore.Metadata.ValueGenerated.Never;
+                }
+            }
+
             if (typeof(ITenantScoped).IsAssignableFrom(entityType.ClrType))
             {
                 var method = typeof(AppDbContext)

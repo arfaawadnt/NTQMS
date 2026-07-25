@@ -35,3 +35,25 @@ public sealed record RecordPtResultRequest(decimal Submitted, decimal Assigned, 
 public sealed record PtEnrollmentDto(
     Guid Id, string PtRef, string Scheme, string Analyte, string Cycle,
     decimal? SubmittedValue, decimal? AssignedValue, decimal? ZScore, string Performance);
+
+// ── Measurement uncertainty (ISO 17025 §7.6) ─────────────────────────────────
+
+public sealed record CreateUncertaintyBudgetRequest(
+    string Analyte, string Method, string Unit, string Level,
+    decimal CoverageFactor, decimal? TargetExpandedUncertainty);
+public sealed record AddUncertaintyComponentRequest(
+    string Name, string Type, decimal RelativeStandardUncertainty, string? Source);
+
+public sealed record UncertaintyComponentDto(
+    Guid Id, string Name, string Type, decimal RelativeStandardUncertainty, string? Source);
+
+public sealed record UncertaintyBudgetListItemDto(
+    Guid Id, string BudgetRef, string Analyte, string Method, string Level, string Status,
+    decimal? ExpandedUncertainty, bool? MeetsTarget);
+
+public sealed record UncertaintyBudgetDetailDto(
+    Guid Id, string BudgetRef, string Analyte, string Method, string Unit, string Level,
+    decimal CoverageFactor, decimal? TargetExpandedUncertainty, string Status,
+    decimal? CombinedStandardUncertainty, decimal? ExpandedUncertainty, bool? MeetsTarget,
+    Guid? ApprovedBy, DateTimeOffset? ApprovedAtUtc,
+    IReadOnlyList<UncertaintyComponentDto> Components);

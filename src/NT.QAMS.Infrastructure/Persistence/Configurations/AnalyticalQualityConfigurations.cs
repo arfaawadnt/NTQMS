@@ -86,3 +86,31 @@ public sealed class PtEnrollmentConfiguration : IEntityTypeConfiguration<PtEnrol
         builder.Ignore(p => p.DomainEvents);
     }
 }
+
+/// <summary>MU budget with owned components — ref unique per tenant.</summary>
+public sealed class UncertaintyBudgetConfiguration : IEntityTypeConfiguration<UncertaintyBudget>
+{
+    public void Configure(EntityTypeBuilder<UncertaintyBudget> builder)
+    {
+        builder.ToTable("uncertainty_budget", "qams");
+        builder.HasKey(b => b.Id);
+        builder.Property(b => b.BudgetRef).HasMaxLength(30);
+        builder.Property(b => b.Analyte).HasMaxLength(200);
+        builder.Property(b => b.Method).HasMaxLength(300);
+        builder.Property(b => b.Unit).HasMaxLength(50);
+        builder.Property(b => b.Level).HasMaxLength(100);
+        builder.Property(b => b.Status).HasConversion<string>().HasMaxLength(20);
+        builder.HasIndex(b => new { b.TenantId, b.BudgetRef }).IsUnique();
+        builder.HasIndex(b => new { b.TenantId, b.Status });
+
+        builder.OwnsMany(b => b.Components, component =>
+        {
+            component.ToTable("uncertainty_component", "qams");
+            component.WithOwner().HasForeignKey("budget_id");
+            component.HasKey(c => c.Id);
+            component.Property(c => c.Name).HasMaxLength(300);
+            component.Property(c => c.Type).HasConversion<string>().HasMaxLength(10);
+            component.Property(c => c.Source).HasMaxLength(500);
+        });
+    }
+}
