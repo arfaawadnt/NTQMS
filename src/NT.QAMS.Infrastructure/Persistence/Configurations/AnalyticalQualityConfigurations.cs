@@ -293,3 +293,122 @@ public sealed class PrecisionStudyConfiguration : IEntityTypeConfiguration<Preci
         builder.Ignore(s => s.DomainEvents);
     }
 }
+
+public sealed class OutlierScreeningConfiguration : IEntityTypeConfiguration<OutlierScreening>
+{
+    public void Configure(EntityTypeBuilder<OutlierScreening> b)
+    {
+        b.ToTable("outlier_screening", "qams");
+        b.HasKey(s => s.Id);
+        b.Property(s => s.ScreeningRef).HasMaxLength(30);
+        b.Property(s => s.Dataset).HasMaxLength(200);
+        b.Property(s => s.Unit).HasMaxLength(50);
+        b.Property(s => s.State).HasConversion<string>().HasMaxLength(20);
+        b.HasIndex(s => new { s.TenantId, s.ScreeningRef }).IsUnique();
+        b.HasIndex(s => new { s.TenantId, s.State });
+        b.OwnsMany(s => s.Points, p =>
+        {
+            p.ToTable("outlier_point", "qams");
+            p.WithOwner().HasForeignKey("screening_id");
+            p.HasKey(x => x.Id);
+            p.Property(x => x.Label).HasMaxLength(100);
+        });
+        b.Ignore(s => s.DomainEvents);
+    }
+}
+
+public sealed class CarryoverStudyConfiguration : IEntityTypeConfiguration<CarryoverStudy>
+{
+    public void Configure(EntityTypeBuilder<CarryoverStudy> b)
+    {
+        b.ToTable("carryover_study", "qams");
+        b.HasKey(s => s.Id);
+        b.Property(s => s.StudyRef).HasMaxLength(30);
+        b.Property(s => s.Analyte).HasMaxLength(200);
+        b.Property(s => s.Unit).HasMaxLength(50);
+        b.Property(s => s.State).HasConversion<string>().HasMaxLength(20);
+        b.HasIndex(s => new { s.TenantId, s.StudyRef }).IsUnique();
+        b.HasIndex(s => new { s.TenantId, s.State });
+        b.OwnsMany(s => s.Readings, r =>
+        {
+            r.ToTable("carryover_reading", "qams");
+            r.WithOwner().HasForeignKey("study_id");
+            r.HasKey(x => x.Id);
+            r.Property(x => x.Kind).HasConversion<string>().HasMaxLength(10);
+        });
+        b.Ignore(s => s.DomainEvents);
+    }
+}
+
+public sealed class LotComparisonStudyConfiguration : IEntityTypeConfiguration<LotComparisonStudy>
+{
+    public void Configure(EntityTypeBuilder<LotComparisonStudy> b)
+    {
+        b.ToTable("lot_comparison_study", "qams");
+        b.HasKey(s => s.Id);
+        b.Property(s => s.StudyRef).HasMaxLength(30);
+        b.Property(s => s.Analyte).HasMaxLength(200);
+        b.Property(s => s.Unit).HasMaxLength(50);
+        b.Property(s => s.CurrentLot).HasMaxLength(60);
+        b.Property(s => s.NewLot).HasMaxLength(60);
+        b.Property(s => s.State).HasConversion<string>().HasMaxLength(20);
+        b.HasIndex(s => new { s.TenantId, s.StudyRef }).IsUnique();
+        b.HasIndex(s => new { s.TenantId, s.State });
+        b.OwnsMany(s => s.Pairs, p =>
+        {
+            p.ToTable("lot_sample_pair", "qams");
+            p.WithOwner().HasForeignKey("study_id");
+            p.HasKey(x => x.Id);
+            p.Property(x => x.SampleId).HasMaxLength(100);
+        });
+        b.Ignore(s => s.DomainEvents);
+    }
+}
+
+public sealed class InterferenceStudyConfiguration : IEntityTypeConfiguration<InterferenceStudy>
+{
+    public void Configure(EntityTypeBuilder<InterferenceStudy> b)
+    {
+        b.ToTable("interference_study", "qams");
+        b.HasKey(s => s.Id);
+        b.Property(s => s.StudyRef).HasMaxLength(30);
+        b.Property(s => s.Analyte).HasMaxLength(200);
+        b.Property(s => s.Unit).HasMaxLength(50);
+        b.Property(s => s.State).HasConversion<string>().HasMaxLength(20);
+        b.HasIndex(s => new { s.TenantId, s.StudyRef }).IsUnique();
+        b.HasIndex(s => new { s.TenantId, s.State });
+        b.OwnsMany(s => s.Measurements, m =>
+        {
+            m.ToTable("interference_measurement", "qams");
+            m.WithOwner().HasForeignKey("study_id");
+            m.HasKey(x => x.Id);
+            m.Property(x => x.Interferent).HasMaxLength(120);
+        });
+        b.Ignore(s => s.DomainEvents);
+    }
+}
+
+public sealed class InstrumentComparabilityStudyConfiguration : IEntityTypeConfiguration<InstrumentComparabilityStudy>
+{
+    public void Configure(EntityTypeBuilder<InstrumentComparabilityStudy> b)
+    {
+        b.ToTable("instrument_comparability_study", "qams");
+        b.HasKey(s => s.Id);
+        b.Property(s => s.StudyRef).HasMaxLength(30);
+        b.Property(s => s.Analyte).HasMaxLength(200);
+        b.Property(s => s.Unit).HasMaxLength(50);
+        b.Property(s => s.ReferenceInstrument).HasMaxLength(100);
+        b.Property(s => s.State).HasConversion<string>().HasMaxLength(20);
+        b.HasIndex(s => new { s.TenantId, s.StudyRef }).IsUnique();
+        b.HasIndex(s => new { s.TenantId, s.State });
+        b.OwnsMany(s => s.Readings, r =>
+        {
+            r.ToTable("instrument_reading", "qams");
+            r.WithOwner().HasForeignKey("study_id");
+            r.HasKey(x => x.Id);
+            r.Property(x => x.Instrument).HasMaxLength(100);
+            r.Property(x => x.SampleId).HasMaxLength(100);
+        });
+        b.Ignore(s => s.DomainEvents);
+    }
+}

@@ -74,6 +74,11 @@ public sealed class AppDbContext(
     public DbSet<ReferenceIntervalStudy> ReferenceIntervalStudies => Set<ReferenceIntervalStudy>();
     public DbSet<SigmaAssessment> SigmaAssessments => Set<SigmaAssessment>();
     public DbSet<PrecisionStudy> PrecisionStudies => Set<PrecisionStudy>();
+    public DbSet<OutlierScreening> OutlierScreenings => Set<OutlierScreening>();
+    public DbSet<CarryoverStudy> CarryoverStudies => Set<CarryoverStudy>();
+    public DbSet<LotComparisonStudy> LotComparisons => Set<LotComparisonStudy>();
+    public DbSet<InterferenceStudy> InterferenceStudies => Set<InterferenceStudy>();
+    public DbSet<InstrumentComparabilityStudy> InstrumentComparabilities => Set<InstrumentComparabilityStudy>();
     public DbSet<PtEnrollment> PtEnrollments => Set<PtEnrollment>();
     public DbSet<PtPlan> PtPlans => Set<PtPlan>();
     public DbSet<AuditTrailReview> AuditTrailReviews => Set<AuditTrailReview>();

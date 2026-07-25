@@ -66,6 +66,11 @@ public interface IAppDbContext
     DbSet<ReferenceIntervalStudy> ReferenceIntervalStudies { get; }
     DbSet<SigmaAssessment> SigmaAssessments { get; }
     DbSet<PrecisionStudy> PrecisionStudies { get; }
+    DbSet<OutlierScreening> OutlierScreenings { get; }
+    DbSet<CarryoverStudy> CarryoverStudies { get; }
+    DbSet<LotComparisonStudy> LotComparisons { get; }
+    DbSet<InterferenceStudy> InterferenceStudies { get; }
+    DbSet<InstrumentComparabilityStudy> InstrumentComparabilities { get; }
     DbSet<PtEnrollment> PtEnrollments { get; }
     DbSet<PtPlan> PtPlans { get; }
     DbSet<AuditTrailReview> AuditTrailReviews { get; }

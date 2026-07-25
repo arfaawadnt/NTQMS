@@ -48,6 +48,65 @@ public sealed record ImportMeasurementPairsRequest(IReadOnlyList<AddMeasurementP
 
 public sealed record ImportPrecisionMeasurementsRequest(IReadOnlyList<AddPrecisionMeasurementRequest> Rows);
 
+// ── Outlier Detection & Normalisation ───────────────────────────────────────
+
+public sealed record CreateOutlierScreeningRequest(string Dataset, string Unit);
+public sealed record AddOutlierPointRequest(decimal Value, string? Label);
+public sealed record OutlierPointDto(Guid Id, decimal Value, string? Label, decimal ZScore, decimal ModifiedZScore, bool IsOutlier);
+public sealed record OutlierScreeningListItemDto(Guid Id, string ScreeningRef, string Dataset, string State, int? PointCount, int? OutlierCount);
+public sealed record OutlierScreeningDetailDto(
+    Guid Id, string ScreeningRef, string Dataset, string Unit, string State,
+    int? PointCount, decimal? Mean, decimal? Sd, decimal? Median, decimal? Q1, decimal? Q3,
+    decimal? TukeyLower, decimal? TukeyUpper, int? OutlierCount,
+    Guid? SignedOffBy, DateTimeOffset? SignedOffAtUtc, IReadOnlyList<OutlierPointDto> Points);
+
+// ── Carryover (CLSI EP10) ───────────────────────────────────────────────────
+
+public sealed record CreateCarryoverStudyRequest(string Analyte, string Unit, decimal AllowableCarryoverPct);
+public sealed record AddCarryoverReadingRequest(string Kind, int Sequence, decimal Value);
+public sealed record CarryoverReadingDto(Guid Id, string Kind, int Sequence, decimal Value);
+public sealed record CarryoverListItemDto(Guid Id, string StudyRef, string Analyte, string State, decimal? CarryoverPct, bool? Passes);
+public sealed record CarryoverDetailDto(
+    Guid Id, string StudyRef, string Analyte, string Unit, decimal AllowableCarryoverPct, string State,
+    decimal? MeanHigh, decimal? FirstLow, decimal? SteadyLow, decimal? CarryoverPct, bool? Passes,
+    Guid? SignedOffBy, DateTimeOffset? SignedOffAtUtc, IReadOnlyList<CarryoverReadingDto> Readings);
+
+// ── Lot-to-Lot Comparison ───────────────────────────────────────────────────
+
+public sealed record CreateLotComparisonRequest(string Analyte, string Unit, string CurrentLot, string NewLot, decimal AllowableBiasPct);
+public sealed record AddLotPairRequest(decimal CurrentLotValue, decimal NewLotValue, string? SampleId);
+public sealed record LotPairDto(Guid Id, decimal CurrentLotValue, decimal NewLotValue, string? SampleId);
+public sealed record LotComparisonListItemDto(Guid Id, string StudyRef, string Analyte, string CurrentLot, string NewLot, string State, decimal? MeanBiasPct, bool? Passes);
+public sealed record LotComparisonDetailDto(
+    Guid Id, string StudyRef, string Analyte, string Unit, string CurrentLot, string NewLot, decimal AllowableBiasPct, string State,
+    int? PairCount, decimal? MeanCurrent, decimal? MeanNew, decimal? MeanBiasPct, bool? Passes,
+    Guid? SignedOffBy, DateTimeOffset? SignedOffAtUtc, IReadOnlyList<LotPairDto> Pairs);
+
+// ── Interference / Specificity (CLSI EP07) ──────────────────────────────────
+
+public sealed record CreateInterferenceStudyRequest(string Analyte, string Unit, decimal AllowableBiasPct);
+public sealed record AddInterferenceMeasurementRequest(string Kind, string? Interferent, decimal Value);
+public sealed record InterferenceMeasurementDto(Guid Id, bool IsControl, string? Interferent, decimal Value);
+public sealed record InterferenceResultDto(string Interferent, int ReplicateCount, decimal MeanTest, decimal BiasPct, bool SignificantInterference);
+public sealed record InterferenceListItemDto(Guid Id, string StudyRef, string Analyte, string State, int? InterferentCount, int? SignificantCount);
+public sealed record InterferenceDetailDto(
+    Guid Id, string StudyRef, string Analyte, string Unit, decimal AllowableBiasPct, string State,
+    decimal? ControlMean, int? InterferentCount, int? SignificantCount,
+    Guid? SignedOffBy, DateTimeOffset? SignedOffAtUtc,
+    IReadOnlyList<InterferenceMeasurementDto> Measurements, IReadOnlyList<InterferenceResultDto> Results);
+
+// ── Instrument-to-Instrument Comparability ──────────────────────────────────
+
+public sealed record CreateInstrumentComparabilityRequest(string Analyte, string Unit, string ReferenceInstrument, decimal AllowableBiasPct);
+public sealed record AddInstrumentReadingRequest(string Instrument, string SampleId, decimal Value);
+public sealed record InstrumentReadingDto(Guid Id, string Instrument, string SampleId, decimal Value);
+public sealed record InstrumentResultDto(string Instrument, int PairedSamples, decimal MeanBiasPct, bool Comparable);
+public sealed record InstrumentComparabilityListItemDto(Guid Id, string StudyRef, string Analyte, string ReferenceInstrument, string State, int? InstrumentCount, int? NonComparableCount);
+public sealed record InstrumentComparabilityDetailDto(
+    Guid Id, string StudyRef, string Analyte, string Unit, string ReferenceInstrument, decimal AllowableBiasPct, string State,
+    int? InstrumentCount, int? NonComparableCount, Guid? SignedOffBy, DateTimeOffset? SignedOffAtUtc,
+    IReadOnlyList<InstrumentReadingDto> Readings, IReadOnlyList<InstrumentResultDto> Results);
+
 // ── Method Comparison (CLSI EP09) ───────────────────────────────────────────
 
 public sealed record CreateMethodComparisonRequest(

@@ -989,6 +989,242 @@ export interface CreatePrecisionStudyRequest {
   claimedWithinLabCvPct: number | null;
 }
 
+// ── Outlier Detection & Normalisation (Tukey + modified-z) ──────────────────
+
+export interface OutlierPoint {
+  id: string;
+  value: number;
+  label: string | null;
+  zScore: number;
+  modifiedZScore: number;
+  isOutlier: boolean;
+}
+
+export interface OutlierScreeningListItem {
+  id: string;
+  screeningRef: string;
+  dataset: string;
+  state: string;
+  pointCount: number | null;
+  outlierCount: number | null;
+}
+
+export interface OutlierScreeningDetail {
+  id: string;
+  screeningRef: string;
+  dataset: string;
+  unit: string;
+  state: string;
+  pointCount: number | null;
+  mean: number | null;
+  sd: number | null;
+  median: number | null;
+  q1: number | null;
+  q3: number | null;
+  tukeyLower: number | null;
+  tukeyUpper: number | null;
+  outlierCount: number | null;
+  signedOffBy: string | null;
+  signedOffAtUtc: string | null;
+  points: OutlierPoint[];
+}
+
+export interface CreateOutlierScreeningRequest {
+  dataset: string;
+  unit: string;
+}
+
+// ── Carryover Study (CLSI EP10) ─────────────────────────────────────────────
+
+export const CARRYOVER_KINDS = ['High', 'Low'] as const;
+export type CarryoverKind = (typeof CARRYOVER_KINDS)[number];
+
+export interface CarryoverReading {
+  id: string;
+  kind: string;
+  sequence: number;
+  value: number;
+}
+
+export interface CarryoverListItem {
+  id: string;
+  studyRef: string;
+  analyte: string;
+  state: string;
+  carryoverPct: number | null;
+  passes: boolean | null;
+}
+
+export interface CarryoverDetail {
+  id: string;
+  studyRef: string;
+  analyte: string;
+  unit: string;
+  allowableCarryoverPct: number;
+  state: string;
+  meanHigh: number | null;
+  firstLow: number | null;
+  steadyLow: number | null;
+  carryoverPct: number | null;
+  passes: boolean | null;
+  signedOffBy: string | null;
+  signedOffAtUtc: string | null;
+  readings: CarryoverReading[];
+}
+
+export interface CreateCarryoverStudyRequest {
+  analyte: string;
+  unit: string;
+  allowableCarryoverPct: number;
+}
+
+// ── Lot-to-Lot Comparison ───────────────────────────────────────────────────
+
+export interface LotPair {
+  id: string;
+  currentLotValue: number;
+  newLotValue: number;
+  sampleId: string | null;
+}
+
+export interface LotComparisonListItem {
+  id: string;
+  studyRef: string;
+  analyte: string;
+  currentLot: string;
+  newLot: string;
+  state: string;
+  meanBiasPct: number | null;
+  passes: boolean | null;
+}
+
+export interface LotComparisonDetail {
+  id: string;
+  studyRef: string;
+  analyte: string;
+  unit: string;
+  currentLot: string;
+  newLot: string;
+  allowableBiasPct: number;
+  state: string;
+  pairCount: number | null;
+  meanCurrent: number | null;
+  meanNew: number | null;
+  meanBiasPct: number | null;
+  passes: boolean | null;
+  signedOffBy: string | null;
+  signedOffAtUtc: string | null;
+  pairs: LotPair[];
+}
+
+export interface CreateLotComparisonRequest {
+  analyte: string;
+  unit: string;
+  currentLot: string;
+  newLot: string;
+  allowableBiasPct: number;
+}
+
+// ── Interference / Specificity (CLSI EP07) ──────────────────────────────────
+
+export const INTERFERENCE_KINDS = ['Control', 'Test'] as const;
+export type InterferenceKind = (typeof INTERFERENCE_KINDS)[number];
+
+export interface InterferenceMeasurement {
+  id: string;
+  isControl: boolean;
+  interferent: string | null;
+  value: number;
+}
+
+export interface InterferenceResult {
+  interferent: string;
+  replicateCount: number;
+  meanTest: number;
+  biasPct: number;
+  significantInterference: boolean;
+}
+
+export interface InterferenceListItem {
+  id: string;
+  studyRef: string;
+  analyte: string;
+  state: string;
+  interferentCount: number | null;
+  significantCount: number | null;
+}
+
+export interface InterferenceDetail {
+  id: string;
+  studyRef: string;
+  analyte: string;
+  unit: string;
+  allowableBiasPct: number;
+  state: string;
+  controlMean: number | null;
+  interferentCount: number | null;
+  significantCount: number | null;
+  signedOffBy: string | null;
+  signedOffAtUtc: string | null;
+  measurements: InterferenceMeasurement[];
+  results: InterferenceResult[];
+}
+
+export interface CreateInterferenceStudyRequest {
+  analyte: string;
+  unit: string;
+  allowableBiasPct: number;
+}
+
+// ── Instrument-to-Instrument Comparability ──────────────────────────────────
+
+export interface InstrumentReading {
+  id: string;
+  instrument: string;
+  sampleId: string;
+  value: number;
+}
+
+export interface InstrumentResult {
+  instrument: string;
+  pairedSamples: number;
+  meanBiasPct: number;
+  comparable: boolean;
+}
+
+export interface InstrumentComparabilityListItem {
+  id: string;
+  studyRef: string;
+  analyte: string;
+  referenceInstrument: string;
+  state: string;
+  instrumentCount: number | null;
+  nonComparableCount: number | null;
+}
+
+export interface InstrumentComparabilityDetail {
+  id: string;
+  studyRef: string;
+  analyte: string;
+  unit: string;
+  referenceInstrument: string;
+  allowableBiasPct: number;
+  state: string;
+  instrumentCount: number | null;
+  nonComparableCount: number | null;
+  signedOffBy: string | null;
+  signedOffAtUtc: string | null;
+  readings: InstrumentReading[];
+  results: InstrumentResult[];
+}
+
+export interface CreateInstrumentComparabilityRequest {
+  analyte: string;
+  unit: string;
+  referenceInstrument: string;
+  allowableBiasPct: number;
+}
+
 // ── Personnel Authorization Matrix (ISO 17025 §6.2.6) ───────────────────────
 
 export const AUTHORIZATION_SCOPES = ['Perform', 'ReviewAndRelease', 'Train'] as const;

@@ -272,6 +272,56 @@ export const routes: Routes = [
             ],
           },
           {
+            path: 'outlier-screenings',
+            loadComponent: () => import('./features/analytical/outlier-list.component').then((m) => m.OutlierListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/analytical/outlier-detail.component').then((m) => m.OutlierDetailComponent),
+              },
+            ],
+          },
+          {
+            path: 'carryover-studies',
+            loadComponent: () => import('./features/analytical/carryover-list.component').then((m) => m.CarryoverListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/analytical/carryover-detail.component').then((m) => m.CarryoverDetailComponent),
+              },
+            ],
+          },
+          {
+            path: 'lot-comparisons',
+            loadComponent: () => import('./features/analytical/lot-comparison-list.component').then((m) => m.LotComparisonListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/analytical/lot-comparison-detail.component').then((m) => m.LotComparisonDetailComponent),
+              },
+            ],
+          },
+          {
+            path: 'interference-studies',
+            loadComponent: () => import('./features/analytical/interference-list.component').then((m) => m.InterferenceListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/analytical/interference-detail.component').then((m) => m.InterferenceDetailComponent),
+              },
+            ],
+          },
+          {
+            path: 'instrument-comparabilities',
+            loadComponent: () => import('./features/analytical/instrument-comparability-list.component').then((m) => m.InstrumentComparabilityListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/analytical/instrument-comparability-detail.component').then((m) => m.InstrumentComparabilityDetailComponent),
+              },
+            ],
+          },
+          {
             path: 'uncertainty',
             loadComponent: () => import('./features/analytical/uncertainty-list.component').then((m) => m.UncertaintyListComponent),
             children: [
