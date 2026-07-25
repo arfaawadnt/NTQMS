@@ -37,4 +37,8 @@ public interface IComplianceLedgerStore
     Task<IReadOnlyList<SignatureRecord>> GetSignaturesForSubjectAsync(string subjectRef, CancellationToken ct);
     Task<IReadOnlyList<SecurityEvent>> GetSecurityEventsAsync(int take, CancellationToken ct);
     Task<(bool Ok, long Verified, long? BrokenAtSequence)> VerifyChainAsync(Guid tenantId, CancellationToken ct);
+
+    /// <summary>Ledger volumes for a review period — evidence of coverage for the periodic audit-trail review.</summary>
+    Task<(int Events, int FieldChanges)> CountForPeriodAsync(
+        Guid tenantId, DateTimeOffset fromUtc, DateTimeOffset toUtc, CancellationToken ct);
 }

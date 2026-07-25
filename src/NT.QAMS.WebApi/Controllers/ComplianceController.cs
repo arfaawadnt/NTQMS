@@ -35,6 +35,25 @@ public sealed class ComplianceController(ISender sender) : ControllerBase
     public async Task<IActionResult> SecurityEvents([FromQuery] int take = 200, CancellationToken ct = default) =>
         Ok(await sender.Send(new GetSecurityEventsQuery(take), ct));
 
+    [HttpGet("audit-trail-reviews")]
+    public async Task<IActionResult> AuditTrailReviews(CancellationToken ct) =>
+        Ok(await sender.Send(new GetAuditTrailReviewsQuery(), ct));
+
+    [HttpPost("audit-trail-reviews")]
+    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    public async Task<IActionResult> OpenAuditTrailReview(
+        NT.QAMS.Contracts.Compliance.OpenAuditTrailReviewRequest request, CancellationToken ct) =>
+        Ok(new { id = await sender.Send(new OpenAuditTrailReviewCommand(request.PeriodStart, request.PeriodEnd), ct) });
+
+    [HttpPost("audit-trail-reviews/{id:guid}/complete")]
+    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    public async Task<IActionResult> CompleteAuditTrailReview(
+        Guid id, NT.QAMS.Contracts.Compliance.CompleteAuditTrailReviewRequest request, CancellationToken ct)
+    {
+        await sender.Send(new CompleteAuditTrailReviewCommand(id, request.AnomaliesFound, request.Conclusion), ct);
+        return NoContent();
+    }
+
     [HttpGet("chain-verification")]
     public async Task<IActionResult> VerifyChain(CancellationToken ct)
     {

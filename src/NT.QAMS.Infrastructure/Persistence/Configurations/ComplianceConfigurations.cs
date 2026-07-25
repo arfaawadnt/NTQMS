@@ -69,3 +69,18 @@ public sealed class FieldChangeRecordConfiguration : IEntityTypeConfiguration<Fi
         builder.HasIndex(f => f.OccurredAtUtc);
     }
 }
+
+public sealed class AuditTrailReviewConfiguration : IEntityTypeConfiguration<AuditTrailReview>
+{
+    public void Configure(EntityTypeBuilder<AuditTrailReview> builder)
+    {
+        builder.ToTable("audit_trail_review", "qams");
+        builder.HasKey(r => r.Id);
+        builder.Property(r => r.ReviewRef).HasMaxLength(30);
+        builder.Property(r => r.Status).HasConversion<string>().HasMaxLength(20);
+        builder.Property(r => r.Conclusion).HasMaxLength(4000);
+        builder.HasIndex(r => new { r.TenantId, r.ReviewRef }).IsUnique();
+        builder.HasIndex(r => new { r.TenantId, r.Status });
+        builder.Ignore(r => r.DomainEvents);
+    }
+}

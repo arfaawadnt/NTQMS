@@ -1,0 +1,70 @@
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using NT.QAMS.Application.AnalyticalQuality;
+using NT.QAMS.Contracts.AnalyticalQuality;
+
+namespace NT.QAMS.WebApi.Controllers;
+
+/// <summary>Annual PT/EQA participation plan (ISO 17025 §7.7.2).</summary>
+[ApiController]
+[Route("api/pt-plans")]
+[Authorize]
+public sealed class PtPlansController(ISender sender) : ControllerBase
+{
+    [HttpGet]
+    public async Task<IActionResult> List(CancellationToken ct) =>
+        Ok(await sender.Send(new GetPtPlansQuery(), ct));
+
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetById(Guid id, CancellationToken ct) =>
+        Ok(await sender.Send(new GetPtPlanByIdQuery(id), ct));
+
+    [HttpPost]
+    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    public async Task<IActionResult> Create(CreatePtPlanRequest request, CancellationToken ct)
+    {
+        var id = await sender.Send(new CreatePtPlanCommand(request.Year), ct);
+        return CreatedAtAction(nameof(GetById), new { id }, new { id });
+    }
+
+    [HttpPost("{id:guid}/items")]
+    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    public async Task<IActionResult> AddItem(Guid id, AddPtPlanItemRequest request, CancellationToken ct) =>
+        Ok(new
+        {
+            itemId = await sender.Send(new AddPtPlanItemCommand(
+                id, request.Scheme, request.Analyte, request.Provider, request.PlannedCycles, request.Notes), ct),
+        });
+
+    [HttpDelete("{id:guid}/items/{itemId:guid}")]
+    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    public async Task<IActionResult> RemoveItem(Guid id, Guid itemId, CancellationToken ct)
+    {
+        await sender.Send(new RemovePtPlanItemCommand(id, itemId), ct);
+        return NoContent();
+    }
+
+    [HttpPost("{id:guid}/approve")]
+    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    public async Task<IActionResult> Approve(Guid id, CancellationToken ct)
+    {
+        await sender.Send(new ApprovePtPlanCommand(id), ct);
+        return NoContent();
+    }
+
+    [HttpPost("{id:guid}/fulfilments")]
+    public async Task<IActionResult> RecordFulfilment(Guid id, RecordPtPlanFulfilmentRequest request, CancellationToken ct)
+    {
+        await sender.Send(new RecordPtPlanFulfilmentCommand(id, request.ItemId, request.EnrollmentId), ct);
+        return NoContent();
+    }
+
+    [HttpPost("{id:guid}/close")]
+    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    public async Task<IActionResult> Close(Guid id, ClosePtPlanRequest request, CancellationToken ct)
+    {
+        await sender.Send(new ClosePtPlanCommand(id, request.ClosureSummary), ct);
+        return NoContent();
+    }
+}

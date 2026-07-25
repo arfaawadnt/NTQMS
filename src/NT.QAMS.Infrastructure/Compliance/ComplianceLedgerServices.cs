@@ -123,6 +123,16 @@ public sealed class ESignatureService(
 
 public sealed class ComplianceLedgerStore(AppDbContext db, ICurrentTenant tenant) : IComplianceLedgerStore
 {
+    public async Task<(int Events, int FieldChanges)> CountForPeriodAsync(
+        Guid tenantId, DateTimeOffset fromUtc, DateTimeOffset toUtc, CancellationToken ct)
+    {
+        var events = await db.Set<AuditTrailEntry>().AsNoTracking()
+            .CountAsync(e => e.TenantId == tenantId && e.OccurredAtUtc >= fromUtc && e.OccurredAtUtc < toUtc, ct);
+        var fieldChanges = await db.Set<FieldChangeRecord>().AsNoTracking()
+            .CountAsync(f => f.TenantId == tenantId && f.OccurredAtUtc >= fromUtc && f.OccurredAtUtc < toUtc, ct);
+        return (events, fieldChanges);
+    }
+
     public async Task<IReadOnlyList<AuditTrailEntry>> GetTrailAsync(string? subjectContains, int take, CancellationToken ct)
     {
         var query = db.Set<AuditTrailEntry>().AsNoTracking();

@@ -64,6 +64,8 @@ public sealed class AppDbContext(
     public DbSet<QcRun> QcRuns => Set<QcRun>();
     public DbSet<ValidationStudy> ValidationStudies => Set<ValidationStudy>();
     public DbSet<PtEnrollment> PtEnrollments => Set<PtEnrollment>();
+    public DbSet<PtPlan> PtPlans => Set<PtPlan>();
+    public DbSet<AuditTrailReview> AuditTrailReviews => Set<AuditTrailReview>();
     public DbSet<UncertaintyBudget> UncertaintyBudgets => Set<UncertaintyBudget>();
     public DbSet<ArchiveEntry> ArchiveEntries => Set<ArchiveEntry>();
     public DbSet<SlaDefinition> SlaDefinitions => Set<SlaDefinition>();

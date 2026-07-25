@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { PermissionsService } from '../../core/permissions.service';
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
@@ -7,11 +8,11 @@ import { ComplianceApiService } from '../../core/api/compliance-api.service';
 import { ExportsApiService } from '../../core/api/exports-api.service';
 import { I18nService } from '../../core/i18n.service';
 import {
-  AuditTrailEntry, ChainVerification, SecurityEvent, SignatureRecord,
+  AuditTrailEntry, AuditTrailReview, ChainVerification, SecurityEvent, SignatureRecord,
 } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 
-type LedgerTab = 'trail' | 'signatures' | 'security';
+type LedgerTab = 'trail' | 'signatures' | 'security' | 'reviews';
 
 /**
  * Compliance Ledger viewer (QM/TenantAdmin/ExternalAuditor): the tamper-evident
@@ -45,6 +46,7 @@ type LedgerTab = 'trail' | 'signatures' | 'security';
       <button class="tab" [class.active]="tab() === 'trail'" (click)="switchTab('trail')">{{ i18n.t('trail.title') }}</button>
       <button class="tab" [class.active]="tab() === 'signatures'" (click)="switchTab('signatures')">{{ i18n.t('cmp.signatures') }}</button>
       <button class="tab" [class.active]="tab() === 'security'" (click)="switchTab('security')">{{ i18n.t('cmp.security') }}</button>
+      <button class="tab" [class.active]="tab() === 'reviews'" (click)="switchTab('reviews')">{{ i18n.t('atr.tab') }}</button>
     </div>
 
     @if (loading()) { <p class="muted">{{ i18n.t('common.loading') }}</p> }
@@ -128,9 +130,70 @@ type LedgerTab = 'trail' | 'signatures' | 'security';
         }
       </div>
     }
+    @if (tab() === 'reviews' && !loading()) {
+      <!-- Periodic audit-trail review (Part 11 §11.10(e)): open a period, examine the ledgers, record the conclusion. -->
+      @if (perms.canApprove()) {
+        <div class="card openrow">
+          <b>{{ i18n.t('atr.open') }}</b>
+          <input type="date" [(ngModel)]="periodStart" [attr.aria-label]="i18n.t('atr.periodStart')" />
+          <span class="muted">→</span>
+          <input type="date" [(ngModel)]="periodEnd" [attr.aria-label]="i18n.t('atr.periodEnd')" />
+          <button (click)="openReview()" [disabled]="!periodStart || !periodEnd">{{ i18n.t('atr.openBtn') }}</button>
+        </div>
+      }
+      <div class="card">
+        @if (reviews().length === 0) { <p class="muted">{{ i18n.t('atr.empty') }}</p> }
+        @else {
+          <table>
+            <thead><tr>
+              <th>{{ i18n.t('mu.ref') }}</th><th>{{ i18n.t('atr.period') }}</th><th>{{ i18n.t('atr.coverage') }}</th>
+              <th>{{ i18n.t('atr.anomalies') }}</th><th>{{ i18n.t('atr.conclusion') }}</th><th>{{ i18n.t('nc.status') }}</th>
+            </tr></thead>
+            <tbody>
+              @for (r of reviews(); track r.id) {
+                <tr>
+                  <td class="code">{{ r.reviewRef }}</td>
+                  <td>{{ r.periodStart | date:'mediumDate' }} – {{ r.periodEnd | date:'mediumDate' }}</td>
+                  <td>
+                    @if (r.eventsReviewed !== null) {
+                      {{ r.eventsReviewed }} {{ i18n.t('cmp.entries') }} · {{ r.fieldChangesReviewed }} {{ i18n.t('atr.fieldChanges') }}
+                    } @else { — }
+                  </td>
+                  <td>
+                    @if (r.anomaliesFound === true) { <span class="bad">✕ {{ i18n.t('atr.found') }}</span> }
+                    @else if (r.anomaliesFound === false) { <span class="good">✓ {{ i18n.t('atr.none') }}</span> }
+                    @else { — }
+                  </td>
+                  <td class="muted">{{ r.conclusion ?? '—' }}</td>
+                  <td>{{ r.status }}</td>
+                </tr>
+                @if (r.status === 'Open' && perms.canApprove()) {
+                  <tr><td colspan="6">
+                    <div class="completerow">
+                      <label class="chk"><input type="checkbox" [(ngModel)]="anomalies" /> {{ i18n.t('atr.anomaliesFound') }}</label>
+                      <input class="grow" [(ngModel)]="conclusion" [placeholder]="i18n.t('atr.conclusionHint')" />
+                      <button (click)="completeReview(r.id)" [disabled]="!conclusion.trim()">{{ i18n.t('atr.complete') }}</button>
+                    </div>
+                  </td></tr>
+                }
+              }
+            </tbody>
+          </table>
+        }
+        <div class="hint">{{ i18n.t('atr.anomalyNote') }}</div>
+      </div>
+    }
   `,
   styles: [`
     .chain { margin-bottom: 1rem; font-weight: 600; }
+    .openrow { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+    .openrow input { max-width: 170px; }
+    .completerow { display: flex; gap: 10px; align-items: center; padding: 6px 0; flex-wrap: wrap; }
+    .completerow .grow { flex: 1; min-width: 240px; }
+    .chk { display: flex; gap: 6px; align-items: center; white-space: nowrap; }
+    .chk input { width: auto; }
+    .good { color: var(--nt-green); font-weight: 600; }
+    .bad { color: var(--nt-red); font-weight: 600; }
     .chain.ok { color: var(--nt-green); border-color: rgba(24, 128, 56, .35); background: rgba(24, 128, 56, .07); }
     .chain.broken { color: var(--nt-red); border-color: rgba(220, 53, 69, .4); background: rgba(220, 53, 69, .07); }
     .tabs { display: flex; gap: 0; margin-bottom: 12px; background: var(--nt-filter-grey); border-radius: 8px; padding: 3px; width: fit-content; }
@@ -154,7 +217,14 @@ export class ComplianceComponent implements OnInit {
   private readonly api = inject(ComplianceApiService);
   readonly exports = inject(ExportsApiService);
 
+  readonly perms = inject(PermissionsService);
   readonly tab = signal<LedgerTab>('trail');
+  readonly reviews = signal<AuditTrailReview[]>([]);
+  /** Open-review form state (template-driven like the trail search). */
+  periodStart = '';
+  periodEnd = '';
+  anomalies = false;
+  conclusion = '';
   readonly trail = signal<AuditTrailEntry[]>([]);
   readonly signatures = signal<SignatureRecord[]>([]);
   readonly security = signal<SecurityEvent[]>([]);
@@ -173,6 +243,29 @@ export class ComplianceComponent implements OnInit {
     if (tab === 'trail' && this.trail().length === 0) { void this.loadTrail(); }
     if (tab === 'signatures' && this.signatures().length === 0) { void this.loadSignatures(); }
     if (tab === 'security' && this.security().length === 0) { void this.loadSecurity(); }
+    if (tab === 'reviews' && this.reviews().length === 0) { void this.loadReviews(); }
+  }
+
+  async loadReviews(): Promise<void> {
+    await this.run(async () => this.reviews.set(await firstValueFrom(this.api.auditTrailReviews())));
+  }
+
+  async openReview(): Promise<void> {
+    await this.run(async () => {
+      await firstValueFrom(this.api.openAuditTrailReview(this.periodStart, this.periodEnd));
+      this.periodStart = '';
+      this.periodEnd = '';
+      this.reviews.set(await firstValueFrom(this.api.auditTrailReviews()));
+    });
+  }
+
+  async completeReview(id: string): Promise<void> {
+    await this.run(async () => {
+      await firstValueFrom(this.api.completeAuditTrailReview(id, this.anomalies, this.conclusion.trim()));
+      this.anomalies = false;
+      this.conclusion = '';
+      this.reviews.set(await firstValueFrom(this.api.auditTrailReviews()));
+    });
   }
 
   async loadTrail(): Promise<void> {

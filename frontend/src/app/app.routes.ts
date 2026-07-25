@@ -183,6 +183,16 @@ export const routes: Routes = [
             ],
           },
           {
+            path: 'pt-plans',
+            loadComponent: () => import('./features/analytical/pt-plan-list.component').then((m) => m.PtPlanListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/analytical/pt-plan-detail.component').then((m) => m.PtPlanDetailComponent),
+              },
+            ],
+          },
+          {
             path: 'proficiency-tests',
             loadComponent: () => import('./features/analytical/pt-list.component').then((m) => m.PtListComponent),
           },

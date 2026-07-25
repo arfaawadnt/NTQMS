@@ -114,3 +114,31 @@ public sealed class UncertaintyBudgetConfiguration : IEntityTypeConfiguration<Un
         });
     }
 }
+
+public sealed class PtPlanConfiguration : IEntityTypeConfiguration<PtPlan>
+{
+    public void Configure(EntityTypeBuilder<PtPlan> builder)
+    {
+        builder.ToTable("pt_plan", "qams");
+        builder.HasKey(p => p.Id);
+        builder.Property(p => p.PlanRef).HasMaxLength(30);
+        builder.Property(p => p.Status).HasConversion<string>().HasMaxLength(20);
+        builder.Property(p => p.ClosureSummary).HasMaxLength(4000);
+        builder.HasIndex(p => new { p.TenantId, p.PlanRef }).IsUnique();
+        builder.HasIndex(p => new { p.TenantId, p.Year }).IsUnique();
+
+        builder.OwnsMany(p => p.Items, item =>
+        {
+            item.ToTable("pt_plan_item", "qams");
+            item.WithOwner().HasForeignKey("plan_id");
+            item.HasKey(i => i.Id);
+            item.Property(i => i.Scheme).HasMaxLength(200);
+            item.Property(i => i.Analyte).HasMaxLength(200);
+            item.Property(i => i.Provider).HasMaxLength(200);
+            item.Property(i => i.LastEnrollmentRef).HasMaxLength(30);
+            item.Property(i => i.Notes).HasMaxLength(1000);
+        });
+
+        builder.Ignore(p => p.DomainEvents);
+    }
+}

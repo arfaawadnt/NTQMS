@@ -38,6 +38,30 @@ public sealed record PtEnrollmentDto(
 
 // ── Measurement uncertainty (ISO 17025 §7.6) ─────────────────────────────────
 
+// ── PT/EQA Annual Plan (ISO 17025 §7.7.2) ───────────────────────────────────
+
+public sealed record CreatePtPlanRequest(int Year);
+
+public sealed record AddPtPlanItemRequest(
+    string Scheme, string Analyte, string? Provider, int PlannedCycles, string? Notes);
+
+public sealed record RecordPtPlanFulfilmentRequest(Guid ItemId, Guid EnrollmentId);
+
+public sealed record ClosePtPlanRequest(string ClosureSummary);
+
+public sealed record PtPlanItemDto(
+    Guid Id, string Scheme, string Analyte, string? Provider,
+    int PlannedCycles, int FulfilledCycles, string? LastEnrollmentRef, string? Notes);
+
+public sealed record PtPlanListItemDto(
+    Guid Id, string PlanRef, int Year, string Status,
+    int ItemCount, int PlannedCycles, int FulfilledCycles);
+
+public sealed record PtPlanDetailDto(
+    Guid Id, string PlanRef, int Year, string Status,
+    Guid? ApprovedBy, DateTimeOffset? ApprovedAtUtc, string? ClosureSummary,
+    IReadOnlyList<PtPlanItemDto> Items);
+
 public sealed record CreateUncertaintyBudgetRequest(
     string Analyte, string Method, string Unit, string Level,
     decimal CoverageFactor, decimal? TargetExpandedUncertainty);

@@ -56,6 +56,8 @@ public interface IAppDbContext
     DbSet<QcRun> QcRuns { get; }
     DbSet<ValidationStudy> ValidationStudies { get; }
     DbSet<PtEnrollment> PtEnrollments { get; }
+    DbSet<PtPlan> PtPlans { get; }
+    DbSet<AuditTrailReview> AuditTrailReviews { get; }
     DbSet<UncertaintyBudget> UncertaintyBudgets { get; }
     DbSet<ArchiveEntry> ArchiveEntries { get; }
     DbSet<SlaDefinition> SlaDefinitions { get; }

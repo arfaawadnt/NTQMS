@@ -425,6 +425,56 @@ export interface RecordIntermediateCheckRequest {
   remarks: string | null;
 }
 
+// ── Periodic Audit-Trail Review (21 CFR Part 11 §11.10(e)) ──────────────────
+
+export interface AuditTrailReview {
+  id: string;
+  reviewRef: string;
+  periodStart: string;
+  periodEnd: string;
+  status: string;
+  reviewedBy: string | null;
+  completedAtUtc: string | null;
+  eventsReviewed: number | null;
+  fieldChangesReviewed: number | null;
+  anomaliesFound: boolean | null;
+  conclusion: string | null;
+}
+
+// ── PT/EQA Annual Plan (ISO 17025 §7.7.2) ───────────────────────────────────
+
+export interface PtPlanItem {
+  id: string;
+  scheme: string;
+  analyte: string;
+  provider: string | null;
+  plannedCycles: number;
+  fulfilledCycles: number;
+  lastEnrollmentRef: string | null;
+  notes: string | null;
+}
+
+export interface PtPlanListItem {
+  id: string;
+  planRef: string;
+  year: number;
+  status: string;
+  itemCount: number;
+  plannedCycles: number;
+  fulfilledCycles: number;
+}
+
+export interface PtPlanDetail {
+  id: string;
+  planRef: string;
+  year: number;
+  status: string;
+  approvedBy: string | null;
+  approvedAtUtc: string | null;
+  closureSummary: string | null;
+  items: PtPlanItem[];
+}
+
 // ── Environmental & Facility Monitoring (ISO 17025 §6.3) ────────────────────
 
 export interface EnvironmentalReading {
