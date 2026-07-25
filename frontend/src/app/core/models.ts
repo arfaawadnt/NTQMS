@@ -233,6 +233,8 @@ export interface DocumentDetail {
   status: string;
   createdAtUtc: string;
   versions: DocumentVersion[];
+  reviewCycleMonths: number;
+  nextReviewDue: string | null;
 }
 
 /** Metadata returned after a file is uploaded to object storage. */
@@ -249,6 +251,7 @@ export interface CreateDocumentRequest {
   category: string;
   fileId: string;
   changeSummary: string;
+  reviewCycleMonths: number;
 }
 
 export interface DraftNewVersionRequest { fileId: string; changeSummary: string; bump: VersionBump; }

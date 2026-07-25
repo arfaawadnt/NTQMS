@@ -32,6 +32,11 @@ export class DocumentsApiService {
   submit(id: string): Observable<void> { return this.http.post<void>(`${this.base}/${id}/submit`, {}); }
   recommend(id: string): Observable<void> { return this.http.post<void>(`${this.base}/${id}/recommend`, {}); }
   reject(id: string, body: RejectVersionRequest): Observable<void> { return this.http.post<void>(`${this.base}/${id}/reject`, body); }
+  /** Records the completed periodic review and re-arms the cycle. */
+  confirmReview(id: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/confirm-review`, {});
+  }
+
   /** Part 11 §11.50 signature manifest for this document (any viewer of the record). */
   signatures(id: string): Observable<SignatureRecord[]> {
     return this.http.get<SignatureRecord[]>(`${this.base}/${id}/signatures`);

@@ -27,6 +27,15 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct) =>
         Ok(await sender.Send(new GetDocumentByIdQuery(id), ct));
 
+    /// <summary>Records the completed periodic review and re-arms the cycle (ISO 17025 §8.3).</summary>
+    [HttpPost("{id:guid}/confirm-review")]
+    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    public async Task<IActionResult> ConfirmReview(Guid id, CancellationToken ct)
+    {
+        await sender.Send(new ConfirmDocumentReviewCommand(id), ct);
+        return NoContent();
+    }
+
     /// <summary>Part 11 §11.50 signature manifest for this document, visible to any viewer of the record.</summary>
     [HttpGet("{id:guid}/signatures")]
     public async Task<IActionResult> Signatures(Guid id, CancellationToken ct) =>
@@ -36,7 +45,7 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
     public async Task<IActionResult> Create(CreateDocumentRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new CreateDocumentCommand(
-            request.Code, request.Title, request.Category, request.FileId, request.ChangeSummary), ct);
+            request.Code, request.Title, request.Category, request.FileId, request.ChangeSummary, request.ReviewCycleMonths), ct);
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }
 

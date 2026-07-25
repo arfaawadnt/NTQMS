@@ -68,6 +68,10 @@ export class DocumentsFacade {
     });
   }
 
+  async confirmReview(id: string): Promise<void> {
+    await this.mutate(id, () => this.api.confirmReview(id));
+  }
+
   private async run<T>(operation: () => Promise<T>): Promise<T | null> {
     this._loading.set(true);
     this._error.set('');

@@ -62,6 +62,7 @@ public sealed class GetDocumentByIdHandler(IAppDbContext db)
                     v.Id, v.VersionLabel, v.State.ToString(), v.FileId, v.ChangeSummary,
                     v.AuthorId, v.RecommendedBy, v.RecommendedAtUtc,
                     v.ApprovedBy, v.ApprovedAtUtc, v.RejectionReason))
-                .ToList());
+                .ToList(),
+            doc.ReviewCycleMonths, doc.NextReviewDue);
     }
 }

@@ -65,6 +65,15 @@ public sealed class ControlledDocument : AggregateRoot, ITenantScoped
     public string Category { get; private set; }
     public DocumentStatus Status { get; private set; }
 
+    /// <summary>Periodic-review cadence (ISO 17025 §8.3 / GMP): months between mandatory reviews of the published document.</summary>
+    public int ReviewCycleMonths { get; private set; } = 24;
+
+    /// <summary>When the next periodic review falls due; stamped at publish and at each review confirmation.</summary>
+    public DateOnly? NextReviewDue { get; private set; }
+
+    /// <summary>True once the sweep has flagged the current cycle as due (prevents duplicate events).</summary>
+    public bool ReviewDueRaised { get; private set; }
+
     public IReadOnlyList<DocumentVersion> Versions => _versions.AsReadOnly();
 
     public DocumentVersion? PublishedVersion => _versions.SingleOrDefault(v => v.State == VersionState.Published);
@@ -73,7 +82,8 @@ public sealed class ControlledDocument : AggregateRoot, ITenantScoped
         v.State is VersionState.Draft or VersionState.UnderReview or VersionState.Approved);
 
     public static ControlledDocument Create(
-        string code, string title, string category, Guid fileId, string changeSummary, Guid authorId)
+        string code, string title, string category, Guid fileId, string changeSummary, Guid authorId,
+        int reviewCycleMonths = 24)
     {
         if (string.IsNullOrWhiteSpace(code))
         {
@@ -91,6 +101,7 @@ public sealed class ControlledDocument : AggregateRoot, ITenantScoped
             Title = title.Trim(),
             Category = string.IsNullOrWhiteSpace(category) ? "SOP" : category.Trim(),
             Status = DocumentStatus.Draft,
+            ReviewCycleMonths = reviewCycleMonths is > 0 and <= 120 ? reviewCycleMonths : 24,
         };
         doc._versions.Add(new DocumentVersion(1, 0, fileId, changeSummary?.Trim() ?? "Initial issue.", authorId));
         return doc;
@@ -156,7 +167,41 @@ public sealed class ControlledDocument : AggregateRoot, ITenantScoped
         version.ApprovedBy = actorId;
         version.ApprovedAtUtc = at;
         Status = DocumentStatus.Published;
+        NextReviewDue = DateOnly.FromDateTime(at.UtcDateTime).AddMonths(ReviewCycleMonths);
+        ReviewDueRaised = false;
         Raise(new DocumentPublished(Id, Code, Title, version.VersionLabel, actorId));
+    }
+
+    /// <summary>
+    /// Sweep proposal: flags the periodic review as due exactly once per cycle
+    /// (the sweep proposes, the aggregate decides — re-runs are no-ops).
+    /// </summary>
+    public void MarkReviewDueIfReached(DateOnly today)
+    {
+        if (Status != DocumentStatus.Published || ReviewDueRaised
+            || NextReviewDue is not { } due || due > today)
+        {
+            return;
+        }
+
+        ReviewDueRaised = true;
+        Raise(new DocumentReviewDue(Id, Code, Title, due));
+    }
+
+    /// <summary>
+    /// Records the completed periodic review (ISO 17025 §8.3): re-stamps the
+    /// next due date one cycle ahead and clears the due flag.
+    /// </summary>
+    public void ConfirmPeriodicReview(Guid reviewerId, DateOnly reviewedOn)
+    {
+        if (Status != DocumentStatus.Published)
+        {
+            throw new InvalidStateTransitionException("DOC-020", "Only a published document undergoes periodic review.");
+        }
+
+        NextReviewDue = reviewedOn.AddMonths(ReviewCycleMonths);
+        ReviewDueRaised = false;
+        Raise(new DocumentReviewConfirmed(Id, Code, reviewerId, reviewedOn));
     }
 
     public void DraftNewVersion(Guid fileId, string changeSummary, VersionBump bump, Guid authorId)
@@ -220,3 +265,9 @@ public sealed record DocumentVersionRejected(Guid DocumentId, string Code, strin
 public sealed record DocumentPublished(Guid DocumentId, string Code, string Title, string Version, Guid ApprovedBy) : DomainEvent;
 public sealed record DocumentVersionObsoleted(Guid DocumentId, string Code, string Version, Guid FileId) : DomainEvent;
 public sealed record DocumentRetired(Guid DocumentId, string Code, Guid RetiredBy) : DomainEvent;
+
+public sealed record DocumentReviewDue(
+    Guid DocumentId, string Code, string Title, DateOnly DueOn) : DomainEvent;
+
+public sealed record DocumentReviewConfirmed(
+    Guid DocumentId, string Code, Guid ReviewerId, DateOnly ReviewedOn) : DomainEvent;

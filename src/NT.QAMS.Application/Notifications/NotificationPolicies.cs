@@ -38,6 +38,7 @@ public sealed class NotificationEventPolicies(IAppDbContext db, NotificationDisp
     public const string HighResidualRiskKey = "RISK_HIGH_RESIDUAL";
     public const string SupplierSuspendedKey = "SUP_SUSPENDED";
     public const string EscalationKey = "SLA_ESCALATED";
+    public const string DocumentReviewDueKey = "DOC_REVIEW_DUE";
 
     public async Task Handle(DomainEventNotification<NcRaised> n, CancellationToken ct)
     {

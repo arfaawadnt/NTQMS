@@ -103,6 +103,24 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
         </section>
       </div>
     
+      @if (d.status === 'Published') {
+        <section class="card">
+          <h3>{{ i18n.t('doc.periodicReview') }}</h3>
+          <div class="review-row">
+            <div>
+              <span class="muted">{{ i18n.t('doc.nextReview') }}</span>
+              <b [class.overdue]="reviewOverdue(d.nextReviewDue)">
+                {{ d.nextReviewDue ? (d.nextReviewDue | date:'mediumDate') : '—' }}
+              </b>
+              <span class="muted"> · {{ i18n.t('doc.reviewCycleEvery') }} {{ d.reviewCycleMonths }} {{ i18n.t('comp.months') }}</span>
+            </div>
+            @if (perms.canApprove()) {
+              <button (click)="facade.confirmReview(d.id)">{{ i18n.t('doc.confirmReview') }}</button>
+            }
+          </div>
+        </section>
+      }
+
       @if (signatures().length > 0) {
         <section class="card">
           <h3>{{ i18n.t('doc.signatures') }}</h3>
@@ -129,6 +147,9 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
     .actions form { border-top: 1px solid var(--nt-border); padding-top: .75rem; margin-top: .75rem; }
     .actions button { margin-top: .5rem; margin-inline-end: .5rem; width: auto; }
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
+    .review-row { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .review-row button { width: auto; }
+    .overdue { color: var(--nt-red); }
     .sig-row { display: flex; gap: 14px; align-items: baseline; padding: 6px 0; border-bottom: 1px solid var(--nt-border); font-size: 12.5px; flex-wrap: wrap; }
     .mono { font-family: var(--nt-mono); font-size: 10.5px; color: var(--nt-grey-m); }
     h3 { margin-top: 1rem; }
@@ -170,6 +191,11 @@ export class DocumentDetailComponent implements OnInit {
     bump: ['Minor' as VersionBump, [Validators.required]],
     changeSummary: ['', [Validators.required, Validators.maxLength(1000)]],
   });
+
+  /** True when the next periodic review date has passed. */
+  reviewOverdue(due: string | null): boolean {
+    return !!due && new Date(due).getTime() < Date.now();
+  }
 
   ngOnInit(): void {
     void this.facade.loadDetail(this.id());

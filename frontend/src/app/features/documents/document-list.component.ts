@@ -35,6 +35,10 @@ import { LovSelectComponent } from '../../shared/ui/lov-select.component';
             <label>{{ i18n.t('doc.category') }}</label>
             <qams-lov-select formControlName="category" category="DOC_CATEGORY" placeholder="SOP" />
           </div>
+          <div>
+            <label>{{ i18n.t('doc.reviewCycle') }}</label>
+            <input type="number" min="1" max="120" formControlName="reviewCycleMonths" />
+          </div>
         </div>
         <label>{{ i18n.t('doc.changeSummary') }}</label>
         <input formControlName="changeSummary" />
@@ -105,6 +109,7 @@ export class DocumentListComponent implements OnInit {
     code: ['', [Validators.required, Validators.maxLength(40)]],
     title: ['', [Validators.required, Validators.maxLength(300)]],
     category: ['SOP', [Validators.required, Validators.maxLength(50)]],
+    reviewCycleMonths: [24, [Validators.required, Validators.min(1), Validators.max(120)]],
     changeSummary: ['Initial issue.', [Validators.maxLength(1000)]],
   });
 

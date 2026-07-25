@@ -126,4 +126,46 @@ public class ControlledDocumentTests
         var revise = () => doc.DraftNewVersion(FileB, "x", VersionBump.Minor, Author);
         revise.Should().Throw<InvalidStateTransitionException>().Which.Code.Should().Be("DOC-015");
     }
+
+    [Fact]
+    public void Publishing_arms_the_periodic_review_cycle()
+    {
+        var doc = PublishedDoc();
+
+        doc.ReviewCycleMonths.Should().Be(24);
+        doc.NextReviewDue.Should().Be(DateOnly.FromDateTime(Now.UtcDateTime).AddMonths(24));
+        doc.ReviewDueRaised.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Review_flag_raises_exactly_once_when_due_and_confirm_rearms_the_cycle()
+    {
+        var doc = PublishedDoc();
+        var dueDay = doc.NextReviewDue!.Value;
+
+        doc.MarkReviewDueIfReached(dueDay.AddDays(-1));
+        doc.ReviewDueRaised.Should().BeFalse(); // not yet due
+
+        doc.MarkReviewDueIfReached(dueDay);
+        doc.ReviewDueRaised.Should().BeTrue();
+        doc.DomainEvents.Should().ContainSingle(e => e is DocumentReviewDue);
+
+        doc.MarkReviewDueIfReached(dueDay.AddDays(1)); // sweep re-run: no duplicate
+        doc.DomainEvents.Count(e => e is DocumentReviewDue).Should().Be(1);
+
+        doc.ConfirmPeriodicReview(Qm, dueDay.AddDays(3));
+        doc.ReviewDueRaised.Should().BeFalse();
+        doc.NextReviewDue.Should().Be(dueDay.AddDays(3).AddMonths(24));
+        doc.DomainEvents.Should().ContainSingle(e => e is DocumentReviewConfirmed);
+    }
+
+    [Fact]
+    public void Periodic_review_is_only_for_published_documents()
+    {
+        var doc = NewDoc();
+
+        var act = () => doc.ConfirmPeriodicReview(Qm, DateOnly.FromDateTime(Now.UtcDateTime));
+
+        act.Should().Throw<InvalidStateTransitionException>().Which.Code.Should().Be("DOC-020");
+    }
 }

@@ -8,7 +8,8 @@ using NT.QAMS.SharedKernel.Primitives;
 namespace NT.QAMS.Application.DocumentControl.Commands;
 
 public sealed record CreateDocumentCommand(
-    string Code, string Title, string Category, Guid FileId, string ChangeSummary) : ICommand<Guid>;
+    string Code, string Title, string Category, Guid FileId, string ChangeSummary,
+    int ReviewCycleMonths = 24) : ICommand<Guid>;
 
 public sealed class CreateDocumentValidator : AbstractValidator<CreateDocumentCommand>
 {
@@ -44,7 +45,8 @@ public sealed class CreateDocumentHandler(IAppDbContext db, ICurrentUser user)
         }
 
         var doc = ControlledDocument.Create(
-            code, command.Title, command.Category, command.FileId, command.ChangeSummary, author);
+            code, command.Title, command.Category, command.FileId, command.ChangeSummary, author,
+            command.ReviewCycleMonths);
 
         db.Documents.Add(doc);
         await db.SaveChangesAsync(ct);
@@ -120,11 +122,27 @@ public sealed class PublishDocumentHandler(
         var approving = doc.InFlightVersion
             ?? throw new SharedKernel.Primitives.DomainException("DOC-014", "No version is awaiting approval.");
 
+        // Pre-validate every publish precondition BEFORE minting the signature —
+        // the signature ledger is append-only, so a signature must never exist
+        // for a publish that then fails its state or SoD gates.
+        if (approving.State != Domain.DocumentControl.VersionState.Approved)
+        {
+            throw new SharedKernel.Primitives.InvalidStateTransitionException(
+                "DOC-014", $"Cannot publish a version in state {approving.State}.");
+        }
+
+        if (actor == approving.AuthorId)
+        {
+            throw new SharedKernel.Primitives.DomainException(
+                "SOD-DOC-002", "Segregation of duties: the author cannot approve their own document.");
+        }
+
         // Content hash of the exact bytes being approved (Part 11 signature↔record link).
         var contentHash = await db.Files
             .Where(f => f.Id == approving.FileId).Select(f => f.Sha256).SingleAsync(ct);
 
-        // Verify the PIN and mint the immutable signature BEFORE the state change.
+        // Verify both signature components and mint the immutable signature,
+        // then apply the (already pre-validated) state change.
         await signatures.SignAsync(
             actor, c.Password, c.Pin,
             $"Approved and published {doc.Code} v{approving.VersionLabel}",
@@ -158,6 +176,22 @@ public sealed class RetireDocumentHandler(IAppDbContext db, ICurrentUser user)
     {
         (await DocumentLoader.LoadAsync(db, c.DocumentId, ct))
             .Retire(DocumentLoader.RequireActor(user));
+        await db.SaveChangesAsync(ct);
+    }
+}
+
+// ── Periodic review (ISO 17025 §8.3) ─────────────────────────────────────────
+
+public sealed record ConfirmDocumentReviewCommand(Guid DocumentId) : ICommand;
+
+public sealed class ConfirmDocumentReviewHandler(IAppDbContext db, ICurrentUser user, IClock clock)
+    : ICommandHandler<ConfirmDocumentReviewCommand>
+{
+    public async Task Handle(ConfirmDocumentReviewCommand c, CancellationToken ct)
+    {
+        var actor = DocumentLoader.RequireActor(user);
+        var doc = await DocumentLoader.LoadAsync(db, c.DocumentId, ct);
+        doc.ConfirmPeriodicReview(actor, DateOnly.FromDateTime(clock.UtcNow.UtcDateTime));
         await db.SaveChangesAsync(ct);
     }
 }
