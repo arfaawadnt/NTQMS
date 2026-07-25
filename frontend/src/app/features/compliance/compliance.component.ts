@@ -4,6 +4,7 @@ import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { ComplianceApiService } from '../../core/api/compliance-api.service';
+import { ExportsApiService } from '../../core/api/exports-api.service';
 import { I18nService } from '../../core/i18n.service';
 import {
   AuditTrailEntry, ChainVerification, SecurityEvent, SignatureRecord,
@@ -25,6 +26,7 @@ type LedgerTab = 'trail' | 'signatures' | 'security';
   imports: [FormsModule, DatePipe, PageHeaderComponent],
   template: `
     <qams-page-header [title]="i18n.t('cmp.title')" [subtitle]="i18n.t('cmp.subtitle')">
+      <button class="secondary" (click)="exports.auditTrailXlsx()">{{ i18n.t('exp.xlsx') }}</button>
       <button (click)="verify()" [disabled]="verifying()">{{ i18n.t('cmp.verifyChain') }}</button>
     </qams-page-header>
 
@@ -150,6 +152,7 @@ type LedgerTab = 'trail' | 'signatures' | 'security';
 export class ComplianceComponent implements OnInit {
   readonly i18n = inject(I18nService);
   private readonly api = inject(ComplianceApiService);
+  readonly exports = inject(ExportsApiService);
 
   readonly tab = signal<LedgerTab>('trail');
   readonly trail = signal<AuditTrailEntry[]>([]);

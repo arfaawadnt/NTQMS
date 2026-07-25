@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ReviewFacade } from './review.facade';
+import { ExportsApiService } from '../../core/api/exports-api.service';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
@@ -25,6 +26,9 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
   template: `
     @if (item(); as r) {
       <qams-page-header [title]="r.reviewRef + ' — ' + r.title" [subtitle]="(r.reviewDate | date:'fullDate') ?? ''">
+        @if (perms.canApprove()) {
+          <button class="secondary" (click)="exports.reviewPackPdf(r.id)">{{ i18n.t('exp.reviewPack') }}</button>
+        }
         <a routerLink="/management-reviews" class="ghost-link">← {{ i18n.t('mrv.backToList') }}</a>
       </qams-page-header>
 
@@ -92,6 +96,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 })
 export class ReviewDetailComponent implements OnInit {
   readonly facade = inject(ReviewFacade);
+  readonly exports = inject(ExportsApiService);
   readonly i18n = inject(I18nService);
   readonly perms = inject(PermissionsService);
   private readonly fb = inject(FormBuilder);

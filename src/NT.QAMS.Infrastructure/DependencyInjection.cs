@@ -48,6 +48,7 @@ public static class DependencyInjection
         services.AddSingleton<IJwtTokenService, Security.JwtTokenService>();
         services.AddSingleton<ITotpService, Security.TotpService>();
         services.AddScoped<IReferenceNumberGenerator, PostgresReferenceNumberGenerator>();
+        services.AddSingleton<IExportService, Exports.ExportService>();
         services.AddScoped<ISecurityEventLog, Compliance.SecurityEventLog>();
         services.AddScoped<IESignatureService, Compliance.ESignatureService>();
         services.AddScoped<IComplianceLedgerStore, Compliance.ComplianceLedgerStore>();

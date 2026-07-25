@@ -4,6 +4,7 @@ import { Router, RouterOutlet } from '@angular/router';
 import { NcFacade } from './nc.facade';
 import { I18nService } from '../../core/i18n.service';
 import { OrgDataService } from '../../core/org-data.service';
+import { ExportsApiService } from '../../core/api/exports-api.service';
 import { NC_SOURCE_TYPES, NcSourceType } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
@@ -23,6 +24,7 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
   imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent],
   template: `
     <qams-page-header [title]="i18n.t('nc.title')">
+      <button class="secondary" (click)="exports.ncRegisterXlsx()">{{ i18n.t('exp.xlsx') }}</button>
       <button (click)="showForm.set(!showForm())">{{ i18n.t('nc.new') }}</button>
     </qams-page-header>
 
@@ -125,6 +127,7 @@ export class NcListComponent implements OnInit {
   readonly facade = inject(NcFacade);
   readonly i18n = inject(I18nService);
   readonly org = inject(OrgDataService);
+  readonly exports = inject(ExportsApiService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
 

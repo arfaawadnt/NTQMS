@@ -290,6 +290,8 @@ export class I18nService {
     'trail.showPayload': { en: 'Show payload', ar: 'عرض البيانات', fr: 'Afficher les données' },
     'trail.hidePayload': { en: 'Hide payload', ar: 'إخفاء البيانات', fr: 'Masquer les données' },
     'trail.hash': { en: 'Entry hash', ar: 'بصمة القيد', fr: "Empreinte de l'entrée" },
+    'exp.xlsx': { en: 'Export XLSX', ar: 'تصدير XLSX', fr: 'Exporter XLSX' },
+    'exp.reviewPack': { en: 'Download Review Pack (PDF)', ar: 'تنزيل حزمة المراجعة (PDF)', fr: 'Télécharger le dossier de revue (PDF)' },
     'doc.reviewCycle': { en: 'Review cycle (months)', ar: 'دورة المراجعة (أشهر)', fr: 'Cycle de revue (mois)' },
     'doc.periodicReview': { en: 'Periodic Review (ISO 17025 §8.3)', ar: 'المراجعة الدورية (ISO 17025 §8.3)', fr: 'Revue périodique (ISO 17025 §8.3)' },
     'doc.nextReview': { en: 'Next review due: ', ar: 'المراجعة القادمة: ', fr: 'Prochaine revue : ' },
