@@ -31,7 +31,7 @@ public sealed class GetNcsHandler(IAppDbContext db)
             .Take(500)
             .Select(n => new NcListItemDto(
                 n.Id, n.NcRef, n.Title, n.Status.ToString(), n.Severity, n.Rpn,
-                n.SourceType.ToString(), n.CreatedAtUtc))
+                n.SourceType.ToString(), n.CreatedAtUtc, n.BranchId, n.DepartmentId))
             .ToListAsync(ct);
     }
 }

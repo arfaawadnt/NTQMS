@@ -9,7 +9,8 @@ namespace NT.QAMS.Application.AuditManagement.Commands;
 
 public sealed record ScheduleAuditCommand(
     string Title, AuditType Type, Guid LeadAuditorId, DateOnly PlannedDate,
-    IReadOnlyList<(string IsoClause, string Question)> Checklist) : ICommand<Guid>;
+    IReadOnlyList<(string IsoClause, string Question)> Checklist,
+    Guid? BranchId = null, Guid? DepartmentId = null) : ICommand<Guid>;
 
 public sealed class ScheduleAuditValidator : AbstractValidator<ScheduleAuditCommand>
 {
@@ -40,6 +41,8 @@ public sealed class ScheduleAuditHandler(
             audit.AddChecklistItem(clause, question);
         }
 
+        audit.BranchId = command.BranchId;
+        audit.DepartmentId = command.DepartmentId;
         db.Audits.Add(audit);
         await db.SaveChangesAsync(ct);
         return audit.Id;

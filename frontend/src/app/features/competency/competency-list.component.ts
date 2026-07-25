@@ -8,13 +8,14 @@ import { PermissionsService } from '../../core/permissions.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
+import { UserSelectComponent } from '../../shared/ui/user-select.component';
 
 /** Competency matrix: status-filterable list + an assign form (role-gated). */
 @Component({
   selector: 'qams-competency-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent],
+  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, UserSelectComponent],
   template: `
     <qams-page-header [title]="i18n.t('comp.title')">
       <select [value]="statusFilter()" (change)="onFilter($event)" aria-label="Status filter">
@@ -30,7 +31,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
       <form class="drawer-form" [formGroup]="form" (ngSubmit)="assign()">
         <div class="grid">
           <div class="col-2"><label>{{ i18n.t('comp.subject') }}</label><input formControlName="subject" /></div>
-          <div><label>{{ i18n.t('comp.trainee') }}</label><input formControlName="traineeId" [placeholder]="i18n.t('comp.userId')" /></div>
+          <div><label>{{ i18n.t('comp.trainee') }}</label><qams-user-select formControlName="traineeId" /></div>
           <div><label>{{ i18n.t('comp.validity') }}</label><input type="number" min="1" formControlName="validityMonths" /></div>
           <div class="col-2"><label>{{ i18n.t('comp.documentId') }}</label><input formControlName="documentId" [placeholder]="i18n.t('common.optional')" /></div>
         </div>

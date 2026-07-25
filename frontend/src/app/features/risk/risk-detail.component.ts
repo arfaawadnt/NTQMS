@@ -8,6 +8,7 @@ import { PermissionsService } from '../../core/permissions.service';
 import { HIGH_RESIDUAL_RPN_THRESHOLD } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
+import { UserSelectComponent } from '../../shared/ui/user-select.component';
 import { WorkflowStepperComponent } from '../../shared/ui/workflow-stepper.component';
 import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 
@@ -21,7 +22,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
   selector: 'qams-risk-detail',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+  imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, UserSelectComponent],
   template: `
     @if (item(); as r) {
       <qams-page-header [title]="r.riskRef + ' — ' + r.title" [subtitle]="r.category">
@@ -65,7 +66,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
           @if (open()) {
             <form [formGroup]="mitForm" (ngSubmit)="addMitigation(r.id)">
               <label>{{ i18n.t('risk.mitDescription') }}</label><input formControlName="description" />
-              <label>{{ i18n.t('risk.owner') }}</label><input formControlName="ownerId" [placeholder]="i18n.t('comp.userId')" />
+              <label>{{ i18n.t('risk.owner') }}</label><qams-user-select formControlName="ownerId" />
               <label>{{ i18n.t('risk.due') }}</label><input type="date" formControlName="dueDate" />
               <button type="submit" [disabled]="mitForm.invalid">{{ i18n.t('risk.addAction') }}</button>
             </form>

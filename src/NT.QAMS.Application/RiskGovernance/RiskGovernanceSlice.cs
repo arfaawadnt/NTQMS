@@ -19,7 +19,8 @@ internal static class GovernanceHelpers
 
 // ── Risk ─────────────────────────────────────────────────────────────────────
 
-public sealed record AssessRiskCommand(string Title, string Category, int Likelihood, int Impact)
+public sealed record AssessRiskCommand(string Title, string Category, int Likelihood, int Impact,
+    Guid? BranchId = null, Guid? DepartmentId = null)
     : ICommand<Guid>;
 
 public sealed class AssessRiskValidator : AbstractValidator<AssessRiskCommand>
@@ -40,6 +41,8 @@ public sealed class AssessRiskHandler(
     {
         var riskRef = await refs.NextAsync(GovernanceHelpers.RequireTenant(tenant), "RSK", ct);
         var risk = RiskItem.Assess(riskRef, c.Title, c.Category, c.Likelihood, c.Impact);
+        risk.BranchId = c.BranchId;
+        risk.DepartmentId = c.DepartmentId;
         db.Risks.Add(risk);
         await db.SaveChangesAsync(ct);
         return risk.Id;
@@ -114,7 +117,7 @@ public sealed class GetRisksHandler(IAppDbContext db)
             .OrderByDescending(r => r.Rpn)
             .Take(500)
             .Select(r => new RiskListItemDto(
-                r.Id, r.RiskRef, r.Title, r.Category, r.Status.ToString(), r.Rpn, r.ResidualRpn))
+                r.Id, r.RiskRef, r.Title, r.Category, r.Status.ToString(), r.Rpn, r.ResidualRpn, r.BranchId, r.DepartmentId))
             .ToListAsync(ct);
     }
 }
@@ -140,7 +143,8 @@ public sealed class GetRiskByIdHandler(IAppDbContext db) : IQueryHandler<GetRisk
 
 // ── Change control ───────────────────────────────────────────────────────────
 
-public sealed record ProposeChangeCommand(string Title, string ImpactAnalysis) : ICommand<Guid>;
+public sealed record ProposeChangeCommand(string Title, string ImpactAnalysis,
+    Guid? BranchId = null, Guid? DepartmentId = null) : ICommand<Guid>;
 
 public sealed class ProposeChangeValidator : AbstractValidator<ProposeChangeCommand>
 {
@@ -160,6 +164,8 @@ public sealed class ProposeChangeHandler(
         var changeRef = await refs.NextAsync(GovernanceHelpers.RequireTenant(tenant), "CHG", ct);
         var change = ChangeRequest.Propose(
             changeRef, c.Title, c.ImpactAnalysis, GovernanceHelpers.RequireActor(user));
+        change.BranchId = c.BranchId;
+        change.DepartmentId = c.DepartmentId;
         db.ChangeRequests.Add(change);
         await db.SaveChangesAsync(ct);
         return change.Id;
@@ -237,7 +243,7 @@ public sealed class GetChangesHandler(IAppDbContext db)
         return await query
             .OrderByDescending(x => x.CreatedAtUtc)
             .Take(500)
-            .Select(x => new ChangeListItemDto(x.Id, x.ChangeRef, x.Title, x.Status.ToString(), x.RiskItemId))
+            .Select(x => new ChangeListItemDto(x.Id, x.ChangeRef, x.Title, x.Status.ToString(), x.RiskItemId, x.BranchId, x.DepartmentId))
             .ToListAsync(ct);
     }
 }
@@ -261,7 +267,8 @@ public sealed class GetChangeByIdHandler(IAppDbContext db)
 
 // ── Management review ────────────────────────────────────────────────────────
 
-public sealed record ScheduleReviewCommand(string Title, DateOnly ReviewDate, string Participants)
+public sealed record ScheduleReviewCommand(string Title, DateOnly ReviewDate, string Participants,
+    Guid? BranchId = null, Guid? DepartmentId = null)
     : ICommand<Guid>;
 
 public sealed class ScheduleReviewHandler(
@@ -272,6 +279,8 @@ public sealed class ScheduleReviewHandler(
     {
         var reviewRef = await refs.NextAsync(GovernanceHelpers.RequireTenant(tenant), "MRV", ct);
         var review = ManagementReview.Schedule(reviewRef, c.Title, c.ReviewDate, c.Participants);
+        review.BranchId = c.BranchId;
+        review.DepartmentId = c.DepartmentId;
         db.ManagementReviews.Add(review);
         await db.SaveChangesAsync(ct);
         return review.Id;
@@ -318,7 +327,7 @@ public sealed class GetReviewsHandler(IAppDbContext db)
             .OrderByDescending(r => r.ReviewDate)
             .Take(500)
             .Select(r => new ReviewListItemDto(
-                r.Id, r.ReviewRef, r.Title, r.ReviewDate, r.Status.ToString(), r.Decisions.Count))
+                r.Id, r.ReviewRef, r.Title, r.ReviewDate, r.Status.ToString(), r.Decisions.Count, r.BranchId, r.DepartmentId))
             .ToListAsync(ct);
 }
 

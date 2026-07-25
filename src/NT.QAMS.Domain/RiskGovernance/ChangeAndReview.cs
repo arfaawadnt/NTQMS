@@ -10,7 +10,7 @@ public enum ChangeStatus { Proposed, Approved, Rejected, Closed }
 /// approved without a linked risk assessment (risk-based thinking, ISO 9001 6.1).
 /// Closed changes are immutable.
 /// </summary>
-public sealed class ChangeRequest : AggregateRoot, ITenantScoped
+public sealed class ChangeRequest : AggregateRoot, ITenantScoped, IAllocatable
 {
     private ChangeRequest()
     {
@@ -20,6 +20,8 @@ public sealed class ChangeRequest : AggregateRoot, ITenantScoped
     }
 
     public Guid TenantId { get; set; }
+    public Guid? BranchId { get; set; }
+    public Guid? DepartmentId { get; set; }
     public string ChangeRef { get; private set; }
     public string Title { get; private set; }
     public string ImpactAnalysis { get; private set; }
@@ -123,7 +125,7 @@ public sealed class ReviewDecision : Entity
 /// Management review. Decisions accumulate while scheduled; closing records the
 /// chair and minutes, after which the record is immutable (ISO 9001 9.3).
 /// </summary>
-public sealed class ManagementReview : AggregateRoot, ITenantScoped
+public sealed class ManagementReview : AggregateRoot, ITenantScoped, IAllocatable
 {
     private readonly List<ReviewDecision> _decisions = [];
 
@@ -135,6 +137,8 @@ public sealed class ManagementReview : AggregateRoot, ITenantScoped
     }
 
     public Guid TenantId { get; set; }
+    public Guid? BranchId { get; set; }
+    public Guid? DepartmentId { get; set; }
     public string ReviewRef { get; private set; }
     public string Title { get; private set; }
     public DateOnly ReviewDate { get; private set; }

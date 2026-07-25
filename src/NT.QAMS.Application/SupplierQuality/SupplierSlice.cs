@@ -8,7 +8,8 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.SupplierQuality;
 
-public sealed record RegisterSupplierCommand(string Name, string SupplierType) : ICommand<Guid>;
+public sealed record RegisterSupplierCommand(string Name, string SupplierType,
+    Guid? BranchId = null, Guid? DepartmentId = null) : ICommand<Guid>;
 
 public sealed class RegisterSupplierValidator : AbstractValidator<RegisterSupplierCommand>
 {
@@ -24,6 +25,8 @@ public sealed class RegisterSupplierHandler(
         var supplierRef = await refs.NextAsync(GovernanceHelpers.RequireTenant(tenant), "SUP", ct);
         var supplier = Supplier.Register(
             supplierRef, c.Name, c.SupplierType, GovernanceHelpers.RequireActor(user));
+        supplier.BranchId = c.BranchId;
+        supplier.DepartmentId = c.DepartmentId;
         db.Suppliers.Add(supplier);
         await db.SaveChangesAsync(ct);
         return supplier.Id;
@@ -112,7 +115,7 @@ public sealed class GetSuppliersHandler(IAppDbContext db)
             .OrderBy(s => s.Name)
             .Take(500)
             .Select(s => new SupplierListItemDto(
-                s.Id, s.SupplierRef, s.Name, s.SupplierType, s.Status.ToString()))
+                s.Id, s.SupplierRef, s.Name, s.SupplierType, s.Status.ToString(), s.BranchId, s.DepartmentId))
             .ToListAsync(ct);
     }
 }

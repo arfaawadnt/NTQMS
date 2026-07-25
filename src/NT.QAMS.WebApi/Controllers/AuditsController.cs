@@ -30,7 +30,8 @@ public sealed class AuditsController(ISender sender) : ControllerBase
             Enum.Parse<AuditType>(request.Type, ignoreCase: true),
             request.LeadAuditorId,
             request.PlannedDate,
-            request.Checklist.Select(i => (i.IsoClause, i.Question)).ToList()), ct);
+            request.Checklist.Select(i => (i.IsoClause, i.Question)).ToList(),
+            request.BranchId, request.DepartmentId), ct);
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }
 

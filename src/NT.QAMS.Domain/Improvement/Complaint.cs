@@ -21,7 +21,7 @@ public enum ComplaintChannel { Phone, Email, Portal, InPerson, Letter }
 /// NC remains open. The confidentiality flag drives reporter-identity masking
 /// at the query boundary.
 /// </summary>
-public sealed class Complaint : AggregateRoot, ITenantScoped
+public sealed class Complaint : AggregateRoot, ITenantScoped, IAllocatable
 {
     private Complaint()
     {
@@ -32,6 +32,8 @@ public sealed class Complaint : AggregateRoot, ITenantScoped
     }
 
     public Guid TenantId { get; set; }
+    public Guid? BranchId { get; set; }
+    public Guid? DepartmentId { get; set; }
     public string ComplaintRef { get; private set; }
     public ComplaintChannel Channel { get; private set; }
     public string ComplainantName { get; private set; }

@@ -32,7 +32,8 @@ public sealed class NonconformancesController(ISender sender) : ControllerBase
     {
         var id = await sender.Send(new RaiseNcCommand(
             request.Title, request.Description, request.Severity, request.Likelihood,
-            Enum.Parse<NcSourceType>(request.SourceType, ignoreCase: true)), ct);
+            Enum.Parse<NcSourceType>(request.SourceType, ignoreCase: true),
+            request.BranchId, request.DepartmentId), ct);
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }
 

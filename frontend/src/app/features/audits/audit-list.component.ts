@@ -1,25 +1,39 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { Router, RouterOutlet } from '@angular/router';
 import { AuditsFacade } from './audits.facade';
 import { I18nService } from '../../core/i18n.service';
+import { OrgDataService } from '../../core/org-data.service';
 import { PermissionsService } from '../../core/permissions.service';
 import { AUDIT_TYPES, AuditType, ChecklistItemRequest } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
+import { AllocationPickerComponent } from '../../shared/ui/allocation-picker.component';
+import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
+import { UserSelectComponent } from '../../shared/ui/user-select.component';
 
 /** Audit register + a schedule form with a dynamic ISO-clause checklist (FormArray). */
 @Component({
   selector: 'qams-audit-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent],
+  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent, UserSelectComponent],
   template: `
     <qams-page-header [title]="i18n.t('audit.title')">
       @if (perms.canApprove()) { <button (click)="showForm.set(!showForm())">{{ i18n.t('audit.new') }}</button> }
     </qams-page-header>
+
+    <qams-list-stats [stats]="stats()" />
+
+    <div class="filterbar card">
+      <input class="search" [value]="search()" (input)="search.set($any($event.target).value)" [placeholder]="i18n.t('common.search')" />
+      <select [value]="branchFilter()" (change)="branchFilter.set($any($event.target).value)" aria-label="Branch filter">
+        <option value="">{{ i18n.t('alloc.allBranches') }}</option>
+        @for (b of org.branches(); track b.id) { <option [value]="b.id">{{ b.code }} — {{ b.name }}</option> }
+      </select>
+    </div>
 
     <qams-drawer [open]="showForm()" [title]="i18n.t('audit.new')" (closed)="cancel()">
       <form class="drawer-form" [formGroup]="form" (ngSubmit)="schedule()">
@@ -28,7 +42,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
           <div><label>{{ i18n.t('audit.type') }}</label>
             <select formControlName="type">@for (t of types; track t) { <option [value]="t">{{ t }}</option> }</select></div>
           <div><label>{{ i18n.t('audit.leadAuditor') }}</label>
-            <input formControlName="leadAuditorId" [placeholder]="i18n.t('nc.userIdHint')" /></div>
+            <qams-user-select formControlName="leadAuditorId" /></div>
           <div><label>{{ i18n.t('audit.plannedDate') }}</label><input type="date" formControlName="plannedDate" /></div>
         </div>
 
@@ -46,6 +60,8 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
           }
         </div>
 
+        <qams-allocation-picker [branchCtrl]="form.controls.branchId" [departmentCtrl]="form.controls.departmentId" />
+
         <div class="row">
           <button type="submit" [disabled]="form.invalid || facade.loading()">{{ i18n.t('audit.schedule') }}</button>
           <button type="button" class="secondary" (click)="cancel()">{{ i18n.t('nc.cancel') }}</button>
@@ -56,7 +72,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 
     @if (facade.loading() && facade.list().length === 0) {
       <p class="muted">{{ i18n.t('common.loading') }}</p>
-    } @else if (facade.list().length === 0) {
+    } @else if (filtered().length === 0) {
       <p class="muted">{{ i18n.t('audit.empty') }}</p>
     } @else {
       <div class="card">
@@ -64,13 +80,15 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
           <thead><tr>
             <th>{{ i18n.t('audit.ref') }}</th><th>{{ i18n.t('audit.auditTitle') }}</th>
             <th>{{ i18n.t('audit.type') }}</th><th>{{ i18n.t('audit.plannedDate') }}</th><th>{{ i18n.t('nc.status') }}</th>
+            <th>{{ i18n.t('alloc.branch') }}</th>
           </tr></thead>
           <tbody>
-            @for (a of facade.list(); track a.id) {
+            @for (a of filtered(); track a.id) {
               <tr class="clickable" (click)="open(a.id)">
                 <td>{{ a.auditRef }}</td><td>{{ a.title }}</td><td>{{ a.type }}</td>
                 <td>{{ a.plannedDate | date:'mediumDate' }}</td>
                 <td><qams-status-pill [status]="a.status" /></td>
+                <td class="code">{{ org.branchName(a.branchId) || '—' }}</td>
               </tr>
             }
           </tbody>
@@ -84,6 +102,8 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
     </qams-drawer>
   `,
   styles: [`
+    .filterbar { display: flex; gap: 10px; align-items: center; padding: 10px 14px; margin-bottom: 14px; flex-wrap: wrap; }
+    .search { max-width: 280px; }
     .form { margin-bottom: 1rem; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: .5rem 1rem; }
     .col-2 { grid-column: span 2; }
@@ -98,6 +118,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 export class AuditListComponent implements OnInit {
   readonly facade = inject(AuditsFacade);
   readonly i18n = inject(I18nService);
+  readonly org = inject(OrgDataService);
   readonly perms = inject(PermissionsService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
@@ -106,6 +127,28 @@ export class AuditListComponent implements OnInit {
   readonly showForm = signal(false);
   /** Whether the record-workspace drawer (child route) is active. */
   readonly detailOpen = signal(false);
+  readonly search = signal('');
+  readonly branchFilter = signal('');
+
+  /** Client-side filtration over the loaded register. */
+  readonly filtered = computed(() => {
+    const q = this.search().trim().toLowerCase();
+    const branch = this.branchFilter();
+    return this.facade.list().filter((a) =>
+      (!branch || a.branchId === branch)
+      && (!q || `${a.auditRef} ${a.title} ${a.type} ${a.status}`.toLowerCase().includes(q)));
+  });
+
+  /** Live statistics computed from the real register. */
+  readonly stats = computed<ListStat[]>(() => {
+    const all = this.facade.list();
+    return [
+      { label: this.i18n.t('stat.total'), value: all.length, tone: 'slate' },
+      { label: this.i18n.t('stat.scheduled'), value: all.filter((a) => a.status === 'Scheduled').length, tone: 'blue' },
+      { label: this.i18n.t('stat.inProgress'), value: all.filter((a) => a.status === 'InProgress').length, tone: 'gold' },
+      { label: this.i18n.t('stat.signedOff'), value: all.filter((a) => a.status === 'SignedOff').length, tone: 'green' },
+    ];
+  });
 
   readonly form = this.fb.nonNullable.group({
     title: ['', [Validators.required, Validators.maxLength(300)]],
@@ -113,11 +156,16 @@ export class AuditListComponent implements OnInit {
     leadAuditorId: ['', [Validators.required]],
     plannedDate: ['', [Validators.required]],
     checklist: this.fb.array([this.newItem()]),
+    branchId: [''],
+    departmentId: [''],
   });
 
   get checklist(): FormArray { return this.form.controls.checklist; }
 
-  ngOnInit(): void { void this.facade.loadList(); }
+  ngOnInit(): void {
+    void this.facade.loadList();
+    void this.org.ensureOrg();
+  }
 
   private newItem(): FormGroup {
     return this.fb.nonNullable.group({
@@ -136,6 +184,8 @@ export class AuditListComponent implements OnInit {
     const id = await this.facade.schedule({
       title: raw.title, type: raw.type, leadAuditorId: raw.leadAuditorId,
       plannedDate: raw.plannedDate, checklist,
+      branchId: raw.branchId || null,
+      departmentId: raw.departmentId || null,
     });
     if (id) { this.cancel(); void this.router.navigate(['/audits', id]); }
   }

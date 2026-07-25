@@ -135,3 +135,24 @@ public sealed class GetUsersHandler(IAppDbContext db, ICurrentTenant tenant)
             .ToListAsync(ct);
     }
 }
+
+/// <summary>
+/// The tenant's active-user directory for name pickers — readable by every
+/// authenticated tenant user (unlike full user administration). Exposes ids,
+/// display names and roles only.
+/// </summary>
+public sealed record GetUserDirectoryQuery : IQuery<IReadOnlyList<UserDirectoryEntryDto>>;
+
+public sealed class GetUserDirectoryHandler(IAppDbContext db, ICurrentTenant tenant)
+    : IQueryHandler<GetUserDirectoryQuery, IReadOnlyList<UserDirectoryEntryDto>>
+{
+    public async Task<IReadOnlyList<UserDirectoryEntryDto>> Handle(GetUserDirectoryQuery q, CancellationToken ct)
+    {
+        var tenantId = tenant.TenantId ?? throw new DomainException("TENANT-000", "A tenant context is required.");
+        return await db.Users.AsNoTracking()
+            .Where(u => u.TenantId == tenantId && u.IsActive)
+            .OrderBy(u => u.DisplayName)
+            .Select(u => new UserDirectoryEntryDto(u.Id, u.DisplayName, u.Role.ToString()))
+            .ToListAsync(ct);
+    }
+}

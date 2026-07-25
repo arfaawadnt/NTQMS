@@ -45,7 +45,7 @@ public sealed class MaintenanceRecord : Entity
 /// due/lockout transitions; this aggregate decides — a job can never bypass
 /// the guards (FR-GOV-01 / FR-EQUIP-LOCK).
 /// </summary>
-public sealed class EquipmentItem : AggregateRoot, ITenantScoped
+public sealed class EquipmentItem : AggregateRoot, ITenantScoped, IAllocatable
 {
     private readonly List<CalibrationRecord> _calibrations = [];
     private readonly List<MaintenanceRecord> _maintenance = [];
@@ -58,6 +58,8 @@ public sealed class EquipmentItem : AggregateRoot, ITenantScoped
     }
 
     public Guid TenantId { get; set; }
+    public Guid? BranchId { get; set; }
+    public Guid? DepartmentId { get; set; }
     public string Code { get; private set; }
     public string Name { get; private set; }
     public string SerialNumber { get; private set; }

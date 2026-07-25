@@ -1,26 +1,39 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterOutlet } from '@angular/router';
 import { ChangeFacade } from './change.facade';
 import { I18nService } from '../../core/i18n.service';
+import { OrgDataService } from '../../core/org-data.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
+import { AllocationPickerComponent } from '../../shared/ui/allocation-picker.component';
+import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
 
-/** Change Control register: status-filterable list + a propose form. */
+/** Change Control register: live statistics, filterable list + a propose form. */
 @Component({
   selector: 'qams-change-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent],
+  imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent],
   template: `
     <qams-page-header [title]="i18n.t('chg.title')">
+      <button (click)="showForm.set(!showForm())">{{ i18n.t('chg.new') }}</button>
+    </qams-page-header>
+
+    <qams-list-stats [stats]="stats()" />
+
+    <div class="filterbar card">
+      <input class="search" [value]="search()" (input)="search.set($any($event.target).value)" [placeholder]="i18n.t('common.search')" />
       <select [value]="statusFilter()" (change)="onFilter($event)" aria-label="Status filter">
         <option value="">{{ i18n.t('nc.allStatuses') }}</option>
         @for (s of statuses; track s) { <option [value]="s">{{ s }}</option> }
       </select>
-      <button (click)="showForm.set(!showForm())">{{ i18n.t('chg.new') }}</button>
-    </qams-page-header>
+      <select [value]="branchFilter()" (change)="branchFilter.set($any($event.target).value)" aria-label="Branch filter">
+        <option value="">{{ i18n.t('alloc.allBranches') }}</option>
+        @for (b of org.branches(); track b.id) { <option [value]="b.id">{{ b.code }} — {{ b.name }}</option> }
+      </select>
+    </div>
 
     <qams-drawer [open]="showForm()" [title]="i18n.t('chg.new')" (closed)="cancel()">
       <form class="drawer-form" [formGroup]="form" (ngSubmit)="propose()">
@@ -28,6 +41,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
         <input formControlName="title" />
         <label>{{ i18n.t('chg.impact') }}</label>
         <textarea formControlName="impactAnalysis" rows="4" [placeholder]="i18n.t('chg.impactHint')"></textarea>
+        <qams-allocation-picker [branchCtrl]="form.controls.branchId" [departmentCtrl]="form.controls.departmentId" />
         <div class="row">
           <button type="submit" [disabled]="form.invalid || facade.loading()">{{ i18n.t('chg.propose') }}</button>
           <button type="button" class="secondary" (click)="cancel()">{{ i18n.t('nc.cancel') }}</button>
@@ -38,7 +52,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 
     @if (facade.loading() && facade.list().length === 0) {
       <p class="muted">{{ i18n.t('common.loading') }}</p>
-    } @else if (facade.list().length === 0) {
+    } @else if (filtered().length === 0) {
       <p class="muted">{{ i18n.t('chg.empty') }}</p>
     } @else {
       <div class="card">
@@ -46,13 +60,15 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
           <thead><tr>
             <th>{{ i18n.t('chg.ref') }}</th><th>{{ i18n.t('chg.changeTitle') }}</th>
             <th>{{ i18n.t('nc.status') }}</th><th>{{ i18n.t('chg.riskLinked') }}</th>
+            <th>{{ i18n.t('alloc.branch') }}</th>
           </tr></thead>
           <tbody>
-            @for (c of facade.list(); track c.id) {
+            @for (c of filtered(); track c.id) {
               <tr class="clickable" (click)="open(c.id)">
                 <td>{{ c.changeRef }}</td><td>{{ c.title }}</td>
                 <td><qams-status-pill [status]="c.status" /></td>
                 <td>{{ c.riskItemId ? i18n.t('common.yes') : i18n.t('common.no') }}</td>
+                <td class="code">{{ org.branchName(c.branchId) || '—' }}</td>
               </tr>
             }
           </tbody>
@@ -66,6 +82,8 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
     </qams-drawer>
   `,
   styles: [`
+    .filterbar { display: flex; gap: 10px; align-items: center; padding: 10px 14px; margin-bottom: 14px; flex-wrap: wrap; }
+    .search { max-width: 280px; }
     .form { margin-bottom: 1rem; }
     .form textarea { width: 100%; }
     .row { display: flex; gap: .6rem; margin-top: 1rem; }
@@ -76,6 +94,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 export class ChangeListComponent implements OnInit {
   readonly facade = inject(ChangeFacade);
   readonly i18n = inject(I18nService);
+  readonly org = inject(OrgDataService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
 
@@ -84,13 +103,41 @@ export class ChangeListComponent implements OnInit {
   /** Whether the record-workspace drawer (child route) is active. */
   readonly detailOpen = signal(false);
   readonly statusFilter = signal('');
+  readonly search = signal('');
+  readonly branchFilter = signal('');
+
+  /** Client-side filtration over the loaded register (status filters server-side). */
+  readonly filtered = computed(() => {
+    const q = this.search().trim().toLowerCase();
+    const branch = this.branchFilter();
+    return this.facade.list().filter((c) =>
+      (!branch || c.branchId === branch)
+      && (!q || `${c.changeRef} ${c.title} ${c.status}`.toLowerCase().includes(q)));
+  });
+
+  /** Live statistics computed from the real register. */
+  readonly stats = computed<ListStat[]>(() => {
+    const all = this.facade.list();
+    return [
+      { label: this.i18n.t('stat.total'), value: all.length, tone: 'slate' },
+      { label: this.i18n.t('stat.pendingApproval'), value: all.filter((c) => c.status === 'Proposed').length, tone: 'gold' },
+      { label: this.i18n.t('stat.approved'), value: all.filter((c) => c.status === 'Approved').length, tone: 'teal' },
+      { label: this.i18n.t('stat.rejected'), value: all.filter((c) => c.status === 'Rejected').length, tone: 'red' },
+      { label: this.i18n.t('stat.closed'), value: all.filter((c) => c.status === 'Closed').length, tone: 'green' },
+    ];
+  });
 
   readonly form = this.fb.nonNullable.group({
     title: ['', [Validators.required, Validators.maxLength(200)]],
     impactAnalysis: ['', [Validators.required, Validators.maxLength(4000)]],
+    branchId: [''],
+    departmentId: [''],
   });
 
-  ngOnInit(): void { void this.facade.loadList(); }
+  ngOnInit(): void {
+    void this.facade.loadList();
+    void this.org.ensureOrg();
+  }
 
   onFilter(event: Event): void {
     this.statusFilter.set((event.target as HTMLSelectElement).value);
@@ -99,7 +146,12 @@ export class ChangeListComponent implements OnInit {
 
   async propose(): Promise<void> {
     if (this.form.invalid) { return; }
-    const id = await this.facade.propose(this.form.getRawValue());
+    const raw = this.form.getRawValue();
+    const id = await this.facade.propose({
+      ...raw,
+      branchId: raw.branchId || null,
+      departmentId: raw.departmentId || null,
+    });
     if (id) { this.cancel(); void this.router.navigate(['/changes', id]); }
   }
 

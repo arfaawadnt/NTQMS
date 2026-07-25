@@ -1,28 +1,44 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterOutlet } from '@angular/router';
-import { signal } from '@angular/core';
 import { NcFacade } from './nc.facade';
 import { I18nService } from '../../core/i18n.service';
+import { OrgDataService } from '../../core/org-data.service';
 import { NC_SOURCE_TYPES, NcSourceType } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
+import { AllocationPickerComponent } from '../../shared/ui/allocation-picker.component';
+import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
 
-/** Nonconformance register: filterable list + a reactive "raise NC" form. */
+/**
+ * Nonconformance register: live statistics, professional filtration (text
+ * search + status + branch/department), and a raise form with organizational
+ * allocation.
+ */
 @Component({
   selector: 'qams-nc-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent],
+  imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent],
   template: `
     <qams-page-header [title]="i18n.t('nc.title')">
+      <button (click)="showForm.set(!showForm())">{{ i18n.t('nc.new') }}</button>
+    </qams-page-header>
+
+    <qams-list-stats [stats]="stats()" />
+
+    <div class="filterbar card">
+      <input class="search" [value]="search()" (input)="search.set($any($event.target).value)" [placeholder]="i18n.t('common.search')" />
       <select [value]="statusFilter()" (change)="onFilter($event)" aria-label="Status filter">
         <option value="">{{ i18n.t('nc.allStatuses') }}</option>
         @for (s of statuses; track s) { <option [value]="s">{{ s }}</option> }
       </select>
-      <button (click)="showForm.set(!showForm())">{{ i18n.t('nc.new') }}</button>
-    </qams-page-header>
+      <select [value]="branchFilter()" (change)="branchFilter.set($any($event.target).value)" aria-label="Branch filter">
+        <option value="">{{ i18n.t('alloc.allBranches') }}</option>
+        @for (b of org.branches(); track b.id) { <option [value]="b.id">{{ b.code }} — {{ b.name }}</option> }
+      </select>
+    </div>
 
     <qams-drawer [open]="showForm()" [title]="i18n.t('nc.new')" (closed)="showForm.set(false)">
       <form class="drawer-form" [formGroup]="form" (ngSubmit)="create()">
@@ -48,6 +64,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
         </div>
         <label>{{ i18n.t('nc.description') }}</label>
         <textarea rows="3" formControlName="description"></textarea>
+        <qams-allocation-picker [branchCtrl]="form.controls.branchId" [departmentCtrl]="form.controls.departmentId" />
         <div class="row">
           <button type="submit" [disabled]="form.invalid || facade.loading()">{{ i18n.t('nc.create') }}</button>
           <button type="button" class="secondary" (click)="showForm.set(false)">{{ i18n.t('nc.cancel') }}</button>
@@ -58,7 +75,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 
     @if (facade.loading() && facade.list().length === 0) {
       <p class="muted">{{ i18n.t('common.loading') }}</p>
-    } @else if (facade.list().length === 0) {
+    } @else if (filtered().length === 0) {
       <p class="muted">{{ i18n.t('nc.empty') }}</p>
     } @else {
       <div class="card">
@@ -68,10 +85,11 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
               <th>{{ i18n.t('nc.ref') }}</th><th>{{ i18n.t('nc.subject') }}</th>
               <th>{{ i18n.t('nc.status') }}</th><th>{{ i18n.t('nc.severity') }}</th>
               <th>{{ i18n.t('nc.rpn') }}</th><th>{{ i18n.t('nc.source') }}</th>
+              <th>{{ i18n.t('alloc.branch') }}</th>
             </tr>
           </thead>
           <tbody>
-            @for (nc of facade.list(); track nc.id) {
+            @for (nc of filtered(); track nc.id) {
               <tr class="clickable" (click)="open(nc.id)">
                 <td>{{ nc.ncRef }}</td>
                 <td>{{ nc.title }}</td>
@@ -79,6 +97,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
                 <td>{{ nc.severity }}</td>
                 <td [class.danger-text]="nc.rpn > 12">{{ nc.rpn }}</td>
                 <td>{{ nc.sourceType }}</td>
+                <td class="code">{{ org.branchName(nc.branchId) || '—' }}</td>
               </tr>
             }
           </tbody>
@@ -92,12 +111,12 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
     </qams-drawer>
   `,
   styles: [`
-    .form { margin-bottom: 1rem; }
+    .filterbar { display: flex; gap: 10px; align-items: center; padding: 10px 14px; margin-bottom: 14px; flex-wrap: wrap; }
+    .search { max-width: 280px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .5rem 1rem; }
     .col-2 { grid-column: span 2; }
     .row { display: flex; gap: .6rem; margin-top: 1rem; }
     .clickable { cursor: pointer; }
-   
     .danger-text { color: var(--nt-danger); font-weight: 700; }
     select, button { width: auto; }
   `],
@@ -105,6 +124,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 export class NcListComponent implements OnInit {
   readonly facade = inject(NcFacade);
   readonly i18n = inject(I18nService);
+  readonly org = inject(OrgDataService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
 
@@ -114,6 +134,29 @@ export class NcListComponent implements OnInit {
   /** Whether the record-workspace drawer (child route) is active. */
   readonly detailOpen = signal(false);
   readonly statusFilter = signal('');
+  readonly search = signal('');
+  readonly branchFilter = signal('');
+
+  /** Client-side filtration over the loaded register (status filters server-side). */
+  readonly filtered = computed(() => {
+    const q = this.search().trim().toLowerCase();
+    const branch = this.branchFilter();
+    return this.facade.list().filter((nc) =>
+      (!branch || nc.branchId === branch)
+      && (!q || `${nc.ncRef} ${nc.title} ${nc.sourceType} ${nc.status}`.toLowerCase().includes(q)));
+  });
+
+  /** Live statistics computed from the real register. */
+  readonly stats = computed<ListStat[]>(() => {
+    const all = this.facade.list();
+    return [
+      { label: this.i18n.t('stat.total'), value: all.length, tone: 'slate' },
+      { label: this.i18n.t('stat.open'), value: all.filter((n) => n.status !== 'Closed' && n.status !== 'Rejected').length, tone: 'blue' },
+      { label: this.i18n.t('stat.highRpn'), value: all.filter((n) => n.rpn > 12).length, tone: 'red' },
+      { label: this.i18n.t('stat.highSeverity'), value: all.filter((n) => n.severity >= 4).length, tone: 'orange' },
+      { label: this.i18n.t('stat.closed'), value: all.filter((n) => n.status === 'Closed').length, tone: 'green' },
+    ];
+  });
 
   readonly form = this.fb.nonNullable.group({
     title: ['', [Validators.required, Validators.maxLength(300)]],
@@ -121,10 +164,13 @@ export class NcListComponent implements OnInit {
     severity: [3, [Validators.required, Validators.min(1), Validators.max(5)]],
     likelihood: [3, [Validators.required, Validators.min(1), Validators.max(5)]],
     sourceType: ['Internal' as NcSourceType, [Validators.required]],
+    branchId: [''],
+    departmentId: [''],
   });
 
   ngOnInit(): void {
     void this.facade.loadList();
+    void this.org.ensureOrg();
   }
 
   onFilter(event: Event): void {
@@ -134,7 +180,12 @@ export class NcListComponent implements OnInit {
 
   async create(): Promise<void> {
     if (this.form.invalid) { return; }
-    const id = await this.facade.raise(this.form.getRawValue());
+    const raw = this.form.getRawValue();
+    const id = await this.facade.raise({
+      ...raw,
+      branchId: raw.branchId || null,
+      departmentId: raw.departmentId || null,
+    });
     if (id) {
       this.showForm.set(false);
       this.form.reset({ severity: 3, likelihood: 3, sourceType: 'Internal' });

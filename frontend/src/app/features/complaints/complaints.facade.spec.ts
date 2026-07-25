@@ -13,7 +13,7 @@ describe('ComplaintsFacade', () => {
   const listItem: ComplaintListItem = {
     id: 'c1', complaintRef: 'CMP-2026-0001', subject: 'Late report', channel: 'Email',
     status: 'Logged', confidential: false, complainantName: 'Dr. Client',
-    loggedAtUtc: '2026-07-25T10:00:00Z',
+    loggedAtUtc: '2026-07-25T10:00:00Z', branchId: null, departmentId: null,
   };
 
   beforeEach(() => {

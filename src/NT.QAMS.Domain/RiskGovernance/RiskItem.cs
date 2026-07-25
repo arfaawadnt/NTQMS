@@ -28,7 +28,7 @@ public sealed class MitigationAction : Entity
 /// recorded residual assessment and completed mitigation actions; residual
 /// RPN above 12 raises HighResidualRisk (dashboard alert per the SRS).
 /// </summary>
-public sealed class RiskItem : AggregateRoot, ITenantScoped
+public sealed class RiskItem : AggregateRoot, ITenantScoped, IAllocatable
 {
     public const int HighResidualThreshold = 12;
 
@@ -42,6 +42,8 @@ public sealed class RiskItem : AggregateRoot, ITenantScoped
     }
 
     public Guid TenantId { get; set; }
+    public Guid? BranchId { get; set; }
+    public Guid? DepartmentId { get; set; }
     public string RiskRef { get; private set; }
     public string Title { get; private set; }
     public string Category { get; private set; }

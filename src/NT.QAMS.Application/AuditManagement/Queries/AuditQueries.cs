@@ -24,7 +24,7 @@ public sealed class GetAuditsHandler(IAppDbContext db)
             .Take(500)
             .Select(a => new AuditListItemDto(
                 a.Id, a.AuditRef, a.Title, a.Type.ToString(), a.Status.ToString(),
-                a.LeadAuditorId, a.PlannedDate, a.CreatedAtUtc))
+                a.LeadAuditorId, a.PlannedDate, a.CreatedAtUtc, a.BranchId, a.DepartmentId))
             .ToListAsync(ct);
     }
 }

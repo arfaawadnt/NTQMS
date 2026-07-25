@@ -10,3 +10,6 @@ public sealed record RegisterUserRequest(
 public sealed record ChangeUserRoleRequest(string Role);
 
 public sealed record ResetUserPasswordRequest(string NewPassword);
+
+/// <summary>Lightweight directory entry for user pickers (no email, no security fields).</summary>
+public sealed record UserDirectoryEntryDto(Guid Id, string DisplayName, string Role);

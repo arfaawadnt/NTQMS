@@ -7,6 +7,7 @@ import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
+import { LovSelectComponent } from '../../shared/ui/lov-select.component';
 import { WorkflowStepperComponent } from '../../shared/ui/workflow-stepper.component';
 import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 
@@ -28,7 +29,7 @@ interface CriterionForm {
   selector: 'qams-supplier-detail',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, LovSelectComponent],
   template: `
     @if (item(); as s) {
       <qams-page-header [title]="s.supplierRef + ' — ' + s.name" [subtitle]="s.supplierType">
@@ -61,7 +62,7 @@ interface CriterionForm {
             </div>
           }
           <form [formGroup]="certForm" (ngSubmit)="addCertificate(s.id)">
-            <label>{{ i18n.t('sup.certType') }}</label><input formControlName="certificateType" [placeholder]="i18n.t('sup.certTypeHint')" />
+            <label>{{ i18n.t('sup.certType') }}</label><qams-lov-select formControlName="certificateType" category="CERTIFICATE_TYPE" [placeholder]="i18n.t('sup.certTypeHint')" />
             <label>{{ i18n.t('sup.expires') }}</label><input type="date" formControlName="expiresAt" />
             <label>{{ i18n.t('sup.certFile') }}</label><input type="file" (change)="onFile($event)" />
             <button type="submit" [disabled]="certForm.invalid">{{ i18n.t('sup.addCert') }}</button>

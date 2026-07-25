@@ -71,7 +71,7 @@ public sealed class RcaRecord : Entity
 /// (closer ≠ raiser). E-signature envelopes attach to Verify/Close in the full
 /// Identity phase; transitions already carry the acting user.
 /// </summary>
-public sealed class Nonconformance : AggregateRoot, ITenantScoped
+public sealed class Nonconformance : AggregateRoot, ITenantScoped, IAllocatable
 {
     private readonly List<CapaAction> _capaActions = [];
     private readonly List<RcaRecord> _rcaRecords = [];
@@ -84,6 +84,8 @@ public sealed class Nonconformance : AggregateRoot, ITenantScoped
     }
 
     public Guid TenantId { get; set; }
+    public Guid? BranchId { get; set; }
+    public Guid? DepartmentId { get; set; }
     public string NcRef { get; private set; }
     public string Title { get; private set; }
     public string Description { get; private set; }

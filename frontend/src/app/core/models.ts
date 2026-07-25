@@ -35,6 +35,8 @@ export interface NcListItem {
   rpn: number;
   sourceType: string;
   createdAtUtc: string;
+  branchId: string | null;
+  departmentId: string | null;
 }
 
 export interface CapaAction {
@@ -79,6 +81,8 @@ export interface RaiseNcRequest {
   severity: number;
   likelihood: number;
   sourceType: NcSourceType;
+  branchId: string | null;
+  departmentId: string | null;
 }
 
 export interface TriageNcRequest { assigneeId: string; }
@@ -141,6 +145,8 @@ export interface ComplaintListItem {
   confidential: boolean;
   complainantName: string;
   loggedAtUtc: string;
+  branchId: string | null;
+  departmentId: string | null;
 }
 
 export interface ComplaintDetail {
@@ -168,6 +174,8 @@ export interface LogComplaintRequest {
   confidential: boolean;
   subject: string;
   description: string;
+  branchId: string | null;
+  departmentId: string | null;
 }
 
 export interface ValidateComplaintRequest { justified: boolean; reason: string; }
@@ -258,6 +266,9 @@ export interface UserAccount {
   mfaEnabled: boolean;
 }
 
+/** Lightweight directory entry for user pickers. */
+export interface UserDirectoryEntry { id: string; displayName: string; role: string; }
+
 export interface RegisterUserRequest {
   email: string;
   displayName: string;
@@ -322,6 +333,8 @@ export interface AuditListItem {
   leadAuditorId: string;
   plannedDate: string;
   createdAtUtc: string;
+  branchId: string | null;
+  departmentId: string | null;
 }
 
 export interface AuditDetail {
@@ -345,6 +358,8 @@ export interface ScheduleAuditRequest {
   leadAuditorId: string;
   plannedDate: string;
   checklist: ChecklistItemRequest[];
+  branchId: string | null;
+  departmentId: string | null;
 }
 export interface AnswerChecklistItemRequest { verdict: ChecklistVerdict; evidence: string | null; }
 export interface RaiseFindingRequest { grade: FindingGrade; description: string; }
@@ -369,6 +384,8 @@ export interface EquipmentListItem {
   location: string | null;
   status: string;
   nextCalibrationDue: string | null;
+  branchId: string | null;
+  departmentId: string | null;
 }
 
 export interface EquipmentDetail {
@@ -392,6 +409,8 @@ export interface RegisterEquipmentRequest {
   location: string | null;
   calibrationIntervalDays: number;
   gracePeriodDays: number;
+  branchId: string | null;
+  departmentId: string | null;
 }
 export interface LogCalibrationRequest { performedAt: string; provider: string; result: string; certificateFileId: string | null; }
 export interface LogMaintenanceRequest { performedAt: string; workDescription: string; }
@@ -462,6 +481,8 @@ export interface RiskListItem {
   status: string;
   rpn: number;
   residualRpn: number | null;
+  branchId: string | null;
+  departmentId: string | null;
 }
 
 export interface RiskDetail {
@@ -479,7 +500,7 @@ export interface RiskDetail {
   actions: MitigationAction[];
 }
 
-export interface AssessRiskRequest { title: string; category: string; likelihood: number; impact: number; }
+export interface AssessRiskRequest { title: string; category: string; likelihood: number; impact: number; branchId: string | null; departmentId: string | null; }
 export interface AddMitigationRequest { description: string; ownerId: string; dueDate: string; }
 export interface ResidualAssessmentRequest { likelihood: number; impact: number; }
 
@@ -491,6 +512,8 @@ export interface ChangeListItem {
   title: string;
   status: string;
   riskItemId: string | null;
+  branchId: string | null;
+  departmentId: string | null;
 }
 
 export interface ChangeDetail {
@@ -507,7 +530,7 @@ export interface ChangeDetail {
   implementationNotes: string | null;
 }
 
-export interface ProposeChangeRequest { title: string; impactAnalysis: string; }
+export interface ProposeChangeRequest { title: string; impactAnalysis: string; branchId: string | null; departmentId: string | null; }
 export interface LinkRiskRequest { riskItemId: string; }
 export interface RejectChangeRequest { reason: string; }
 export interface CloseChangeRequest { implementationNotes: string; }
@@ -528,6 +551,8 @@ export interface ReviewListItem {
   reviewDate: string;
   status: string;
   decisionCount: number;
+  branchId: string | null;
+  departmentId: string | null;
 }
 
 export interface ReviewDetail {
@@ -542,7 +567,7 @@ export interface ReviewDetail {
   decisions: ReviewDecision[];
 }
 
-export interface ScheduleReviewRequest { title: string; reviewDate: string; participants: string; }
+export interface ScheduleReviewRequest { title: string; reviewDate: string; participants: string; branchId: string | null; departmentId: string | null; }
 export interface AddDecisionRequest { description: string; ownerId: string; dueDate: string; }
 export interface CloseReviewRequest { minutes: string; }
 
@@ -565,6 +590,8 @@ export interface SupplierListItem {
   name: string;
   supplierType: string;
   status: string;
+  branchId: string | null;
+  departmentId: string | null;
 }
 
 export interface SupplierDetail {
@@ -589,7 +616,7 @@ export interface SupplierEvaluation {
   criteriaJson: string;
 }
 
-export interface RegisterSupplierRequest { name: string; supplierType: string; }
+export interface RegisterSupplierRequest { name: string; supplierType: string; branchId: string | null; departmentId: string | null; }
 export interface AddCertificateRequest { certificateType: string; expiresAt: string; fileId: string | null; }
 export interface SuspendSupplierRequest { reason: string; }
 export interface EvaluationCriterion { criterion: string; weight: number; score: number; }

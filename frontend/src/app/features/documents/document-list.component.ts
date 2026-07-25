@@ -7,13 +7,14 @@ import { I18nService } from '../../core/i18n.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
+import { LovSelectComponent } from '../../shared/ui/lov-select.component';
 
 /** Controlled-document register: list + a create form that uploads the initial file. */
 @Component({
   selector: 'qams-document-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent],
+  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, LovSelectComponent],
   template: `
     <qams-page-header [title]="i18n.t('doc.title')">
       <button (click)="showForm.set(!showForm())">{{ i18n.t('doc.new') }}</button>
@@ -32,7 +33,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
           </div>
           <div>
             <label>{{ i18n.t('doc.category') }}</label>
-            <input formControlName="category" placeholder="SOP" />
+            <qams-lov-select formControlName="category" category="DOC_CATEGORY" placeholder="SOP" />
           </div>
         </div>
         <label>{{ i18n.t('doc.changeSummary') }}</label>

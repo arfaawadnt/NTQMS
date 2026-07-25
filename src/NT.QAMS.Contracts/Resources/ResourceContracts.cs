@@ -4,7 +4,7 @@ namespace NT.QAMS.Contracts.Resources;
 
 public sealed record RegisterEquipmentRequest(
     string Name, string SerialNumber, string? Location,
-    int CalibrationIntervalDays, int GracePeriodDays);
+    int CalibrationIntervalDays, int GracePeriodDays, Guid? BranchId = null, Guid? DepartmentId = null);
 
 public sealed record LogCalibrationRequest(
     DateOnly PerformedAt, string Provider, string Result, Guid? CertificateFileId);
@@ -18,7 +18,7 @@ public sealed record MaintenanceRecordDto(Guid Id, DateOnly PerformedAt, string 
 
 public sealed record EquipmentListItemDto(
     Guid Id, string Code, string Name, string SerialNumber, string? Location,
-    string Status, DateOnly? NextCalibrationDue);
+    string Status, DateOnly? NextCalibrationDue, Guid? BranchId = null, Guid? DepartmentId = null);
 
 public sealed record EquipmentDetailDto(
     Guid Id, string Code, string Name, string SerialNumber, string? Location,

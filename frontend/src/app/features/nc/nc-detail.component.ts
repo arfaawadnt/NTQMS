@@ -8,6 +8,7 @@ import { PermissionsService } from '../../core/permissions.service';
 import { CAPA_ACTION_TYPES, CapaActionType, RCA_METHODS, RcaMethod } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
+import { UserSelectComponent } from '../../shared/ui/user-select.component';
 import { WorkflowStepperComponent } from '../../shared/ui/workflow-stepper.component';
 import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 
@@ -21,7 +22,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
   selector: 'qams-nc-detail',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, NgTemplateOutlet, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+  imports: [ReactiveFormsModule, DatePipe, NgTemplateOutlet, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, UserSelectComponent],
   template: `
     @if (nc(); as n) {
       <qams-page-header [title]="n.ncRef + ' — ' + n.title">
@@ -73,7 +74,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
               @if (perms.canApprove()) {
                 <form [formGroup]="triageForm" (ngSubmit)="facade.triage(n.id, triageForm.getRawValue())">
                   <label>{{ i18n.t('nc.assignee') }}</label>
-                  <input formControlName="assigneeId" [placeholder]="i18n.t('nc.userIdHint')" />
+                  <qams-user-select formControlName="assigneeId" />
                   <button type="submit" [disabled]="triageForm.invalid">{{ i18n.t('nc.triage') }}</button>
                 </form>
                 <form [formGroup]="rejectForm" (ngSubmit)="facade.reject(n.id, rejectForm.getRawValue())">
@@ -127,7 +128,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
               <label>{{ i18n.t('nc.actionDetails') }}</label>
               <input formControlName="details" />
               <label>{{ i18n.t('nc.owner') }}</label>
-              <input formControlName="ownerId" [placeholder]="i18n.t('nc.userIdHint')" />
+              <qams-user-select formControlName="ownerId" />
               <label>{{ i18n.t('nc.due') }}</label>
               <input type="date" formControlName="dueDate" />
               <button type="submit" [disabled]="actionForm.invalid">{{ i18n.t('nc.addAction') }}</button>

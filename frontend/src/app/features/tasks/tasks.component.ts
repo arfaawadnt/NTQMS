@@ -7,6 +7,7 @@ import { PermissionsService } from '../../core/permissions.service';
 import { TENANT_ROLES } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
+import { UserSelectComponent } from '../../shared/ui/user-select.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 
 /** Group-level validator: a task must name a user or a role (mirrors TASK-002). */
@@ -25,7 +26,7 @@ function assigneeRequired(group: AbstractControl): ValidationErrors | null {
   selector: 'qams-tasks',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent],
+  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent, UserSelectComponent],
   template: `
     <qams-page-header [title]="i18n.t('task.title')" [subtitle]="i18n.t('task.subtitle')">
       @if (perms.canAssignTraining()) {
@@ -40,7 +41,7 @@ function assigneeRequired(group: AbstractControl): ValidationErrors | null {
         <label>{{ i18n.t('task.subjectRef') }}</label>
         <input formControlName="subjectRef" [placeholder]="i18n.t('common.optional')" />
         <label>{{ i18n.t('task.assigneeUser') }}</label>
-        <input formControlName="assigneeUserId" [placeholder]="i18n.t('comp.userId')" />
+        <qams-user-select formControlName="assigneeUserId" />
         <label>{{ i18n.t('task.assigneeRole') }}</label>
         <select formControlName="assigneeRole">
           <option value="">—</option>

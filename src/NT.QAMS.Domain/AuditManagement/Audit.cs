@@ -50,7 +50,7 @@ public sealed class AuditFinding : Entity
 /// the record is immutable after sign-off. The finding→NC guarantee is the
 /// event loop: FindingRaised → Improvement raises the NC → AcknowledgeFindingNc.
 /// </summary>
-public sealed class Audit : AggregateRoot, ITenantScoped
+public sealed class Audit : AggregateRoot, ITenantScoped, IAllocatable
 {
     private readonly List<AuditChecklistItem> _checklist = [];
     private readonly List<AuditFinding> _findings = [];
@@ -62,6 +62,8 @@ public sealed class Audit : AggregateRoot, ITenantScoped
     }
 
     public Guid TenantId { get; set; }
+    public Guid? BranchId { get; set; }
+    public Guid? DepartmentId { get; set; }
     public string AuditRef { get; private set; }
     public string Title { get; private set; }
     public AuditType Type { get; private set; }

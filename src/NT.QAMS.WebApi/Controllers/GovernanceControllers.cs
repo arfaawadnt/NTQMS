@@ -24,7 +24,8 @@ public sealed class RisksController(ISender sender) : ControllerBase
     public async Task<IActionResult> Assess(AssessRiskRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new AssessRiskCommand(
-            request.Title, request.Category, request.Likelihood, request.Impact), ct);
+            request.Title, request.Category, request.Likelihood, request.Impact,
+            request.BranchId, request.DepartmentId), ct);
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }
 
@@ -73,7 +74,8 @@ public sealed class ChangeRequestsController(ISender sender) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Propose(ProposeChangeRequest request, CancellationToken ct)
     {
-        var id = await sender.Send(new ProposeChangeCommand(request.Title, request.ImpactAnalysis), ct);
+        var id = await sender.Send(new ProposeChangeCommand(request.Title, request.ImpactAnalysis,
+            request.BranchId, request.DepartmentId), ct);
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }
 
@@ -126,7 +128,8 @@ public sealed class ManagementReviewsController(ISender sender) : ControllerBase
     public async Task<IActionResult> Schedule(ScheduleReviewRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new ScheduleReviewCommand(
-            request.Title, request.ReviewDate, request.Participants), ct);
+            request.Title, request.ReviewDate, request.Participants,
+            request.BranchId, request.DepartmentId), ct);
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }
 
@@ -161,7 +164,8 @@ public sealed class SuppliersController(ISender sender) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Register(RegisterSupplierRequest request, CancellationToken ct)
     {
-        var id = await sender.Send(new RegisterSupplierCommand(request.Name, request.SupplierType), ct);
+        var id = await sender.Send(new RegisterSupplierCommand(request.Name, request.SupplierType,
+            request.BranchId, request.DepartmentId), ct);
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }
 

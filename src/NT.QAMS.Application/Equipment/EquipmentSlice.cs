@@ -11,7 +11,8 @@ namespace NT.QAMS.Application.Equipment;
 
 public sealed record RegisterEquipmentCommand(
     string Name, string SerialNumber, string? Location,
-    int CalibrationIntervalDays, int GracePeriodDays) : ICommand<Guid>;
+    int CalibrationIntervalDays, int GracePeriodDays,
+    Guid? BranchId = null, Guid? DepartmentId = null) : ICommand<Guid>;
 
 public sealed class RegisterEquipmentValidator : AbstractValidator<RegisterEquipmentCommand>
 {
@@ -43,6 +44,8 @@ public sealed class RegisterEquipmentHandler(
         var item = EquipmentItem.Register(
             code, c.Name, serial, c.Location, c.CalibrationIntervalDays, c.GracePeriodDays);
 
+        item.BranchId = c.BranchId;
+        item.DepartmentId = c.DepartmentId;
         db.EquipmentItems.Add(item);
         await db.SaveChangesAsync(ct);
         return item.Id;
@@ -122,7 +125,7 @@ public sealed class GetEquipmentHandler(IAppDbContext db)
             .Take(500)
             .Select(e => new EquipmentListItemDto(
                 e.Id, e.Code, e.Name, e.SerialNumber, e.Location,
-                e.Status.ToString(), e.NextCalibrationDue))
+                e.Status.ToString(), e.NextCalibrationDue, e.BranchId, e.DepartmentId))
             .ToListAsync(ct);
     }
 }

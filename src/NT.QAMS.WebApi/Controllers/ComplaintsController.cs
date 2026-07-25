@@ -30,7 +30,8 @@ public sealed class ComplaintsController(ISender sender) : ControllerBase
         var id = await sender.Send(new LogComplaintCommand(
             Enum.Parse<ComplaintChannel>(request.Channel, ignoreCase: true),
             request.ComplainantName, request.ComplainantContact,
-            request.Confidential, request.Subject, request.Description), ct);
+            request.Confidential, request.Subject, request.Description,
+            request.BranchId, request.DepartmentId), ct);
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }
 

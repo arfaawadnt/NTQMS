@@ -12,7 +12,8 @@ namespace NT.QAMS.Application.Improvement.Commands;
 
 public sealed record LogComplaintCommand(
     ComplaintChannel Channel, string ComplainantName, string? ComplainantContact,
-    bool Confidential, string Subject, string Description) : ICommand<Guid>;
+    bool Confidential, string Subject, string Description,
+    Guid? BranchId = null, Guid? DepartmentId = null) : ICommand<Guid>;
 
 public sealed class LogComplaintValidator : AbstractValidator<LogComplaintCommand>
 {
@@ -42,6 +43,8 @@ public sealed class LogComplaintHandler(
             complaintRef, command.Channel, command.ComplainantName, command.ComplainantContact,
             command.Confidential, command.Subject, command.Description, actor, clock.UtcNow);
 
+        complaint.BranchId = command.BranchId;
+        complaint.DepartmentId = command.DepartmentId;
         db.Complaints.Add(complaint);
         await db.SaveChangesAsync(cancellationToken);
         return complaint.Id;
@@ -152,7 +155,7 @@ public sealed class GetComplaintsHandler(IAppDbContext db)
                 c.Id, c.ComplaintRef, c.Subject, c.Channel.ToString(), c.Status.ToString(),
                 c.Confidential,
                 c.Confidential && !query.CanViewConfidential ? "•••" : c.ComplainantName,
-                c.LoggedAtUtc))
+                c.LoggedAtUtc, c.BranchId, c.DepartmentId))
             .ToListAsync(ct);
     }
 }

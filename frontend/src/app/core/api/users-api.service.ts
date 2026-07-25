@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   ChangeUserRoleRequest, CreatedResource, RegisterUserRequest,
-  ResetUserPasswordRequest, UserAccount,
+  ResetUserPasswordRequest, UserAccount, UserDirectoryEntry,
 } from '../models';
 
 /** Typed client for tenant user administration (tenant-admin only, server-enforced). */
@@ -30,5 +30,10 @@ export class UsersApiService {
 
   resetPassword(id: string, body: ResetUserPasswordRequest): Observable<void> {
     return this.http.post<void>(`${this.base}/${id}/reset-password`, body);
+  }
+
+  /** Active-user directory for name pickers (readable by every tenant user). */
+  directory(): Observable<UserDirectoryEntry[]> {
+    return this.http.get<UserDirectoryEntry[]>(`${this.base}/directory`);
   }
 }

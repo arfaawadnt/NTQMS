@@ -6,6 +6,7 @@ import { I18nService } from '../../core/i18n.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
+import { LovSelectComponent } from '../../shared/ui/lov-select.component';
 
 /**
  * Proficiency-testing register: enrollments with per-row result entry. The
@@ -16,7 +17,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
   selector: 'qams-pt-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DecimalPipe, PageHeaderComponent, DrawerComponent, StatusPillComponent],
+  imports: [ReactiveFormsModule, DecimalPipe, PageHeaderComponent, DrawerComponent, StatusPillComponent, LovSelectComponent],
   template: `
     <qams-page-header [title]="i18n.t('pt.title')" [subtitle]="i18n.t('pt.sagaNote')">
       <select [value]="performanceFilter()" (change)="onFilter($event)" aria-label="Performance filter">
@@ -29,7 +30,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
     <qams-drawer [open]="showForm()" [title]="i18n.t('pt.new')" (closed)="cancel()">
       <form class="drawer-form" [formGroup]="enrollForm" (ngSubmit)="enroll()">
         <div class="grid">
-          <div><label>{{ i18n.t('pt.scheme') }}</label><input formControlName="scheme" [placeholder]="i18n.t('pt.schemeHint')" /></div>
+          <div><label>{{ i18n.t('pt.scheme') }}</label><qams-lov-select formControlName="scheme" category="PT_SCHEME" [placeholder]="i18n.t('pt.schemeHint')" /></div>
           <div><label>{{ i18n.t('qc.analyte') }}</label><input formControlName="analyte" /></div>
           <div><label>{{ i18n.t('pt.cycle') }}</label><input formControlName="cycle" [placeholder]="i18n.t('pt.cycleHint')" /></div>
         </div>

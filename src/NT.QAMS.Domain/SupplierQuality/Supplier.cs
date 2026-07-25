@@ -26,7 +26,7 @@ public sealed class CertificateRecord : Entity
 /// the user who registered the supplier. Certificate expiry auto-suspends via
 /// the sweep (proposal method — the aggregate decides).
 /// </summary>
-public sealed class Supplier : AggregateRoot, ITenantScoped
+public sealed class Supplier : AggregateRoot, ITenantScoped, IAllocatable
 {
     private readonly List<CertificateRecord> _certificates = [];
 
@@ -38,6 +38,8 @@ public sealed class Supplier : AggregateRoot, ITenantScoped
     }
 
     public Guid TenantId { get; set; }
+    public Guid? BranchId { get; set; }
+    public Guid? DepartmentId { get; set; }
     public string SupplierRef { get; private set; }
     public string Name { get; private set; }
     public string SupplierType { get; private set; }

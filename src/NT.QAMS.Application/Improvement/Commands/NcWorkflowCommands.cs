@@ -10,7 +10,8 @@ namespace NT.QAMS.Application.Improvement.Commands;
 // ── Raise ────────────────────────────────────────────────────────────────────
 
 public sealed record RaiseNcCommand(
-    string Title, string Description, int Severity, int Likelihood, NcSourceType SourceType)
+    string Title, string Description, int Severity, int Likelihood, NcSourceType SourceType,
+    Guid? BranchId = null, Guid? DepartmentId = null)
     : ICommand<Guid>;
 
 public sealed class RaiseNcValidator : AbstractValidator<RaiseNcCommand>
@@ -41,6 +42,8 @@ public sealed class RaiseNcHandler(
             ncRef, command.Title, command.Description,
             command.Severity, command.Likelihood, command.SourceType, actor);
 
+        nc.BranchId = command.BranchId;
+        nc.DepartmentId = command.DepartmentId;
         db.Nonconformances.Add(nc);
         await db.SaveChangesAsync(cancellationToken);
         return nc.Id;

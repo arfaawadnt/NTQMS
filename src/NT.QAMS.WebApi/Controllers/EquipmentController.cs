@@ -24,7 +24,8 @@ public sealed class EquipmentController(ISender sender) : ControllerBase
     {
         var id = await sender.Send(new RegisterEquipmentCommand(
             request.Name, request.SerialNumber, request.Location,
-            request.CalibrationIntervalDays, request.GracePeriodDays), ct);
+            request.CalibrationIntervalDays, request.GracePeriodDays,
+            request.BranchId, request.DepartmentId), ct);
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }
 

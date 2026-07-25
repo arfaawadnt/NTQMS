@@ -2,7 +2,7 @@ namespace NT.QAMS.Contracts.Governance;
 
 // ── Risk ─────────────────────────────────────────────────────────────────────
 
-public sealed record AssessRiskRequest(string Title, string Category, int Likelihood, int Impact);
+public sealed record AssessRiskRequest(string Title, string Category, int Likelihood, int Impact, Guid? BranchId = null, Guid? DepartmentId = null);
 public sealed record AddMitigationRequest(string Description, Guid OwnerId, DateOnly DueDate);
 public sealed record ResidualAssessmentRequest(int Likelihood, int Impact);
 
@@ -10,7 +10,7 @@ public sealed record MitigationActionDto(
     Guid Id, string Description, Guid OwnerId, DateOnly DueDate, bool Completed);
 
 public sealed record RiskListItemDto(
-    Guid Id, string RiskRef, string Title, string Category, string Status, int Rpn, int? ResidualRpn);
+    Guid Id, string RiskRef, string Title, string Category, string Status, int Rpn, int? ResidualRpn, Guid? BranchId = null, Guid? DepartmentId = null);
 
 public sealed record RiskDetailDto(
     Guid Id, string RiskRef, string Title, string Category, string Status,
@@ -20,13 +20,13 @@ public sealed record RiskDetailDto(
 
 // ── Change control ───────────────────────────────────────────────────────────
 
-public sealed record ProposeChangeRequest(string Title, string ImpactAnalysis);
+public sealed record ProposeChangeRequest(string Title, string ImpactAnalysis, Guid? BranchId = null, Guid? DepartmentId = null);
 public sealed record LinkRiskRequest(Guid RiskItemId);
 public sealed record RejectChangeRequest(string Reason);
 public sealed record CloseChangeRequest(string ImplementationNotes);
 
 public sealed record ChangeListItemDto(
-    Guid Id, string ChangeRef, string Title, string Status, Guid? RiskItemId);
+    Guid Id, string ChangeRef, string Title, string Status, Guid? RiskItemId, Guid? BranchId = null, Guid? DepartmentId = null);
 
 public sealed record ChangeDetailDto(
     Guid Id, string ChangeRef, string Title, string ImpactAnalysis, string Status,
@@ -35,14 +35,14 @@ public sealed record ChangeDetailDto(
 
 // ── Management review ────────────────────────────────────────────────────────
 
-public sealed record ScheduleReviewRequest(string Title, DateOnly ReviewDate, string Participants);
+public sealed record ScheduleReviewRequest(string Title, DateOnly ReviewDate, string Participants, Guid? BranchId = null, Guid? DepartmentId = null);
 public sealed record AddDecisionRequest(string Description, Guid OwnerId, DateOnly DueDate);
 public sealed record CloseReviewRequest(string Minutes);
 
 public sealed record ReviewDecisionDto(Guid Id, string Description, Guid OwnerId, DateOnly DueDate);
 
 public sealed record ReviewListItemDto(
-    Guid Id, string ReviewRef, string Title, DateOnly ReviewDate, string Status, int DecisionCount);
+    Guid Id, string ReviewRef, string Title, DateOnly ReviewDate, string Status, int DecisionCount, Guid? BranchId = null, Guid? DepartmentId = null);
 
 public sealed record ReviewDetailDto(
     Guid Id, string ReviewRef, string Title, DateOnly ReviewDate, string Participants,
@@ -50,7 +50,7 @@ public sealed record ReviewDetailDto(
 
 // ── Supplier quality ─────────────────────────────────────────────────────────
 
-public sealed record RegisterSupplierRequest(string Name, string SupplierType);
+public sealed record RegisterSupplierRequest(string Name, string SupplierType, Guid? BranchId = null, Guid? DepartmentId = null);
 public sealed record AddCertificateRequest(string CertificateType, DateOnly ExpiresAt, Guid? FileId);
 public sealed record SuspendSupplierRequest(string Reason);
 public sealed record EvaluationCriterionRequest(string Criterion, decimal Weight, decimal Score);
@@ -60,7 +60,7 @@ public sealed record RecordEvaluationRequest(
 public sealed record CertificateDto(Guid Id, string CertificateType, DateOnly ExpiresAt, Guid? FileId);
 
 public sealed record SupplierListItemDto(
-    Guid Id, string SupplierRef, string Name, string SupplierType, string Status);
+    Guid Id, string SupplierRef, string Name, string SupplierType, string Status, Guid? BranchId = null, Guid? DepartmentId = null);
 
 public sealed record SupplierDetailDto(
     Guid Id, string SupplierRef, string Name, string SupplierType, string Status,

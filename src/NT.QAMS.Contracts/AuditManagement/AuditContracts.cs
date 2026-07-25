@@ -2,7 +2,7 @@ namespace NT.QAMS.Contracts.AuditManagement;
 
 public sealed record ScheduleAuditRequest(
     string Title, string Type, Guid LeadAuditorId, DateOnly PlannedDate,
-    IReadOnlyList<ChecklistItemRequest> Checklist);
+    IReadOnlyList<ChecklistItemRequest> Checklist, Guid? BranchId = null, Guid? DepartmentId = null);
 
 public sealed record ChecklistItemRequest(string IsoClause, string Question);
 
@@ -17,7 +17,7 @@ public sealed record FindingDto(Guid Id, string Grade, string Description, Guid?
 
 public sealed record AuditListItemDto(
     Guid Id, string AuditRef, string Title, string Type, string Status,
-    Guid LeadAuditorId, DateOnly PlannedDate, DateTimeOffset CreatedAtUtc);
+    Guid LeadAuditorId, DateOnly PlannedDate, DateTimeOffset CreatedAtUtc, Guid? BranchId = null, Guid? DepartmentId = null);
 
 public sealed record AuditDetailDto(
     Guid Id, string AuditRef, string Title, string Type, string Status,
