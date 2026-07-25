@@ -1,6 +1,7 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
+using NT.QAMS.Application.Organization;
 using NT.QAMS.Domain.IdentityAccess;
 using NT.QAMS.Domain.Tenancy;
 using NT.QAMS.SharedKernel.Primitives;
@@ -52,6 +53,11 @@ public sealed class ProvisionTenantHandler(IAppDbContext db, IPasswordHasher has
 
         db.Tenants.Add(tenant);
         db.Users.Add(admin);
+
+        // Starter list-of-values so every dropdown is usable on day one —
+        // seeded in the SAME transaction as the tenant itself.
+        await DefaultLovCatalog.SeedMissingAsync(db, tenant.Id, cancellationToken);
+
         await db.SaveChangesAsync(cancellationToken);
 
         return tenant.Id;

@@ -92,6 +92,26 @@ if (!string.IsNullOrWhiteSpace(bootstrapEmail) && !string.IsNullOrWhiteSpace(boo
     }
 }
 
+// Backfill the starter list-of-values for tenants provisioned before the
+// default catalog existed (or before a category was added to it). Additive and
+// per-category idempotent — curated lists are never touched.
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var tenantIds = await db.Tenants.Select(t => t.Id).ToListAsync();
+    var seeded = 0;
+    foreach (var tenantId in tenantIds)
+    {
+        seeded += await NT.QAMS.Application.Organization.DefaultLovCatalog.SeedMissingAsync(db, tenantId, CancellationToken.None);
+    }
+
+    if (seeded > 0)
+    {
+        await db.SaveChangesAsync();
+        app.Logger.LogInformation("LOV backfill: {Count} starter entries added across {Tenants} tenant(s)", seeded, tenantIds.Count);
+    }
+}
+
 app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
