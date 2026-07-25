@@ -1,10 +1,17 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../core/auth.service';
 import { I18nService, Lang } from '../../core/i18n.service';
 
+/**
+ * Split-panel sign-in per the QAMS Design System: a signature-gradient brand
+ * panel (logo, tagline, compliance chips) beside a 15px-radius form card.
+ * The laboratory comes exclusively from its own URL (/t/{lab}) — the form
+ * carries no tenant field; without a lab address the page signs in the
+ * platform administrator.
+ */
 @Component({
   selector: 'qams-login',
   standalone: true,
@@ -12,76 +19,137 @@ import { I18nService, Lang } from '../../core/i18n.service';
   template: `
     <div class="wrap">
       <div class="panel">
-        <div class="brandstrip"></div>
-        <div class="inner">
-        <div class="head">
-          <img class="logo" src="assets/nt-qams-logo.png" alt="NT.QAMS" />
-          <select [value]="i18n.lang()" (change)="onLang($event)" aria-label="Language">
-            <option value="en">EN</option>
-            <option value="ar">AR</option>
-            <option value="fr">FR</option>
-          </select>
-        </div>
-        <div class="subtitle">{{ i18n.t('app.subtitle') }}</div>
-        <h2>{{ i18n.t('login.title') }}</h2>
+        <!-- brand side -->
+        <aside class="brand">
+          <div class="logocard"><img src="assets/nt-qms-logo.svg" alt="NT.QMS" /></div>
+          <h1>{{ i18n.t('app.subtitle') }}</h1>
+          <p class="tagline">{{ i18n.t('login.tagline') }}</p>
+          <div class="chips">
+            <span class="chip">ISO/IEC 17025</span>
+            <span class="chip">ISO 15189</span>
+            <span class="chip">ISO 9001</span>
+            <span class="chip">21 CFR Part 11</span>
+            <span class="chip">GMP</span>
+          </div>
+          <div class="brandfoot">National Technology · NT.QMS</div>
+        </aside>
 
-        <form (ngSubmit)="submit()">
-          <label>{{ i18n.t('login.tenant') }}</label>
-          <input name="tenant" [(ngModel)]="tenant" autocomplete="organization" />
-          <div class="muted hint">{{ i18n.t('login.tenantHint') }}</div>
+        <!-- form side -->
+        <section class="form">
+          <div class="formhead">
+            <h2>{{ i18n.t('login.title') }}</h2>
+            <div class="langswitch" role="group" aria-label="Language">
+              @for (l of langs; track l.code) {
+                <button type="button" [class.active]="i18n.lang() === l.code" (click)="i18n.setLang(l.code)">{{ l.label }}</button>
+              }
+            </div>
+          </div>
 
-          <label>{{ i18n.t('login.email') }}</label>
-          <input name="email" type="email" [(ngModel)]="email" autocomplete="username" required />
-
-          <label>{{ i18n.t('login.password') }}</label>
-          <input name="password" type="password" [(ngModel)]="password" autocomplete="current-password" required />
-
-          @if (passwordExpired()) {
-            <div class="error">{{ i18n.t('login.expired') }}</div>
-            <label>{{ i18n.t('login.newPassword') }}</label>
-            <input name="newPassword" type="password" [(ngModel)]="newPassword" autocomplete="new-password" />
-            <div class="muted hint">{{ i18n.t('login.newPasswordHint') }}</div>
+          @if (tenantSlug(); as slug) {
+            <div class="tenantline">
+              <span class="tenantchip" [title]="i18n.t('login.tenantChipHint')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M3 21h18 M5 21V7l8-4v18 M19 21V11l-6-4 M9 9v.01 M9 12v.01 M9 15v.01 M9 18v.01" />
+                </svg>
+                {{ slug }}
+              </span>
+              <span class="muted">{{ i18n.t('login.notYourLab') }}</span>
+            </div>
+          } @else {
+            <div class="platformline">{{ i18n.t('login.platformMode') }}</div>
+            <div class="muted hint">{{ i18n.t('login.labUrlHint') }}</div>
           }
 
-          @if (mfaRequired()) {
-            <label>{{ i18n.t('login.mfa') }}</label>
-            <input name="mfa" inputmode="numeric" [(ngModel)]="mfaCode" autocomplete="one-time-code" />
-            <div class="muted hint">{{ i18n.t('login.mfaPrompt') }}</div>
-          }
+          <form (ngSubmit)="submit()">
+            <label>{{ i18n.t('login.email') }}</label>
+            <input name="email" type="email" [(ngModel)]="email" autocomplete="username" required />
 
-          <button type="submit" class="signin" [disabled]="busy()">
-            {{ busy() ? i18n.t('common.loading') : i18n.t('login.submit') }}
-          </button>
+            <label>{{ i18n.t('login.password') }}</label>
+            <input name="password" type="password" [(ngModel)]="password" autocomplete="current-password" required />
 
-          @if (error()) { <div class="error">{{ error() }}</div> }
-        </form>
-        </div>
-        <div class="foot">National Technology · NT.QAMS</div>
+            @if (passwordExpired()) {
+              <div class="error">{{ i18n.t('login.expired') }}</div>
+              <label>{{ i18n.t('login.newPassword') }}</label>
+              <input name="newPassword" type="password" [(ngModel)]="newPassword" autocomplete="new-password" />
+              <div class="muted hint">{{ i18n.t('login.newPasswordHint') }}</div>
+            }
+
+            @if (mfaRequired()) {
+              <label>{{ i18n.t('login.mfa') }}</label>
+              <input name="mfa" inputmode="numeric" [(ngModel)]="mfaCode" autocomplete="one-time-code" />
+              <div class="muted hint">{{ i18n.t('login.mfaPrompt') }}</div>
+            }
+
+            <button type="submit" class="signin" [disabled]="busy()">
+              {{ busy() ? i18n.t('common.loading') : i18n.t('login.submit') }}
+            </button>
+
+            @if (error()) { <div class="error">{{ error() }}</div> }
+          </form>
+        </section>
       </div>
     </div>
   `,
   styles: [`
-    .wrap { min-height: 100vh; display: grid; place-items: center; padding: 1rem;
-            background: linear-gradient(135deg, #1E3A5F 0%, #16314f 60%, #0f2338 100%); }
+    .wrap { min-height: 100vh; display: grid; place-items: center; padding: 1.5rem;
+            background: linear-gradient(135deg, #10263e 0%, #16314f 55%, #0d3a4a 100%); }
     .panel {
-      width: 400px; max-width: 100%; background: var(--nt-surface);
-      border-radius: 8px; box-shadow: var(--nt-shadow-pop); overflow: hidden;
+      width: 880px; max-width: 100%; display: grid; grid-template-columns: 1.05fr 1fr;
+      background: var(--nt-surface); border-radius: var(--nt-radius-login);
+      box-shadow: var(--nt-shadow-pop); overflow: hidden;
     }
-    .brandstrip { height: 6px; background: var(--nt-header-grad); }
-    .inner { padding: 24px 28px 20px; }
-    .head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    .head select { width: auto; }
-    .logo { height: 42px; }
-    .subtitle { font-size: 12px; color: var(--nt-grey-d); margin: 8px 0 16px; }
-    h2 { font-size: 15px; font-weight: 700; color: var(--nt-slate); margin: 0 0 4px; }
-    .hint { margin-top: 3px; }
+
+    /* brand side */
+    .brand {
+      background: var(--nt-header-grad); color: #fff; padding: 44px 36px;
+      display: flex; flex-direction: column; align-items: flex-start;
+    }
+    .logocard { background: #fff; border-radius: 10px; padding: 12px 18px; }
+    .logocard img { height: 54px; display: block; }
+    .brand h1 { font-size: 19px; font-weight: 800; margin: 26px 0 0; letter-spacing: .01em; }
+    .tagline { font-size: 13px; opacity: .92; margin: 10px 0 0; line-height: 1.6; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+    .chip {
+      font-size: 11px; font-weight: 700; letter-spacing: .03em;
+      border: 1px solid rgba(255,255,255,.45); border-radius: 999px; padding: 4px 12px;
+      background: rgba(255,255,255,.08);
+    }
+    .brandfoot { margin-top: auto; padding-top: 32px; font-size: 11.5px; opacity: .75; font-weight: 600; }
+
+    /* form side */
+    .form { padding: 36px 34px 30px; }
+    .formhead { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+    h2 { font-size: 17px; font-weight: 800; color: var(--nt-navy-deep); margin: 0; }
+    .langswitch {
+      display: inline-flex; background: var(--nt-filter-grey); border-radius: 999px; padding: 3px;
+    }
+    .langswitch button {
+      width: auto; background: transparent; color: var(--nt-slate);
+      font-size: 11.5px; font-weight: 700; padding: 5px 12px; border-radius: 999px;
+    }
+    .langswitch button.active { background: #fff; color: var(--nt-blue); box-shadow: var(--nt-shadow-xs); }
+
+    .tenantline { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .tenantchip {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: var(--nt-brand-soft); color: var(--nt-blue);
+      font-size: 12.5px; font-weight: 700; border-radius: 999px; padding: 5px 14px;
+    }
+    .tenantchip svg { width: 14px; height: 14px; }
+    .tenantline .muted { font-size: 11.5px; }
+    .platformline { font-size: 13px; font-weight: 700; color: var(--nt-teal); margin-bottom: 4px; }
+    .hint { margin: 2px 0 14px; }
+
+    label { margin-top: 12px; }
     .signin {
-      margin-top: 20px; width: 100%; border-radius: var(--nt-radius-login);
-      padding: 11px 16px; font-size: 14px; font-weight: 700;
+      margin-top: 22px; width: 100%; border-radius: 10px;
+      padding: 12px 16px; font-size: 14px; font-weight: 700;
     }
-    .foot {
-      text-align: center; font-size: 12px; font-weight: 700; color: var(--nt-navy-deep);
-      border-top: 1px solid var(--nt-filter-grey); padding: 12px;
+
+    @media (max-width: 760px) {
+      .panel { grid-template-columns: 1fr; }
+      .brand { padding: 28px 28px 24px; }
+      .brandfoot { padding-top: 20px; }
     }
   `],
 })
@@ -90,25 +158,29 @@ export class LoginComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
-  tenant = '';
+  readonly langs: { code: Lang; label: string }[] = [
+    { code: 'en', label: 'EN' },
+    { code: 'ar', label: 'ع' },
+    { code: 'fr', label: 'FR' },
+  ];
+
+  /** The lab pinned by its /t/{slug} address — null means platform sign-in. */
+  readonly tenantSlug = computed(() => this.auth.tenantSlug());
+
   email = '';
   password = '';
   mfaCode = '';
+  newPassword = '';
 
   readonly busy = signal(false);
   readonly error = signal('');
   readonly mfaRequired = signal(false);
   readonly passwordExpired = signal(false);
-  newPassword = '';
-
-  onLang(event: Event): void {
-    this.i18n.setLang((event.target as HTMLSelectElement).value as Lang);
-  }
 
   submit(): void {
     this.error.set('');
     this.busy.set(true);
-    const tenant = this.tenant.trim() || null;
+    const tenant = this.tenantSlug();
 
     if (this.passwordExpired()) {
       this.auth.changePassword(tenant, this.email.trim(), this.password, this.newPassword).subscribe({

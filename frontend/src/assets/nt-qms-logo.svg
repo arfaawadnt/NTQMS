@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 300" role="img" aria-label="NT.QMS">
+  <defs>
+    <linearGradient id="shieldGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1D7BD8" />
+      <stop offset="1" stop-color="#0A4E9B" />
+    </linearGradient>
+    <linearGradient id="checkGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#19C2C2" />
+      <stop offset="1" stop-color="#0FA3A3" />
+    </linearGradient>
+  </defs>
+
+  <!-- circuit traces: left -->
+  <g stroke="#1D7BD8" stroke-width="7" fill="none" stroke-linecap="round">
+    <path d="M78 118 H44 L26 100" />
+    <path d="M74 150 H30" />
+    <path d="M78 182 H44 L26 200" />
+  </g>
+  <g fill="none" stroke="#1D7BD8" stroke-width="7">
+    <circle cx="18" cy="92" r="9" />
+    <circle cx="20" cy="150" r="9" />
+    <circle cx="18" cy="208" r="9" />
+  </g>
+
+  <!-- circuit traces: right -->
+  <g stroke="#1D7BD8" stroke-width="7" fill="none" stroke-linecap="round">
+    <path d="M222 128 H262" />
+    <path d="M226 162 H256 L272 178" />
+  </g>
+  <g fill="none" stroke="#1D7BD8" stroke-width="7">
+    <circle cx="272" cy="128" r="9" />
+    <circle cx="282" cy="186" r="9" />
+  </g>
+
+  <!-- shield -->
+  <path d="M150 22 L242 56 V150 C242 208 206 248 150 276 C94 248 58 208 58 150 V56 Z"
+        fill="none" stroke="url(#shieldGrad)" stroke-width="19" stroke-linejoin="round" />
+
+  <!-- document with folded corner -->
+  <g>
+    <path d="M108 84 H172 L200 112 V204 H108 Z" fill="#F4F7FA" stroke="#C7D3DE" stroke-width="5" stroke-linejoin="round" />
+    <path d="M172 84 V112 H200 Z" fill="#8FA6B8" />
+    <g stroke="#9FB3C4" stroke-width="9" stroke-linecap="round">
+      <path d="M126 138 H182" />
+      <path d="M126 162 H166" />
+    </g>
+  </g>
+
+  <!-- teal check overlapping the shield base -->
+  <path d="M96 176 L142 224 L226 128"
+        fill="none" stroke="url(#checkGrad)" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- wordmark: NT.QMS -->
+  <text x="316" y="196" font-family="'Encode Sans', 'Segoe UI', Arial, sans-serif" font-weight="800"
+        font-size="118" letter-spacing="2">
+    <tspan fill="#1565B8">NT</tspan><tspan fill="#1D7BD8">.</tspan><tspan fill="#00B2A9">Q</tspan><tspan fill="#2B3E54">MS</tspan>
+  </text>
+</svg>

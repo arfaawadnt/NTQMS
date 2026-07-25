@@ -81,16 +81,34 @@ const GROUPS_STATE_KEY = 'qams.sidebar.groups';
           </svg>
         </button>
         <div class="logobox">
-          <img src="assets/nt-qams-logo.png" alt="NT.QAMS" />
+          <img src="assets/nt-qms-logo.svg" alt="NT.QMS" />
         </div>
+        @if (!perms.isPlatformAdmin() && auth.tenantSlug(); as slug) {
+          <span class="tenantchip">{{ slug }}</span>
+        }
         <div class="ctitle">{{ i18n.t('app.subtitle') }}</div>
         <div class="right">
-          <div class="langtoggle">
-            <select [value]="i18n.lang()" (change)="onLang($event)" aria-label="Language">
-              <option value="en">EN</option>
-              <option value="ar">AR</option>
-              <option value="fr">FR</option>
-            </select>
+          @if (!perms.isPlatformAdmin()) {
+            <a class="hicon" routerLink="/dashboard" [attr.title]="i18n.t('nav.dashboard')" [attr.aria-label]="i18n.t('nav.dashboard')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10" />
+              </svg>
+            </a>
+            <a class="hicon" routerLink="/tasks" [attr.title]="i18n.t('nav.tasks')" [attr.aria-label]="i18n.t('nav.tasks')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M9 11l3 3L22 4 M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+              </svg>
+            </a>
+            <a class="hicon" routerLink="/notifications" [attr.title]="i18n.t('nav.notifications')" [attr.aria-label]="i18n.t('nav.notifications')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+            </a>
+          }
+          <div class="langswitch" role="group" aria-label="Language">
+            @for (l of langs; track l.code) {
+              <button type="button" [class.active]="i18n.lang() === l.code" (click)="i18n.setLang(l.code)">{{ l.label }}</button>
+            }
           </div>
           <div class="who">
             <span class="avatar">{{ initials() }}</span>
@@ -147,18 +165,30 @@ const GROUPS_STATE_KEY = 'qams.sidebar.groups';
       height: 58px; background: var(--nt-header-grad); display: flex; align-items: center;
       gap: 14px; padding: 0 16px; flex-shrink: 0; color: #fff;
     }
-    .logobox { background: #fff; border-radius: 6px; padding: 6px 12px; display: flex; align-items: center; }
-    .logobox img { height: 30px; display: block; }
-    .ctitle { font-size: 15px; font-weight: 700; letter-spacing: .01em; opacity: .97; }
-    .right { margin-inline-start: auto; display: flex; align-items: center; gap: 10px; }
-    .langtoggle select {
-      width: auto; background: transparent; border: 1px solid rgba(255,255,255,.4);
-      border-radius: 999px; padding: 5px 26px 5px 12px; font-weight: 600; font-size: 12.5px; color: #fff;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-      background-position: right 8px center;
+    .logobox { background: #fff; border-radius: 6px; padding: 5px 12px; display: flex; align-items: center; }
+    .logobox img { height: 32px; display: block; }
+    .tenantchip {
+      font-size: 12px; font-weight: 700; letter-spacing: .02em;
+      border: 1px solid rgba(255,255,255,.5); border-radius: 999px; padding: 3px 12px;
+      background: rgba(255,255,255,.12); white-space: nowrap;
     }
-    .langtoggle select:focus { box-shadow: 0 0 0 2px rgba(255,255,255,.25); border-color: #fff; }
-    .langtoggle option { color: var(--nt-slate); }
+    .ctitle { font-size: 15px; font-weight: 700; letter-spacing: .01em; opacity: .97; }
+    .right { margin-inline-start: auto; display: flex; align-items: center; gap: 8px; }
+    .hicon {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 34px; height: 34px; border-radius: 8px; color: #fff;
+    }
+    .hicon:hover { background: rgba(255,255,255,.15); }
+    .hicon svg { width: 18px; height: 18px; }
+    .langswitch {
+      display: inline-flex; background: rgba(255,255,255,.14); border-radius: 999px; padding: 3px;
+      border: 1px solid rgba(255,255,255,.28);
+    }
+    .langswitch button {
+      width: auto; background: transparent; color: #fff;
+      font-size: 11.5px; font-weight: 700; padding: 4px 11px; border-radius: 999px; border: none;
+    }
+    .langswitch button.active { background: #fff; color: var(--nt-blue); }
     .who { display: flex; align-items: center; gap: 8px; }
     .avatar {
       width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,.22);
@@ -369,9 +399,12 @@ export class ShellComponent {
     return new Set(['overview', 'improvement', 'platform']);
   }
 
-  onLang(event: Event): void {
-    this.i18n.setLang((event.target as HTMLSelectElement).value as Lang);
-  }
+  /** Language switcher segments (Arabic shown by its own letter, per the prototype). */
+  readonly langs: { code: Lang; label: string }[] = [
+    { code: 'en', label: 'EN' },
+    { code: 'ar', label: 'ع' },
+    { code: 'fr', label: 'FR' },
+  ];
 
   signOut(): void {
     this.auth.logout();

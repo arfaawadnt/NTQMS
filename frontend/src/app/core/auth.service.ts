@@ -13,6 +13,7 @@ interface StoredSession {
 }
 
 const STORAGE_KEY = 'qams.session';
+const TENANT_SLUG_KEY = 'qams.tenant.slug';
 
 /**
  * Holds the JWT session (signals for reactive UI) and drives the login /
@@ -29,6 +30,25 @@ export class AuthService {
   readonly displayName = computed(() => this.session()?.displayName ?? '');
   readonly role = computed(() => this.session()?.role ?? '');
   readonly tenantId = computed(() => this.session()?.tenantId ?? null);
+
+  /**
+   * The laboratory this browser signs into, taken from the tenant's own URL
+   * (/t/{slug}) — never typed at the login form. Survives logout so the next
+   * sign-in stays on the same lab.
+   */
+  private readonly _tenantSlug = signal<string | null>(localStorage.getItem(TENANT_SLUG_KEY));
+  readonly tenantSlug = this._tenantSlug.asReadonly();
+
+  setTenantSlug(slug: string | null): void {
+    const normalized = slug?.trim().toLowerCase() || null;
+    if (normalized) {
+      localStorage.setItem(TENANT_SLUG_KEY, normalized);
+    } else {
+      localStorage.removeItem(TENANT_SLUG_KEY);
+    }
+
+    this._tenantSlug.set(normalized);
+  }
 
   constructor(private readonly http: HttpClient) {}
 

@@ -4,6 +4,11 @@ import { platformOnlyGuard, tenantOnlyGuard } from './core/role.guard';
 
 export const routes: Routes = [
   {
+    // Tenant front door: /t/{lab} pins the laboratory for this browser.
+    path: 't/:tenant',
+    loadComponent: () => import('./features/login/tenant-entry.component').then((m) => m.TenantEntryComponent),
+  },
+  {
     path: 'login',
     loadComponent: () => import('./features/login/login.component').then((m) => m.LoginComponent),
   },
