@@ -927,6 +927,63 @@ export interface CreateSigmaAssessmentRequest {
   cvPct: number;
 }
 
+// ── Precision Study (CLSI EP05) ─────────────────────────────────────────────
+
+export interface PrecisionMeasurement {
+  id: string;
+  runLabel: string;
+  value: number;
+}
+
+export interface PrecisionRun {
+  runLabel: string;
+  replicateCount: number;
+  mean: number;
+}
+
+export interface PrecisionListItem {
+  id: string;
+  studyRef: string;
+  analyte: string;
+  level: string;
+  state: string;
+  repeatabilityCvPct: number | null;
+  withinLabCvPct: number | null;
+  meetsWithinLabClaim: boolean | null;
+}
+
+export interface PrecisionDetail {
+  id: string;
+  studyRef: string;
+  analyte: string;
+  unit: string;
+  level: string;
+  claimedRepeatabilityCvPct: number | null;
+  claimedWithinLabCvPct: number | null;
+  state: string;
+  grandMean: number | null;
+  repeatabilitySd: number | null;
+  repeatabilityCvPct: number | null;
+  betweenRunSd: number | null;
+  betweenRunCvPct: number | null;
+  withinLabSd: number | null;
+  withinLabCvPct: number | null;
+  meetsRepeatabilityClaim: boolean | null;
+  meetsWithinLabClaim: boolean | null;
+  signedOffBy: string | null;
+  signedOffAtUtc: string | null;
+  measurements: PrecisionMeasurement[];
+  runs: PrecisionRun[];
+}
+
+export interface CreatePrecisionStudyRequest {
+  analyte: string;
+  unit: string;
+  level: string;
+  claimedRepeatabilityCvPct: number | null;
+  claimedWithinLabCvPct: number | null;
+}
+
 // ── Personnel Authorization Matrix (ISO 17025 §6.2.6) ───────────────────────
 
 export const AUTHORIZATION_SCOPES = ['Perform', 'ReviewAndRelease', 'Train'] as const;

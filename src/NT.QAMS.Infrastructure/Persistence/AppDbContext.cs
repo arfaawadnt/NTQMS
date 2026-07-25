@@ -73,6 +73,7 @@ public sealed class AppDbContext(
     public DbSet<DetectionLimitStudy> DetectionLimitStudies => Set<DetectionLimitStudy>();
     public DbSet<ReferenceIntervalStudy> ReferenceIntervalStudies => Set<ReferenceIntervalStudy>();
     public DbSet<SigmaAssessment> SigmaAssessments => Set<SigmaAssessment>();
+    public DbSet<PrecisionStudy> PrecisionStudies => Set<PrecisionStudy>();
     public DbSet<PtEnrollment> PtEnrollments => Set<PtEnrollment>();
     public DbSet<PtPlan> PtPlans => Set<PtPlan>();
     public DbSet<AuditTrailReview> AuditTrailReviews => Set<AuditTrailReview>();

@@ -267,3 +267,29 @@ public sealed class SigmaAssessmentConfiguration : IEntityTypeConfiguration<Sigm
         builder.Ignore(a => a.DomainEvents);
     }
 }
+
+public sealed class PrecisionStudyConfiguration : IEntityTypeConfiguration<PrecisionStudy>
+{
+    public void Configure(EntityTypeBuilder<PrecisionStudy> builder)
+    {
+        builder.ToTable("precision_study", "qams");
+        builder.HasKey(s => s.Id);
+        builder.Property(s => s.StudyRef).HasMaxLength(30);
+        builder.Property(s => s.Analyte).HasMaxLength(200);
+        builder.Property(s => s.Unit).HasMaxLength(50);
+        builder.Property(s => s.Level).HasMaxLength(100);
+        builder.Property(s => s.State).HasConversion<string>().HasMaxLength(20);
+        builder.HasIndex(s => new { s.TenantId, s.StudyRef }).IsUnique();
+        builder.HasIndex(s => new { s.TenantId, s.State });
+
+        builder.OwnsMany(s => s.Measurements, m =>
+        {
+            m.ToTable("precision_measurement", "qams");
+            m.WithOwner().HasForeignKey("study_id");
+            m.HasKey(x => x.Id);
+            m.Property(x => x.RunLabel).HasMaxLength(60);
+        });
+
+        builder.Ignore(s => s.DomainEvents);
+    }
+}

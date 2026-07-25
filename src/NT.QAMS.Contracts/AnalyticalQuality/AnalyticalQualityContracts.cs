@@ -149,6 +149,32 @@ public sealed record SigmaAssessmentDetailDto(
     decimal SigmaValue, string Grade, string QcRecommendation, string State,
     Guid? SignedOffBy, DateTimeOffset? SignedOffAtUtc);
 
+// ── Precision Study (CLSI EP05) ─────────────────────────────────────────────
+
+public sealed record CreatePrecisionStudyRequest(
+    string Analyte, string Unit, string Level,
+    decimal? ClaimedRepeatabilityCvPct, decimal? ClaimedWithinLabCvPct);
+
+public sealed record AddPrecisionMeasurementRequest(string RunLabel, decimal Value);
+
+public sealed record PrecisionMeasurementDto(Guid Id, string RunLabel, decimal Value);
+
+public sealed record PrecisionRunDto(string RunLabel, int ReplicateCount, decimal Mean);
+
+public sealed record PrecisionListItemDto(
+    Guid Id, string StudyRef, string Analyte, string Level, string State,
+    decimal? RepeatabilityCvPct, decimal? WithinLabCvPct, bool? MeetsWithinLabClaim);
+
+public sealed record PrecisionDetailDto(
+    Guid Id, string StudyRef, string Analyte, string Unit, string Level,
+    decimal? ClaimedRepeatabilityCvPct, decimal? ClaimedWithinLabCvPct, string State,
+    decimal? GrandMean, decimal? RepeatabilitySd, decimal? RepeatabilityCvPct,
+    decimal? BetweenRunSd, decimal? BetweenRunCvPct, decimal? WithinLabSd, decimal? WithinLabCvPct,
+    bool? MeetsRepeatabilityClaim, bool? MeetsWithinLabClaim,
+    Guid? SignedOffBy, DateTimeOffset? SignedOffAtUtc,
+    IReadOnlyList<PrecisionMeasurementDto> Measurements,
+    IReadOnlyList<PrecisionRunDto> Runs);
+
 // ── PT/EQA Annual Plan (ISO 17025 §7.7.2) ───────────────────────────────────
 
 public sealed record CreatePtPlanRequest(int Year);

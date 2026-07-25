@@ -262,6 +262,16 @@ export const routes: Routes = [
             ],
           },
           {
+            path: 'precision-studies',
+            loadComponent: () => import('./features/analytical/precision-list.component').then((m) => m.PrecisionListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/analytical/precision-detail.component').then((m) => m.PrecisionDetailComponent),
+              },
+            ],
+          },
+          {
             path: 'uncertainty',
             loadComponent: () => import('./features/analytical/uncertainty-list.component').then((m) => m.UncertaintyListComponent),
             children: [
