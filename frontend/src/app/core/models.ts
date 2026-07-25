@@ -404,6 +404,76 @@ export interface EquipmentDetail {
   nextCalibrationDue: string | null;
   calibrations: CalibrationRecord[];
   maintenance: MaintenanceRecord[];
+  intermediateChecks: IntermediateCheck[];
+}
+
+export interface IntermediateCheck {
+  id: string;
+  performedOn: string;
+  performedById: string;
+  checkType: string;
+  passed: boolean;
+  referenceStandardId: string | null;
+  remarks: string | null;
+}
+
+export interface RecordIntermediateCheckRequest {
+  performedOn: string;
+  checkType: string;
+  passed: boolean;
+  referenceStandardId: string | null;
+  remarks: string | null;
+}
+
+// ── Metrological Traceability (ISO 17025 §6.5) ──────────────────────────────
+
+export const REFERENCE_STANDARD_TYPES = ['CertifiedReferenceMaterial', 'ReferenceStandard', 'WorkingStandard'] as const;
+export type ReferenceStandardType = (typeof REFERENCE_STANDARD_TYPES)[number];
+
+export interface ReferenceStandardListItem {
+  id: string;
+  standardRef: string;
+  name: string;
+  type: string;
+  traceableTo: string;
+  status: string;
+  expiresOn: string | null;
+  branchId: string | null;
+  departmentId: string | null;
+}
+
+export interface ReferenceStandardDetail {
+  id: string;
+  standardRef: string;
+  name: string;
+  type: string;
+  traceableTo: string;
+  manufacturer: string | null;
+  lotNumber: string | null;
+  certificateNumber: string | null;
+  certifiedValue: string | null;
+  uncertaintyStatement: string | null;
+  receivedOn: string;
+  expiresOn: string | null;
+  status: string;
+  quarantineReason: string | null;
+  branchId: string | null;
+  departmentId: string | null;
+}
+
+export interface RegisterReferenceStandardRequest {
+  name: string;
+  type: ReferenceStandardType;
+  traceableTo: string;
+  manufacturer: string | null;
+  lotNumber: string | null;
+  certificateNumber: string | null;
+  certifiedValue: string | null;
+  uncertaintyStatement: string | null;
+  receivedOn: string;
+  expiresOn: string | null;
+  branchId: string | null;
+  departmentId: string | null;
 }
 
 export interface RegisterEquipmentRequest {

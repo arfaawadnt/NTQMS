@@ -38,6 +38,35 @@ public sealed class MaintenanceRecord : Entity
 }
 
 /// <summary>
+/// Between-calibration confidence check (ISO 17025 §6.4.10): a zero/drift/
+/// control check against a reference standard. A failed check questions every
+/// result since the last good check, so it raises an event that opens an NC.
+/// </summary>
+public sealed class IntermediateCheck : Entity
+{
+    internal IntermediateCheck(
+        DateOnly performedOn, Guid performedById, string checkType,
+        bool passed, Guid? referenceStandardId, string? remarks)
+    {
+        PerformedOn = performedOn;
+        PerformedById = performedById;
+        CheckType = checkType;
+        Passed = passed;
+        ReferenceStandardId = referenceStandardId;
+        Remarks = remarks;
+    }
+
+    private IntermediateCheck() { CheckType = null!; }
+
+    public DateOnly PerformedOn { get; private set; }
+    public Guid PerformedById { get; private set; }
+    public string CheckType { get; private set; }
+    public bool Passed { get; private set; }
+    public Guid? ReferenceStandardId { get; private set; }
+    public string? Remarks { get; private set; }
+}
+
+/// <summary>
 /// Instrument/equipment with the canonical calibration state machine:
 /// registered as NeedsCalibration (first calibration activates) → Active →
 /// NeedsCalibration (due date reached) → OutOfService (grace exhausted) →
@@ -49,6 +78,7 @@ public sealed class EquipmentItem : AggregateRoot, ITenantScoped, IAllocatable
 {
     private readonly List<CalibrationRecord> _calibrations = [];
     private readonly List<MaintenanceRecord> _maintenance = [];
+    private readonly List<IntermediateCheck> _intermediateChecks = [];
 
     private EquipmentItem()
     {
@@ -72,6 +102,7 @@ public sealed class EquipmentItem : AggregateRoot, ITenantScoped, IAllocatable
 
     public IReadOnlyList<CalibrationRecord> Calibrations => _calibrations.AsReadOnly();
     public IReadOnlyList<MaintenanceRecord> Maintenance => _maintenance.AsReadOnly();
+    public IReadOnlyList<IntermediateCheck> IntermediateChecks => _intermediateChecks.AsReadOnly();
 
     public static EquipmentItem Register(
         string code, string name, string serialNumber, string? location,
@@ -174,6 +205,39 @@ public sealed class EquipmentItem : AggregateRoot, ITenantScoped, IAllocatable
         _maintenance.Add(new MaintenanceRecord(performedAt, workDescription.Trim()));
     }
 
+    /// <summary>
+    /// Records a between-calibration confidence check (§6.4.10). A failure
+    /// raises IntermediateCheckFailed so the improvement context opens an NC —
+    /// results since the last good check may be affected.
+    /// </summary>
+    public Guid RecordIntermediateCheck(
+        DateOnly performedOn, Guid performedById, string checkType,
+        bool passed, Guid? referenceStandardId, string? remarks)
+    {
+        if (Status == EquipmentStatus.Retired)
+        {
+            throw new InvalidStateTransitionException("EQP-020", "Retired equipment cannot receive intermediate checks.");
+        }
+
+        if (string.IsNullOrWhiteSpace(checkType))
+        {
+            throw new DomainException("EQP-021", "A check type is required.");
+        }
+
+        var check = new IntermediateCheck(
+            performedOn, performedById, checkType.Trim(), passed, referenceStandardId,
+            string.IsNullOrWhiteSpace(remarks) ? null : remarks.Trim());
+        _intermediateChecks.Add(check);
+
+        if (!passed)
+        {
+            Raise(new IntermediateCheckFailed(
+                Id, Code, Name, check.Id, check.CheckType, performedOn, performedById, TenantId));
+        }
+
+        return check.Id;
+    }
+
     public void Retire()
     {
         if (Status == EquipmentStatus.Retired)
@@ -194,3 +258,7 @@ public sealed record EquipmentLockedOut(Guid EquipmentId, string Code, string Na
 public sealed record EquipmentReturnedToService(Guid EquipmentId, string Code, Guid TenantId) : DomainEvent;
 
 public sealed record EquipmentRetired(Guid EquipmentId, string Code, Guid TenantId) : DomainEvent;
+
+public sealed record IntermediateCheckFailed(
+    Guid EquipmentId, string Code, string Name, Guid CheckId, string CheckType,
+    DateOnly PerformedOn, Guid PerformedById, Guid TenantId) : DomainEvent;

@@ -43,6 +43,7 @@ public sealed class AppDbContext(
     public DbSet<FileReference> Files => Set<FileReference>();
     public DbSet<Audit> Audits => Set<Audit>();
     public DbSet<EquipmentItem> EquipmentItems => Set<EquipmentItem>();
+    public DbSet<ReferenceStandard> ReferenceStandards => Set<ReferenceStandard>();
     public DbSet<CompetencyRecord> Competencies => Set<CompetencyRecord>();
     public DbSet<TrainingAssignment> TrainingAssignments => Set<TrainingAssignment>();
     public DbSet<RiskItem> Risks => Set<RiskItem>();

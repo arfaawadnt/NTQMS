@@ -1,14 +1,19 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { EquipmentFacade } from './equipment.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
+import { OrgDataService } from '../../core/org-data.service';
+import { ReferenceStandardsApiService } from '../../core/api/reference-standards-api.service';
+import { ReferenceStandardListItem } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { WorkflowStepperComponent } from '../../shared/ui/workflow-stepper.component';
 import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
+import { LovSelectComponent } from '../../shared/ui/lov-select.component';
 
 /**
  * Equipment workspace: calibration status + logs (with certificate upload +
@@ -19,7 +24,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
   selector: 'qams-equipment-detail',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+  imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, LovSelectComponent],
   template: `
     @if (item(); as e) {
       <qams-page-header [title]="e.code + ' — ' + e.name" [subtitle]="e.serialNumber">
@@ -75,7 +80,66 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
           }
         </section>
       </div>
-    
+
+      <section class="card checks">
+        <h3>{{ i18n.t('equip.checks') }} <span class="muted">(ISO 17025 §6.4.10)</span></h3>
+        @if (e.intermediateChecks.length === 0) { <p class="muted">{{ i18n.t('equip.noChecks') }}</p> }
+        @else {
+          <table>
+            <thead><tr>
+              <th>{{ i18n.t('equip.performedAt') }}</th><th>{{ i18n.t('equip.checkType') }}</th>
+              <th>{{ i18n.t('val.verdict') }}</th><th>{{ i18n.t('equip.standardUsed') }}</th>
+              <th>{{ i18n.t('equip.performedBy') }}</th><th>{{ i18n.t('equip.remarks') }}</th>
+            </tr></thead>
+            <tbody>
+              @for (c of e.intermediateChecks; track c.id) {
+                <tr>
+                  <td>{{ c.performedOn | date:'mediumDate' }}</td>
+                  <td>{{ c.checkType }}</td>
+                  <td>
+                    @if (c.passed) { <qams-status-pill status="Pass" /> }
+                    @else { <qams-status-pill status="Failed" /> }
+                  </td>
+                  <td>{{ standardName(c.referenceStandardId) }}</td>
+                  <td>{{ org.userName(c.performedById) || '—' }}</td>
+                  <td class="muted">{{ c.remarks ?? '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+        @if (e.status !== 'Retired') {
+          <form [formGroup]="checkForm" (ngSubmit)="recordCheck(e.id)">
+            <div class="check-grid">
+              <div><label>{{ i18n.t('equip.performedAt') }}</label><input type="date" formControlName="performedOn" /></div>
+              <div>
+                <label>{{ i18n.t('equip.checkType') }}</label>
+                <qams-lov-select formControlName="checkType" category="INTERMEDIATE_CHECK_TYPE" [placeholder]="i18n.t('equip.checkTypeHint')" />
+              </div>
+              <div>
+                <label>{{ i18n.t('equip.standardUsed') }}</label>
+                <select formControlName="referenceStandardId">
+                  <option [value]="''">{{ i18n.t('common.optional') }}</option>
+                  @for (s of activeStandards(); track s.id) {
+                    <option [value]="s.id">{{ s.standardRef }} — {{ s.name }}</option>
+                  }
+                </select>
+              </div>
+              <div>
+                <label>{{ i18n.t('val.verdict') }}</label>
+                <select formControlName="passed">
+                  <option [value]="'true'">{{ i18n.t('equip.pass') }}</option>
+                  <option [value]="'false'">{{ i18n.t('equip.fail') }}</option>
+                </select>
+              </div>
+              <div class="wide"><label>{{ i18n.t('equip.remarks') }}</label><input formControlName="remarks" /></div>
+            </div>
+            <div class="hint">{{ i18n.t('equip.failNote') }}</div>
+            <button type="submit" [disabled]="checkForm.invalid">{{ i18n.t('equip.recordCheck') }}</button>
+          </form>
+        }
+      </section>
+
       <qams-audit-trail [subject]="e.id" />
     } @else {
       <p class="muted">{{ i18n.t('common.loading') }}</p>
@@ -86,6 +150,10 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
     .meta span.muted { display: block; font-size: .75rem; }
     .meta button { width: auto; margin-inline-start: auto; }
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
+    .checks { margin-top: 1rem; }
+    .check-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .check-grid .wide { grid-column: 1 / -1; }
+    @media (max-width: 900px) { .check-grid { grid-template-columns: 1fr 1fr; } }
     .row-item { padding: .5rem 0; border-bottom: 1px solid var(--nt-border); display: flex; justify-content: space-between; gap: 1rem; }
     form { border-top: 1px solid var(--nt-border); padding-top: .75rem; margin-top: .75rem; }
     form button { width: auto; margin-top: .5rem; }
@@ -97,6 +165,8 @@ export class EquipmentDetailComponent implements OnInit {
   readonly facade = inject(EquipmentFacade);
   readonly i18n = inject(I18nService);
   readonly perms = inject(PermissionsService);
+  readonly org = inject(OrgDataService);
+  private readonly standardsApi = inject(ReferenceStandardsApiService);
   private readonly fb = inject(FormBuilder);
 
   /** Route-bound equipment id. */
@@ -117,8 +187,44 @@ export class EquipmentDetailComponent implements OnInit {
     performedAt: ['', [Validators.required]],
     workDescription: ['', [Validators.required, Validators.maxLength(2000)]],
   });
+  readonly checkForm = this.fb.nonNullable.group({
+    performedOn: ['', [Validators.required]],
+    checkType: ['', [Validators.required, Validators.maxLength(200)]],
+    referenceStandardId: [''],
+    passed: ['true'],
+    remarks: ['', [Validators.maxLength(2000)]],
+  });
 
-  ngOnInit(): void { void this.facade.loadDetail(this.id()); }
+  /** Full register for name resolution; the dropdown offers only active entries. */
+  private readonly standards = signal<ReferenceStandardListItem[]>([]);
+  readonly activeStandards = computed(() => this.standards().filter((s) => s.status === 'Active'));
+
+  ngOnInit(): void {
+    void this.facade.loadDetail(this.id());
+    void this.org.ensureDirectory();
+    void firstValueFrom(this.standardsApi.list())
+      .then((standards) => this.standards.set(standards))
+      .catch(() => this.standards.set([]));
+  }
+
+  /** Ref label for a standard id ('—' when none was used). */
+  standardName(id: string | null): string {
+    if (!id) { return '—'; }
+    return this.standards().find((s) => s.id === id)?.standardRef ?? id.slice(0, 8);
+  }
+
+  async recordCheck(id: string): Promise<void> {
+    if (this.checkForm.invalid) { return; }
+    const raw = this.checkForm.getRawValue();
+    await this.facade.recordCheck(id, {
+      performedOn: raw.performedOn,
+      checkType: raw.checkType,
+      passed: raw.passed === 'true',
+      referenceStandardId: raw.referenceStandardId || null,
+      remarks: raw.remarks.trim() || null,
+    });
+    this.checkForm.reset({ passed: 'true', referenceStandardId: '' });
+  }
 
   onCert(event: Event): void { this.certificate.set((event.target as HTMLInputElement).files?.[0] ?? null); }
 

@@ -46,6 +46,16 @@ public sealed class EquipmentController(ISender sender) : ControllerBase
         return NoContent();
     }
 
+    [HttpPost("{id:guid}/checks")]
+    public async Task<IActionResult> RecordIntermediateCheck(
+        Guid id, RecordIntermediateCheckRequest request, CancellationToken ct) =>
+        Ok(new
+        {
+            checkId = await sender.Send(new RecordIntermediateCheckCommand(
+                id, request.PerformedOn, request.CheckType, request.Passed,
+                request.ReferenceStandardId, request.Remarks), ct),
+        });
+
     [HttpPost("{id:guid}/retire")]
     [Authorize(Roles = "QualityManager,TenantAdmin")]
     public async Task<IActionResult> Retire(Guid id, CancellationToken ct)

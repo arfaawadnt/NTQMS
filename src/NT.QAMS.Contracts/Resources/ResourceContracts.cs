@@ -20,12 +20,41 @@ public sealed record EquipmentListItemDto(
     Guid Id, string Code, string Name, string SerialNumber, string? Location,
     string Status, DateOnly? NextCalibrationDue, Guid? BranchId = null, Guid? DepartmentId = null);
 
+public sealed record RecordIntermediateCheckRequest(
+    DateOnly PerformedOn, string CheckType, bool Passed, Guid? ReferenceStandardId, string? Remarks);
+
+public sealed record IntermediateCheckDto(
+    Guid Id, DateOnly PerformedOn, Guid PerformedById, string CheckType,
+    bool Passed, Guid? ReferenceStandardId, string? Remarks);
+
 public sealed record EquipmentDetailDto(
     Guid Id, string Code, string Name, string SerialNumber, string? Location,
     string Status, int CalibrationIntervalDays, int GracePeriodDays,
     DateOnly? LastCalibrationAt, DateOnly? NextCalibrationDue,
     IReadOnlyList<CalibrationRecordDto> Calibrations,
-    IReadOnlyList<MaintenanceRecordDto> Maintenance);
+    IReadOnlyList<MaintenanceRecordDto> Maintenance,
+    IReadOnlyList<IntermediateCheckDto> IntermediateChecks);
+
+// ── Metrological Traceability (ISO 17025 §6.5) ──────────────────────────────
+
+public sealed record RegisterReferenceStandardRequest(
+    string Name, string Type, string TraceableTo,
+    string? Manufacturer, string? LotNumber, string? CertificateNumber,
+    string? CertifiedValue, string? UncertaintyStatement,
+    DateOnly ReceivedOn, DateOnly? ExpiresOn, Guid? BranchId = null, Guid? DepartmentId = null);
+
+public sealed record QuarantineReferenceStandardRequest(string Reason);
+
+public sealed record ReferenceStandardListItemDto(
+    Guid Id, string StandardRef, string Name, string Type, string TraceableTo,
+    string Status, DateOnly? ExpiresOn, Guid? BranchId = null, Guid? DepartmentId = null);
+
+public sealed record ReferenceStandardDetailDto(
+    Guid Id, string StandardRef, string Name, string Type, string TraceableTo,
+    string? Manufacturer, string? LotNumber, string? CertificateNumber,
+    string? CertifiedValue, string? UncertaintyStatement,
+    DateOnly ReceivedOn, DateOnly? ExpiresOn, string Status, string? QuarantineReason,
+    Guid? BranchId, Guid? DepartmentId);
 
 // ── Competency & Training ────────────────────────────────────────────────────
 

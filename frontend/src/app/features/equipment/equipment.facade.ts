@@ -4,7 +4,8 @@ import { Observable, firstValueFrom } from 'rxjs';
 import { EquipmentApiService } from '../../core/api/equipment-api.service';
 import { FilesApiService } from '../../core/api/files-api.service';
 import {
-  EquipmentDetail, EquipmentListItem, LogMaintenanceRequest, RegisterEquipmentRequest,
+  EquipmentDetail, EquipmentListItem, LogMaintenanceRequest,
+  RecordIntermediateCheckRequest, RegisterEquipmentRequest,
 } from '../../core/models';
 
 /** Signal-based facade for Equipment & Calibration, including certificate upload. */
@@ -48,6 +49,10 @@ export class EquipmentFacade {
 
   async logMaintenance(id: string, request: LogMaintenanceRequest): Promise<void> {
     await this.mutate(id, () => this.api.logMaintenance(id, request));
+  }
+
+  async recordCheck(id: string, request: RecordIntermediateCheckRequest): Promise<void> {
+    await this.mutate(id, () => this.api.recordCheck(id, request));
   }
 
   async retire(id: string): Promise<void> { await this.mutate(id, () => this.api.retire(id)); }

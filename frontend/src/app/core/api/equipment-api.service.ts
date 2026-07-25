@@ -3,8 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
-  CreatedResource, EquipmentDetail, EquipmentListItem,
-  LogCalibrationRequest, LogMaintenanceRequest, RegisterEquipmentRequest,
+  CreatedResource, EquipmentDetail, EquipmentListItem, LogCalibrationRequest,
+  LogMaintenanceRequest, RecordIntermediateCheckRequest, RegisterEquipmentRequest,
 } from '../models';
 
 /** Typed client for the Equipment & Calibration API (one method per backend endpoint). */
@@ -31,6 +31,10 @@ export class EquipmentApiService {
 
   logMaintenance(id: string, body: LogMaintenanceRequest): Observable<void> {
     return this.http.post<void>(`${this.base}/${id}/maintenance`, body);
+  }
+
+  recordCheck(id: string, body: RecordIntermediateCheckRequest): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/checks`, body);
   }
 
   retire(id: string): Observable<void> { return this.http.post<void>(`${this.base}/${id}/retire`, {}); }

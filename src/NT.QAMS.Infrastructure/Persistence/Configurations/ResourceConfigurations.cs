@@ -39,7 +39,42 @@ public sealed class EquipmentItemConfiguration : IEntityTypeConfiguration<Equipm
             m.Property(x => x.WorkDescription).HasMaxLength(2000);
         });
 
+        builder.OwnsMany(e => e.IntermediateChecks, check =>
+        {
+            check.ToTable("intermediate_check", "qams");
+            check.WithOwner().HasForeignKey("equipment_id");
+            check.HasKey(x => x.Id);
+            check.Property(x => x.CheckType).HasMaxLength(200);
+            check.Property(x => x.Remarks).HasMaxLength(2000);
+        });
+
         builder.Ignore(e => e.DomainEvents);
+    }
+}
+
+public sealed class ReferenceStandardConfiguration : IEntityTypeConfiguration<ReferenceStandard>
+{
+    public void Configure(EntityTypeBuilder<ReferenceStandard> builder)
+    {
+        builder.ToTable("reference_standard", "qams");
+        builder.HasKey(s => s.Id);
+
+        builder.Property(s => s.StandardRef).HasMaxLength(30);
+        builder.Property(s => s.Name).HasMaxLength(300);
+        builder.Property(s => s.Type).HasConversion<string>().HasMaxLength(40);
+        builder.Property(s => s.TraceableTo).HasMaxLength(500);
+        builder.Property(s => s.Manufacturer).HasMaxLength(200);
+        builder.Property(s => s.LotNumber).HasMaxLength(100);
+        builder.Property(s => s.CertificateNumber).HasMaxLength(100);
+        builder.Property(s => s.CertifiedValue).HasMaxLength(200);
+        builder.Property(s => s.UncertaintyStatement).HasMaxLength(200);
+        builder.Property(s => s.Status).HasConversion<string>().HasMaxLength(20);
+        builder.Property(s => s.QuarantineReason).HasMaxLength(1000);
+
+        builder.HasIndex(s => new { s.TenantId, s.StandardRef }).IsUnique();
+        builder.HasIndex(s => new { s.TenantId, s.Status });
+
+        builder.Ignore(s => s.DomainEvents);
     }
 }
 

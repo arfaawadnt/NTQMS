@@ -79,6 +79,16 @@ export const routes: Routes = [
             ],
           },
           {
+            path: 'reference-standards',
+            loadComponent: () => import('./features/equipment/standards-list.component').then((m) => m.StandardsListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/equipment/standards-detail.component').then((m) => m.StandardsDetailComponent),
+              },
+            ],
+          },
+          {
             path: 'competencies',
             loadComponent: () => import('./features/competency/competency-list.component').then((m) => m.CompetencyListComponent),
             children: [

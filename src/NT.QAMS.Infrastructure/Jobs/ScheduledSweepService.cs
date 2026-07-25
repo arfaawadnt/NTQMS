@@ -91,6 +91,13 @@ public sealed partial class ScheduledSweepService(
         supplierCandidates.ForEach(s => s.SuspendIfCertificateExpired(today));
         var suspended = supplierCandidates.Count(s => s.Status == SupplierStatus.Suspended);
 
+        var standardCandidates = await db.ReferenceStandards
+            .IgnoreQueryFilters()
+            .Where(s => s.Status == ReferenceStandardStatus.Active
+                        && s.ExpiresOn != null && s.ExpiresOn <= today)
+            .ToListAsync(ct);
+        standardCandidates.ForEach(s => s.MarkExpiredIfReached(today));
+
         var reviewCandidates = await db.Documents
             .IgnoreQueryFilters()
             .Where(d => d.Status == Domain.DocumentControl.DocumentStatus.Published

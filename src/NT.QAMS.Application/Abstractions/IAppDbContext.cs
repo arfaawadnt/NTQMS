@@ -35,6 +35,7 @@ public interface IAppDbContext
     DbSet<FileReference> Files { get; }
     DbSet<Audit> Audits { get; }
     DbSet<EquipmentItem> EquipmentItems { get; }
+    DbSet<ReferenceStandard> ReferenceStandards { get; }
     DbSet<CompetencyRecord> Competencies { get; }
     DbSet<TrainingAssignment> TrainingAssignments { get; }
     DbSet<RiskItem> Risks { get; }

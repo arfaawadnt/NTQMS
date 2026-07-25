@@ -67,6 +67,7 @@ internal static class EquipmentLoader
         await db.EquipmentItems
             .Include(e => e.Calibrations)
             .Include(e => e.Maintenance)
+            .Include(e => e.IntermediateChecks)
             .SingleOrDefaultAsync(e => e.Id == id, ct)
         ?? throw new DomainException("EQP-404", "Equipment not found.");
 }
@@ -102,6 +103,47 @@ public sealed class RetireEquipmentHandler(IAppDbContext db) : ICommandHandler<R
     {
         (await EquipmentLoader.LoadAsync(db, c.EquipmentId, ct)).Retire();
         await db.SaveChangesAsync(ct);
+    }
+}
+
+public sealed record RecordIntermediateCheckCommand(
+    Guid EquipmentId, DateOnly PerformedOn, string CheckType, bool Passed,
+    Guid? ReferenceStandardId, string? Remarks) : ICommand<Guid>;
+
+public sealed class RecordIntermediateCheckValidator : AbstractValidator<RecordIntermediateCheckCommand>
+{
+    public RecordIntermediateCheckValidator()
+    {
+        RuleFor(x => x.CheckType).NotEmpty().MaximumLength(200);
+        RuleFor(x => x.Remarks).MaximumLength(2000);
+    }
+}
+
+public sealed class RecordIntermediateCheckHandler(IAppDbContext db, ICurrentUser user)
+    : ICommandHandler<RecordIntermediateCheckCommand, Guid>
+{
+    public async Task<Guid> Handle(RecordIntermediateCheckCommand c, CancellationToken ct)
+    {
+        var actor = user.UserId
+            ?? throw new DomainException("AUTH-003", "An authenticated user is required.");
+
+        if (c.ReferenceStandardId is { } standardId)
+        {
+            var standard = await db.ReferenceStandards
+                .FirstOrDefaultAsync(s => s.Id == standardId, ct)
+                ?? throw new DomainException("RS-404", "Reference standard not found.");
+            if (standard.Status != ReferenceStandardStatus.Active)
+            {
+                throw new DomainException("RS-020",
+                    $"Standard {standard.StandardRef} is {standard.Status} — checks must use an active, in-date standard.");
+            }
+        }
+
+        var equipment = await EquipmentLoader.LoadAsync(db, c.EquipmentId, ct);
+        var checkId = equipment.RecordIntermediateCheck(
+            c.PerformedOn, actor, c.CheckType, c.Passed, c.ReferenceStandardId, c.Remarks);
+        await db.SaveChangesAsync(ct);
+        return checkId;
     }
 }
 
@@ -141,6 +183,7 @@ public sealed class GetEquipmentByIdHandler(IAppDbContext db)
             .AsNoTracking()
             .Include(x => x.Calibrations)
             .Include(x => x.Maintenance)
+            .Include(x => x.IntermediateChecks)
             .SingleOrDefaultAsync(x => x.Id == q.EquipmentId, ct)
             ?? throw new DomainException("EQP-404", "Equipment not found.");
 
@@ -152,6 +195,10 @@ public sealed class GetEquipmentByIdHandler(IAppDbContext db)
                 .ToList(),
             e.Maintenance.OrderByDescending(x => x.PerformedAt)
                 .Select(x => new MaintenanceRecordDto(x.Id, x.PerformedAt, x.WorkDescription))
+                .ToList(),
+            e.IntermediateChecks.OrderByDescending(x => x.PerformedOn)
+                .Select(x => new IntermediateCheckDto(
+                    x.Id, x.PerformedOn, x.PerformedById, x.CheckType, x.Passed, x.ReferenceStandardId, x.Remarks))
                 .ToList());
     }
 }

@@ -28,7 +28,8 @@ public sealed class NotificationEventPolicies(IAppDbContext db, NotificationDisp
     INotificationHandler<DomainEventNotification<CompetencyExpired>>,
     INotificationHandler<DomainEventNotification<HighResidualRisk>>,
     INotificationHandler<DomainEventNotification<SupplierSuspended>>,
-    INotificationHandler<DomainEventNotification<EscalationTriggered>>
+    INotificationHandler<DomainEventNotification<EscalationTriggered>>,
+    INotificationHandler<DomainEventNotification<ReferenceStandardExpired>>
 {
     public const string NcRaisedKey = "NC_RAISED";
     public const string DocumentPublishedKey = "DOC_PUBLISHED";
@@ -39,6 +40,7 @@ public sealed class NotificationEventPolicies(IAppDbContext db, NotificationDisp
     public const string SupplierSuspendedKey = "SUP_SUSPENDED";
     public const string EscalationKey = "SLA_ESCALATED";
     public const string DocumentReviewDueKey = "DOC_REVIEW_DUE";
+    public const string ReferenceStandardExpiredKey = "STD_EXPIRED";
 
     public async Task Handle(DomainEventNotification<NcRaised> n, CancellationToken ct)
     {
@@ -74,6 +76,14 @@ public sealed class NotificationEventPolicies(IAppDbContext db, NotificationDisp
     public Task Handle(DomainEventNotification<EquipmentLockedOut> n, CancellationToken ct) =>
         dispatcher.DispatchAsync(n.Event.EventId, n.Event.TenantId, EquipmentLockedOutKey,
             new Dictionary<string, string> { ["ref"] = n.Event.Code, ["title"] = n.Event.Name }, ct);
+
+    public Task Handle(DomainEventNotification<ReferenceStandardExpired> n, CancellationToken ct) =>
+        dispatcher.DispatchAsync(n.Event.EventId, n.Event.TenantId, ReferenceStandardExpiredKey,
+            new Dictionary<string, string>
+            {
+                ["ref"] = n.Event.StandardRef, ["title"] = n.Event.Name,
+                ["due"] = n.Event.ExpiredOn.ToString("yyyy-MM-dd"),
+            }, ct);
 
     public Task Handle(DomainEventNotification<CompetencyExpired> n, CancellationToken ct) =>
         dispatcher.DispatchAsync(n.Event.EventId, n.Event.TenantId, CompetencyExpiredKey,
