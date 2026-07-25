@@ -48,6 +48,7 @@ const ICONS: Record<string, string> = {
   training: 'M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z',
   qc: 'M22 12h-4l-3 9L9 3l-3 9H2',
   validation: 'M22 11.08V12a10 10 0 1 1-5.93-9.14 M22 4L12 14.01l-3-3',
+  methodcomp: 'M3 3v18h18 M7 15l4-5 3 3 5-7',
   uncertainty: 'M19 5L5 19 M6.5 9a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z M17.5 20a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z',
   ptplan: 'M3 4h18v18H3z M16 2v4 M8 2v4 M3 10h18',
   pt: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M22 12h-4 M6 12H2 M12 6V2 M12 22v-4',
@@ -339,6 +340,7 @@ export class ShellComponent {
         items: [
           { path: '/qc', label: 'nav.qc', icon: 'qc' },
           { path: '/validation-studies', label: 'nav.validation', icon: 'validation' },
+          { path: '/method-comparisons', label: 'nav.mc', icon: 'methodcomp' },
           { path: '/uncertainty', label: 'nav.mu', icon: 'uncertainty' },
           { path: '/pt-plans', label: 'nav.ptp', icon: 'ptplan' },
           { path: '/proficiency-tests', label: 'nav.pt', icon: 'pt' },

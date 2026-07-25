@@ -142,3 +142,31 @@ public sealed class PtPlanConfiguration : IEntityTypeConfiguration<PtPlan>
         builder.Ignore(p => p.DomainEvents);
     }
 }
+
+public sealed class MethodComparisonStudyConfiguration : IEntityTypeConfiguration<MethodComparisonStudy>
+{
+    public void Configure(EntityTypeBuilder<MethodComparisonStudy> builder)
+    {
+        builder.ToTable("method_comparison_study", "qams");
+        builder.HasKey(s => s.Id);
+        builder.Property(s => s.StudyRef).HasMaxLength(30);
+        builder.Property(s => s.Analyte).HasMaxLength(200);
+        builder.Property(s => s.Unit).HasMaxLength(50);
+        builder.Property(s => s.ReferenceMethod).HasMaxLength(200);
+        builder.Property(s => s.TestMethod).HasMaxLength(200);
+        builder.Property(s => s.State).HasConversion<string>().HasMaxLength(20);
+        builder.HasIndex(s => new { s.TenantId, s.StudyRef }).IsUnique();
+        builder.HasIndex(s => new { s.TenantId, s.State });
+
+        builder.OwnsMany(s => s.Pairs, pair =>
+        {
+            pair.ToTable("measurement_pair", "qams");
+            pair.WithOwner().HasForeignKey("study_id");
+            pair.HasKey(p => p.Id);
+            pair.Property(p => p.SampleId).HasMaxLength(100);
+        });
+
+        builder.Ignore(s => s.MeetsRecommendedPower);
+        builder.Ignore(s => s.DomainEvents);
+    }
+}

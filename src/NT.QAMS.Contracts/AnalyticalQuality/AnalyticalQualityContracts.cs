@@ -38,6 +38,27 @@ public sealed record PtEnrollmentDto(
 
 // ── Measurement uncertainty (ISO 17025 §7.6) ─────────────────────────────────
 
+// ── Method Comparison (CLSI EP09) ───────────────────────────────────────────
+
+public sealed record CreateMethodComparisonRequest(
+    string Analyte, string Unit, string ReferenceMethod, string TestMethod);
+
+public sealed record AddMeasurementPairRequest(decimal ReferenceValue, decimal TestValue, string? SampleId);
+
+public sealed record MeasurementPairDto(Guid Id, decimal ReferenceValue, decimal TestValue, string? SampleId);
+
+public sealed record MethodComparisonListItemDto(
+    Guid Id, string StudyRef, string Analyte, string ReferenceMethod, string TestMethod, string State,
+    int? PairCount, decimal? DemingSlope, decimal? DemingIntercept, decimal? PearsonR, decimal? MeanBias);
+
+public sealed record MethodComparisonDetailDto(
+    Guid Id, string StudyRef, string Analyte, string Unit, string ReferenceMethod, string TestMethod, string State,
+    int? PairCount, decimal? PearsonR, decimal? DemingSlope, decimal? DemingIntercept,
+    decimal? PassingBablokSlope, decimal? PassingBablokIntercept,
+    decimal? MeanBias, decimal? BiasSd, decimal? LimitOfAgreementLower, decimal? LimitOfAgreementUpper,
+    bool MeetsRecommendedPower, Guid? SignedOffBy, DateTimeOffset? SignedOffAtUtc,
+    IReadOnlyList<MeasurementPairDto> Pairs);
+
 // ── PT/EQA Annual Plan (ISO 17025 §7.7.2) ───────────────────────────────────
 
 public sealed record CreatePtPlanRequest(int Year);

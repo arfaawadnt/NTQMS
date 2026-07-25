@@ -60,6 +60,7 @@ public interface IAppDbContext
     DbSet<QcProfile> QcProfiles { get; }
     DbSet<QcRun> QcRuns { get; }
     DbSet<ValidationStudy> ValidationStudies { get; }
+    DbSet<MethodComparisonStudy> MethodComparisons { get; }
     DbSet<PtEnrollment> PtEnrollments { get; }
     DbSet<PtPlan> PtPlans { get; }
     DbSet<AuditTrailReview> AuditTrailReviews { get; }

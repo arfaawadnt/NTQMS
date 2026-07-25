@@ -212,6 +212,16 @@ export const routes: Routes = [
             ],
           },
           {
+            path: 'method-comparisons',
+            loadComponent: () => import('./features/analytical/method-comparison-list.component').then((m) => m.MethodComparisonListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/analytical/method-comparison-detail.component').then((m) => m.MethodComparisonDetailComponent),
+              },
+            ],
+          },
+          {
             path: 'uncertainty',
             loadComponent: () => import('./features/analytical/uncertainty-list.component').then((m) => m.UncertaintyListComponent),
             children: [

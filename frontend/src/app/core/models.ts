@@ -668,6 +668,60 @@ export interface RegisterMonitoringPointRequest {
   departmentId: string | null;
 }
 
+// ── Method Comparison (CLSI EP09) ───────────────────────────────────────────
+
+export interface MeasurementPair {
+  id: string;
+  referenceValue: number;
+  testValue: number;
+  sampleId: string | null;
+}
+
+export interface MethodComparisonListItem {
+  id: string;
+  studyRef: string;
+  analyte: string;
+  referenceMethod: string;
+  testMethod: string;
+  state: string;
+  pairCount: number | null;
+  demingSlope: number | null;
+  demingIntercept: number | null;
+  pearsonR: number | null;
+  meanBias: number | null;
+}
+
+export interface MethodComparisonDetail {
+  id: string;
+  studyRef: string;
+  analyte: string;
+  unit: string;
+  referenceMethod: string;
+  testMethod: string;
+  state: string;
+  pairCount: number | null;
+  pearsonR: number | null;
+  demingSlope: number | null;
+  demingIntercept: number | null;
+  passingBablokSlope: number | null;
+  passingBablokIntercept: number | null;
+  meanBias: number | null;
+  biasSd: number | null;
+  limitOfAgreementLower: number | null;
+  limitOfAgreementUpper: number | null;
+  meetsRecommendedPower: boolean;
+  signedOffBy: string | null;
+  signedOffAtUtc: string | null;
+  pairs: MeasurementPair[];
+}
+
+export interface CreateMethodComparisonRequest {
+  analyte: string;
+  unit: string;
+  referenceMethod: string;
+  testMethod: string;
+}
+
 // ── Personnel Authorization Matrix (ISO 17025 §6.2.6) ───────────────────────
 
 export const AUTHORIZATION_SCOPES = ['Perform', 'ReviewAndRelease', 'Train'] as const;
