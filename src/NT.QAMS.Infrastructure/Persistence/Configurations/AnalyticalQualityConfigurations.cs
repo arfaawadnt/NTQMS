@@ -249,3 +249,21 @@ public sealed class ReferenceIntervalStudyConfiguration : IEntityTypeConfigurati
         builder.Ignore(s => s.DomainEvents);
     }
 }
+
+public sealed class SigmaAssessmentConfiguration : IEntityTypeConfiguration<SigmaAssessment>
+{
+    public void Configure(EntityTypeBuilder<SigmaAssessment> builder)
+    {
+        builder.ToTable("sigma_assessment", "qams");
+        builder.HasKey(a => a.Id);
+        builder.Property(a => a.AssessmentRef).HasMaxLength(30);
+        builder.Property(a => a.Analyte).HasMaxLength(200);
+        builder.Property(a => a.Unit).HasMaxLength(50);
+        builder.Property(a => a.State).HasConversion<string>().HasMaxLength(20);
+        builder.Property(a => a.Grade).HasConversion<string>().HasMaxLength(20);
+        builder.HasIndex(a => new { a.TenantId, a.AssessmentRef }).IsUnique();
+        builder.HasIndex(a => new { a.TenantId, a.State });
+        builder.Ignore(a => a.QcRecommendation);
+        builder.Ignore(a => a.DomainEvents);
+    }
+}

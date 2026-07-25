@@ -252,6 +252,16 @@ export const routes: Routes = [
             ],
           },
           {
+            path: 'sigma-metrics',
+            loadComponent: () => import('./features/analytical/sigma-list.component').then((m) => m.SigmaListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/analytical/sigma-detail.component').then((m) => m.SigmaDetailComponent),
+              },
+            ],
+          },
+          {
             path: 'uncertainty',
             loadComponent: () => import('./features/analytical/uncertainty-list.component').then((m) => m.UncertaintyListComponent),
             children: [

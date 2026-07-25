@@ -131,6 +131,24 @@ public sealed record ReferenceIntervalDetailDto(
     Guid? SignedOffBy, DateTimeOffset? SignedOffAtUtc,
     IReadOnlyList<ReferenceSampleDto> Samples);
 
+// ── Sigma Metrics ───────────────────────────────────────────────────────────
+
+public sealed record CreateSigmaAssessmentRequest(
+    string Analyte, string Unit, decimal AllowableTotalErrorPct, decimal BiasPct, decimal CvPct);
+
+public sealed record UpdateSigmaInputsRequest(decimal AllowableTotalErrorPct, decimal BiasPct, decimal CvPct);
+
+public sealed record SigmaAssessmentListItemDto(
+    Guid Id, string AssessmentRef, string Analyte,
+    decimal AllowableTotalErrorPct, decimal BiasPct, decimal CvPct,
+    decimal SigmaValue, string Grade, string State);
+
+public sealed record SigmaAssessmentDetailDto(
+    Guid Id, string AssessmentRef, string Analyte, string Unit,
+    decimal AllowableTotalErrorPct, decimal BiasPct, decimal CvPct,
+    decimal SigmaValue, string Grade, string QcRecommendation, string State,
+    Guid? SignedOffBy, DateTimeOffset? SignedOffAtUtc);
+
 // ── PT/EQA Annual Plan (ISO 17025 §7.7.2) ───────────────────────────────────
 
 public sealed record CreatePtPlanRequest(int Year);

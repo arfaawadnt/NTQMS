@@ -889,6 +889,44 @@ export interface CreateReferenceIntervalStudyRequest {
   claimedUpper: number;
 }
 
+// ── Sigma Metrics ───────────────────────────────────────────────────────────
+
+export interface SigmaAssessmentListItem {
+  id: string;
+  assessmentRef: string;
+  analyte: string;
+  allowableTotalErrorPct: number;
+  biasPct: number;
+  cvPct: number;
+  sigmaValue: number;
+  grade: string;
+  state: string;
+}
+
+export interface SigmaAssessmentDetail {
+  id: string;
+  assessmentRef: string;
+  analyte: string;
+  unit: string;
+  allowableTotalErrorPct: number;
+  biasPct: number;
+  cvPct: number;
+  sigmaValue: number;
+  grade: string;
+  qcRecommendation: string;
+  state: string;
+  signedOffBy: string | null;
+  signedOffAtUtc: string | null;
+}
+
+export interface CreateSigmaAssessmentRequest {
+  analyte: string;
+  unit: string;
+  allowableTotalErrorPct: number;
+  biasPct: number;
+  cvPct: number;
+}
+
 // ── Personnel Authorization Matrix (ISO 17025 §6.2.6) ───────────────────────
 
 export const AUTHORIZATION_SCOPES = ['Perform', 'ReviewAndRelease', 'Train'] as const;
