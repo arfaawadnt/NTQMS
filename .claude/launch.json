@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "qams-frontend",
+      "runtimeExecutable": "C:\\Users\\a.awad\\AppData\\Local\\nodejs-portable\\node-v20.18.1-win-x64\\npm.cmd",
+      "runtimeArgs": ["start", "--prefix", "frontend", "--", "--proxy-config", "proxy.conf.json"],
+      "port": 4200
+    }
+  ]
+}

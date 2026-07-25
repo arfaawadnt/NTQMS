@@ -1,14 +1,72 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../core/auth.service';
 import { I18nService, Lang } from '../core/i18n.service';
 import { PermissionsService } from '../core/permissions.service';
 
+/** One sidebar destination: route, i18n label key, and its descriptive icon. */
+interface NavItem {
+  path: string;
+  label: string;
+  icon: string;
+  visible?: () => boolean;
+}
+
+/** A collapsible sidebar group. */
+interface NavGroup {
+  key: string;
+  label: string;
+  items: NavItem[];
+}
+
+/**
+ * Feather-style single-path icons (compound subpaths in one `d`), stroked with
+ * currentColor so they inherit the item's active/hover color.
+ */
+const ICONS: Record<string, string> = {
+  dashboard: 'M3 3h7v7H3z M14 3h7v7h-7z M14 14h7v7h-7z M3 14h7v7H3z',
+  tasks: 'M9 11l3 3L22 4 M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11',
+  bell: 'M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 0 1-3.46 0',
+  nc: 'M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z M12 9v4 M12 17h.01',
+  complaints: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z',
+  feedback: 'M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3z M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3',
+  audits: 'M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2 M9 2h6a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z',
+  objectives: 'M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z M4 22v-7',
+  changes: 'M23 4v6h-6 M1 20v-6h6 M3.51 9a9 9 0 0 1 14.85-3.36L23 10 M1 14l4.64 4.36A9 9 0 0 0 20.49 15',
+  reviews: 'M3 3h18v12H3z M8 21l4-4 4 4',
+  documents: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M16 13H8 M16 17H8',
+  records: 'M21 8v13H3V8 M1 3h22v5H1z M10 12h4',
+  risks: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',
+  coi: 'M12 3v18 M8 21h8 M5 7l7-4 7 4 M3 13a3 3 0 0 0 6 0L6 7l-3 6z M15 13a3 3 0 0 0 6 0l-3-6-3 6',
+  context: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M2 12h20 M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z',
+  equipment: 'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z',
+  standards: 'M12 15a7 7 0 1 0 0-14 7 7 0 0 0 0 14z M8.21 13.89L7 23l5-3 5 3-1.21-9.12',
+  environment: 'M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z',
+  suppliers: 'M1 3h15v13H1z M16 8h4l3 3v5h-7V8z M5.5 21a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z M18.5 21a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z',
+  competencies: 'M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M8.5 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M17 11l2 2 4-4',
+  authorizations: 'M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4',
+  training: 'M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z',
+  qc: 'M22 12h-4l-3 9L9 3l-3 9H2',
+  validation: 'M22 11.08V12a10 10 0 1 1-5.93-9.14 M22 4L12 14.01l-3-3',
+  uncertainty: 'M19 5L5 19 M6.5 9a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z M17.5 20a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z',
+  ptplan: 'M3 4h18v18H3z M16 2v4 M8 2v4 M3 10h18',
+  pt: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M22 12h-4 M6 12H2 M12 6V2 M12 22v-4',
+  reference: 'M12 8c4.97 0 9-1.34 9-3s-4.03-3-9-3-9 1.34-9 3 4.03 3 9 3z M21 12c0 1.66-4.03 3-9 3s-9-1.34-9-3 M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5',
+  rules: 'M4 21v-7 M4 10V3 M12 21v-9 M12 8V3 M20 21v-5 M20 12V3 M1 14h6 M9 8h6 M17 16h6',
+  compliance: 'M5 11h14v10H5z M7 11V7a5 5 0 0 1 10 0v4',
+  users: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75',
+  tenants: 'M12 2L2 7l10 5 10-5-10-5z M2 17l10 5 10-5 M2 12l10 5 10-5',
+};
+
+const SIDEBAR_COLLAPSED_KEY = 'qams.sidebar.collapsed';
+const GROUPS_STATE_KEY = 'qams.sidebar.groups';
+
 /**
  * Application chrome per the QAMS Design System: 58px signature-gradient
- * header (navy → blue → teal) with a white logo box, and a white collapsible
- * grouped sidebar (Quality / Resources / Administration) whose active item is
- * soft-blue with a brand inline-start bar.
+ * header and a white grouped sidebar. Groups expand/collapse individually
+ * (first two open by default, state persisted); the whole sidebar collapses
+ * to an icon rail — every page carries a descriptive icon — expanded on first
+ * use until the user chooses otherwise.
  */
 @Component({
   selector: 'qams-shell',
@@ -17,6 +75,11 @@ import { PermissionsService } from '../core/permissions.service';
   template: `
     <div class="app">
       <header class="hdr">
+        <button class="hbtn burger" (click)="toggleSidebar()" [attr.aria-label]="i18n.t('nav.toggleSidebar')" [attr.title]="i18n.t('nav.toggleSidebar')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 12h18 M3 6h18 M3 18h18" />
+          </svg>
+        </button>
         <div class="logobox">
           <img src="assets/nt-qams-logo.png" alt="NT.QAMS" />
         </div>
@@ -39,55 +102,31 @@ import { PermissionsService } from '../core/permissions.service';
       </header>
 
       <div class="body">
-        <nav class="nav">
-          @if (perms.isPlatformAdmin()) {
-            <!-- Control plane: platform administrators manage tenants, not lab records. -->
-            <div class="grouplabel">{{ i18n.t('nav.groupPlatform') }}</div>
-            <a class="item" routerLink="/platform/tenants" routerLinkActive="active">{{ i18n.t('nav.tenants') }}</a>
-          } @else {
-            <div class="grouplabel">{{ i18n.t('nav.groupQuality') }}</div>
-            <a class="item" routerLink="/dashboard" routerLinkActive="active">{{ i18n.t('nav.dashboard') }}</a>
-            <a class="item" routerLink="/tasks" routerLinkActive="active">{{ i18n.t('nav.tasks') }}</a>
-            <a class="item" routerLink="/nonconformances" routerLinkActive="active">{{ i18n.t('nav.nc') }}</a>
-            <a class="item" routerLink="/feedback" routerLinkActive="active">{{ i18n.t('nav.feedback') }}</a>
-            <a class="item" routerLink="/complaints" routerLinkActive="active">{{ i18n.t('nav.complaints') }}</a>
-            <a class="item" routerLink="/audits" routerLinkActive="active">{{ i18n.t('nav.audits') }}</a>
-            <a class="item" routerLink="/quality-objectives" routerLinkActive="active">{{ i18n.t('nav.objectives') }}</a>
-            <a class="item" routerLink="/risks" routerLinkActive="active">{{ i18n.t('nav.risks') }}</a>
-            <a class="item" routerLink="/conflicts" routerLinkActive="active">{{ i18n.t('nav.coi') }}</a>
-            <a class="item" routerLink="/org-context" routerLinkActive="active">{{ i18n.t('nav.ctx') }}</a>
-            <a class="item" routerLink="/changes" routerLinkActive="active">{{ i18n.t('nav.changes') }}</a>
-            <a class="item" routerLink="/management-reviews" routerLinkActive="active">{{ i18n.t('nav.reviews') }}</a>
-
-            <div class="grouplabel">{{ i18n.t('nav.groupResources') }}</div>
-            <a class="item" routerLink="/documents" routerLinkActive="active">{{ i18n.t('nav.documents') }}</a>
-            <a class="item" routerLink="/equipment" routerLinkActive="active">{{ i18n.t('nav.equipment') }}</a>
-            <a class="item" routerLink="/monitoring" routerLinkActive="active">{{ i18n.t('nav.env') }}</a>
-            <a class="item" routerLink="/reference-standards" routerLinkActive="active">{{ i18n.t('nav.standards') }}</a>
-            <a class="item" routerLink="/competencies" routerLinkActive="active">{{ i18n.t('nav.competency') }}</a>
-            <a class="item" routerLink="/authorizations" routerLinkActive="active">{{ i18n.t('nav.authz') }}</a>
-            <a class="item" routerLink="/training" routerLinkActive="active">{{ i18n.t('nav.training') }}</a>
-            <a class="item" routerLink="/suppliers" routerLinkActive="active">{{ i18n.t('nav.suppliers') }}</a>
-
-            <div class="grouplabel">{{ i18n.t('nav.groupAnalytical') }}</div>
-            <a class="item" routerLink="/qc" routerLinkActive="active">{{ i18n.t('nav.qc') }}</a>
-            <a class="item" routerLink="/validation-studies" routerLinkActive="active">{{ i18n.t('nav.validation') }}</a>
-            <a class="item" routerLink="/uncertainty" routerLinkActive="active">{{ i18n.t('nav.mu') }}</a>
-            <a class="item" routerLink="/pt-plans" routerLinkActive="active">{{ i18n.t('nav.ptp') }}</a>
-            <a class="item" routerLink="/proficiency-tests" routerLinkActive="active">{{ i18n.t('nav.pt') }}</a>
-
-            <div class="grouplabel">{{ i18n.t('nav.groupAdmin') }}</div>
-            <a class="item" routerLink="/reference-data" routerLinkActive="active">{{ i18n.t('nav.reference') }}</a>
-            <a class="item" routerLink="/records" routerLinkActive="active">{{ i18n.t('nav.records') }}</a>
-            <a class="item" routerLink="/notifications" routerLinkActive="active">{{ i18n.t('nav.notifications') }}</a>
-            @if (perms.canViewCompliance()) {
-              <a class="item" routerLink="/compliance" routerLinkActive="active">{{ i18n.t('nav.compliance') }}</a>
+        <nav class="nav" [class.rail]="sidebarCollapsed()">
+          @for (group of groups(); track group.key) {
+            @if (!sidebarCollapsed()) {
+              <button class="grouphead" (click)="toggleGroup(group.key)"
+                      [attr.aria-expanded]="isOpen(group.key)">
+                <span class="grouplabel">{{ i18n.t(group.label) }}</span>
+                <svg class="chev" [class.open]="isOpen(group.key)" [class.rtl]="i18n.isRtl()" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+            } @else if (!$first) {
+              <div class="railsep" role="separator"></div>
             }
-            @if (perms.canApprove()) {
-              <a class="item" routerLink="/notification-rules" routerLinkActive="active">{{ i18n.t('nav.notificationRules') }}</a>
-            }
-            @if (perms.isTenantAdmin()) {
-              <a class="item" routerLink="/users" routerLinkActive="active">{{ i18n.t('nav.users') }}</a>
+            @if (sidebarCollapsed() || isOpen(group.key)) {
+              @for (item of group.items; track item.path) {
+                <a class="item" [routerLink]="item.path" routerLinkActive="active"
+                   [attr.title]="sidebarCollapsed() ? i18n.t(item.label) : null">
+                  <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path [attr.d]="icon(item.icon)" />
+                  </svg>
+                  @if (!sidebarCollapsed()) { <span class="lbl">{{ i18n.t(item.label) }}</span> }
+                </a>
+              }
             }
           }
         </nav>
@@ -129,20 +168,36 @@ import { PermissionsService } from '../core/permissions.service';
     .rl { font-size: 11px; opacity: .85; border: 1px solid rgba(255,255,255,.4); border-radius: 999px; padding: 2px 9px; }
     .hbtn { background: transparent; border: none; color: #fff; padding: 8px 10px; border-radius: 5px; font-size: 13px; font-weight: 600; }
     .hbtn:hover { background: rgba(255,255,255,.15); }
+    .burger { display: inline-flex; align-items: center; padding: 8px; }
+    .burger svg { width: 20px; height: 20px; }
 
     .body { flex: 1; display: flex; overflow: hidden; }
 
     /* ---------- white grouped sidebar ---------- */
     .nav {
       width: 248px; background: #fff; border-inline-end: 1px solid var(--nt-border);
-      flex-shrink: 0; overflow-y: auto; overflow-x: hidden; padding: 8px 0;
+      flex-shrink: 0; overflow-y: auto; overflow-x: hidden; padding: 8px 0 24px;
+      transition: width .18s ease;
     }
+    .nav.rail { width: 56px; }
+
+    .grouphead {
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      background: transparent; border: none; cursor: pointer;
+      padding: 13px 14px 5px 18px; text-align: start;
+    }
+    .grouphead:hover .grouplabel { color: var(--nt-blue); }
     .grouplabel {
       font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
-      color: var(--nt-grey-m); padding: 13px 18px 5px; white-space: nowrap;
+      color: var(--nt-grey-m); white-space: nowrap;
     }
+    .chev { width: 13px; height: 13px; color: var(--nt-grey-m); flex-shrink: 0; transition: transform .15s ease; }
+    /* Closed chevrons point INTO the reading direction; open always points down. */
+    .chev.rtl { transform: rotate(180deg); }
+    .chev.open { transform: rotate(90deg); }
+
     .item {
-      display: flex; align-items: center; gap: 12px; padding: 9px 18px;
+      display: flex; align-items: center; gap: 11px; padding: 8px 18px;
       font-size: 13.5px; font-weight: 500; color: var(--nt-slate);
       border-inline-start: 3px solid transparent; text-decoration: none; white-space: nowrap;
     }
@@ -151,6 +206,14 @@ import { PermissionsService } from '../core/permissions.service';
       background: var(--nt-brand-soft); color: var(--nt-blue);
       border-inline-start-color: var(--nt-blue); font-weight: 600;
     }
+    .ic { width: 17px; height: 17px; flex-shrink: 0; opacity: .85; }
+    .item.active .ic { opacity: 1; }
+    .lbl { overflow: hidden; text-overflow: ellipsis; }
+
+    /* Icon rail: centered icons with group separators, labels as tooltips. */
+    .nav.rail .item { justify-content: center; padding: 10px 0; gap: 0; }
+    .nav.rail .ic { width: 19px; height: 19px; }
+    .railsep { height: 1px; background: var(--nt-border); margin: 7px 12px; }
 
     main { flex: 1; overflow-y: auto; }
     .wrap { padding: 20px 24px 48px; }
@@ -162,16 +225,149 @@ export class ShellComponent {
   constructor() {
     // Part 11-friendly idle lockout for every authenticated session.
     this.auth.startIdleWatch();
+    // The group holding the current page always opens, even if stored collapsed.
+    const active = this.groups().find((g) => g.items.some((i) => this.router.url.startsWith(i.path)));
+    if (active && !this.openGroups().has(active.key)) {
+      this.openGroups.update((open) => new Set(open).add(active.key));
+    }
   }
+
   readonly i18n = inject(I18nService);
   readonly perms = inject(PermissionsService);
   private readonly router = inject(Router);
+
+  /** Whole-sidebar rail mode: expanded on first use until the user collapses it. */
+  readonly sidebarCollapsed = signal(localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1');
+
+  /** Open group keys — first two groups open by default until the user decides. */
+  readonly openGroups = signal<Set<string>>(this.restoreGroupState());
+
+  /** The professional module map: overview → improvement → knowledge → risk → resources → people → analytical → admin. */
+  readonly groups = computed<NavGroup[]>(() => {
+    if (this.perms.isPlatformAdmin()) {
+      return [{
+        key: 'platform', label: 'nav.groupPlatform',
+        items: [{ path: '/platform/tenants', label: 'nav.tenants', icon: 'tenants' }],
+      }];
+    }
+
+    const all: NavGroup[] = [
+      {
+        key: 'overview', label: 'nav.groupOverview',
+        items: [
+          { path: '/dashboard', label: 'nav.dashboard', icon: 'dashboard' },
+          { path: '/tasks', label: 'nav.tasks', icon: 'tasks' },
+          { path: '/notifications', label: 'nav.notifications', icon: 'bell' },
+        ],
+      },
+      {
+        key: 'improvement', label: 'nav.groupImprovement',
+        items: [
+          { path: '/nonconformances', label: 'nav.nc', icon: 'nc' },
+          { path: '/complaints', label: 'nav.complaints', icon: 'complaints' },
+          { path: '/feedback', label: 'nav.feedback', icon: 'feedback' },
+          { path: '/audits', label: 'nav.audits', icon: 'audits' },
+          { path: '/quality-objectives', label: 'nav.objectives', icon: 'objectives' },
+          { path: '/changes', label: 'nav.changes', icon: 'changes' },
+          { path: '/management-reviews', label: 'nav.reviews', icon: 'reviews' },
+        ],
+      },
+      {
+        key: 'docs', label: 'nav.groupDocs',
+        items: [
+          { path: '/documents', label: 'nav.documents', icon: 'documents' },
+          { path: '/records', label: 'nav.records', icon: 'records' },
+        ],
+      },
+      {
+        key: 'risk', label: 'nav.groupRisk',
+        items: [
+          { path: '/risks', label: 'nav.risks', icon: 'risks' },
+          { path: '/conflicts', label: 'nav.coi', icon: 'coi' },
+          { path: '/org-context', label: 'nav.ctx', icon: 'context' },
+        ],
+      },
+      {
+        key: 'resources', label: 'nav.groupResources',
+        items: [
+          { path: '/equipment', label: 'nav.equipment', icon: 'equipment' },
+          { path: '/reference-standards', label: 'nav.standards', icon: 'standards' },
+          { path: '/monitoring', label: 'nav.env', icon: 'environment' },
+          { path: '/suppliers', label: 'nav.suppliers', icon: 'suppliers' },
+        ],
+      },
+      {
+        key: 'people', label: 'nav.groupPeople',
+        items: [
+          { path: '/competencies', label: 'nav.competency', icon: 'competencies' },
+          { path: '/authorizations', label: 'nav.authz', icon: 'authorizations' },
+          { path: '/training', label: 'nav.training', icon: 'training' },
+        ],
+      },
+      {
+        key: 'analytical', label: 'nav.groupAnalytical',
+        items: [
+          { path: '/qc', label: 'nav.qc', icon: 'qc' },
+          { path: '/validation-studies', label: 'nav.validation', icon: 'validation' },
+          { path: '/uncertainty', label: 'nav.mu', icon: 'uncertainty' },
+          { path: '/pt-plans', label: 'nav.ptp', icon: 'ptplan' },
+          { path: '/proficiency-tests', label: 'nav.pt', icon: 'pt' },
+        ],
+      },
+      {
+        key: 'admin', label: 'nav.groupAdmin',
+        items: [
+          { path: '/reference-data', label: 'nav.reference', icon: 'reference' },
+          { path: '/notification-rules', label: 'nav.notificationRules', icon: 'rules', visible: () => this.perms.canApprove() },
+          { path: '/compliance', label: 'nav.compliance', icon: 'compliance', visible: () => this.perms.canViewCompliance() },
+          { path: '/users', label: 'nav.users', icon: 'users', visible: () => this.perms.isTenantAdmin() },
+        ],
+      },
+    ];
+
+    return all
+      .map((g) => ({ ...g, items: g.items.filter((i) => i.visible?.() ?? true) }))
+      .filter((g) => g.items.length > 0);
+  });
 
   /** Uppercase initials for the header avatar (max two). */
   readonly initials = computed(() => {
     const parts = this.auth.displayName().trim().split(/\s+/);
     return parts.slice(0, 2).map((p) => p[0]?.toUpperCase() ?? '').join('');
   });
+
+  icon(name: string): string { return ICONS[name] ?? ICONS['dashboard']; }
+
+  isOpen(key: string): boolean { return this.openGroups().has(key); }
+
+  toggleGroup(key: string): void {
+    this.openGroups.update((open) => {
+      const next = new Set(open);
+      if (next.has(key)) { next.delete(key); } else { next.add(key); }
+      localStorage.setItem(GROUPS_STATE_KEY, JSON.stringify([...next]));
+      return next;
+    });
+  }
+
+  toggleSidebar(): void {
+    this.sidebarCollapsed.update((collapsed) => {
+      const next = !collapsed;
+      localStorage.setItem(SIDEBAR_COLLAPSED_KEY, next ? '1' : '0');
+      return next;
+    });
+  }
+
+  private restoreGroupState(): Set<string> {
+    const stored = localStorage.getItem(GROUPS_STATE_KEY);
+    if (stored) {
+      try {
+        return new Set(JSON.parse(stored) as string[]);
+      } catch { /* fall through to defaults */ }
+    }
+
+    // First visit: only the first two groups open (platform admins get their single group).
+    return new Set(['overview', 'improvement', 'platform']);
+  }
 
   onLang(event: Event): void {
     this.i18n.setLang((event.target as HTMLSelectElement).value as Lang);
