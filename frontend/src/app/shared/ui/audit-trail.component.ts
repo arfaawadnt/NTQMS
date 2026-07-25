@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { ComplianceApiService } from '../../core/api/compliance-api.service';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
-import { AuditTrailEntry } from '../../core/models';
+import { AuditTrailEntry, FieldChange } from '../../core/models';
 
 /**
  * Per-record audit trail: the tamper-evident ledger entries whose payload
@@ -27,7 +27,7 @@ import { AuditTrailEntry } from '../../core/models';
         <p class="muted">{{ i18n.t('common.loading') }}</p>
       } @else if (error()) {
         <div class="error">{{ error() }}</div>
-      } @else if (entries().length === 0) {
+      } @else if (entries().length === 0 && changes().length === 0) {
         <p class="muted">{{ i18n.t('trail.empty') }}</p>
       } @else {
         <ol class="timeline">
@@ -50,6 +50,29 @@ import { AuditTrailEntry } from '../../core/models';
             </li>
           }
         </ol>
+      }
+
+      @if (perms.canViewCompliance() && changes().length > 0) {
+        <h3 class="sub">{{ i18n.t('trail.fieldChanges') }}</h3>
+        <table class="fc">
+          <thead><tr>
+            <th>{{ i18n.t('cmp.when') }}</th><th>{{ i18n.t('trail.action') }}</th>
+            <th>{{ i18n.t('trail.property') }}</th><th>{{ i18n.t('trail.from') }}</th>
+            <th>{{ i18n.t('trail.to') }}</th><th>{{ i18n.t('cmp.actor') }}</th>
+          </tr></thead>
+          <tbody>
+            @for (f of changes(); track f.id) {
+              <tr>
+                <td>{{ f.occurredAtUtc | date:'short' }}</td>
+                <td>{{ f.action }}</td>
+                <td class="code">{{ f.property ?? '—' }}</td>
+                <td class="val">{{ f.oldValue ?? '—' }}</td>
+                <td class="val">{{ f.newValue ?? '—' }}</td>
+                <td>{{ f.actor }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
       }
     </section>
   `,
@@ -74,6 +97,9 @@ import { AuditTrailEntry } from '../../core/models';
     }
     .hash { font-size: 10.5px; font-family: var(--nt-mono); }
     .link { font-size: 11.5px; }
+    .sub { margin-top: 16px; }
+    .fc { font-size: 11.5px; }
+    .fc .val { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--nt-mono); font-size: 10.5px; }
   `],
 })
 export class AuditTrailComponent implements OnInit {
@@ -85,6 +111,7 @@ export class AuditTrailComponent implements OnInit {
   readonly subject = input.required<string>();
 
   readonly entries = signal<AuditTrailEntry[]>([]);
+  readonly changes = signal<FieldChange[]>([]);
   readonly loading = signal(false);
   readonly error = signal('');
   /** Id of the entry whose payload is expanded ('' = none). */
@@ -94,7 +121,12 @@ export class AuditTrailComponent implements OnInit {
     if (!this.perms.canViewCompliance()) { return; }
     this.loading.set(true);
     try {
-      this.entries.set(await firstValueFrom(this.api.auditTrail(this.subject())));
+      const [entries, changes] = await Promise.all([
+        firstValueFrom(this.api.auditTrail(this.subject())),
+        firstValueFrom(this.api.fieldChanges(this.subject())),
+      ]);
+      this.entries.set(entries);
+      this.changes.set(changes);
     } catch {
       this.error.set(this.i18n.t('trail.loadFailed'));
     } finally {

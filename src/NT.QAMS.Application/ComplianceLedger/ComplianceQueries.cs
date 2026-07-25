@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Domain.ComplianceLedger;
 using NT.QAMS.SharedKernel.Primitives;
@@ -44,5 +45,31 @@ public sealed class VerifyChainHandler(IComplianceLedgerStore store)
     {
         var (ok, verified, broken) = await store.VerifyChainAsync(q.TenantId, ct);
         return new ChainVerificationDto(ok, verified, broken);
+    }
+}
+
+/// <summary>
+/// Field-level change history (Part 11 §11.10(e)): optionally filtered to one
+/// record's id. Tenant-scoped in-app (RLS also scopes at the database).
+/// </summary>
+public sealed record GetFieldChangesQuery(string? EntityId, int Take = 200)
+    : IQuery<IReadOnlyList<FieldChangeRecord>>;
+
+public sealed class GetFieldChangesHandler(IAppDbContext db, ICurrentTenant tenant)
+    : IQueryHandler<GetFieldChangesQuery, IReadOnlyList<FieldChangeRecord>>
+{
+    public async Task<IReadOnlyList<FieldChangeRecord>> Handle(GetFieldChangesQuery q, CancellationToken ct)
+    {
+        var query = db.FieldChanges.AsNoTracking()
+            .Where(f => f.TenantId == tenant.TenantId);
+        if (!string.IsNullOrWhiteSpace(q.EntityId))
+        {
+            query = query.Where(f => f.EntityId == q.EntityId);
+        }
+
+        return await query
+            .OrderByDescending(f => f.OccurredAtUtc)
+            .Take(Math.Clamp(q.Take, 1, 1000))
+            .ToListAsync(ct);
     }
 }

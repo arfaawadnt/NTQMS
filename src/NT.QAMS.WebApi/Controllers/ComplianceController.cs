@@ -22,6 +22,11 @@ public sealed class ComplianceController(ISender sender) : ControllerBase
         [FromQuery] string? subject, [FromQuery] int take = 200, CancellationToken ct = default) =>
         Ok(await sender.Send(new GetAuditTrailQuery(subject, take), ct));
 
+    [HttpGet("field-changes")]
+    public async Task<IActionResult> FieldChanges(
+        [FromQuery] string? entityId, [FromQuery] int take = 200, CancellationToken ct = default) =>
+        Ok(await sender.Send(new GetFieldChangesQuery(entityId, take), ct));
+
     [HttpGet("signatures")]
     public async Task<IActionResult> Signatures([FromQuery] int take = 200, CancellationToken ct = default) =>
         Ok(await sender.Send(new GetSignatureLogQuery(take), ct));

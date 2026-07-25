@@ -23,6 +23,7 @@ public static class DependencyInjection
         services.AddScoped<ICurrentUser, AnonymousCurrentUser>();
 
         services.AddScoped<AuditStampInterceptor>();
+        services.AddScoped<FieldChangeInterceptor>();
         services.AddScoped<TenantStampInterceptor>();
         services.AddScoped<OutboxInterceptor>();
 
@@ -34,6 +35,7 @@ public static class DependencyInjection
                 .AddInterceptors(
                     sp.GetRequiredService<AuditStampInterceptor>(),
                     sp.GetRequiredService<TenantStampInterceptor>(),
+                    sp.GetRequiredService<FieldChangeInterceptor>(),
                     sp.GetRequiredService<OutboxInterceptor>());
         });
 

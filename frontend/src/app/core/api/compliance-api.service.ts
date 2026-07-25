@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AuditTrailEntry, ChainVerification, SecurityEvent, SignatureRecord } from '../models';
+import { AuditTrailEntry, ChainVerification, FieldChange, SecurityEvent, SignatureRecord } from '../models';
 
 /** Typed client for the read-only Compliance Ledger API (QM/TenantAdmin/ExternalAuditor). */
 @Injectable({ providedIn: 'root' })
@@ -15,6 +15,13 @@ export class ComplianceApiService {
     let params = new HttpParams().set('take', take);
     if (subject) { params = params.set('subject', subject); }
     return this.http.get<AuditTrailEntry[]>(`${this.base}/audit-trail`, { params });
+  }
+
+  /** Field-level change rows, optionally filtered to one record's id. */
+  fieldChanges(entityId?: string, take = 200): Observable<FieldChange[]> {
+    let params = new HttpParams().set('take', take);
+    if (entityId) { params = params.set('entityId', entityId); }
+    return this.http.get<FieldChange[]>(`${this.base}/field-changes`, { params });
   }
 
   signatures(take = 200): Observable<SignatureRecord[]> {

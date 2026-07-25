@@ -10,6 +10,7 @@ using NT.QAMS.Domain.Improvement;
 using NT.QAMS.Domain.Notifications;
 using NT.QAMS.Domain.Organization;
 using NT.QAMS.Domain.Records;
+using NT.QAMS.Domain.ComplianceLedger;
 using NT.QAMS.Domain.Reporting;
 using NT.QAMS.Domain.Sla;
 using NT.QAMS.Domain.RiskGovernance;
@@ -55,6 +56,7 @@ public interface IAppDbContext
     DbSet<WorkTask> WorkTasks { get; }
     DbSet<EscalationTimer> EscalationTimers { get; }
     DbSet<KpiSnapshot> KpiSnapshots { get; }
+    DbSet<FieldChangeRecord> FieldChanges { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

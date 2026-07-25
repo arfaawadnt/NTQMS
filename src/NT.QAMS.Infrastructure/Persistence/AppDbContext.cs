@@ -11,6 +11,7 @@ using NT.QAMS.Domain.Improvement;
 using NT.QAMS.Domain.Notifications;
 using NT.QAMS.Domain.Organization;
 using NT.QAMS.Domain.Records;
+using NT.QAMS.Domain.ComplianceLedger;
 using NT.QAMS.Domain.Reporting;
 using NT.QAMS.Domain.Sla;
 using NT.QAMS.Domain.RiskGovernance;
@@ -63,6 +64,7 @@ public sealed class AppDbContext(
     public DbSet<WorkTask> WorkTasks => Set<WorkTask>();
     public DbSet<EscalationTimer> EscalationTimers => Set<EscalationTimer>();
     public DbSet<KpiSnapshot> KpiSnapshots => Set<KpiSnapshot>();
+    public DbSet<FieldChangeRecord> FieldChanges => Set<FieldChangeRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

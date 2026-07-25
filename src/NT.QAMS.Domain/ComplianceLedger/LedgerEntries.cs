@@ -50,3 +50,27 @@ public sealed class SecurityEvent
     public string? Detail { get; init; }
     public DateTimeOffset OccurredAtUtc { get; init; }
 }
+
+/// <summary>
+/// Field-level change record (21 CFR Part 11 §11.10(e) / ALCOA+): who changed
+/// which property of which record, from what value to what value, when.
+/// Written contemporaneously by a persistence interceptor in the same
+/// transaction as the change itself. Append-only; sensitive credential
+/// fields are redacted at capture.
+/// </summary>
+public sealed class FieldChangeRecord
+{
+    public Guid Id { get; init; } = Guid.CreateVersion7();
+    public Guid? TenantId { get; init; }
+    public string EntityType { get; init; } = null!;
+    public string EntityId { get; init; } = null!;
+    /// <summary>Created | Modified | Deleted.</summary>
+    public string Action { get; init; } = null!;
+    /// <summary>Property name for Modified rows; null for Created/Deleted rows.</summary>
+    public string? Property { get; init; }
+    public string? OldValue { get; init; }
+    public string? NewValue { get; init; }
+    public Guid? ActorId { get; init; }
+    public string Actor { get; init; } = null!;
+    public DateTimeOffset OccurredAtUtc { get; init; }
+}

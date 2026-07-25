@@ -50,3 +50,22 @@ public sealed class SecurityEventConfiguration : IEntityTypeConfiguration<Securi
         builder.HasIndex(e => e.OccurredAtUtc);
     }
 }
+
+/// <summary>Field-level change ledger — append-only, protected by the same trigger family.</summary>
+public sealed class FieldChangeRecordConfiguration : IEntityTypeConfiguration<FieldChangeRecord>
+{
+    public void Configure(EntityTypeBuilder<FieldChangeRecord> builder)
+    {
+        builder.ToTable("field_change", "audit");
+        builder.HasKey(f => f.Id);
+        builder.Property(f => f.EntityType).HasMaxLength(150);
+        builder.Property(f => f.EntityId).HasMaxLength(200);
+        builder.Property(f => f.Action).HasMaxLength(20);
+        builder.Property(f => f.Property).HasMaxLength(150);
+        builder.Property(f => f.OldValue).HasMaxLength(4000);
+        builder.Property(f => f.NewValue).HasMaxLength(4000);
+        builder.Property(f => f.Actor).HasMaxLength(300);
+        builder.HasIndex(f => new { f.TenantId, f.EntityId });
+        builder.HasIndex(f => f.OccurredAtUtc);
+    }
+}

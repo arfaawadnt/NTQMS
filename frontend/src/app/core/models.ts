@@ -861,6 +861,21 @@ export interface AuditTrailEntry {
   entryHash: string;
 }
 
+/** One field-level change row (Part 11 §11.10(e)): who changed what, from → to. */
+export interface FieldChange {
+  id: string;
+  tenantId: string | null;
+  entityType: string;
+  entityId: string;
+  action: string;
+  property: string | null;
+  oldValue: string | null;
+  newValue: string | null;
+  actorId: string | null;
+  actor: string;
+  occurredAtUtc: string;
+}
+
 /** A 21 CFR Part 11 electronic-signature record (§11.50/§11.70). */
 export interface SignatureRecord {
   id: string;
