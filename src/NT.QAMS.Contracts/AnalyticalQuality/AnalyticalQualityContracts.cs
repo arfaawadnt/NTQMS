@@ -84,6 +84,31 @@ public sealed record LinearityDetailDto(
     IReadOnlyList<LinearityMeasurementDto> Measurements,
     IReadOnlyList<LinearityLevelDto> Levels);
 
+// ── Detection Capability: LoB / LoD / LoQ (CLSI EP17) ───────────────────────
+
+public sealed record CreateDetectionLimitStudyRequest(
+    string Analyte, string Unit, string Method, decimal LoqCvTargetPct);
+
+public sealed record AddDetectionMeasurementRequest(string Kind, decimal? AssignedValue, decimal MeasuredValue);
+
+public sealed record DetectionMeasurementDto(Guid Id, string Kind, decimal? AssignedValue, decimal MeasuredValue);
+
+public sealed record LowLevelAssessmentDto(
+    decimal AssignedValue, int ReplicateCount, decimal Mean, decimal Sd, decimal CvPct, bool QualifiesForLoq);
+
+public sealed record DetectionLimitListItemDto(
+    Guid Id, string StudyRef, string Analyte, string Method, string State,
+    decimal? Lob, decimal? Lod, decimal? Loq);
+
+public sealed record DetectionLimitDetailDto(
+    Guid Id, string StudyRef, string Analyte, string Unit, string Method,
+    decimal LoqCvTargetPct, string State,
+    decimal? BlankMean, decimal? BlankSd, decimal? PooledLowSd,
+    decimal? Lob, decimal? Lod, decimal? Loq,
+    Guid? SignedOffBy, DateTimeOffset? SignedOffAtUtc,
+    IReadOnlyList<DetectionMeasurementDto> Measurements,
+    IReadOnlyList<LowLevelAssessmentDto> LowLevels);
+
 // ── PT/EQA Annual Plan (ISO 17025 §7.7.2) ───────────────────────────────────
 
 public sealed record CreatePtPlanRequest(int Year);

@@ -232,6 +232,16 @@ export const routes: Routes = [
             ],
           },
           {
+            path: 'detection-limits',
+            loadComponent: () => import('./features/analytical/detection-limit-list.component').then((m) => m.DetectionLimitListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/analytical/detection-limit-detail.component').then((m) => m.DetectionLimitDetailComponent),
+              },
+            ],
+          },
+          {
             path: 'uncertainty',
             loadComponent: () => import('./features/analytical/uncertainty-list.component').then((m) => m.UncertaintyListComponent),
             children: [

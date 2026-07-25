@@ -780,6 +780,65 @@ export interface CreateLinearityStudyRequest {
   allowableDeviationPct: number;
 }
 
+// ── Detection Capability: LoB / LoD / LoQ (CLSI EP17) ───────────────────────
+
+export const DETECTION_SAMPLE_KINDS = ['Blank', 'LowLevel'] as const;
+export type DetectionSampleKind = (typeof DETECTION_SAMPLE_KINDS)[number];
+
+export interface DetectionMeasurement {
+  id: string;
+  kind: string;
+  assignedValue: number | null;
+  measuredValue: number;
+}
+
+export interface LowLevelAssessment {
+  assignedValue: number;
+  replicateCount: number;
+  mean: number;
+  sd: number;
+  cvPct: number;
+  qualifiesForLoq: boolean;
+}
+
+export interface DetectionLimitListItem {
+  id: string;
+  studyRef: string;
+  analyte: string;
+  method: string;
+  state: string;
+  lob: number | null;
+  lod: number | null;
+  loq: number | null;
+}
+
+export interface DetectionLimitDetail {
+  id: string;
+  studyRef: string;
+  analyte: string;
+  unit: string;
+  method: string;
+  loqCvTargetPct: number;
+  state: string;
+  blankMean: number | null;
+  blankSd: number | null;
+  pooledLowSd: number | null;
+  lob: number | null;
+  lod: number | null;
+  loq: number | null;
+  signedOffBy: string | null;
+  signedOffAtUtc: string | null;
+  measurements: DetectionMeasurement[];
+  lowLevels: LowLevelAssessment[];
+}
+
+export interface CreateDetectionLimitStudyRequest {
+  analyte: string;
+  unit: string;
+  method: string;
+  loqCvTargetPct: number;
+}
+
 // ── Personnel Authorization Matrix (ISO 17025 §6.2.6) ───────────────────────
 
 export const AUTHORIZATION_SCOPES = ['Perform', 'ReviewAndRelease', 'Train'] as const;
