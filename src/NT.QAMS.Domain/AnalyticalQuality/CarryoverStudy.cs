@@ -145,6 +145,7 @@ public sealed class CarryoverStudy : AggregateRoot, ITenantScoped
 
     public void SignOff(Guid actorId, DateTimeOffset at)
     {
+        EnsureSignerIsNotPreparer(actorId, "SOD-AQ-001");
         if (State != CarryoverState.Calculated)
         {
             throw new InvalidStateTransitionException(

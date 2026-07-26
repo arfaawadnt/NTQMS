@@ -46,6 +46,7 @@ public sealed class AuditStampInterceptor(IClock clock, ICurrentUser currentUser
                 case EntityState.Added:
                     entry.Entity.CreatedAtUtc = now;
                     entry.Entity.CreatedBy = actor;
+                    entry.Entity.CreatedByUserId = currentUser.UserId;
                     break;
                 case EntityState.Modified:
                     entry.Entity.ModifiedAtUtc = now;

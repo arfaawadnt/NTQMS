@@ -145,6 +145,7 @@ public sealed class LotComparisonStudy : AggregateRoot, ITenantScoped
 
     public void SignOff(Guid actorId, DateTimeOffset at)
     {
+        EnsureSignerIsNotPreparer(actorId, "SOD-AQ-001");
         if (State != LotComparisonState.Calculated)
         {
             throw new InvalidStateTransitionException(

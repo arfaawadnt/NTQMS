@@ -192,6 +192,7 @@ public sealed class InstrumentComparabilityStudy : AggregateRoot, ITenantScoped
 
     public void SignOff(Guid actorId, DateTimeOffset at)
     {
+        EnsureSignerIsNotPreparer(actorId, "SOD-AQ-001");
         if (State != InstrumentComparabilityState.Calculated)
         {
             throw new InvalidStateTransitionException(

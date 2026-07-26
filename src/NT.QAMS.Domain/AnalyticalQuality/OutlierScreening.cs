@@ -167,6 +167,7 @@ public sealed class OutlierScreening : AggregateRoot, ITenantScoped
 
     public void SignOff(Guid actorId, DateTimeOffset at)
     {
+        EnsureSignerIsNotPreparer(actorId, "SOD-AQ-001");
         if (State != OutlierScreeningState.Calculated)
         {
             throw new InvalidStateTransitionException(

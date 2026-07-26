@@ -166,6 +166,7 @@ public sealed class InterferenceStudy : AggregateRoot, ITenantScoped
 
     public void SignOff(Guid actorId, DateTimeOffset at)
     {
+        EnsureSignerIsNotPreparer(actorId, "SOD-AQ-001");
         if (State != InterferenceState.Calculated)
         {
             throw new InvalidStateTransitionException(

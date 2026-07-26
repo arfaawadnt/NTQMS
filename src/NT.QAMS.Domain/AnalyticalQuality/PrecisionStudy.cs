@@ -197,6 +197,7 @@ public sealed class PrecisionStudy : AggregateRoot, ITenantScoped
 
     public void SignOff(Guid actorId, DateTimeOffset at)
     {
+        EnsureSignerIsNotPreparer(actorId, "SOD-AQ-001");
         if (State != PrecisionState.Calculated)
         {
             throw new InvalidStateTransitionException(

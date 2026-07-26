@@ -95,6 +95,7 @@ public sealed class SigmaAssessment : AggregateRoot, ITenantScoped
 
     public void SignOff(Guid actorId, DateTimeOffset at)
     {
+        EnsureSignerIsNotPreparer(actorId, "SOD-AQ-001");
         if (State != SigmaAssessmentState.Draft)
         {
             throw new InvalidStateTransitionException("SIG-011", "The assessment is already signed off.");

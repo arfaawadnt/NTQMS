@@ -18,6 +18,7 @@ public abstract class AggregateRoot : Entity, IAuditable
 
     public DateTimeOffset CreatedAtUtc { get; set; }
     public string? CreatedBy { get; set; }
+    public Guid? CreatedByUserId { get; set; }
     public DateTimeOffset? ModifiedAtUtc { get; set; }
     public string? ModifiedBy { get; set; }
 
@@ -26,4 +27,17 @@ public abstract class AggregateRoot : Entity, IAuditable
     public void ClearDomainEvents() => _domainEvents.Clear();
 
     protected void Raise(IDomainEvent domainEvent) => _domainEvents.Add(domainEvent);
+
+    /// <summary>
+    /// Segregation of duties (Part 11 §11.10(g)): the person who prepared/created
+    /// this record cannot also sign it off. No-op when the preparer is unknown
+    /// (records created before the id was captured, or by background/system work).
+    /// </summary>
+    protected void EnsureSignerIsNotPreparer(Guid signerId, string code)
+    {
+        if (CreatedByUserId is { } preparer && preparer == signerId)
+        {
+            throw new DomainException(code, "Segregation of duties: the preparer of a record cannot sign it off.");
+        }
+    }
 }

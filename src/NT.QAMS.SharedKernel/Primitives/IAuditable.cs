@@ -9,6 +9,8 @@ public interface IAuditable
 {
     DateTimeOffset CreatedAtUtc { get; set; }
     string? CreatedBy { get; set; }
+    /// <summary>Stable actor id of the creator (for segregation-of-duties checks).</summary>
+    Guid? CreatedByUserId { get; set; }
     DateTimeOffset? ModifiedAtUtc { get; set; }
     string? ModifiedBy { get; set; }
 }

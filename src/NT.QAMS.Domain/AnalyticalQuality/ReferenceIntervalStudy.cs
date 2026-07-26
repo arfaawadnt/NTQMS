@@ -150,6 +150,7 @@ public sealed class ReferenceIntervalStudy : AggregateRoot, ITenantScoped
 
     public void SignOff(Guid actorId, DateTimeOffset at)
     {
+        EnsureSignerIsNotPreparer(actorId, "SOD-AQ-001");
         if (State != ReferenceIntervalState.Calculated)
         {
             throw new InvalidStateTransitionException(

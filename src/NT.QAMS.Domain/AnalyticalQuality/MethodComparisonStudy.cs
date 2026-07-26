@@ -187,6 +187,7 @@ public sealed class MethodComparisonStudy : AggregateRoot, ITenantScoped
 
     public void SignOff(Guid actorId, DateTimeOffset at)
     {
+        EnsureSignerIsNotPreparer(actorId, "SOD-AQ-001");
         if (State != MethodComparisonState.Calculated)
         {
             throw new InvalidStateTransitionException(

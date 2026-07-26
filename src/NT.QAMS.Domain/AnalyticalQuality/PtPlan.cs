@@ -105,6 +105,7 @@ public sealed class PtPlan : AggregateRoot, ITenantScoped
 
     public void Approve(Guid actorId, DateTimeOffset at)
     {
+        EnsureSignerIsNotPreparer(actorId, "SOD-AQ-001");
         if (Status != PtPlanStatus.Draft)
         {
             throw new InvalidStateTransitionException("PTP-010", $"Only a draft plan can be approved (current: {Status}).");

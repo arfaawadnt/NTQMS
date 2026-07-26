@@ -163,6 +163,7 @@ public sealed class UncertaintyBudget : AggregateRoot, ITenantScoped
     /// <summary>QM approval freezes the budget as evidence.</summary>
     public void Approve(Guid actorId, DateTimeOffset at)
     {
+        EnsureSignerIsNotPreparer(actorId, "SOD-AQ-001");
         if (Status != UncertaintyBudgetStatus.Calculated)
         {
             throw new InvalidStateTransitionException("MU-010", $"Only a calculated budget can be approved (current: {Status}).");

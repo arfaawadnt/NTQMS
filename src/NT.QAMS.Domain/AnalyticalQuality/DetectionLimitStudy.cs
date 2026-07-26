@@ -207,6 +207,7 @@ public sealed class DetectionLimitStudy : AggregateRoot, ITenantScoped
 
     public void SignOff(Guid actorId, DateTimeOffset at)
     {
+        EnsureSignerIsNotPreparer(actorId, "SOD-AQ-001");
         if (State != DetectionLimitState.Calculated)
         {
             throw new InvalidStateTransitionException(

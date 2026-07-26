@@ -142,6 +142,7 @@ public sealed class ValidationStudy : AggregateRoot, ITenantScoped
 
     public void SignOff(Guid actorId, DateTimeOffset at)
     {
+        EnsureSignerIsNotPreparer(actorId, "SOD-AQ-001");
         if (State != ValidationState.StatsCalculated)
         {
             throw new InvalidStateTransitionException("MV-015", "Statistics must be calculated before sign-off.");
