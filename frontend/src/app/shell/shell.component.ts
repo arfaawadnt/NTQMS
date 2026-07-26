@@ -275,6 +275,7 @@ export class ShellComponent {
       {
         key: 'docs', label: 'nav.groupDocs',
         items: [
+          { path: '/quality-policy', label: 'nav.qualityPolicy', icon: 'qualityPolicy' },
           { path: '/documents', label: 'nav.documents', icon: 'documents' },
           { path: '/records', label: 'nav.records', icon: 'records' },
         ],

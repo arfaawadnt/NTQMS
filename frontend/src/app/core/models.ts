@@ -488,6 +488,17 @@ export interface ObjectiveProgress {
   comment: string | null;
 }
 
+export interface QualityPolicy {
+  id: string;
+  policyRef: string;
+  version: number;
+  statement: string;
+  status: string;
+  effectiveDate: string | null;
+  approvedById: string | null;
+  approvedAtUtc: string | null;
+}
+
 export interface QualityObjectiveListItem {
   id: string;
   objectiveRef: string;

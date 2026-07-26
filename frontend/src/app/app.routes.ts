@@ -69,6 +69,10 @@ export const routes: Routes = [
             ],
           },
           {
+            path: 'quality-policy',
+            loadComponent: () => import('./features/governance/quality-policy.component').then((m) => m.QualityPolicyComponent),
+          },
+          {
             path: 'quality-objectives',
             loadComponent: () => import('./features/objectives/objective-list.component').then((m) => m.ObjectiveListComponent),
             children: [

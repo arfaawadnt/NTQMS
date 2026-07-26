@@ -33,6 +33,7 @@ public interface IAppDbContext
     DbSet<Nonconformance> Nonconformances { get; }
     DbSet<Complaint> Complaints { get; }
     DbSet<QualityObjective> QualityObjectives { get; }
+    DbSet<QualityPolicy> QualityPolicies { get; }
     DbSet<FeedbackEntry> FeedbackEntries { get; }
     DbSet<ControlledDocument> Documents { get; }
     DbSet<FileReference> Files { get; }
