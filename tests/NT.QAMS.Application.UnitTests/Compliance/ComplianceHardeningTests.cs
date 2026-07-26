@@ -150,7 +150,8 @@ public class ESignatureServiceTests
         db.Users.Add(user);
         await db.SaveChangesAsync();
 
-        var service = new ESignatureService(db, tenant, hasher, new FixedClock(Now));
+        var security = new SecurityEventLog(db, new FixedClock(Now));
+        var service = new ESignatureService(db, tenant, hasher, new FixedClock(Now), security);
 
         // Part 11 §11.200(a)(1): wrong password is refused even with the right PIN…
         var wrongPassword = () => service.SignAsync(
@@ -171,5 +172,9 @@ public class ESignatureServiceTests
         record.ContentHash.Should().Be("abc123");
 
         (await db.Set<SignatureRecord>().CountAsync()).Should().Be(1);
+
+        // Part 11 §11.300(d): both failed signing attempts were recorded.
+        (await db.Set<NT.QAMS.Domain.ComplianceLedger.SecurityEvent>()
+            .CountAsync(e => e.EventType == "ESIGN_FAILED")).Should().Be(2);
     }
 }

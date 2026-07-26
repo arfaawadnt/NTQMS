@@ -84,7 +84,7 @@ public sealed class SecurityEventLog(AppDbContext db, IClock clock) : ISecurityE
 }
 
 public sealed class ESignatureService(
-    AppDbContext db, ICurrentTenant tenant, IPasswordHasher hasher, IClock clock)
+    AppDbContext db, ICurrentTenant tenant, IPasswordHasher hasher, IClock clock, ISecurityEventLog security)
     : IESignatureService
 {
     public async Task<SignatureRecord> SignAsync(
@@ -93,14 +93,24 @@ public sealed class ESignatureService(
         var signer = await db.Users.SingleOrDefaultAsync(u => u.Id == signerId, ct)
             ?? throw new DomainException("SIG-404", "Signer not found.");
 
+        // Part 11 §11.300(d): detect and report attempts at unauthorized use, and
+        // throttle them. Repeated signing failures lock the account, like login.
+        if (signer.IsLockedOut(clock.UtcNow))
+        {
+            await security.WriteAsync("ESIGN_LOCKED", tenant.TenantId, signer.DisplayName, subjectRef, ct);
+            throw new DomainException("SIG-003", "Account is temporarily locked after repeated failed signings.");
+        }
+
         // Part 11 §11.200(a)(1): a signing demands both identification components.
         if (!hasher.Verify(signer.PasswordHash, password))
         {
+            await RecordFailureAsync(signer, "bad-password", subjectRef, ct);
             throw new DomainException("SIG-002", "Account password is incorrect.");
         }
 
         if (string.IsNullOrWhiteSpace(signer.PinHash) || !hasher.Verify(signer.PinHash, pin))
         {
+            await RecordFailureAsync(signer, "bad-pin", subjectRef, ct);
             throw new DomainException("SIG-001", "Electronic-signature PIN is not set or is incorrect.");
         }
 
@@ -118,6 +128,18 @@ public sealed class ESignatureService(
         db.Set<SignatureRecord>().Add(record);
         await db.SaveChangesAsync(ct);
         return record;
+    }
+
+    /// <summary>
+    /// Record a failed signing to the security-event ledger and count it toward
+    /// the account lockout. WriteAsync's SaveChanges persists the incremented
+    /// counter (same DbContext) alongside the event.
+    /// </summary>
+    private async Task RecordFailureAsync(
+        NT.QAMS.Domain.IdentityAccess.UserAccount signer, string reason, string subjectRef, CancellationToken ct)
+    {
+        signer.RegisterFailedLogin(clock.UtcNow);
+        await security.WriteAsync("ESIGN_FAILED", tenant.TenantId, signer.DisplayName, $"{reason}:{subjectRef}", ct);
     }
 }
 

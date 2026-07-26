@@ -50,7 +50,7 @@ public class NonconformanceTests
         var actionId = nc.PlanCapaAction(CapaActionType.Corrective, "Replace seal", Owner, Due);
         nc.CompleteCapaAction(actionId, Now);
         nc.SubmitForVerification();
-        nc.Verify(passed: true);
+        nc.Verify(passed: true, actorId: Manager);
         nc.ConfirmEffectiveness(effective: true, actorId: Manager);
 
         nc.Status.Should().Be(NcStatus.Closed);
@@ -79,9 +79,25 @@ public class NonconformanceTests
         nc.CompleteCapaAction(actionId, Now);
         nc.SubmitForVerification();
 
-        nc.Verify(passed: false);
+        nc.Verify(passed: false, actorId: Manager);
 
         nc.Status.Should().Be(NcStatus.ActionPlan);
+    }
+
+    [Fact]
+    public void Segregation_of_duties_raiser_cannot_verify_own_nc()
+    {
+        var nc = Raised();
+        nc.Triage(Manager);
+        nc.RecordRca(RcaMethod.FiveWhys, "Analysis", Manager);
+        var actionId = nc.PlanCapaAction(CapaActionType.Corrective, "Fix", Owner, Due);
+        nc.CompleteCapaAction(actionId, Now);
+        nc.SubmitForVerification();
+
+        var act = () => nc.Verify(passed: true, actorId: Raiser);
+
+        act.Should().Throw<DomainException>().Which.Code.Should().Be("SOD-CAPA-002");
+        nc.Status.Should().Be(NcStatus.PendingVerification, "the illegal verify must not change state");
     }
 
     [Fact]
@@ -93,7 +109,7 @@ public class NonconformanceTests
         var actionId = nc.PlanCapaAction(CapaActionType.Corrective, "Fix", Owner, Due);
         nc.CompleteCapaAction(actionId, Now);
         nc.SubmitForVerification();
-        nc.Verify(passed: true);
+        nc.Verify(passed: true, actorId: Manager);
 
         var act = () => nc.ConfirmEffectiveness(effective: true, actorId: Raiser);
 

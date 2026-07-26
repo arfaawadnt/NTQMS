@@ -221,9 +221,17 @@ public sealed class Nonconformance : AggregateRoot, ITenantScoped, IAllocatable
         Status = NcStatus.PendingVerification;
     }
 
-    public void Verify(bool passed)
+    public void Verify(bool passed, Guid actorId)
     {
         Require(NcStatus.PendingVerification, "NC-021", "verify");
+
+        // Segregation of duties: the person who raised the nonconformance cannot
+        // verify the corrective action on it (Part 11 §11.10(g)).
+        if (actorId == RaisedBy)
+        {
+            throw new DomainException("SOD-CAPA-002", "Segregation of duties: the raiser cannot verify their own nonconformance.");
+        }
+
         Status = passed ? NcStatus.EffectivenessCheck : NcStatus.ActionPlan;
         if (passed)
         {

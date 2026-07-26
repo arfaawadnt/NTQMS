@@ -163,11 +163,12 @@ public sealed class SubmitNcForVerificationHandler(IAppDbContext db)
     }
 }
 
-public sealed class VerifyNcHandler(IAppDbContext db) : ICommandHandler<VerifyNcCommand>
+public sealed class VerifyNcHandler(IAppDbContext db, ICurrentUser user) : ICommandHandler<VerifyNcCommand>
 {
     public async Task Handle(VerifyNcCommand c, CancellationToken ct)
     {
-        (await NcLoader.LoadAsync(db, c.NcId, ct)).Verify(c.Passed);
+        var actor = user.UserId ?? throw new DomainException("AUTH-003", "An authenticated user is required.");
+        (await NcLoader.LoadAsync(db, c.NcId, ct)).Verify(c.Passed, actor);
         await db.SaveChangesAsync(ct);
     }
 }
