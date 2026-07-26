@@ -35,3 +35,12 @@ public sealed record MyDocumentAcknowledgementDto(
 
 public sealed record DocumentAcknowledgementDto(
     Guid UserId, string UserDisplay, string VersionLabel, DateTimeOffset AcknowledgedAtUtc);
+
+// ── Controlled printed-copy / distribution register (ISO 17025 §8.3 / 9001 §7.5.3) ──
+
+public sealed record IssueControlledCopyRequest(string Holder);
+public sealed record CloseControlledCopyRequest(string Outcome); // Returned | Destroyed
+
+public sealed record ControlledCopyDto(
+    Guid Id, int CopyNumber, string VersionLabel, string Holder, string Status,
+    Guid IssuedBy, DateTimeOffset IssuedAtUtc, DateTimeOffset? ClosedAtUtc);

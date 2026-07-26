@@ -260,6 +260,17 @@ export interface DocumentAcknowledgement {
   acknowledgedAtUtc: string;
 }
 
+export interface ControlledCopy {
+  id: string;
+  copyNumber: number;
+  versionLabel: string;
+  holder: string;
+  status: string;
+  issuedBy: string;
+  issuedAtUtc: string;
+  closedAtUtc: string | null;
+}
+
 /** Metadata returned after a file is uploaded to object storage. */
 export interface FileUploaded {
   id: string;

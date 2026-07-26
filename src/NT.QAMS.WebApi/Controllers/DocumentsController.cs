@@ -58,6 +58,24 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
     public async Task<IActionResult> Acknowledgements(Guid id, CancellationToken ct) =>
         Ok(await sender.Send(new GetDocumentAcknowledgementsQuery(id), ct));
 
+    /// <summary>Controlled printed-copy / distribution register for this document (ISO 17025 §8.3).</summary>
+    [HttpGet("{id:guid}/controlled-copies")]
+    public async Task<IActionResult> ControlledCopies(Guid id, CancellationToken ct) =>
+        Ok(await sender.Send(new GetControlledCopiesQuery(id), ct));
+
+    [HttpPost("{id:guid}/controlled-copies")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
+    public async Task<IActionResult> IssueControlledCopy(Guid id, IssueControlledCopyRequest request, CancellationToken ct) =>
+        Ok(new { id = await sender.Send(new IssueControlledCopyCommand(id, request.Holder), ct) });
+
+    [HttpPost("controlled-copies/{copyId:guid}/close")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
+    public async Task<IActionResult> CloseControlledCopy(Guid copyId, CloseControlledCopyRequest request, CancellationToken ct)
+    {
+        await sender.Send(new CloseControlledCopyCommand(copyId, request.Outcome), ct);
+        return NoContent();
+    }
+
     [HttpPost]
     public async Task<IActionResult> Create(CreateDocumentRequest request, CancellationToken ct)
     {

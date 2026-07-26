@@ -52,6 +52,22 @@ public sealed class DocumentAcknowledgementConfiguration : IEntityTypeConfigurat
     }
 }
 
+public sealed class DocumentControlledCopyConfiguration : IEntityTypeConfiguration<DocumentControlledCopy>
+{
+    public void Configure(EntityTypeBuilder<DocumentControlledCopy> builder)
+    {
+        builder.ToTable("document_controlled_copy", "qams");
+        builder.HasKey(c => c.Id);
+        builder.Property(c => c.DocumentCode).HasMaxLength(60);
+        builder.Property(c => c.VersionLabel).HasMaxLength(20);
+        builder.Property(c => c.Holder).HasMaxLength(200);
+        builder.Property(c => c.Status).HasConversion<string>().HasMaxLength(20);
+        builder.HasIndex(c => new { c.TenantId, c.DocumentId, c.CopyNumber }).IsUnique();
+        builder.HasIndex(c => new { c.TenantId, c.Status });
+        builder.Ignore(c => c.DomainEvents);
+    }
+}
+
 public sealed class FileReferenceConfiguration : IEntityTypeConfiguration<FileReference>
 {
     public void Configure(EntityTypeBuilder<FileReference> builder)

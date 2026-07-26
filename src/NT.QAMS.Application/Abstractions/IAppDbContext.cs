@@ -38,6 +38,7 @@ public interface IAppDbContext
     DbSet<FeedbackEntry> FeedbackEntries { get; }
     DbSet<ControlledDocument> Documents { get; }
     DbSet<DocumentAcknowledgement> DocumentAcknowledgements { get; }
+    DbSet<DocumentControlledCopy> DocumentControlledCopies { get; }
     DbSet<FileReference> Files { get; }
     DbSet<Audit> Audits { get; }
     DbSet<EquipmentItem> EquipmentItems { get; }

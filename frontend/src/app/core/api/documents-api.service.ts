@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
-  CreateDocumentRequest, CreatedResource, DocumentAcknowledgement, DocumentDetail, DocumentListItem,
+  ControlledCopy, CreateDocumentRequest, CreatedResource, DocumentAcknowledgement, DocumentDetail, DocumentListItem,
   DraftNewVersionRequest, MyDocumentAcknowledgement, PublishDocumentRequest, RejectVersionRequest, SignatureRecord,
 } from '../models';
 
@@ -46,6 +46,10 @@ export class DocumentsApiService {
   acknowledge(id: string): Observable<CreatedResource> { return this.http.post<CreatedResource>(`${this.base}/${id}/acknowledge`, {}); }
   myAcknowledgement(id: string): Observable<MyDocumentAcknowledgement> { return this.http.get<MyDocumentAcknowledgement>(`${this.base}/${id}/my-acknowledgement`); }
   acknowledgements(id: string): Observable<DocumentAcknowledgement[]> { return this.http.get<DocumentAcknowledgement[]>(`${this.base}/${id}/acknowledgements`); }
+
+  controlledCopies(id: string): Observable<ControlledCopy[]> { return this.http.get<ControlledCopy[]>(`${this.base}/${id}/controlled-copies`); }
+  issueControlledCopy(id: string, holder: string): Observable<CreatedResource> { return this.http.post<CreatedResource>(`${this.base}/${id}/controlled-copies`, { holder }); }
+  closeControlledCopy(copyId: string, outcome: string): Observable<void> { return this.http.post<void>(`${this.base}/controlled-copies/${copyId}/close`, { outcome }); }
 
   publish(id: string, body: PublishDocumentRequest): Observable<void> { return this.http.post<void>(`${this.base}/${id}/publish`, body); }
   draftNewVersion(id: string, body: DraftNewVersionRequest): Observable<void> { return this.http.post<void>(`${this.base}/${id}/versions`, body); }

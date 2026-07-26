@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -8,7 +8,7 @@ import { DocumentsApiService } from '../../core/api/documents-api.service';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
 import {
-  VERSION_BUMPS, VersionBump, SignatureRecord, DocumentAcknowledgement, MyDocumentAcknowledgement,
+  VERSION_BUMPS, VersionBump, SignatureRecord, DocumentAcknowledgement, MyDocumentAcknowledgement, ControlledCopy,
 } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
@@ -25,7 +25,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
   selector: 'qams-document-detail',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+  imports: [ReactiveFormsModule, FormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
   template: `
     @if (doc(); as d) {
       <qams-page-header [title]="d.code + ' — ' + d.title" [subtitle]="d.category">
@@ -155,6 +155,45 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
         </section>
       }
 
+      @if (d.status === 'Published' || copies().length > 0) {
+        <section class="card">
+          <h3>{{ i18n.t('doc.copies') }}</h3>
+          <p class="muted small">{{ i18n.t('doc.copiesHint') }}</p>
+          @if (perms.canApprove() && d.status === 'Published') {
+            <div class="ack-row">
+              <input [(ngModel)]="copyHolder" [placeholder]="i18n.t('doc.copyHolder')" />
+              <button (click)="issueCopy(d.id)" [disabled]="!copyHolder.trim()">{{ i18n.t('doc.issueCopy') }}</button>
+            </div>
+          }
+          @if (copies().length === 0) { <p class="muted">{{ i18n.t('doc.noCopies') }}</p> }
+          @else {
+            <table>
+              <thead><tr>
+                <th>#</th><th>{{ i18n.t('doc.version') }}</th><th>{{ i18n.t('doc.copyHolder') }}</th>
+                <th>{{ i18n.t('nc.status') }}</th><th>{{ i18n.t('doc.issued') }}</th><th></th>
+              </tr></thead>
+              <tbody>
+                @for (cp of copies(); track cp.id) {
+                  <tr>
+                    <td>{{ cp.copyNumber }}</td>
+                    <td>v{{ cp.versionLabel }}</td>
+                    <td>{{ cp.holder }}</td>
+                    <td><qams-status-pill [status]="cp.status" /></td>
+                    <td>{{ cp.issuedAtUtc | date:'mediumDate' }}</td>
+                    <td class="actions">
+                      @if (cp.status === 'Issued' && perms.canApprove()) {
+                        <button class="link" type="button" (click)="closeCopy(cp.id, 'Returned')">{{ i18n.t('doc.copyReturned') }}</button>
+                        <button class="link danger-link" type="button" (click)="closeCopy(cp.id, 'Destroyed')">{{ i18n.t('doc.copyDestroyed') }}</button>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </section>
+      }
+
       @if (signatures().length > 0) {
         <section class="card">
           <h3>{{ i18n.t('doc.signatures') }}</h3>
@@ -215,6 +254,9 @@ export class DocumentDetailComponent implements OnInit {
   /** Read-and-understand state for the current user + (for approvers) full coverage. */
   readonly myAck = signal<MyDocumentAcknowledgement | null>(null);
   readonly acks = signal<DocumentAcknowledgement[]>([]);
+  /** Controlled printed-copy / distribution register. */
+  readonly copies = signal<ControlledCopy[]>([]);
+  copyHolder = '';
 
   /** The state of the single in-flight (non-published, non-obsolete) version, if any. */
   readonly inFlightState = computed<string | null>(() => {
@@ -242,6 +284,27 @@ export class DocumentDetailComponent implements OnInit {
     void this.facade.loadDetail(this.id());
     void this.loadSignatures();
     void this.loadAcknowledgements();
+    void this.loadCopies();
+  }
+
+  private async loadCopies(): Promise<void> {
+    try {
+      this.copies.set(await firstValueFrom(this.docsApi.controlledCopies(this.id())));
+    } catch {
+      this.copies.set([]);
+    }
+  }
+
+  async issueCopy(id: string): Promise<void> {
+    if (!this.copyHolder.trim()) { return; }
+    await firstValueFrom(this.docsApi.issueControlledCopy(id, this.copyHolder.trim()));
+    this.copyHolder = '';
+    await this.loadCopies();
+  }
+
+  async closeCopy(copyId: string, outcome: string): Promise<void> {
+    await firstValueFrom(this.docsApi.closeControlledCopy(copyId, outcome));
+    await this.loadCopies();
   }
 
   private async loadSignatures(): Promise<void> {
