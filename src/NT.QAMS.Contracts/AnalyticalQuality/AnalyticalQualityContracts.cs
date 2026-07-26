@@ -6,6 +6,7 @@ public sealed record CreateQcProfileRequest(
     string Analyte, string Instrument, string ControlLot, decimal TargetMean, decimal TargetSd);
 public sealed record RecordQcRunRequest(decimal Value, string Operator);
 public sealed record QcTroubleshootRequest(string Note);
+public sealed record UpdateQcTargetsRequest(decimal TargetMean, decimal TargetSd, string Reason);
 
 public sealed record QcProfileDto(
     Guid Id, string Analyte, string Instrument, string ControlLot,

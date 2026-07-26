@@ -26,6 +26,12 @@ public sealed class QcProfile : AggregateRoot, ITenantScoped
     public decimal TargetSd { get; private set; }
     public bool IsActive { get; private set; }
 
+    /// <summary>When the current targets took effect (forward-only). Null = since creation.</summary>
+    public DateTimeOffset? TargetEffectiveFromUtc { get; private set; }
+
+    /// <summary>The reason recorded for the most recent target change (Part 11 §11.10(e)).</summary>
+    public string? LastTargetChangeReason { get; private set; }
+
     public static QcProfile Create(
         string analyte, string instrument, string controlLot, decimal targetMean, decimal targetSd)
     {
@@ -50,15 +56,33 @@ public sealed class QcProfile : AggregateRoot, ITenantScoped
         };
     }
 
-    public void UpdateTargets(decimal targetMean, decimal targetSd)
+    /// <summary>
+    /// Effective-dated, forward-only target change with a mandatory reason. Prior
+    /// runs are unaffected — each QcRun stores the z-score/verdict computed against
+    /// the target in force at the time — and the old→new values, the reason, and
+    /// the effective date are all captured by the field-change ledger.
+    /// </summary>
+    public void UpdateTargets(decimal targetMean, decimal targetSd, string reason, DateTimeOffset effectiveFrom)
     {
         if (targetSd <= 0m)
         {
             throw new DomainException("QC-002", "Target SD must be positive.");
         }
 
+        if (string.IsNullOrWhiteSpace(reason))
+        {
+            throw new DomainException("QC-012", "A reason is required to change QC targets.");
+        }
+
+        if (TargetEffectiveFromUtc is { } current && effectiveFrom < current)
+        {
+            throw new DomainException("QC-013", "Target changes are forward-only; the effective date cannot precede the current one.");
+        }
+
         TargetMean = targetMean;
         TargetSd = targetSd;
+        LastTargetChangeReason = reason.Trim();
+        TargetEffectiveFromUtc = effectiveFrom;
     }
 
     public void Deactivate() => IsActive = false;

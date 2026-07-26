@@ -68,6 +68,30 @@ public sealed class RecordQcRunHandler(IAppDbContext db, IClock clock)
     }
 }
 
+public sealed record UpdateQcTargetsCommand(Guid ProfileId, decimal TargetMean, decimal TargetSd, string Reason)
+    : ICommand;
+
+public sealed class UpdateQcTargetsValidator : AbstractValidator<UpdateQcTargetsCommand>
+{
+    public UpdateQcTargetsValidator()
+    {
+        RuleFor(x => x.TargetSd).GreaterThan(0m);
+        RuleFor(x => x.Reason).NotEmpty().MaximumLength(500);
+    }
+}
+
+public sealed class UpdateQcTargetsHandler(IAppDbContext db, IClock clock)
+    : ICommandHandler<UpdateQcTargetsCommand>
+{
+    public async Task Handle(UpdateQcTargetsCommand c, CancellationToken ct)
+    {
+        var profile = await db.QcProfiles.SingleOrDefaultAsync(p => p.Id == c.ProfileId, ct)
+            ?? throw new DomainException("QC-404", "QC profile not found.");
+        profile.UpdateTargets(c.TargetMean, c.TargetSd, c.Reason, clock.UtcNow);
+        await db.SaveChangesAsync(ct);
+    }
+}
+
 public sealed record LogQcTroubleshootingCommand(Guid RunId, string Note) : ICommand;
 
 public sealed class LogQcTroubleshootingHandler(IAppDbContext db)

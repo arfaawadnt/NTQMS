@@ -15,6 +15,7 @@ public sealed class QcProfileConfiguration : IEntityTypeConfiguration<QcProfile>
         builder.Property(p => p.ControlLot).HasMaxLength(60);
         builder.Property(p => p.TargetMean).HasPrecision(18, 6);
         builder.Property(p => p.TargetSd).HasPrecision(18, 6);
+        builder.Property(p => p.LastTargetChangeReason).HasMaxLength(500);
         builder.HasIndex(p => new { p.TenantId, p.Analyte, p.Instrument, p.ControlLot });
         builder.Ignore(p => p.DomainEvents);
     }

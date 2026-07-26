@@ -22,6 +22,14 @@ public sealed class QualityControlController(ISender sender) : ControllerBase
             request.Analyte, request.Instrument, request.ControlLot,
             request.TargetMean, request.TargetSd), ct) });
 
+    [HttpPut("profiles/{id:guid}/targets")]
+    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    public async Task<IActionResult> UpdateTargets(Guid id, UpdateQcTargetsRequest request, CancellationToken ct)
+    {
+        await sender.Send(new UpdateQcTargetsCommand(id, request.TargetMean, request.TargetSd, request.Reason), ct);
+        return NoContent();
+    }
+
     [HttpGet("profiles/{id:guid}/runs")]
     public async Task<IActionResult> Runs(Guid id, [FromQuery] int take = 60, CancellationToken ct = default) =>
         Ok(await sender.Send(new GetQcRunsQuery(id, take), ct));
