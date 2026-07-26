@@ -5,7 +5,7 @@ import { NcFacade } from './nc.facade';
 import { I18nService } from '../../core/i18n.service';
 import { OrgDataService } from '../../core/org-data.service';
 import { ExportsApiService } from '../../core/api/exports-api.service';
-import { NC_SOURCE_TYPES, NcSourceType } from '../../core/models';
+import { NC_SOURCE_TYPES, NcSourceType, QUALITY_EVENT_TYPES, QualityEventType } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
@@ -56,6 +56,12 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
             </select>
           </div>
           <div>
+            <label>{{ i18n.t('nc.eventType') }}</label>
+            <select formControlName="eventType">
+              @for (e of eventTypes; track e) { <option [value]="e">{{ i18n.t('nc.event.' + e) }}</option> }
+            </select>
+          </div>
+          <div>
             <label>{{ i18n.t('nc.severity') }} (1-5)</label>
             <input type="number" min="1" max="5" formControlName="severity" />
           </div>
@@ -87,6 +93,7 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
               <th>{{ i18n.t('nc.ref') }}</th><th>{{ i18n.t('nc.subject') }}</th>
               <th>{{ i18n.t('nc.status') }}</th><th>{{ i18n.t('nc.severity') }}</th>
               <th>{{ i18n.t('nc.rpn') }}</th><th>{{ i18n.t('nc.source') }}</th>
+              <th>{{ i18n.t('nc.eventType') }}</th>
               <th>{{ i18n.t('alloc.branch') }}</th>
             </tr>
           </thead>
@@ -99,6 +106,7 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
                 <td>{{ nc.severity }}</td>
                 <td [class.danger-text]="nc.rpn > 12">{{ nc.rpn }}</td>
                 <td>{{ nc.sourceType }}</td>
+                <td>{{ i18n.t('nc.event.' + nc.eventType) }}</td>
                 <td class="code">{{ org.branchName(nc.branchId) || '—' }}</td>
               </tr>
             }
@@ -132,6 +140,7 @@ export class NcListComponent implements OnInit {
   private readonly router = inject(Router);
 
   readonly sources = NC_SOURCE_TYPES;
+  readonly eventTypes = QUALITY_EVENT_TYPES;
   readonly statuses = ['Draft', 'Raised', 'Assigned', 'Rca', 'ActionPlan', 'PendingVerification', 'EffectivenessCheck', 'Closed', 'Rejected'];
   readonly showForm = signal(false);
   /** Whether the record-workspace drawer (child route) is active. */
@@ -167,6 +176,7 @@ export class NcListComponent implements OnInit {
     severity: [3, [Validators.required, Validators.min(1), Validators.max(5)]],
     likelihood: [3, [Validators.required, Validators.min(1), Validators.max(5)]],
     sourceType: ['Internal' as NcSourceType, [Validators.required]],
+    eventType: ['Nonconformity' as QualityEventType, [Validators.required]],
     branchId: [''],
     departmentId: [''],
   });
@@ -191,7 +201,7 @@ export class NcListComponent implements OnInit {
     });
     if (id) {
       this.showForm.set(false);
-      this.form.reset({ severity: 3, likelihood: 3, sourceType: 'Internal' });
+      this.form.reset({ severity: 3, likelihood: 3, sourceType: 'Internal', eventType: 'Nonconformity' });
       void this.router.navigate(['/nonconformances', id]);
     }
   }

@@ -10,6 +10,16 @@ public enum NcStatus
 
 public enum NcSourceType { Internal, Complaint, Audit, Supplier, ProficiencyTest }
 
+/// <summary>
+/// The kind of quality event (F-11 / GMP, ISO 17025 §7.10). All share the same
+/// investigation and CAPA workflow but are first-class and distinctly reportable:
+/// a plain Nonconformity, a Deviation from a procedure, an Out-of-Specification
+/// result, or an Out-of-Trend result. Defaults to Nonconformity so events raised
+/// from other modules (audit findings, complaints, PT, excursions) keep their
+/// established meaning.
+/// </summary>
+public enum QualityEventType { Nonconformity, Deviation, OutOfSpecification, OutOfTrend }
+
 public enum CapaActionType { Corrective, Preventive }
 
 public enum CapaActionStatus { Open, Completed }
@@ -93,6 +103,8 @@ public sealed class Nonconformance : AggregateRoot, ITenantScoped, IAllocatable
     public int Likelihood { get; private set; }
     public int Rpn { get; private set; }
     public NcSourceType SourceType { get; private set; }
+    /// <summary>The kind of quality event (Nonconformity / Deviation / OOS / OOT).</summary>
+    public QualityEventType EventType { get; private set; }
     /// <summary>Logical origin ref (e.g. "AUD-2026-0001#findingId") — idempotency key for source-driven NCs.</summary>
     public string? SourceRef { get; private set; }
     public NcStatus Status { get; private set; }
@@ -106,7 +118,7 @@ public sealed class Nonconformance : AggregateRoot, ITenantScoped, IAllocatable
     public static Nonconformance Raise(
         string ncRef, string title, string description,
         int severity, int likelihood, NcSourceType sourceType, Guid raisedBy,
-        string? sourceRef = null)
+        string? sourceRef = null, QualityEventType eventType = QualityEventType.Nonconformity)
     {
         if (string.IsNullOrWhiteSpace(title))
         {
@@ -127,6 +139,7 @@ public sealed class Nonconformance : AggregateRoot, ITenantScoped, IAllocatable
             Likelihood = likelihood,
             Rpn = severity * likelihood,
             SourceType = sourceType,
+            EventType = eventType,
             SourceRef = string.IsNullOrWhiteSpace(sourceRef) ? null : sourceRef.Trim(),
             Status = NcStatus.Draft,
             RaisedBy = raisedBy,

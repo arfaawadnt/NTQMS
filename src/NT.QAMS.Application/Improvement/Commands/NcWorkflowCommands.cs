@@ -11,7 +11,8 @@ namespace NT.QAMS.Application.Improvement.Commands;
 
 public sealed record RaiseNcCommand(
     string Title, string Description, int Severity, int Likelihood, NcSourceType SourceType,
-    Guid? BranchId = null, Guid? DepartmentId = null)
+    Guid? BranchId = null, Guid? DepartmentId = null,
+    QualityEventType EventType = QualityEventType.Nonconformity)
     : ICommand<Guid>;
 
 public sealed class RaiseNcValidator : AbstractValidator<RaiseNcCommand>
@@ -40,7 +41,8 @@ public sealed class RaiseNcHandler(
 
         var nc = Nonconformance.Raise(
             ncRef, command.Title, command.Description,
-            command.Severity, command.Likelihood, command.SourceType, actor);
+            command.Severity, command.Likelihood, command.SourceType, actor,
+            eventType: command.EventType);
 
         nc.BranchId = command.BranchId;
         nc.DepartmentId = command.DepartmentId;

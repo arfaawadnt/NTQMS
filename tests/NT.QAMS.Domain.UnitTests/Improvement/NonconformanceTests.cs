@@ -32,6 +32,19 @@ public class NonconformanceTests
         nc.DomainEvents.Should().BeEmpty("NcRaised fires on submit, not on draft");
     }
 
+    [Fact]
+    public void Event_type_defaults_to_nonconformity_and_can_be_classified()
+    {
+        // F-11: quality events are first-class — a plain NC by default, but a
+        // deviation / OOS / OOT when explicitly classified.
+        Nonconformance.Raise("NC-1", "T", "D", 3, 3, NcSourceType.Internal, Raiser)
+            .EventType.Should().Be(QualityEventType.Nonconformity);
+
+        Nonconformance.Raise("NC-2", "T", "D", 3, 3, NcSourceType.Internal, Raiser,
+                eventType: QualityEventType.OutOfSpecification)
+            .EventType.Should().Be(QualityEventType.OutOfSpecification);
+    }
+
     [Theory]
     [InlineData(0, 3)]
     [InlineData(3, 6)]

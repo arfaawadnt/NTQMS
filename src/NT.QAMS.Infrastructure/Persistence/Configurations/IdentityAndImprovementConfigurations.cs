@@ -35,6 +35,7 @@ public sealed class NonconformanceConfiguration : IEntityTypeConfiguration<Nonco
         builder.Property(n => n.Description).HasMaxLength(4000);
         builder.Property(n => n.Status).HasConversion<string>().HasMaxLength(30);
         builder.Property(n => n.SourceType).HasConversion<string>().HasMaxLength(30);
+        builder.Property(n => n.EventType).HasConversion<string>().HasMaxLength(30);
         builder.Property(n => n.RejectionReason).HasMaxLength(1000);
 
         builder.HasIndex(n => new { n.TenantId, n.NcRef }).IsUnique();

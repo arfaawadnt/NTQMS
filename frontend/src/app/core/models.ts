@@ -16,6 +16,10 @@ export interface AuthResponse {
 export const NC_SOURCE_TYPES = ['Internal', 'Complaint', 'Audit', 'Supplier', 'ProficiencyTest'] as const;
 export type NcSourceType = (typeof NC_SOURCE_TYPES)[number];
 
+/** Quality-event classification (F-11): plain NC, deviation, out-of-spec, out-of-trend. */
+export const QUALITY_EVENT_TYPES = ['Nonconformity', 'Deviation', 'OutOfSpecification', 'OutOfTrend'] as const;
+export type QualityEventType = (typeof QUALITY_EVENT_TYPES)[number];
+
 /** CAPA action types accepted by the backend. */
 export const CAPA_ACTION_TYPES = ['Corrective', 'Preventive'] as const;
 export type CapaActionType = (typeof CAPA_ACTION_TYPES)[number];
@@ -37,6 +41,7 @@ export interface NcListItem {
   rpn: number;
   sourceType: string;
   createdAtUtc: string;
+  eventType: string;
   branchId: string | null;
   departmentId: string | null;
 }
@@ -68,6 +73,7 @@ export interface NcDetail {
   likelihood: number;
   rpn: number;
   sourceType: string;
+  eventType: string;
   raisedBy: string;
   assignedTo: string | null;
   rejectionReason: string | null;
@@ -85,6 +91,7 @@ export interface RaiseNcRequest {
   sourceType: NcSourceType;
   branchId: string | null;
   departmentId: string | null;
+  eventType: QualityEventType;
 }
 
 export interface TriageNcRequest { assigneeId: string; }

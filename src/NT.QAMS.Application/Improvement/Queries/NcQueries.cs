@@ -1,11 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.Improvement;
+using NT.QAMS.Domain.Improvement;
 using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.Improvement.Queries;
 
-public sealed record GetNcsQuery(string? Status = null, string? Search = null)
+public sealed record GetNcsQuery(string? Status = null, string? Search = null, string? EventType = null)
     : IQuery<IReadOnlyList<NcListItemDto>>;
 
 public sealed class GetNcsHandler(IAppDbContext db)
@@ -26,12 +27,18 @@ public sealed class GetNcsHandler(IAppDbContext db)
             query = query.Where(n => n.Title.Contains(term) || n.NcRef.Contains(term));
         }
 
+        if (!string.IsNullOrWhiteSpace(q.EventType)
+            && Enum.TryParse<QualityEventType>(q.EventType, ignoreCase: true, out var eventType))
+        {
+            query = query.Where(n => n.EventType == eventType);
+        }
+
         return await query
             .OrderByDescending(n => n.CreatedAtUtc)
             .Take(500)
             .Select(n => new NcListItemDto(
                 n.Id, n.NcRef, n.Title, n.Status.ToString(), n.Severity, n.Rpn,
-                n.SourceType.ToString(), n.CreatedAtUtc, n.BranchId, n.DepartmentId))
+                n.SourceType.ToString(), n.CreatedAtUtc, n.EventType.ToString(), n.BranchId, n.DepartmentId))
             .ToListAsync(ct);
     }
 }
@@ -51,7 +58,7 @@ public sealed class GetNcByIdHandler(IAppDbContext db) : IQueryHandler<GetNcById
 
         return new NcDetailDto(
             nc.Id, nc.NcRef, nc.Title, nc.Description, nc.Status.ToString(),
-            nc.Severity, nc.Likelihood, nc.Rpn, nc.SourceType.ToString(),
+            nc.Severity, nc.Likelihood, nc.Rpn, nc.SourceType.ToString(), nc.EventType.ToString(),
             nc.RaisedBy, nc.AssignedTo, nc.RejectionReason, nc.CreatedAtUtc,
             nc.CapaActions.Select(a => new CapaActionDto(
                 a.Id, a.Type.ToString(), a.Details, a.OwnerId, a.DueDate,

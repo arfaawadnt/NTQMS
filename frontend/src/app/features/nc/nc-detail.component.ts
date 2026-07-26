@@ -39,6 +39,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
             <div><span class="muted">{{ i18n.t('nc.likelihood') }}</span> {{ n.likelihood }}</div>
             <div><span class="muted">RPN</span> <b [class.danger-text]="n.rpn > 12">{{ n.rpn }}</b></div>
             <div><span class="muted">{{ i18n.t('nc.source') }}</span> {{ n.sourceType }}</div>
+            <div><span class="muted">{{ i18n.t('nc.eventType') }}</span> {{ i18n.t('nc.event.' + n.eventType) }}</div>
           </div>
           <p>{{ n.description }}</p>
           @if (n.rejectionReason) { <p class="error">{{ i18n.t('nc.rejected') }}: {{ n.rejectionReason }}</p> }

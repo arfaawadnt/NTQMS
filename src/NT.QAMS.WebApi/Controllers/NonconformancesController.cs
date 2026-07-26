@@ -20,8 +20,9 @@ public sealed class NonconformancesController(ISender sender) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> List(
-        [FromQuery] string? status, [FromQuery] string? search, CancellationToken ct) =>
-        Ok(await sender.Send(new GetNcsQuery(status, search), ct));
+        [FromQuery] string? status, [FromQuery] string? search, [FromQuery] string? eventType,
+        CancellationToken ct) =>
+        Ok(await sender.Send(new GetNcsQuery(status, search, eventType), ct));
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct) =>
@@ -33,7 +34,8 @@ public sealed class NonconformancesController(ISender sender) : ControllerBase
         var id = await sender.Send(new RaiseNcCommand(
             request.Title, request.Description, request.Severity, request.Likelihood,
             Enum.Parse<NcSourceType>(request.SourceType, ignoreCase: true),
-            request.BranchId, request.DepartmentId), ct);
+            request.BranchId, request.DepartmentId,
+            Enum.Parse<QualityEventType>(request.EventType, ignoreCase: true)), ct);
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }
 

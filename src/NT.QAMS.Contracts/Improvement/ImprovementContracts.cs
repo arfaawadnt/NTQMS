@@ -1,7 +1,8 @@
 namespace NT.QAMS.Contracts.Improvement;
 
 public sealed record RaiseNcRequest(
-    string Title, string Description, int Severity, int Likelihood, string SourceType, Guid? BranchId = null, Guid? DepartmentId = null);
+    string Title, string Description, int Severity, int Likelihood, string SourceType,
+    Guid? BranchId = null, Guid? DepartmentId = null, string EventType = "Nonconformity");
 
 public sealed record TriageNcRequest(Guid AssigneeId);
 
@@ -23,11 +24,12 @@ public sealed record RcaRecordDto(Guid Id, string Method, string Analysis, Guid 
 
 public sealed record NcListItemDto(
     Guid Id, string NcRef, string Title, string Status, int Severity, int Rpn,
-    string SourceType, DateTimeOffset CreatedAtUtc, Guid? BranchId = null, Guid? DepartmentId = null);
+    string SourceType, DateTimeOffset CreatedAtUtc, string EventType = "Nonconformity",
+    Guid? BranchId = null, Guid? DepartmentId = null);
 
 public sealed record NcDetailDto(
     Guid Id, string NcRef, string Title, string Description, string Status,
-    int Severity, int Likelihood, int Rpn, string SourceType,
+    int Severity, int Likelihood, int Rpn, string SourceType, string EventType,
     Guid RaisedBy, Guid? AssignedTo, string? RejectionReason,
     DateTimeOffset CreatedAtUtc,
     IReadOnlyList<CapaActionDto> CapaActions,
