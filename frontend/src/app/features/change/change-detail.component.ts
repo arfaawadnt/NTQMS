@@ -49,6 +49,14 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
       @if (c.implementationNotes) {
         <section class="card"><h3>{{ i18n.t('chg.implNotes') }}</h3><p class="pre">{{ c.implementationNotes }}</p></section>
       }
+      @if (c.status === 'Reviewed') {
+        <section class="card pir" [class.ok]="c.changeEffective" [class.bad]="c.changeEffective === false">
+          <h3>{{ i18n.t('chg.pir') }}</h3>
+          <p><b>{{ c.changeEffective ? i18n.t('chg.pirEffectiveYes') : i18n.t('chg.pirEffectiveNo') }}</b>
+            <span class="muted"> · {{ c.postImplementationReviewedBy }} · {{ c.postImplementationReviewedAtUtc | date:'medium' }}</span></p>
+          <p class="pre">{{ c.postImplementationReviewNotes }}</p>
+        </section>
+      }
 
       @if (c.status === 'Proposed') {
         <section class="card">
@@ -90,6 +98,21 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
             <button type="submit" [disabled]="closeForm.invalid">{{ i18n.t('chg.close') }}</button>
           </form>
         </section>
+      } @else if (c.status === 'Closed' && perms.canApprove()) {
+        <section class="card">
+          <h3>{{ i18n.t('chg.pir') }}</h3>
+          <p class="muted small">{{ i18n.t('chg.pirHint') }}</p>
+          <form [formGroup]="reviewForm" (ngSubmit)="review(c.id)">
+            <label>{{ i18n.t('chg.pirEffective') }}</label>
+            <select formControlName="effective">
+              <option [ngValue]="true">{{ i18n.t('common.yes') }}</option>
+              <option [ngValue]="false">{{ i18n.t('common.no') }}</option>
+            </select>
+            <label>{{ i18n.t('chg.pirNotes') }}</label>
+            <textarea formControlName="notes" rows="3"></textarea>
+            <button type="submit" [disabled]="reviewForm.invalid">{{ i18n.t('chg.recordPir') }}</button>
+          </form>
+        </section>
       }
     
       <qams-audit-trail [subject]="c.id" />
@@ -108,6 +131,8 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
     form button { width: auto; margin-top: .5rem; }
     .small { font-size: .78rem; margin-top: .35rem; }
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
+    .pir.ok { border-left: 3px solid var(--nt-green); }
+    .pir.bad { border-left: 3px solid var(--nt-red); }
   `],
 })
 export class ChangeDetailComponent implements OnInit {
@@ -120,7 +145,7 @@ export class ChangeDetailComponent implements OnInit {
   readonly id = input.required<string>();
 
   /** Canonical workflow path for the stepper (off-path states render as terminal). */
-  readonly flowSteps = ['Proposed', 'Approved', 'Closed'] as const;
+  readonly flowSteps = ['Proposed', 'Approved', 'Closed', 'Reviewed'] as const;
 
   readonly item = this.facade.selected;
 
@@ -132,6 +157,10 @@ export class ChangeDetailComponent implements OnInit {
   });
   readonly closeForm = this.fb.nonNullable.group({
     implementationNotes: ['', [Validators.required, Validators.maxLength(4000)]],
+  });
+  readonly reviewForm = this.fb.nonNullable.group({
+    effective: [true, [Validators.required]],
+    notes: ['', [Validators.required, Validators.maxLength(4000)]],
   });
 
   ngOnInit(): void {
@@ -155,5 +184,12 @@ export class ChangeDetailComponent implements OnInit {
     if (this.closeForm.invalid) { return; }
     await this.facade.close(id, this.closeForm.getRawValue().implementationNotes);
     this.closeForm.reset();
+  }
+
+  async review(id: string): Promise<void> {
+    if (this.reviewForm.invalid) { return; }
+    const { effective, notes } = this.reviewForm.getRawValue();
+    await this.facade.review(id, effective, notes);
+    this.reviewForm.reset({ effective: true, notes: '' });
   }
 }

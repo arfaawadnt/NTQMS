@@ -24,6 +24,7 @@ public sealed record ProposeChangeRequest(string Title, string ImpactAnalysis, G
 public sealed record LinkRiskRequest(Guid RiskItemId);
 public sealed record RejectChangeRequest(string Reason);
 public sealed record CloseChangeRequest(string ImplementationNotes);
+public sealed record ReviewChangeRequest(bool Effective, string Notes);
 
 public sealed record ChangeListItemDto(
     Guid Id, string ChangeRef, string Title, string Status, Guid? RiskItemId, Guid? BranchId = null, Guid? DepartmentId = null);
@@ -31,7 +32,9 @@ public sealed record ChangeListItemDto(
 public sealed record ChangeDetailDto(
     Guid Id, string ChangeRef, string Title, string ImpactAnalysis, string Status,
     Guid ProposedBy, Guid? RiskItemId, Guid? ApprovedBy, DateTimeOffset? ApprovedAtUtc,
-    string? RejectionReason, string? ImplementationNotes);
+    string? RejectionReason, string? ImplementationNotes,
+    bool? ChangeEffective = null, string? PostImplementationReviewNotes = null,
+    Guid? PostImplementationReviewedBy = null, DateTimeOffset? PostImplementationReviewedAtUtc = null);
 
 // ── Management review ────────────────────────────────────────────────────────
 

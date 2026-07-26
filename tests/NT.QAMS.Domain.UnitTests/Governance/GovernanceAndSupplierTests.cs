@@ -89,6 +89,44 @@ public class ChangeRequestTests
         var reopen = () => change.Approve(Approver, Now);
         reopen.Should().Throw<InvalidStateTransitionException>();
     }
+
+    private static ChangeRequest Implemented()
+    {
+        var change = ChangeRequest.Propose("CHG-2026-0002", "T", "Impact", Proposer);
+        change.LinkRiskAssessment(Guid.CreateVersion7());
+        change.Approve(Approver, Now);
+        change.Close("Deployed to production");
+        return change;
+    }
+
+    [Fact]
+    public void Post_implementation_review_verifies_effectiveness_and_is_terminal()
+    {
+        // F-11: the change lifecycle now has an effectiveness/verification stage.
+        var change = Implemented();
+        change.RecordPostImplementationReview(Approver, effective: true, "KPIs confirm the change met its objective.", Now);
+
+        change.Status.Should().Be(ChangeStatus.Reviewed);
+        change.ChangeEffective.Should().BeTrue();
+        change.PostImplementationReviewedBy.Should().Be(Approver);
+        change.DomainEvents.OfType<ChangePostImplementationReviewed>().Should().ContainSingle();
+
+        var reReview = () => change.RecordPostImplementationReview(Approver, false, "again", Now);
+        reReview.Should().Throw<DomainException>().Which.Code.Should().Be("CHG-020");
+    }
+
+    [Fact]
+    public void Review_requires_notes_and_only_applies_to_a_closed_change()
+    {
+        Implemented().Invoking(c => c.RecordPostImplementationReview(Approver, true, " ", Now))
+            .Should().Throw<DomainException>().Which.Code.Should().Be("CHG-021");
+
+        var approvedNotClosed = ChangeRequest.Propose("CHG-3", "T", "Impact", Proposer);
+        approvedNotClosed.LinkRiskAssessment(Guid.CreateVersion7());
+        approvedNotClosed.Approve(Approver, Now);
+        approvedNotClosed.Invoking(c => c.RecordPostImplementationReview(Approver, true, "x", Now))
+            .Should().Throw<DomainException>().Which.Code.Should().Be("CHG-020");
+    }
 }
 
 public class ManagementReviewTests

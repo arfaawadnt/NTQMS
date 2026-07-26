@@ -108,6 +108,15 @@ public sealed class ChangeRequestsController(ISender sender) : ControllerBase
         await sender.Send(new CloseChangeCommand(id, request.ImplementationNotes), ct);
         return NoContent();
     }
+
+    /// <summary>Post-implementation review: verify the implemented change was effective (F-11).</summary>
+    [HttpPost("{id:guid}/review")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
+    public async Task<IActionResult> Review(Guid id, ReviewChangeRequest request, CancellationToken ct)
+    {
+        await sender.Send(new ReviewChangeCommand(id, request.Effective, request.Notes), ct);
+        return NoContent();
+    }
 }
 
 [ApiController]

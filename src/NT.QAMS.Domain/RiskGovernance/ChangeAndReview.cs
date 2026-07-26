@@ -3,7 +3,7 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Domain.RiskGovernance;
 
-public enum ChangeStatus { Proposed, Approved, Rejected, Closed }
+public enum ChangeStatus { Proposed, Approved, Rejected, Closed, Reviewed }
 
 /// <summary>
 /// Controlled change request. The load-bearing invariant: a change cannot be
@@ -32,6 +32,14 @@ public sealed class ChangeRequest : AggregateRoot, ITenantScoped, IAllocatable
     public DateTimeOffset? ApprovedAtUtc { get; private set; }
     public string? RejectionReason { get; private set; }
     public string? ImplementationNotes { get; private set; }
+
+    // Post-implementation review (F-11 / ISO 9001 §8.5.6 / EU Annex 11 §10): the
+    // verification, after the change is live, that it achieved its purpose without
+    // adverse effect. Populated only once the change has been reviewed.
+    public Guid? PostImplementationReviewedBy { get; private set; }
+    public DateTimeOffset? PostImplementationReviewedAtUtc { get; private set; }
+    public bool? ChangeEffective { get; private set; }
+    public string? PostImplementationReviewNotes { get; private set; }
 
     public static ChangeRequest Propose(string changeRef, string title, string impactAnalysis, Guid proposedBy)
     {
@@ -92,6 +100,28 @@ public sealed class ChangeRequest : AggregateRoot, ITenantScoped, IAllocatable
         Require(ChangeStatus.Approved, "CHG-015", "close");
         ImplementationNotes = implementationNotes?.Trim() ?? string.Empty;
         Status = ChangeStatus.Closed;
+    }
+
+    /// <summary>
+    /// Record the post-implementation review of a closed (implemented) change:
+    /// whether it proved effective and the supporting notes. This is the
+    /// effectiveness/verification stage the change lifecycle previously lacked
+    /// (F-11). A reviewed change is fully terminal and immutable.
+    /// </summary>
+    public void RecordPostImplementationReview(Guid reviewerId, bool effective, string notes, DateTimeOffset at)
+    {
+        Require(ChangeStatus.Closed, "CHG-020", "review");
+        if (string.IsNullOrWhiteSpace(notes))
+        {
+            throw new DomainException("CHG-021", "Post-implementation review notes are required.");
+        }
+
+        Status = ChangeStatus.Reviewed;
+        PostImplementationReviewedBy = reviewerId;
+        PostImplementationReviewedAtUtc = at;
+        ChangeEffective = effective;
+        PostImplementationReviewNotes = notes.Trim();
+        Raise(new ChangePostImplementationReviewed(Id, ChangeRef, effective, reviewerId, TenantId));
     }
 
     private void Require(ChangeStatus expected, string code, string action)
@@ -206,6 +236,9 @@ public sealed class ManagementReview : AggregateRoot, ITenantScoped, IAllocatabl
 
 public sealed record ChangeApproved(
     Guid ChangeId, string ChangeRef, string Title, Guid ApprovedBy, Guid TenantId) : DomainEvent;
+
+public sealed record ChangePostImplementationReviewed(
+    Guid ChangeId, string ChangeRef, bool Effective, Guid ReviewedBy, Guid TenantId) : DomainEvent;
 
 public sealed record ReviewClosed(
     Guid ReviewId, string ReviewRef, Guid ClosedBy, int DecisionCount, Guid TenantId) : DomainEvent;

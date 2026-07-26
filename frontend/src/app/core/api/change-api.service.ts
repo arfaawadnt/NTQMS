@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   ChangeDetail, ChangeListItem, CloseChangeRequest, CreatedResource, LinkRiskRequest,
-  ProposeChangeRequest, RejectChangeRequest,
+  ProposeChangeRequest, RejectChangeRequest, ReviewChangeRequest,
 } from '../models';
 
 /** Typed client for the Change Control API (one method per backend endpoint). */
@@ -39,5 +39,9 @@ export class ChangeApiService {
 
   close(id: string, body: CloseChangeRequest): Observable<void> {
     return this.http.post<void>(`${this.base}/${id}/close`, body);
+  }
+
+  review(id: string, body: ReviewChangeRequest): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/review`, body);
   }
 }

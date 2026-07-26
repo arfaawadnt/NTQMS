@@ -60,6 +60,10 @@ export class ChangeFacade {
     await this.mutate(id, () => this.api.close(id, { implementationNotes }));
   }
 
+  async review(id: string, effective: boolean, notes: string): Promise<void> {
+    await this.mutate(id, () => this.api.review(id, { effective, notes }));
+  }
+
   private async mutate(id: string, call: () => Observable<void>): Promise<void> {
     await this.run(async () => {
       await firstValueFrom(call());

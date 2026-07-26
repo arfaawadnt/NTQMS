@@ -1476,9 +1476,14 @@ export interface ChangeDetail {
   approvedAtUtc: string | null;
   rejectionReason: string | null;
   implementationNotes: string | null;
+  changeEffective: boolean | null;
+  postImplementationReviewNotes: string | null;
+  postImplementationReviewedBy: string | null;
+  postImplementationReviewedAtUtc: string | null;
 }
 
 export interface ProposeChangeRequest { title: string; impactAnalysis: string; branchId: string | null; departmentId: string | null; }
+export interface ReviewChangeRequest { effective: boolean; notes: string; }
 export interface LinkRiskRequest { riskItemId: string; }
 export interface RejectChangeRequest { reason: string; }
 export interface CloseChangeRequest { implementationNotes: string; }

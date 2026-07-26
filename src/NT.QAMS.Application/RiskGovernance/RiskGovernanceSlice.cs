@@ -176,6 +176,13 @@ public sealed record LinkRiskCommand(Guid ChangeId, Guid RiskItemId) : ICommand;
 public sealed record ApproveChangeCommand(Guid ChangeId) : ICommand;
 public sealed record RejectChangeCommand(Guid ChangeId, string Reason) : ICommand;
 public sealed record CloseChangeCommand(Guid ChangeId, string ImplementationNotes) : ICommand;
+public sealed record ReviewChangeCommand(Guid ChangeId, bool Effective, string Notes) : ICommand;
+
+public sealed class ReviewChangeValidator : AbstractValidator<ReviewChangeCommand>
+{
+    public ReviewChangeValidator() =>
+        RuleFor(x => x.Notes).NotEmpty().MaximumLength(4000);
+}
 
 internal static class ChangeLoader
 {
@@ -227,6 +234,17 @@ public sealed class CloseChangeHandler(IAppDbContext db) : ICommandHandler<Close
     }
 }
 
+public sealed class ReviewChangeHandler(IAppDbContext db, ICurrentUser user, IClock clock)
+    : ICommandHandler<ReviewChangeCommand>
+{
+    public async Task Handle(ReviewChangeCommand c, CancellationToken ct)
+    {
+        (await ChangeLoader.LoadAsync(db, c.ChangeId, ct))
+            .RecordPostImplementationReview(GovernanceHelpers.RequireActor(user), c.Effective, c.Notes, clock.UtcNow);
+        await db.SaveChangesAsync(ct);
+    }
+}
+
 public sealed record GetChangesQuery(string? Status = null) : IQuery<IReadOnlyList<ChangeListItemDto>>;
 
 public sealed class GetChangesHandler(IAppDbContext db)
@@ -261,7 +279,9 @@ public sealed class GetChangeByIdHandler(IAppDbContext db)
         return new ChangeDetailDto(
             x.Id, x.ChangeRef, x.Title, x.ImpactAnalysis, x.Status.ToString(),
             x.ProposedBy, x.RiskItemId, x.ApprovedBy, x.ApprovedAtUtc,
-            x.RejectionReason, x.ImplementationNotes);
+            x.RejectionReason, x.ImplementationNotes,
+            x.ChangeEffective, x.PostImplementationReviewNotes,
+            x.PostImplementationReviewedBy, x.PostImplementationReviewedAtUtc);
     }
 }
 
