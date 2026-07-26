@@ -102,4 +102,8 @@ public sealed class Tenant : AggregateRoot
         ArgumentNullException.ThrowIfNull(settings);
         Settings = settings;
     }
+
+    /// <summary>Opt this tenant in or out of enforced MFA for its privileged users (F-04).</summary>
+    public void SetPrivilegedMfaPolicy(bool require) =>
+        Settings = Settings with { RequireMfaForPrivilegedRoles = require };
 }

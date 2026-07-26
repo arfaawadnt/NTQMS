@@ -17,6 +17,7 @@ public sealed class AuthActorFunctionalTests(QamsWebAppFactory factory)
 {
     private sealed record AuthResponse(
         string accessToken, string role, string displayName, string? tenantId, bool mfaRequired);
+    private sealed record EnrollAuthResponse(string accessToken, bool mfaEnrollmentRequired);
     private sealed record IdResponse(Guid id);
 
     private readonly HttpClient _client = factory.CreateClient();
@@ -56,6 +57,74 @@ public sealed class AuthActorFunctionalTests(QamsWebAppFactory factory)
         // role claim round-trips through the JWT.
         var res = await client.GetAsync("/api/tenants");
         res.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task Privileged_user_without_mfa_is_gated_to_enrollment_when_enforced()
+    {
+        // Flip F-04 on for this host only (default off elsewhere).
+        var mfaOn = factory.WithWebHostBuilder(b =>
+            b.UseSetting("Security:RequireMfaForPrivilegedRoles", "true"));
+        var client = mfaOn.CreateClient();
+
+        var loginRes = await client.PostAsJsonAsync("/api/auth/login", new
+        {
+            email = QamsWebAppFactory.PlatformAdminEmail,
+            password = QamsWebAppFactory.PlatformAdminPassword,
+        });
+        loginRes.StatusCode.Should().Be(HttpStatusCode.OK);
+        var login = await loginRes.Content.ReadFromJsonAsync<EnrollAuthResponse>();
+        login!.mfaEnrollmentRequired.Should().BeTrue("a privileged user without MFA must be forced to enrol");
+        login.accessToken.Should().NotBeNullOrEmpty();
+
+        Authorize(client, login.accessToken);
+
+        // The enrollment-scoped session is refused everywhere…
+        var blocked = await client.GetAsync("/api/tenants");
+        blocked.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+
+        // …except the MFA-enrollment endpoint, so the user can break the deadlock.
+        var enroll = await client.PostAsync("/api/auth/mfa/enroll", null);
+        enroll.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task Tenant_can_opt_into_enforced_mfa_for_its_privileged_users()
+    {
+        // Provision a tenant — MFA is OFF by default.
+        var admin = factory.CreateClient();
+        Authorize(admin, await PlatformTokenAsync());
+        var slug = $"mfa-{Guid.NewGuid():N}"[..12];
+        var provision = await admin.PostAsJsonAsync("/api/tenants", new
+        {
+            identifier = slug,
+            name = "MFA Opt-in Lab",
+            adminEmail = "admin@mfa.test",
+            adminDisplayName = "TA",
+            adminPassword = "Tenant-Admin-Pass-1!",
+        });
+        provision.StatusCode.Should().Be(HttpStatusCode.Created);
+
+        var ta = factory.CreateClient();
+        async Task<EnrollAuthResponse> LoginAsync() =>
+            (await (await ta.PostAsJsonAsync("/api/auth/login", new
+            {
+                tenantIdentifier = slug,
+                email = "admin@mfa.test",
+                password = "Tenant-Admin-Pass-1!",
+            })).Content.ReadFromJsonAsync<EnrollAuthResponse>())!;
+
+        var before = await LoginAsync();
+        before.mfaEnrollmentRequired.Should().BeFalse("a new tenant does not enforce MFA");
+
+        // The tenant admin opts THEIR tenant in.
+        Authorize(ta, before.accessToken);
+        var set = await ta.PutAsJsonAsync("/api/tenant-settings/mfa-policy", new { require = true });
+        set.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        // Now a privileged login for that tenant is gated to enrollment.
+        var after = await LoginAsync();
+        after.mfaEnrollmentRequired.Should().BeTrue("the tenant opted into enforced MFA");
     }
 
     [Fact]

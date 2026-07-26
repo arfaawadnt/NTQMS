@@ -12,7 +12,11 @@ public interface IPasswordHasher
 /// <summary>JWT issuance port.</summary>
 public interface IJwtTokenService
 {
-    (string Token, DateTimeOffset ExpiresAtUtc) Issue(UserAccount user);
+    /// <param name="enrollmentOnly">
+    /// When true the token carries scope=mfa_enrollment: the holder may only reach
+    /// the MFA-enrollment endpoints until they enrol (F-04 enforcement).
+    /// </param>
+    (string Token, DateTimeOffset ExpiresAtUtc) Issue(UserAccount user, bool enrollmentOnly = false);
 }
 
 /// <summary>

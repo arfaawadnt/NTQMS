@@ -53,3 +53,43 @@ public sealed class TenantResolutionMiddleware(RequestDelegate next)
         await next(context);
     }
 }
+
+/// <summary>
+/// F-04 enforcement: a session issued to a privileged user who has not enrolled
+/// MFA carries scope=mfa_enrollment. Such a session may reach ONLY the MFA-
+/// enrollment endpoints; every other request is refused with 403 + code
+/// MFA-ENROLL-REQUIRED so the client routes the user to enrolment. Full sessions
+/// (and anonymous requests) pass straight through.
+/// </summary>
+public sealed class MfaEnrollmentGateMiddleware(RequestDelegate next)
+{
+    private static readonly string[] Allowed =
+    [
+        "/api/auth/mfa/enroll",
+        "/api/auth/mfa/confirm",
+    ];
+
+    public async Task InvokeAsync(HttpContext context)
+    {
+        var scope = context.User.FindFirstValue("scope");
+        if (scope == "mfa_enrollment")
+        {
+            var path = context.Request.Path.Value ?? string.Empty;
+            var permitted = Allowed.Any(p => path.StartsWith(p, StringComparison.OrdinalIgnoreCase));
+            if (!permitted)
+            {
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                context.Response.ContentType = "application/json";
+                await context.Response.WriteAsJsonAsync(new
+                {
+                    title = "Multi-factor authentication must be set up before continuing.",
+                    status = 403,
+                    code = "MFA-ENROLL-REQUIRED",
+                });
+                return;
+            }
+        }
+
+        await next(context);
+    }
+}

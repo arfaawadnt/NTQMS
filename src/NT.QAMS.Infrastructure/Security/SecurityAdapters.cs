@@ -65,7 +65,12 @@ public sealed class JwtTokenService : IJwtTokenService
             SecurityAlgorithms.HmacSha256);
     }
 
-    public (string Token, DateTimeOffset ExpiresAtUtc) Issue(UserAccount user)
+    /// <summary>Claim marking a session's scope: "full" or "mfa_enrollment".</summary>
+    public const string ScopeClaim = "scope";
+    public const string EnrollmentScope = "mfa_enrollment";
+    public const string FullScope = "full";
+
+    public (string Token, DateTimeOffset ExpiresAtUtc) Issue(UserAccount user, bool enrollmentOnly = false)
     {
         var expires = _clock.UtcNow.AddMinutes(_options.ExpiryMinutes);
 
@@ -75,6 +80,7 @@ public sealed class JwtTokenService : IJwtTokenService
             new(JwtRegisteredClaimNames.Email, user.Email),
             new(JwtRegisteredClaimNames.Name, user.DisplayName),
             new(ClaimTypes.Role, user.Role.ToString()),
+            new(ScopeClaim, enrollmentOnly ? EnrollmentScope : FullScope),
         };
 
         if (user.TenantId is { } tenantId)

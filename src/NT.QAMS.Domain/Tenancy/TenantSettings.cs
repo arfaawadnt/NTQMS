@@ -13,5 +13,11 @@ public sealed record TenantSettings
     public string DefaultLanguage { get; init; } = "en";
     public string TimeZone { get; init; } = "UTC";
 
+    /// <summary>
+    /// When true, privileged users (TenantAdmin) of this tenant must enrol MFA
+    /// before they get a full session (F-04). Off by default — each tenant opts in.
+    /// </summary>
+    public bool RequireMfaForPrivilegedRoles { get; init; }
+
     public static TenantSettings Default => new();
 }

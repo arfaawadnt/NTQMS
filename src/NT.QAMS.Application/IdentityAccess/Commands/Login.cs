@@ -28,7 +28,8 @@ public sealed class LoginValidator : AbstractValidator<LoginCommand>
 
 public sealed class LoginHandler(
     IAppDbContext db, IPasswordHasher hasher, IJwtTokenService jwt,
-    ITotpService totp, ISecurityEventLog security, IClock clock, PasswordPolicyOptions passwordPolicy)
+    ITotpService totp, ISecurityEventLog security, IClock clock, PasswordPolicyOptions passwordPolicy,
+    SecurityOptions securityOptions)
     : ICommandHandler<LoginCommand, AuthResponse>
 {
     private const string InvalidCredentials = "Invalid credentials.";
@@ -36,6 +37,9 @@ public sealed class LoginHandler(
     public async Task<AuthResponse> Handle(LoginCommand command, CancellationToken ct)
     {
         Guid? tenantId = null;
+        // MFA enforcement is decided per tenant for tenant users (their own opt-in
+        // setting); platform admins fall back to the global SecurityOptions flag.
+        bool requireMfaPolicy = securityOptions.RequireMfaForPrivilegedRoles;
 
         if (!string.IsNullOrWhiteSpace(command.TenantIdentifier))
         {
@@ -50,6 +54,7 @@ public sealed class LoginHandler(
             }
 
             tenantId = tenant.Id;
+            requireMfaPolicy = tenant.Settings.RequireMfaForPrivilegedRoles;
         }
 
         var email = command.Email.Trim().ToLowerInvariant();
@@ -98,12 +103,21 @@ public sealed class LoginHandler(
             }
         }
 
+        // F-04 (Part 11 §11.10(d)): a privileged user who has not enrolled MFA is
+        // given only an enrollment-scoped session until they set it up. Enforced
+        // by MfaEnrollmentGateMiddleware; opt-in per environment (off by default).
+        var mustEnrollMfa = requireMfaPolicy
+            && !user.MfaEnabled
+            && user.Role is UserRole.PlatformAdmin or UserRole.TenantAdmin;
+
         user.RegisterSuccessfulLogin();
         await db.SaveChangesAsync(ct);
-        await security.WriteAsync("LOGIN_SUCCESS", tenantId, email, null, ct);
+        await security.WriteAsync(mustEnrollMfa ? "LOGIN_MFA_ENROLL_REQUIRED" : "LOGIN_SUCCESS", tenantId, email, null, ct);
 
-        var (token, expires) = jwt.Issue(user);
-        return new AuthResponse(token, expires, user.Role.ToString(), user.DisplayName, user.TenantId, MfaRequired: false);
+        var (token, expires) = jwt.Issue(user, enrollmentOnly: mustEnrollMfa);
+        return new AuthResponse(
+            token, expires, user.Role.ToString(), user.DisplayName, user.TenantId,
+            MfaRequired: false, MfaEnrollmentRequired: mustEnrollMfa);
     }
 
     private async Task<DomainException> FailAsync(

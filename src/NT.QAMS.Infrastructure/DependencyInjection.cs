@@ -49,6 +49,8 @@ public static class DependencyInjection
         services.AddSingleton(new PasswordPolicyOptions(
             int.TryParse(configuration["PasswordPolicy:MaxAgeDays"], out var maxAge) ? maxAge : 90,
             int.TryParse(configuration["PasswordPolicy:HistoryDepth"], out var depth) ? depth : 5));
+        services.AddSingleton(new SecurityOptions(
+            bool.TryParse(configuration["Security:RequireMfaForPrivilegedRoles"], out var requireMfa) && requireMfa));
         services.AddSingleton<IJwtTokenService, Security.JwtTokenService>();
         services.AddSingleton<ITotpService, Security.TotpService>();
         services.AddScoped<IReferenceNumberGenerator, PostgresReferenceNumberGenerator>();

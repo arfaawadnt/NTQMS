@@ -123,6 +123,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthentication();
 app.UseMiddleware<TenantResolutionMiddleware>();
+app.UseMiddleware<MfaEnrollmentGateMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();

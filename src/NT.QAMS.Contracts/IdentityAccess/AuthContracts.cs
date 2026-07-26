@@ -8,7 +8,7 @@ public sealed record LoginRequest(string? TenantIdentifier, string Email, string
 
 public sealed record AuthResponse(
     string AccessToken, DateTimeOffset ExpiresAtUtc, string Role, string DisplayName,
-    Guid? TenantId, bool MfaRequired);
+    Guid? TenantId, bool MfaRequired, bool MfaEnrollmentRequired = false);
 
 /// <summary>Returned when starting MFA enrollment — show the QR/URI to the user's authenticator app.</summary>
 public sealed record MfaEnrollmentResponse(string Secret, string OtpAuthUri);

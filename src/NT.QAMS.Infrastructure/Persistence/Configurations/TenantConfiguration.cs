@@ -38,6 +38,7 @@ public sealed class TenantConfiguration : IEntityTypeConfiguration<Tenant>
             settings.Property(s => s.SopExpiryReminderMonths).HasColumnName("sop_expiry_reminder_months");
             settings.Property(s => s.DefaultLanguage).HasColumnName("default_language").HasMaxLength(5);
             settings.Property(s => s.TimeZone).HasColumnName("time_zone").HasMaxLength(60);
+            settings.Property(s => s.RequireMfaForPrivilegedRoles).HasColumnName("require_mfa_privileged");
         });
 
         builder.Ignore(t => t.DomainEvents);
