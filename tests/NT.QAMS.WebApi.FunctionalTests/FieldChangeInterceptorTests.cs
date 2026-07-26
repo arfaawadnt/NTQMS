@@ -36,7 +36,7 @@ public sealed class FieldChangeInterceptorTests
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(name)
-            .AddInterceptors(new FieldChangeInterceptor(new FixedClock(), new FixedUser()))
+            .AddInterceptors(new FieldChangeInterceptor(new FixedClock(), new FixedUser(), new StubTenant()))
             .Options;
         return new AppDbContext(options, new StubTenant());
     }

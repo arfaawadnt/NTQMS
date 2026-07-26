@@ -19,7 +19,7 @@ namespace NT.QAMS.Infrastructure.Persistence.Interceptors;
 /// trail, or derived data); credential-bearing properties are redacted at
 /// capture so secrets never reach the ledger.
 /// </summary>
-public sealed class FieldChangeInterceptor(IClock clock, ICurrentUser currentUser)
+public sealed class FieldChangeInterceptor(IClock clock, ICurrentUser currentUser, ICurrentTenant currentTenant)
     : SaveChangesInterceptor
 {
     /// <summary>Entity types that must never generate field rows (the ledgers themselves, plumbing, and derived data).</summary>
@@ -102,7 +102,10 @@ public sealed class FieldChangeInterceptor(IClock clock, ICurrentUser currentUse
     private FieldChangeRecord Record(
         EntityEntry entry, string action, string? property, string? oldValue, string? newValue) => new()
     {
-        TenantId = (entry.Entity as ITenantScoped)?.TenantId,
+        // Owned children (and other non-ITenantScoped entities) inherit the
+        // request's tenant, so a child change is attributed to — and visible in —
+        // the owning tenant's audit trail, and satisfies the RLS WITH CHECK.
+        TenantId = (entry.Entity as ITenantScoped)?.TenantId ?? currentTenant.TenantId,
         EntityType = entry.Entity.GetType().Name,
         EntityId = RenderKey(entry),
         Action = action,
