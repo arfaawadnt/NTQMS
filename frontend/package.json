@@ -4,10 +4,11 @@
   "description": "NT.QAMS Angular 18 frontend",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "ng serve --proxy-config proxy.conf.json",
     "build": "ng build",
     "test": "ng test",
-    "test:ci": "ng test --watch=false --browsers=ChromeHeadless"
+    "test:ci": "ng test --watch=false --browsers=ChromeHeadless",
+    "e2e": "playwright test"
   },
   "private": true,
   "dependencies": {
@@ -27,6 +28,7 @@
     "@angular-devkit/build-angular": "^18.2.0",
     "@angular/cli": "^18.2.0",
     "@angular/compiler-cli": "^18.2.0",
+    "@playwright/test": "^1.62.0",
     "@types/jasmine": "^6.0.0",
     "jasmine-core": "^6.3.0",
     "karma": "^6.4.4",
