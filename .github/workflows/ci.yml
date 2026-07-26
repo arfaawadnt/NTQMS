@@ -2,14 +2,38 @@ name: CI
 
 on:
   push:
-    branches: [main, dev]
+    branches: [main, master, dev]
   pull_request:
-    branches: [main]
+    branches: [main, master]
 
 jobs:
   build-test:
-    name: Build & Test
+    name: Build & Test (with real PostgreSQL)
     runs-on: ubuntu-latest
+
+    # A real PostgreSQL 17 so the integration suite can exercise Row-Level
+    # Security and the immutability triggers (audit findings F-01 / F-02). The
+    # default superuser is used only to provision a NON-superuser runtime role —
+    # RLS is bypassed by superusers, so the tests must run as qams_app.
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      # Non-superuser role + dedicated CI database (created in the step below).
+      CI_PG_CONN: "Host=localhost;Port=5432;Database=ntqms_ci;Username=qams_app;Password=ci-only-pass"
+
     steps:
       - uses: actions/checkout@v4
 
@@ -24,7 +48,30 @@ jobs:
       - name: Build
         run: dotnet build NT.QAMS.sln --configuration Release --no-restore
 
+      - name: Provision non-superuser role + CI database
+        env:
+          PGPASSWORD: postgres
+        run: |
+          sudo apt-get update && sudo apt-get install -y postgresql-client
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 \
+            -c "CREATE ROLE qams_app LOGIN PASSWORD 'ci-only-pass' NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE;" \
+            -c "CREATE DATABASE ntqms_ci OWNER qams_app;"
+
+      - name: Apply EF migrations (as the owning role)
+        env:
+          ConnectionStrings__Postgres: ${{ env.CI_PG_CONN }}
+        run: |
+          dotnet tool restore
+          dotnet ef database update \
+            --project src/NT.QAMS.Infrastructure \
+            --startup-project src/NT.QAMS.WebApi \
+            --configuration Release --no-build
+
+      # Runs the whole solution. The integration project talks to the real
+      # database via QMS_ITEST_POSTGRES; every other project is provider-agnostic.
       # Architecture tests are a merge gate: a layer/module boundary violation
       # fails the pipeline, not code review.
       - name: Test
+        env:
+          QMS_ITEST_POSTGRES: ${{ env.CI_PG_CONN }}
         run: dotnet test NT.QAMS.sln --configuration Release --no-build --verbosity normal
