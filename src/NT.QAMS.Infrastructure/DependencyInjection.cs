@@ -25,6 +25,7 @@ public static class DependencyInjection
         services.AddScoped<AuditStampInterceptor>();
         services.AddScoped<FieldChangeInterceptor>();
         services.AddScoped<TenantStampInterceptor>();
+        services.AddScoped<TenantConnectionInterceptor>();
         services.AddScoped<OutboxInterceptor>();
 
         services.AddDbContext<AppDbContext>((sp, options) =>
@@ -33,6 +34,9 @@ public static class DependencyInjection
                 .UseNpgsql(configuration.GetConnectionString("Postgres"))
                 .UseSnakeCaseNamingConvention()
                 .AddInterceptors(
+                    // Layer-2 isolation runs first: the tenant GUCs must be set on
+                    // the connection before any query the other interceptors trigger.
+                    sp.GetRequiredService<TenantConnectionInterceptor>(),
                     sp.GetRequiredService<AuditStampInterceptor>(),
                     sp.GetRequiredService<TenantStampInterceptor>(),
                     sp.GetRequiredService<FieldChangeInterceptor>(),

@@ -29,11 +29,15 @@ public sealed class ProvisionTenantValidator : AbstractValidator<ProvisionTenant
     }
 }
 
-public sealed class ProvisionTenantHandler(IAppDbContext db, IPasswordHasher hasher)
+public sealed class ProvisionTenantHandler(IAppDbContext db, IPasswordHasher hasher, ICurrentTenantSetter tenantScope)
     : ICommandHandler<ProvisionTenantCommand, Guid>
 {
     public async Task<Guid> Handle(ProvisionTenantCommand command, CancellationToken cancellationToken)
     {
+        // Provisioning seeds a brand-new tenant's scoped rows on a platform-admin
+        // request (which carries no tenant). Elevate so the seed writes pass RLS.
+        tenantScope.Elevate();
+
         var slug = TenantSlug.Create(command.Identifier);
 
         var slugTaken = await db.Tenants.AnyAsync(t => t.Slug == slug, cancellationToken);

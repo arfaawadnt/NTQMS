@@ -45,6 +45,7 @@ public sealed class FieldChangeInterceptorTests
     {
         public Guid? TenantId => Tenant;
         public bool IsResolved => true;
+        public bool IsElevated => false;
     }
 
     private static Complaint NewComplaint() => Complaint.Log(

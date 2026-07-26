@@ -13,9 +13,17 @@ public sealed class CurrentTenant : ICurrentTenant, ICurrentTenantSetter
 {
     public Guid? TenantId { get; private set; }
     public bool IsResolved => TenantId.HasValue;
+    public bool IsElevated { get; private set; }
 
     public void Set(Guid tenantId) => TenantId = tenantId;
-    public void Clear() => TenantId = null;
+
+    public void Clear()
+    {
+        TenantId = null;
+        IsElevated = false;
+    }
+
+    public void Elevate() => IsElevated = true;
 }
 
 /// <summary>

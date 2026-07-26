@@ -97,6 +97,8 @@ if (!string.IsNullOrWhiteSpace(bootstrapEmail) && !string.IsNullOrWhiteSpace(boo
 // per-category idempotent — curated lists are never touched.
 {
     using var scope = app.Services.CreateScope();
+    // Cross-tenant backfill runs as trusted infrastructure — elevate past RLS.
+    scope.ServiceProvider.GetRequiredService<NT.QAMS.Application.Abstractions.ICurrentTenantSetter>().Elevate();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     var tenantIds = await db.Tenants.Select(t => t.Id).ToListAsync();
     var seeded = 0;

@@ -35,7 +35,7 @@ public class ProvisionTenantTests
     public async Task Provision_persists_tenant_admin_user_audit_stamps_and_outbox_event()
     {
         await using var db = NewContext();
-        var handler = new ProvisionTenantHandler(db, new FakePasswordHasher());
+        var handler = new ProvisionTenantHandler(db, new FakePasswordHasher(), new NT.QAMS.Infrastructure.Services.CurrentTenant());
 
         var id = await handler.Handle(
             Command("Amman-Central-Lab", "Amman Central Laboratory"),
@@ -65,7 +65,7 @@ public class ProvisionTenantTests
     public async Task Provision_rejects_duplicate_identifier()
     {
         await using var db = NewContext();
-        var handler = new ProvisionTenantHandler(db, new FakePasswordHasher());
+        var handler = new ProvisionTenantHandler(db, new FakePasswordHasher(), new NT.QAMS.Infrastructure.Services.CurrentTenant());
 
         await handler.Handle(Command("acme-lab", "Acme 1"), CancellationToken.None);
 

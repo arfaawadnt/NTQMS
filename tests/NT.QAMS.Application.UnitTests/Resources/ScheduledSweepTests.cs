@@ -34,6 +34,7 @@ public class ScheduledSweepTests
         services.AddSingleton<IClock>(new FixedClock(Now));
         services.AddScoped<CurrentTenant>();
         services.AddScoped<ICurrentTenant>(sp => sp.GetRequiredService<CurrentTenant>());
+        services.AddScoped<ICurrentTenantSetter>(sp => sp.GetRequiredService<CurrentTenant>());
         services.AddScoped<ICurrentUser, FakeCurrentUser>();
         services.AddScoped<AuditStampInterceptor>();
         services.AddScoped<TenantStampInterceptor>();

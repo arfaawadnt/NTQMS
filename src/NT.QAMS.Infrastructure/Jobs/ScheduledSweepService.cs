@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Domain.Competency;
 using NT.QAMS.Domain.Equipment;
 using NT.QAMS.Domain.Sla;
@@ -58,6 +59,9 @@ public sealed partial class ScheduledSweepService(
     internal async Task<(int Due, int Locked, int Expired, int Suspended)> RunSweepAsync(CancellationToken ct)
     {
         using var scope = scopeFactory.CreateScope();
+        // Trusted cross-tenant sweep: elevate before the first query so the
+        // connection runs with RLS bypass for this unit of work only.
+        scope.ServiceProvider.GetRequiredService<ICurrentTenantSetter>().Elevate();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var today = DateOnly.FromDateTime(clock.UtcNow.UtcDateTime);
 

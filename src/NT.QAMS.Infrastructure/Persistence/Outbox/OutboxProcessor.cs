@@ -51,6 +51,9 @@ public sealed partial class OutboxProcessor(
     internal async Task<int> ProcessBatchAsync(CancellationToken cancellationToken)
     {
         using var scope = scopeFactory.CreateScope();
+        // The outbox chains audit-trail rows for many tenants in one SaveChanges;
+        // elevate so RLS bypass applies to this trusted infrastructure batch.
+        scope.ServiceProvider.GetRequiredService<ICurrentTenantSetter>().Elevate();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var publisher = scope.ServiceProvider.GetRequiredService<IPublisher>();
         var ledger = new Compliance.AuditTrailAppender(db);

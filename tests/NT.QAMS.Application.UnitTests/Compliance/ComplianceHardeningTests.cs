@@ -117,6 +117,7 @@ public class AuditTrailChainTests
     {
         public Guid? TenantId => Id;
         public bool IsResolved => true;
+        public bool IsElevated => false;
     }
 }
 

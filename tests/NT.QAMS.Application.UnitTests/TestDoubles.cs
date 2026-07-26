@@ -7,6 +7,7 @@ public sealed class FakeCurrentTenant : ICurrentTenant
 {
     public Guid? TenantId { get; set; }
     public bool IsResolved => TenantId.HasValue;
+    public bool IsElevated { get; set; }
 }
 
 public sealed class FakeCurrentUser : ICurrentUser
