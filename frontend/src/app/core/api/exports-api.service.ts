@@ -27,6 +27,7 @@ export class ExportsApiService {
 
   ncRegisterXlsx(): Promise<void> { return this.download('nonconformances.xlsx', 'nc-register.xlsx'); }
   auditTrailXlsx(): Promise<void> { return this.download('audit-trail.xlsx', 'audit-trail.xlsx'); }
+  signaturesXlsx(): Promise<void> { return this.download('signatures.xlsx', 'signature-manifest.xlsx'); }
   reviewPackPdf(reviewId: string): Promise<void> {
     return this.download(`review-pack/${reviewId}.pdf`, 'review-pack.pdf');
   }

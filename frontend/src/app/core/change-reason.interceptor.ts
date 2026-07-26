@@ -17,7 +17,7 @@ export const changeReasonInterceptor: HttpInterceptorFn = (req, next) => {
   }
 
   const reason = window.prompt(
-    'Removing this record is audited (21 CFR Part 11). Enter the reason for voiding it:',
+    'This change is audited (21 CFR Part 11). Enter the reason:',
   );
 
   // Cancelled or blank — abort silently; the record stays and nothing is sent.

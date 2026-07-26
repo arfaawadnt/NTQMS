@@ -45,6 +45,22 @@ public sealed class ArchivesController(ISender sender) : ControllerBase
         await sender.Send(new DisposeRecordCommand(id), ct);
         return NoContent();
     }
+
+    [HttpPost("{id:guid}/legal-hold")]
+    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    public async Task<IActionResult> PlaceLegalHold(Guid id, PlaceLegalHoldRequest request, CancellationToken ct)
+    {
+        await sender.Send(new PlaceLegalHoldCommand(id, request.Reason), ct);
+        return NoContent();
+    }
+
+    [HttpDelete("{id:guid}/legal-hold")]
+    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    public async Task<IActionResult> ReleaseLegalHold(Guid id, CancellationToken ct)
+    {
+        await sender.Send(new ReleaseLegalHoldCommand(id), ct);
+        return NoContent();
+    }
 }
 
 [ApiController]

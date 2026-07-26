@@ -1,6 +1,7 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
+using NT.QAMS.Application.IdentityAccess;
 using NT.QAMS.Application.Organization;
 using NT.QAMS.Domain.IdentityAccess;
 using NT.QAMS.Domain.Tenancy;
@@ -24,8 +25,7 @@ public sealed class ProvisionTenantValidator : AbstractValidator<ProvisionTenant
         RuleFor(x => x.Name).NotEmpty().MaximumLength(Tenant.MaxNameLength);
         RuleFor(x => x.AdminEmail).NotEmpty().EmailAddress().MaximumLength(320);
         RuleFor(x => x.AdminDisplayName).NotEmpty().MaximumLength(150);
-        RuleFor(x => x.AdminPassword).NotEmpty().MinimumLength(12)
-            .WithMessage("The initial administrator password must be at least 12 characters.");
+        RuleFor(x => x.AdminPassword).StrongPassword();
     }
 }
 

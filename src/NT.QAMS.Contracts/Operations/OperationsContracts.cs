@@ -3,11 +3,13 @@ namespace NT.QAMS.Contracts.Operations;
 // ── Records & retention ──────────────────────────────────────────────────────
 
 public sealed record ArchiveRecordRequest(
-    string SourceModule, string SourceRef, Guid? SnapshotFileId, string RetentionClass);
+    string SourceModule, string SourceRef, Guid SnapshotFileId, string RetentionClass);
+
+public sealed record PlaceLegalHoldRequest(string Reason);
 
 public sealed record ArchiveListItemDto(
     Guid Id, string ArchiveRef, string SourceModule, string SourceRef,
-    string RetentionClass, DateOnly ArchivedOn, DateOnly? RetentionExpiry, string State);
+    string RetentionClass, DateOnly ArchivedOn, DateOnly? RetentionExpiry, string State, bool IsOnLegalHold);
 
 // ── SLA definitions ──────────────────────────────────────────────────────────
 

@@ -140,7 +140,7 @@ public sealed class ChangePasswordValidator : AbstractValidator<ChangePasswordCo
     {
         RuleFor(x => x.Email).NotEmpty().MaximumLength(320);
         RuleFor(x => x.CurrentPassword).NotEmpty();
-        RuleFor(x => x.NewPassword).NotEmpty().MinimumLength(10).MaximumLength(200);
+        RuleFor(x => x.NewPassword).StrongPassword();
     }
 }
 

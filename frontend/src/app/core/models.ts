@@ -1634,12 +1634,13 @@ export interface ArchiveListItem {
   archivedOn: string;
   retentionExpiry: string | null;
   state: string;
+  isOnLegalHold: boolean;
 }
 
 export interface ArchiveRecordRequest {
   sourceModule: string;
   sourceRef: string;
-  snapshotFileId: string | null;
+  snapshotFileId: string;
   retentionClass: RetentionClass;
 }
 

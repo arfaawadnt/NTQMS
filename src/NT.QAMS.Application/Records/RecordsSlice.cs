@@ -1,3 +1,4 @@
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.Operations;
@@ -8,8 +9,19 @@ using NT.QAMS.SharedKernel.Primitives;
 namespace NT.QAMS.Application.Records;
 
 public sealed record ArchiveRecordCommand(
-    string SourceModule, string SourceRef, Guid? SnapshotFileId, RetentionClass RetentionClass)
+    string SourceModule, string SourceRef, Guid SnapshotFileId, RetentionClass RetentionClass)
     : ICommand<Guid>;
+
+public sealed class ArchiveRecordValidator : AbstractValidator<ArchiveRecordCommand>
+{
+    public ArchiveRecordValidator()
+    {
+        RuleFor(x => x.SourceModule).NotEmpty().MaximumLength(60);
+        RuleFor(x => x.SourceRef).NotEmpty().MaximumLength(60);
+        RuleFor(x => x.SnapshotFileId).NotEmpty()
+            .WithMessage("An immutable content snapshot is required to archive a record (F-14).");
+    }
+}
 
 public sealed class ArchiveRecordHandler(
     IAppDbContext db, ICurrentTenant tenant, ICurrentUser user, IReferenceNumberGenerator refs, IClock clock)
@@ -28,7 +40,7 @@ public sealed class ArchiveRecordHandler(
             throw new DomainException("ARC-020", $"{c.SourceModule} {c.SourceRef} is already archived.");
         }
 
-        if (c.SnapshotFileId is { } fileId && !await db.Files.AnyAsync(f => f.Id == fileId, ct))
+        if (!await db.Files.AnyAsync(f => f.Id == c.SnapshotFileId, ct))
         {
             throw new DomainException("FILE-404", "Snapshot file not found.");
         }
@@ -47,6 +59,14 @@ public sealed class ArchiveRecordHandler(
 public sealed record RetrieveRecordCommand(Guid ArchiveId) : ICommand;
 public sealed record ReturnRecordCommand(Guid ArchiveId) : ICommand;
 public sealed record DisposeRecordCommand(Guid ArchiveId) : ICommand;
+public sealed record PlaceLegalHoldCommand(Guid ArchiveId, string Reason) : ICommand;
+public sealed record ReleaseLegalHoldCommand(Guid ArchiveId) : ICommand;
+
+public sealed class PlaceLegalHoldValidator : AbstractValidator<PlaceLegalHoldCommand>
+{
+    public PlaceLegalHoldValidator() =>
+        RuleFor(x => x.Reason).NotEmpty().MaximumLength(1000);
+}
 
 internal static class ArchiveLoader
 {
@@ -85,6 +105,28 @@ public sealed class DisposeRecordHandler(IAppDbContext db, ICurrentUser user, IC
     }
 }
 
+public sealed class PlaceLegalHoldHandler(IAppDbContext db, ICurrentUser user)
+    : ICommandHandler<PlaceLegalHoldCommand>
+{
+    public async Task Handle(PlaceLegalHoldCommand c, CancellationToken ct)
+    {
+        var actor = user.UserId ?? throw new DomainException("AUTH-003", "An authenticated user is required.");
+        (await ArchiveLoader.LoadAsync(db, c.ArchiveId, ct)).PlaceLegalHold(c.Reason, actor);
+        await db.SaveChangesAsync(ct);
+    }
+}
+
+public sealed class ReleaseLegalHoldHandler(IAppDbContext db, ICurrentUser user)
+    : ICommandHandler<ReleaseLegalHoldCommand>
+{
+    public async Task Handle(ReleaseLegalHoldCommand c, CancellationToken ct)
+    {
+        var actor = user.UserId ?? throw new DomainException("AUTH-003", "An authenticated user is required.");
+        (await ArchiveLoader.LoadAsync(db, c.ArchiveId, ct)).ReleaseLegalHold(actor);
+        await db.SaveChangesAsync(ct);
+    }
+}
+
 public sealed record GetArchivesQuery(string? State = null) : IQuery<IReadOnlyList<ArchiveListItemDto>>;
 
 public sealed class GetArchivesHandler(IAppDbContext db)
@@ -102,7 +144,7 @@ public sealed class GetArchivesHandler(IAppDbContext db)
             .Take(500)
             .Select(a => new ArchiveListItemDto(
                 a.Id, a.ArchiveRef, a.SourceModule, a.SourceRef,
-                a.RetentionClass.ToString(), a.ArchivedOn, a.RetentionExpiry, a.State.ToString()))
+                a.RetentionClass.ToString(), a.ArchivedOn, a.RetentionExpiry, a.State.ToString(), a.IsOnLegalHold))
             .ToListAsync(ct);
     }
 }

@@ -25,4 +25,12 @@ export class ArchivesApiService {
   return(id: string): Observable<void> { return this.http.post<void>(`${this.base}/${id}/return`, {}); }
 
   dispose(id: string): Observable<void> { return this.http.post<void>(`${this.base}/${id}/dispose`, {}); }
+
+  placeLegalHold(id: string, reason: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/legal-hold`, { reason });
+  }
+
+  releaseLegalHold(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${id}/legal-hold`);
+  }
 }

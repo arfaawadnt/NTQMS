@@ -38,8 +38,7 @@ public sealed class RegisterUserValidator : AbstractValidator<RegisterUserComman
         RuleFor(x => x.Email).NotEmpty().EmailAddress().MaximumLength(320);
         RuleFor(x => x.DisplayName).NotEmpty().MaximumLength(150);
         RuleFor(x => x.Role).NotEmpty();
-        RuleFor(x => x.InitialPassword).NotEmpty().MinimumLength(12)
-            .WithMessage("The initial password must be at least 12 characters.");
+        RuleFor(x => x.InitialPassword).StrongPassword();
     }
 }
 
@@ -73,7 +72,7 @@ public sealed record ResetUserPasswordCommand(Guid UserId, string NewPassword) :
 public sealed class ResetUserPasswordValidator : AbstractValidator<ResetUserPasswordCommand>
 {
     public ResetUserPasswordValidator() =>
-        RuleFor(x => x.NewPassword).NotEmpty().MinimumLength(12);
+        RuleFor(x => x.NewPassword).StrongPassword();
 }
 
 internal static class TenantUserLoader

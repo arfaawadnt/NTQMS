@@ -9,10 +9,11 @@ namespace NT.QAMS.Domain.UnitTests.Operations;
 public class ArchiveEntryTests
 {
     private static readonly Guid Actor = Guid.CreateVersion7();
+    private static readonly Guid Snapshot = Guid.CreateVersion7();
     private static readonly DateOnly Archived = new(2020, 1, 15);
 
     private static ArchiveEntry FiveYear() =>
-        ArchiveEntry.Archive("ARC-2020-0001", "DOCUMENTS", "SOP-CAL-045", null, RetentionClass.FiveYears, Archived, Actor);
+        ArchiveEntry.Archive("ARC-2020-0001", "DOCUMENTS", "SOP-CAL-045", Snapshot, RetentionClass.FiveYears, Archived, Actor);
 
     [Fact]
     public void Retention_expiry_is_derived_from_class()
@@ -20,7 +21,7 @@ public class ArchiveEntryTests
         FiveYear().RetentionExpiry.Should().Be(new DateOnly(2025, 1, 15));
 
         var permanent = ArchiveEntry.Archive(
-            "ARC-1", "NC", "NC-1", null, RetentionClass.Permanent, Archived, Actor);
+            "ARC-1", "NC", "NC-1", Snapshot, RetentionClass.Permanent, Archived, Actor);
         permanent.RetentionExpiry.Should().BeNull();
     }
 
@@ -47,7 +48,7 @@ public class ArchiveEntryTests
     public void Permanent_records_can_never_be_disposed()
     {
         var permanent = ArchiveEntry.Archive(
-            "ARC-1", "NC", "NC-1", null, RetentionClass.Permanent, Archived, Actor);
+            "ARC-1", "NC", "NC-1", Snapshot, RetentionClass.Permanent, Archived, Actor);
         var act = () => permanent.AuthorizeDisposal(Actor, new DateOnly(2099, 1, 1));
         act.Should().Throw<DomainException>().Which.Code.Should().Be("ARC-013");
     }
@@ -60,6 +61,50 @@ public class ArchiveEntryTests
         entry.State.Should().Be(ArchiveState.Retrieved);
         entry.Return();
         entry.State.Should().Be(ArchiveState.Archived);
+    }
+
+    [Fact]
+    public void Archiving_without_a_content_snapshot_is_rejected()
+    {
+        // F-14: an archive entry must carry an immutable content copy.
+        var act = () => ArchiveEntry.Archive(
+            "ARC-2", "DOCUMENTS", "SOP-1", Guid.Empty, RetentionClass.FiveYears, Archived, Actor);
+        act.Should().Throw<DomainException>().Which.Code.Should().Be("ARC-002");
+    }
+
+    [Fact]
+    public void Legal_hold_blocks_disposal_even_after_expiry()
+    {
+        // F-14: litigation/investigation hold overrides retention expiry.
+        var entry = FiveYear();
+        entry.PlaceLegalHold("Litigation ref 2025-88", Actor);
+        entry.IsOnLegalHold.Should().BeTrue();
+        entry.DomainEvents.OfType<ArchiveLegalHoldPlaced>().Should().ContainSingle();
+
+        var disposeUnderHold = () => entry.AuthorizeDisposal(Actor, new DateOnly(2025, 2, 1));
+        disposeUnderHold.Should().Throw<DomainException>().Which.Code.Should().Be("ARC-015");
+    }
+
+    [Fact]
+    public void Releasing_a_legal_hold_restores_disposability()
+    {
+        var entry = FiveYear();
+        entry.PlaceLegalHold("Litigation ref 2025-88", Actor);
+        entry.ReleaseLegalHold(Actor);
+
+        entry.IsOnLegalHold.Should().BeFalse();
+        entry.DomainEvents.OfType<ArchiveLegalHoldReleased>().Should().ContainSingle();
+
+        entry.AuthorizeDisposal(Actor, new DateOnly(2025, 2, 1));
+        entry.State.Should().Be(ArchiveState.Disposed);
+    }
+
+    [Fact]
+    public void A_legal_hold_requires_a_reason()
+    {
+        var entry = FiveYear();
+        var act = () => entry.PlaceLegalHold(" ", Actor);
+        act.Should().Throw<DomainException>().Which.Code.Should().Be("ARC-030");
     }
 }
 

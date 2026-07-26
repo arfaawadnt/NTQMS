@@ -83,6 +83,9 @@ type LedgerTab = 'trail' | 'signatures' | 'security' | 'reviews';
 
     @if (tab() === 'signatures' && !loading()) {
       <div class="card">
+        <div class="exportrow">
+          <button class="secondary" (click)="exports.signaturesXlsx()">{{ i18n.t('exp.xlsx') }}</button>
+        </div>
         @if (signatures().length === 0) { <p class="muted">{{ i18n.t('cmp.noSignatures') }}</p> }
         @else {
           <table>
@@ -200,6 +203,7 @@ type LedgerTab = 'trail' | 'signatures' | 'security' | 'reviews';
     .tab { background: transparent; color: var(--nt-slate); font-size: 12.5px; padding: 7px 16px; border-radius: 6px; }
     .tab:hover { background: rgba(255,255,255,.6); }
     .tab.active { background: #fff; color: var(--nt-blue); box-shadow: var(--nt-shadow-xs); font-weight: 700; }
+    .exportrow { display: flex; justify-content: flex-end; margin-bottom: 10px; }
     .searchrow { display: flex; gap: 8px; margin-bottom: 12px; }
     .searchrow input { max-width: 380px; }
     .clickable { cursor: pointer; }

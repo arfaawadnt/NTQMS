@@ -41,10 +41,11 @@ import { DrawerComponent } from '../../shared/ui/drawer.component';
         <select formControlName="retentionClass">
           @for (c of classes; track c) { <option [value]="c">{{ c }}</option> }
         </select>
-        <label>{{ i18n.t('arc.snapshot') }}</label>
-        <input type="file" (change)="onFile($event)" />
+        <label>{{ i18n.t('arc.snapshot') }} *</label>
+        <input type="file" (change)="onFile($event)" required />
+        <p class="hint">{{ i18n.t('arc.snapshotRequired') }}</p>
         <div class="row">
-          <button type="submit" [disabled]="form.invalid || facade.loading()">{{ i18n.t('arc.archive') }}</button>
+          <button type="submit" [disabled]="form.invalid || !snapshot() || facade.loading()">{{ i18n.t('arc.archive') }}</button>
           <button type="button" class="secondary" (click)="cancel()">{{ i18n.t('nc.cancel') }}</button>
         </div>
         @if (facade.error()) { <div class="error">{{ facade.error() }}</div> }
@@ -71,15 +72,25 @@ import { DrawerComponent } from '../../shared/ui/drawer.component';
                 <td class="code">{{ a.sourceRef }}</td>
                 <td>{{ a.retentionClass }}</td>
                 <td>{{ a.retentionExpiry ? (a.retentionExpiry | date:'mediumDate') : i18n.t('arc.permanent') }}</td>
-                <td><qams-status-pill [status]="a.state" /></td>
+                <td>
+                  <qams-status-pill [status]="a.state" />
+                  @if (a.isOnLegalHold) { <span class="hold" [title]="i18n.t('arc.onHoldNote')">⚖ {{ i18n.t('arc.onHold') }}</span> }
+                </td>
                 <td class="actions">
                   @if (a.state === 'Archived') {
                     <button class="link" type="button" (click)="facade.retrieve(a.id)">{{ i18n.t('arc.retrieve') }}</button>
-                    @if (perms.canApprove() && a.retentionClass !== 'Permanent') {
+                    @if (perms.canApprove() && a.retentionClass !== 'Permanent' && !a.isOnLegalHold) {
                       <button class="link danger-link" type="button" (click)="facade.dispose(a.id)">{{ i18n.t('arc.dispose') }}</button>
                     }
                   } @else if (a.state === 'Retrieved') {
                     <button class="link" type="button" (click)="facade.return(a.id)">{{ i18n.t('arc.return') }}</button>
+                  }
+                  @if (perms.canApprove() && a.state !== 'Disposed') {
+                    @if (a.isOnLegalHold) {
+                      <button class="link" type="button" (click)="facade.releaseLegalHold(a.id)">{{ i18n.t('arc.releaseHold') }}</button>
+                    } @else {
+                      <button class="link" type="button" (click)="placeHold(a.id)">{{ i18n.t('arc.placeHold') }}</button>
+                    }
                   }
                 </td>
               </tr>
@@ -93,6 +104,8 @@ import { DrawerComponent } from '../../shared/ui/drawer.component';
     .row { display: flex; gap: .6rem; margin-top: 1rem; }
     .actions { white-space: nowrap; }
     .danger-link { color: var(--nt-red); }
+    .hint { font-size: 11.5px; color: var(--nt-slate); margin: 2px 0 0; }
+    .hold { margin-left: 6px; font-size: 11px; font-weight: 700; color: var(--nt-red); white-space: nowrap; }
     button, select { width: auto; }
   `],
 })
@@ -123,6 +136,12 @@ export class RecordsComponent implements OnInit {
   }
 
   onFile(event: Event): void { this.snapshot.set((event.target as HTMLInputElement).files?.[0] ?? null); }
+
+  /** Legal hold requires a reason (litigation/investigation ref) — captured before the call. */
+  placeHold(id: string): void {
+    const reason = window.prompt(this.i18n.t('arc.placeHoldPrompt'));
+    if (reason && reason.trim()) { void this.facade.placeLegalHold(id, reason.trim()); }
+  }
 
   async archive(): Promise<void> {
     if (this.form.invalid) { return; }

@@ -51,7 +51,23 @@ public sealed class ExportsController(
     {
         var entries = await sender.Send(new GetAuditTrailQuery(null, take), ct);
         var changes = await sender.Send(new GetFieldChangesQuery(null, take), ct);
+
+        // F-13: the export carries a live chain-integrity attestation, so the copy
+        // itself is evidence that the trail was intact at the moment it was drawn.
+        var integrity = tenant.TenantId is { } tid
+            ? await sender.Send(new VerifyChainQuery(tid), ct)
+            : new ChainVerificationDto(false, 0, null);
+
         var pack = await PackAsync("Compliance Audit Trail", ct,
+            new ExportTable(
+                "Integrity Attestation",
+                ["Chain integrity", "Entries verified", "First break at sequence", "Entries in this export"],
+                [[
+                    integrity.Ok ? "OK — chain intact" : "BROKEN",
+                    integrity.VerifiedEntries.ToString(),
+                    integrity.BrokenAtSequence?.ToString() ?? "—",
+                    entries.Count.ToString(),
+                ]]),
             new ExportTable(
                 "Event Trail",
                 ["Seq", "Occurred (UTC)", "Event", "Payload", "Entry Hash"],
@@ -61,17 +77,37 @@ public sealed class ExportsController(
                 ]).ToList()),
             new ExportTable(
                 "Field-Level Changes",
-                ["Occurred (UTC)", "Entity", "Record", "Action", "Field", "From", "To", "Actor"],
+                ["Occurred (UTC)", "Entity", "Record", "Action", "Field", "From", "To", "Actor", "Reason"],
                 changes.Select(f => (IReadOnlyList<string>)
                 [
                     f.OccurredAtUtc.ToString("u"), f.EntityType, f.EntityId, f.Action,
-                    f.Property ?? "", f.OldValue ?? "", f.NewValue ?? "", f.Actor,
+                    f.Property ?? "", f.OldValue ?? "", f.NewValue ?? "", f.Actor, f.Reason ?? "",
                 ]).ToList()));
 
         await LogExportAsync("audit-trail.xlsx", ct);
         return File(exports.ToXlsx(pack),
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             $"audit-trail-{clock.UtcNow:yyyyMMdd-HHmm}.xlsx");
+    }
+
+    [HttpGet("signatures.xlsx")]
+    [Authorize(Roles = "QualityManager,TenantAdmin,ExternalAuditor")]
+    public async Task<IActionResult> SignatureManifest([FromQuery] int take = 1000, CancellationToken ct = default)
+    {
+        var signatures = await sender.Send(new GetSignatureLogQuery(take), ct);
+        var pack = await PackAsync("Electronic Signature Manifest", ct,
+            new ExportTable(
+                "Signatures",
+                ["Signed (UTC)", "Signer", "Meaning", "Subject", "Content Hash"],
+                signatures.Select(s => (IReadOnlyList<string>)
+                [
+                    s.SignedAtUtc.ToString("u"), s.SignerDisplay, s.Meaning, s.SubjectRef, s.ContentHash,
+                ]).ToList()));
+
+        await LogExportAsync("signatures.xlsx", ct);
+        return File(exports.ToXlsx(pack),
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            $"signature-manifest-{clock.UtcNow:yyyyMMdd-HHmm}.xlsx");
     }
 
     [HttpGet("review-pack/{reviewId:guid}.pdf")]

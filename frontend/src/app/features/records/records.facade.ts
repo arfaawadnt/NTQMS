@@ -31,10 +31,18 @@ export class RecordsFacade {
     await this.run(async () => this._list.set(await firstValueFrom(this.api.list(state))));
   }
 
-  /** Archives a record snapshot, uploading the file first when one is provided. */
+  /**
+   * Archives a record snapshot. A content snapshot is mandatory (F-14): the file
+   * uploads first, then links by id — an archive with no immutable copy is refused.
+   */
   async archive(sourceModule: string, sourceRef: string, retentionClass: RetentionClass, snapshot: File | null): Promise<boolean> {
+    if (!snapshot) {
+      this._error.set('A content snapshot file is required to archive a record.');
+      return false;
+    }
+
     return await this.run(async () => {
-      const snapshotFileId = snapshot ? (await firstValueFrom(this.files.upload(snapshot))).id : null;
+      const snapshotFileId = (await firstValueFrom(this.files.upload(snapshot))).id;
       await firstValueFrom(this.api.archive({ sourceModule, sourceRef, snapshotFileId, retentionClass }));
       this._list.set(await firstValueFrom(this.api.list(this.stateFilter)));
       return true;
@@ -46,6 +54,12 @@ export class RecordsFacade {
   async return(id: string): Promise<void> { await this.mutate(() => this.api.return(id)); }
 
   async dispose(id: string): Promise<void> { await this.mutate(() => this.api.dispose(id)); }
+
+  async placeLegalHold(id: string, reason: string): Promise<void> {
+    await this.mutate(() => this.api.placeLegalHold(id, reason));
+  }
+
+  async releaseLegalHold(id: string): Promise<void> { await this.mutate(() => this.api.releaseLegalHold(id)); }
 
   private async mutate(call: () => Observable<void>): Promise<void> {
     await this.run(async () => {

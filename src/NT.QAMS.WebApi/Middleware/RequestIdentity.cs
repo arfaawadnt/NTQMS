@@ -123,7 +123,7 @@ public sealed class ChangeReasonMiddleware(RequestDelegate next)
             context.Response.ContentType = "application/json";
             await context.Response.WriteAsJsonAsync(new
             {
-                title = "A reason is required to void this record.",
+                title = "A reason is required for this change.",
                 status = 400,
                 code = "CHANGE-REASON-REQUIRED",
             });
