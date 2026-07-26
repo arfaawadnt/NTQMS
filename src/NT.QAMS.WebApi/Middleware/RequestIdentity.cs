@@ -102,6 +102,40 @@ public sealed class ActiveSessionMiddleware(RequestDelegate next)
 }
 
 /// <summary>
+/// F-06 enforcement: capturing the "reason for change" (21 CFR Part 11 §11.10(e)
+/// / ALCOA+). Every DELETE in this system voids a piece of analytical evidence,
+/// which must never happen without a recorded justification. The reason travels
+/// in the <c>X-Change-Reason</c> header; a DELETE without one is refused
+/// (400 CHANGE-REASON-REQUIRED) before it can reach a handler, and an accepted
+/// reason is placed on the scoped context so the field-change interceptor stamps
+/// it onto the void's ledger row in the same transaction. Non-DELETE requests
+/// pass straight through (the header is still honoured if present).
+/// </summary>
+public sealed class ChangeReasonMiddleware(RequestDelegate next)
+{
+    public async Task InvokeAsync(HttpContext context, ICurrentChangeReasonSetter reasonSetter)
+    {
+        var reason = context.Request.Headers["X-Change-Reason"].ToString();
+
+        if (HttpMethods.IsDelete(context.Request.Method) && string.IsNullOrWhiteSpace(reason))
+        {
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+            context.Response.ContentType = "application/json";
+            await context.Response.WriteAsJsonAsync(new
+            {
+                title = "A reason is required to void this record.",
+                status = 400,
+                code = "CHANGE-REASON-REQUIRED",
+            });
+            return;
+        }
+
+        reasonSetter.Set(reason);
+        await next(context);
+    }
+}
+
+/// <summary>
 /// F-04 enforcement: a session issued to a privileged user who has not enrolled
 /// MFA carries scope=mfa_enrollment. Such a session may reach ONLY the MFA-
 /// enrollment endpoints; every other request is refused with 403 + code

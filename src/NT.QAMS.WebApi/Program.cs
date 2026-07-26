@@ -125,6 +125,7 @@ app.UseAuthentication();
 app.UseMiddleware<TenantResolutionMiddleware>();
 app.UseMiddleware<ActiveSessionMiddleware>();
 app.UseMiddleware<MfaEnrollmentGateMiddleware>();
+app.UseMiddleware<ChangeReasonMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();

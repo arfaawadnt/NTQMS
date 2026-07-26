@@ -75,7 +75,7 @@ public sealed class RealPostgresFixture : IDisposable
                 new TenantConnectionInterceptor(ctx),
                 new AuditStampInterceptor(clock, ctx),
                 new TenantStampInterceptor(ctx),
-                new FieldChangeInterceptor(clock, ctx, ctx))
+                new FieldChangeInterceptor(clock, ctx, ctx, ctx))
             .Options;
         return new AppDbContext(options, ctx);
     }

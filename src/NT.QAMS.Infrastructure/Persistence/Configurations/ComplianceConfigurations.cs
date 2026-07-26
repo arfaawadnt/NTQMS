@@ -65,6 +65,7 @@ public sealed class FieldChangeRecordConfiguration : IEntityTypeConfiguration<Fi
         builder.Property(f => f.OldValue).HasMaxLength(4000);
         builder.Property(f => f.NewValue).HasMaxLength(4000);
         builder.Property(f => f.Actor).HasMaxLength(300);
+        builder.Property(f => f.Reason).HasMaxLength(1000);
         builder.HasIndex(f => new { f.TenantId, f.EntityId });
         builder.HasIndex(f => f.OccurredAtUtc);
     }

@@ -27,6 +27,20 @@ public sealed class CurrentTenant : ICurrentTenant, ICurrentTenantSetter
 }
 
 /// <summary>
+/// Scoped holder for the current unit of work's change reason. Written once per
+/// request by the change-reason middleware (from the <c>X-Change-Reason</c>
+/// header) and read by the field-change interceptor when it writes the ledger.
+/// Transaction-scoped by DI lifetime — never leaks across pooled requests.
+/// </summary>
+public sealed class CurrentChangeReason : ICurrentChangeReason, ICurrentChangeReasonSetter
+{
+    public string? Reason { get; private set; }
+
+    public void Set(string? reason) =>
+        Reason = string.IsNullOrWhiteSpace(reason) ? null : reason.Trim();
+}
+
+/// <summary>
 /// Placeholder actor until Identity &amp; Access (Phase 1) supplies the real
 /// JWT-backed implementation. Unauthenticated by design — nothing in Phase 0
 /// grants privileges based on it.

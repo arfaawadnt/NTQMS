@@ -19,7 +19,8 @@ namespace NT.QAMS.Infrastructure.Persistence.Interceptors;
 /// trail, or derived data); credential-bearing properties are redacted at
 /// capture so secrets never reach the ledger.
 /// </summary>
-public sealed class FieldChangeInterceptor(IClock clock, ICurrentUser currentUser, ICurrentTenant currentTenant)
+public sealed class FieldChangeInterceptor(
+    IClock clock, ICurrentUser currentUser, ICurrentTenant currentTenant, ICurrentChangeReason changeReason)
     : SaveChangesInterceptor
 {
     /// <summary>Entity types that must never generate field rows (the ledgers themselves, plumbing, and derived data).</summary>
@@ -114,6 +115,7 @@ public sealed class FieldChangeInterceptor(IClock clock, ICurrentUser currentUse
         NewValue = newValue,
         ActorId = currentUser.UserId,
         Actor = currentUser.DisplayName ?? "system",
+        Reason = changeReason.Reason,
         OccurredAtUtc = clock.UtcNow,
     };
 

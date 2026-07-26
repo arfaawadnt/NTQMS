@@ -22,6 +22,10 @@ public static class DependencyInjection
         services.AddScoped<ICurrentTenantSetter>(sp => sp.GetRequiredService<CurrentTenant>());
         services.AddScoped<ICurrentUser, AnonymousCurrentUser>();
 
+        services.AddScoped<CurrentChangeReason>();
+        services.AddScoped<ICurrentChangeReason>(sp => sp.GetRequiredService<CurrentChangeReason>());
+        services.AddScoped<ICurrentChangeReasonSetter>(sp => sp.GetRequiredService<CurrentChangeReason>());
+
         services.AddScoped<AuditStampInterceptor>();
         services.AddScoped<FieldChangeInterceptor>();
         services.AddScoped<TenantStampInterceptor>();

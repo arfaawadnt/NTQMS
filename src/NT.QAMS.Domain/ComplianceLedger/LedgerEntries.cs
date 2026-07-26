@@ -72,5 +72,7 @@ public sealed class FieldChangeRecord
     public string? NewValue { get; init; }
     public Guid? ActorId { get; init; }
     public string Actor { get; init; } = null!;
+    /// <summary>Operator-supplied justification for the change (Part 11 §11.10(e)); null when none was given.</summary>
+    public string? Reason { get; init; }
     public DateTimeOffset OccurredAtUtc { get; init; }
 }

@@ -32,11 +32,12 @@ public sealed class FieldChangeInterceptorTests
         public bool IsAuthenticated => true;
     }
 
-    private static AppDbContext CreateContext(string name)
+    private static AppDbContext CreateContext(string name, string? reason = null)
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(name)
-            .AddInterceptors(new FieldChangeInterceptor(new FixedClock(), new FixedUser(), new StubTenant()))
+            .AddInterceptors(new FieldChangeInterceptor(
+                new FixedClock(), new FixedUser(), new StubTenant(), new StubReason(reason)))
             .Options;
         return new AppDbContext(options, new StubTenant());
     }
@@ -46,6 +47,11 @@ public sealed class FieldChangeInterceptorTests
         public Guid? TenantId => Tenant;
         public bool IsResolved => true;
         public bool IsElevated => false;
+    }
+
+    private sealed class StubReason(string? reason) : ICurrentChangeReason
+    {
+        public string? Reason => reason;
     }
 
     private static Complaint NewComplaint() => Complaint.Log(
@@ -98,6 +104,37 @@ public sealed class FieldChangeInterceptorTests
         var selfRows = await db.FieldChanges
             .Where(f => f.EntityType == nameof(FieldChangeRecord)).CountAsync();
         selfRows.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task The_change_reason_in_scope_is_stamped_on_every_ledger_row()
+    {
+        // F-06: the operator-supplied justification (e.g. the X-Change-Reason on a
+        // void) is captured contemporaneously in the same transaction as the change.
+        const string reason = "Transcription error — value keyed against the wrong run.";
+        await using var db = CreateContext(nameof(The_change_reason_in_scope_is_stamped_on_every_ledger_row), reason);
+        var complaint = NewComplaint();
+        complaint.TenantId = Tenant;
+
+        db.Complaints.Add(complaint);
+        await db.SaveChangesAsync();
+
+        var row = await db.FieldChanges.SingleAsync(f => f.EntityType == nameof(Complaint));
+        row.Reason.Should().Be(reason);
+    }
+
+    [Fact]
+    public async Task A_change_with_no_reason_in_scope_leaves_the_ledger_reason_null()
+    {
+        await using var db = CreateContext(nameof(A_change_with_no_reason_in_scope_leaves_the_ledger_reason_null));
+        var complaint = NewComplaint();
+        complaint.TenantId = Tenant;
+
+        db.Complaints.Add(complaint);
+        await db.SaveChangesAsync();
+
+        var row = await db.FieldChanges.SingleAsync(f => f.EntityType == nameof(Complaint));
+        row.Reason.Should().BeNull();
     }
 
     [Fact]

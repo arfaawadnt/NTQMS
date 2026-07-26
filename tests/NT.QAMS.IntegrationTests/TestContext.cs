@@ -9,7 +9,8 @@ namespace NT.QAMS.IntegrationTests;
 /// the tenant GUC and TenantStampInterceptor stamps rows) and ICurrentUser (for
 /// the audit / field-change ledgers).
 /// </summary>
-public sealed class TestContext : ICurrentTenant, ICurrentTenantSetter, ICurrentUser
+public sealed class TestContext
+    : ICurrentTenant, ICurrentTenantSetter, ICurrentUser, ICurrentChangeReason, ICurrentChangeReasonSetter
 {
     public Guid? TenantId { get; private set; }
     public bool IsResolved => TenantId.HasValue;
@@ -19,9 +20,12 @@ public sealed class TestContext : ICurrentTenant, ICurrentTenantSetter, ICurrent
     public string? DisplayName { get; set; } = "integration-test";
     public bool IsAuthenticated => true;
 
+    public string? Reason { get; private set; }
+
     public void Set(Guid tenantId) => TenantId = tenantId;
     public void Clear() { TenantId = null; IsElevated = false; }
     public void Elevate() => IsElevated = true;
+    public void Set(string? reason) => Reason = string.IsNullOrWhiteSpace(reason) ? null : reason.Trim();
 }
 
 /// <summary>Fixed clock — record timestamps stay deterministic in tests.</summary>
