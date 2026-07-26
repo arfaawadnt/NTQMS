@@ -79,6 +79,16 @@ export class AuthService {
     return this.http.post<void>(`${this.base}/signature-pin`, { pin });
   }
 
+  /** Current tenant's privileged-MFA enforcement policy (TenantAdmin). */
+  getTenantMfaPolicy(): Observable<{ requireMfaForPrivilegedRoles: boolean }> {
+    return this.http.get<{ requireMfaForPrivilegedRoles: boolean }>(
+      `${environment.apiBaseUrl}/tenant-settings/mfa-policy`);
+  }
+
+  setTenantMfaPolicy(require: boolean): Observable<void> {
+    return this.http.put<void>(`${environment.apiBaseUrl}/tenant-settings/mfa-policy`, { require });
+  }
+
   /** Self-service rotation — anonymous endpoint; works while the password is expired. */
   changePassword(tenantIdentifier: string | null, email: string, currentPassword: string, newPassword: string): Observable<void> {
     return this.http.post<void>(`${this.base}/change-password`, {

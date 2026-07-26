@@ -328,6 +328,7 @@ export class ShellComponent {
       {
         key: 'admin', label: 'nav.groupAdmin',
         items: [
+          { path: '/settings/security', label: 'nav.security', icon: 'security' },
           { path: '/reference-data', label: 'nav.reference', icon: 'reference' },
           { path: '/notification-rules', label: 'nav.notificationRules', icon: 'rules', visible: () => this.perms.canApprove() },
           { path: '/compliance', label: 'nav.compliance', icon: 'compliance', visible: () => this.perms.canViewCompliance() },

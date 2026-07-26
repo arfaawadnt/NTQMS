@@ -13,6 +13,13 @@ export const routes: Routes = [
     loadComponent: () => import('./features/login/login.component').then((m) => m.LoginComponent),
   },
   {
+    // Standalone MFA enrollment — outside the shell so it works under an
+    // enrollment-scoped session that is barred from every other endpoint.
+    path: 'security/mfa-setup',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/security/mfa-setup.component').then((m) => m.MfaSetupComponent),
+  },
+  {
     path: '',
     canActivate: [authGuard],
     loadComponent: () => import('./shell/shell.component').then((m) => m.ShellComponent),
@@ -32,6 +39,10 @@ export const routes: Routes = [
           {
             path: 'dashboard',
             loadComponent: () => import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent),
+          },
+          {
+            path: 'settings/security',
+            loadComponent: () => import('./features/security/security-settings.component').then((m) => m.SecuritySettingsComponent),
           },
           {
             path: 'manual',

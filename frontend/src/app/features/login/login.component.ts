@@ -55,6 +55,9 @@ import { I18nService, Lang } from '../../core/i18n.service';
               </span>
               <span class="muted">{{ i18n.t('login.notYourLab') }}</span>
             </div>
+            <button type="button" class="link platformswitch" (click)="switchToPlatform()">
+              {{ i18n.t('login.platformSwitch') }} →
+            </button>
           } @else {
             <div class="platformline">{{ i18n.t('login.platformMode') }}</div>
             <div class="muted hint">{{ i18n.t('login.labUrlHint') }}</div>
@@ -140,6 +143,8 @@ import { I18nService, Lang } from '../../core/i18n.service';
     .tenantline .muted { font-size: 11.5px; }
     .platformline { font-size: 13px; font-weight: 700; color: var(--nt-teal); margin-bottom: 4px; }
     .hint { margin: 2px 0 14px; }
+    .platformswitch { width: auto; background: transparent; color: var(--nt-blue); font-size: 12px; font-weight: 700; padding: 0 0 12px; }
+    .platformswitch:hover { text-decoration: underline; }
 
     label { margin-top: 12px; }
     .signin {
@@ -178,6 +183,13 @@ export class LoginComponent {
   readonly mfaRequired = signal(false);
   readonly passwordExpired = signal(false);
 
+  /** Clear the pinned lab so the form signs in the platform administrator. */
+  switchToPlatform(): void {
+    this.auth.setTenantSlug(null);
+    this.error.set('');
+    this.mfaRequired.set(false);
+  }
+
   submit(): void {
     this.error.set('');
     this.busy.set(true);
@@ -207,6 +219,11 @@ export class LoginComponent {
         this.busy.set(false);
         if (res.mfaRequired) {
           this.mfaRequired.set(true);
+          return;
+        }
+        // Privileged user of an MFA-enforcing tenant: must enrol before full access.
+        if (res.mfaEnrollmentRequired) {
+          void this.router.navigate(['/security/mfa-setup']);
           return;
         }
         // Platform administrators land on the control plane; lab users on the dashboard.

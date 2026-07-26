@@ -8,6 +8,8 @@ export interface AuthResponse {
   displayName: string;
   tenantId: string | null;
   mfaRequired: boolean;
+  /** Privileged user of an MFA-enforcing tenant who must enrol before full access (F-04). */
+  mfaEnrollmentRequired?: boolean;
 }
 
 /** Nonconformance source classifications accepted by the backend. */
