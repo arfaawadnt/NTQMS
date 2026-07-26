@@ -141,6 +141,21 @@ public sealed class QualityObjectiveConfiguration : IEntityTypeConfiguration<Qua
     }
 }
 
+public sealed class UserAccessReviewConfiguration : IEntityTypeConfiguration<UserAccessReview>
+{
+    public void Configure(EntityTypeBuilder<UserAccessReview> builder)
+    {
+        builder.ToTable("user_access_review", "qams");
+        builder.HasKey(r => r.Id);
+        builder.Property(r => r.ReviewRef).HasMaxLength(30);
+        builder.Property(r => r.Status).HasConversion<string>().HasMaxLength(20);
+        builder.Property(r => r.Conclusion).HasMaxLength(4000);
+        builder.HasIndex(r => new { r.TenantId, r.ReviewRef }).IsUnique();
+        builder.HasIndex(r => new { r.TenantId, r.Status });
+        builder.Ignore(r => r.DomainEvents);
+    }
+}
+
 public sealed class QualityPolicyConfiguration : IEntityTypeConfiguration<QualityPolicy>
 {
     public void Configure(EntityTypeBuilder<QualityPolicy> builder)

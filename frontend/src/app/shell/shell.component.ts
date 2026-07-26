@@ -334,6 +334,7 @@ export class ShellComponent {
           { path: '/notification-rules', label: 'nav.notificationRules', icon: 'rules', visible: () => this.perms.canApprove() },
           { path: '/compliance', label: 'nav.compliance', icon: 'compliance', visible: () => this.perms.canViewCompliance() },
           { path: '/users', label: 'nav.users', icon: 'users', visible: () => this.perms.isTenantAdmin() },
+          { path: '/access-reviews', label: 'nav.accessReviews', icon: 'accessReview', visible: () => this.perms.canApprove() },
         ],
       },
     ];

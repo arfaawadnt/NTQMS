@@ -34,6 +34,7 @@ public interface IAppDbContext
     DbSet<Complaint> Complaints { get; }
     DbSet<QualityObjective> QualityObjectives { get; }
     DbSet<QualityPolicy> QualityPolicies { get; }
+    DbSet<UserAccessReview> UserAccessReviews { get; }
     DbSet<FeedbackEntry> FeedbackEntries { get; }
     DbSet<ControlledDocument> Documents { get; }
     DbSet<DocumentAcknowledgement> DocumentAcknowledgements { get; }

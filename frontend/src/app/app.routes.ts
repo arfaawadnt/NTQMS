@@ -387,6 +387,10 @@ export const routes: Routes = [
             loadComponent: () => import('./features/users/users.component').then((m) => m.UsersComponent),
           },
           {
+            path: 'access-reviews',
+            loadComponent: () => import('./features/security/access-reviews.component').then((m) => m.AccessReviewsComponent),
+          },
+          {
             path: 'notifications',
             loadComponent: () => import('./features/notifications/notifications.component').then((m) => m.NotificationsComponent),
           },

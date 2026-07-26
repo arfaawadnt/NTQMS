@@ -613,6 +613,19 @@ export interface AuditTrailReview {
   conclusion: string | null;
 }
 
+/** Periodic user-access review / recertification (Part 11 §11.10(d) / Annex 11 §12). */
+export interface UserAccessReview {
+  id: string;
+  reviewRef: string;
+  openedOn: string;
+  status: string;
+  reviewedBy: string | null;
+  completedAtUtc: string | null;
+  accountsReviewed: number | null;
+  changesRequired: boolean | null;
+  conclusion: string | null;
+}
+
 // ── PT/EQA Annual Plan (ISO 17025 §7.7.2) ───────────────────────────────────
 
 export interface PtPlanItem {
