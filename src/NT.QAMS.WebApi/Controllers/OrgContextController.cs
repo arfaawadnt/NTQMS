@@ -19,7 +19,7 @@ public sealed class OrgContextController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetInterestedPartiesQuery(), ct));
 
     [HttpPost("interested-parties")]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> RegisterParty(RegisterInterestedPartyRequest request, CancellationToken ct) =>
         Ok(new
         {
@@ -29,7 +29,7 @@ public sealed class OrgContextController(ISender sender) : ControllerBase
         });
 
     [HttpPut("interested-parties/{id:guid}")]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> ReviseParty(Guid id, ReviseInterestedPartyRequest request, CancellationToken ct)
     {
         await sender.Send(new ReviseInterestedPartyCommand(
@@ -39,7 +39,7 @@ public sealed class OrgContextController(ISender sender) : ControllerBase
     }
 
     [HttpPost("interested-parties/{id:guid}/archive")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> ArchiveParty(Guid id, CancellationToken ct)
     {
         await sender.Send(new ArchiveInterestedPartyCommand(id), ct);
@@ -53,7 +53,7 @@ public sealed class OrgContextController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetContextIssuesQuery(), ct));
 
     [HttpPost("issues")]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> RegisterIssue(RegisterContextIssueRequest request, CancellationToken ct) =>
         Ok(new
         {
@@ -62,7 +62,7 @@ public sealed class OrgContextController(ISender sender) : ControllerBase
         });
 
     [HttpPut("issues/{id:guid}")]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> ReviseIssue(Guid id, ReviseContextIssueRequest request, CancellationToken ct)
     {
         await sender.Send(new ReviseContextIssueCommand(
@@ -71,7 +71,7 @@ public sealed class OrgContextController(ISender sender) : ControllerBase
     }
 
     [HttpPost("issues/{id:guid}/link-risk")]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> LinkRisk(Guid id, LinkContextIssueRiskRequest request, CancellationToken ct)
     {
         await sender.Send(new LinkContextIssueRiskCommand(id, request.RiskId), ct);
@@ -79,7 +79,7 @@ public sealed class OrgContextController(ISender sender) : ControllerBase
     }
 
     [HttpPost("issues/{id:guid}/close")]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> CloseIssue(Guid id, CloseContextIssueRequest request, CancellationToken ct)
     {
         await sender.Send(new CloseContextIssueCommand(id, request.Resolution), ct);

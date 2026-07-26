@@ -42,7 +42,7 @@ public sealed class RisksController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/residual")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> RecordResidual(Guid id, ResidualAssessmentRequest request, CancellationToken ct)
     {
         await sender.Send(new RecordResidualCommand(id, request.Likelihood, request.Impact), ct);
@@ -50,7 +50,7 @@ public sealed class RisksController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/close")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> Close(Guid id, CancellationToken ct)
     {
         await sender.Send(new CloseRiskCommand(id), ct);
@@ -87,7 +87,7 @@ public sealed class ChangeRequestsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/approve")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> Approve(Guid id, CancellationToken ct)
     {
         await sender.Send(new ApproveChangeCommand(id), ct);
@@ -95,7 +95,7 @@ public sealed class ChangeRequestsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/reject")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> Reject(Guid id, RejectChangeRequest request, CancellationToken ct)
     {
         await sender.Send(new RejectChangeCommand(id, request.Reason), ct);
@@ -124,7 +124,7 @@ public sealed class ManagementReviewsController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetReviewByIdQuery(id), ct));
 
     [HttpPost]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> Schedule(ScheduleReviewRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new ScheduleReviewCommand(
@@ -134,13 +134,13 @@ public sealed class ManagementReviewsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/decisions")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> AddDecision(Guid id, AddDecisionRequest request, CancellationToken ct) =>
         Ok(new { decisionId = await sender.Send(new AddDecisionCommand(
             id, request.Description, request.OwnerId, request.DueDate), ct) });
 
     [HttpPost("{id:guid}/close")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> Close(Guid id, CloseReviewRequest request, CancellationToken ct)
     {
         await sender.Send(new CloseReviewCommand(id, request.Minutes), ct);
@@ -175,7 +175,7 @@ public sealed class SuppliersController(ISender sender) : ControllerBase
             id, request.CertificateType, request.ExpiresAt, request.FileId), ct) });
 
     [HttpPost("{id:guid}/approve")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> Approve(Guid id, CancellationToken ct)
     {
         await sender.Send(new ApproveSupplierCommand(id), ct);
@@ -183,7 +183,7 @@ public sealed class SuppliersController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/suspend")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> Suspend(Guid id, SuspendSupplierRequest request, CancellationToken ct)
     {
         await sender.Send(new SuspendSupplierCommand(id, request.Reason), ct);
@@ -195,7 +195,7 @@ public sealed class SuppliersController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetEvaluationsQuery(id), ct));
 
     [HttpPost("{id:guid}/evaluations")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> RecordEvaluation(
         Guid id, RecordEvaluationRequest request, CancellationToken ct) =>
         Ok(new { evaluationId = await sender.Send(new RecordEvaluationCommand(

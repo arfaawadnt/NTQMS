@@ -21,7 +21,7 @@ public sealed class ReferenceIntervalStudiesController(ISender sender) : Control
         Ok(await sender.Send(new GetReferenceIntervalStudyByIdQuery(id), ct));
 
     [HttpPost]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> Create(CreateReferenceIntervalStudyRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new CreateReferenceIntervalStudyCommand(
@@ -52,7 +52,7 @@ public sealed class ReferenceIntervalStudiesController(ISender sender) : Control
     }
 
     [HttpPost("{id:guid}/sign-off")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> SignOff(Guid id, CancellationToken ct)
     {
         await sender.Send(new SignOffReferenceIntervalCommand(id), ct);

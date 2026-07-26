@@ -21,7 +21,7 @@ public sealed class LinearityStudiesController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetLinearityStudyByIdQuery(id), ct));
 
     [HttpPost]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> Create(CreateLinearityStudyRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new CreateLinearityStudyCommand(
@@ -52,7 +52,7 @@ public sealed class LinearityStudiesController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/sign-off")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> SignOff(Guid id, CancellationToken ct)
     {
         await sender.Send(new SignOffLinearityCommand(id), ct);

@@ -39,7 +39,7 @@ public sealed class ArchivesController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/dispose")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> Dispose(Guid id, CancellationToken ct)
     {
         await sender.Send(new DisposeRecordCommand(id), ct);
@@ -47,7 +47,7 @@ public sealed class ArchivesController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/legal-hold")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> PlaceLegalHold(Guid id, PlaceLegalHoldRequest request, CancellationToken ct)
     {
         await sender.Send(new PlaceLegalHoldCommand(id, request.Reason), ct);
@@ -55,7 +55,7 @@ public sealed class ArchivesController(ISender sender) : ControllerBase
     }
 
     [HttpDelete("{id:guid}/legal-hold")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> ReleaseLegalHold(Guid id, CancellationToken ct)
     {
         await sender.Send(new ReleaseLegalHoldCommand(id), ct);
@@ -73,7 +73,7 @@ public sealed class SlaDefinitionsController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetSlaDefinitionsQuery(), ct));
 
     [HttpPost]
-    [Authorize(Roles = "TenantAdmin,QualityManager")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> Upsert(UpsertSlaRequest request, CancellationToken ct) =>
         Ok(new { id = await sender.Send(new UpsertSlaCommand(
             request.Module, request.Severity, request.TargetHours), ct) });
@@ -92,7 +92,7 @@ public sealed class WorkTasksController(ISender sender) : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> Create(CreateTaskRequest request, CancellationToken ct) =>
         Ok(new { id = await sender.Send(new CreateTaskCommand(
             request.Subject, request.SubjectRef, request.AssigneeUserId,

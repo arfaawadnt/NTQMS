@@ -87,6 +87,27 @@ public class WestgardEvaluatorTests
         var act = () => WestgardEvaluator.Evaluate(100m, 100m, 0m, []);
         act.Should().Throw<SharedKernel.Primitives.DomainException>().Which.Code.Should().Be("QC-SD");
     }
+
+    [Fact]
+    public void Configured_limits_change_the_grading_and_the_rule_labels()
+    {
+        // F-16: acceptance limits are a controlled parameter. Under a stricter
+        // profile (reject at 2SD, warn at 1SD) a z=2.2 value that is normally a
+        // warning becomes an out-of-control 1-2s rejection.
+        var strict = new WestgardLimits(WarningSd: 1m, RejectSd: 2m, RangeSd: 4m, RunLength: 8);
+
+        var v = WestgardEvaluator.Evaluate(111m, Mean, Sd, [], strict); // z = 2.2
+
+        v.Outcome.Should().Be(WestgardOutcome.OutOfControl);
+        v.ViolatedRules.Should().Contain("1-2s");
+    }
+
+    [Fact]
+    public void An_invalid_limit_set_is_rejected()
+    {
+        var act = () => new WestgardLimits(WarningSd: 3m, RejectSd: 2m).Validated();
+        act.Should().Throw<SharedKernel.Primitives.DomainException>().Which.Code.Should().Be("QC-LIM-002");
+    }
 }
 
 public class ValidationStudyTests

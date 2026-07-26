@@ -31,7 +31,7 @@ public sealed class FeedbackController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/review")]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> Review(Guid id, ReviewFeedbackRequest request, CancellationToken ct)
     {
         await sender.Send(new ReviewFeedbackCommand(id, request.ReviewNotes), ct);
@@ -39,7 +39,7 @@ public sealed class FeedbackController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/close")]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> Close(Guid id, CloseFeedbackRequest request, CancellationToken ct)
     {
         await sender.Send(new CloseFeedbackCommand(id, request.ActionSummary), ct);
@@ -47,7 +47,7 @@ public sealed class FeedbackController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/escalate")]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> Escalate(Guid id, EscalateFeedbackRequest request, CancellationToken ct) =>
         Ok(new
         {

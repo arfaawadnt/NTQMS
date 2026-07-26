@@ -40,7 +40,7 @@ public sealed class CreateQcProfileHandler(IAppDbContext db) : ICommandHandler<C
 /// </summary>
 public sealed record RecordQcRunCommand(Guid ProfileId, decimal Value, string Operator) : ICommand<Guid>;
 
-public sealed class RecordQcRunHandler(IAppDbContext db, IClock clock)
+public sealed class RecordQcRunHandler(IAppDbContext db, IClock clock, WestgardLimits westgardLimits)
     : ICommandHandler<RecordQcRunCommand, Guid>
 {
     public const int WindowSize = 12;
@@ -58,7 +58,8 @@ public sealed class RecordQcRunHandler(IAppDbContext db, IClock clock)
             .ToListAsync(ct);
         priorValues.Reverse(); // oldest first for the evaluator
 
-        var verdict = WestgardEvaluator.Evaluate(c.Value, profile.TargetMean, profile.TargetSd, priorValues);
+        var verdict = WestgardEvaluator.Evaluate(
+            c.Value, profile.TargetMean, profile.TargetSd, priorValues, westgardLimits);
         var z = (c.Value - profile.TargetMean) / profile.TargetSd;
 
         var run = QcRun.Record(c.ProfileId, c.Value, z, verdict, c.Operator, clock.UtcNow);

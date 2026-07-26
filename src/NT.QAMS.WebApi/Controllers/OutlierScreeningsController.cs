@@ -21,7 +21,7 @@ public sealed class OutlierScreeningsController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetOutlierScreeningByIdQuery(id), ct));
 
     [HttpPost]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> Create(CreateOutlierScreeningRequest r, CancellationToken ct)
     {
         var id = await sender.Send(new CreateOutlierScreeningCommand(r.Dataset, r.Unit), ct);
@@ -47,7 +47,7 @@ public sealed class OutlierScreeningsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/sign-off")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> SignOff(Guid id, CancellationToken ct)
     {
         await sender.Send(new SignOffOutlierScreeningCommand(id), ct);

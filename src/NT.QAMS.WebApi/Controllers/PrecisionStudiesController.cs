@@ -21,7 +21,7 @@ public sealed class PrecisionStudiesController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetPrecisionStudyByIdQuery(id), ct));
 
     [HttpPost]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> Create(CreatePrecisionStudyRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new CreatePrecisionStudyCommand(
@@ -56,7 +56,7 @@ public sealed class PrecisionStudiesController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/sign-off")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> SignOff(Guid id, CancellationToken ct)
     {
         await sender.Send(new SignOffPrecisionCommand(id), ct);

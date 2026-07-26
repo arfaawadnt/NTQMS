@@ -9,7 +9,7 @@ namespace NT.QAMS.WebApi.Controllers;
 /// <summary>Control-plane tenant administration. Thin by law: bind → send → map.</summary>
 [ApiController]
 [Route("api/tenants")]
-[Microsoft.AspNetCore.Authorization.Authorize(Roles = "PlatformAdmin")]
+[Microsoft.AspNetCore.Authorization.Authorize(Roles = Roles.PlatformAdmin)]
 public sealed class TenantsController(ISender sender) : ControllerBase
 {
     [HttpPost]

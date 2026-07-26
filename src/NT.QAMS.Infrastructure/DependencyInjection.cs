@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NT.QAMS.Application.Abstractions;
+using NT.QAMS.Domain.AnalyticalQuality;
 using NT.QAMS.Infrastructure.Persistence;
 using NT.QAMS.Infrastructure.Persistence.Interceptors;
 using NT.QAMS.Infrastructure.Persistence.Outbox;
@@ -55,6 +56,16 @@ public static class DependencyInjection
             int.TryParse(configuration["PasswordPolicy:HistoryDepth"], out var depth) ? depth : 5));
         services.AddSingleton(new SecurityOptions(
             bool.TryParse(configuration["Security:RequireMfaForPrivilegedRoles"], out var requireMfa) && requireMfa));
+
+        // F-16: QC acceptance limits are a controlled parameter set — configurable
+        // (AnalyticalQuality:Westgard:*) rather than hard-coded, defaulting to the
+        // standard Westgard multi-rule thresholds. Validated at startup so a bad
+        // configuration fails fast instead of silently mis-grading QC.
+        services.AddSingleton(new WestgardLimits(
+            decimal.TryParse(configuration["AnalyticalQuality:Westgard:WarningSd"], out var warn) ? warn : 2m,
+            decimal.TryParse(configuration["AnalyticalQuality:Westgard:RejectSd"], out var reject) ? reject : 3m,
+            decimal.TryParse(configuration["AnalyticalQuality:Westgard:RangeSd"], out var range) ? range : 4m,
+            int.TryParse(configuration["AnalyticalQuality:Westgard:RunLength"], out var run) ? run : 10).Validated());
         services.AddSingleton<IJwtTokenService, Security.JwtTokenService>();
         services.AddSingleton<ITotpService, Security.TotpService>();
         services.AddScoped<IReferenceNumberGenerator, PostgresReferenceNumberGenerator>();

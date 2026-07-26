@@ -14,7 +14,7 @@ namespace NT.QAMS.WebApi.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/compliance")]
-[Authorize(Roles = "QualityManager,TenantAdmin,ExternalAuditor")]
+[Authorize(Roles = Roles.QmAdminAuditor)]
 public sealed class ComplianceController(ISender sender) : ControllerBase
 {
     [HttpGet("audit-trail")]
@@ -40,13 +40,13 @@ public sealed class ComplianceController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetAuditTrailReviewsQuery(), ct));
 
     [HttpPost("audit-trail-reviews")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> OpenAuditTrailReview(
         NT.QAMS.Contracts.Compliance.OpenAuditTrailReviewRequest request, CancellationToken ct) =>
         Ok(new { id = await sender.Send(new OpenAuditTrailReviewCommand(request.PeriodStart, request.PeriodEnd), ct) });
 
     [HttpPost("audit-trail-reviews/{id:guid}/complete")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> CompleteAuditTrailReview(
         Guid id, NT.QAMS.Contracts.Compliance.CompleteAuditTrailReviewRequest request, CancellationToken ct)
     {

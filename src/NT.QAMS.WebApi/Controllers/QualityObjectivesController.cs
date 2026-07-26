@@ -21,7 +21,7 @@ public sealed class QualityObjectivesController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetQualityObjectiveByIdQuery(id), ct));
 
     [HttpPost]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> Define(DefineQualityObjectiveRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new DefineQualityObjectiveCommand(
@@ -40,7 +40,7 @@ public sealed class QualityObjectivesController(ISender sender) : ControllerBase
         });
 
     [HttpPost("{id:guid}/close")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> Close(Guid id, CloseObjectiveRequest request, CancellationToken ct)
     {
         await sender.Send(new CloseObjectiveCommand(id, request.Outcome, request.Note), ct);

@@ -22,7 +22,7 @@ public sealed class AuditsController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetAuditByIdQuery(id), ct));
 
     [HttpPost]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> Schedule(ScheduleAuditRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new ScheduleAuditCommand(
@@ -62,7 +62,7 @@ public sealed class AuditsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/sign-off")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> SignOff(Guid id, CancellationToken ct)
     {
         await sender.Send(new SignOffAuditCommand(id), ct);

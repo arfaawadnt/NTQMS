@@ -16,14 +16,14 @@ public sealed class QualityControlController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetQcProfilesQuery(), ct));
 
     [HttpPost("profiles")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> CreateProfile(CreateQcProfileRequest request, CancellationToken ct) =>
         Ok(new { id = await sender.Send(new CreateQcProfileCommand(
             request.Analyte, request.Instrument, request.ControlLot,
             request.TargetMean, request.TargetSd), ct) });
 
     [HttpPut("profiles/{id:guid}/targets")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> UpdateTargets(Guid id, UpdateQcTargetsRequest request, CancellationToken ct)
     {
         await sender.Send(new UpdateQcTargetsCommand(id, request.TargetMean, request.TargetSd, request.Reason), ct);
@@ -60,7 +60,7 @@ public sealed class ValidationStudiesController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetStudyByIdQuery(id), ct));
 
     [HttpPost]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> Configure(ConfigureStudyRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new ConfigureStudyCommand(
@@ -83,7 +83,7 @@ public sealed class ValidationStudiesController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/sign-off")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> SignOff(Guid id, CancellationToken ct)
     {
         await sender.Send(new SignOffStudyCommand(id), ct);

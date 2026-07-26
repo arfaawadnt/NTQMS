@@ -45,7 +45,7 @@ public sealed class NonconformancesController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/triage")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> Triage(Guid id, TriageNcRequest request, CancellationToken ct)
     {
         await sender.Send(new TriageNcCommand(id, request.AssigneeId), ct);
@@ -53,7 +53,7 @@ public sealed class NonconformancesController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/reject")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> Reject(Guid id, RejectNcRequest request, CancellationToken ct)
     {
         await sender.Send(new RejectNcCommand(id, request.Reason), ct);
@@ -92,7 +92,7 @@ public sealed class NonconformancesController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/verify")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> Verify(Guid id, VerifyNcRequest request, CancellationToken ct)
     {
         await sender.Send(new VerifyNcCommand(id, request.Passed), ct);
@@ -100,7 +100,7 @@ public sealed class NonconformancesController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/confirm-effectiveness")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> ConfirmEffectiveness(
         Guid id, ConfirmEffectivenessRequest request, CancellationToken ct)
     {

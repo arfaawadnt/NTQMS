@@ -21,7 +21,7 @@ public sealed class MethodComparisonsController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetMethodComparisonByIdQuery(id), ct));
 
     [HttpPost]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> Create(CreateMethodComparisonRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new CreateMethodComparisonCommand(
@@ -56,7 +56,7 @@ public sealed class MethodComparisonsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/sign-off")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> SignOff(Guid id, CancellationToken ct)
     {
         await sender.Send(new SignOffMethodComparisonCommand(id), ct);

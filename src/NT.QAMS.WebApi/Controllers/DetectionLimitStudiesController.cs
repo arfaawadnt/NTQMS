@@ -21,7 +21,7 @@ public sealed class DetectionLimitStudiesController(ISender sender) : Controller
         Ok(await sender.Send(new GetDetectionLimitStudyByIdQuery(id), ct));
 
     [HttpPost]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> Create(CreateDetectionLimitStudyRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new CreateDetectionLimitStudyCommand(
@@ -52,7 +52,7 @@ public sealed class DetectionLimitStudiesController(ISender sender) : Controller
     }
 
     [HttpPost("{id:guid}/sign-off")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> SignOff(Guid id, CancellationToken ct)
     {
         await sender.Send(new SignOffDetectionLimitCommand(id), ct);

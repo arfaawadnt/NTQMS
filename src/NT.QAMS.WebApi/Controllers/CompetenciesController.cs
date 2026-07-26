@@ -21,7 +21,7 @@ public sealed class CompetenciesController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetCompetencyByIdQuery(id), ct));
 
     [HttpPost]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> Assign(AssignCompetencyRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new AssignCompetencyCommand(
@@ -30,7 +30,7 @@ public sealed class CompetenciesController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/assessments")]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> Score(Guid id, ScoreAssessmentRequest request, CancellationToken ct)
     {
         await sender.Send(new ScoreAssessmentCommand(id, request.Score), ct);
@@ -38,7 +38,7 @@ public sealed class CompetenciesController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/authorize")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> AuthorizeCompetency(Guid id, CancellationToken ct)
     {
         await sender.Send(new AuthorizeCompetencyCommand(id), ct);
@@ -46,7 +46,7 @@ public sealed class CompetenciesController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/revoke")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> Revoke(Guid id, RevokeCompetencyRequest request, CancellationToken ct)
     {
         await sender.Send(new RevokeCompetencyCommand(id, request.Reason), ct);
@@ -65,7 +65,7 @@ public sealed class TrainingAssignmentsController(ISender sender) : ControllerBa
         Ok(await sender.Send(new GetTrainingQueueQuery(traineeId, includeCompleted), ct));
 
     [HttpPost]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> Assign(AssignTrainingRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new AssignTrainingCommand(

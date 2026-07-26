@@ -57,7 +57,7 @@ public sealed class EquipmentController(ISender sender) : ControllerBase
         });
 
     [HttpPost("{id:guid}/retire")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> Retire(Guid id, CancellationToken ct)
     {
         await sender.Send(new RetireEquipmentCommand(id), ct);

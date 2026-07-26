@@ -21,7 +21,7 @@ public sealed class ReferenceStandardsController(ISender sender) : ControllerBas
         Ok(await sender.Send(new GetReferenceStandardByIdQuery(id), ct));
 
     [HttpPost]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> Register(RegisterReferenceStandardRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new RegisterReferenceStandardCommand(
@@ -33,7 +33,7 @@ public sealed class ReferenceStandardsController(ISender sender) : ControllerBas
     }
 
     [HttpPost("{id:guid}/quarantine")]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> Quarantine(Guid id, QuarantineReferenceStandardRequest request, CancellationToken ct)
     {
         await sender.Send(new QuarantineReferenceStandardCommand(id, request.Reason), ct);
@@ -41,7 +41,7 @@ public sealed class ReferenceStandardsController(ISender sender) : ControllerBas
     }
 
     [HttpPost("{id:guid}/reactivate")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> Reactivate(Guid id, CancellationToken ct)
     {
         await sender.Send(new ReactivateReferenceStandardCommand(id), ct);
@@ -49,7 +49,7 @@ public sealed class ReferenceStandardsController(ISender sender) : ControllerBas
     }
 
     [HttpPost("{id:guid}/retire")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> Retire(Guid id, CancellationToken ct)
     {
         await sender.Send(new RetireReferenceStandardCommand(id), ct);

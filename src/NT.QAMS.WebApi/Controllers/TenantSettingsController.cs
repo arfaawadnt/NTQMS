@@ -12,7 +12,7 @@ namespace NT.QAMS.WebApi.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/tenant-settings")]
-[Authorize(Roles = "TenantAdmin")]
+[Authorize(Roles = Roles.TenantAdminOnly)]
 public sealed class TenantSettingsController(ISender sender) : ControllerBase
 {
     /// <summary>Current privileged-MFA enforcement for this tenant (F-04).</summary>

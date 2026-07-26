@@ -36,7 +36,7 @@ public sealed class ComplaintsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/acknowledge")]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> Acknowledge(Guid id, CancellationToken ct)
     {
         await sender.Send(new AcknowledgeComplaintCommand(id), ct);
@@ -44,7 +44,7 @@ public sealed class ComplaintsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/validate")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> Validate(Guid id, ValidateComplaintRequest request, CancellationToken ct)
     {
         await sender.Send(new ValidateComplaintCommand(id, request.Justified, request.Reason), ct);
@@ -52,7 +52,7 @@ public sealed class ComplaintsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/start-investigation")]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> StartInvestigation(Guid id, CancellationToken ct)
     {
         await sender.Send(new StartComplaintInvestigationCommand(id), ct);
@@ -60,7 +60,7 @@ public sealed class ComplaintsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/outcome")]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> LogOutcome(Guid id, LogComplaintOutcomeRequest request, CancellationToken ct)
     {
         await sender.Send(new LogComplaintOutcomeCommand(id, request.Outcome), ct);
@@ -68,7 +68,7 @@ public sealed class ComplaintsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/resolve")]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> Resolve(Guid id, ResolveComplaintRequest request, CancellationToken ct)
     {
         await sender.Send(new ResolveComplaintCommand(id, request.Resolution), ct);
@@ -76,7 +76,7 @@ public sealed class ComplaintsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/close")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> Close(Guid id, CancellationToken ct)
     {
         await sender.Send(new CloseComplaintCommand(id), ct);

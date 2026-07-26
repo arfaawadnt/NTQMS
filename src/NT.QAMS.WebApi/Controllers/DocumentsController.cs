@@ -29,7 +29,7 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
 
     /// <summary>Records the completed periodic review and re-arms the cycle (ISO 17025 §8.3).</summary>
     [HttpPost("{id:guid}/confirm-review")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> ConfirmReview(Guid id, CancellationToken ct)
     {
         await sender.Send(new ConfirmDocumentReviewCommand(id), ct);
@@ -57,7 +57,7 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/recommend")]
-    [Authorize(Roles = "DepartmentHead,QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> Recommend(Guid id, CancellationToken ct)
     {
         await sender.Send(new RecommendDocumentCommand(id), ct);
@@ -65,7 +65,7 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/reject")]
-    [Authorize(Roles = "DepartmentHead,QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> Reject(Guid id, RejectVersionRequest request, CancellationToken ct)
     {
         await sender.Send(new RejectDocumentVersionCommand(id, request.Reason), ct);
@@ -73,7 +73,7 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/publish")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> Publish(Guid id, PublishDocumentRequest request, CancellationToken ct)
     {
         await sender.Send(new PublishDocumentCommand(id, request.Password, request.Pin), ct);
@@ -90,7 +90,7 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/retire")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> Retire(Guid id, CancellationToken ct)
     {
         await sender.Send(new RetireDocumentCommand(id), ct);

@@ -22,7 +22,7 @@ public sealed class TestAuthorizationsController(ISender sender) : ControllerBas
         Ok(await sender.Send(new GetTestAuthorizationByIdQuery(id), ct));
 
     [HttpPost]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> Grant(GrantTestAuthorizationRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new GrantTestAuthorizationCommand(
@@ -31,7 +31,7 @@ public sealed class TestAuthorizationsController(ISender sender) : ControllerBas
     }
 
     [HttpPost("{id:guid}/suspend")]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> Suspend(Guid id, SuspendTestAuthorizationRequest request, CancellationToken ct)
     {
         await sender.Send(new SuspendTestAuthorizationCommand(id, request.Reason), ct);
@@ -39,7 +39,7 @@ public sealed class TestAuthorizationsController(ISender sender) : ControllerBas
     }
 
     [HttpPost("{id:guid}/reinstate")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> Reinstate(Guid id, CancellationToken ct)
     {
         await sender.Send(new ReinstateTestAuthorizationCommand(id), ct);
@@ -47,7 +47,7 @@ public sealed class TestAuthorizationsController(ISender sender) : ControllerBas
     }
 
     [HttpPost("{id:guid}/revoke")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> Revoke(Guid id, RevokeTestAuthorizationRequest request, CancellationToken ct)
     {
         await sender.Send(new RevokeTestAuthorizationCommand(id, request.Reason), ct);

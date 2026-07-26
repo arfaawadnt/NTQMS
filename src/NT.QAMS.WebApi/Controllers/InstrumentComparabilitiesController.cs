@@ -21,7 +21,7 @@ public sealed class InstrumentComparabilitiesController(ISender sender) : Contro
         Ok(await sender.Send(new GetInstrumentComparabilityByIdQuery(id), ct));
 
     [HttpPost]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> Create(CreateInstrumentComparabilityRequest r, CancellationToken ct)
     {
         var id = await sender.Send(new CreateInstrumentComparabilityCommand(r.Analyte, r.Unit, r.ReferenceInstrument, r.AllowableBiasPct), ct);
@@ -47,7 +47,7 @@ public sealed class InstrumentComparabilitiesController(ISender sender) : Contro
     }
 
     [HttpPost("{id:guid}/sign-off")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> SignOff(Guid id, CancellationToken ct)
     {
         await sender.Send(new SignOffInstrumentComparabilityCommand(id), ct);

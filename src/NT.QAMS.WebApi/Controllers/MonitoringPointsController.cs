@@ -21,7 +21,7 @@ public sealed class MonitoringPointsController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetMonitoringPointByIdQuery(id), ct));
 
     [HttpPost]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> Register(RegisterMonitoringPointRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new RegisterMonitoringPointCommand(
@@ -31,7 +31,7 @@ public sealed class MonitoringPointsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/limits")]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> SetLimits(Guid id, SetMonitoringLimitsRequest request, CancellationToken ct)
     {
         await sender.Send(new SetMonitoringLimitsCommand(id, request.LowLimit, request.HighLimit), ct);
@@ -43,7 +43,7 @@ public sealed class MonitoringPointsController(ISender sender) : ControllerBase
         Ok(new { readingId = await sender.Send(new RecordReadingCommand(id, request.Value, request.Remark), ct) });
 
     [HttpPost("{id:guid}/suspend")]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> Suspend(Guid id, CancellationToken ct)
     {
         await sender.Send(new SuspendMonitoringPointCommand(id), ct);
@@ -51,7 +51,7 @@ public sealed class MonitoringPointsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/resume")]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> Resume(Guid id, CancellationToken ct)
     {
         await sender.Send(new ResumeMonitoringPointCommand(id), ct);
@@ -59,7 +59,7 @@ public sealed class MonitoringPointsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/retire")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> Retire(Guid id, CancellationToken ct)
     {
         await sender.Send(new RetireMonitoringPointCommand(id), ct);

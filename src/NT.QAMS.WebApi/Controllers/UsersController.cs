@@ -13,7 +13,7 @@ namespace NT.QAMS.WebApi.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/users")]
-[Authorize(Roles = "TenantAdmin")]
+[Authorize(Roles = Roles.TenantAdminOnly)]
 public sealed class UsersController(ISender sender) : ControllerBase
 {
     [HttpGet]

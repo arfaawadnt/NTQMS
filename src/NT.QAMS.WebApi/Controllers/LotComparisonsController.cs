@@ -21,7 +21,7 @@ public sealed class LotComparisonsController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetLotComparisonByIdQuery(id), ct));
 
     [HttpPost]
-    [Authorize(Roles = "QualityManager,DepartmentHead,TenantAdmin")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
     public async Task<IActionResult> Create(CreateLotComparisonRequest r, CancellationToken ct)
     {
         var id = await sender.Send(new CreateLotComparisonCommand(r.Analyte, r.Unit, r.CurrentLot, r.NewLot, r.AllowableBiasPct), ct);
@@ -47,7 +47,7 @@ public sealed class LotComparisonsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/sign-off")]
-    [Authorize(Roles = "QualityManager,TenantAdmin")]
+    [Authorize(Roles = Roles.QmOrAdmin)]
     public async Task<IActionResult> SignOff(Guid id, CancellationToken ct)
     {
         await sender.Send(new SignOffLotComparisonCommand(id), ct);
