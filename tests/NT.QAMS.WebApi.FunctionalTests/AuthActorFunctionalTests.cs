@@ -128,6 +128,47 @@ public sealed class AuthActorFunctionalTests(QamsWebAppFactory factory)
     }
 
     [Fact]
+    public async Task Deactivating_a_user_revokes_their_live_session_immediately()
+    {
+        // Provision a tenant + admin, who then registers a second user.
+        var admin = factory.CreateClient();
+        Authorize(admin, await PlatformTokenAsync());
+        var slug = $"rev-{Guid.NewGuid():N}"[..12];
+        (await admin.PostAsJsonAsync("/api/tenants", new
+        {
+            identifier = slug, name = "Revocation Lab",
+            adminEmail = "admin@rev.test", adminDisplayName = "TA", adminPassword = "Tenant-Admin-Pass-1!",
+        })).StatusCode.Should().Be(HttpStatusCode.Created);
+
+        var ta = factory.CreateClient();
+        var taLogin = await (await ta.PostAsJsonAsync("/api/auth/login", new
+        {
+            tenantIdentifier = slug, email = "admin@rev.test", password = "Tenant-Admin-Pass-1!",
+        })).Content.ReadFromJsonAsync<AuthResponse>();
+        Authorize(ta, taLogin!.accessToken);
+
+        var reg = await ta.PostAsJsonAsync("/api/users", new
+        {
+            email = "analyst@rev.test", displayName = "Analyst", role = "Analyst", initialPassword = "Analyst-Pass-1!",
+        });
+        reg.StatusCode.Should().Be(HttpStatusCode.OK);
+        var userId = (await reg.Content.ReadFromJsonAsync<IdResponse>())!.id;
+
+        // The analyst signs in and their token works.
+        var analyst = factory.CreateClient();
+        var aLogin = await (await analyst.PostAsJsonAsync("/api/auth/login", new
+        {
+            tenantIdentifier = slug, email = "analyst@rev.test", password = "Analyst-Pass-1!",
+        })).Content.ReadFromJsonAsync<AuthResponse>();
+        Authorize(analyst, aLogin!.accessToken);
+        (await analyst.GetAsync("/api/notifications/mine")).StatusCode.Should().Be(HttpStatusCode.OK);
+
+        // The admin deactivates the analyst — the SAME token must now be refused.
+        (await ta.PostAsync($"/api/users/{userId}/deactivate", null)).StatusCode.Should().Be(HttpStatusCode.NoContent);
+        (await analyst.GetAsync("/api/notifications/mine")).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
     public async Task Actor_scoped_flow_works_end_to_end_over_real_jwt()
     {
         // 1. Platform admin provisions a tenant + its admin.

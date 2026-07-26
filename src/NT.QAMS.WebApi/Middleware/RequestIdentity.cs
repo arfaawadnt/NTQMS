@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 
 namespace NT.QAMS.WebApi.Middleware;
@@ -51,6 +52,52 @@ public sealed class TenantResolutionMiddleware(RequestDelegate next)
         }
 
         await next(context);
+    }
+}
+
+/// <summary>
+/// F-07: server-side session revocation. On every authenticated request the
+/// user is re-checked against the database, so a deactivated account — or one
+/// whose role changed — stops working immediately instead of lingering until the
+/// JWT expires. (Idle timeout is handled client-side by the 30-minute watch.)
+/// </summary>
+public sealed class ActiveSessionMiddleware(RequestDelegate next)
+{
+    public async Task InvokeAsync(HttpContext context, IAppDbContext db)
+    {
+        if (context.User.Identity?.IsAuthenticated == true)
+        {
+            var sub = context.User.FindFirstValue("sub") ?? context.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (Guid.TryParse(sub, out var userId))
+            {
+                var row = await db.Users.AsNoTracking()
+                    .Where(u => u.Id == userId)
+                    .Select(u => new { u.IsActive, u.Role })
+                    .FirstOrDefaultAsync(context.RequestAborted);
+
+                if (row is null || !row.IsActive)
+                {
+                    await Deny(context, "AUTH-006", "Your session is no longer valid. Please sign in again.");
+                    return;
+                }
+
+                var tokenRole = context.User.FindFirstValue(ClaimTypes.Role);
+                if (!string.Equals(tokenRole, row.Role.ToString(), StringComparison.Ordinal))
+                {
+                    await Deny(context, "AUTH-007", "Your permissions have changed. Please sign in again.");
+                    return;
+                }
+            }
+        }
+
+        await next(context);
+    }
+
+    private static async Task Deny(HttpContext context, string code, string title)
+    {
+        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        context.Response.ContentType = "application/json";
+        await context.Response.WriteAsJsonAsync(new { title, status = 401, code });
     }
 }
 
