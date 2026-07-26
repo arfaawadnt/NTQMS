@@ -3,8 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
-  CreateDocumentRequest, CreatedResource, DocumentDetail, DocumentListItem,
-  DraftNewVersionRequest, PublishDocumentRequest, RejectVersionRequest, SignatureRecord,
+  CreateDocumentRequest, CreatedResource, DocumentAcknowledgement, DocumentDetail, DocumentListItem,
+  DraftNewVersionRequest, MyDocumentAcknowledgement, PublishDocumentRequest, RejectVersionRequest, SignatureRecord,
 } from '../models';
 
 /** Typed client for the Document Control API (one method per backend endpoint). */
@@ -41,6 +41,11 @@ export class DocumentsApiService {
   signatures(id: string): Observable<SignatureRecord[]> {
     return this.http.get<SignatureRecord[]>(`${this.base}/${id}/signatures`);
   }
+
+  /** Current user confirms they read & understood the published version. */
+  acknowledge(id: string): Observable<CreatedResource> { return this.http.post<CreatedResource>(`${this.base}/${id}/acknowledge`, {}); }
+  myAcknowledgement(id: string): Observable<MyDocumentAcknowledgement> { return this.http.get<MyDocumentAcknowledgement>(`${this.base}/${id}/my-acknowledgement`); }
+  acknowledgements(id: string): Observable<DocumentAcknowledgement[]> { return this.http.get<DocumentAcknowledgement[]>(`${this.base}/${id}/acknowledgements`); }
 
   publish(id: string, body: PublishDocumentRequest): Observable<void> { return this.http.post<void>(`${this.base}/${id}/publish`, body); }
   draftNewVersion(id: string, body: DraftNewVersionRequest): Observable<void> { return this.http.post<void>(`${this.base}/${id}/versions`, body); }

@@ -7,7 +7,9 @@ import { DocumentsFacade } from './documents.facade';
 import { DocumentsApiService } from '../../core/api/documents-api.service';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
-import { VERSION_BUMPS, VersionBump , SignatureRecord } from '../../core/models';
+import {
+  VERSION_BUMPS, VersionBump, SignatureRecord, DocumentAcknowledgement, MyDocumentAcknowledgement,
+} from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { WorkflowStepperComponent } from '../../shared/ui/workflow-stepper.component';
@@ -121,6 +123,38 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
         </section>
       }
 
+      @if (d.status === 'Published') {
+        <section class="card">
+          <h3>{{ i18n.t('doc.ackHeading') }}</h3>
+          @if (myAck(); as m) {
+            <div class="ack-row">
+              @if (m.acknowledged) {
+                <span class="ack-done">✓ {{ i18n.t('doc.ackDone') }} (v{{ m.publishedVersion }}) — {{ m.acknowledgedAtUtc | date:'medium' }}</span>
+              } @else {
+                <span class="muted">{{ i18n.t('doc.ackPrompt') }} (v{{ m.publishedVersion }})</span>
+                <button (click)="acknowledge(d.id)">{{ i18n.t('doc.ackButton') }}</button>
+              }
+            </div>
+          }
+          @if (perms.canApprove()) {
+            <h4>{{ i18n.t('doc.ackCoverage') }}</h4>
+            @if (acks().length === 0) { <p class="muted">{{ i18n.t('doc.ackNone') }}</p> }
+            @else {
+              <table>
+                <thead><tr>
+                  <th>{{ i18n.t('cmp.signer') }}</th><th>{{ i18n.t('doc.version') }}</th><th>{{ i18n.t('cmp.when') }}</th>
+                </tr></thead>
+                <tbody>
+                  @for (a of acks(); track a.userId + a.versionLabel) {
+                    <tr><td>{{ a.userDisplay }}</td><td>v{{ a.versionLabel }}</td><td>{{ a.acknowledgedAtUtc | date:'medium' }}</td></tr>
+                  }
+                </tbody>
+              </table>
+            }
+          }
+        </section>
+      }
+
       @if (signatures().length > 0) {
         <section class="card">
           <h3>{{ i18n.t('doc.signatures') }}</h3>
@@ -150,6 +184,10 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
     .review-row { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; }
     .review-row button { width: auto; }
     .overdue { color: var(--nt-red); }
+    .ack-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .ack-row button { width: auto; }
+    .ack-done { color: var(--nt-green); font-weight: 600; }
+    h4 { margin: 1rem 0 .5rem; font-size: 12.5px; color: var(--nt-slate); }
     .sig-row { display: flex; gap: 14px; align-items: baseline; padding: 6px 0; border-bottom: 1px solid var(--nt-border); font-size: 12.5px; flex-wrap: wrap; }
     .mono { font-family: var(--nt-mono); font-size: 10.5px; color: var(--nt-grey-m); }
     h3 { margin-top: 1rem; }
@@ -174,6 +212,9 @@ export class DocumentDetailComponent implements OnInit {
   readonly file = signal<File | null>(null);
   /** Part 11 §11.50 signature manifest for this document. */
   readonly signatures = signal<SignatureRecord[]>([]);
+  /** Read-and-understand state for the current user + (for approvers) full coverage. */
+  readonly myAck = signal<MyDocumentAcknowledgement | null>(null);
+  readonly acks = signal<DocumentAcknowledgement[]>([]);
 
   /** The state of the single in-flight (non-published, non-obsolete) version, if any. */
   readonly inFlightState = computed<string | null>(() => {
@@ -200,6 +241,7 @@ export class DocumentDetailComponent implements OnInit {
   ngOnInit(): void {
     void this.facade.loadDetail(this.id());
     void this.loadSignatures();
+    void this.loadAcknowledgements();
   }
 
   private async loadSignatures(): Promise<void> {
@@ -208,6 +250,27 @@ export class DocumentDetailComponent implements OnInit {
     } catch {
       this.signatures.set([]); // Manifest is additive — never block the workspace.
     }
+  }
+
+  private async loadAcknowledgements(): Promise<void> {
+    try {
+      this.myAck.set(await firstValueFrom(this.docsApi.myAcknowledgement(this.id())));
+    } catch {
+      this.myAck.set(null);
+    }
+
+    if (this.perms.canApprove()) {
+      try {
+        this.acks.set(await firstValueFrom(this.docsApi.acknowledgements(this.id())));
+      } catch {
+        this.acks.set([]);
+      }
+    }
+  }
+
+  async acknowledge(id: string): Promise<void> {
+    await firstValueFrom(this.docsApi.acknowledge(id));
+    await this.loadAcknowledgements();
   }
 
   onFile(event: Event): void {

@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NT.QAMS.Application.DocumentControl;
 using NT.QAMS.Application.DocumentControl.Commands;
 using NT.QAMS.Application.DocumentControl.Queries;
 using NT.QAMS.Contracts.DocumentControl;
@@ -40,6 +41,22 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
     [HttpGet("{id:guid}/signatures")]
     public async Task<IActionResult> Signatures(Guid id, CancellationToken ct) =>
         Ok(await sender.Send(new NT.QAMS.Application.ComplianceLedger.GetSignaturesForSubjectQuery($"DOC:{id:N}"), ct));
+
+    /// <summary>The current user confirms they have read and understood the published version.</summary>
+    [HttpPost("{id:guid}/acknowledge")]
+    public async Task<IActionResult> Acknowledge(Guid id, CancellationToken ct) =>
+        Ok(new { id = await sender.Send(new AcknowledgeDocumentCommand(id), ct) });
+
+    /// <summary>Whether the current user has acknowledged the current published version.</summary>
+    [HttpGet("{id:guid}/my-acknowledgement")]
+    public async Task<IActionResult> MyAcknowledgement(Guid id, CancellationToken ct) =>
+        Ok(await sender.Send(new GetMyDocumentAcknowledgementQuery(id), ct));
+
+    /// <summary>Read-and-understand coverage for this document (quality-management view).</summary>
+    [HttpGet("{id:guid}/acknowledgements")]
+    [Authorize(Roles = Roles.QmDeptAdmin)]
+    public async Task<IActionResult> Acknowledgements(Guid id, CancellationToken ct) =>
+        Ok(await sender.Send(new GetDocumentAcknowledgementsQuery(id), ct));
 
     [HttpPost]
     public async Task<IActionResult> Create(CreateDocumentRequest request, CancellationToken ct)

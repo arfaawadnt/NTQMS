@@ -37,6 +37,21 @@ public sealed class ControlledDocumentConfiguration : IEntityTypeConfiguration<C
     }
 }
 
+public sealed class DocumentAcknowledgementConfiguration : IEntityTypeConfiguration<DocumentAcknowledgement>
+{
+    public void Configure(EntityTypeBuilder<DocumentAcknowledgement> builder)
+    {
+        builder.ToTable("document_acknowledgement", "qams");
+        builder.HasKey(a => a.Id);
+        builder.Property(a => a.DocumentCode).HasMaxLength(60);
+        builder.Property(a => a.VersionLabel).HasMaxLength(20);
+        // One receipt per (document version, user): re-acknowledging is idempotent.
+        builder.HasIndex(a => new { a.TenantId, a.DocumentId, a.VersionLabel, a.UserId }).IsUnique();
+        builder.HasIndex(a => new { a.TenantId, a.UserId });
+        builder.Ignore(a => a.DomainEvents);
+    }
+}
+
 public sealed class FileReferenceConfiguration : IEntityTypeConfiguration<FileReference>
 {
     public void Configure(EntityTypeBuilder<FileReference> builder)

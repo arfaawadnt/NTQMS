@@ -44,6 +44,7 @@ public sealed class AppDbContext(
     public DbSet<QualityPolicy> QualityPolicies => Set<QualityPolicy>();
     public DbSet<FeedbackEntry> FeedbackEntries => Set<FeedbackEntry>();
     public DbSet<ControlledDocument> Documents => Set<ControlledDocument>();
+    public DbSet<DocumentAcknowledgement> DocumentAcknowledgements => Set<DocumentAcknowledgement>();
     public DbSet<FileReference> Files => Set<FileReference>();
     public DbSet<Audit> Audits => Set<Audit>();
     public DbSet<EquipmentItem> EquipmentItems => Set<EquipmentItem>();

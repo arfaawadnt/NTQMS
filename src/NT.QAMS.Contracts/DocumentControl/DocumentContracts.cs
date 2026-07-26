@@ -26,3 +26,12 @@ public sealed record DocumentDetailDto(
     int ReviewCycleMonths = 24, DateOnly? NextReviewDue = null);
 
 public sealed record FileUploadedDto(Guid Id, string FileName, string Sha256, long SizeBytes);
+
+// ── Read-and-understand acknowledgements (ISO 9001 §7.5 / 17025 §8.3 / Part 11) ──
+
+/// <summary>Whether the current user has acknowledged the document's current published version.</summary>
+public sealed record MyDocumentAcknowledgementDto(
+    string? PublishedVersion, bool Acknowledged, DateTimeOffset? AcknowledgedAtUtc);
+
+public sealed record DocumentAcknowledgementDto(
+    Guid UserId, string UserDisplay, string VersionLabel, DateTimeOffset AcknowledgedAtUtc);

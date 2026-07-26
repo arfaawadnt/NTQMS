@@ -239,6 +239,20 @@ export interface DocumentDetail {
   nextReviewDue: string | null;
 }
 
+/** Whether the current user has acknowledged the document's current published version. */
+export interface MyDocumentAcknowledgement {
+  publishedVersion: string | null;
+  acknowledged: boolean;
+  acknowledgedAtUtc: string | null;
+}
+
+export interface DocumentAcknowledgement {
+  userId: string;
+  userDisplay: string;
+  versionLabel: string;
+  acknowledgedAtUtc: string;
+}
+
 /** Metadata returned after a file is uploaded to object storage. */
 export interface FileUploaded {
   id: string;

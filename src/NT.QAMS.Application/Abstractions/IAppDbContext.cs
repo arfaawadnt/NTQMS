@@ -36,6 +36,7 @@ public interface IAppDbContext
     DbSet<QualityPolicy> QualityPolicies { get; }
     DbSet<FeedbackEntry> FeedbackEntries { get; }
     DbSet<ControlledDocument> Documents { get; }
+    DbSet<DocumentAcknowledgement> DocumentAcknowledgements { get; }
     DbSet<FileReference> Files { get; }
     DbSet<Audit> Audits { get; }
     DbSet<EquipmentItem> EquipmentItems { get; }
