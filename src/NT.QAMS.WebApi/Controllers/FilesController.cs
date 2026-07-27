@@ -33,9 +33,22 @@ public sealed class FilesController(IAppDbContext db, IFileStorage storage, ICur
             ?? throw new SharedKernel.Primitives.DomainException("TENANT-000", "A tenant context is required.");
 
         await using var content = file.OpenReadStream();
+
+        // API-005: allow-list + magic-byte sniff. The stored content type is
+        // the CANONICAL one for the sniffed format — never the client's claim.
+        var header = new byte[Security.FileContentPolicy.HeaderLength];
+        var read = await content.ReadAtLeastAsync(header, header.Length, throwOnEndOfStream: false, ct);
+        var (canonicalContentType, refusal) =
+            Security.FileContentPolicy.Inspect(file.FileName, header.AsSpan(0, read));
+        if (refusal is not null)
+        {
+            throw new SharedKernel.Primitives.DomainException("FILE-415", refusal);
+        }
+
+        content.Position = 0;
         var (sha, size, key) = await storage.SaveAsync(tenantId, content, ct);
 
-        var reference = FileReference.Register(file.FileName, file.ContentType, sha, size, key);
+        var reference = FileReference.Register(file.FileName, canonicalContentType!, sha, size, key);
         db.Files.Add(reference);
         await db.SaveChangesAsync(ct);
 
@@ -53,6 +66,8 @@ public sealed class FilesController(IAppDbContext db, IFileStorage storage, ICur
         }
 
         var stream = await storage.OpenReadAsync(reference.StorageKey, ct);
+        // API-005: fileDownloadName forces Content-Disposition: attachment —
+        // evidence is downloaded, never rendered in the app's origin.
         return File(stream, reference.ContentType, reference.FileName);
     }
 }
