@@ -31,6 +31,8 @@ public sealed class ConcurrencyConflictMappingTests
 
         handled.Should().BeTrue("the handler owns concurrency conflicts");
         httpContext.Response.StatusCode.Should().Be(StatusCodes.Status409Conflict);
+        httpContext.Response.ContentType.Should().StartWith(ProblemResponse.ContentType,
+            "API-003: the 409 uses the same problem+json contract as every error");
 
         httpContext.Response.Body.Position = 0;
         using var problem = await JsonDocument.ParseAsync(httpContext.Response.Body);

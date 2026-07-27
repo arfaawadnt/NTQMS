@@ -93,12 +93,9 @@ public sealed class ActiveSessionMiddleware(RequestDelegate next)
         await next(context);
     }
 
-    private static async Task Deny(HttpContext context, string code, string title)
-    {
-        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-        context.Response.ContentType = "application/json";
-        await context.Response.WriteAsJsonAsync(new { title, status = 401, code });
-    }
+    private static Task Deny(HttpContext context, string code, string title) =>
+        // API-003: same problem+json writer as every other error path.
+        ProblemResponse.WriteAsync(context, StatusCodes.Status401Unauthorized, title, code);
 }
 
 /// <summary>
@@ -119,14 +116,10 @@ public sealed class ChangeReasonMiddleware(RequestDelegate next)
 
         if (HttpMethods.IsDelete(context.Request.Method) && string.IsNullOrWhiteSpace(reason))
         {
-            context.Response.StatusCode = StatusCodes.Status400BadRequest;
-            context.Response.ContentType = "application/json";
-            await context.Response.WriteAsJsonAsync(new
-            {
-                title = "A reason is required for this change.",
-                status = 400,
-                code = "CHANGE-REASON-REQUIRED",
-            });
+            // API-003: same problem+json writer as every other error path.
+            await ProblemResponse.WriteAsync(
+                context, StatusCodes.Status400BadRequest,
+                "A reason is required for this change.", "CHANGE-REASON-REQUIRED");
             return;
         }
 
@@ -159,14 +152,10 @@ public sealed class MfaEnrollmentGateMiddleware(RequestDelegate next)
             var permitted = Allowed.Any(p => path.StartsWith(p, StringComparison.OrdinalIgnoreCase));
             if (!permitted)
             {
-                context.Response.StatusCode = StatusCodes.Status403Forbidden;
-                context.Response.ContentType = "application/json";
-                await context.Response.WriteAsJsonAsync(new
-                {
-                    title = "Multi-factor authentication must be set up before continuing.",
-                    status = 403,
-                    code = "MFA-ENROLL-REQUIRED",
-                });
+                // API-003: same problem+json writer as every other error path.
+                await ProblemResponse.WriteAsync(
+                    context, StatusCodes.Status403Forbidden,
+                    "Multi-factor authentication must be set up before continuing.", "MFA-ENROLL-REQUIRED");
                 return;
             }
         }

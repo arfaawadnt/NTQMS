@@ -77,17 +77,9 @@ public sealed class DomainExceptionHandler : IExceptionHandler
             return false;
         }
 
-        // OBS-002: every error response carries the ids that join it to the
-        // server logs and the distributed trace.
-        problem.Extensions["traceId"] =
-            System.Diagnostics.Activity.Current?.TraceId.ToString() ?? httpContext.TraceIdentifier;
-        if (httpContext.Items[ObservabilityMiddleware.CorrelationItemKey] is string correlationId)
-        {
-            problem.Extensions["correlationId"] = correlationId;
-        }
-
-        httpContext.Response.StatusCode = problem.Status!.Value;
-        await httpContext.Response.WriteAsJsonAsync(problem, cancellationToken);
+        // API-003/OBS-002: the shared writer stamps trace/correlation ids and
+        // the application/problem+json media type on every error path.
+        await ProblemResponse.WriteAsync(httpContext, problem, cancellationToken);
         return true;
     }
 }
