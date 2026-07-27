@@ -85,6 +85,11 @@ public static class DependencyInjection
             services.AddSingleton<Application.Notifications.IEmailSender, Email.SmtpEmailSender>();
         }
 
+        // MSG-007: processed outbox rows are transport, not the record (the
+        // hash-chained ledger keeps the history) — purge after the window.
+        services.AddSingleton(new OutboxOptions(
+            int.TryParse(configuration["Outbox:RetentionDays"], out var retention) ? retention : 30).Validated());
+
         services.AddHostedService<OutboxProcessor>();
         services.AddHostedService<Jobs.ScheduledSweepService>();
         services.AddHostedService<Jobs.KpiSnapshotService>();

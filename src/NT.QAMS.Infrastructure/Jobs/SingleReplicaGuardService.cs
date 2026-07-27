@@ -18,12 +18,8 @@ public sealed class SingleReplicaGuardService(
     IConfiguration configuration,
     ILogger<SingleReplicaGuardService> logger) : BackgroundService
 {
-    /// <summary>
-    /// Application-wide advisory lock key: ASCII "NTQMS" followed by sentinel
-    /// number 01 ("single-replica"). Advisory locks are per-database, so the
-    /// key only needs to be unique within NT.QMS.
-    /// </summary>
-    public const long SingletonLockKey = 0x4E54514D_5301;
+    /// <summary>The sentinel's key in the shared advisory-lock key space.</summary>
+    public const long SingletonLockKey = Persistence.AdvisoryLockKeys.SingleReplicaSentinel;
 
     /// <summary>How often a contended instance re-probes for the lock.</summary>
     private static readonly TimeSpan RetryInterval = TimeSpan.FromSeconds(60);

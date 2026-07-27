@@ -329,3 +329,37 @@ cross-tenant denial functional test suite (merge gate from day one).
   10 integration + 18 functional); build 0 warnings. Verified live: role-guard
   warning fires in dev (qams_app owns tables), lock acquired, all 3 health
   endpoints 200.
+
+## EA Remediation Phase 1 (v1.39.0, 2026-07-28) ✅ — data consistency & messaging robustness
+
+- **DB-009/VAL-003 — optimistic concurrency.** PostgreSQL `xmin` mapped as the
+  concurrency token on EVERY aggregate root by convention in AppDbContext
+  (Npgsql-only; zero schema change — scaffolded AddColumn ops removed by hand
+  per Npgsql docs since xmin is a system column). DbUpdateConcurrencyException
+  → HTTP 409 + stable code `CONCURRENCY-409` in DomainExceptionHandler.
+  Proven: two racing edits on one committed row → exactly one wins (integration)
+  + handler mapping test.
+- **MSG-004/005 — dead-letter + backoff.** outbox_event gains
+  `next_attempt_at_utc` (exponential backoff 5s·2^n with ≤25% jitter),
+  `dead_lettered_at_utc` (set at MaxAttempts=5, ERROR alert log names the row
+  for triage, filtered index for the triage query). Per-row try/catch + due
+  filter ⇒ a poison event never head-of-line-blocks healthy ones (proven with
+  an unresolvable-type poison row racing a real PtUnsatisfactory event).
+- **MSG-006 — redelivery idempotency.** Policies already dedupe by natural key;
+  now DB-ENFORCED: unique partial index `ux_nonconformance_source`
+  (tenant_id, source_ref WHERE NOT NULL). Crash-before-mark redelivery proven
+  to net exactly one NC through the real MediatR pipeline.
+- **MSG-007 — retention purge.** Hourly `ExecuteDelete` of processed rows older
+  than `Outbox:RetentionDays` (default 30, validated at startup); the ledger
+  keeps the history. harden-runtime-role.sql grants qams_app DELETE on
+  qams.outbox_event ONLY (outbox is transport, not record). Purge proven to
+  spare recent-processed and unprocessed rows.
+- **OPS-002 (durable) — scale-out safety.** Outbox claim = CTE with
+  `FOR UPDATE SKIP LOCKED` + 2-min lease (`claimed_until_utc`): two concurrent
+  claimants proven disjoint; leases proven to expire and release. Sweeps
+  (ScheduledSweepService, KpiSnapshotService) wrap in `pg_try_advisory_xact_lock`
+  leader election (AdvisoryLock + AdvisoryLockKeys registry; sentinel key moved
+  there too). InMemory unit-test path unaffected (locks are Npgsql-only).
+- Migration `Phase1OutboxResilienceAndConcurrency` applied. Suite: **290 tests
+  green, 0 skipped** (was 279); build 0 warnings. Live: /health/ready 200,
+  login 200, xmin visible in EF SQL, singleton lock acquired.

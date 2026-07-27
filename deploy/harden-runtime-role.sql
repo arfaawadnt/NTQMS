@@ -54,6 +54,11 @@ GRANT SELECT, INSERT ON ALL TABLES IN SCHEMA audit TO qams_app;
 --    Explicitly remove DELETE anywhere it may have been inherited.
 REVOKE DELETE ON ALL TABLES IN SCHEMA qams, audit, read, saas, ref FROM qams_app;
 
+--    Exception (MSG-007): the transactional outbox is delivery transport, not a
+--    regulated record — processed events live on in the hash-chained audit
+--    ledger. The retention purge deletes processed rows past the window.
+GRANT DELETE ON qams.outbox_event TO qams_app;
+
 -- 5. Sequences (reference-number counters etc.) ------------------------------
 GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA qams, saas, ref TO qams_app;
 

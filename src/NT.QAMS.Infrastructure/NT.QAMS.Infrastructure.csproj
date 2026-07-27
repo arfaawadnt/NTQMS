@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="NT.QAMS.Application.UnitTests" />
+    <InternalsVisibleTo Include="NT.QAMS.IntegrationTests" />
   </ItemGroup>
 
 </Project>

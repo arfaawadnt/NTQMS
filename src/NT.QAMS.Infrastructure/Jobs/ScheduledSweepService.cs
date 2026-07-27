@@ -63,6 +63,18 @@ public sealed partial class ScheduledSweepService(
         // connection runs with RLS bypass for this unit of work only.
         scope.ServiceProvider.GetRequiredService<ICurrentTenantSetter>().Elevate();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        // OPS-002: leader election — with more than one instance, exactly one
+        // runs a sweep round; the others skip (the next interval retries).
+        var result = (Due: 0, Locked: 0, Expired: 0, Suspended: 0);
+        await AdvisoryLock.TryRunExclusiveAsync(
+            db, AdvisoryLockKeys.ComplianceSweep,
+            async () => result = await SweepAsync(db, ct), ct);
+        return result;
+    }
+
+    private async Task<(int Due, int Locked, int Expired, int Suspended)> SweepAsync(AppDbContext db, CancellationToken ct)
+    {
         var today = DateOnly.FromDateTime(clock.UtcNow.UtcDateTime);
 
         var dueCandidates = await db.EquipmentItems

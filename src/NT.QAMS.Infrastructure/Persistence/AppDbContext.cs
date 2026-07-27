@@ -98,6 +98,43 @@ public sealed class AppDbContext(
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 
+        if (Database.IsNpgsql())
+        {
+            // DB-009/VAL-003: PostgreSQL's xmin system column is the optimistic-
+            // concurrency token on every aggregate root — zero schema change; a
+            // lost update surfaces as DbUpdateConcurrencyException, which the
+            // API maps to HTTP 409 (DomainExceptionHandler). Convention-applied
+            // so a new module cannot forget it. (Npgsql-only: the InMemory
+            // provider used by unit tests has no xmin.)
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                if (typeof(SharedKernel.Primitives.AggregateRoot).IsAssignableFrom(entityType.ClrType)
+                    && entityType.BaseType is null)
+                {
+                    // Equivalent of Npgsql's UseXminAsConcurrencyToken(), which
+                    // only ships a generic overload: map the xid system column
+                    // as a store-generated shadow concurrency token.
+                    modelBuilder.Entity(entityType.ClrType)
+                        .Property<uint>("xmin")
+                        .HasColumnType("xid")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .IsConcurrencyToken();
+                }
+            }
+
+            // MSG-006: the natural idempotency key for source-driven NCs
+            // (audit finding, complaint, PT, excursion, …) — at-least-once
+            // redelivery can never net a second NC for the same source, even
+            // across concurrent processors. Partial index: manual NCs have no
+            // source. (Npgsql-only: InMemory ignores index filters and would
+            // reject the second manual NC.)
+            modelBuilder.Entity<Nonconformance>()
+                .HasIndex(n => new { n.TenantId, n.SourceRef })
+                .IsUnique()
+                .HasFilter("source_ref IS NOT NULL")
+                .HasDatabaseName("ux_nonconformance_source");
+        }
+
         // Layer-1 isolation: tenant global query filter on every ITenantScoped
         // entity, applied by convention so it is structurally unforgettable.
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())

@@ -1,6 +1,7 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.WebApi.Middleware;
@@ -12,11 +13,24 @@ namespace NT.QAMS.WebApi.Middleware;
 /// </summary>
 public sealed class DomainExceptionHandler : IExceptionHandler
 {
+    /// <summary>
+    /// Stable code for an optimistic-concurrency conflict (DB-009/VAL-003):
+    /// the row's xmin changed between read and write — the client reloads and
+    /// reapplies its change.
+    /// </summary>
+    public const string ConcurrencyConflictCode = "CONCURRENCY-409";
+
     public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
         ProblemDetails? problem = exception switch
         {
+            DbUpdateConcurrencyException => new ProblemDetails
+            {
+                Status = StatusCodes.Status409Conflict,
+                Title = "The record was modified by someone else since it was loaded — reload and retry.",
+                Extensions = { ["code"] = ConcurrencyConflictCode },
+            },
             ValidationException validation => new ProblemDetails
             {
                 Status = StatusCodes.Status400BadRequest,

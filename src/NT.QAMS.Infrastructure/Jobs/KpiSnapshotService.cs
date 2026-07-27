@@ -62,6 +62,18 @@ public sealed partial class KpiSnapshotService(
         // connection runs with RLS bypass for this unit of work only.
         scope.ServiceProvider.GetRequiredService<ICurrentTenantSetter>().Elevate();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        // OPS-002: leader election — with more than one instance, exactly one
+        // upserts a snapshot round; the others skip (the next interval retries).
+        var tenants = 0;
+        await AdvisoryLock.TryRunExclusiveAsync(
+            db, AdvisoryLockKeys.KpiSnapshot,
+            async () => tenants = await SnapshotAsync(db, ct), ct);
+        return tenants;
+    }
+
+    private async Task<int> SnapshotAsync(AppDbContext db, CancellationToken ct)
+    {
         var today = DateOnly.FromDateTime(clock.UtcNow.UtcDateTime);
 
         var tenantIds = await db.Tenants
