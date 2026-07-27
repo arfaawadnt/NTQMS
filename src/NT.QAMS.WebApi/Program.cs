@@ -148,7 +148,17 @@ builder.Services.AddRateLimiter(_ => { });
 builder.Services.AddOptions<Microsoft.AspNetCore.RateLimiting.RateLimiterOptions>()
     .Configure<RateLimitSettings>(RateLimiting.Configure);
 
-builder.Services.AddControllers();
+// API-001: dual routing — api/... (implicit v1.0) and api/v1/... both resolve;
+// evolution policy in docs/adr/ADR-0004-api-versioning.md.
+builder.Services.AddControllers(options =>
+    options.Conventions.Add(new NT.QAMS.WebApi.Versioning.VersionedRouteConvention()));
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new Asp.Versioning.ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+    options.ApiVersionReader = new Asp.Versioning.UrlSegmentApiVersionReader();
+}).AddMvc();
 builder.Services.AddOpenApi();
 builder.Services.AddExceptionHandler<DomainExceptionHandler>();
 // OBS-002: every ProblemDetails (framework-produced included) carries the ids

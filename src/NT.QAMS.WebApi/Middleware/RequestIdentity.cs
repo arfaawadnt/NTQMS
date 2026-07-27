@@ -141,6 +141,9 @@ public sealed class MfaEnrollmentGateMiddleware(RequestDelegate next)
     [
         "/api/auth/mfa/enroll",
         "/api/auth/mfa/confirm",
+        // API-001: the same endpoints on the versioned route.
+        "/api/v1/auth/mfa/enroll",
+        "/api/v1/auth/mfa/confirm",
     ];
 
     public async Task InvokeAsync(HttpContext context)
