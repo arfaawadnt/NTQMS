@@ -10,4 +10,7 @@ public interface ICurrentUser
     Guid? UserId { get; }
     string? DisplayName { get; }
     bool IsAuthenticated { get; }
+
+    /// <summary>The actor's role from the validated token; null when anonymous (CQRS-003).</summary>
+    Domain.IdentityAccess.UserRole? Role { get; }
 }

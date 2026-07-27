@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Domain.AuditManagement;
@@ -7,6 +7,7 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.AuditManagement.Commands;
 
+[RequireInternalActor]
 public sealed record ScheduleAuditCommand(
     string Title, AuditType Type, Guid LeadAuditorId, DateOnly PlannedDate,
     IReadOnlyList<(string IsoClause, string Question)> Checklist,
@@ -49,11 +50,15 @@ public sealed class ScheduleAuditHandler(
     }
 }
 
+[RequireInternalActor]
 public sealed record StartAuditCommand(Guid AuditId) : ICommand;
+[RequireInternalActor]
 public sealed record AnswerChecklistItemCommand(
     Guid AuditId, Guid ItemId, ChecklistVerdict Verdict, string? Evidence) : ICommand;
+[RequireInternalActor]
 public sealed record RaiseFindingCommand(Guid AuditId, FindingGrade Grade, string Description)
     : ICommand<Guid>;
+[RequireInternalActor]
 public sealed record SignOffAuditCommand(Guid AuditId) : ICommand;
 
 public sealed class RaiseFindingValidator : AbstractValidator<RaiseFindingCommand>

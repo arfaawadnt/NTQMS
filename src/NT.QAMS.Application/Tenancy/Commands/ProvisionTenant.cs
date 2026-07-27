@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Application.IdentityAccess;
@@ -13,6 +13,7 @@ namespace NT.QAMS.Application.Tenancy.Commands;
 /// Control-plane command: provision a new tenant AND its initial tenant
 /// administrator in one transaction. Returns the new tenant id.
 /// </summary>
+[RequireRole(NT.QAMS.Domain.IdentityAccess.UserRole.PlatformAdmin)]
 public sealed record ProvisionTenantCommand(
     string Identifier, string Name,
     string AdminEmail, string AdminDisplayName, string AdminPassword) : ICommand<Guid>;
@@ -58,7 +59,7 @@ public sealed class ProvisionTenantHandler(IAppDbContext db, IPasswordHasher has
         db.Tenants.Add(tenant);
         db.Users.Add(admin);
 
-        // Starter list-of-values so every dropdown is usable on day one —
+        // Starter list-of-values so every dropdown is usable on day one â€”
         // seeded in the SAME transaction as the tenant itself.
         await DefaultLovCatalog.SeedMissingAsync(db, tenant.Id, cancellationToken);
 

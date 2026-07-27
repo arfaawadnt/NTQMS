@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.AnalyticalQuality;
@@ -8,8 +8,9 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.AnalyticalQuality;
 
-// ── Commands ─────────────────────────────────────────────────────────────────
+// â”€â”€ Commands â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record CreateSigmaAssessmentCommand(
     string Analyte, string Unit, decimal AllowableTotalErrorPct, decimal BiasPct, decimal CvPct) : ICommand<Guid>;
 
@@ -41,8 +42,10 @@ public sealed class CreateSigmaAssessmentHandler(
     }
 }
 
+[RequireInternalActor]
 public sealed record UpdateSigmaInputsCommand(
     Guid AssessmentId, decimal AllowableTotalErrorPct, decimal BiasPct, decimal CvPct) : ICommand;
+[RequireInternalActor]
 public sealed record SignOffSigmaAssessmentCommand(Guid AssessmentId) : ICommand;
 
 public sealed class SigmaAssessmentWorkflowHandlers(IAppDbContext db, ICurrentUser user, IClock clock) :
@@ -70,7 +73,7 @@ public sealed class SigmaAssessmentWorkflowHandlers(IAppDbContext db, ICurrentUs
             ?? throw new DomainException("SIG-404", "Sigma assessment not found.");
 }
 
-// ── Queries ──────────────────────────────────────────────────────────────────
+// â”€â”€ Queries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 public sealed record GetSigmaAssessmentsQuery(string? State)
     : IQuery<IReadOnlyList<SigmaAssessmentListItemDto>>;

@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.Governance;
@@ -17,8 +17,9 @@ internal static class GovernanceHelpers
         user.UserId ?? throw new DomainException("AUTH-003", "An authenticated user is required.");
 }
 
-// ── Risk ─────────────────────────────────────────────────────────────────────
+// â”€â”€ Risk â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record AssessRiskCommand(string Title, string Category, int Likelihood, int Impact,
     Guid? BranchId = null, Guid? DepartmentId = null)
     : ICommand<Guid>;
@@ -49,10 +50,14 @@ public sealed class AssessRiskHandler(
     }
 }
 
+[RequireInternalActor]
 public sealed record AddMitigationCommand(Guid RiskId, string Description, Guid OwnerId, DateOnly DueDate)
     : ICommand<Guid>;
+[RequireInternalActor]
 public sealed record CompleteMitigationCommand(Guid RiskId, Guid ActionId) : ICommand;
+[RequireInternalActor]
 public sealed record RecordResidualCommand(Guid RiskId, int Likelihood, int Impact) : ICommand;
+[RequireInternalActor]
 public sealed record CloseRiskCommand(Guid RiskId) : ICommand;
 
 internal static class RiskLoader
@@ -141,8 +146,9 @@ public sealed class GetRiskByIdHandler(IAppDbContext db) : IQueryHandler<GetRisk
     }
 }
 
-// ── Change control ───────────────────────────────────────────────────────────
+// â”€â”€ Change control â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record ProposeChangeCommand(string Title, string ImpactAnalysis,
     Guid? BranchId = null, Guid? DepartmentId = null) : ICommand<Guid>;
 
@@ -172,10 +178,15 @@ public sealed class ProposeChangeHandler(
     }
 }
 
+[RequireInternalActor]
 public sealed record LinkRiskCommand(Guid ChangeId, Guid RiskItemId) : ICommand;
+[RequireInternalActor]
 public sealed record ApproveChangeCommand(Guid ChangeId) : ICommand;
+[RequireInternalActor]
 public sealed record RejectChangeCommand(Guid ChangeId, string Reason) : ICommand;
+[RequireInternalActor]
 public sealed record CloseChangeCommand(Guid ChangeId, string ImplementationNotes) : ICommand;
+[RequireInternalActor]
 public sealed record ReviewChangeCommand(Guid ChangeId, bool Effective, string Notes) : ICommand;
 
 public sealed class ReviewChangeValidator : AbstractValidator<ReviewChangeCommand>
@@ -285,8 +296,9 @@ public sealed class GetChangeByIdHandler(IAppDbContext db)
     }
 }
 
-// ── Management review ────────────────────────────────────────────────────────
+// â”€â”€ Management review â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record ScheduleReviewCommand(string Title, DateOnly ReviewDate, string Participants,
     Guid? BranchId = null, Guid? DepartmentId = null)
     : ICommand<Guid>;
@@ -307,8 +319,10 @@ public sealed class ScheduleReviewHandler(
     }
 }
 
+[RequireInternalActor]
 public sealed record AddDecisionCommand(Guid ReviewId, string Description, Guid OwnerId, DateOnly DueDate)
     : ICommand<Guid>;
+[RequireInternalActor]
 public sealed record CloseReviewCommand(Guid ReviewId, string Minutes) : ICommand;
 
 public sealed class AddDecisionHandler(IAppDbContext db) : ICommandHandler<AddDecisionCommand, Guid>

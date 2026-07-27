@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.Platform;
@@ -8,8 +8,9 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.Organization;
 
-// ── Branches & departments ───────────────────────────────────────────────────
+// â”€â”€ Branches & departments â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record CreateBranchCommand(string Code, string Name, string? City) : ICommand<Guid>;
 
 public sealed class CreateBranchValidator : AbstractValidator<CreateBranchCommand>
@@ -38,6 +39,7 @@ public sealed class CreateBranchHandler(IAppDbContext db) : ICommandHandler<Crea
     }
 }
 
+[RequireInternalActor]
 public sealed record CreateDepartmentCommand(Guid BranchId, string Code, string Name) : ICommand<Guid>;
 
 public sealed class CreateDepartmentHandler(IAppDbContext db) : ICommandHandler<CreateDepartmentCommand, Guid>
@@ -62,6 +64,7 @@ public sealed class CreateDepartmentHandler(IAppDbContext db) : ICommandHandler<
     }
 }
 
+[RequireInternalActor]
 public sealed record DeactivateOrgUnitCommand(Guid Id, bool IsBranch) : ICommand;
 
 public sealed class DeactivateOrgUnitHandler(IAppDbContext db) : ICommandHandler<DeactivateOrgUnitCommand>
@@ -115,8 +118,9 @@ public sealed class GetDepartmentsHandler(IAppDbContext db)
     }
 }
 
-// ── Test catalog & LOVs ──────────────────────────────────────────────────────
+// â”€â”€ Test catalog & LOVs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record CreateTestCommand(string TestCode, string TestName, string Methodology, int TurnaroundHours)
     : ICommand<Guid>;
 
@@ -149,6 +153,7 @@ public sealed class GetTestCatalogHandler(IAppDbContext db)
             .ToListAsync(ct);
 }
 
+[RequireInternalActor]
 public sealed record UpsertLovCommand(
     string Category, string Code, string NameEn, string? NameAr, string? NameFr, int SortOrder)
     : ICommand<Guid>;

@@ -15,9 +15,11 @@ public static class DependencyInjection
         {
             cfg.RegisterServicesFromAssembly(assembly);
             // Pipeline order is the law: tracing wraps logging wraps everything;
+            // authorization decides before validation can leak request schema;
             // validation precedes every handler.
             cfg.AddOpenBehavior(typeof(TracingBehavior<,>));
             cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));
+            cfg.AddOpenBehavior(typeof(AuthorizationBehavior<,>));
             cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
         });
 

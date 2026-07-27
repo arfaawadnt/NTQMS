@@ -30,6 +30,8 @@ public sealed class FieldChangeInterceptorTests
         public Guid? UserId => Actor;
         public string? DisplayName => "Field Tester";
         public bool IsAuthenticated => true;
+        public NT.QAMS.Domain.IdentityAccess.UserRole? Role =>
+            NT.QAMS.Domain.IdentityAccess.UserRole.QualityManager;
     }
 
     private static AppDbContext CreateContext(string name, string? reason = null)

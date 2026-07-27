@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.AnalyticalQuality;
@@ -8,14 +8,20 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.AnalyticalQuality;
 
-// ── Commands ─────────────────────────────────────────────────────────────────
+// â”€â”€ Commands â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record CreatePtPlanCommand(int Year) : ICommand<Guid>;
+[RequireInternalActor]
 public sealed record AddPtPlanItemCommand(
     Guid PlanId, string Scheme, string Analyte, string? Provider, int PlannedCycles, string? Notes) : ICommand<Guid>;
+[RequireInternalActor]
 public sealed record RemovePtPlanItemCommand(Guid PlanId, Guid ItemId) : ICommand;
+[RequireInternalActor]
 public sealed record ApprovePtPlanCommand(Guid PlanId) : ICommand;
+[RequireInternalActor]
 public sealed record RecordPtPlanFulfilmentCommand(Guid PlanId, Guid ItemId, Guid EnrollmentId) : ICommand;
+[RequireInternalActor]
 public sealed record ClosePtPlanCommand(Guid PlanId, string ClosureSummary) : ICommand;
 
 public sealed class AddPtPlanItemValidator : AbstractValidator<AddPtPlanItemCommand>
@@ -39,7 +45,7 @@ public sealed class CreatePtPlanHandler(IAppDbContext db, ICurrentTenant tenant,
             ?? throw new DomainException("TENANT-000", "A tenant context is required.");
         if (await db.PtPlans.AnyAsync(p => p.Year == c.Year, ct))
         {
-            throw new DomainException("PTP-020", $"A PT plan for {c.Year} already exists — one plan per year.");
+            throw new DomainException("PTP-020", $"A PT plan for {c.Year} already exists â€” one plan per year.");
         }
 
         var planRef = await refs.NextAsync(tenantId, "PTP", ct);
@@ -89,7 +95,7 @@ public sealed class PtPlanWorkflowHandlers(IAppDbContext db, ICurrentUser user, 
             ?? throw new DomainException("PT-404", "PT enrollment not found.");
         if (enrollment.Performance == PtPerformance.Pending)
         {
-            throw new DomainException("PTP-021", $"Enrollment {enrollment.PtRef} has no result yet — a pending cycle is not fulfilment.");
+            throw new DomainException("PTP-021", $"Enrollment {enrollment.PtRef} has no result yet â€” a pending cycle is not fulfilment.");
         }
 
         var plan = await LoadAsync(c.PlanId, ct);
@@ -109,7 +115,7 @@ public sealed class PtPlanWorkflowHandlers(IAppDbContext db, ICurrentUser user, 
             ?? throw new DomainException("PTP-404", "PT plan not found.");
 }
 
-// ── Queries ──────────────────────────────────────────────────────────────────
+// â”€â”€ Queries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 public sealed record GetPtPlansQuery : IQuery<IReadOnlyList<PtPlanListItemDto>>;
 

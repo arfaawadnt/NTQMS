@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.SharedKernel.Primitives;
 
@@ -8,6 +8,7 @@ namespace NT.QAMS.Application.Tenancy.Commands;
 public sealed record GetTenantMfaPolicyQuery : IQuery<bool>;
 
 /// <summary>Turn enforced MFA for the current tenant's privileged users on or off (F-04).</summary>
+[RequireInternalActor]
 public sealed record SetTenantMfaPolicyCommand(bool Require) : ICommand;
 
 public sealed class GetTenantMfaPolicyHandler(IAppDbContext db, ICurrentTenant tenant)

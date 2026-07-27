@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.AnalyticalQuality;
@@ -8,8 +8,9 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.AnalyticalQuality;
 
-// ── Commands ─────────────────────────────────────────────────────────────────
+// â”€â”€ Commands â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record CreateDetectionLimitStudyCommand(
     string Analyte, string Unit, string Method, decimal LoqCvTargetPct) : ICommand<Guid>;
 
@@ -40,10 +41,14 @@ public sealed class CreateDetectionLimitStudyHandler(
     }
 }
 
+[RequireInternalActor]
 public sealed record AddDetectionMeasurementCommand(
     Guid StudyId, string Kind, decimal? AssignedValue, decimal MeasuredValue) : ICommand<Guid>;
+[RequireInternalActor]
 public sealed record RemoveDetectionMeasurementCommand(Guid StudyId, Guid MeasurementId) : ICommand;
+[RequireInternalActor]
 public sealed record CalculateDetectionLimitCommand(Guid StudyId) : ICommand;
+[RequireInternalActor]
 public sealed record SignOffDetectionLimitCommand(Guid StudyId) : ICommand;
 
 public sealed class DetectionLimitWorkflowHandlers(IAppDbContext db, ICurrentUser user, IClock clock) :
@@ -89,7 +94,7 @@ public sealed class DetectionLimitWorkflowHandlers(IAppDbContext db, ICurrentUse
             ?? throw new DomainException("DL-404", "Detection-limit study not found.");
 }
 
-// ── Queries ──────────────────────────────────────────────────────────────────
+// â”€â”€ Queries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 public sealed record GetDetectionLimitStudiesQuery(string? State)
     : IQuery<IReadOnlyList<DetectionLimitListItemDto>>;

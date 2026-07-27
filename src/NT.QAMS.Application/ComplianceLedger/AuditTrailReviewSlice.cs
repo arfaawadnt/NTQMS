@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -11,9 +11,11 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.ComplianceLedger;
 
-// ── Commands ─────────────────────────────────────────────────────────────────
+// â”€â”€ Commands â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record OpenAuditTrailReviewCommand(DateOnly PeriodStart, DateOnly PeriodEnd) : ICommand<Guid>;
+[RequireInternalActor]
 public sealed record CompleteAuditTrailReviewCommand(
     Guid ReviewId, bool AnomaliesFound, string Conclusion) : ICommand;
 
@@ -64,7 +66,7 @@ public sealed class CompleteAuditTrailReviewHandler(
     }
 }
 
-// ── Anomaly saga ─────────────────────────────────────────────────────────────
+// â”€â”€ Anomaly saga â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /// <summary>
 /// Data-integrity saga: an anomaly found during the periodic audit-trail
@@ -86,15 +88,15 @@ public sealed partial class AuditTrailAnomalyToNcPolicy(
         var sourceRef = $"ATR:{e.ReviewId}";
         if (await db.Nonconformances.AnyAsync(n => n.SourceRef == sourceRef, ct))
         {
-            return; // Outbox redelivery — the NC already exists.
+            return; // Outbox redelivery â€” the NC already exists.
         }
 
         var ncRef = await refs.NextAsync(e.TenantId, "NC", ct);
         var nc = Nonconformance.Raise(
             ncRef,
-            $"Audit-trail anomaly — review {e.ReviewRef} ({e.PeriodStart:yyyy-MM-dd} to {e.PeriodEnd:yyyy-MM-dd})",
+            $"Audit-trail anomaly â€” review {e.ReviewRef} ({e.PeriodStart:yyyy-MM-dd} to {e.PeriodEnd:yyyy-MM-dd})",
             $"The periodic audit-trail review concluded: {e.Conclusion} " +
-            "Investigate the anomaly as a potential data-integrity incident (21 CFR Part 11 §11.10(e)).",
+            "Investigate the anomaly as a potential data-integrity incident (21 CFR Part 11 Â§11.10(e)).",
             severity: 5,
             likelihood: 2,
             NcSourceType.Internal,
@@ -112,7 +114,7 @@ public sealed partial class AuditTrailAnomalyToNcPolicy(
     private static partial void LogNcRaised(ILogger logger, string ncRef, string reviewRef);
 }
 
-// ── Queries ──────────────────────────────────────────────────────────────────
+// â”€â”€ Queries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 public sealed record GetAuditTrailReviewsQuery : IQuery<IReadOnlyList<AuditTrailReviewDto>>;
 

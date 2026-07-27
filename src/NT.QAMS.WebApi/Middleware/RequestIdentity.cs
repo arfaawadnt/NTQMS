@@ -34,6 +34,15 @@ public sealed class HttpCurrentUser(IHttpContextAccessor accessor) : ICurrentUse
     }
 
     public bool IsAuthenticated => accessor.HttpContext?.User.Identity?.IsAuthenticated == true;
+
+    public NT.QAMS.Domain.IdentityAccess.UserRole? Role
+    {
+        get
+        {
+            var raw = accessor.HttpContext?.User.FindFirstValue(ClaimTypes.Role);
+            return Enum.TryParse<NT.QAMS.Domain.IdentityAccess.UserRole>(raw, out var role) ? role : null;
+        }
+    }
 }
 
 /// <summary>

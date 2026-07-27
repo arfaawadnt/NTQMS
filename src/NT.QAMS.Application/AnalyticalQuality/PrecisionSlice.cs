@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.AnalyticalQuality;
@@ -8,8 +8,9 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.AnalyticalQuality;
 
-// ── Commands ─────────────────────────────────────────────────────────────────
+// â”€â”€ Commands â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record CreatePrecisionStudyCommand(
     string Analyte, string Unit, string Level,
     decimal? ClaimedRepeatabilityCvPct, decimal? ClaimedWithinLabCvPct) : ICommand<Guid>;
@@ -41,9 +42,13 @@ public sealed class CreatePrecisionStudyHandler(
     }
 }
 
+[RequireInternalActor]
 public sealed record AddPrecisionMeasurementCommand(Guid StudyId, string RunLabel, decimal Value) : ICommand<Guid>;
+[RequireInternalActor]
 public sealed record RemovePrecisionMeasurementCommand(Guid StudyId, Guid MeasurementId) : ICommand;
+[RequireInternalActor]
 public sealed record CalculatePrecisionCommand(Guid StudyId) : ICommand;
+[RequireInternalActor]
 public sealed record SignOffPrecisionCommand(Guid StudyId) : ICommand;
 
 public sealed class PrecisionWorkflowHandlers(IAppDbContext db, ICurrentUser user, IClock clock) :
@@ -88,12 +93,13 @@ public sealed class PrecisionWorkflowHandlers(IAppDbContext db, ICurrentUser use
             ?? throw new DomainException("PR-404", "Precision study not found.");
 }
 
+[RequireInternalActor]
 public sealed record ImportPrecisionMeasurementsCommand(
     Guid StudyId, IReadOnlyList<AddPrecisionMeasurementRequest> Rows) : ICommand<BulkImportResultDto>;
 
 /// <summary>
 /// Bulk import of run-grouped replicates (analyzer/LIS export). Each row is
-/// validated and added independently — a bad row is reported and skipped while
+/// validated and added independently â€” a bad row is reported and skipped while
 /// the rest import; the batch commits once.
 /// </summary>
 public sealed class ImportPrecisionMeasurementsHandler(IAppDbContext db)
@@ -130,7 +136,7 @@ public sealed class ImportPrecisionMeasurementsHandler(IAppDbContext db)
     }
 }
 
-// ── Queries ──────────────────────────────────────────────────────────────────
+// â”€â”€ Queries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 public sealed record GetPrecisionStudiesQuery(string? State)
     : IQuery<IReadOnlyList<PrecisionListItemDto>>;

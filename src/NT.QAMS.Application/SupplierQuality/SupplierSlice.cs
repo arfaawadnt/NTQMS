@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Application.RiskGovernance;
@@ -8,6 +8,7 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.SupplierQuality;
 
+[RequireInternalActor]
 public sealed record RegisterSupplierCommand(string Name, string SupplierType,
     Guid? BranchId = null, Guid? DepartmentId = null) : ICommand<Guid>;
 
@@ -33,10 +34,14 @@ public sealed class RegisterSupplierHandler(
     }
 }
 
+[RequireInternalActor]
 public sealed record AddCertificateCommand(
     Guid SupplierId, string CertificateType, DateOnly ExpiresAt, Guid? FileId) : ICommand<Guid>;
+[RequireInternalActor]
 public sealed record ApproveSupplierCommand(Guid SupplierId) : ICommand;
+[RequireInternalActor]
 public sealed record SuspendSupplierCommand(Guid SupplierId, string Reason) : ICommand;
+[RequireInternalActor]
 public sealed record RecordEvaluationCommand(
     Guid SupplierId, DateOnly PeriodStart, DateOnly PeriodEnd,
     IReadOnlyList<(string Criterion, decimal Weight, decimal Score)> Criteria) : ICommand<Guid>;

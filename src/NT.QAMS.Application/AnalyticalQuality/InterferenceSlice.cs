@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.AnalyticalQuality;
@@ -8,6 +8,7 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.AnalyticalQuality;
 
+[RequireInternalActor]
 public sealed record CreateInterferenceStudyCommand(string Analyte, string Unit, decimal AllowableBiasPct) : ICommand<Guid>;
 
 public sealed class CreateInterferenceStudyValidator : AbstractValidator<CreateInterferenceStudyCommand>
@@ -35,9 +36,13 @@ public sealed class CreateInterferenceStudyHandler(IAppDbContext db, ICurrentTen
 }
 
 /// <summary>Kind = "Control" (interferent ignored) or "Test" (interferent required).</summary>
+[RequireInternalActor]
 public sealed record AddInterferenceMeasurementCommand(Guid StudyId, string Kind, string? Interferent, decimal Value) : ICommand<Guid>;
+[RequireInternalActor]
 public sealed record RemoveInterferenceMeasurementCommand(Guid StudyId, Guid MeasurementId) : ICommand;
+[RequireInternalActor]
 public sealed record CalculateInterferenceCommand(Guid StudyId) : ICommand;
+[RequireInternalActor]
 public sealed record SignOffInterferenceCommand(Guid StudyId) : ICommand;
 
 public sealed class InterferenceWorkflowHandlers(IAppDbContext db, ICurrentUser user, IClock clock) :

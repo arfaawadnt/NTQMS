@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
@@ -10,8 +10,9 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.Sla;
 
-// ── SLA definitions ──────────────────────────────────────────────────────────
+// â”€â”€ SLA definitions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record UpsertSlaCommand(string Module, string Severity, int TargetHours) : ICommand<Guid>;
 
 public sealed class UpsertSlaValidator : AbstractValidator<UpsertSlaCommand>
@@ -58,8 +59,9 @@ public sealed class GetSlaDefinitionsHandler(IAppDbContext db)
             .ToListAsync(ct);
 }
 
-// ── Work tasks ───────────────────────────────────────────────────────────────
+// â”€â”€ Work tasks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record CreateTaskCommand(
     string Subject, string? SubjectRef, Guid? AssigneeUserId, string? AssigneeRole, DateOnly DueDate)
     : ICommand<Guid>;
@@ -75,6 +77,7 @@ public sealed class CreateTaskHandler(IAppDbContext db) : ICommandHandler<Create
     }
 }
 
+[RequireInternalActor]
 public sealed record CompleteTaskCommand(Guid TaskId) : ICommand;
 
 public sealed class CompleteTaskHandler(IAppDbContext db, IClock clock) : ICommandHandler<CompleteTaskCommand>
@@ -112,7 +115,7 @@ public sealed class GetMyTasksHandler(IAppDbContext db, ICurrentUser user, ICloc
     }
 }
 
-// ── Escalation policies (arm/cancel timers off NC/CAPA events) ───────────────
+// â”€â”€ Escalation policies (arm/cancel timers off NC/CAPA events) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /// <summary>Arms an escalation timer when a CAPA action is planned (deadline = its due date).</summary>
 public sealed class ArmEscalationOnCapaPlannedPolicy(IAppDbContext db, ICurrentTenantSetter tenantSetter)

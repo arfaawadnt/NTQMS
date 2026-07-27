@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.AnalyticalQuality;
@@ -8,6 +8,7 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.AnalyticalQuality;
 
+[RequireInternalActor]
 public sealed record CreateQcProfileCommand(
     string Analyte, string Instrument, string ControlLot, decimal TargetMean, decimal TargetSd)
     : ICommand<Guid>;
@@ -38,6 +39,7 @@ public sealed class CreateQcProfileHandler(IAppDbContext db) : ICommandHandler<C
 /// runs, evaluates Westgard rules once, and stores the verdict as the record of
 /// fact. Out-of-control runs raise QcOutOfControl through the outbox.
 /// </summary>
+[RequireInternalActor]
 public sealed record RecordQcRunCommand(Guid ProfileId, decimal Value, string Operator) : ICommand<Guid>;
 
 public sealed class RecordQcRunHandler(IAppDbContext db, IClock clock, WestgardLimits westgardLimits)
@@ -69,6 +71,7 @@ public sealed class RecordQcRunHandler(IAppDbContext db, IClock clock, WestgardL
     }
 }
 
+[RequireInternalActor]
 public sealed record UpdateQcTargetsCommand(Guid ProfileId, decimal TargetMean, decimal TargetSd, string Reason)
     : ICommand;
 
@@ -93,6 +96,7 @@ public sealed class UpdateQcTargetsHandler(IAppDbContext db, IClock clock)
     }
 }
 
+[RequireInternalActor]
 public sealed record LogQcTroubleshootingCommand(Guid RunId, string Note) : ICommand;
 
 public sealed class LogQcTroubleshootingHandler(IAppDbContext db)

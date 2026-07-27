@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.Operations;
@@ -8,6 +8,7 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.Records;
 
+[RequireInternalActor]
 public sealed record ArchiveRecordCommand(
     string SourceModule, string SourceRef, Guid SnapshotFileId, RetentionClass RetentionClass)
     : ICommand<Guid>;
@@ -56,10 +57,15 @@ public sealed class ArchiveRecordHandler(
     }
 }
 
+[RequireInternalActor]
 public sealed record RetrieveRecordCommand(Guid ArchiveId) : ICommand;
+[RequireInternalActor]
 public sealed record ReturnRecordCommand(Guid ArchiveId) : ICommand;
+[RequireInternalActor]
 public sealed record DisposeRecordCommand(Guid ArchiveId) : ICommand;
+[RequireInternalActor]
 public sealed record PlaceLegalHoldCommand(Guid ArchiveId, string Reason) : ICommand;
+[RequireInternalActor]
 public sealed record ReleaseLegalHoldCommand(Guid ArchiveId) : ICommand;
 
 public sealed class PlaceLegalHoldValidator : AbstractValidator<PlaceLegalHoldCommand>

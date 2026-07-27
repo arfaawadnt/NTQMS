@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.AnalyticalQuality;
@@ -8,8 +8,9 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.AnalyticalQuality;
 
-// ── Method validation ────────────────────────────────────────────────────────
+// â”€â”€ Method validation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record ConfigureStudyCommand(string Analyte, string Protocol, decimal TotalAllowableError)
     : ICommand<Guid>;
 
@@ -39,9 +40,12 @@ public sealed class ConfigureStudyHandler(
     }
 }
 
+[RequireInternalActor]
 public sealed record EnterReplicateCommand(Guid StudyId, string Level, decimal Measured, decimal? Reference)
     : ICommand;
+[RequireInternalActor]
 public sealed record CalculateStudyCommand(Guid StudyId) : ICommand;
+[RequireInternalActor]
 public sealed record SignOffStudyCommand(Guid StudyId) : ICommand;
 
 internal static class StudyLoader
@@ -118,8 +122,9 @@ public sealed class GetStudyByIdHandler(IAppDbContext db)
     }
 }
 
-// ── Proficiency testing ──────────────────────────────────────────────────────
+// â”€â”€ Proficiency testing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record EnrollPtCommand(string Scheme, string Analyte, string Cycle) : ICommand<Guid>;
 
 public sealed class EnrollPtHandler(
@@ -138,6 +143,7 @@ public sealed class EnrollPtHandler(
     }
 }
 
+[RequireInternalActor]
 public sealed record RecordPtResultCommand(Guid PtId, decimal Submitted, decimal Assigned, decimal Sd)
     : ICommand;
 

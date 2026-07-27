@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.IdentityAccess;
@@ -11,9 +11,10 @@ namespace NT.QAMS.Application.IdentityAccess.Commands;
 
 /// <summary>
 /// Password (+ MFA, if enrolled) login with account lockout. AUTH-coded failures
-/// map to 401 and never reveal which factor failed. Every attempt — success,
-/// bad password, bad MFA, lockout — is written to the security-event ledger.
+/// map to 401 and never reveal which factor failed. Every attempt â€” success,
+/// bad password, bad MFA, lockout â€” is written to the security-event ledger.
 /// </summary>
+[AllowUnauthenticated]
 public sealed record LoginCommand(string? TenantIdentifier, string Email, string Password, string? MfaCode)
     : ICommand<AuthResponse>;
 
@@ -77,7 +78,7 @@ public sealed class LoginHandler(
             throw await FailAsync("AUTH-001", InvalidCredentials, tenantId, email, "bad-password", ct);
         }
 
-        // Part 11 §11.300(b): force rotation once the password exceeds its maximum age.
+        // Part 11 Â§11.300(b): force rotation once the password exceeds its maximum age.
         if (passwordPolicy.MaxAgeDays > 0
             && user.PasswordChangedAtUtc is { } changed
             && changed.AddDays(passwordPolicy.MaxAgeDays) < clock.UtcNow)
@@ -90,7 +91,7 @@ public sealed class LoginHandler(
         {
             if (string.IsNullOrWhiteSpace(command.MfaCode))
             {
-                // Password OK but MFA required — signal the client to collect a code.
+                // Password OK but MFA required â€” signal the client to collect a code.
                 await security.WriteAsync("LOGIN_MFA_REQUIRED", tenantId, email, null, ct);
                 return new AuthResponse(string.Empty, default, user.Role.ToString(), user.DisplayName, user.TenantId, MfaRequired: true);
             }
@@ -103,7 +104,7 @@ public sealed class LoginHandler(
             }
         }
 
-        // F-04 (Part 11 §11.10(d)): a privileged user who has not enrolled MFA is
+        // F-04 (Part 11 Â§11.10(d)): a privileged user who has not enrolled MFA is
         // given only an enrollment-scoped session until they set it up. Enforced
         // by MfaEnrollmentGateMiddleware; opt-in per environment (off by default).
         var mustEnrollMfa = requireMfaPolicy
@@ -129,8 +130,9 @@ public sealed class LoginHandler(
 }
 
 
-// ── Self-service password change (works while the password is expired) ──────
+// â”€â”€ Self-service password change (works while the password is expired) â”€â”€â”€â”€â”€â”€
 
+[AllowUnauthenticated]
 public sealed record ChangePasswordCommand(
     string? TenantIdentifier, string Email, string CurrentPassword, string NewPassword) : ICommand;
 

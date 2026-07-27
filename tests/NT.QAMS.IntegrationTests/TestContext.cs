@@ -19,6 +19,8 @@ public sealed class TestContext
     public Guid? UserId { get; set; } = Guid.CreateVersion7();
     public string? DisplayName { get; set; } = "integration-test";
     public bool IsAuthenticated => true;
+    public NT.QAMS.Domain.IdentityAccess.UserRole? Role { get; set; } =
+        NT.QAMS.Domain.IdentityAccess.UserRole.QualityManager;
 
     public string? Reason { get; private set; }
 

@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.AnalyticalQuality;
@@ -8,6 +8,7 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.AnalyticalQuality;
 
+[RequireInternalActor]
 public sealed record CreateOutlierScreeningCommand(string Dataset, string Unit) : ICommand<Guid>;
 
 public sealed class CreateOutlierScreeningValidator : AbstractValidator<CreateOutlierScreeningCommand>
@@ -33,9 +34,13 @@ public sealed class CreateOutlierScreeningHandler(IAppDbContext db, ICurrentTena
     }
 }
 
+[RequireInternalActor]
 public sealed record AddOutlierPointCommand(Guid ScreeningId, decimal Value, string? Label) : ICommand<Guid>;
+[RequireInternalActor]
 public sealed record RemoveOutlierPointCommand(Guid ScreeningId, Guid PointId) : ICommand;
+[RequireInternalActor]
 public sealed record CalculateOutlierScreeningCommand(Guid ScreeningId) : ICommand;
+[RequireInternalActor]
 public sealed record SignOffOutlierScreeningCommand(Guid ScreeningId) : ICommand;
 
 public sealed class OutlierScreeningWorkflowHandlers(IAppDbContext db, ICurrentUser user, IClock clock) :

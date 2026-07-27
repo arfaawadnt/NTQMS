@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Domain.DocumentControl;
@@ -7,6 +7,7 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.DocumentControl.Commands;
 
+[RequireInternalActor]
 public sealed record CreateDocumentCommand(
     string Code, string Title, string Category, Guid FileId, string ChangeSummary,
     int ReviewCycleMonths = 24) : ICommand<Guid>;
@@ -54,13 +55,19 @@ public sealed class CreateDocumentHandler(IAppDbContext db, ICurrentUser user)
     }
 }
 
+[RequireInternalActor]
 public sealed record SubmitDocumentForReviewCommand(Guid DocumentId) : ICommand;
+[RequireInternalActor]
 public sealed record RecommendDocumentCommand(Guid DocumentId) : ICommand;
+[RequireInternalActor]
 public sealed record RejectDocumentVersionCommand(Guid DocumentId, string Reason) : ICommand;
 /// <summary>Publishing is a Part 11 signing ceremony: it requires the approver's e-signature PIN.</summary>
+[RequireRole(NT.QAMS.Domain.IdentityAccess.UserRole.QualityManager, NT.QAMS.Domain.IdentityAccess.UserRole.TenantAdmin)]
 public sealed record PublishDocumentCommand(Guid DocumentId, string Password, string Pin) : ICommand;
+[RequireInternalActor]
 public sealed record DraftNewVersionCommand(
     Guid DocumentId, Guid FileId, string ChangeSummary, VersionBump Bump) : ICommand;
+[RequireInternalActor]
 public sealed record RetireDocumentCommand(Guid DocumentId) : ICommand;
 
 public sealed class RejectDocumentVersionValidator : AbstractValidator<RejectDocumentVersionCommand>
@@ -122,7 +129,7 @@ public sealed class PublishDocumentHandler(
         var approving = doc.InFlightVersion
             ?? throw new SharedKernel.Primitives.DomainException("DOC-014", "No version is awaiting approval.");
 
-        // Pre-validate every publish precondition BEFORE minting the signature —
+        // Pre-validate every publish precondition BEFORE minting the signature â€”
         // the signature ledger is append-only, so a signature must never exist
         // for a publish that then fails its state or SoD gates.
         if (approving.State != Domain.DocumentControl.VersionState.Approved)
@@ -137,7 +144,7 @@ public sealed class PublishDocumentHandler(
                 "SOD-DOC-002", "Segregation of duties: the author cannot approve their own document.");
         }
 
-        // Content hash of the exact bytes being approved (Part 11 signature↔record link).
+        // Content hash of the exact bytes being approved (Part 11 signatureâ†”record link).
         var contentHash = await db.Files
             .Where(f => f.Id == approving.FileId).Select(f => f.Sha256).SingleAsync(ct);
 
@@ -180,8 +187,9 @@ public sealed class RetireDocumentHandler(IAppDbContext db, ICurrentUser user)
     }
 }
 
-// ── Periodic review (ISO 17025 §8.3) ─────────────────────────────────────────
+// â”€â”€ Periodic review (ISO 17025 Â§8.3) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record ConfirmDocumentReviewCommand(Guid DocumentId) : ICommand;
 
 public sealed class ConfirmDocumentReviewHandler(IAppDbContext db, ICurrentUser user, IClock clock)

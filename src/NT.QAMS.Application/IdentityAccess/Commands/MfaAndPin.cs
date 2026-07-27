@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.IdentityAccess;
@@ -7,8 +7,9 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.IdentityAccess.Commands;
 
-// ── MFA enrollment ───────────────────────────────────────────────────────────
+// â”€â”€ MFA enrollment â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireAuthenticatedActor]
 public sealed record EnrollMfaCommand : ICommand<MfaEnrollmentResponse>;
 
 public sealed class EnrollMfaHandler(
@@ -30,6 +31,7 @@ public sealed class EnrollMfaHandler(
     }
 }
 
+[RequireAuthenticatedActor]
 public sealed record ConfirmMfaCommand(string Code) : ICommand;
 
 public sealed class ConfirmMfaHandler(
@@ -53,8 +55,9 @@ public sealed class ConfirmMfaHandler(
     }
 }
 
-// ── E-signature PIN ──────────────────────────────────────────────────────────
+// â”€â”€ E-signature PIN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireAuthenticatedActor]
 public sealed record SetPinCommand(string Pin) : ICommand;
 
 public sealed class SetPinValidator : AbstractValidator<SetPinCommand>

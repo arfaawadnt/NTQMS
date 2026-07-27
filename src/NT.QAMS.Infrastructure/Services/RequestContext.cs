@@ -50,6 +50,7 @@ public sealed class AnonymousCurrentUser : ICurrentUser
     public Guid? UserId => null;
     public string? DisplayName => null;
     public bool IsAuthenticated => false;
+    public NT.QAMS.Domain.IdentityAccess.UserRole? Role => null;
 }
 
 public sealed class SystemClock : IClock

@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.AnalyticalQuality;
@@ -8,8 +8,9 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.AnalyticalQuality;
 
-// ── Commands ─────────────────────────────────────────────────────────────────
+// â”€â”€ Commands â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record CreateMethodComparisonCommand(
     string Analyte, string Unit, string ReferenceMethod, string TestMethod) : ICommand<Guid>;
 
@@ -40,10 +41,14 @@ public sealed class CreateMethodComparisonHandler(
     }
 }
 
+[RequireInternalActor]
 public sealed record AddMeasurementPairCommand(
     Guid StudyId, decimal ReferenceValue, decimal TestValue, string? SampleId) : ICommand<Guid>;
+[RequireInternalActor]
 public sealed record RemoveMeasurementPairCommand(Guid StudyId, Guid PairId) : ICommand;
+[RequireInternalActor]
 public sealed record CalculateMethodComparisonCommand(Guid StudyId) : ICommand;
+[RequireInternalActor]
 public sealed record SignOffMethodComparisonCommand(Guid StudyId) : ICommand;
 
 public sealed class MethodComparisonWorkflowHandlers(IAppDbContext db, ICurrentUser user, IClock clock) :
@@ -88,6 +93,7 @@ public sealed class MethodComparisonWorkflowHandlers(IAppDbContext db, ICurrentU
             ?? throw new DomainException("MC-404", "Method-comparison study not found.");
 }
 
+[RequireInternalActor]
 public sealed record ImportMeasurementPairsCommand(
     Guid StudyId, IReadOnlyList<AddMeasurementPairRequest> Rows) : ICommand<BulkImportResultDto>;
 
@@ -131,7 +137,7 @@ public sealed class ImportMeasurementPairsHandler(IAppDbContext db)
     }
 }
 
-// ── Queries ──────────────────────────────────────────────────────────────────
+// â”€â”€ Queries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 public sealed record GetMethodComparisonsQuery(string? State)
     : IQuery<IReadOnlyList<MethodComparisonListItemDto>>;

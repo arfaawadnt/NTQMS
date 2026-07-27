@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.AnalyticalQuality;
@@ -8,6 +8,7 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.AnalyticalQuality;
 
+[RequireInternalActor]
 public sealed record CreateLotComparisonCommand(
     string Analyte, string Unit, string CurrentLot, string NewLot, decimal AllowableBiasPct) : ICommand<Guid>;
 
@@ -37,9 +38,13 @@ public sealed class CreateLotComparisonHandler(IAppDbContext db, ICurrentTenant 
     }
 }
 
+[RequireInternalActor]
 public sealed record AddLotPairCommand(Guid StudyId, decimal CurrentLotValue, decimal NewLotValue, string? SampleId) : ICommand<Guid>;
+[RequireInternalActor]
 public sealed record RemoveLotPairCommand(Guid StudyId, Guid PairId) : ICommand;
+[RequireInternalActor]
 public sealed record CalculateLotComparisonCommand(Guid StudyId) : ICommand;
+[RequireInternalActor]
 public sealed record SignOffLotComparisonCommand(Guid StudyId) : ICommand;
 
 public sealed class LotComparisonWorkflowHandlers(IAppDbContext db, ICurrentUser user, IClock clock) :

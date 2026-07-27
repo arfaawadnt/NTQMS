@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.Resources;
@@ -8,8 +8,9 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.Competency;
 
-// ── Competency commands ──────────────────────────────────────────────────────
+// â”€â”€ Competency commands â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record AssignCompetencyCommand(
     Guid TraineeId, string Subject, Guid? DocumentId, int ValidityMonths) : ICommand<Guid>;
 
@@ -35,8 +36,11 @@ public sealed class AssignCompetencyHandler(IAppDbContext db)
     }
 }
 
+[RequireInternalActor]
 public sealed record ScoreAssessmentCommand(Guid CompetencyId, int Score) : ICommand;
+[RequireInternalActor]
 public sealed record AuthorizeCompetencyCommand(Guid CompetencyId) : ICommand;
+[RequireInternalActor]
 public sealed record RevokeCompetencyCommand(Guid CompetencyId, string Reason) : ICommand;
 
 internal static class CompetencyLoader
@@ -84,8 +88,9 @@ public sealed class RevokeCompetencyHandler(IAppDbContext db, ICurrentUser user)
     }
 }
 
-// ── Training commands ────────────────────────────────────────────────────────
+// â”€â”€ Training commands â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record AssignTrainingCommand(
     Guid TraineeId, string Subject, Guid? DocumentId, DateOnly DueDate) : ICommand<Guid>;
 
@@ -101,6 +106,7 @@ public sealed class AssignTrainingHandler(IAppDbContext db)
     }
 }
 
+[RequireInternalActor]
 public sealed record CompleteTrainingCommand(Guid AssignmentId) : ICommand;
 
 public sealed class CompleteTrainingHandler(IAppDbContext db, IClock clock)
@@ -115,7 +121,7 @@ public sealed class CompleteTrainingHandler(IAppDbContext db, IClock clock)
     }
 }
 
-// ── Queries ──────────────────────────────────────────────────────────────────
+// â”€â”€ Queries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 public sealed record GetCompetenciesQuery(Guid? TraineeId = null, string? Status = null)
     : IQuery<IReadOnlyList<CompetencyListItemDto>>;

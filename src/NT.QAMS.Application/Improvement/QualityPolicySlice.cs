@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.Improvement;
@@ -8,10 +8,13 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.Improvement;
 
-// ── Commands ─────────────────────────────────────────────────────────────────
+// â”€â”€ Commands â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record DraftQualityPolicyCommand(string Statement) : ICommand<Guid>;
+[RequireInternalActor]
 public sealed record ReviseQualityPolicyCommand(Guid PolicyId, string Statement) : ICommand;
+[RequireInternalActor]
 public sealed record ApproveQualityPolicyCommand(Guid PolicyId, DateOnly EffectiveDate) : ICommand;
 
 public sealed class DraftQualityPolicyValidator : AbstractValidator<DraftQualityPolicyCommand>
@@ -35,7 +38,7 @@ public sealed class DraftQualityPolicyHandler(
         var tenantId = tenant.TenantId
             ?? throw new DomainException("TENANT-000", "A tenant context is required.");
 
-        // Version is the next in this tenant's sequence — a new draft always builds on the latest.
+        // Version is the next in this tenant's sequence â€” a new draft always builds on the latest.
         var latestVersion = await db.QualityPolicies
             .Where(p => p.TenantId == tenantId)
             .Select(p => (int?)p.Version)
@@ -86,7 +89,7 @@ public sealed class QualityPolicyWorkflowHandlers(IAppDbContext db, ICurrentUser
         ?? throw new DomainException("QP-404", "Quality policy not found.");
 }
 
-// ── Queries ──────────────────────────────────────────────────────────────────
+// â”€â”€ Queries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 public sealed record GetQualityPoliciesQuery : IQuery<IReadOnlyList<QualityPolicyDto>>;
 

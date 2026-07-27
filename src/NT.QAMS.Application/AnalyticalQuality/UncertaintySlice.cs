@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.AnalyticalQuality;
@@ -8,8 +8,9 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.AnalyticalQuality;
 
-// ── Commands ─────────────────────────────────────────────────────────────────
+// â”€â”€ Commands â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record CreateUncertaintyBudgetCommand(
     string Analyte, string Method, string Unit, string Level,
     decimal CoverageFactor, decimal? TargetExpandedUncertainty) : ICommand<Guid>;
@@ -43,10 +44,14 @@ public sealed class CreateUncertaintyBudgetHandler(
     }
 }
 
+[RequireInternalActor]
 public sealed record AddUncertaintyComponentCommand(
     Guid BudgetId, string Name, string Type, decimal RelativeStandardUncertainty, string? Source) : ICommand<Guid>;
+[RequireInternalActor]
 public sealed record RemoveUncertaintyComponentCommand(Guid BudgetId, Guid ComponentId) : ICommand;
+[RequireInternalActor]
 public sealed record CalculateUncertaintyBudgetCommand(Guid BudgetId) : ICommand;
+[RequireInternalActor]
 public sealed record ApproveUncertaintyBudgetCommand(Guid BudgetId) : ICommand;
 
 public sealed class AddUncertaintyComponentValidator : AbstractValidator<AddUncertaintyComponentCommand>
@@ -103,7 +108,7 @@ public sealed class UncertaintyWorkflowHandlers(IAppDbContext db, ICurrentUser u
             ?? throw new DomainException("MU-404", "Uncertainty budget not found.");
 }
 
-// ── Queries ──────────────────────────────────────────────────────────────────
+// â”€â”€ Queries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 public sealed record GetUncertaintyBudgetsQuery(string? Status)
     : IQuery<IReadOnlyList<UncertaintyBudgetListItemDto>>;

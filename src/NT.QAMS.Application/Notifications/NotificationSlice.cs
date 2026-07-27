@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.Platform;
 using NT.QAMS.Domain.Notifications;
@@ -6,6 +6,7 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.Notifications;
 
+[RequireInternalActor]
 public sealed record UpsertNotificationRuleCommand(
     string EventKey, string RecipientRoles, bool EmailEnabled,
     string SubjectTemplate, string BodyTemplate) : ICommand<Guid>;
@@ -77,6 +78,7 @@ public sealed class GetMyNotificationsHandler(IAppDbContext db, ICurrentUser use
     }
 }
 
+[RequireInternalActor]
 public sealed record MarkNotificationReadCommand(Guid DispatchId) : ICommand;
 
 public sealed class MarkNotificationReadHandler(IAppDbContext db, ICurrentUser user)

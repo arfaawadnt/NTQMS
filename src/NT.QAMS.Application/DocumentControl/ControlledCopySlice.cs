@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.DocumentControl;
 using NT.QAMS.Domain.DocumentControl;
@@ -7,10 +7,12 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.DocumentControl;
 
-// ── Commands ──────────────────────────────────────────────────────────────────
+// â”€â”€ Commands â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /// <summary>Issue a numbered physical copy of a published document to a named holder.</summary>
+[RequireInternalActor]
 public sealed record IssueControlledCopyCommand(Guid DocumentId, string Holder) : ICommand<Guid>;
+[RequireInternalActor]
 public sealed record CloseControlledCopyCommand(Guid CopyId, string Outcome) : ICommand;
 
 public sealed class IssueControlledCopyHandler(IAppDbContext db, ICurrentUser user, IClock clock)
@@ -59,7 +61,7 @@ public sealed class CloseControlledCopyHandler(IAppDbContext db, ICurrentUser us
     }
 }
 
-// ── Query ─────────────────────────────────────────────────────────────────────
+// â”€â”€ Query â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 public sealed record GetControlledCopiesQuery(Guid DocumentId) : IQuery<IReadOnlyList<ControlledCopyDto>>;
 

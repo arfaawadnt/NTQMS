@@ -15,6 +15,8 @@ public sealed class FakeCurrentUser : ICurrentUser
     public Guid? UserId { get; set; } = Guid.CreateVersion7();
     public string? DisplayName { get; set; } = "test-user";
     public bool IsAuthenticated => UserId.HasValue;
+    public NT.QAMS.Domain.IdentityAccess.UserRole? Role { get; set; } =
+        NT.QAMS.Domain.IdentityAccess.UserRole.QualityManager;
 }
 
 public sealed class FixedClock(DateTimeOffset now) : IClock

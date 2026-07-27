@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.Platform;
@@ -8,14 +8,17 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.Organization;
 
-// ── Interested parties ───────────────────────────────────────────────────────
+// â”€â”€ Interested parties â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record RegisterInterestedPartyCommand(
     string Name, string Category, string NeedsAndExpectations,
     string? RelevantRequirements, DateOnly ReviewedOn) : ICommand<Guid>;
+[RequireInternalActor]
 public sealed record ReviseInterestedPartyCommand(
     Guid PartyId, string Name, string Category, string NeedsAndExpectations,
     string? RelevantRequirements, DateOnly ReviewedOn) : ICommand;
+[RequireInternalActor]
 public sealed record ArchiveInterestedPartyCommand(Guid PartyId) : ICommand;
 
 public sealed class RegisterInterestedPartyValidator : AbstractValidator<RegisterInterestedPartyCommand>
@@ -80,13 +83,17 @@ public sealed class GetInterestedPartiesHandler(IAppDbContext db)
             .ToListAsync(ct);
 }
 
-// ── Context issues ───────────────────────────────────────────────────────────
+// â”€â”€ Context issues â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record RegisterContextIssueCommand(
     string Type, string Category, string Description, string Impact) : ICommand<Guid>;
+[RequireInternalActor]
 public sealed record ReviseContextIssueCommand(
     Guid IssueId, string Type, string Category, string Description, string Impact) : ICommand;
+[RequireInternalActor]
 public sealed record LinkContextIssueRiskCommand(Guid IssueId, Guid RiskId) : ICommand;
+[RequireInternalActor]
 public sealed record CloseContextIssueCommand(Guid IssueId, string Resolution) : ICommand;
 
 public sealed class RegisterContextIssueValidator : AbstractValidator<RegisterContextIssueCommand>
@@ -129,7 +136,7 @@ public sealed class ContextIssueHandlers(
 
     public async Task Handle(LinkContextIssueRiskCommand c, CancellationToken ct)
     {
-        // The risk must exist in this tenant's register — a dangling link is worse than none.
+        // The risk must exist in this tenant's register â€” a dangling link is worse than none.
         if (!await db.Risks.AnyAsync(r => r.Id == c.RiskId, ct))
         {
             throw new DomainException("RSK-404", "Risk not found.");

@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.DocumentControl;
 using NT.QAMS.Domain.DocumentControl;
@@ -7,9 +7,10 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.DocumentControl;
 
-// ── Command ──────────────────────────────────────────────────────────────────
+// â”€â”€ Command â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /// <summary>The current user confirms they have read and understood the document's published version.</summary>
+[RequireInternalActor]
 public sealed record AcknowledgeDocumentCommand(Guid DocumentId) : ICommand<Guid>;
 
 public sealed class AcknowledgeDocumentHandler(IAppDbContext db, ICurrentUser user, IClock clock)
@@ -47,7 +48,7 @@ public sealed class AcknowledgeDocumentHandler(IAppDbContext db, ICurrentUser us
     }
 }
 
-// ── Queries ──────────────────────────────────────────────────────────────────
+// â”€â”€ Queries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /// <summary>Whether the current user has acknowledged this document's current published version.</summary>
 public sealed record GetMyDocumentAcknowledgementQuery(Guid DocumentId)

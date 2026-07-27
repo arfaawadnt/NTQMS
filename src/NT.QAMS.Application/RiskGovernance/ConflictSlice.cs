@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.Governance;
@@ -8,11 +8,14 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.RiskGovernance;
 
-// ── Commands ─────────────────────────────────────────────────────────────────
+// â”€â”€ Commands â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record DeclareConflictCommand(
     Guid DeclarantId, string Description, string RelatedParty, DateOnly DeclaredOn) : ICommand<Guid>;
+[RequireInternalActor]
 public sealed record AssessConflictCommand(Guid ConflictId, string RiskLevel, string Mitigation) : ICommand;
+[RequireInternalActor]
 public sealed record CloseConflictCommand(Guid ConflictId, string Outcome, string ClosureNote) : ICommand;
 
 public sealed class DeclareConflictValidator : AbstractValidator<DeclareConflictCommand>
@@ -76,7 +79,7 @@ public sealed class ConflictWorkflowHandlers(IAppDbContext db, ICurrentUser user
             ?? throw new DomainException("COI-404", "Conflict declaration not found.");
 }
 
-// ── Queries ──────────────────────────────────────────────────────────────────
+// â”€â”€ Queries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 public sealed record GetConflictsQuery(string? Status) : IQuery<IReadOnlyList<ConflictListItemDto>>;
 

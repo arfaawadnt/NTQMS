@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.AnalyticalQuality;
@@ -8,6 +8,7 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.AnalyticalQuality;
 
+[RequireInternalActor]
 public sealed record CreateCarryoverStudyCommand(string Analyte, string Unit, decimal AllowableCarryoverPct) : ICommand<Guid>;
 
 public sealed class CreateCarryoverStudyValidator : AbstractValidator<CreateCarryoverStudyCommand>
@@ -34,9 +35,13 @@ public sealed class CreateCarryoverStudyHandler(IAppDbContext db, ICurrentTenant
     }
 }
 
+[RequireInternalActor]
 public sealed record AddCarryoverReadingCommand(Guid StudyId, string Kind, int Sequence, decimal Value) : ICommand<Guid>;
+[RequireInternalActor]
 public sealed record RemoveCarryoverReadingCommand(Guid StudyId, Guid ReadingId) : ICommand;
+[RequireInternalActor]
 public sealed record CalculateCarryoverCommand(Guid StudyId) : ICommand;
+[RequireInternalActor]
 public sealed record SignOffCarryoverCommand(Guid StudyId) : ICommand;
 
 public sealed class CarryoverWorkflowHandlers(IAppDbContext db, ICurrentUser user, IClock clock) :

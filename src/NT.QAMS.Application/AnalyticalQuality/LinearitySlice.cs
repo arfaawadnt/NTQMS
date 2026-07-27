@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.AnalyticalQuality;
@@ -8,8 +8,9 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.AnalyticalQuality;
 
-// ── Commands ─────────────────────────────────────────────────────────────────
+// â”€â”€ Commands â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record CreateLinearityStudyCommand(
     string Analyte, string Unit, string Method, decimal AllowableDeviationPct) : ICommand<Guid>;
 
@@ -40,10 +41,14 @@ public sealed class CreateLinearityStudyHandler(
     }
 }
 
+[RequireInternalActor]
 public sealed record AddLinearityMeasurementCommand(
     Guid StudyId, decimal AssignedValue, decimal MeasuredValue) : ICommand<Guid>;
+[RequireInternalActor]
 public sealed record RemoveLinearityMeasurementCommand(Guid StudyId, Guid MeasurementId) : ICommand;
+[RequireInternalActor]
 public sealed record CalculateLinearityCommand(Guid StudyId) : ICommand;
+[RequireInternalActor]
 public sealed record SignOffLinearityCommand(Guid StudyId) : ICommand;
 
 public sealed class LinearityWorkflowHandlers(IAppDbContext db, ICurrentUser user, IClock clock) :
@@ -88,7 +93,7 @@ public sealed class LinearityWorkflowHandlers(IAppDbContext db, ICurrentUser use
             ?? throw new DomainException("LIN-404", "Linearity study not found.");
 }
 
-// ── Queries ──────────────────────────────────────────────────────────────────
+// â”€â”€ Queries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 public sealed record GetLinearityStudiesQuery(string? State)
     : IQuery<IReadOnlyList<LinearityListItemDto>>;

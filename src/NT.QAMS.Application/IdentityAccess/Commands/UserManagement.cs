@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.IdentityAccess;
@@ -26,8 +26,9 @@ internal static class TenantRole
     }
 }
 
-// ── Register ─────────────────────────────────────────────────────────────────
+// â”€â”€ Register â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record RegisterUserCommand(string Email, string DisplayName, string Role, string InitialPassword)
     : ICommand<Guid>;
 
@@ -63,10 +64,13 @@ public sealed class RegisterUserHandler(IAppDbContext db, ICurrentTenant tenant,
     }
 }
 
-// ── Role / status / password ─────────────────────────────────────────────────
+// â”€â”€ Role / status / password â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record ChangeUserRoleCommand(Guid UserId, string Role) : ICommand;
+[RequireInternalActor]
 public sealed record SetUserActiveCommand(Guid UserId, bool Active) : ICommand;
+[RequireInternalActor]
 public sealed record ResetUserPasswordCommand(Guid UserId, string NewPassword) : ICommand;
 
 public sealed class ResetUserPasswordValidator : AbstractValidator<ResetUserPasswordCommand>
@@ -117,7 +121,7 @@ public sealed class ResetUserPasswordHandler(IAppDbContext db, ICurrentTenant te
     }
 }
 
-// ── Queries ──────────────────────────────────────────────────────────────────
+// â”€â”€ Queries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 public sealed record GetUsersQuery : IQuery<IReadOnlyList<UserDto>>;
 
@@ -136,7 +140,7 @@ public sealed class GetUsersHandler(IAppDbContext db, ICurrentTenant tenant)
 }
 
 /// <summary>
-/// The tenant's active-user directory for name pickers — readable by every
+/// The tenant's active-user directory for name pickers â€” readable by every
 /// authenticated tenant user (unlike full user administration). Exposes ids,
 /// display names and roles only.
 /// </summary>

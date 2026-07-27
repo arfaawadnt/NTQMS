@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.Improvement;
@@ -8,8 +8,9 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.Improvement.Commands;
 
-// ── Log ──────────────────────────────────────────────────────────────────────
+// â”€â”€ Log â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record LogComplaintCommand(
     ComplaintChannel Channel, string ComplainantName, string? ComplainantContact,
     bool Confidential, string Subject, string Description,
@@ -51,13 +52,19 @@ public sealed class LogComplaintHandler(
     }
 }
 
-// ── Workflow transitions (load → guarded aggregate method → save) ───────────
+// â”€â”€ Workflow transitions (load â†’ guarded aggregate method â†’ save) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record AcknowledgeComplaintCommand(Guid ComplaintId) : ICommand;
+[RequireInternalActor]
 public sealed record ValidateComplaintCommand(Guid ComplaintId, bool Justified, string Reason) : ICommand;
+[RequireInternalActor]
 public sealed record StartComplaintInvestigationCommand(Guid ComplaintId) : ICommand;
+[RequireInternalActor]
 public sealed record LogComplaintOutcomeCommand(Guid ComplaintId, string Outcome) : ICommand;
+[RequireInternalActor]
 public sealed record ResolveComplaintCommand(Guid ComplaintId, string Resolution) : ICommand;
+[RequireInternalActor]
 public sealed record CloseComplaintCommand(Guid ComplaintId) : ICommand;
 
 public sealed class ValidateComplaintValidator : AbstractValidator<ValidateComplaintCommand>
@@ -131,7 +138,7 @@ public sealed class ComplaintWorkflowHandlers(IAppDbContext db, IClock clock) :
             ?? throw new DomainException("CMP-404", "Complaint not found.");
 }
 
-// ── Queries ──────────────────────────────────────────────────────────────────
+// â”€â”€ Queries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 public sealed record GetComplaintsQuery(string? Status, bool CanViewConfidential)
     : IQuery<IReadOnlyList<ComplaintListItemDto>>;
@@ -154,7 +161,7 @@ public sealed class GetComplaintsHandler(IAppDbContext db)
             .Select(c => new ComplaintListItemDto(
                 c.Id, c.ComplaintRef, c.Subject, c.Channel.ToString(), c.Status.ToString(),
                 c.Confidential,
-                c.Confidential && !query.CanViewConfidential ? "•••" : c.ComplainantName,
+                c.Confidential && !query.CanViewConfidential ? "â€¢â€¢â€¢" : c.ComplainantName,
                 c.LoggedAtUtc, c.BranchId, c.DepartmentId))
             .ToListAsync(ct);
     }
@@ -177,7 +184,7 @@ public sealed class GetComplaintByIdHandler(IAppDbContext db)
         var masked = c.Confidential && !query.CanViewConfidential;
         return new ComplaintDetailDto(
             c.Id, c.ComplaintRef, c.Channel.ToString(),
-            masked ? "•••" : c.ComplainantName,
+            masked ? "â€¢â€¢â€¢" : c.ComplainantName,
             masked ? null : c.ComplainantContact,
             c.Confidential, c.Subject, c.Description, c.Status.ToString(),
             c.LoggedAtUtc, c.AcknowledgedAtUtc, c.ValidationVerdict,

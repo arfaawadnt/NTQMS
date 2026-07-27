@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.IdentityAccess;
@@ -8,9 +8,11 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.IdentityAccess.Commands;
 
-// ── Commands ─────────────────────────────────────────────────────────────────
+// â”€â”€ Commands â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record OpenAccessReviewCommand : ICommand<Guid>;
+[RequireInternalActor]
 public sealed record CompleteAccessReviewCommand(
     Guid ReviewId, bool ChangesRequired, string Conclusion) : ICommand;
 
@@ -58,7 +60,7 @@ public sealed class CompleteAccessReviewHandler(
     }
 }
 
-// ── Query ────────────────────────────────────────────────────────────────────
+// â”€â”€ Query â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 public sealed record GetAccessReviewsQuery : IQuery<IReadOnlyList<UserAccessReviewDto>>;
 

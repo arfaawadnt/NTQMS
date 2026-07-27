@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.AnalyticalQuality;
@@ -8,8 +8,9 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.AnalyticalQuality;
 
-// ── Commands ─────────────────────────────────────────────────────────────────
+// â”€â”€ Commands â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record CreateReferenceIntervalStudyCommand(
     string Analyte, string Unit, string Population, string Source,
     decimal ClaimedLower, decimal ClaimedUpper) : ICommand<Guid>;
@@ -42,9 +43,13 @@ public sealed class CreateReferenceIntervalStudyHandler(
     }
 }
 
+[RequireInternalActor]
 public sealed record AddReferenceSampleCommand(Guid StudyId, decimal Value, string? SubjectRef) : ICommand<Guid>;
+[RequireInternalActor]
 public sealed record RemoveReferenceSampleCommand(Guid StudyId, Guid SampleId) : ICommand;
+[RequireInternalActor]
 public sealed record CalculateReferenceIntervalCommand(Guid StudyId) : ICommand;
+[RequireInternalActor]
 public sealed record SignOffReferenceIntervalCommand(Guid StudyId) : ICommand;
 
 public sealed class ReferenceIntervalWorkflowHandlers(IAppDbContext db, ICurrentUser user, IClock clock) :
@@ -89,7 +94,7 @@ public sealed class ReferenceIntervalWorkflowHandlers(IAppDbContext db, ICurrent
             ?? throw new DomainException("RI-404", "Reference-interval study not found.");
 }
 
-// ── Queries ──────────────────────────────────────────────────────────────────
+// â”€â”€ Queries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 public sealed record GetReferenceIntervalStudiesQuery(string? State)
     : IQuery<IReadOnlyList<ReferenceIntervalListItemDto>>;

@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.Resources;
@@ -8,8 +8,9 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.Competency;
 
-// ── Commands ─────────────────────────────────────────────────────────────────
+// â”€â”€ Commands â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record GrantTestAuthorizationCommand(
     Guid UserId, Guid TestCatalogItemId, Guid CompetencyRecordId, string Scope) : ICommand<Guid>;
 
@@ -37,7 +38,7 @@ public sealed class GrantTestAuthorizationHandler(IAppDbContext db, ICurrentUser
             ?? throw new DomainException("ORG-404", "Catalog test not found.");
         if (!test.IsActive)
         {
-            throw new DomainException("AUTHZ-002", $"Test {test.TestCode} is inactive — authorizations can only target active catalog tests.");
+            throw new DomainException("AUTHZ-002", $"Test {test.TestCode} is inactive â€” authorizations can only target active catalog tests.");
         }
 
         // The evidence gate: a current, Authorized competency belonging to the
@@ -71,8 +72,11 @@ public sealed class GrantTestAuthorizationHandler(IAppDbContext db, ICurrentUser
     }
 }
 
+[RequireInternalActor]
 public sealed record SuspendTestAuthorizationCommand(Guid AuthorizationId, string Reason) : ICommand;
+[RequireInternalActor]
 public sealed record ReinstateTestAuthorizationCommand(Guid AuthorizationId) : ICommand;
+[RequireInternalActor]
 public sealed record RevokeTestAuthorizationCommand(Guid AuthorizationId, string Reason) : ICommand;
 
 public sealed class SuspendTestAuthorizationValidator : AbstractValidator<SuspendTestAuthorizationCommand>
@@ -124,7 +128,7 @@ public sealed class TestAuthorizationWorkflowHandlers(IAppDbContext db, ICurrent
             ?? throw new DomainException("AUTHZ-404", "Test authorization not found.");
 }
 
-// ── Queries ──────────────────────────────────────────────────────────────────
+// â”€â”€ Queries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 public sealed record GetTestAuthorizationsQuery(Guid? UserId = null, string? Status = null)
     : IQuery<IReadOnlyList<TestAuthorizationListItemDto>>;

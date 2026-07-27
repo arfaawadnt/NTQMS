@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.Facility;
@@ -8,8 +8,9 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.Facility;
 
-// ── Commands ─────────────────────────────────────────────────────────────────
+// â”€â”€ Commands â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record RegisterMonitoringPointCommand(
     string Name, string? Location, string Parameter, string Unit,
     decimal? LowLimit, decimal? HighLimit,
@@ -45,10 +46,15 @@ public sealed class RegisterMonitoringPointHandler(
     }
 }
 
+[RequireInternalActor]
 public sealed record SetMonitoringLimitsCommand(Guid PointId, decimal? LowLimit, decimal? HighLimit) : ICommand;
+[RequireInternalActor]
 public sealed record RecordReadingCommand(Guid PointId, decimal Value, string? Remark) : ICommand<Guid>;
+[RequireInternalActor]
 public sealed record SuspendMonitoringPointCommand(Guid PointId) : ICommand;
+[RequireInternalActor]
 public sealed record ResumeMonitoringPointCommand(Guid PointId) : ICommand;
+[RequireInternalActor]
 public sealed record RetireMonitoringPointCommand(Guid PointId) : ICommand;
 
 public sealed class RecordReadingValidator : AbstractValidator<RecordReadingCommand>
@@ -110,7 +116,7 @@ public sealed class MonitoringWorkflowHandlers(IAppDbContext db, ICurrentUser us
             ?? throw new DomainException("ENV-404", "Monitoring point not found.");
 }
 
-// ── Queries ──────────────────────────────────────────────────────────────────
+// â”€â”€ Queries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 public sealed record GetMonitoringPointsQuery(string? Status)
     : IQuery<IReadOnlyList<MonitoringPointListItemDto>>;

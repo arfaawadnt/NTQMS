@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Domain.Improvement;
@@ -7,8 +7,9 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.Improvement.Commands;
 
-// ── Raise ────────────────────────────────────────────────────────────────────
+// â”€â”€ Raise â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record RaiseNcCommand(
     string Title, string Description, int Severity, int Likelihood, NcSourceType SourceType,
     Guid? BranchId = null, Guid? DepartmentId = null,
@@ -52,17 +53,26 @@ public sealed class RaiseNcHandler(
     }
 }
 
-// ── Workflow transitions (load → guarded aggregate method → save) ───────────
+// â”€â”€ Workflow transitions (load â†’ guarded aggregate method â†’ save) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record SubmitNcCommand(Guid NcId) : ICommand;
+[RequireInternalActor]
 public sealed record TriageNcCommand(Guid NcId, Guid AssigneeId) : ICommand;
+[RequireInternalActor]
 public sealed record RejectNcCommand(Guid NcId, string Reason) : ICommand;
+[RequireInternalActor]
 public sealed record RecordRcaCommand(Guid NcId, RcaMethod Method, string Analysis) : ICommand;
+[RequireInternalActor]
 public sealed record PlanCapaActionCommand(
     Guid NcId, CapaActionType Type, string Details, Guid OwnerId, DateOnly DueDate) : ICommand<Guid>;
+[RequireInternalActor]
 public sealed record CompleteCapaActionCommand(Guid NcId, Guid ActionId) : ICommand;
+[RequireInternalActor]
 public sealed record SubmitNcForVerificationCommand(Guid NcId) : ICommand;
+[RequireInternalActor]
 public sealed record VerifyNcCommand(Guid NcId, bool Passed) : ICommand;
+[RequireInternalActor]
 public sealed record ConfirmNcEffectivenessCommand(Guid NcId, bool Effective) : ICommand;
 
 public sealed class RejectNcValidator : AbstractValidator<RejectNcCommand>

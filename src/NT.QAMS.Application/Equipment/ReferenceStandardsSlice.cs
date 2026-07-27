@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.Resources;
@@ -8,8 +8,9 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.Equipment;
 
-// ── Commands ─────────────────────────────────────────────────────────────────
+// â”€â”€ Commands â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record RegisterReferenceStandardCommand(
     string Name, string Type, string TraceableTo,
     string? Manufacturer, string? LotNumber, string? CertificateNumber,
@@ -52,8 +53,11 @@ public sealed class RegisterReferenceStandardHandler(
     }
 }
 
+[RequireInternalActor]
 public sealed record QuarantineReferenceStandardCommand(Guid StandardId, string Reason) : ICommand;
+[RequireInternalActor]
 public sealed record ReactivateReferenceStandardCommand(Guid StandardId) : ICommand;
+[RequireInternalActor]
 public sealed record RetireReferenceStandardCommand(Guid StandardId) : ICommand;
 
 public sealed class QuarantineReferenceStandardValidator : AbstractValidator<QuarantineReferenceStandardCommand>
@@ -95,7 +99,7 @@ public sealed class ReferenceStandardWorkflowHandlers(IAppDbContext db, IClock c
             ?? throw new DomainException("RS-404", "Reference standard not found.");
 }
 
-// ── Queries ──────────────────────────────────────────────────────────────────
+// â”€â”€ Queries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 public sealed record GetReferenceStandardsQuery(string? Status)
     : IQuery<IReadOnlyList<ReferenceStandardListItemDto>>;

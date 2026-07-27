@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.Improvement;
@@ -8,8 +8,9 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.Improvement;
 
-// ── Commands ─────────────────────────────────────────────────────────────────
+// â”€â”€ Commands â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record DefineQualityObjectiveCommand(
     string Title, string? Description, string Metric, string Unit,
     decimal TargetValue, string Direction, Guid OwnerId,
@@ -50,8 +51,10 @@ public sealed class DefineQualityObjectiveHandler(
     }
 }
 
+[RequireInternalActor]
 public sealed record RecordObjectiveProgressCommand(
     Guid ObjectiveId, DateOnly MeasuredOn, decimal Value, string? Comment) : ICommand<Guid>;
+[RequireInternalActor]
 public sealed record CloseObjectiveCommand(Guid ObjectiveId, string Outcome, string Note) : ICommand;
 
 public sealed class RecordObjectiveProgressValidator : AbstractValidator<RecordObjectiveProgressCommand>
@@ -96,7 +99,7 @@ public sealed class QualityObjectiveWorkflowHandlers(IAppDbContext db, ICurrentU
             ?? throw new DomainException("OBJ-404", "Quality objective not found.");
 }
 
-// ── Queries ──────────────────────────────────────────────────────────────────
+// â”€â”€ Queries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 public sealed record GetQualityObjectivesQuery(string? Status)
     : IQuery<IReadOnlyList<QualityObjectiveListItemDto>>;
@@ -114,7 +117,7 @@ public sealed class GetQualityObjectivesHandler(IAppDbContext db)
             objectives = objectives.Where(o => o.Status == status);
         }
 
-        // CurrentValue/OnTarget are domain-computed — materialise then project.
+        // CurrentValue/OnTarget are domain-computed â€” materialise then project.
         var rows = await objectives
             .Include(o => o.Updates)
             .OrderByDescending(o => o.PeriodStart)

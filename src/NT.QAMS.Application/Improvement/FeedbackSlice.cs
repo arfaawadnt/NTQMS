@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.Improvement;
@@ -8,8 +8,9 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.Improvement;
 
-// ── Commands ─────────────────────────────────────────────────────────────────
+// â”€â”€ Commands â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record LogFeedbackCommand(
     string Source, string Channel, string Type, string Subject, string Details,
     int? SatisfactionScore, DateOnly ReceivedOn,
@@ -50,8 +51,11 @@ public sealed class LogFeedbackHandler(
     }
 }
 
+[RequireInternalActor]
 public sealed record ReviewFeedbackCommand(Guid FeedbackId, string ReviewNotes) : ICommand;
+[RequireInternalActor]
 public sealed record CloseFeedbackCommand(Guid FeedbackId, string ActionSummary) : ICommand;
+[RequireInternalActor]
 public sealed record EscalateFeedbackCommand(Guid FeedbackId, string ComplainantName, string? ComplainantContact) : ICommand<Guid>;
 
 public sealed class ReviewFeedbackValidator : AbstractValidator<ReviewFeedbackCommand>
@@ -92,7 +96,7 @@ public sealed class FeedbackWorkflowHandlers(
 
     /// <summary>
     /// Escalation opens a formal complaint carrying the feedback content and
-    /// links the two records in the SAME transaction — no half-escalated state.
+    /// links the two records in the SAME transaction â€” no half-escalated state.
     /// </summary>
     public async Task<Guid> Handle(EscalateFeedbackCommand c, CancellationToken ct)
     {
@@ -122,7 +126,7 @@ public sealed class FeedbackWorkflowHandlers(
             ?? throw new DomainException("FBK-404", "Feedback entry not found.");
 }
 
-// ── Queries ──────────────────────────────────────────────────────────────────
+// â”€â”€ Queries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 public sealed record GetFeedbackQuery(string? Status, string? Type)
     : IQuery<IReadOnlyList<FeedbackListItemDto>>;

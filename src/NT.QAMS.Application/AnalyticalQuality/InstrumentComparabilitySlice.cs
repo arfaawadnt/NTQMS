@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.AnalyticalQuality;
@@ -8,6 +8,7 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.AnalyticalQuality;
 
+[RequireInternalActor]
 public sealed record CreateInstrumentComparabilityCommand(
     string Analyte, string Unit, string ReferenceInstrument, decimal AllowableBiasPct) : ICommand<Guid>;
 
@@ -36,9 +37,13 @@ public sealed class CreateInstrumentComparabilityHandler(IAppDbContext db, ICurr
     }
 }
 
+[RequireInternalActor]
 public sealed record AddInstrumentReadingCommand(Guid StudyId, string Instrument, string SampleId, decimal Value) : ICommand<Guid>;
+[RequireInternalActor]
 public sealed record RemoveInstrumentReadingCommand(Guid StudyId, Guid ReadingId) : ICommand;
+[RequireInternalActor]
 public sealed record CalculateInstrumentComparabilityCommand(Guid StudyId) : ICommand;
+[RequireInternalActor]
 public sealed record SignOffInstrumentComparabilityCommand(Guid StudyId) : ICommand;
 
 public sealed class InstrumentComparabilityWorkflowHandlers(IAppDbContext db, ICurrentUser user, IClock clock) :

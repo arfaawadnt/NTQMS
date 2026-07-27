@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.Resources;
@@ -7,8 +7,9 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.Equipment;
 
-// ── Commands ─────────────────────────────────────────────────────────────────
+// â”€â”€ Commands â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+[RequireInternalActor]
 public sealed record RegisterEquipmentCommand(
     string Name, string SerialNumber, string? Location,
     int CalibrationIntervalDays, int GracePeriodDays,
@@ -52,13 +53,16 @@ public sealed class RegisterEquipmentHandler(
     }
 }
 
+[RequireInternalActor]
 public sealed record LogCalibrationCommand(
     Guid EquipmentId, DateOnly PerformedAt, string Provider, string Result, Guid? CertificateFileId)
     : ICommand;
 
+[RequireInternalActor]
 public sealed record LogMaintenanceCommand(Guid EquipmentId, DateOnly PerformedAt, string WorkDescription)
     : ICommand;
 
+[RequireInternalActor]
 public sealed record RetireEquipmentCommand(Guid EquipmentId) : ICommand;
 
 internal static class EquipmentLoader
@@ -106,6 +110,7 @@ public sealed class RetireEquipmentHandler(IAppDbContext db) : ICommandHandler<R
     }
 }
 
+[RequireInternalActor]
 public sealed record RecordIntermediateCheckCommand(
     Guid EquipmentId, DateOnly PerformedOn, string CheckType, bool Passed,
     Guid? ReferenceStandardId, string? Remarks) : ICommand<Guid>;
@@ -135,7 +140,7 @@ public sealed class RecordIntermediateCheckHandler(IAppDbContext db, ICurrentUse
             if (standard.Status != ReferenceStandardStatus.Active)
             {
                 throw new DomainException("RS-020",
-                    $"Standard {standard.StandardRef} is {standard.Status} — checks must use an active, in-date standard.");
+                    $"Standard {standard.StandardRef} is {standard.Status} â€” checks must use an active, in-date standard.");
             }
         }
 
@@ -147,7 +152,7 @@ public sealed class RecordIntermediateCheckHandler(IAppDbContext db, ICurrentUse
     }
 }
 
-// ── Queries ──────────────────────────────────────────────────────────────────
+// â”€â”€ Queries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 public sealed record GetEquipmentQuery(string? Status = null) : IQuery<IReadOnlyList<EquipmentListItemDto>>;
 
