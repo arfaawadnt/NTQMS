@@ -86,9 +86,18 @@ Linux/containers: build from source with `docker build -f src/NT.QAMS.WebApi/Doc
 ### 1 — Database (once)
 
 ```
-psql -U postgres -f db-init.sql          # edit the password inside first
-psql -U qams_app -d ntqams -f migrations.sql
+psql -U postgres -f db-init.sql               # edit BOTH passwords inside first
+psql -U qams_owner -d ntqams -f migrations.sql    # DDL runs as the OWNER role
+psql -U postgres -d ntqams -f harden-runtime-role.sql   # least-privilege runtime grants
 ```
+
+**Role split (TENANT-004):** migrations run as `qams_owner`; the application
+connects as `qams_app` (no DDL, no DELETE, `NOSUPERUSER NOBYPASSRLS`). The app
+**refuses to start in Production** if its connection role is a superuser, has
+BYPASSRLS, or owns the tables — that would void RLS tenant isolation (F-01) and
+signed-record immutability (F-02). On every upgrade, re-run `migrations.sql` as
+`qams_owner` (re-running `harden-runtime-role.sql` after is safe and covers any
+newly created tables).
 
 ### 2 — Copy & configure
 
@@ -103,7 +112,12 @@ variables only** (never put secrets in appsettings.json):
 | `PlatformAdmin__Password` | Strong password, ≥ 12 chars |
 | `ASPNETCORE_URLS` | `http://127.0.0.1:5000` (loopback; front with a TLS reverse proxy for network exposure) |
 | `ASPNETCORE_ENVIRONMENT` | `Production` |
-| `Database__MigrateOnStartup` | `false` (or `true` for first boot instead of running migrations.sql) |
+| `Database__MigrateOnStartup` | `false` — migrations run as `qams_owner` via `migrations.sql`; the runtime role has no DDL rights |
+
+> **Topology (OPS-002 / ADR-0001):** run exactly **one** API instance per
+> database (`replicas: 1` in any orchestrator manifest). A second instance logs
+> a prominent startup warning (contended singleton advisory lock) and may
+> double-process background jobs. Scale-out controls ship in Phase 1.
 
 ### 3 — Run as a Windows service
 
@@ -118,8 +132,9 @@ or on the service key `HKLM\SYSTEM\CurrentControlSet\Services\NTQAMS\Environment
 ### 4 — Verify (complete end-to-end check)
 
 ```bat
-:: 1. Health (anonymous)
-curl http://127.0.0.1:5000/health                              → 200 Healthy
+:: 1. Health (anonymous) — live = process up; ready = PostgreSQL answering
+curl http://127.0.0.1:5000/health/live                         → 200 Healthy
+curl http://127.0.0.1:5000/health/ready                        → 200 Healthy (503 if DB down)
 
 :: 2. Deny-by-default proof (no token)
 curl -i http://127.0.0.1:5000/api/tenants                      → 401

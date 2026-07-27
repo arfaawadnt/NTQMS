@@ -50,6 +50,20 @@ public sealed class RealPostgresFixture : IDisposable
                 return;
             }
 
+            // TENANT-004: a SUPERUSER/BYPASSRLS role is exempt from RLS, so the
+            // isolation tests would silently prove nothing — refuse to run.
+            cmd.CommandText =
+                "SELECT r.rolsuper OR r.rolbypassrls FROM pg_roles r WHERE r.rolname = current_user";
+            if ((bool)cmd.ExecuteScalar()!)
+            {
+                Available = false;
+                Unavailable =
+                    "The test connection role has SUPERUSER/BYPASSRLS — RLS is bypassed for it, so the " +
+                    "isolation tests prove nothing. Run the suite as the least-privilege qams_app role " +
+                    "(see deploy/harden-runtime-role.sql).";
+                return;
+            }
+
             Available = true;
         }
         catch (Exception ex)

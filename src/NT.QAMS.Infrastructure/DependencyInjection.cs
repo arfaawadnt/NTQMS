@@ -88,6 +88,9 @@ public static class DependencyInjection
         services.AddHostedService<OutboxProcessor>();
         services.AddHostedService<Jobs.ScheduledSweepService>();
         services.AddHostedService<Jobs.KpiSnapshotService>();
+        // OPS-002: single-replica topology sentinel — warns when a second
+        // instance runs against the same database (see ADR-0001).
+        services.AddHostedService<Jobs.SingleReplicaGuardService>();
 
         return services;
     }

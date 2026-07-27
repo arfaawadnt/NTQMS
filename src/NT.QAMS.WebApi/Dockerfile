@@ -10,6 +10,7 @@ WORKDIR /app
 COPY --from=build /app/publish .
 ENV ASPNETCORE_URLS=http://0.0.0.0:8080
 EXPOSE 8080
+# OPS-008: probe readiness (process up AND PostgreSQL answering), not bare liveness.
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-  CMD wget -qO- http://localhost:8080/health || exit 1
+  CMD wget -qO- http://localhost:8080/health/ready || exit 1
 ENTRYPOINT ["dotnet", "NT.QAMS.WebApi.dll"]

@@ -30,8 +30,8 @@ NT.QMS is a **multi-tenant SaaS Quality Management System** for ISO 17025 / 1518
 8. **Commit discipline:** work on `master`; commit/push only when asked; end commit
    messages with `Co-Authored-By: Claude <noreply@anthropic.com>` (use the current model).
 
-## 3. Current state (as of restore-point 2026-07-27)
-- Code at tag **`v1.37.0`** (also `restore-point-20260727`). Repo: `github.com/arfaawadnt/NTQMS`.
+## 3. Current state (as of 2026-07-28)
+- Code at tag **`v1.38.0`** (EA remediation Phase 0 shipped; `restore-point-20260727` = v1.37.0). Repo: `github.com/arfaawadnt/NTQMS`.
 - **All 18 CSV/regulatory-audit findings are CLOSED** (release train v1.25→v1.37): tenant
   RLS, signed-record immutability, MFA, SoD, reason-for-change, session revocation,
   e-sig logging, integration tests, backup/DR, governance modules, exports, password
@@ -44,7 +44,7 @@ NT.QMS is a **multi-tenant SaaS Quality Management System** for ISO 17025 / 1518
 Follow **`docs/reference/NT_QMS_Enterprise_Architecture_Remediation_Plan.html`** — a gated
 7-phase train (v1.38 → v1.44), in order. Ship each phase behind the CI gate; each finding
 has acceptance criteria + a proving test. Summary:
-- **Phase 0 (P0, v1.38):** `qams_app` role guard, DB readiness health-check, replica-topology decision.
+- **Phase 0 (P0, v1.38): ✅ SHIPPED** — role guard (Production refuses over-privileged DB role), `/health/live`+`/health/ready`, single-replica ADR-0001 + advisory-lock sentinel.
 - **Phase 1 (P1, v1.39):** optimistic-concurrency (`xmin`) + 409; Outbox dead-letter/backoff/dedup/retention + `SKIP LOCKED`.
 - **Phase 2 (P1, v1.40):** observability — structured JSON logs, OpenTelemetry + correlation IDs, metrics/alerts.
 - **Phase 3 (P1/P2, v1.41):** rate limiting + security headers/CSP + TLS/HSTS + token-storage decision.

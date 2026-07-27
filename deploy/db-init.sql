@@ -1,10 +1,20 @@
 -- NT.QAMS database bootstrap — run ONCE per server, as a PostgreSQL superuser.
--- Replace the password before running; never reuse dev credentials.
+-- Replace both passwords before running; never reuse dev credentials.
+--
+-- Two-role model (TENANT-004 / harden-runtime-role.sql):
+--   qams_owner — owns the database/schema; runs migrations ONLY (DDL).
+--   qams_app   — the application's runtime login; least privilege, DML only.
+-- The application must NEVER connect as qams_owner: a table owner can drop the
+-- RLS policies and immutability triggers, and the Production start-up guard
+-- refuses to boot as an over-privileged role.
 
-CREATE ROLE qams_app LOGIN PASSWORD 'CHANGE_ME_BEFORE_RUNNING';
-CREATE DATABASE ntqams OWNER qams_app;
+CREATE ROLE qams_owner LOGIN PASSWORD 'CHANGE_ME_OWNER_BEFORE_RUNNING';
+CREATE ROLE qams_app   LOGIN PASSWORD 'CHANGE_ME_APP_BEFORE_RUNNING'
+    NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE;
+CREATE DATABASE ntqams OWNER qams_owner;
 
--- Note (Phase 0): qams_app owns the database so EF migrations can create
--- schemas/tables. The stricter split (migration role vs runtime role, RLS
--- policies, FORCE ROW LEVEL SECURITY) ships with the first tenant-scoped
--- business tables in Phase 1+, per NT_QAMS_Database_Architecture.md §1.1.
+-- Next steps (see DEPLOY.md):
+--   1. Run migrations as the owner:  psql -U qams_owner -d ntqams -f migrations.sql
+--   2. Grant the runtime role its least-privilege DML surface:
+--      psql -U postgres -d ntqams -f harden-runtime-role.sql
+--   3. Point the app's ConnectionStrings__Postgres at Username=qams_app.

@@ -1,13 +1,18 @@
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
+using Npgsql;
 using NT.QAMS.Application;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Domain.IdentityAccess;
 using NT.QAMS.Infrastructure;
+using NT.QAMS.Infrastructure.Health;
 using NT.QAMS.Infrastructure.Persistence;
+using NT.QAMS.Infrastructure.Security;
 using NT.QAMS.WebApi.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -58,9 +63,49 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddExceptionHandler<DomainExceptionHandler>();
 builder.Services.AddProblemDetails();
-builder.Services.AddHealthChecks();
+
+// OPS-008: readiness is DB-backed — the service only accepts traffic when
+// PostgreSQL answers. Liveness stays check-free (a DB outage must recycle
+// traffic, not the process).
+var postgresConnectionString = builder.Configuration.GetConnectionString("Postgres")
+    ?? throw new InvalidOperationException("ConnectionStrings:Postgres is not configured.");
+builder.Services.AddHealthChecks()
+    .AddCheck(
+        PostgresReadinessHealthCheck.Name,
+        new PostgresReadinessHealthCheck(postgresConnectionString),
+        HealthStatus.Unhealthy,
+        [PostgresReadinessHealthCheck.ReadyTag]);
 
 var app = builder.Build();
+
+// TENANT-004: deployment safety gate. Production refuses to boot when the DB
+// connection role is over-privileged (SUPERUSER / BYPASSRLS / table owner) —
+// any of those would void RLS tenant isolation and record immutability.
+// Non-production logs the violations so dev setups stay honest about the gap.
+try
+{
+    if (app.Environment.IsProduction())
+    {
+        await DatabaseRoleGuard.EnsureLeastPrivilegeAsync(postgresConnectionString);
+    }
+    else
+    {
+        foreach (var violation in await DatabaseRoleGuard.FindViolationsAsync(postgresConnectionString))
+        {
+            app.Logger.LogWarning(
+                "Database role guard ({Environment}): {Violation} — Production will refuse to start; " +
+                "see deploy/harden-runtime-role.sql",
+                app.Environment.EnvironmentName, violation);
+        }
+    }
+}
+catch (Exception ex) when (ex is NpgsqlException or TimeoutException)
+{
+    // Unreachable database is a readiness concern, not a privilege violation:
+    // /health/ready stays Unhealthy until PostgreSQL answers.
+    app.Logger.LogWarning(ex,
+        "Database role guard: could not verify the connection role's privileges (database unreachable).");
+}
 
 // Deployment convenience: apply pending migrations at startup when explicitly
 // enabled (small installs / first boot). Pipeline deployments should prefer the
@@ -129,7 +174,17 @@ app.UseMiddleware<ChangeReasonMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapHealthChecks("/health").AllowAnonymous();
+
+// OPS-008: /health/live = process is up (no checks — never fails on DB loss);
+// /health/ready = live AND PostgreSQL answering (503 otherwise) — the probe
+// target for the container HEALTHCHECK and any LB/orchestrator readiness gate.
+// /health remains as the legacy liveness alias (existing probes/scripts).
+app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false }).AllowAnonymous();
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = registration => registration.Tags.Contains(PostgresReadinessHealthCheck.ReadyTag),
+}).AllowAnonymous();
+app.MapHealthChecks("/health", new HealthCheckOptions { Predicate = _ => false }).AllowAnonymous();
 
 app.Run();
 

@@ -41,9 +41,11 @@ function Api($method, $path, $body, $token) {
 
 Write-Host "NT.QAMS end-to-end verification against $BaseUrl" -ForegroundColor Cyan
 
-Step "1. health is anonymous 200" {
-    $r = Invoke-WebRequest "$BaseUrl/health" -UseBasicParsing -TimeoutSec 15
-    if ($r.StatusCode -ne 200) { throw "status $($r.StatusCode)" }
+Step "1. health is anonymous 200 (live + ready)" {
+    $r = Invoke-WebRequest "$BaseUrl/health/live" -UseBasicParsing -TimeoutSec 15
+    if ($r.StatusCode -ne 200) { throw "live status $($r.StatusCode)" }
+    $r = Invoke-WebRequest "$BaseUrl/health/ready" -UseBasicParsing -TimeoutSec 15
+    if ($r.StatusCode -ne 200) { throw "ready status $($r.StatusCode) — is PostgreSQL up?" }
 }
 
 Step "2. deny-by-default (no token -> 401)" {

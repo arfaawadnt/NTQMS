@@ -301,3 +301,31 @@ Per architecture §11: JWT + refresh + MFA(TOTP), UserAccount/Role/Privilege agg
 privilege catalog + authorization behavior, session registry, provisioning saga
 (TenantProvisioned → seed admin + canonical roles), security_event capture,
 cross-tenant denial functional test suite (merge gate from day one).
+
+## EA Remediation Phase 0 (v1.38.0, 2026-07-28) ✅ — deployment safety gates
+
+- **TENANT-004 — least-privilege role guard.** `DatabaseRoleGuard` (Infrastructure/
+  Security) inspects the connection role at startup: SUPERUSER, BYPASSRLS, or
+  ownership of application tables (qams/audit/read/saas/ref, `pg_has_role`-aware).
+  Production **refuses to boot** on any violation (message carries the
+  harden-runtime-role.sql remediation); other environments log warnings.
+  `db-init.sql` rewritten to the two-role model (qams_owner DDL / qams_app DML);
+  DEPLOY.md documents migrate-as-owner + harden + connect-as-app. CI gate: with
+  `QMS_ITEST_POSTGRES` set the RLS suite hard-fails instead of skipping when the
+  DB is unreachable or the role is over-privileged (RealPostgresFixture +
+  RuntimeRolePrivilegeTests — includes the boot-as-owner-rejected test).
+- **OPS-008 — DB-backed readiness.** `PostgresReadinessHealthCheck`
+  (Infrastructure/Health, 5s-capped probe): `/health/ready` = PostgreSQL
+  answering (503 otherwise); `/health/live` + legacy `/health` = process-only.
+  Dockerfile HEALTHCHECK and verify-e2e.ps1 repointed at readiness. Functional
+  tests prove live=200/ready=503 with the DB down; integration tests prove
+  Healthy/Unhealthy against real PG.
+- **OPS-002 — single-replica topology (ADR-0001).** Supported topology is one
+  API instance per database until Phase 1 (outbox SKIP LOCKED + leader election).
+  `SingleReplicaGuardService` holds session advisory lock 0x4E54514D5301 for the
+  process lifetime; a second instance logs a prominent scale-out warning and
+  re-probes. docs/adr/ADR-0001-single-replica-topology.md + DEPLOY.md note.
+- Suite: **279 tests green, 0 skipped** (211 domain + 35 application + 5 arch +
+  10 integration + 18 functional); build 0 warnings. Verified live: role-guard
+  warning fires in dev (qams_app owns tables), lock acquired, all 3 health
+  endpoints 200.

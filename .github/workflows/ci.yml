@@ -71,6 +71,10 @@ jobs:
       # database via QMS_ITEST_POSTGRES; every other project is provider-agnostic.
       # Architecture tests are a merge gate: a layer/module boundary violation
       # fails the pipeline, not code review.
+      # TENANT-004 gate: because QMS_ITEST_POSTGRES is set, the RLS suite
+      # HARD-FAILS (instead of skipping) if the database is unreachable or the
+      # connection role is not least-privilege (SUPERUSER/BYPASSRLS) — see
+      # RuntimeRolePrivilegeTests + RealPostgresFixture.
       - name: Test
         env:
           QMS_ITEST_POSTGRES: ${{ env.CI_PG_CONN }}
