@@ -397,3 +397,41 @@ cross-tenant denial functional test suite (merge gate from day one).
 - Suite: **297 tests green, 0 skipped** (was 290); build 0 warnings. Live:
   correlation echo ✓, 401 problem carries traceId+correlationId ✓, /metrics
   serves RED + qams gauges ✓, completion logs carry all fields ✓.
+
+## EA Remediation Phase 3 (v1.41.0, 2026-07-28) ✅ — edge & security hardening
+
+- **SEC-013/API-002 — rate limiting.** Built-in AddRateLimiter: global
+  per-client fixed window (default 300/min) + strict policies on the
+  credential surface (`[EnableRateLimiting("auth")]` on AuthController,
+  default 10/min per client) and the password+PIN e-signature ceremony
+  (documents publish — per ACTOR, default 10/min, so a PIN can't be
+  brute-forced inside a valid session). 429 + Retry-After; health/metrics
+  endpoints DisableRateLimiting (throttled probes = broken monitoring).
+  Typed RateLimitSettings (RateLimit:*), resolved via DI at options-build time
+  so tests swap the singleton cleanly. Proven: burst → first N pass, rest 429
+  (functional + live: 10×401 then 429, Retry-After 60); probes never throttled.
+- **SEC-011 — security headers.** SecurityHeadersMiddleware on EVERY response:
+  API CSP `default-src 'none'; frame-ancestors 'none'; base-uri 'none';
+  form-action 'none'` (no script-src grant ⇒ inline script blocked by
+  definition), nosniff, X-Frame-Options DENY, Referrer-Policy no-referrer,
+  HSTS 2y+subdomains outside Development. SPA host headers added to
+  deploy/web.config (script-src 'self' — Angular AOT, no inline/eval) +
+  /metrics added to the proxy rule. Header set asserted on success AND error
+  responses.
+- **SEC-012 — TLS/HSTS decision (ADR-0002).** TLS terminates at the reverse
+  proxy (certificates/redirects/protocol policy); the app emits HSTS itself so
+  the commitment can't be dropped in proxy config; UseForwardedHeaders
+  (loopback-trusted) first in the pipeline so the real client IP feeds the
+  rate-limit partitions and logs. No in-app UseHttpsRedirection (loopback
+  proxy model). Go-live checklist in the ADR.
+- **SEC-017 — token storage (ADR-0003, risk acceptance).** Web-storage tokens
+  stay for this train, compensated by: strict SPA CSP (the actual anti-XSS
+  control), access-token default lifetime **halved 120→60 min**
+  (Jwt:ExpiryMinutes), existing server-side session revocation (F-06), MFA +
+  lockout + the new auth rate limit. Residual risk + revisit trigger (refresh
+  cookie flow) captured in the ADR.
+- Suite: **301 tests green, 0 skipped** (was 297); build 0 warnings. Live:
+  header set on every response ✓, 12-burst → 10×401 + 2×429 + Retry-After ✓,
+  probes exempt ✓.
+- **Phases 0–3 complete → every production blocker from the EA audit is
+  cleared; the release condition is now unconditional.**

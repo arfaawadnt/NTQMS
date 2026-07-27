@@ -42,6 +42,11 @@ public sealed class QamsWebAppFactory : WebApplicationFactory<Program>
         Environment.SetEnvironmentVariable("PlatformAdmin__Email", PlatformAdminEmail);
         Environment.SetEnvironmentVariable("PlatformAdmin__Password", PlatformAdminPassword);
         Environment.SetEnvironmentVariable("Database__MigrateOnStartup", "false");
+        // SEC-013: the suite logs in liberally — keep the shared-process limits
+        // out of the way; the rate-limit tests tighten them per-host instead.
+        Environment.SetEnvironmentVariable("RateLimit__GlobalPermitPerMinute", "100000");
+        Environment.SetEnvironmentVariable("RateLimit__AuthPermitPerMinute", "100000");
+        Environment.SetEnvironmentVariable("RateLimit__ESignaturePermitPerMinute", "100000");
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)

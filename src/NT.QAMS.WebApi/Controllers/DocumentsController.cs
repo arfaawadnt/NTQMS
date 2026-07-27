@@ -109,6 +109,9 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
 
     [HttpPost("{id:guid}/publish")]
     [Authorize(Roles = Roles.QmOrAdmin)]
+    // SEC-013: password+PIN signing ceremony — throttled per actor so a PIN
+    // cannot be brute-forced inside a valid session.
+    [Microsoft.AspNetCore.RateLimiting.EnableRateLimiting(Security.RateLimiting.ESignaturePolicy)]
     public async Task<IActionResult> Publish(Guid id, PublishDocumentRequest request, CancellationToken ct)
     {
         await sender.Send(new PublishDocumentCommand(id, request.Password, request.Pin), ct);

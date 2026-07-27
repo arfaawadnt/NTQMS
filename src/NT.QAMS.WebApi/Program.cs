@@ -15,8 +15,10 @@ using NT.QAMS.Infrastructure;
 using NT.QAMS.Infrastructure.Health;
 using NT.QAMS.Infrastructure.Observability;
 using NT.QAMS.Infrastructure.Persistence;
+using Microsoft.AspNetCore.HttpOverrides;
 using NT.QAMS.Infrastructure.Security;
 using NT.QAMS.WebApi.Middleware;
+using NT.QAMS.WebApi.Security;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -131,6 +133,21 @@ builder.Services.AddAuthorization(options =>
         .Build();
 });
 
+// SEC-012: TLS terminates at the reverse proxy (ADR-0002); honour its
+// X-Forwarded-For/Proto (loopback-trusted by default) so the client address
+// survives for rate limiting + logs and the scheme reads as https.
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto);
+
+// SEC-013/API-002: request throttling — global window + strict partitions on
+// the credential and e-signature surfaces; rejected bursts get 429.
+builder.Services.AddSingleton(RateLimitSettings.From(builder.Configuration).Validated());
+builder.Services.AddRateLimiter(_ => { });
+// Settings resolve from DI at first use, so the functional tests can swap the
+// singleton without fighting configuration-source precedence.
+builder.Services.AddOptions<Microsoft.AspNetCore.RateLimiting.RateLimiterOptions>()
+    .Configure<RateLimitSettings>(RateLimiting.Configure);
+
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddExceptionHandler<DomainExceptionHandler>();
@@ -241,9 +258,12 @@ if (!string.IsNullOrWhiteSpace(bootstrapEmail) && !string.IsNullOrWhiteSpace(boo
     }
 }
 
+app.UseForwardedHeaders();
 // First in the pipeline: correlation + the canonical completion log cover
-// every response, including ones produced by the exception handler below.
+// every response, including ones produced by the exception handler below;
+// the defensive headers ride the same guarantee.
 app.UseMiddleware<ObservabilityMiddleware>();
+app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
@@ -252,6 +272,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseAuthentication();
+// After authentication so the e-signature policy can throttle per actor.
+app.UseRateLimiter();
 app.UseMiddleware<TenantResolutionMiddleware>();
 app.UseMiddleware<ActiveSessionMiddleware>();
 app.UseMiddleware<MfaEnrollmentGateMiddleware>();
@@ -264,16 +286,20 @@ app.MapControllers();
 // /health/ready = live AND PostgreSQL answering (503 otherwise) — the probe
 // target for the container HEALTHCHECK and any LB/orchestrator readiness gate.
 // /health remains as the legacy liveness alias (existing probes/scripts).
-app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false }).AllowAnonymous();
+// Probes and scrapers run on fixed schedules — throttling them only breaks
+// the monitoring that Phase 2 added, so they sit outside the rate limiter.
+app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false })
+    .AllowAnonymous().DisableRateLimiting();
 app.MapHealthChecks("/health/ready", new HealthCheckOptions
 {
     Predicate = registration => registration.Tags.Contains(PostgresReadinessHealthCheck.ReadyTag),
-}).AllowAnonymous();
-app.MapHealthChecks("/health", new HealthCheckOptions { Predicate = _ => false }).AllowAnonymous();
+}).AllowAnonymous().DisableRateLimiting();
+app.MapHealthChecks("/health", new HealthCheckOptions { Predicate = _ => false })
+    .AllowAnonymous().DisableRateLimiting();
 
 // OBS-003: Prometheus scrape endpoint (RED + Npgsql pool + NT.QAMS meters).
 // Anonymous like the health probes — measurements only, no tenant data.
-app.MapPrometheusScrapingEndpoint("/metrics").AllowAnonymous();
+app.MapPrometheusScrapingEndpoint("/metrics").AllowAnonymous().DisableRateLimiting();
 
 app.Run();
 

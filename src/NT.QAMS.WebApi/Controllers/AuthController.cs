@@ -1,13 +1,18 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using NT.QAMS.Application.IdentityAccess.Commands;
 using NT.QAMS.Contracts.IdentityAccess;
+using NT.QAMS.WebApi.Security;
 
 namespace NT.QAMS.WebApi.Controllers;
 
 [ApiController]
 [Route("api/auth")]
+// SEC-013: the credential surface gets the strict per-client budget — a burst
+// of attempts here is credential guessing, not a workload.
+[EnableRateLimiting(RateLimiting.AuthPolicy)]
 public sealed class AuthController(ISender sender) : ControllerBase
 {
     [HttpPost("login")]
