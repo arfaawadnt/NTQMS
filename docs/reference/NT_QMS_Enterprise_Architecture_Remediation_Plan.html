@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NT.QMS — Enterprise Architecture Remediation Plan</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>">
+<style>*{box-sizing:border-box}html,body{margin:0;padding:0}</style>
+</head>
+<body>
+<style>
+  :root{
+    --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;--line:#dbe1ea;
+    --accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+    --p0:#b42318;--p1:#b54708;--p2:#8a6d1d;--p3:#475467;
+    --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);
+    --mono:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,ui-serif,serif;
+    --sans:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;--line:#263041;
+    --accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+    --p0:#f87171;--p1:#fbbf24;--p2:#e2b04a;--p3:#94a3b8;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}}
+  :root[data-theme="dark"]{--bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;--line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;--p0:#f87171;--p1:#fbbf24;--p2:#e2b04a;--p3:#94a3b8;--shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}
+  :root[data-theme="light"]{--bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;--line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;--p0:#b42318;--p1:#b54708;--p2:#8a6d1d;--p3:#475467;--shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 22px 90px}
+  h1,h2,h3{font-family:var(--serif);font-weight:600;letter-spacing:-.01em;text-wrap:balance}
+  a{color:var(--accent)}
+  code{font-family:var(--mono);font-size:.85em;background:var(--panel-2);padding:.1em .4em;border-radius:4px}
+  .masthead{border-bottom:1px solid var(--line);padding:46px 0 30px;margin-bottom:34px}
+  .eyebrow{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:700;margin:0 0 14px}
+  .masthead h1{font-size:clamp(28px,5vw,44px);margin:0 0 10px;line-height:1.08}
+  .masthead .lede{font-size:17px;color:var(--muted);max-width:72ch;margin:0}
+  .meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:26px}
+  .meta-grid div{background:var(--panel);padding:12px 16px}
+  .meta-grid dt{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 3px}
+  .meta-grid dd{margin:0;font-weight:600;font-size:14px;font-variant-numeric:tabular-nums}
+  .principles{background:linear-gradient(180deg,var(--accent-soft),transparent),var(--panel);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:14px;padding:22px 26px;box-shadow:var(--shadow);margin-bottom:38px}
+  .principles h2{margin:0 0 12px;font-size:19px}
+  .principles ul{margin:0;padding-left:20px;color:var(--muted);font-size:14px}
+  .principles li{margin:5px 0}
+  section{margin:46px 0}
+  h2.sec{font-size:23px;margin:0 0 6px;display:flex;align-items:baseline;gap:12px}
+  h2.sec .num{font-family:var(--mono);font-size:14px;color:var(--accent);font-weight:700}
+  .sec-sub{color:var(--muted);margin:0 0 20px;max-width:82ch}
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);margin-top:8px}
+  table{width:100%;border-collapse:collapse;font-size:13px;background:var(--panel);min-width:680px}
+  thead th{text-align:left;padding:11px 13px;background:var(--panel-2);color:var(--muted);font-size:11px;letter-spacing:.05em;text-transform:uppercase}
+  tbody td{padding:11px 13px;border-top:1px solid var(--line);vertical-align:top}
+  tbody tr:hover{background:var(--accent-soft)}
+  .chip{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:999px;letter-spacing:.03em;white-space:nowrap}
+  .p0{color:var(--p0);background:color-mix(in srgb,var(--p0) 13%,transparent)}
+  .p1{color:var(--p1);background:color-mix(in srgb,var(--p1) 15%,transparent)}
+  .p2{color:var(--p2);background:color-mix(in srgb,var(--p2) 17%,transparent)}
+  .p3{color:var(--p3);background:color-mix(in srgb,var(--p3) 16%,transparent)}
+  .pill{display:inline-block;font-size:11px;font-weight:600;padding:2px 9px;border-radius:6px;background:var(--panel-2);color:var(--muted);margin:2px 4px 2px 0}
+  .phase{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);margin:20px 0;overflow:hidden}
+  .phase-hd{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid var(--line);background:var(--panel-2)}
+  .phase-hd .t{font-family:var(--serif);font-size:18px;font-weight:600}
+  .phase-hd .tag{font-family:var(--mono);font-size:12px;color:var(--accent);font-weight:700}
+  .phase-bd{padding:6px 22px 18px}
+  .phase-bd h4{margin:16px 0 6px;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+  ul.clean{margin:6px 0 0;padding:0;list-style:none}
+  ul.clean li{padding:8px 0 8px 24px;position:relative;border-top:1px solid var(--line);font-size:14px}
+  ul.clean li:first-child{border-top:none}
+  ul.clean li::before{content:"";position:absolute;left:3px;top:15px;width:8px;height:8px;border-radius:2px;background:var(--accent)}
+  ul.clean li b .fid,.fid{font-family:var(--mono);font-weight:700;font-size:.9em}
+  .ac{background:var(--pass-soft);border:1px solid color-mix(in srgb,var(--pass) 30%,transparent);border-radius:8px;padding:10px 14px;font-size:13px;margin-top:6px}
+  .ac b{color:var(--pass)}
+  ol.steps{margin:0;padding-left:22px}ol.steps li{padding:5px 0}ol.steps li::marker{color:var(--accent);font-weight:700}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;box-shadow:var(--shadow)}
+  .card h3{margin:0 0 8px;font-size:15px}
+  .card p{margin:0 0 6px;color:var(--muted);font-size:13.5px}
+  .note{background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 24%,transparent);border-radius:10px;padding:13px 17px;font-size:13.5px;margin-top:16px}
+  .foot{margin-top:56px;border-top:1px solid var(--line);padding-top:22px;color:var(--muted);font-size:12.5px}
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">Remediation Implementation Plan · Enterprise Architecture Audit</p>
+  <h1>NT.QMS — Enterprise Architecture Remediation Plan</h1>
+  <p class="lede">An ordered, gated implementation plan to close the findings of the Enterprise Architecture Compliance Audit (EA-AUD-NTQMS-001) and lift NT.QMS from "approved with conditions" to an unconditional production posture — structured on the AWS Well-Architected pillars and delivered as a continuation of the existing v1.25→v1.37 release train.</p>
+  <dl class="meta-grid">
+    <div><dt>Plan ID</dt><dd>EA-PLAN-NTQMS-001</dd></div>
+    <div><dt>Source audit</dt><dd>EA-AUD-NTQMS-001</dd></div>
+    <div><dt>Findings to close</dt><dd>~30 (0 critical · 8 high)</dd></div>
+    <div><dt>Release train</dt><dd>v1.38 → v1.44</dd></div>
+    <div><dt>Indicative effort</dt><dd>≈ 9–11 dev-weeks (P0–P1 ≈ 5–6)</dd></div>
+    <div><dt>Date</dt><dd>2026-07-27</dd></div>
+  </dl>
+</header>
+
+<div class="principles">
+  <h2>Guiding principles</h2>
+  <ul>
+    <li><strong>Gated release train.</strong> Each phase ships as a tagged increment behind the existing CI gate (build + ~310 tests + real-PostgreSQL integration + architecture boundaries). No phase merges until its acceptance tests are green.</li>
+    <li><strong>No regression of the strong core.</strong> The verified controls — tenant isolation, backend authorization, audit/immutability, e-signature — are load-bearing; every change adds an accompanying test and must keep the existing suite green.</li>
+    <li><strong>Well-Architected alignment.</strong> Work is grouped by the pillar it most serves: Reliability, Operational Excellence, Security, Performance Efficiency, Cost Optimization.</li>
+    <li><strong>Safety-first ordering.</strong> Cheap, high-safety deployment gates first; then data-consistency and messaging robustness; then observability; then edge hardening and polish — mirroring the mandated remediation-priority order.</li>
+    <li><strong>Every change is provable.</strong> Each finding has explicit acceptance criteria and the test that proves it; documentation-only decisions are captured as ADRs.</li>
+  </ul>
+</div>
+
+<!-- OVERVIEW -->
+<section>
+  <h2 class="sec"><span class="num">01</span> Phase overview &amp; release train</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Phase</th><th>Theme</th><th>Findings</th><th>Primary pillar</th><th>Pri</th><th>Effort</th><th>Tag</th></tr></thead>
+    <tbody>
+      <tr><td><strong>0</strong></td><td>Deployment safety gates</td><td>TENANT-004, OPS-008, OPS-002</td><td>Reliability / Security</td><td><span class="chip p0">P0</span></td><td>S (2–4 d)</td><td>v1.38.0</td></tr>
+      <tr><td><strong>1</strong></td><td>Data consistency &amp; messaging robustness</td><td>DB-009/VAL-009, MSG-004/005/006/007</td><td>Reliability</td><td><span class="chip p1">P1</span></td><td>M–L (~2 wk)</td><td>v1.39.0</td></tr>
+      <tr><td><strong>2</strong></td><td>Observability baseline</td><td>OBS-001, OBS-002, OBS-003, API-006</td><td>Operational Excellence</td><td><span class="chip p1">P1</span></td><td>L (~1.5–2 wk)</td><td>v1.40.0</td></tr>
+      <tr><td><strong>3</strong></td><td>Edge &amp; security hardening</td><td>SEC-013/API-002, SEC-011, SEC-012, SEC-017</td><td>Security</td><td><span class="chip p1">P1</span> / <span class="chip p2">P2</span></td><td>M (~1 wk)</td><td>v1.41.0</td></tr>
+      <tr><td><strong>4</strong></td><td>API &amp; application-pipeline polish</td><td>API-003/004/005/001, CQRS-003/004, VAL-003</td><td>Perf. Efficiency / Security</td><td><span class="chip p2">P2</span></td><td>L (~2 wk)</td><td>v1.42.0</td></tr>
+      <tr><td><strong>5</strong></td><td>DB integrity, config &amp; container</td><td>DB-005, CFG-001/002, DEPLOY-002/003</td><td>Reliability / Cost</td><td><span class="chip p2">P2</span></td><td>M (~1 wk)</td><td>v1.43.0</td></tr>
+      <tr><td><strong>6</strong></td><td>Test coverage &amp; governance</td><td>TEST-001/002/003, ARCH-004/005/006, SEC-003, UI-008/014</td><td>Operational Excellence</td><td><span class="chip p2">P2</span> / <span class="chip p3">P3</span></td><td>M–L (~1.5 wk)</td><td>v1.44.0</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note"><strong>Unconditional-release milestone:</strong> completing <strong>Phases 0–3</strong> (≈ 5–6 weeks) clears all five production blockers plus the observability and edge-hardening gaps — the point at which the audit's "approved with conditions" becomes an unconditional approval. Phases 4–6 are quality/robustness hardening for the following release.</p></div>
+</section>
+
+<!-- WELL-ARCHITECTED MAP -->
+<section>
+  <h2 class="sec"><span class="num">02</span> Well-Architected pillar mapping</h2>
+  <div class="cards">
+    <div class="card"><h3>Reliability</h3><p>Optimistic concurrency (DB-009), Outbox dead-letter/backoff/dedup/retention (MSG-004…007), readiness health (OPS-008), scale-out safety (OPS-002), DB retry/circuit-breaker (OPS-009), CHECK constraints (DB-005).</p></div>
+    <div class="card"><h3>Operational Excellence</h3><p>Structured log sink (OBS-001), distributed tracing + correlation IDs (OBS-002/API-006), metrics/alerts/dashboards (OBS-003), ADR record set (ARCH-006), test-coverage gaps (TEST-*).</p></div>
+    <div class="card"><h3>Security</h3><p>Least-privilege role gate (TENANT-004), rate limiting (SEC-013), security headers/CSP (SEC-011), TLS/HSTS confirmation (SEC-012), token-storage decision (SEC-017), study-DELETE authz + authorization behavior (SEC-003/CQRS-003).</p></div>
+    <div class="card"><h3>Performance Efficiency</h3><p>Real pagination vs silent cap (API-004), query-plan review &amp; indexes (DB-010 follow-up), connection-pool/retry tuning (OPS-009), OTel-driven latency baselines (OBS-002).</p></div>
+    <div class="card"><h3>Cost Optimization</h3><p>Outbox retention purge to bound storage (MSG-007), container resource limits (DEPLOY-003), telemetry sampling that never hides failures (OBS-003).</p></div>
+  </div>
+</section>
+
+<!-- PHASE 0 -->
+<section>
+  <h2 class="sec"><span class="num">03</span> Phase detail</h2>
+
+  <div class="phase">
+    <div class="phase-hd"><span class="t">Phase 0 — Deployment safety gates</span><span class="tag">v1.38.0 · P0 · S</span></div>
+    <div class="phase-bd">
+      <p style="color:var(--muted);margin:12px 0 0">Cheapest, highest-safety work; clears the two hard blockers that gate any production release and the operational gate on which tenant isolation depends.</p>
+      <h4>Tasks</h4>
+      <ul class="clean">
+        <li><b><span class="fid">TENANT-004</span></b> — Add a startup guard that refuses to boot in Production if the DB connection role has BYPASSRLS or is the table owner; document/automate applying <code>deploy/harden-runtime-role.sql</code>; add a CI check that the RLS integration tests run as <code>qams_app</code>.</li>
+        <li><b><span class="fid">OPS-008</span></b> — Register a DB-backed readiness check (<code>AddHealthChecks().AddNpgSql()/AddDbContextCheck()</code> tagged <code>ready</code>); expose <code>/health/live</code> (self) and <code>/health/ready</code> (DB + critical deps); repoint the Dockerfile <code>HEALTHCHECK</code> and any LB/orchestrator probe at <code>/health/ready</code>.</li>
+        <li><b><span class="fid">OPS-002</span></b> — Decision + implementation: for the near term, enforce and document single-replica (deployment manifest <code>replicas: 1</code> + a startup log warning if a peer lock is contended); schedule the durable fix in Phase 1 (Outbox <code>SKIP LOCKED</code> claim + advisory-lock/leader election for sweeps).</li>
+      </ul>
+      <div class="ac"><b>Acceptance:</b> app refuses to start as an over-privileged role; <code>/health/ready</code> returns Unhealthy when PostgreSQL is stopped and Healthy when up; a documented topology exists (single-replica or the Phase-1 scale-out control). <b>Tests:</b> readiness-fails-when-DB-down integration test; boot-as-owner rejected test.</div>
+      <h4>Dependencies</h4><p style="color:var(--muted);font-size:13.5px;margin:6px 0 0">None. Ship first.</p>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-hd"><span class="t">Phase 1 — Data consistency &amp; messaging robustness</span><span class="tag">v1.39.0 · P1 · M–L</span></div>
+    <div class="phase-bd">
+      <h4>Tasks</h4>
+      <ul class="clean">
+        <li><b><span class="fid">DB-009 / VAL-003</span></b> — Add PostgreSQL <code>xmin</code> as a concurrency token on mutable aggregate roots (<code>modelBuilder.Entity&lt;T&gt;().UseXminAsConcurrencyToken()</code> — no schema change), or a <code>RowVersion</code> on <code>AggregateRoot</code>; map <code>DbUpdateConcurrencyException</code> → HTTP 409 with a stable code in <code>DomainExceptionHandler</code>.</li>
+        <li><b><span class="fid">MSG-004</span></b> — Add an <code>outbox_dead_letter</code> table (or a <code>dead_lettered_at</code> flag); move rows past <code>MaxAttempts</code> there; isolate per-event so one poison event cannot head-of-line-block the batch; emit a metric/alert.</li>
+        <li><b><span class="fid">MSG-005</span></b> — Per-event exponential backoff via a <code>next_attempt_at_utc</code> column with jitter; the processor selects only rows due for retry.</li>
+        <li><b><span class="fid">MSG-006</span></b> — A processed-event inbox keyed on <code>(EventId, handler)</code>, or assert idempotency in each policy via a natural unique key (e.g. NC-per-source); redelivery must net a single side-effect.</li>
+        <li><b><span class="fid">MSG-007</span></b> — Implement the documented Outbox retention purge (delete <code>processed_at_utc &lt; now − retention</code>) as a scheduled sweep, or correct the stale comments.</li>
+        <li><b><span class="fid">OPS-002 (durable)</span></b> — Outbox claim with <code>FOR UPDATE SKIP LOCKED</code> + a lease; advisory-lock/leader election for the recurring sweeps, enabling safe horizontal scale-out.</li>
+      </ul>
+      <div class="ac"><b>Acceptance:</b> two concurrent transitions on one aggregate → exactly one succeeds (other 409); a permanently-failing event lands in dead-letter after N attempts without blocking a healthy following event; crash-between-publish-and-commit yields one net side-effect; two processors publish each row once; processed rows are purged on schedule. <b>Tests:</b> concurrency-conflict, poison→dead-letter (no HOL block), redelivery-idempotency, two-processor exactly-once, retention purge.</div>
+      <h4>Dependencies</h4><p style="color:var(--muted);font-size:13.5px;margin:6px 0 0">Phase 0 topology decision informs the SKIP-LOCKED/leader-election work.</p>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-hd"><span class="t">Phase 2 — Observability baseline</span><span class="tag">v1.40.0 · P1 · L</span></div>
+    <div class="phase-bd">
+      <h4>Tasks</h4>
+      <ul class="clean">
+        <li><b><span class="fid">OBS-001</span></b> — Structured JSON logging with a real sink (Serilog or the built-in JSON console formatter → OTLP/Seq/Elastic/Loki) with retention aligned to the DR runbook; standard enriched properties (service, environment, tenant, user, operation, outcome, duration).</li>
+        <li><b><span class="fid">OBS-002 / API-006</span></b> — Add OpenTelemetry tracing (ASP.NET Core + Npgsql + a MediatR pipeline span + background-job spans) with OTLP export; generate/propagate a correlation ID via middleware, enrich logs with trace/span/correlation IDs, and return it safely in responses and ProblemDetails <code>traceId</code>.</li>
+        <li><b><span class="fid">OBS-003</span></b> — Emit metrics (<code>System.Diagnostics.Metrics</code>): RED (request rate/errors/latency), DB pool, Outbox backlog age + dead-letter count, sweep liveness; publish a metrics endpoint; define actionable alerts (error-rate, p95 latency, Outbox backlog/age, sweep-hasn't-run, dead-letter&gt;0).</li>
+      </ul>
+      <div class="ac"><b>Acceptance:</b> a single request produces correlated logs + a trace spanning HTTP→MediatR→EF→Outbox with a shared trace id returned to the client; the Outbox dead-letter condition (from Phase 1) raises an alert; log shape asserted by test. <b>Tests:</b> JSON log-shape/required-fields test; trace-context-propagation test across the async job boundary.</div>
+      <h4>Dependencies</h4><p style="color:var(--muted);font-size:13.5px;margin:6px 0 0">Best after Phase 1 so the new dead-letter/backoff metrics have something to emit.</p>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-hd"><span class="t">Phase 3 — Edge &amp; security hardening</span><span class="tag">v1.41.0 · P1/P2 · M</span></div>
+    <div class="phase-bd">
+      <h4>Tasks</h4>
+      <ul class="clean">
+        <li><b><span class="fid">SEC-013 / API-002</span></b> — <code>AddRateLimiter</code>/<code>UseRateLimiter</code> with a global window plus stricter partitions on <code>/api/auth/*</code> and the password+PIN publish/e-signature endpoints; return 429; (or document + configure the reverse-proxy equivalent).</li>
+        <li><b><span class="fid">SEC-011</span></b> — Security-headers middleware: HSTS, a locked-down Content-Security-Policy, <code>X-Content-Type-Options:nosniff</code>, <code>X-Frame-Options:DENY</code>/<code>frame-ancestors 'none'</code>, <code>Referrer-Policy:no-referrer</code>.</li>
+        <li><b><span class="fid">SEC-012</span></b> — Confirm the reverse proxy enforces TLS + HSTS, or add <code>UseHttpsRedirection</code>+<code>UseHsts</code> in-app; record the decision.</li>
+        <li><b><span class="fid">SEC-017</span></b> — Decide token storage: move the access token to memory + an httpOnly SameSite refresh cookie, or (if <code>localStorage</code> stays) ship the strict CSP from SEC-011 and shorten token lifetime — capture the risk-acceptance ADR.</li>
+      </ul>
+      <div class="ac"><b>Acceptance:</b> burst of login attempts → 429; security headers present on every response and a CSP that blocks inline script; TLS/HSTS demonstrably enforced. <b>Tests:</b> rate-limit 429 functional test; response-headers assertion test.</div>
+      <h4>Dependencies</h4><p style="color:var(--muted);font-size:13.5px;margin:6px 0 0">Independent; can run in parallel with Phase 2.</p>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-hd"><span class="t">Phase 4 — API &amp; application-pipeline polish</span><span class="tag">v1.42.0 · P2 · L</span></div>
+    <div class="phase-bd">
+      <h4>Tasks</h4>
+      <ul class="clean">
+        <li><b><span class="fid">API-003</span></b> — Emit <code>application/problem+json</code> and route the auth/tenant/change-reason middleware errors through the same ProblemDetails writer (kill the anonymous-object shape drift); ensure the concurrency 409 (Phase 1) is uniform.</li>
+        <li><b><span class="fid">API-004</span></b> — Replace the silent <code>.Take(500)</code> caps with a real pagination envelope (page/size or cursor + <code>total</code>/<code>hasMore</code>); allow-list any client sort.</li>
+        <li><b><span class="fid">API-005</span></b> — File hardening: content-type/extension allow-list + magic-byte sniffing on upload; force <code>Content-Disposition: attachment</code> (or serve from an isolated origin) on download.</li>
+        <li><b><span class="fid">CQRS-003/004</span></b> — Add an <code>AuthorizationBehavior</code> (policy marker per request) + an <code>IdempotencyBehavior</code> for unsafe retryable commands; role-gate the currently-ungated commands (e.g. NC <code>Raise</code>/<code>Submit</code>, analytical add/calculate/DELETE).</li>
+        <li><b><span class="fid">API-001</span></b> — Introduce <code>Asp.Versioning.Mvc</code> with <code>api/v1/...</code> and a documented contract-evolution policy.</li>
+      </ul>
+      <div class="ac"><b>Acceptance:</b> all errors are <code>problem+json</code> with stable <code>code</code>; list endpoints page correctly with a total; disallowed uploads rejected and downloads forced to attachment; a command without its policy is denied by the behavior; versioned routes resolve. <b>Tests:</b> ProblemDetails contract test, pagination boundary/navigation test, file type + disposition test, authorization-behavior deny test, version-routing test.</div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-hd"><span class="t">Phase 5 — DB integrity, configuration &amp; container</span><span class="tag">v1.43.0 · P2 · M</span></div>
+    <div class="phase-bd">
+      <h4>Tasks</h4>
+      <ul class="clean">
+        <li><b><span class="fid">DB-005</span></b> — Add CHECK constraints for enum domains (or PG enum types), non-negative monetary/quantity columns, and date-ordering invariants on regulated tables — the DB as last line of defense.</li>
+        <li><b><span class="fid">CFG-001/002</span></b> — Move options to <code>services.Configure&lt;T&gt;().ValidateDataAnnotations().ValidateOnStart()</code>; validate the connection string and all security options at startup so a mistyped MFA/policy value fails fast instead of silently defaulting.</li>
+        <li><b><span class="fid">OPS-009</span></b> — Enable Npgsql <code>EnableRetryOnFailure</code> + a command timeout; consider a resilience pipeline for SMTP.</li>
+        <li><b><span class="fid">DEPLOY-002/003</span></b> — Run the container as non-root (<code>USER app</code>), add CPU/memory limits, and publish a production orchestration manifest (pinning replicas per the Phase-0/1 decision).</li>
+      </ul>
+      <div class="ac"><b>Acceptance:</b> invalid enum/negative value rejected by PostgreSQL; boot with blank/invalid critical config fails fast; container runs as non-root with resource limits. <b>Tests:</b> constraint-rejection migration test; invalid-config fast-fail test.</div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-hd"><span class="t">Phase 6 — Test coverage &amp; governance</span><span class="tag">v1.44.0 · P2/P3 · M–L</span></div>
+    <div class="phase-bd">
+      <h4>Tasks</h4>
+      <ul class="clean">
+        <li><b><span class="fid">TEST-001/002/003</span></b> — ProblemDetails contract tests; optimistic-concurrency conflict test; Outbox processor retry/dead-letter test; inbox/dedup test; migration up/down round-trip smoke test; mid-chain audit-tamper detection test; a baseline load/perf suite.</li>
+        <li><b><span class="fid">ARCH-004</span></b> — NetArchTest fact forbidding cross-module type references (enforce the modular-monolith boundary). <b><span class="fid">ARCH-005</span></b> — OpenAPI/contract snapshot diff test. <b><span class="fid">ARCH-006</span></b> — stand up <code>docs/adr/</code> (MADR) with the records listed in §04.</li>
+        <li><b><span class="fid">SEC-003</span></b> — Confirm the analyst study-reading DELETE authorization against the threat model; add the explicit role gate if unintended + a role×endpoint 403 matrix test.</li>
+        <li><b><span class="fid">UI-008/014</span></b> — Wrap the unmanaged <code>valueChanges</code> subscription with <code>takeUntilDestroyed()</code>; replace the Part-11 change-reason <code>window.prompt()</code> with an accessible modal; expand frontend component/e2e specs on regulated workflows.</li>
+      </ul>
+      <div class="ac"><b>Acceptance:</b> each new test green in CI; module-boundary violations fail the pipeline; ADR set published; accessible change-reason capture. <b>Tests:</b> the tests themselves are the deliverable.</div>
+    </div>
+  </div>
+</section>
+
+<!-- REQUIRED ADRs -->
+<section>
+  <h2 class="sec"><span class="num">04</span> Required ADRs (decisions to formalize)</h2>
+  <ul class="clean">
+    <li>Optimistic concurrency strategy (<code>xmin</code> token) alongside the existing trigger-based immutability.</li>
+    <li>Outbox reliability model: dead-letter + backoff + dedup, and the horizontal-scale claim mechanism (<code>SKIP LOCKED</code>/leader election).</li>
+    <li>Deployment topology &amp; the single-replica → scale-out transition.</li>
+    <li>Token-storage decision (<code>localStorage</code> risk-acceptance vs httpOnly cookie).</li>
+    <li>Same-origin deployment assumption (no CORS by design) and the API-versioning/contract-evolution policy.</li>
+    <li>Application coupling to EF Core <code>DbSet</code> in the persistence port (accepted Clean-Architecture convention).</li>
+  </ul>
+</section>
+
+<!-- SEQUENCING / CRITICAL PATH -->
+<section>
+  <h2 class="sec"><span class="num">05</span> Sequencing, critical path &amp; effort</h2>
+  <div class="cards">
+    <div class="card"><h3>Critical path to unconditional release</h3>
+      <ol class="steps">
+        <li><strong>Phase 0</strong> (2–4 d) — safety gates, ship immediately.</li>
+        <li><strong>Phase 1</strong> (~2 wk) — concurrency + Outbox robustness (the two P1 blockers).</li>
+        <li><strong>Phase 2</strong> (~1.5–2 wk) — observability, so production is diagnosable.</li>
+        <li><strong>Phase 3</strong> (~1 wk, parallelizable with P2) — rate limiting + headers/CSP.</li>
+      </ol>
+      <p style="margin-top:8px"><strong>≈ 5–6 weeks</strong> of focused effort clears every production blocker and the highest-risk gaps.</p>
+    </div>
+    <div class="card"><h3>Parallelization</h3>
+      <p>Phase 3 (security edge) is independent of Phases 1–2 and can run concurrently with a second engineer. Phase 5 (config/container/CHECK) and Phase 6 (tests/ADRs) can begin opportunistically once their target areas stabilize.</p>
+      <p><strong>Capacity note:</strong> effort is indicative for one senior engineer excluding review and any CSV re-validation; calendar time depends on team size and the QA/validation bandwidth (the long pole for a regulated system).</p>
+    </div>
+    <div class="card"><h3>Definition of Done (per finding)</h3>
+      <p>Code merged behind the CI gate · accompanying automated test green · no regression in the ~310-test suite · migration (if any) applied to a real PostgreSQL · documentation/ADR updated · finding re-verified closed with file:line evidence.</p>
+    </div>
+  </div>
+</section>
+
+<!-- RISK IF DEFERRED -->
+<section>
+  <h2 class="sec"><span class="num">06</span> Risk if deferred &amp; explicit non-goals</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>If deferred…</th><th>Consequence</th></tr></thead>
+    <tbody>
+      <tr><td>Phase 0 (readiness / role gate)</td><td>Traffic routed to broken instances; worst case, RLS silently bypassed if prod runs as owner — a tenant-isolation defeat.</td></tr>
+      <tr><td>Phase 1 (concurrency / Outbox)</td><td>Silent lost-updates on regulated records and silently-stranded integration events (finding→NC etc. never fire) — data-integrity erosion invisible to operators.</td></tr>
+      <tr><td>Phase 2 (observability)</td><td>Production incidents are near-undiagnosable; MTTR unbounded; no early warning on Outbox backlog or sweep failure.</td></tr>
+      <tr><td>Phase 3 (rate limit / headers)</td><td>Brute-force exposure on auth &amp; e-signature; a single XSS exfiltrates the localStorage token absent a CSP.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note"><strong>Explicit non-goals for this plan:</strong> no domain/feature redesign, no re-architecture off the modular monolith, no migration away from EF Core — the strong, verified core is preserved. SignalR/real-time remains out of scope (no requirement). Formal CSV re-validation of the changed areas (updating the IQ/OQ/PQ &amp; RTM) is a downstream activity, not part of this engineering plan.</p></div>
+</section>
+
+<div class="foot">
+  <p>NT.QMS Enterprise Architecture Remediation Plan · EA-PLAN-NTQMS-001 · 2026-07-27 · Derived from audit EA-AUD-NTQMS-001. Effort and tags are indicative and subject to team capacity; each phase is gated on its stated acceptance criteria and automated tests. This plan closes the enterprise-architecture findings; it complements — and does not replace — the CSV validation package.</p>
+</div>
+
+</div>
+</body></html>

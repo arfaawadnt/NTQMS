@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>NT.QMS — CSV & Regulatory Readiness Audit</title>
+<style>
+  :root{
+    --bg:#eef1f4; --surface:#ffffff; --surface-2:#f6f8fa; --ink:#182533; --ink-2:#3b4a5a; --muted:#64748b;
+    --border:#dde3ea; --navy:#14263a; --teal:#0d7d7d; --blue:#0a63b8;
+    --crit:#c0322b; --crit-bg:#fbe9e7; --major:#b9600a; --major-bg:#fbeede; --minor:#8a6d1f; --minor-bg:#f7f0d9;
+    --ok:#1f8a54; --ok-bg:#e6f4ec; --nv:#64748b; --nv-bg:#eceff2; --info:#0a63b8; --info-bg:#e7f0fa;
+    --mono:'SFMono-Regular',ui-monospace,'Cascadia Code','Consolas',monospace;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --shadow:0 1px 2px rgba(20,38,58,.06),0 1px 3px rgba(20,38,58,.05);
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#0e141b; --surface:#161f29; --surface-2:#1b2531; --ink:#e7edf3; --ink-2:#b7c2ce; --muted:#8595a4;
+      --border:#26313d; --navy:#9fb6d0; --teal:#39b3b3; --blue:#5aa2e6;
+      --crit:#f0857c; --crit-bg:#33110e; --major:#e6a24e; --major-bg:#33240f; --minor:#d9be6a; --minor-bg:#2b2410;
+      --ok:#5ecb8f; --ok-bg:#10281c; --nv:#93a2b2; --nv-bg:#1c2530; --info:#5aa2e6; --info-bg:#122132;
+      --shadow:0 1px 2px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0e141b; --surface:#161f29; --surface-2:#1b2531; --ink:#e7edf3; --ink-2:#b7c2ce; --muted:#8595a4;
+    --border:#26313d; --navy:#9fb6d0; --teal:#39b3b3; --blue:#5aa2e6;
+    --crit:#f0857c; --crit-bg:#33110e; --major:#e6a24e; --major-bg:#33240f; --minor:#d9be6a; --minor-bg:#2b2410;
+    --ok:#5ecb8f; --ok-bg:#10281c; --nv:#93a2b2; --nv-bg:#1c2530; --info:#5aa2e6; --info-bg:#122132;
+    --shadow:0 1px 2px rgba(0,0,0,.3);
+  }
+  :root[data-theme="light"]{
+    --bg:#eef1f4; --surface:#ffffff; --surface-2:#f6f8fa; --ink:#182533; --ink-2:#3b4a5a; --muted:#64748b;
+    --border:#dde3ea; --navy:#14263a; --teal:#0d7d7d; --blue:#0a63b8;
+    --crit:#c0322b; --crit-bg:#fbe9e7; --major:#b9600a; --major-bg:#fbeede; --minor:#8a6d1f; --minor-bg:#f7f0d9;
+    --ok:#1f8a54; --ok-bg:#e6f4ec; --nv:#64748b; --nv-bg:#eceff2; --info:#0a63b8; --info-bg:#e7f0fa;
+    --shadow:0 1px 2px rgba(20,38,58,.06),0 1px 3px rgba(20,38,58,.05);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.55;font-size:15px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 20px 80px}
+  a{color:var(--blue)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:.5px 5px;color:var(--ink-2);word-break:break-word}
+  h1,h2,h3,h4{line-height:1.25;color:var(--ink);text-wrap:balance}
+  /* Masthead */
+  header.mast{background:linear-gradient(135deg,var(--navy),color-mix(in srgb,var(--navy) 78%, var(--teal)));color:#fff;padding:34px 0 30px;margin-bottom:0}
+  :root[data-theme="dark"] header.mast,@media(prefers-color-scheme:dark){header.mast{color:#eaf1f8}}
+  .mast .wrap{padding-bottom:0}
+  .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.85;font-weight:600;margin:0 0 8px;color:#cfe0ef}
+  .mast h1{font-size:29px;margin:0 0 6px;color:#fff;font-weight:750;letter-spacing:-.01em}
+  .mast .sub{font-size:15px;opacity:.9;margin:0;max-width:70ch;color:#e7eef6}
+  .metagrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:2px 22px;margin-top:20px;font-size:12.5px}
+  .metagrid div{padding:5px 0;border-top:1px solid rgba(255,255,255,.16)}
+  .metagrid .k{opacity:.72;color:#cfe0ef}
+  .metagrid .v{font-weight:600}
+  /* verdict band */
+  .verdict{background:var(--crit);color:#fff;padding:16px 0}
+  .verdict .wrap{padding-top:0;padding-bottom:0;display:flex;flex-wrap:wrap;align-items:center;gap:14px}
+  .verdict .badge{font-weight:750;font-size:15px;letter-spacing:.02em;display:flex;align-items:center;gap:9px}
+  .verdict .dot{width:11px;height:11px;border-radius:50%;background:#fff;box-shadow:0 0 0 4px rgba(255,255,255,.25)}
+  .verdict .note{font-size:13px;opacity:.94}
+  /* nav */
+  nav.toc{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);margin-bottom:26px}
+  nav.toc .wrap{padding-top:0;padding-bottom:0;display:flex;gap:2px;overflow-x:auto;scrollbar-width:thin}
+  nav.toc a{color:var(--ink-2);text-decoration:none;font-size:12.5px;font-weight:600;padding:11px 11px;white-space:nowrap;border-bottom:2px solid transparent}
+  nav.toc a:hover{color:var(--blue);border-bottom-color:color-mix(in srgb,var(--blue) 40%,transparent)}
+  /* sections */
+  section{margin:0 0 34px;scroll-margin-top:56px}
+  .sec-h{display:flex;align-items:baseline;gap:12px;border-bottom:2px solid var(--border);padding-bottom:7px;margin:0 0 16px}
+  .sec-h .n{font-family:var(--mono);font-size:13px;color:var(--teal);font-weight:700}
+  .sec-h h2{font-size:20px;margin:0;font-weight:700}
+  p{color:var(--ink-2);margin:0 0 12px}
+  .lead{font-size:15.5px;color:var(--ink)}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:18px 20px;margin-bottom:16px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  @media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr}}
+  /* tiles */
+  .tile{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:15px 16px;box-shadow:var(--shadow)}
+  .tile .big{font-size:30px;font-weight:750;line-height:1;font-variant-numeric:tabular-nums}
+  .tile .lbl{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.35}
+  .tile.crit .big{color:var(--crit)} .tile.major .big{color:var(--major)} .tile.minor .big{color:var(--minor)} .tile.ok .big{color:var(--ok)}
+  /* chips */
+  .chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;border-radius:20px;padding:2px 9px;white-space:nowrap;line-height:1.7}
+  .chip::before{content:"";width:7px;height:7px;border-radius:50%}
+  .c-crit{color:var(--crit);background:var(--crit-bg)} .c-crit::before{background:var(--crit)}
+  .c-major{color:var(--major);background:var(--major-bg)} .c-major::before{background:var(--major)}
+  .c-minor{color:var(--minor);background:var(--minor-bg)} .c-minor::before{background:var(--minor)}
+  .c-ok{color:var(--ok);background:var(--ok-bg)} .c-ok::before{background:var(--ok)}
+  .c-nv{color:var(--nv);background:var(--nv-bg)} .c-nv::before{background:var(--nv)}
+  .c-info{color:var(--info);background:var(--info-bg)} .c-info::before{background:var(--info)}
+  /* tables */
+  .tablecard{background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:16px}
+  .scroll{overflow-x:auto}
+  table{border-collapse:collapse;width:100%;font-size:12.8px}
+  th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--border);vertical-align:top}
+  thead th{background:var(--surface-2);font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:700;position:sticky;top:0}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:color-mix(in srgb,var(--blue) 4%,transparent)}
+  td.mono,code.path{font-family:var(--mono);font-size:11.5px;color:var(--ink-2)}
+  .fid{font-family:var(--mono);font-weight:700;font-size:11.5px;white-space:nowrap}
+  ul.tight{margin:6px 0 12px;padding-left:20px} ul.tight li{margin-bottom:5px;color:var(--ink-2)}
+  ol.tight{margin:6px 0 12px;padding-left:20px} ol.tight li{margin-bottom:6px;color:var(--ink-2)}
+  .callout{border-left:4px solid var(--crit);background:var(--crit-bg);border-radius:0 8px 8px 0;padding:12px 15px;margin:0 0 14px;font-size:13.5px}
+  .callout.warn{border-left-color:var(--major);background:var(--major-bg)}
+  .callout.ok{border-left-color:var(--ok);background:var(--ok-bg)}
+  .callout.info{border-left-color:var(--info);background:var(--info-bg)}
+  .callout b{color:var(--ink)}
+  /* score bars */
+  .scorewrap{display:flex;flex-direction:column;gap:9px}
+  .scorerow{display:grid;grid-template-columns:190px 1fr 44px;gap:12px;align-items:center;font-size:13px}
+  .bar{height:9px;border-radius:6px;background:var(--surface-2);overflow:hidden;border:1px solid var(--border)}
+  .bar span{display:block;height:100%;border-radius:6px}
+  .s-hi span{background:var(--ok)} .s-md span{background:var(--major)} .s-lo span{background:var(--crit)}
+  .scorerow .val{font-variant-numeric:tabular-nums;font-weight:700;text-align:right}
+  @media(max-width:640px){.scorerow{grid-template-columns:120px 1fr 38px}}
+  .verdictgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+  .vcard{border:1px solid var(--border);border-radius:11px;padding:14px 15px;background:var(--surface)}
+  .vcard h4{margin:0 0 4px;font-size:13.5px}
+  .vcard .r{font-weight:750;font-size:14px;margin:3px 0 5px}
+  .vcard .r.no{color:var(--crit)} .vcard .r.cond{color:var(--major)} .vcard .r.na{color:var(--muted)}
+  .vcard p{font-size:12px;margin:0;color:var(--muted)}
+  .foot{margin-top:36px;padding-top:18px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 16px}
+  .phase{font-weight:750;font-size:12px;color:var(--navy);text-transform:uppercase;letter-spacing:.04em;margin:14px 0 6px}
+  :root[data-theme="dark"] .phase,@media(prefers-color-scheme:dark){.phase{color:var(--teal)}}
+  .pill-strong{background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:11px;border-radius:6px;padding:2px 7px}
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div class="wrap">
+    <p class="eyebrow">Computerized System Validation &amp; Regulatory Readiness Audit</p>
+    <h1>NT.QMS — Independent Compliance &amp; Validation Audit</h1>
+    <p class="sub">Evidence-based readiness assessment of the NT.QMS quality-management application against ISO/IEC 17025:2017, ISO 15189:2022, ISO 9001:2015, 21 CFR Part 11, EU GMP Annex 11 and GMP — conducted from source code, database schema and automated-test evidence.</p>
+    <div class="metagrid">
+      <div><div class="k">Application</div><div class="v">NT.QMS (multi-tenant SaaS QMS)</div></div>
+      <div><div class="k">Version reviewed</div><div class="v">v1.24.0 (git-tagged)</div></div>
+      <div><div class="k">Environment</div><div class="v">Development / source &amp; schema</div></div>
+      <div><div class="k">Stack</div><div class="v">.NET 9 · PostgreSQL 17 · Angular 18</div></div>
+      <div><div class="k">Deployment model</div><div class="v">Cloud / on-prem, multi-tenant</div></div>
+      <div><div class="k">Risk classification</div><div class="v">High (GxP electronic records)</div></div>
+      <div><div class="k">Validation approach</div><div class="v">GAMP 5 · risk-based CSV</div></div>
+      <div><div class="k">Audit basis</div><div class="v">Code, schema, tests — not a live PQ</div></div>
+    </div>
+  </div>
+</header>
+
+<div class="verdict">
+  <div class="wrap">
+    <span class="badge"><span class="dot"></span>GO-LIVE DECISION: PRODUCTION RELEASE PROHIBITED</span>
+    <span class="note">UAT continuation permitted. Three critical blockers must be closed and a formal CSV lifecycle executed before controlled production use of regulated records.</span>
+  </div>
+</div>
+
+<nav class="toc">
+  <div class="wrap">
+    <a href="#exec">1 · Executive Summary</a>
+    <a href="#scope">2 · Scope &amp; Limits</a>
+    <a href="#arch">3 · Architecture</a>
+    <a href="#standards">4 · Standards</a>
+    <a href="#trace">5 · Traceability</a>
+    <a href="#missing">6 · Missing</a>
+    <a href="#incomplete">7 · Incomplete</a>
+    <a href="#dup">8 · Duplicates</a>
+    <a href="#together">9 · Consolidation</a>
+    <a href="#part11">10 · Records &amp; Signatures</a>
+    <a href="#csv">11 · CSV</a>
+    <a href="#sec">12 · Security</a>
+    <a href="#integ">13 · Integration</a>
+    <a href="#findings">14 · Findings</a>
+    <a href="#road">15 · Remediation</a>
+    <a href="#decision">16 · Readiness</a>
+    <a href="#golive">17 · Go-Live</a>
+    <a href="#score">Scoring</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <!-- 1 EXEC -->
+  <section id="exec">
+    <div class="sec-h"><span class="n">01</span><h2>Executive Summary</h2></div>
+    <p class="lead">NT.QMS is a genuinely capable, well-architected quality-management platform. Every module inspected has a real domain model, API and user interface — there are no hollow or mock screens — and several regulated-record controls (a hash-chained audit trail, a dual-component electronic signature, server-side time, and consistent sign-off freezing) are implemented to a standard rarely seen at this stage. <b>However, as a computerized system for GxP use it is pre-validation, and three critical, go-live-blocking defects were confirmed.</b> The functional breadth must not be mistaken for compliance readiness: per this audit's scoring rules, unresolved critical findings override any favourable functional percentage.</p>
+
+    <div class="grid4" style="margin:16px 0">
+      <div class="tile crit"><div class="big">3</div><div class="lbl">Critical nonconformities (go-live blockers)</div></div>
+      <div class="tile major"><div class="big">7</div><div class="lbl">Major nonconformities</div></div>
+      <div class="tile minor"><div class="big">10</div><div class="lbl">Minor nonconformities</div></div>
+      <div class="tile ok"><div class="big">12</div><div class="lbl">Strong controls credited</div></div>
+    </div>
+
+    <div class="callout"><b>Critical 1 — Tenant isolation is not enforced at the database.</b> PostgreSQL Row-Level Security policies exist on 53 tables but are <b>dormant</b>: the application never sets the <code>app.current_tenant</code> session variable, sets no <code>FORCE ROW LEVEL SECURITY</code>, and connects as the table-owning role — all three independently defeat RLS. Isolation currently rests solely on an in-process EF query filter, which 25+ <code>IgnoreQueryFilters()</code> code paths bypass with no database backstop. For a multi-tenant regulated system this is a data-integrity and confidentiality blocker.</div>
+    <div class="callout"><b>Critical 2 — Regulated business records are database-editable.</b> Append-only triggers and least-privilege protect the four <code>audit.*</code> ledger tables, but <b>no equivalent protection exists on the <code>qams.*</code> tables</b> holding signed studies, documents, NCs and archives. A holder of the application's database role (or a DBA) can <code>UPDATE</code>/<code>DELETE</code> a signed-off record via raw SQL — bypassing every domain guard and leaving no trail, since the change-ledger only observes EF-mediated writes. The intended least-privilege runtime role is described in a code comment but is not codified in any migration (zero <code>GRANT</code>/<code>REVOKE</code>).</div>
+    <div class="callout"><b>Critical 3 — No computerized-system-validation evidence exists.</b> There is no Validation Master Plan, URS, functional/design specification, requirements-traceability matrix, IQ/OQ/PQ, UAT, formal risk assessment or validation summary report. The architecture/sizing Markdown documents are engineering artefacts, not approved validation deliverables. The system is formally unvalidated and cannot be released for regulated production use on that basis alone (21 CFR Part 11 §11.10(a); Annex 11 §4).</div>
+
+    <p><b>Balance of evidence.</b> The audit-trail and electronic-signature subsystems, the sign-off-freeze immutability across all twelve analytical study aggregates, server-UTC contemporaneity, fail-closed tenant/actor attribution, deny-by-default authorization, account lockout, PBKDF2 hashing, and ~203 backend tests (including a hash-chain tamper test and a dual-component signing test) are real strengths. The gaps are concentrated in (a) database-layer enforcement of controls that today live only in application code, (b) enforcement of multi-factor authentication and segregation of duties, and (c) the entire formal validation lifecycle.</p>
+
+    <p><b>Recommended decision:</b> <b style="color:var(--crit)">Production release prohibited; UAT may continue.</b> The system is a strong conditional candidate — the three blockers are addressable with focused engineering (activate RLS, harden the database role, execute a CSV) rather than redesign.</p>
+  </section>
+
+  <!-- 2 SCOPE -->
+  <section id="scope">
+    <div class="sec-h"><span class="n">02</span><h2>Audit Scope &amp; Limitations</h2></div>
+    <div class="grid2">
+      <div class="card">
+        <h4 style="margin-top:0">Reviewed</h4>
+        <ul class="tight">
+          <li>Source code — domain, application, infrastructure, WebApi controllers</li>
+          <li>PostgreSQL schema &amp; 26 EF Core migrations (RLS, triggers, indexes)</li>
+          <li>Automated test suites (~203 backend, 7 frontend specs)</li>
+          <li>Role/authorization gates, e-signature &amp; audit-trail implementation</li>
+          <li>Angular frontend feature modules &amp; navigation</li>
+          <li>Deployment notes, app settings, seeding logic</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4 style="margin-top:0">Not reviewed / limitations</h4>
+        <ul class="tight">
+          <li><b>No live production or qualified instance</b> — this is a code/schema-level readiness audit, not an executed IQ/OQ/PQ. Runtime DB-role privileges are <span class="chip c-nv">Not Verified</span> against a live cluster.</li>
+          <li>Contractually-binding standard editions &amp; jurisdictions not supplied — dependent items marked Not Verified.</li>
+          <li>No approved URS/specs to test against; requirements inferred from code &amp; the SOW.</li>
+          <li>No penetration test, load test, or backup-restore drill evidence available.</li>
+          <li>Licensed standard texts not provided — clauses are paraphrased, not reproduced.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout info"><b>Assumptions.</b> Intended use: a multi-tenant QMS for accredited testing/medical laboratories operating under ISO/IEC 17025, ISO 15189 and ISO 9001, with electronic records subject to 21 CFR Part 11 / EU GMP Annex 11. Laboratory operational functions (order entry, sample management, per-result authorization, reporting) are assumed to reside in an integrated LIMS/LIS and are assessed as external-system-controlled, not as QMS gaps.</div>
+  </section>
+
+  <!-- 3 ARCH -->
+  <section id="arch">
+    <div class="sec-h"><span class="n">03</span><h2>Application Architecture &amp; Module Inventory</h2></div>
+    <p>Clean/DDD architecture with CQRS (MediatR), EF Core 9 on PostgreSQL (snake_case, UUIDv7 keys), and an Angular 18 standalone/signals frontend. Cross-cutting compliance services are <b>centralized behind single application ports</b> — identity/RBAC, electronic signature, audit-trail/field-change ledger, security events, notifications, attachments and reporting each have one implementation, not per-module copies. This is an architectural strength and materially reduces Part 11 risk surface.</p>
+    <p>Every navigation entry was confirmed to have a matching domain aggregate + controller + frontend feature. <b>No duplicate or hollow modules were found.</b> Confirmed module families:</p>
+    <div class="scroll tablecard">
+      <table>
+        <thead><tr><th>Area</th><th>Confirmed modules (domain + API + UI)</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Governance</td><td>Org context &amp; interested parties, quality objectives, management review, risk register, conflict-of-interest / impartiality</td><td><span class="chip c-ok">Present</span></td></tr>
+          <tr><td>Documents &amp; records</td><td>Controlled documents (draft→review→approve→publish→obsolete, versioning, periodic review), records &amp; retention/archive</td><td><span class="chip c-ok">Present</span></td></tr>
+          <tr><td>Quality events</td><td>Nonconformance/CAPA (9-state, RCA, effectiveness), complaints, feedback</td><td><span class="chip c-ok">Present</span></td></tr>
+          <tr><td>Audit</td><td>Internal audit with checklist, findings &amp; finding→NC saga</td><td><span class="chip c-ok">Present</span></td></tr>
+          <tr><td>People</td><td>Competency, personnel authorization matrix, training assignment, requalification</td><td><span class="chip c-ok">Present</span></td></tr>
+          <tr><td>Equipment &amp; facilities</td><td>Equipment (calibration/maintenance/intermediate checks/lockout), reference standards (SI traceability), environmental monitoring</td><td><span class="chip c-ok">Present</span></td></tr>
+          <tr><td>Supplier quality</td><td>Registration, weighted evaluation, approved list, re-evaluation, auto-suspend</td><td><span class="chip c-ok">Present</span></td></tr>
+          <tr><td>Change / review</td><td>Change control (risk-gated approval), management review</td><td><span class="chip c-ok">Present</span></td></tr>
+          <tr><td>Analytical quality</td><td>QC/Westgard, method validation, method comparison, precision, linearity, detection limit, reference interval, sigma, outlier, carryover, lot-to-lot, interference, instrument comparability, uncertainty, PT/PT-plans — 15+ study aggregates</td><td><span class="chip c-ok">Present</span></td></tr>
+          <tr><td>Compliance platform</td><td>Hash-chained audit trail, electronic signatures, security events, audit-trail review, notifications, tasks/SLA, KPI reporting, files, reference data (LOV)</td><td><span class="chip c-ok">Present</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="lead" style="font-size:14px">Full module-by-module inventory (business purpose, workflow, records, signatures, criticality) is available in the supporting evidence; the summary above reflects confirmed domain+API+UI presence.</p>
+  </section>
+
+  <!-- 4 STANDARDS -->
+  <section id="standards">
+    <div class="sec-h"><span class="n">04</span><h2>Standards Applicability Assessment</h2></div>
+    <div class="scroll tablecard">
+      <table>
+        <thead><tr><th>Standard / edition</th><th>Applicability</th><th>Headline position</th></tr></thead>
+        <tbody>
+          <tr><td>ISO/IEC 17025:2017</td><td>Applicable (testing/calibration labs)</td><td>Strong functional coverage of §6 (resources), §7.7 (QA of results), §8 (management system). Software itself unvalidated; DB-layer controls dormant. <span class="chip c-major">Not ready</span></td></tr>
+          <tr><td>ISO 15189:2022</td><td>Applicable (medical labs)</td><td>As 17025 plus clinical items (critical-result notification, amended reports) that are LIS-controlled. <span class="chip c-major">Not ready</span></td></tr>
+          <tr><td>ISO 9001:2015 (+A1:2024)</td><td>Applicable</td><td>Broadly supported; gaps in quality policy, continual-improvement register, post-implementation review. Software unvalidated. <span class="chip c-major">Conditionally ready</span></td></tr>
+          <tr><td>21 CFR Part 11</td><td>Applicable (regulated e-records)</td><td>Excellent §11.200 signatures &amp; §11.10(e) audit trail; but §11.10(a) validation absent and §11.10(c) record protection incomplete on business tables. <span class="chip c-crit">Not ready</span></td></tr>
+          <tr><td>EU GMP Annex 11</td><td>Applicable where GMP e-records</td><td>No validation, no formal risk assessment, DB data-integrity gaps. <span class="chip c-crit">Not ready</span></td></tr>
+          <tr><td>GMP framework (WHO/EU/FDA)</td><td>Limited — lab-oriented product</td><td>GMP manufacturing processes (batch release, stability, recalls…) absent by design; require MES/ERP/LIMS. <span class="chip c-nv">Not applicable / external</span></td></tr>
+          <tr><td>National accreditation / privacy / cyber</td><td>Jurisdiction not supplied</td><td>Dependent on jurisdiction. <span class="chip c-nv">Not verified</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 5 TRACE -->
+  <section id="trace">
+    <div class="sec-h"><span class="n">05</span><h2>Clause-Level Traceability Matrix (representative)</h2></div>
+    <p>Key testable requirements mapped to implementation and evidence. Status uses: <span class="chip c-ok">Conforming</span> <span class="chip c-major">Partial</span> <span class="chip c-crit">Nonconforming</span> <span class="chip c-nv">Not verified</span>. "Conforming" is used only with objective code evidence; a full clause-by-clause matrix for accreditation should be completed against licensed standard texts.</p>
+    <div class="scroll tablecard">
+      <table>
+        <thead><tr><th>Std · Clause</th><th>Requirement (paraphrased)</th><th>Control type</th><th>Evidence</th><th>Status</th><th>Finding</th></tr></thead>
+        <tbody>
+          <tr><td>17025 §7.5 / §8.4</td><td>Technical &amp; quality records, complete and amendment-traceable</td><td>Hybrid</td><td class="mono">FieldChangeInterceptor.cs; audit.field_change</td><td><span class="chip c-ok">Conforming</span></td><td>—</td></tr>
+          <tr><td>17025 §7.11 / Annex 11 §7</td><td>Data protection: prevent loss/unauthorized change of records</td><td>System</td><td class="mono">triggers on audit.* only; qams.* unprotected</td><td><span class="chip c-crit">Nonconforming</span></td><td class="fid">F-02</td></tr>
+          <tr><td>17025 §7.7</td><td>Ensuring validity of results — IQC, PT, uncertainty, method validation</td><td>System</td><td class="mono">QcProfile+WestgardEvaluator; PtEnrollment; UncertaintyBudget; 12 study aggregates</td><td><span class="chip c-ok">Conforming</span></td><td>—</td></tr>
+          <tr><td>17025 §6.4 / §6.5</td><td>Equipment control &amp; metrological traceability</td><td>System</td><td class="mono">EquipmentItem.cs; ReferenceStandard.cs (TraceableTo)</td><td><span class="chip c-ok">Conforming</span></td><td>—</td></tr>
+          <tr><td>17025 §6.2</td><td>Personnel competence &amp; authorization</td><td>System</td><td class="mono">CompetencyRecord.cs; TestAuthorization.cs</td><td><span class="chip c-ok">Conforming</span></td><td>—</td></tr>
+          <tr><td>17025 §4.1</td><td>Impartiality / conflict of interest</td><td>System</td><td class="mono">ConflictDeclaration.cs</td><td><span class="chip c-ok">Conforming</span></td><td>—</td></tr>
+          <tr><td>17025 §7.8</td><td>Reporting of results; amended reports</td><td>External</td><td>LIMS/LIS domain</td><td><span class="chip c-nv">Not applicable</span></td><td>—</td></tr>
+          <tr><td>15189 §7 / §5.9</td><td>Critical-result notification; clinical report amendment</td><td>External</td><td>LIS domain</td><td><span class="chip c-nv">Not applicable</span></td><td>—</td></tr>
+          <tr><td>9001 §5.2</td><td>Quality policy established &amp; communicated</td><td>Hybrid</td><td class="mono">no QualityPolicy aggregate</td><td><span class="chip c-crit">Nonconforming</span></td><td class="fid">F-11</td></tr>
+          <tr><td>9001 §9.3</td><td>Management review with defined inputs/outputs</td><td>System</td><td class="mono">ChangeAndReview.cs → ManagementReview</td><td><span class="chip c-ok">Conforming</span></td><td>—</td></tr>
+          <tr><td>9001 §10 / §8.5.6</td><td>Change control with post-implementation review</td><td>System</td><td class="mono">ChangeRequest (risk-gated); no PIR step</td><td><span class="chip c-major">Partial</span></td><td class="fid">F-11</td></tr>
+          <tr><td>Part 11 §11.10(a)</td><td>Validation of systems for accuracy/reliability</td><td>Hybrid</td><td class="mono">no VMP/URS/IQ/OQ/PQ/RTM</td><td><span class="chip c-crit">Nonconforming</span></td><td class="fid">F-03</td></tr>
+          <tr><td>Part 11 §11.10(c)</td><td>Protection of records for accurate retrieval throughout retention</td><td>System</td><td class="mono">audit.* protected; qams.* editable via DB role</td><td><span class="chip c-crit">Nonconforming</span></td><td class="fid">F-02</td></tr>
+          <tr><td>Part 11 §11.10(d)</td><td>Limiting access to authorized individuals</td><td>System</td><td class="mono">deny-by-default; RBAC; MFA opt-in only; RLS dormant</td><td><span class="chip c-crit">Nonconforming</span></td><td class="fid">F-01, F-04</td></tr>
+          <tr><td>Part 11 §11.10(e)</td><td>Secure, computer-generated, time-stamped audit trail incl. reason</td><td>System</td><td class="mono">hash-chained trail; but no reason-for-change field</td><td><span class="chip c-major">Partial</span></td><td class="fid">F-06</td></tr>
+          <tr><td>Part 11 §11.10(g)/(d)</td><td>Authority checks &amp; segregation of duties</td><td>System</td><td class="mono">SoD in docs/NC-close/competency; absent in analytical sign-off</td><td><span class="chip c-major">Partial</span></td><td class="fid">F-05</td></tr>
+          <tr><td>Part 11 §11.50 / §11.70</td><td>Signature manifestations &amp; record linking</td><td>System</td><td class="mono">SignatureRecord: signer/UTC/meaning + SHA-256 content hash</td><td><span class="chip c-ok">Conforming</span></td><td>—</td></tr>
+          <tr><td>Part 11 §11.200</td><td>Signatures use ≥2 components; re-auth</td><td>System</td><td class="mono">ESignatureService verifies password + PIN</td><td><span class="chip c-ok">Conforming</span></td><td>—</td></tr>
+          <tr><td>Part 11 §11.300</td><td>Identification-code/password controls; failed-attempt logging</td><td>System</td><td class="mono">login logs+lockout; e-sig failures NOT logged</td><td><span class="chip c-major">Partial</span></td><td class="fid">F-08</td></tr>
+          <tr><td>Annex 11 §12</td><td>Security — access control, segregation, data protection</td><td>System</td><td class="mono">RLS dormant; MFA not enforced</td><td><span class="chip c-crit">Nonconforming</span></td><td class="fid">F-01, F-04</td></tr>
+          <tr><td>Annex 11 §7.1 / ALCOA+</td><td>Data stored securely; integrity through lifecycle</td><td>System</td><td class="mono">strong app-layer; DB-layer editable business records</td><td><span class="chip c-major">Partial</span></td><td class="fid">F-02</td></tr>
+          <tr><td>Annex 11 §16 / Part 11 §11.10</td><td>Business continuity, backup &amp; restore verified</td><td>Hybrid</td><td class="mono">note only; no restore test / DR plan</td><td><span class="chip c-nv">Not verified</span></td><td class="fid">F-16</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 6 MISSING -->
+  <section id="missing">
+    <div class="sec-h"><span class="n">06</span><h2>Missing Modules &amp; Capabilities</h2></div>
+    <p>Genuinely absent capabilities. Items marked <span class="chip c-info">External</span> are appropriately out of a QMS and belong in an integrated, separately-validated system (must be covered by a controlled interface, not re-built here).</p>
+    <div class="scroll tablecard">
+      <table>
+        <thead><tr><th>Capability</th><th>Standard</th><th>Impact</th><th>Disposition</th><th>Risk</th></tr></thead>
+        <tbody>
+          <tr><td>Quality policy (controlled)</td><td>9001 §5.2; 17025 §8.2</td><td>No system-of-record for the policy statement &amp; its communication</td><td>Add lightweight aggregate</td><td><span class="chip c-major">Major</span></td></tr>
+          <tr><td>Read-and-understand acknowledgement (per document)</td><td>9001 §7.5; 17025 §8.3; Part 11 training</td><td>Cannot evidence personnel read/understood a controlled SOP</td><td>Add doc-acknowledgement receipt</td><td><span class="chip c-major">Major</span></td></tr>
+          <tr><td>Distinct Deviation / OOS / OOT event types</td><td>GMP; 17025 §7.10</td><td>All funnel through a generic nonconformance; no first-class OOS/OOT investigation workflow</td><td>Extend quality-event framework</td><td><span class="chip c-major">Major</span></td></tr>
+          <tr><td>Legal hold on records</td><td>Part 11 §11.10(c); retention law</td><td>An expired record can be disposed even under litigation hold</td><td>Add hold state to archive</td><td><span class="chip c-major">Major</span></td></tr>
+          <tr><td>Post-implementation review (change control)</td><td>9001 §8.5.6; Annex 11 §10</td><td>Change closure records notes but no effectiveness/verification stage</td><td>Add PIR step</td><td><span class="chip c-minor">Minor</span></td></tr>
+          <tr><td>Controlled printed-copy / distribution register</td><td>17025 §8.3; 9001 §7.5.3</td><td>No control of physical copies</td><td>Add copy register (or enforce electronic-only)</td><td><span class="chip c-minor">Minor</span></td></tr>
+          <tr><td>Data-driven role/privilege matrix</td><td>Part 11 §11.10(d); Annex 11 §12</td><td>Roles are a fixed enum; no configurable privilege catalogue or responsibilities register</td><td>Planned; interim documented</td><td><span class="chip c-minor">Minor</span></td></tr>
+          <tr><td>Periodic user-access review / recertification</td><td>Part 11 §11.10(d); Annex 11 §12</td><td>No recurring access-review workflow</td><td>Add access-review task</td><td><span class="chip c-minor">Minor</span></td></tr>
+          <tr><td>Request/contract review · sample management · per-result authorization · critical-result notification · amended reports</td><td>17025 §7.1/§7.2/§7.8; 15189</td><td>Core lab operations</td><td><span class="chip c-info">External</span> — LIMS/LIS + controlled interface</td><td><span class="chip c-nv">N/A</span></td></tr>
+          <tr><td>GMP manufacturing: batch record review, batch/material release, process &amp; cleaning validation, stability, returns, recalls, product-quality review, retention samples</td><td>GMP; Annex 11</td><td>Not a lab-QMS scope</td><td><span class="chip c-info">External</span> — MES/ERP/LIMS</td><td><span class="chip c-nv">N/A</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 7 INCOMPLETE -->
+  <section id="incomplete">
+    <div class="sec-h"><span class="n">07</span><h2>Incomplete Modules (present but missing controls)</h2></div>
+    <div class="scroll tablecard">
+      <table>
+        <thead><tr><th>Module</th><th>Present</th><th>Missing control</th><th>Failed requirement</th><th>Risk</th></tr></thead>
+        <tbody>
+          <tr><td>Analytical study sign-off</td><td>State machine, actor + UTC captured, immutability freeze</td><td>No author≠signer segregation-of-duties guard (validation study, uncertainty, PT plan; NC <i>verify</i>)</td><td>Part 11 §11.10(g)</td><td><span class="chip c-major">Major</span></td></tr>
+          <tr><td>Evidence entry (all studies)</td><td>"Void-and-re-enter" immutable evidence; deletes audit-logged</td><td>Removal captures <b>no reason-for-change</b>; contradicts documented design</td><td>Part 11 §11.10(e)</td><td><span class="chip c-major">Major</span></td></tr>
+          <tr><td>QC profile</td><td>Westgard evaluation, troubleshooting note mandatory</td><td><code>UpdateTargets</code> overwrites mean/SD in place — no reason, no effective-dating (contradicts its own contract); Westgard limits hard-coded literals</td><td>Part 11 §11.10(e); data integrity</td><td><span class="chip c-major">Major</span></td></tr>
+          <tr><td>Electronic signature</td><td>Dual-component re-auth, immutable, meaning/hash</td><td>Failed signing attempts not logged or rate-limited (login is)</td><td>Part 11 §11.300(d)</td><td><span class="chip c-minor">Minor</span></td></tr>
+          <tr><td>Audit trail</td><td>Computer-generated, hash-chained, old/new value</td><td>No reason-for-change field; no transaction/correlation id; no dedicated export</td><td>Part 11 §11.10(e)</td><td><span class="chip c-minor">Minor</span></td></tr>
+          <tr><td>Records &amp; retention</td><td>Retention classes, disposal blocked before expiry + authorized</td><td>Archive content snapshot optional (nullable) → entry may lack immutable copy; no legal hold</td><td>Part 11 §11.10(c)</td><td><span class="chip c-minor">Minor</span></td></tr>
+          <tr><td>Session / identity</td><td>JWT, lockout, aging, reuse-ban, TOTP available</td><td>No refresh/revocation/idle-timeout; deactivated user's token valid ≤120 min; MFA not enforced</td><td>Part 11 §11.10(d)</td><td><span class="chip c-major">Major</span></td></tr>
+          <tr><td>Internal audit</td><td>Individual audit lifecycle, findings, finding→NC</td><td>No multi-audit annual-programme/schedule aggregate</td><td>17025 §8.8</td><td><span class="chip c-minor">Minor</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 8 DUP -->
+  <section id="dup">
+    <div class="sec-h"><span class="n">08</span><h2>Repeated &amp; Duplicate Modules</h2></div>
+    <div class="callout ok"><b>No true duplicates found.</b> Each navigation item maps to a distinct aggregate, controller and UI. Cross-cutting services (identity, e-signature, audit trail, notifications, attachments, reporting) are single centralized implementations — not re-implemented per module. This is a notable strength versus typical enterprise QMS builds.</div>
+    <p><b>Watch items (not defects):</b></p>
+    <ul class="tight">
+      <li><b>Improvement-event chain</b> — Feedback → Complaint → Nonconformance are three deliberately-separate aggregates with escalation links; correct modelling, but confirm users are guided to the right entry point so the same dissatisfaction is not opened in two places.</li>
+      <li><b>Analytical study surface</b> — a generic <code>ValidationStudy</code> coexists with 12 specialised study aggregates. Confirm the generic study is still needed and is not a thinner variant of the specialised ones (menu-bloat / wrong-module-selection risk).</li>
+      <li><b>Risk linkage</b> appears in the risk register and is referenced by change requests and context issues — correct cross-linking, not duplication.</li>
+    </ul>
+  </section>
+
+  <!-- 9 TOGETHER -->
+  <section id="together">
+    <div class="sec-h"><span class="n">09</span><h2>Modules That Should Be Managed Together</h2></div>
+    <p>Most recommended consolidations are <b>already realised</b> in the architecture. Assessment of the target shared-capability map:</p>
+    <div class="scroll tablecard">
+      <table>
+        <thead><tr><th>Shared capability</th><th>Current state</th><th>Recommendation</th></tr></thead>
+        <tbody>
+          <tr><td>Identity · RBAC · e-signature · audit trail · notifications · attachments · reporting</td><td><span class="pill-strong">Centralized</span> single ports/services</td><td>Retain; add data-driven privilege matrix</td></tr>
+          <tr><td>CAPA / action management</td><td>CAPA lives inside Nonconformance; audit/change/supplier actions link to their own records</td><td>Consider one shared action-tracker engine so all action types share due-date/escalation/effectiveness</td></tr>
+          <tr><td>Quality-event framework</td><td>NC/complaint/feedback separate; no deviation/OOS/OOT types</td><td>Introduce a shared event framework with typed classifications (keep distinct workflows)</td></tr>
+          <tr><td>Controlled content</td><td>One ControlledDocument service; transaction records distinct from templates</td><td>Retain; add read-and-understand + copy control</td></tr>
+          <tr><td>Training ↔ documents ↔ competency</td><td>Competency + training + authorization integrated; SOP-revision → training-impact not automated</td><td>Auto-trigger training-impact assessment on document revision</td></tr>
+          <tr><td>Equipment lifecycle · supplier quality</td><td>Unified per domain</td><td>Retain</td></tr>
+          <tr><td>Risk ↔ change ↔ validation</td><td>Change is risk-gated; validation of the <i>software</i> is absent</td><td>Integrate a validation-impact assessment into change control</td></tr>
+          <tr><td>Central workflow engine</td><td>Each aggregate owns its guarded state machine (no configurable engine)</td><td>Acceptable DDD choice; document as a design decision</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 10 PART 11 -->
+  <section id="part11">
+    <div class="sec-h"><span class="n">10</span><h2>Electronic Records &amp; Signatures (Part 11 / Annex 11)</h2></div>
+    <div class="grid2">
+      <div class="card">
+        <h4 style="margin-top:0">Audit trail <span class="chip c-ok">Strong</span></h4>
+        <ul class="tight">
+          <li>Two computer-generated mechanisms: a field-change ledger (EF <code>SavingChanges</code> interceptor, same transaction) and a SHA-256 <b>per-tenant hash-chained</b> event trail with an independent verifier.</li>
+          <li>Captures user, server-UTC timestamp, action, entity, <b>old &amp; new value</b>; credentials redacted at capture.</li>
+          <li>Append-only enforced by DB triggers on all four <code>audit.*</code> tables; ledger self-excluded from capture.</li>
+          <li><b>Gaps:</b> no reason-for-change field (F-06); no transaction/correlation id; no CSV/PDF export (F-13); completeness depends on EF — out-of-band SQL writes leave no trail (tied to F-02).</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4 style="margin-top:0">Electronic signatures <span class="chip c-ok">Strong</span></h4>
+        <ul class="tight">
+          <li>Two components re-verified at signing — account <b>password + separate e-signature PIN</b> (§11.200).</li>
+          <li>Records signer identity, server-UTC, and human-readable <b>meaning</b>; permanently bound to the record via <b>SHA-256 content hash</b> + subject reference (cannot be transplanted).</li>
+          <li>Rows immutable (append-only trigger); segregation of duties enforced for document approval (author≠approver).</li>
+          <li><b>Gaps:</b> failed signing attempts not logged/rate-limited (F-08); post-signature freeze relies on each aggregate's state machine — not a system-wide invariant, and a later edit does not auto-invalidate an existing signature (F-05 related).</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout warn"><b>Record protection is the weak point (F-02).</b> Signatures and audit rows are DB-protected; the <b>signed business records they attest to are not</b>. Because tamper-evidence is generated by the EF layer, a direct-SQL change to a signed <code>qams.*</code> record is both possible (no trigger/least-privilege) and invisible (no ledger row). This undermines the reliability of the otherwise-excellent signature/audit design.</div>
+  </section>
+
+  <!-- 11 CSV -->
+  <section id="csv">
+    <div class="sec-h"><span class="n">11</span><h2>Computerized System Validation</h2></div>
+    <p>Engineering discipline is high; formal validation is absent. Automated tests: ~203 backend (unit, application, and HTTP-functional) plus 7 frontend specs.</p>
+    <div class="callout warn"><b>Functional tests do not run against PostgreSQL.</b> The HTTP functional harness swaps in EF In-Memory, so RLS, delete/restrict FK semantics, migrations and PostgreSQL-specific behaviour are <b>never exercised in CI</b>. E-signature and audit-trail are proven at unit level only; authorization is tested for a single endpoint. There is no IQ/OQ against the real target platform.</div>
+    <div class="scroll tablecard">
+      <table>
+        <thead><tr><th>Validation artefact</th><th>Status</th><th>Artefact</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Validation Master Plan</td><td><span class="chip c-crit">Absent</span></td><td>IQ / OQ / PQ protocols &amp; reports</td><td><span class="chip c-crit">Absent</span></td></tr>
+          <tr><td>User Requirements Spec (approved)</td><td><span class="chip c-crit">Absent</span></td><td>UAT protocol &amp; records</td><td><span class="chip c-crit">Absent</span></td></tr>
+          <tr><td>Functional / Design Spec (controlled)</td><td><span class="chip c-major">Informal</span></td><td>Risk assessment (FMEA/GAMP)</td><td><span class="chip c-crit">Absent</span></td></tr>
+          <tr><td>Requirements Traceability Matrix</td><td><span class="chip c-crit">Absent</span></td><td>Validation Summary Report</td><td><span class="chip c-crit">Absent</span></td></tr>
+          <tr><td>Configuration specification</td><td><span class="chip c-crit">Absent</span></td><td>Release-approval records</td><td><span class="chip c-major">Git tags only</span></td></tr>
+          <tr><td>Backup &amp; restore test</td><td><span class="chip c-crit">Absent</span></td><td>Disaster-recovery plan/test</td><td><span class="chip c-crit">Absent</span></td></tr>
+          <tr><td>Data-migration validation</td><td><span class="chip c-nv">N/A (greenfield)</span></td><td>Defect log (formal)</td><td><span class="chip c-major">Commit msgs only</span></td></tr>
+          <tr><td>Periodic-review record</td><td><span class="chip c-crit">Absent</span></td><td>SOPs (change/validation)</td><td><span class="chip c-crit">Absent</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Change/release control is informal (git tags + descriptive commits; 24 semver tags to v1.24.0) — adequate source-control, but not GAMP-compliant change control (no change requests, impact/risk assessment per change, approval gate, or release-authorization record).</p>
+  </section>
+
+  <!-- 12 SEC -->
+  <section id="sec">
+    <div class="sec-h"><span class="n">12</span><h2>Security &amp; Access Control</h2></div>
+    <div class="grid2">
+      <div class="card">
+        <h4 style="margin-top:0"><span class="chip c-ok">Strong</span> controls</h4>
+        <ul class="tight">
+          <li>Deny-by-default authorization (global fallback policy); role gates on all endpoints.</li>
+          <li>PBKDF2-HMAC-SHA256 password hashing; account lockout (5 attempts / 30 min); password aging (90 d) &amp; reuse ban (last 5).</li>
+          <li>Tenant resolved <b>only</b> from the validated JWT claim — headers/query spoofing explicitly banned.</li>
+          <li>Fail-closed attribution: unscoped rows are rejected (<code>TENANT-000</code>), not silently persisted.</li>
+          <li>Soft deactivation (no hard user delete) preserves the Part 11 trail.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4 style="margin-top:0"><span class="chip c-crit">Weaknesses</span></h4>
+        <ul class="tight">
+          <li><b>Tenant RLS dormant</b> (F-01) — GUC unset, no <code>FORCE RLS</code>, app runs as table owner; single-layer app isolation with <code>IgnoreQueryFilters()</code> bypass surfaces.</li>
+          <li><b>MFA not enforced</b> (F-04) — TOTP is opt-in even for TenantAdmin/PlatformAdmin.</li>
+          <li><b>SoD absent</b> in analytical sign-offs (F-05).</li>
+          <li>No JWT revocation / idle-timeout / refresh (F-07); deactivated token valid ≤120 min.</li>
+          <li>Password policy: no complexity/breach check; min length inconsistent (10 vs 12) (F-15).</li>
+          <li>Dev credentials (JWT secret, DB &amp; platform-admin passwords) committed in <code>appsettings.Development.json</code> (F-17).</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 INTEG -->
+  <section id="integ">
+    <div class="sec-h"><span class="n">13</span><h2>Integration &amp; Data Migration</h2></div>
+    <ul class="tight">
+      <li><b>Interfaces:</b> the product exposes a REST API and a CSV/analyzer importer with per-row validation. No live LIMS/LIS/ERP/HL7/identity-provider integration was evidenced; lab-operational functions assumed external must be delivered via a <b>controlled, validated interface</b> with error handling, reconciliation and traceability — none of which is yet specified or tested.</li>
+      <li><b>Error handling / exception queues:</b> an outbox pattern drives domain events and the audit chain; interface error-queue/reconciliation for external systems is <span class="chip c-nv">Not verified</span> (no external interface present).</li>
+      <li><b>Data migration:</b> greenfield schema (26 EF migrations); no legacy-data migration in scope, so migration validation is <span class="chip c-nv">N/A</span> today — but must be planned before any production data load, restore or tenant import.</li>
+    </ul>
+  </section>
+
+  <!-- 14 FINDINGS -->
+  <section id="findings">
+    <div class="sec-h"><span class="n">14</span><h2>Findings Register</h2></div>
+    <div class="legend">
+      <span class="chip c-crit">Critical</span><span class="chip c-major">Major</span><span class="chip c-minor">Minor</span><span class="chip c-ok">Strength</span>
+    </div>
+    <div class="scroll tablecard">
+      <table>
+        <thead><tr><th>ID</th><th>Std · clause</th><th>Finding</th><th>Evidence</th><th>Class</th><th>Required correction</th></tr></thead>
+        <tbody>
+          <tr><td class="fid">F-01</td><td>Annex 11 §12; Part 11 §11.10(d); 17025 §7.11</td><td>Tenant RLS dormant — <code>app.current_tenant</code> never set, no <code>FORCE RLS</code>, app connects as table owner; DB-level isolation inert</td><td class="mono">migrations (policies present, comment "dormant"); no set_config in src; appsettings role qams_app</td><td><span class="chip c-crit">Critical</span></td><td>Split a low-privilege non-owner runtime role; <code>FORCE ROW LEVEL SECURITY</code>; set GUC per connection via a DbConnection interceptor; add cross-tenant denial tests</td></tr>
+          <tr><td class="fid">F-02</td><td>Part 11 §11.10(c); Annex 11 §7</td><td>Regulated <code>qams.*</code> records have no DB-level immutability/delete protection; least-privilege runtime role asserted in comment only</td><td class="mono">triggers only on audit.*; zero GRANT/REVOKE in repo; PrecisionStudies.cs:90-94 (RLS only)</td><td><span class="chip c-crit">Critical</span></td><td>Codify least-privilege grants; add append-only/immutability triggers (or ledger-verified writes) on signed/closed regulated tables; forbid direct DB writes operationally</td></tr>
+          <tr><td class="fid">F-03</td><td>Part 11 §11.10(a); Annex 11 §4</td><td>No CSV lifecycle evidence (VMP, URS, FS/DS, RTM, IQ/OQ/PQ, UAT, risk assessment, validation summary)</td><td class="mono">repo &amp; parent folder searched; only architecture/sizing docs</td><td><span class="chip c-crit">Critical</span></td><td>Execute a GAMP 5 risk-based validation; produce &amp; approve the full deliverable set with traceability to executed tests</td></tr>
+          <tr><td class="fid">F-04</td><td>Part 11 §11.10(d); Annex 11 §12</td><td>MFA implemented (TOTP) but not enforced, including for privileged roles</td><td class="mono">Login.cs:84 (checks only if user.MfaEnabled)</td><td><span class="chip c-major">Major</span></td><td>Mandate MFA for TenantAdmin/PlatformAdmin; make configurable per tenant</td></tr>
+          <tr><td class="fid">F-05</td><td>Part 11 §11.10(g)</td><td>Segregation of duties absent in analytical sign-off (validation study, uncertainty, PT plan) and NC verify — same person can create and sign</td><td class="mono">ValidationStudy.cs:143-153; UncertaintyBudget.cs:164-175; PtPlan.cs:108-121</td><td><span class="chip c-major">Major</span></td><td>Add author≠signer guards mirroring the Document/CAPA-close pattern</td></tr>
+          <tr><td class="fid">F-06</td><td>Part 11 §11.10(e); ALCOA+</td><td>Reason-for-change not captured on evidence void/removal or QC target change; contradicts documented "void-and-re-enter" &amp; effective-dating design</td><td class="mono">PrecisionStudy.cs:118 (RemoveMeasurement no reason); QcProfile.cs:53-62 (UpdateTargets overwrites)</td><td><span class="chip c-major">Major</span></td><td>Require a reason on all voids/edits of regulated data; implement forward-only effective-dating for QC targets</td></tr>
+          <tr><td class="fid">F-07</td><td>Part 11 §11.10(d)</td><td>No JWT revocation / refresh / idle-timeout; deactivated or role-changed user retains valid token ≤120 min</td><td class="mono">SecurityAdapters.cs:31,53,70; Program.cs:33-45</td><td><span class="chip c-major">Major</span></td><td>Short access tokens + refresh with server-side revocation, or per-request active/role re-check</td></tr>
+          <tr><td class="fid">F-08</td><td>Part 11 §11.300(d)</td><td>Failed electronic-signature attempts not logged or rate-limited (login path is)</td><td class="mono">ComplianceLedgerServices.cs:90-121 (throws, no SecurityEvent)</td><td><span class="chip c-major">Major</span></td><td>Log failed signings to the security-event ledger; add throttling/lockout</td></tr>
+          <tr><td class="fid">F-09</td><td>End-to-end validation</td><td>Functional tests bypass PostgreSQL (EF In-Memory); RLS/delete-restrict/migrations never exercised in CI</td><td class="mono">QamsWebAppFactory.cs (InMemory swap)</td><td><span class="chip c-major">Major</span></td><td>Add integration tests against real PostgreSQL (Testcontainers) covering RLS, deletes, migrations, e-sig, audit</td></tr>
+          <tr><td class="fid">F-10</td><td>Annex 11 §16</td><td>No backup-restore test, no DR plan/RTO/RPO, no restore verification</td><td class="mono">deploy/DEPLOY.md:159 (note only)</td><td><span class="chip c-major">Major</span></td><td>Document &amp; execute a backup/restore &amp; DR test; record RTO/RPO</td></tr>
+          <tr><td class="fid">F-11</td><td>9001 §5.2/§8.5.6; 17025 §8</td><td>Governance gaps: no quality-policy module, no read-and-understand acknowledgement, no legal hold, no post-implementation review, no distinct deviation/OOS/OOT types</td><td class="mono">no QualityPolicy aggregate; ArchiveState has no Hold; ChangeRequest close has no PIR</td><td><span class="chip c-major">Major</span></td><td>Add the missing governance capabilities per Section 6</td></tr>
+          <tr><td class="fid">F-12</td><td>ALCOA+ / trail completeness</td><td>Field-change trail is complete only for EF-mediated writes; out-of-band writes leave no record (consequence of F-02)</td><td class="mono">FieldChangeInterceptor.cs</td><td><span class="chip c-minor">Minor</span></td><td>Resolve via F-02 (no direct DB writes); add DB-trigger audit as defence-in-depth</td></tr>
+          <tr><td class="fid">F-13</td><td>Part 11 §11.10(b)</td><td>No dedicated human-readable audit-trail/signature export (CSV/PDF); review via UI timeline only</td><td class="mono">ComplianceController (no export endpoint found)</td><td><span class="chip c-minor">Minor</span></td><td>Add inspector-ready export of trail &amp; signature manifest</td></tr>
+          <tr><td class="fid">F-14</td><td>Part 11 §11.10(c)</td><td>Archive snapshot optional (nullable) → an archive entry may hold no immutable content copy; no legal hold</td><td class="mono">ArchiveEntry.cs:29,87-96</td><td><span class="chip c-minor">Minor</span></td><td>Require a content snapshot on archive; add hold state</td></tr>
+          <tr><td class="fid">F-15</td><td>Part 11 §11.300(b)</td><td>Password policy weak/inconsistent — no complexity/breach check; min length 10 vs 12</td><td class="mono">UserManagement.cs:41,76; Login.cs:129</td><td><span class="chip c-minor">Minor</span></td><td>Unify ≥12, add complexity &amp; breached-password screening</td></tr>
+          <tr><td class="fid">F-16</td><td>Configuration control</td><td>Controlled parameters hard-coded — Westgard acceptance limits as inline literals; role identifiers as scattered magic strings</td><td class="mono">WestgardEvaluator.cs; no central Roles constants</td><td><span class="chip c-minor">Minor</span></td><td>Externalize to versioned controlled configuration; central role constants</td></tr>
+          <tr><td class="fid">F-17</td><td>Security hygiene</td><td>Dev credentials (JWT secret, DB &amp; platform-admin passwords) committed in source</td><td class="mono">appsettings.Development.json</td><td><span class="chip c-minor">Minor</span></td><td>Move to secrets/user-secrets; rotate; production settings correctly leave secrets empty</td></tr>
+          <tr><td class="fid">F-18</td><td>Frontend quality</td><td>Near-absent frontend tests (7 specs) and no e2e framework</td><td class="mono">frontend *.spec.ts ×7; no Cypress/Playwright</td><td><span class="chip c-minor">Minor</span></td><td>Add component + e2e coverage for regulated workflows (sign-off, approvals)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 15 ROADMAP -->
+  <section id="road">
+    <div class="sec-h"><span class="n">15</span><h2>Remediation Roadmap</h2></div>
+
+    <p class="phase">Immediate containment (before further UAT with real data)</p>
+    <ul class="tight">
+      <li><b>F-01</b> Activate tenant isolation: introduce a low-privilege non-owner runtime DB role, add <code>FORCE ROW LEVEL SECURITY</code>, and set <code>app.current_tenant</code> per connection/transaction via a <code>DbConnection</code> interceptor. Add automated cross-tenant denial tests. <i>(Evidence: passing RLS integration tests; role privileges.)</i></li>
+      <li><b>F-02</b> Codify least-privilege grants and add DB-level immutability on signed/closed regulated tables; prohibit direct production DB writes by procedure. <i>(Evidence: migration with GRANT/REVOKE + triggers; DBA SOP.)</i></li>
+      <li><b>F-17</b> Rotate and remove committed dev secrets.</li>
+    </ul>
+
+    <p class="phase">Before UAT sign-off</p>
+    <ul class="tight">
+      <li><b>F-04</b> Enforce MFA for privileged roles. <b>F-05</b> Add SoD guards to analytical sign-offs and NC verify. <b>F-06</b> Capture reason-for-change on all regulated voids/edits; implement QC target effective-dating.</li>
+      <li><b>F-09</b> Add PostgreSQL integration tests (RLS, deletes, migrations, e-sig, audit) to CI.</li>
+    </ul>
+
+    <p class="phase">Before production release (go-live blockers)</p>
+    <ul class="tight">
+      <li><b>F-03</b> Execute the CSV lifecycle: approved VMP, URS, FS/DS, risk assessment, RTM, IQ/OQ/PQ, UAT, and validation summary — traced to executed evidence on the qualified target platform.</li>
+      <li><b>F-07</b> Token revocation/idle-timeout. <b>F-08</b> Log/limit failed signings. <b>F-10</b> Backup-restore &amp; DR test. <b>F-11</b> Close priority governance gaps (quality policy, read-and-understand, legal hold, PIR).</li>
+    </ul>
+
+    <p class="phase">Within 30–90 days / continual improvement</p>
+    <ul class="tight">
+      <li>F-13 trail export · F-14 mandatory archive snapshot + hold · F-15 password policy · F-16 externalize controlled parameters · F-18 frontend/e2e coverage · data-driven privilege matrix · distinct deviation/OOS/OOT event types · periodic access review · shared action-tracker engine.</li>
+    </ul>
+  </section>
+
+  <!-- 16 DECISION -->
+  <section id="decision">
+    <div class="sec-h"><span class="n">16</span><h2>Final Compliance Readiness Decision (per standard)</h2></div>
+    <div class="verdictgrid">
+      <div class="vcard"><h4>ISO/IEC 17025:2017</h4><div class="r no">Not ready</div><p>Strong functional coverage; blocked by software validation (F-03) &amp; record protection (F-01/F-02). Lab-operational clauses are LIS-scoped.</p></div>
+      <div class="vcard"><h4>ISO 15189:2022</h4><div class="r no">Not ready</div><p>As 17025; clinical reporting/critical-result items are LIS-controlled and out of QMS scope.</p></div>
+      <div class="vcard"><h4>ISO 9001:2015 (+A1:2024)</h4><div class="r cond">Conditionally ready</div><p>Broadly supported; add quality policy, PIR, continual-improvement register; software still requires validation.</p></div>
+      <div class="vcard"><h4>21 CFR Part 11</h4><div class="r no">Not ready</div><p>Signatures &amp; audit trail excellent; blocked by §11.10(a) validation, §11.10(c) record protection, §11.10(d) access (MFA/RLS).</p></div>
+      <div class="vcard"><h4>EU GMP Annex 11</h4><div class="r no">Not ready</div><p>No validation, no formal risk assessment, DB data-integrity gaps.</p></div>
+      <div class="vcard"><h4>GMP (manufacturing)</h4><div class="r na">Not applicable</div><p>Manufacturing processes out of scope; require MES/ERP/LIMS with their own validation.</p></div>
+      <div class="vcard"><h4>National / privacy / cyber</h4><div class="r na">Insufficient evidence</div><p>Jurisdiction not supplied — assess once confirmed.</p></div>
+    </div>
+  </section>
+
+  <!-- 17 GOLIVE -->
+  <section id="golive">
+    <div class="sec-h"><span class="n">17</span><h2>Go-Live Recommendation</h2></div>
+    <div class="callout"><b>Production release prohibited. UAT continuation permitted.</b> Existing/pilot use with real regulated data should be subject to immediate risk assessment given the tenant-isolation and record-protection findings.</div>
+    <p><b>Conditions that must be completed before any controlled production approval:</b></p>
+    <ol class="tight">
+      <li>Tenant isolation enforced at the database and proven by test (F-01).</li>
+      <li>Regulated records protected from undetectable alteration/deletion; least-privilege DB role codified (F-02).</li>
+      <li>A completed, approved computerized-system-validation package with executed IQ/OQ/PQ on the qualified platform (F-03).</li>
+      <li>MFA enforced for privileged roles; SoD on all sign-offs; reason-for-change on regulated edits (F-04, F-05, F-06).</li>
+      <li>Backup/restore &amp; DR tested; token revocation in place (F-10, F-07).</li>
+    </ol>
+    <p>Once these conditions are met and re-verified, the recommendation would move to <b>Approved with documented conditions</b> for a controlled, monitored production rollout.</p>
+  </section>
+
+  <!-- SCORING -->
+  <section id="score">
+    <div class="sec-h"><span class="n">—</span><h2>Scoring Dashboard (management indicator only)</h2></div>
+    <div class="callout warn">These indicators <b>do not</b> override the critical findings. Per the audit's scoring rules, unresolved tenant-isolation, DB-editable regulated records, and absence of validation for critical intended use each independently bar a "ready" conclusion regardless of any high percentage.</div>
+    <div class="card">
+      <div class="scorewrap">
+        <div class="scorerow"><span>Requirements coverage</span><div class="bar s-hi"><span style="width:85%"></span></div><span class="val">85</span></div>
+        <div class="scorerow"><span>Functional completeness</span><div class="bar s-hi"><span style="width:88%"></span></div><span class="val">88</span></div>
+        <div class="scorerow"><span>Control effectiveness</span><div class="bar s-md"><span style="width:58%"></span></div><span class="val">58</span></div>
+        <div class="scorerow"><span>Electronic signatures</span><div class="bar s-hi"><span style="width:82%"></span></div><span class="val">82</span></div>
+        <div class="scorerow"><span>Audit trails</span><div class="bar s-hi"><span style="width:80%"></span></div><span class="val">80</span></div>
+        <div class="scorerow"><span>Data integrity</span><div class="bar s-md"><span style="width:55%"></span></div><span class="val">55</span></div>
+        <div class="scorerow"><span>Security &amp; access</span><div class="bar s-md"><span style="width:52%"></span></div><span class="val">52</span></div>
+        <div class="scorerow"><span>Documentation</span><div class="bar s-lo"><span style="width:12%"></span></div><span class="val">12</span></div>
+        <div class="scorerow"><span>Validation evidence</span><div class="bar s-lo"><span style="width:10%"></span></div><span class="val">10</span></div>
+        <div class="scorerow"><span>Operational readiness</span><div class="bar s-lo"><span style="width:28%"></span></div><span class="val">28</span></div>
+      </div>
+    </div>
+    <p class="lead" style="font-size:14px">Interpretation: a <b>strong product</b> on a <b>weak validation footing</b>. The engineering is largely done; the compliance work (DB-layer enforcement + a formal CSV) is what stands between this build and a controlled go-live.</p>
+  </section>
+
+  <div class="foot">
+    <p><b>Auditor's declaration.</b> This is an independent, evidence-based ISO/GxP readiness assessment of source code, database schema and automated tests for NT.QMS v1.24.0 in a development environment. It is <b>not</b> a certification, accreditation, or regulatory approval, and does not constitute legal advice. Conclusions marked <span class="chip c-nv">Not verified</span> require confirmation against a qualified production instance, licensed standard texts, and the organization's approved procedures. Formal certification/accreditation decisions rest with an accredited certification body, accreditation body, Qualified Person or competent authority as applicable. All findings cite the code evidence on which they rest; where evidence was unavailable the item is classified Not Verified rather than assumed conforming.</p>
+    <p>Report generated as a management deliverable · classifications: Critical / Major / Minor / Observation per Section 14 of the audit protocol.</p>
+  </div>
+
+</div>
+
+<script>
+  // Smooth-scroll for the sticky TOC.
+  document.querySelectorAll('nav.toc a').forEach(function(a){
+    a.addEventListener('click',function(e){
+      var t=document.querySelector(a.getAttribute('href'));
+      if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NT.QMS — Enterprise Architecture Compliance Audit</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>">
+<style>*{box-sizing:border-box}html,body{margin:0;padding:0}</style>
+</head>
+<body>
+<style>
+  :root{
+    --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;--line:#dbe1ea;
+    --accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+    --crit:#b42318;--high:#b54708;--med:#8a6d1d;--low:#475467;--info:#5b6472;
+    --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);
+    --mono:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,ui-serif,serif;
+    --sans:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;--line:#263041;
+    --accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+    --crit:#f87171;--high:#fbbf24;--med:#e2b04a;--low:#94a3b8;--info:#9aa7bd;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}}
+  :root[data-theme="dark"]{--bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;--line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;--crit:#f87171;--high:#fbbf24;--med:#e2b04a;--low:#94a3b8;--info:#9aa7bd;--shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}
+  :root[data-theme="light"]{--bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;--line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;--crit:#b42318;--high:#b54708;--med:#8a6d1d;--low:#475467;--info:#5b6472;--shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 22px 90px}
+  h1,h2,h3{font-family:var(--serif);font-weight:600;letter-spacing:-.01em;text-wrap:balance}
+  a{color:var(--accent)}
+  code{font-family:var(--mono);font-size:.85em;background:var(--panel-2);padding:.1em .4em;border-radius:4px}
+  .masthead{border-bottom:1px solid var(--line);padding:46px 0 30px;margin-bottom:34px}
+  .eyebrow{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:700;margin:0 0 14px}
+  .masthead h1{font-size:clamp(28px,5vw,44px);margin:0 0 10px;line-height:1.08}
+  .masthead .lede{font-size:17px;color:var(--muted);max-width:70ch;margin:0}
+  .meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:26px}
+  .meta-grid div{background:var(--panel);padding:12px 16px}
+  .meta-grid dt{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 3px}
+  .meta-grid dd{margin:0;font-weight:600;font-size:14px;font-variant-numeric:tabular-nums}
+  .verdict{background:linear-gradient(180deg,var(--accent-soft),transparent),var(--panel);border:1px solid var(--line);border-left:4px solid var(--high);border-radius:14px;padding:24px 28px;box-shadow:var(--shadow);margin-bottom:36px}
+  .verdict .tag{display:inline-flex;align-items:center;gap:8px;color:var(--high);font-weight:700;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+  .verdict h2{font-size:clamp(20px,3.2vw,27px);margin:10px 0 8px}
+  .verdict p{margin:0 0 8px;color:var(--muted);max-width:82ch}
+  section{margin:44px 0}
+  h2.sec{font-size:23px;margin:0 0 6px;display:flex;align-items:baseline;gap:12px}
+  h2.sec .num{font-family:var(--mono);font-size:14px;color:var(--accent);font-weight:700}
+  .sec-sub{color:var(--muted);margin:0 0 20px;max-width:80ch}
+  h3.mini{font-size:16px;margin:26px 0 8px}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow)}
+  .stat .big{font-family:var(--serif);font-size:30px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums}
+  .stat .lbl{color:var(--muted);font-size:12.5px;margin-top:7px}
+  .stat.good .big{color:var(--pass)} .stat.warn .big{color:var(--high)} .stat.crit .big{color:var(--crit)}
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);margin-top:8px}
+  table{width:100%;border-collapse:collapse;font-size:13px;background:var(--panel);min-width:640px}
+  thead th{text-align:left;padding:11px 13px;background:var(--panel-2);color:var(--muted);font-size:11px;letter-spacing:.05em;text-transform:uppercase}
+  tbody td{padding:10px 13px;border-top:1px solid var(--line);vertical-align:top}
+  tbody tr:hover{background:var(--accent-soft)}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  .bar{height:8px;border-radius:5px;background:var(--panel-2);position:relative;overflow:hidden;min-width:80px}
+  .bar>span{position:absolute;inset:0 auto 0 0;border-radius:5px;background:linear-gradient(90deg,var(--accent),var(--pass))}
+  .bar.mid>span{background:linear-gradient(90deg,var(--med),var(--accent))}
+  .bar.low>span{background:linear-gradient(90deg,var(--crit),var(--high))}
+  .chip{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:999px;letter-spacing:.03em;white-space:nowrap}
+  .c-crit{color:var(--crit);background:color-mix(in srgb,var(--crit) 13%,transparent)}
+  .c-high{color:var(--high);background:color-mix(in srgb,var(--high) 15%,transparent)}
+  .c-med{color:var(--med);background:color-mix(in srgb,var(--med) 17%,transparent)}
+  .c-low{color:var(--low);background:color-mix(in srgb,var(--low) 16%,transparent)}
+  .c-pass{color:var(--pass);background:var(--pass-soft)}
+  .c-na{color:var(--info);background:color-mix(in srgb,var(--info) 14%,transparent)}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;box-shadow:var(--shadow)}
+  .card.block{border-left:3px solid var(--high)}
+  .card h3{margin:0 0 8px;font-size:15px}
+  .card p{margin:0 0 6px;color:var(--muted);font-size:13.5px}
+  ul.clean{margin:8px 0 0;padding:0;list-style:none}
+  ul.clean li{padding:8px 0 8px 24px;position:relative;border-top:1px solid var(--line);font-size:14px}
+  ul.clean li:first-child{border-top:none}
+  ul.clean li::before{content:"";position:absolute;left:3px;top:15px;width:8px;height:8px;border-radius:2px;background:var(--accent)}
+  ol.steps{margin:0;padding-left:22px}ol.steps li{padding:5px 0}ol.steps li::marker{color:var(--accent);font-weight:700}
+  .note{background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 24%,transparent);border-radius:10px;padding:13px 17px;font-size:13.5px;margin-top:14px}
+  .callout{border-left:3px solid var(--med);background:color-mix(in srgb,var(--med) 9%,transparent);padding:11px 15px;border-radius:0 8px 8px 0;font-size:13px;margin:10px 0}
+  .foot{margin-top:56px;border-top:1px solid var(--line);padding-top:22px;color:var(--muted);font-size:12.5px}
+  @media(max-width:640px){.tablewrap table{font-size:12px}}
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">Enterprise Application Architecture Compliance Assessment</p>
+  <h1>NT.QMS — Enterprise Architecture Compliance Audit</h1>
+  <p class="lede">An evidence-based assessment of the NT.QMS application against the Enterprise Application Architecture checklist, across 22 categories. Compliance was validated from implementation behaviour — source, migrations, configuration, container, and executed tests — not from names, comments, or intended design.</p>
+  <dl class="meta-grid">
+    <div><dt>Mode</dt><dd>Enterprise Compliance Assessment</dd></div>
+    <div><dt>Platform</dt><dd>.NET 9 · PostgreSQL 17 · Angular 18</dd></div>
+    <div><dt>Overall compliance</dt><dd>≈ 76%</dd></div>
+    <div><dt>Verification coverage</dt><dd>≈ 88% (High confidence)</dd></div>
+    <div><dt>Critical findings</dt><dd>0</dd></div>
+    <div><dt>Report ID / date</dt><dd>EA-AUD-NTQMS-001 · 2026-07-27</dd></div>
+  </dl>
+</header>
+
+<div class="verdict">
+  <span class="tag">◑ Production decision</span>
+  <h2>APPROVED WITH CONDITIONS — generally aligned; material operational improvements required before an unconditional go-live.</h2>
+  <p>The application's security, multi-tenancy, and data-integrity core is <strong>strong and runtime-verified</strong>: tenant isolation, backend authorization, database integrity, and Part-11 controls are implemented <em>and tested against real PostgreSQL this session</em>. There are <strong>no critical findings and no cross-tenant exposure</strong>.</p>
+  <p>However, genuine <strong>enterprise-architecture gaps</strong> remain in observability, runtime resilience, optimistic concurrency, and messaging robustness. These do not compromise the critical controls but must be closed as <strong>conditions</strong> of production release (see Production Blockers).</p>
+</div>
+
+<section>
+  <div class="stats">
+    <div class="stat warn"><div class="big">≈76%</div><div class="lbl">Overall compliance (21 applicable categories)</div></div>
+    <div class="stat good"><div class="big">0</div><div class="lbl">Critical findings · no cross-tenant exposure</div></div>
+    <div class="stat warn"><div class="big">8</div><div class="lbl">High findings</div></div>
+    <div class="stat warn"><div class="big">4 + 1</div><div class="lbl">Production blockers (P0/P1) + 1 operational gate</div></div>
+    <div class="stat good"><div class="big">~310</div><div class="lbl">Automated tests executed &amp; green this session</div></div>
+  </div>
+</section>
+
+<!-- 1-5 SCOPE -->
+<section>
+  <h2 class="sec"><span class="num">01</span> Objective, scope &amp; inputs</h2>
+  <p class="sec-sub">Verify how closely NT.QMS complies with the Enterprise Application Architecture checklist, using concrete evidence.</p>
+  <div class="cards">
+    <div class="card"><h3>Artifacts reviewed (first-hand)</h3>
+      <p>6-project Clean-Architecture solution + 5 test projects; EF Core configs &amp; 40+ migrations; live PostgreSQL 17 dev DB; Angular 18 SPA; <code>docker-compose.yml</code> + <code>Dockerfile</code>; CI workflow; <code>deploy/</code> runbooks; <code>docs/validation/</code> CSV set + architecture markdown.</p>
+      <p><strong>Executed this session</strong> (asserted as fact, not inference): Release build succeeded; ~270 backend + 37 frontend-unit + 3 Playwright e2e tests passed; migrations applied to real PostgreSQL 17; RLS &amp; signed-record-immutability integration tests executed and passed.</p></div>
+    <div class="card"><h3>Artifacts NOT provided</h3>
+      <p><strong>NOT VERIFIED:</strong> <code>Enterprise_Application_Development_Standard.txt</code> was not supplied — audited against the checklist in the prompt, which encodes those requirements.</p>
+      <p>No production runtime/telemetry, no penetration test, no load test, no formal ADR repository, no published OpenAPI artifact.</p></div>
+    <div class="card"><h3>Assumptions &amp; open questions</h3>
+      <p><strong>ASSUMPTION:</strong> the checklist is the authoritative standard absent the .txt. <strong>ASSUMPTION:</strong> production runs the least-privilege <code>qams_app</code> role (RLS relies on it).</p>
+      <p><strong>OPEN QUESTION:</strong> intended production replica count (single-instance is currently implicit). <strong>OPEN QUESTION:</strong> is the analyst-can-delete-study-readings authorization intentional?</p></div>
+  </div>
+  <div class="note"><strong>Stack deviations from the checklist's assumptions (verified):</strong> no Hangfire (background work is custom <code>BackgroundService</code> + transactional Outbox); no SignalR (Category 12 → Not Applicable); no Serilog/OpenTelemetry (default logging — a real observability gap); no Polly/rate-limiter; Angular <strong>18</strong> not 19.</p></div>
+</section>
+
+<!-- EXEC SUMMARY -->
+<section>
+  <h2 class="sec"><span class="num">02</span> Executive summary</h2>
+  <p style="color:var(--muted);max-width:82ch">NT.QMS is a well-engineered, DDD-faithful modular monolith whose <strong>regulated-domain core is production-grade</strong>: a genuinely rich domain layer with in-domain invariants and guarded state machines; two independent, fail-closed tenant-isolation layers (EF global filter + FORCED PostgreSQL RLS) backed by a least-privilege role and passing cross-tenant denial tests; a SHA-256 hash-chained append-only audit trail with DB-trigger signed-record immutability; and dual-factor (password + PIN) Part-11 e-signatures. Clean-Architecture boundaries are enforced by NetArchTest as CI gates. This is verified in code and, for the highest-risk controls, at runtime.</p>
+  <p style="color:var(--muted);max-width:82ch;margin-top:12px">The gaps are concentrated in the <strong>operational and runtime-robustness dimensions</strong> that a regulated multi-tenant SaaS needs before an unconditional production release: there is no distributed tracing, log aggregation, or metrics/alerting; no optimistic-concurrency control on any aggregate (silent lost-update risk); the Outbox has no dead-letter or backoff and its documented retention job does not exist; the health endpoint never tests the database; the background workers implicitly assume a single replica; and there is no rate limiting or security-header/CSP hardening at the application layer. None are critical-severity or expose data across tenants, but several are legitimate production blockers.</p>
+</section>
+
+<!-- OVERALL SCORE + COVERAGE -->
+<section>
+  <h2 class="sec"><span class="num">03</span> Overall compliance &amp; verification coverage</h2>
+  <div class="cards">
+    <div class="card"><h3>Overall compliance ≈ 76%</h3><p>Unweighted mean across the 21 applicable categories (Category 12 SignalR is Not Applicable). Band: <strong>Generally aligned (lower); material improvements required</strong>. Weighting toward the security/tenancy/data-integrity controls that matter most for a regulated QMS would raise the effective posture, since those are the strongest categories.</p></div>
+    <div class="card"><h3>Verification coverage ≈ 88% → High confidence</h3><p>All six source layers, all 37 controllers, 40+ migrations, DI wiring, interceptors, background services, container/compose, and the test suite were inspected directly (file:line evidence). Build + full test suite + migrations were <strong>executed</strong> this session. The ~12% gap is runtime-only: no production telemetry, load test, or penetration test.</p></div>
+  </div>
+</section>
+
+<!-- A. EXECUTIVE SCORECARD -->
+<section>
+  <h2 class="sec"><span class="num">04</span> A · Executive scorecard</h2>
+  <p class="sec-sub">Per-category compliance from six independent, evidence-based sub-audits. Verification coverage was High (≥85%) across all categories.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>#</th><th>Category</th><th>Compliance</th><th class="num">%</th><th>Crit</th><th>High</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Business &amp; functional alignment</td><td><div class="bar"><span style="width:97%"></span></div></td><td class="num">97</td><td>0</td><td>0</td><td><span class="chip c-pass">Strong</span></td></tr>
+      <tr><td>2</td><td>Solution architecture</td><td><div class="bar mid"><span style="width:68%"></span></div></td><td class="num">68</td><td>0</td><td>0</td><td><span class="chip c-med">Partial</span></td></tr>
+      <tr><td>3</td><td>SOLID &amp; code structure</td><td><div class="bar"><span style="width:100%"></span></div></td><td class="num">100</td><td>0</td><td>0</td><td><span class="chip c-pass">Strong</span></td></tr>
+      <tr><td>4</td><td>Domain-driven design</td><td><div class="bar"><span style="width:92%"></span></div></td><td class="num">92</td><td>0</td><td>1</td><td><span class="chip c-pass">Strong</span></td></tr>
+      <tr><td>5</td><td>CQRS &amp; MediatR</td><td><div class="bar mid"><span style="width:68%"></span></div></td><td class="num">68</td><td>0</td><td>0</td><td><span class="chip c-med">Partial</span></td></tr>
+      <tr><td>6</td><td>API design</td><td><div class="bar low"><span style="width:52%"></span></div></td><td class="num">52</td><td>0</td><td>1</td><td><span class="chip c-med">Partial</span></td></tr>
+      <tr><td>7</td><td>Authentication &amp; authorization</td><td><div class="bar"><span style="width:90%"></span></div></td><td class="num">90</td><td>0</td><td>0</td><td><span class="chip c-pass">Strong</span></td></tr>
+      <tr><td>8</td><td>Multi-tenancy</td><td><div class="bar"><span style="width:97%"></span></div></td><td class="num">97</td><td>0</td><td>0</td><td><span class="chip c-pass">Strong</span></td></tr>
+      <tr><td>9</td><td>Database &amp; EF Core</td><td><div class="bar"><span style="width:85%"></span></div></td><td class="num">85</td><td>0</td><td>1</td><td><span class="chip c-pass">Strong</span></td></tr>
+      <tr><td>10</td><td>Transactions, consistency &amp; messaging</td><td><div class="bar low"><span style="width:58%"></span></div></td><td class="num">58</td><td>0</td><td>2</td><td><span class="chip c-med">Partial</span></td></tr>
+      <tr><td>11</td><td>Background processing</td><td><div class="bar mid"><span style="width:72%"></span></div></td><td class="num">72</td><td>0</td><td>1</td><td><span class="chip c-med">Partial</span></td></tr>
+      <tr><td>12</td><td>SignalR / real-time</td><td><div class="bar"><span style="width:0%"></span></div></td><td class="num">N/A</td><td>0</td><td>0</td><td><span class="chip c-na">Not applicable</span></td></tr>
+      <tr><td>13</td><td>Angular frontend</td><td><div class="bar"><span style="width:90%"></span></div></td><td class="num">90</td><td>0</td><td>0</td><td><span class="chip c-pass">Strong</span></td></tr>
+      <tr><td>14</td><td>Validation &amp; error handling</td><td><div class="bar mid"><span style="width:72%"></span></div></td><td class="num">72</td><td>0</td><td>0</td><td><span class="chip c-med">Partial</span></td></tr>
+      <tr><td>15</td><td>Audit &amp; e-signatures</td><td><div class="bar"><span style="width:95%"></span></div></td><td class="num">95</td><td>0</td><td>0</td><td><span class="chip c-pass">Strong</span></td></tr>
+      <tr><td>16</td><td>Security architecture &amp; STRIDE</td><td><div class="bar low"><span style="width:58%"></span></div></td><td class="num">58</td><td>0</td><td>1</td><td><span class="chip c-med">Partial</span></td></tr>
+      <tr><td>17</td><td>Logging &amp; observability</td><td><div class="bar low"><span style="width:33%"></span></div></td><td class="num">33</td><td>0</td><td>3</td><td><span class="chip c-high">Weak</span></td></tr>
+      <tr><td>18</td><td>Configuration &amp; secrets</td><td><div class="bar"><span style="width:80%"></span></div></td><td class="num">80</td><td>0</td><td>0</td><td><span class="chip c-pass">Strong</span></td></tr>
+      <tr><td>19</td><td>Health, resilience &amp; operations</td><td><div class="bar low"><span style="width:58%"></span></div></td><td class="num">58</td><td>0</td><td>1</td><td><span class="chip c-med">Partial</span></td></tr>
+      <tr><td>20</td><td>Docker &amp; deployment</td><td><div class="bar mid"><span style="width:68%"></span></div></td><td class="num">68</td><td>0</td><td>0</td><td><span class="chip c-med">Partial</span></td></tr>
+      <tr><td>21</td><td>Testing</td><td><div class="bar mid"><span style="width:72%"></span></div></td><td class="num">72</td><td>0</td><td>0</td><td><span class="chip c-med">Partial</span></td></tr>
+      <tr><td>22</td><td>Documentation &amp; traceability</td><td><div class="bar"><span style="width:85%"></span></div></td><td class="num">85</td><td>0</td><td>0</td><td><span class="chip c-pass">Strong</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- C. PRODUCTION BLOCKERS -->
+<section>
+  <h2 class="sec"><span class="num">05</span> C · Production blockers</h2>
+  <p class="sec-sub">Conditions of the "Approved with conditions" decision. None are critical-severity or cross-tenant, but each is production-relevant and must be resolved (or explicitly risk-accepted) before an unconditional release.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>ID</th><th>Blocker</th><th>Sev</th><th>Pri</th><th>Risk</th><th>Required action</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">OPS-008</td><td>Readiness health check never tests the database</td><td><span class="chip c-high">High</span></td><td>P0</td><td><code>/health</code> returns Healthy while PostgreSQL is unreachable → orchestrator/LB routes traffic to a broken instance</td><td>Add a DB-backed readiness check; split <code>/health/live</code> (self) vs <code>/health/ready</code> (DB + deps); point Docker/LB probes accordingly</td></tr>
+      <tr><td class="mono">OPS-002</td><td>Background workers &amp; Outbox assume a single replica</td><td><span class="chip c-high">High</span></td><td>P0</td><td>Multi-replica deploy → every replica runs all sweeps and reads the same Outbox rows → duplicate event publication &amp; racing transitions</td><td>Add <code>FOR UPDATE SKIP LOCKED</code>/lease to Outbox claiming + advisory-lock/leader election for sweeps, OR enforce &amp; document single-replica</td></tr>
+      <tr><td class="mono">DB-009 / MSG-009</td><td>No optimistic-concurrency control on any aggregate</td><td><span class="chip c-high">High</span></td><td>P1</td><td>Concurrent edits of the same NC/document/study last-writer-wins silently → lost updates that bypass in-domain SoD/immutability guarantees</td><td>Add <code>xmin</code> concurrency token (no schema change) on mutable roots; map <code>DbUpdateConcurrencyException</code> → HTTP 409</td></tr>
+      <tr><td class="mono">MSG-004</td><td>Outbox poison-message handling: no dead-letter, can head-of-line-block</td><td><span class="chip c-high">High</span></td><td>P1</td><td>An event failing 5× is stranded silently (integration policies never fire) and, being oldest, blocks newer events for ~5 sweeps</td><td>Move exhausted rows to a dead-letter table + metric/alert; isolate per-event so one poison event can't block the batch</td></tr>
+      <tr><td class="mono">TENANT-004</td><td>Operational gate: production must run as least-privilege <code>qams_app</code></td><td><span class="chip c-high">High</span></td><td>P0</td><td>If prod connects as the table owner or a superuser, FORCED RLS is bypassed entirely (isolation defeated)</td><td>Verify prod connection string uses <code>qams_app</code> (NOBYPASSRLS, no DELETE) and <code>harden-runtime-role.sql</code> was applied; add a startup guard/CI check</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- MANDATORY RULE ASSESSMENT (B) -->
+<section>
+  <h2 class="sec"><span class="num">06</span> B · Mandatory-rule assessment (integrity gates)</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Mandatory rule</th><th>Status</th><th>Evidence</th><th>Main gap</th><th>Blocker</th></tr></thead>
+    <tbody>
+      <tr><td>Clean-Architecture dependency direction preserved</td><td><span class="chip c-pass">Compliant</span></td><td>Domain refs only SharedKernel; 5 NetArchTest facts (<code>LayerRulesTests.cs</code>)</td><td>Module isolation conventional, not compile-enforced</td><td>No</td></tr>
+      <tr><td>Tenant isolation enforced (not inferred from TenantId)</td><td><span class="chip c-pass">Compliant</span></td><td>EF filter (by convention) + FORCED RLS + GUCs + <code>qams_app</code>; RLS tests passed on real PG</td><td>Prod must use <code>qams_app</code> (TENANT-004)</td><td>Op. gate</td></tr>
+      <tr><td>Backend authorization on every protected op (not from UI)</td><td><span class="chip c-pass">Compliant</span></td><td>Deny-by-default <code>FallbackPolicy</code>; central <code>Roles</code>; server re-checks each request</td><td>No authorization <em>pipeline behavior</em>; study-DELETE role asymmetry; thin HTTP authz tests</td><td>No</td></tr>
+      <tr><td>Signed/audit records immutable &amp; tamper-evident</td><td><span class="chip c-pass">Compliant</span></td><td>Hash-chained ledger + <code>reject_frozen_mutation()</code>/append-only triggers; tested on real PG</td><td>No mid-chain tamper-detection test</td><td>No</td></tr>
+      <tr><td>DDD aggregates protect invariants &amp; state</td><td><span class="chip c-pass">Compliant</span></td><td>Private setters, factories, guarded transitions, domain events over outbox</td><td>Public <code>TenantId</code> setter (infra-stamped); no concurrency token</td><td>No</td></tr>
+      <tr><td>CQRS separation; no IQueryable leak</td><td><span class="chip c-pass">Compliant</span></td><td>Custom command/query markers; DTO projection; 0 <code>IQueryable</code> at boundary</td><td>Missing authz/idempotency/transaction behaviors</td><td>No</td></tr>
+      <tr><td>Secrets not in source / bundle / image / logs</td><td><span class="chip c-pass">Compliant</span></td><td>Blanked <code>appsettings</code>, user-secrets, prod empty; Angular env clean; no secret logging</td><td>Hand-rolled options can silently fall back to defaults</td><td>No</td></tr>
+      <tr><td>Reliable integration events (Outbox)</td><td><span class="chip c-med">Partial</span></td><td>Atomic Outbox (event + change in one SaveChanges); publish after commit</td><td>No dead-letter/backoff; retention job documented but absent; dedup unenforced</td><td>MSG-004 (P1)</td></tr>
+      <tr><td>Observability (structured logs, tracing, metrics)</td><td><span class="chip c-high">Non-compliant</span></td><td>Request-scoped <code>LoggingBehavior</code> + compliance ledger only</td><td>No sink/aggregation, no tracing/correlation-id, no metrics/alerts</td><td>No (severe)</td></tr>
+      <tr><td>Compilation / tests / migrations executed successfully</td><td><span class="chip c-pass">Verified</span></td><td>Build + ~310 tests + migrations on real PostgreSQL 17, this session</td><td>No load/penetration test executed</td><td>No</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- DETAILED FINDINGS BY DOMAIN 07-13 -->
+<section>
+  <h2 class="sec"><span class="num">07</span> Domain &amp; architecture assessment</h2>
+  <p class="sec-sub">Categories 2–4. Compliance 68% / 100% / 92%.</p>
+  <div class="cards">
+    <div class="card"><h3>Strengths</h3>
+      <ul class="clean">
+        <li>Domain project references only SharedKernel — zero framework/EF/MediatR packages; enforced by NetArchTest (ARCH-001, ARCH-003).</li>
+        <li>Rich aggregates: private setters, factories, guarded state machines, invariants in-domain, value objects, domain events over a transactional outbox; SoD baked into <code>AggregateRoot</code> (DOMAIN-001…006).</li>
+        <li>Entities never exposed via API — separate <code>Contracts</code> DTOs, enforced by an architecture test (DOMAIN-007). No dependency cycles (ARCH-007). No god classes (ARCH-010).</li>
+      </ul></div>
+    <div class="card block"><h3>Gaps</h3>
+      <ul class="clean">
+        <li><strong>DOMAIN-009 (High):</strong> no optimistic-concurrency token on any aggregate — see blocker.</li>
+        <li><strong>ARCH-004 (Medium):</strong> modular-monolith boundaries are conventional; one shared <code>IAppDbContext</code> exposes every <code>DbSet</code>, so cross-module access isn't compile-prevented.</li>
+        <li><strong>ARCH-005 (Medium):</strong> no API/contract versioning strategy. <strong>ARCH-006 (Low):</strong> no ADR record set (rationale lives in comments/markdown).</li>
+        <li><strong>ARCH-002 (Low):</strong> Application couples to EF Core via <code>DbSet</code> in the persistence port (a deliberate, tested Clean-Architecture convention).</li>
+      </ul></div>
+  </div>
+</section>
+
+<section>
+  <h2 class="sec"><span class="num">08</span> Database &amp; tenant-isolation assessment</h2>
+  <p class="sec-sub">Categories 8 &amp; 9. Compliance 97% / 85%. <strong>No cross-tenant exposure found.</strong></p>
+  <div class="cards">
+    <div class="card"><h3>Strengths</h3>
+      <ul class="clean">
+        <li>Two enforcing isolation layers: EF global filter (applied by convention, fail-closed) + <code>ENABLE</code>+<code>FORCE ROW LEVEL SECURITY</code> with USING/WITH CHECK reading per-connection GUCs; verified to extend to every table added after activation (TENANT-002/003, DB-014).</li>
+        <li>Tenant id from JWT claim only across all 37 controllers — no body/route/query binding (TENANT-001). Connection-pool re-stamps GUC on each open (TENANT-005). Background jobs use scoped <code>Elevate()</code> (TENANT-006).</li>
+        <li>UUIDv7 PKs (<code>ValueGeneratedNever</code>), tenant-scoped unique indexes, decimal precision, UTC <code>DateTimeOffset</code>, no generic repository, no <code>IQueryable</code> leak, append-only hash-chained ledgers + frozen-record triggers (DB-002/004/007/008/013/015/016).</li>
+      </ul></div>
+    <div class="card block"><h3>Gaps</h3>
+      <ul class="clean">
+        <li><strong>DB-005 (Medium):</strong> zero domain CHECK constraints — enum/range/date invariants live only in code, not at the DB "last line of defense".</li>
+        <li><strong>DB-009 (High):</strong> no concurrency token (blocker). <strong>MSG-007 (Medium):</strong> Outbox retention job is documented but not implemented → unbounded growth.</li>
+        <li><strong>TENANT-004 (operational):</strong> RLS only bites when prod connects as <code>qams_app</code> — must be verified at deploy.</li>
+      </ul></div>
+  </div>
+</section>
+
+<section>
+  <h2 class="sec"><span class="num">09</span> Security &amp; STRIDE assessment</h2>
+  <p class="sec-sub">Categories 7 &amp; 16. Compliance 90% / 58%.</p>
+  <div class="cards">
+    <div class="card"><h3>Strong (Spoofing/Tampering/Repudiation/Elevation)</h3>
+      <ul class="clean">
+        <li>Full JWT validation (issuer/audience/signature/lifetime, tight skew, fail-fast secret); deny-by-default fallback; per-tenant TOTP MFA + enrollment gate; live session/role revocation (SEC-001/002/004/005).</li>
+        <li>Unified strong-password policy; user-enumeration-resistant errors; PBKDF2 hashing (SEC-006/007).</li>
+        <li>Repudiation covered by the hash-chained audit trail + append-only grants + dual-factor e-signatures (SEC-016). Parameterized EF everywhere (SEC-014). DTO binding, not entities (SEC-015).</li>
+      </ul></div>
+    <div class="card block"><h3>Gaps (Info-disclosure / DoS)</h3>
+      <ul class="clean">
+        <li><strong>SEC-011 (Medium):</strong> no security headers (HSTS/CSP/X-Frame/X-Content-Type). <strong>SEC-017 (Medium):</strong> JWT stored in <code>localStorage</code> — XSS-exfiltratable without a CSP.</li>
+        <li><strong>SEC-013 (High):</strong> no application-layer rate limiting (only per-account lockout) → brute-force/DoS exposure on <code>/api/auth/*</code> and the password+PIN publish endpoint.</li>
+        <li><strong>SEC-010 (Low-Med):</strong> no CORS policy (defensible for the same-origin SPA, but undocumented). <strong>SEC-012:</strong> in-app HTTPS/HSTS delegated to the proxy — must be confirmed.</li>
+        <li><strong>SEC-003 (Low):</strong> analytical-study sub-resource DELETEs inherit only class-level <code>[Authorize]</code> — an Analyst can delete study readings within their own tenant; confirm against the threat model.</li>
+      </ul></div>
+  </div>
+</section>
+
+<section>
+  <h2 class="sec"><span class="num">10</span> API, CQRS &amp; validation assessment</h2>
+  <p class="sec-sub">Categories 5, 6, 14. Compliance 68% / 52% / 72%.</p>
+  <div class="cards">
+    <div class="card"><h3>Strengths</h3><ul class="clean">
+      <li>Textbook CQRS — commands mutate one aggregate &amp; return refs, queries project to DTOs with <code>AsNoTracking</code>, controllers are pure dispatchers; validation runs before every handler (CQRS-001/002, VAL-001).</li>
+      <li>Central exception handler maps coded <code>DomainException</code>s to correct RFC-7807 statuses (401/404/409/422); stable machine-readable error codes; no stack-trace/SQL/secret leakage (VAL-002/004, API-007).</li>
+    </ul></div>
+    <div class="card block"><h3>Gaps</h3><ul class="clean">
+      <li><strong>API-002 (High):</strong> no rate limiting. <strong>API-001 (Medium):</strong> no API versioning. <strong>API-006 (Low-Med):</strong> no correlation IDs.</li>
+      <li><strong>VAL-003 (Medium):</strong> concurrency conflicts unrepresented (<code>DbUpdateConcurrencyException</code>→500). <strong>API-003 (Med):</strong> ProblemDetails emitted as <code>application/json</code> not <code>problem+json</code>; middleware writes anonymous error objects (shape drift).</li>
+      <li><strong>API-004 (Medium):</strong> list endpoints use a silent <code>.Take(500)</code> cap, not real pagination. <strong>API-005 (Medium):</strong> file download echoes stored content-type without <code>attachment</code> disposition + no type allow-list (stored-XSS vector).</li>
+      <li><strong>CQRS-003/004 (Medium):</strong> authorization / idempotency / transaction / performance pipeline behaviors absent (authorization deferred to "Phase 1" in code — currently attribute-only, and some commands have no role gate).</li>
+    </ul></div>
+  </div>
+</section>
+
+<section>
+  <h2 class="sec"><span class="num">11</span> Angular frontend assessment</h2>
+  <p class="sec-sub">Category 13. Compliance 90%.</p>
+  <div class="cards">
+    <div class="card"><h3>Strengths</h3><ul class="clean">
+      <li>96/96 standalone components, zero NgModules, <code>bootstrapApplication</code>; fully lazy-loaded routes; feature-by-capability folders (UI-001/002/003).</li>
+      <li>Signal-based facades own state; strict TypeScript + strict templates, zero <code>: any</code>; typed reactive forms; centralized typed API layer (44 services); trilingual centralized i18n (1315 keys) (UI-004…012).</li>
+      <li>Authorization visibility is explicitly affordance-only, with server as the authority (UI-011).</li>
+    </ul></div>
+    <div class="card block"><h3>Gaps / deviations</h3><ul class="clean">
+      <li><strong>UI-013 (Medium):</strong> JWT in <code>localStorage</code> (mitigated by idle-lockout, expiry check, 401-logout, server re-check) — record a risk-acceptance ADR or move to httpOnly cookie.</li>
+      <li><strong>UI-000:</strong> Angular <strong>18</strong>, not 19 (functionally equivalent for every pattern audited). <strong>UI-008 (Low):</strong> one unmanaged <code>valueChanges</code> subscription; 4 non-OnPush components.</li>
+      <li><strong>UI-014 (Low):</strong> Part-11 change-reason uses <code>window.prompt()</code> — replace with an accessible modal.</li>
+    </ul></div>
+  </div>
+</section>
+
+<section>
+  <h2 class="sec"><span class="num">12</span> Testing &amp; quality assessment</h2>
+  <p class="sec-sub">Category 21. Compliance 72%. Coverage is real behaviour, not just line-coverage — but uneven.</p>
+  <div class="cards">
+    <div class="card"><h3>Present &amp; executed (green this session)</h3><ul class="clean">
+      <li>Domain unit, application handler/policy, FluentValidation, architecture-boundary (NetArchTest), API functional, field-change/audit interceptor.</li>
+      <li><strong>Cross-tenant denial &amp; signed-record immutability against real PostgreSQL</strong> (RLS with the EF filter off; trigger SqlState 23514) — the highest-value tests, executed and passing.</li>
+      <li>Frontend: 37 Karma unit tests + 3 Playwright e2e (auth gate + real tenant login → NC register).</li>
+    </ul></div>
+    <div class="card block"><h3>Test gaps</h3><ul class="clean">
+      <li><strong>TEST-002 (Medium):</strong> no optimistic-concurrency conflict test (no token to test). <strong>TEST-001 (Medium):</strong> no ProblemDetails contract test.</li>
+      <li>No Outbox-processor retry/dead-letter test, no inbox/dedup test, no migration up/down round-trip test, no load/performance suite, no mid-chain tamper-detection test.</li>
+      <li>Frontend spec ratio is thin (~10% of 96 components); no role×endpoint 403 matrix at HTTP level.</li>
+    </ul></div>
+  </div>
+</section>
+
+<section>
+  <h2 class="sec"><span class="num">13</span> Observability &amp; operational assessment</h2>
+  <p class="sec-sub">Categories 11, 17, 18, 19, 20. Compliance 72% / 33% / 80% / 58% / 68%. The weakest cluster.</p>
+  <div class="cards">
+    <div class="card"><h3>Strengths</h3><ul class="clean">
+      <li>Transactional Outbox with correct scoped <code>Elevate()</code>; idempotent guarded sweeps with real end-to-end tests; thorough <code>CancellationToken</code> propagation (OPS-001/004/006/011).</li>
+      <li>Exemplary DR runbook (RPO ≤5 min PITR / RTO ≤4 h, off-site AES-256, drills, hash-chain restore verification) + backup/restore scripts (OPS-012). Clean secret externalization + centralized roles (CFG-003/004).</li>
+      <li>Multi-stage Dockerfile, no baked secrets, safe migration strategy, prod debug disabled (DEPLOY-001/004).</li>
+    </ul></div>
+    <div class="card block"><h3>Gaps</h3><ul class="clean">
+      <li><strong>Observability (Cat 17, High×3):</strong> no log sink/aggregation (OBS-001), no distributed tracing or correlation IDs (OBS-002), no metrics/alerts/dashboards (OBS-003) — the app is near-blind in production.</li>
+      <li><strong>OPS-008 (High, blocker):</strong> readiness doesn't test the DB. <strong>OPS-009 (Medium):</strong> no Npgsql retry / circuit breaker. <strong>OPS-010 (Medium):</strong> no rate limiting.</li>
+      <li><strong>CFG-001/002 (Medium):</strong> options are hand-rolled with silent fallback; connection string not validated at startup. <strong>DEPLOY-002 (Medium):</strong> container runs as root. <strong>DEPLOY-003 (Medium):</strong> no resource limits; compose is dev-DB only.</li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- D. RISK REGISTER -->
+<section>
+  <h2 class="sec"><span class="num">14</span> D · Risk register</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>ID</th><th>Risk</th><th>Likelihood</th><th>Impact</th><th>Sev</th><th>Owner</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">OPS-008</td><td>Traffic routed to a DB-disconnected instance (no readiness)</td><td>High</td><td>High</td><td><span class="chip c-high">High</span></td><td>Unassigned</td></tr>
+      <tr><td class="mono">OPS-002</td><td>Duplicate event processing / racing transitions if scaled out</td><td>Med</td><td>High</td><td><span class="chip c-high">High</span></td><td>Unassigned</td></tr>
+      <tr><td class="mono">DB-009</td><td>Silent lost-update on concurrent edits of a regulated record</td><td>Med</td><td>High</td><td><span class="chip c-high">High</span></td><td>Unassigned</td></tr>
+      <tr><td class="mono">MSG-004</td><td>Integration event silently stranded / head-of-line blocking</td><td>Med</td><td>High</td><td><span class="chip c-high">High</span></td><td>Unassigned</td></tr>
+      <tr><td class="mono">OBS-001/2/3</td><td>Production incident undiagnosable (no logs sink/tracing/metrics)</td><td>High</td><td>Med</td><td><span class="chip c-high">High</span></td><td>Unassigned</td></tr>
+      <tr><td class="mono">SEC-013</td><td>Brute-force / DoS on auth &amp; e-signature endpoints (no rate limit)</td><td>Med</td><td>Med</td><td><span class="chip c-high">High</span></td><td>Unassigned</td></tr>
+      <tr><td class="mono">SEC-011/017</td><td>Token theft via XSS (no CSP + JWT in localStorage)</td><td>Low</td><td>High</td><td><span class="chip c-med">Medium</span></td><td>Unassigned</td></tr>
+      <tr><td class="mono">MSG-007</td><td>Unbounded Outbox growth (documented retention job absent)</td><td>High</td><td>Low</td><td><span class="chip c-med">Medium</span></td><td>Unassigned</td></tr>
+      <tr><td class="mono">DB-005</td><td>Out-of-range value persists via non-EF path (no CHECK constraints)</td><td>Low</td><td>Med</td><td><span class="chip c-med">Medium</span></td><td>Unassigned</td></tr>
+      <tr><td class="mono">DEPLOY-002</td><td>Container escape runs as root</td><td>Low</td><td>Med</td><td><span class="chip c-med">Medium</span></td><td>Unassigned</td></tr>
+      <tr><td class="mono">SEC-003</td><td>Analyst deletes study readings within own tenant (if unintended)</td><td>Med</td><td>Low</td><td><span class="chip c-low">Low</span></td><td>Unassigned</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- E. REMEDIATION BACKLOG -->
+<section>
+  <h2 class="sec"><span class="num">15</span> E · Prioritized remediation backlog</h2>
+  <p class="sec-sub">Ordered per the mandated priority: authorization/tenant → data-consistency → secrets/exposure → availability → DB integrity → boundaries → tests → maintainability.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Pri</th><th>ID</th><th>Corrective action</th><th>Affected</th><th>Required tests</th></tr></thead>
+    <tbody>
+      <tr><td><span class="chip c-high">P0</span></td><td class="mono">TENANT-004</td><td>Verify/guard prod runs as <code>qams_app</code> (NOBYPASSRLS, no DELETE); apply <code>harden-runtime-role.sql</code>; add a startup role-check</td><td>Deploy, Program.cs</td><td>Boot-as-owner rejected; RLS denies cross-tenant as qams_app</td></tr>
+      <tr><td><span class="chip c-high">P0</span></td><td class="mono">OPS-008</td><td>DB readiness check; split live/ready; wire Docker/LB probes</td><td>WebApi health, Dockerfile</td><td>Readiness fails when DB down</td></tr>
+      <tr><td><span class="chip c-high">P0</span></td><td class="mono">OPS-002</td><td><code>SKIP LOCKED</code>/lease on Outbox + leader election on sweeps, or enforce single replica</td><td>Outbox, jobs, deploy</td><td>Two processors → each row published once</td></tr>
+      <tr><td><span class="chip c-high">P1</span></td><td class="mono">DB-009/MSG-009/VAL-003</td><td>Add <code>xmin</code> concurrency token on mutable roots; map conflict → 409</td><td>EF config, exception handler</td><td>Concurrent transition → exactly one succeeds (409)</td></tr>
+      <tr><td><span class="chip c-high">P1</span></td><td class="mono">MSG-004/005/006/007</td><td>Outbox dead-letter + per-event exponential backoff + processed-event dedup + implement the retention purge</td><td>Outbox, processor</td><td>Poison → dead-letter, no HOL block; redelivery → single side-effect</td></tr>
+      <tr><td><span class="chip c-high">P1</span></td><td class="mono">SEC-013/API-002</td><td>Rate limiting (stricter on <code>/api/auth/*</code> + e-signature)</td><td>Program.cs pipeline</td><td>Burst → 429</td></tr>
+      <tr><td><span class="chip c-high">P1</span></td><td class="mono">OBS-001/002/003</td><td>Structured JSON sink + OpenTelemetry (HTTP/EF/MediatR/jobs) + correlation IDs + core metrics &amp; alerts</td><td>WebApi, Application behaviors</td><td>Log shape + trace propagation assertions</td></tr>
+      <tr><td><span class="chip c-med">P2</span></td><td class="mono">SEC-011/017/012</td><td>Security-headers middleware (HSTS/CSP/X-Frame/nosniff); confirm proxy TLS/HSTS; reconsider token storage</td><td>WebApi, proxy, SPA</td><td>Headers present; CSP blocks inline</td></tr>
+      <tr><td><span class="chip c-med">P2</span></td><td class="mono">API-003/004/005</td><td><code>problem+json</code> + uniform middleware errors; real pagination envelope; file type allow-list + <code>attachment</code> disposition</td><td>Handlers, controllers</td><td>Contract + pagination + download tests</td></tr>
+      <tr><td><span class="chip c-med">P2</span></td><td class="mono">CQRS-003/004</td><td>Authorization + idempotency behaviors; role-gate ungated commands</td><td>Application pipeline</td><td>Deny-without-permission behavior test</td></tr>
+      <tr><td><span class="chip c-med">P2</span></td><td class="mono">DB-005 / CFG-001/002 / DEPLOY-002/003</td><td>DB CHECK constraints; <code>Configure&lt;T&gt;().ValidateOnStart()</code>; non-root container + resource limits + prod topology</td><td>Migrations, DI, Docker</td><td>Invalid config/enum rejected fast</td></tr>
+      <tr><td><span class="chip c-low">P2/P3</span></td><td class="mono">TEST-* / ARCH-005/006 / API-001</td><td>Concurrency/contract/migration/tamper tests; API versioning; ADR record set; module-boundary arch test</td><td>Tests, docs, contracts</td><td>New tests green in CI</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- SEQUENCE + ADRs -->
+<section>
+  <h2 class="sec"><span class="num">16</span> Recommended implementation sequence &amp; required ADRs</h2>
+  <div class="cards">
+    <div class="card"><h3>Sequence</h3>
+      <ol class="steps">
+        <li>Confirm the <code>qams_app</code> production role &amp; readiness health (cheap, highest safety) — TENANT-004, OPS-008.</li>
+        <li>Decide replica topology: enforce single-instance now, or add <code>SKIP LOCKED</code>/leader election — OPS-002.</li>
+        <li>Add optimistic concurrency (<code>xmin</code>) + 409 mapping — DB-009.</li>
+        <li>Harden the Outbox: dead-letter, backoff, dedup, retention — MSG-004…007.</li>
+        <li>Observability baseline: JSON logs + OTel + correlation IDs + metrics/alerts — OBS-001…003.</li>
+        <li>Edge hardening: rate limiting + security headers/CSP — SEC-013/011.</li>
+        <li>API polish + config validation + container hardening + the test-coverage gaps.</li>
+      </ol></div>
+    <div class="card"><h3>Required ADRs (currently undocumented decisions)</h3>
+      <ul class="clean">
+        <li>JWT stored in <code>localStorage</code> (risk-acceptance vs httpOnly cookie).</li>
+        <li>Trigger-based immutability <em>instead of</em> version-token concurrency — and the plan to add both.</li>
+        <li>Single-threaded in-process Outbox + implicit single-replica topology.</li>
+        <li>Application coupling to EF Core <code>DbSet</code> in the persistence port.</li>
+        <li>Same-origin deployment assumption (no CORS by design).</li>
+      </ul></div>
+  </div>
+</section>
+
+<!-- F. EVIDENCE COVERAGE -->
+<section>
+  <h2 class="sec"><span class="num">17</span> F · Evidence coverage &amp; limitations</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Area</th><th>Evidence reviewed</th><th>Missing / not executed</th><th>Confidence</th></tr></thead>
+    <tbody>
+      <tr><td>Architecture / DDD</td><td>All 6 .csproj, DAG, 5 arch tests, 4 aggregates in full</td><td>Not every one of ~55 aggregates read</td><td>High</td></tr>
+      <tr><td>Multi-tenancy / security</td><td>All 37 controllers, migrations, interceptors, JWT setup; RLS tests executed on real PG</td><td>No penetration test</td><td>High</td></tr>
+      <tr><td>Database / messaging</td><td>Configs, 40+ migrations, Outbox/interceptors; migrations applied to real PG</td><td>Query plans not profiled; poison behaviour inferred from code</td><td>High</td></tr>
+      <tr><td>API / CQRS / validation</td><td>Controllers, slices, pipeline, exception handler</td><td>Endpoint HTTP-contract tests thin (~30%)</td><td>High</td></tr>
+      <tr><td>Frontend</td><td>package.json, tsconfig, routes, facades, api layer, i18n; build + 37 unit + 3 e2e executed</td><td>Per-assertion green counts not re-tallied by hand</td><td>High</td></tr>
+      <tr><td>Ops / observability / deploy</td><td>Program.cs, Dockerfile, compose, DR runbook, background services</td><td>No production runtime/telemetry; no load test</td><td>High</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- CONCLUSION -->
+<section>
+  <h2 class="sec"><span class="num">18</span> Compliance status &amp; production decision</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Question</th><th>Answer</th></tr></thead>
+    <tbody>
+      <tr><td>Overall score</td><td><strong>≈ 76%</strong> — Generally aligned (lower band); material improvements required</td></tr>
+      <tr><td>Verification coverage</td><td><strong>≈ 88%</strong></td></tr>
+      <tr><td>Confidence level</td><td><strong>High</strong> (≥ 85% coverage; build + tests + migrations executed)</td></tr>
+      <tr><td>Critical findings</td><td><strong>0</strong></td></tr>
+      <tr><td>High findings</td><td><strong>8</strong></td></tr>
+      <tr><td>Production blockers</td><td><strong>4</strong> technical (P0/P1) + <strong>1</strong> operational gate</td></tr>
+      <tr><td>Tenant isolation verified?</td><td><strong>Yes</strong> — code (EF filter + FORCED RLS + least-privilege role) and runtime (RLS integration tests executed &amp; passed on real PostgreSQL)</td></tr>
+      <tr><td>Backend authorization verified?</td><td><strong>Yes</strong> — deny-by-default + central role gates + per-request server re-check; gap is authorization <em>behavior</em> + HTTP authz test depth, not enforcement</td></tr>
+      <tr><td>Database integrity verified?</td><td><strong>Yes</strong> — FKs, tenant-scoped uniqueness, append-only ledgers, immutability triggers; tested on real PostgreSQL. Gaps: CHECK constraints + concurrency token</td></tr>
+      <tr><td>Automated tests sufficient?</td><td><strong>Partially</strong> — strong domain/integration/architecture coverage; gaps in endpoint-contract, concurrency, messaging-robustness, and load</td></tr>
+      <tr><td>Can it proceed to production?</td><td><strong>Yes, with conditions</strong> — after the P0/P1 blockers are resolved or explicitly risk-accepted</td></tr>
+    </tbody>
+  </table></div>
+  <div class="verdict" style="margin-top:24px;border-left-color:var(--accent)">
+    <span class="tag" style="color:var(--accent)">Final</span>
+    <h2>PRODUCTION DECISION: APPROVED WITH CONDITIONS</h2>
+    <p>All applicable <strong>critical controls</strong> — tenant isolation, backend authorization, data integrity/immutability, and Part-11 audit &amp; e-signature — are implemented and were <strong>tested this session</strong>, and no critical-severity or cross-tenant findings exist. Approval is conditioned on closing the five production blockers (readiness health, single-replica/scale-out safety, optimistic concurrency, Outbox dead-letter, and the <code>qams_app</code> deployment gate) and standing up an observability baseline, with the P2 hardening scheduled for the following release.</p>
+  </div>
+</section>
+
+<section>
+  <h2 class="sec"><span class="num">19</span> Limitations &amp; incomplete items</h2>
+  <ul class="clean">
+    <li><strong>LIMITATION:</strong> the Enterprise standard document was not supplied; audited against the prompt checklist. No production runtime, penetration test, or load test was performed.</li>
+    <li><strong>LIMITATION:</strong> a representative sample of ~55 aggregates / ~44 API services was read in full, not every file.</li>
+    <li><strong>Partially compliant:</strong> Solution architecture (2), CQRS (5), API (6), Validation (14), Messaging (10), Background (11), Security/STRIDE (16), Health/Resilience (19), Docker (20), Testing (21).</li>
+    <li><strong>Non-compliant:</strong> Observability (17). <strong>Not applicable:</strong> SignalR/real-time (12).</li>
+    <li><strong>Not verified at runtime:</strong> production telemetry, horizontal-scale behaviour, brute-force resistance under load.</li>
+  </ul>
+  <div class="note">Integrity note: claims of successful build, passing tests, and applied migrations reflect actions <strong>executed during this assessment</strong> against a real PostgreSQL 17 environment. Security is assessed from code + executed tests, not asserted from static inspection alone; no unresolved risk has been hidden or down-graded to improve the score.</div>
+</section>
+
+<div class="foot">
+  <p>NT.QMS Enterprise Application Architecture Compliance Audit · EA-AUD-NTQMS-001 · 2026-07-27 · Evidence-based, read-only assessment across 22 categories via six independent sub-audits. Findings cite concrete file/migration/config/test evidence in the repository. This report evaluates architectural &amp; operational compliance; it is not, by itself, a declaration of validated GxP status (see the separate CSV validation package).</p>
+</div>
+
+</div>
+</body></html>
