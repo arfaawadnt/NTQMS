@@ -363,3 +363,37 @@ cross-tenant denial functional test suite (merge gate from day one).
 - Migration `Phase1OutboxResilienceAndConcurrency` applied. Suite: **290 tests
   green, 0 skipped** (was 279); build 0 warnings. Live: /health/ready 200,
   login 200, xmin visible in EF SQL, singleton lock acquired.
+
+## EA Remediation Phase 2 (v1.40.0, 2026-07-28) ✅ — observability baseline
+
+- **OBS-001 — structured logging.** Production: JSON console (built-in
+  formatter, UTC, scopes). ObservabilityMiddleware (first in pipeline) opens a
+  scope (Service/Environment/CorrelationId/TraceId) and emits ONE canonical
+  completion record per request with Service, Environment, Method, Path,
+  Operation, Status, Outcome (success/client-error/server-error), DurationMs,
+  TenantId, UserId, CorrelationId — shape locked by a structured-state test.
+- **OBS-002/API-006 — tracing + correlation.** OpenTelemetry: ASP.NET Core
+  server spans (health/metrics filtered), Npgsql command spans, MediatR
+  request spans (TracingBehavior, BCL ActivitySource — Application stays
+  vendor-free), outbox delivery + job spans (QamsDiagnostics). The async
+  boundary keeps the trace: OutboxInterceptor persists the writing W3C
+  traceparent (`outbox_event.trace_parent`, migration Phase2OutboxTraceParent)
+  and the processor parents the delivery span on it — acceptance test proves
+  HTTP→EF→Outbox share one trace id. X-Correlation-Id accepted (sanitized: the
+  reflected-XSS case is tested), echoed on every response; traceId +
+  correlationId stamped into ALL ProblemDetails (handler + framework).
+  OTLP export for traces/metrics/logs when `Otlp:Endpoint` is set.
+- **OBS-003 — metrics + alerts.** /metrics (Prometheus, anonymous) publishes
+  ASP.NET RED, Npgsql pool, and NT.QAMS instruments: outbox
+  processed/failed/dead_lettered counters + backlog / dead_letters /
+  oldest_pending_age_seconds gauges (30s stats poll in the processor) +
+  job.last_success_timestamp_seconds{job} liveness for compliance-sweep and
+  kpi-snapshot. deploy/OBSERVABILITY.md defines the actionable alert set
+  (error-rate, p95, dead-letter>0, backlog age, sweep/snapshot liveness) and
+  aligns log retention with the DR runbook (≥35 days; ledger remains the
+  7-year compliance record).
+- Packages (WebApi only): OpenTelemetry 1.17 (hosting/aspnetcore/otlp),
+  Npgsql.OpenTelemetry 9.0.4, Prometheus exporter 1.17.0-beta.1 (endpoint).
+- Suite: **297 tests green, 0 skipped** (was 290); build 0 warnings. Live:
+  correlation echo ✓, 401 problem carries traceId+correlationId ✓, /metrics
+  serves RED + qams gauges ✓, completion logs carry all fields ✓.

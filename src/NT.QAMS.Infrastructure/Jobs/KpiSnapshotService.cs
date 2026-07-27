@@ -66,9 +66,19 @@ public sealed partial class KpiSnapshotService(
         // OPS-002: leader election — with more than one instance, exactly one
         // upserts a snapshot round; the others skip (the next interval retries).
         var tenants = 0;
-        await AdvisoryLock.TryRunExclusiveAsync(
+        var ran = await AdvisoryLock.TryRunExclusiveAsync(
             db, AdvisoryLockKeys.KpiSnapshot,
-            async () => tenants = await SnapshotAsync(db, ct), ct);
+            async () =>
+            {
+                using var activity = Observability.QamsDiagnostics.Jobs.StartActivity("job kpi-snapshot");
+                tenants = await SnapshotAsync(db, ct);
+            }, ct);
+        if (ran)
+        {
+            // OBS-003: liveness gauge — the "snapshot hasn't run" alert source.
+            Observability.QamsMetrics.RecordJobSuccess("kpi-snapshot", clock.UtcNow);
+        }
+
         return tenants;
     }
 

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -5,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NT.QAMS.Application.Abstractions;
+using NT.QAMS.Infrastructure.Observability;
 using NT.QAMS.SharedKernel.Abstractions;
 
 namespace NT.QAMS.Infrastructure.Persistence.Outbox;
@@ -49,17 +51,25 @@ public sealed partial class OutboxProcessor(
 
     private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(2);
     private static readonly TimeSpan PurgeInterval = TimeSpan.FromHours(1);
+    private static readonly TimeSpan QueueStatsInterval = TimeSpan.FromSeconds(30);
     private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var nextPurgeDueAt = clock.UtcNow; // first purge on startup, then hourly
+        var nextStatsDueAt = clock.UtcNow; // gauge refresh for backlog/dead-letter alerts
 
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
                 var processed = await ProcessBatchAsync(stoppingToken);
+
+                if (clock.UtcNow >= nextStatsDueAt)
+                {
+                    nextStatsDueAt = clock.UtcNow + QueueStatsInterval;
+                    await RefreshQueueStatsAsync(stoppingToken);
+                }
 
                 if (clock.UtcNow >= nextPurgeDueAt)
                 {
@@ -99,6 +109,14 @@ public sealed partial class OutboxProcessor(
 
         foreach (var row in batch)
         {
+            // OBS-002: the delivery span is parented on the trace that WROTE the
+            // row, so HTTP → MediatR → EF → Outbox share one trace id.
+            using var activity = QamsDiagnostics.Outbox.StartActivity(
+                "outbox deliver", ActivityKind.Consumer, row.TraceParent);
+            activity?.SetTag("qams.outbox.event_id", row.Id);
+            activity?.SetTag("qams.outbox.event_type", row.EventType);
+            activity?.SetTag("qams.outbox.attempt", row.Attempts + 1);
+
             try
             {
                 var notification = Deserialize(row);
@@ -109,18 +127,22 @@ public sealed partial class OutboxProcessor(
                     row.TenantId, row.Id, row.EventType, row.Payload, row.OccurredAtUtc, cancellationToken);
                 row.ProcessedAtUtc = clock.UtcNow;
                 row.ClaimedUntilUtc = null;
+                QamsMetrics.OutboxProcessed.Add(1);
             }
             catch (Exception ex)
             {
                 row.Attempts++;
                 row.LastError = ex.Message;
                 row.ClaimedUntilUtc = null;
+                activity?.SetStatus(ActivityStatusCode.Error, ex.GetType().Name);
+                QamsMetrics.OutboxFailed.Add(1);
 
                 if (row.Attempts >= MaxAttempts)
                 {
-                    // MSG-004: out of the retry stream, into triage. ERROR level
-                    // is the alert channel until the Phase-2 metrics pipeline.
+                    // MSG-004: out of the retry stream, into triage. The metric
+                    // and the ERROR log are both alert channels.
                     row.DeadLetteredAtUtc = clock.UtcNow;
+                    QamsMetrics.OutboxDeadLettered.Add(1);
                     LogEventDeadLettered(logger, ex, row.Id, row.EventType, row.Attempts);
                 }
                 else
@@ -191,6 +213,31 @@ public sealed partial class OutboxProcessor(
         var baseDelay = BackoffBase * Math.Pow(2, attempts - 1);
         var jitter = baseDelay * (Random.Shared.NextDouble() * 0.25);
         return baseDelay + jitter;
+    }
+
+    /// <summary>
+    /// OBS-003: refreshes the backlog / dead-letter / oldest-age gauges that
+    /// feed the outbox alerts (see deploy/OBSERVABILITY.md).
+    /// </summary>
+    private async Task RefreshQueueStatsAsync(CancellationToken cancellationToken)
+    {
+        using var scope = scopeFactory.CreateScope();
+        scope.ServiceProvider.GetRequiredService<ICurrentTenantSetter>().Elevate();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        var live = db.Set<OutboxEvent>()
+            .Where(e => e.ProcessedAtUtc == null && e.DeadLetteredAtUtc == null);
+        var backlog = await live.LongCountAsync(cancellationToken);
+        var oldest = backlog == 0
+            ? null
+            : await live.OrderBy(e => e.OccurredAtUtc).Select(e => (DateTimeOffset?)e.OccurredAtUtc)
+                .FirstOrDefaultAsync(cancellationToken);
+        var deadLetters = await db.Set<OutboxEvent>()
+            .LongCountAsync(e => e.DeadLetteredAtUtc != null, cancellationToken);
+
+        QamsMetrics.RecordOutboxQueueStats(
+            backlog, deadLetters,
+            oldest is null ? 0 : Math.Max(0, (clock.UtcNow - oldest.Value).TotalSeconds));
     }
 
     private async Task RunRetentionPurgeAsync(CancellationToken cancellationToken)

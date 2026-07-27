@@ -14,8 +14,9 @@ public static class DependencyInjection
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssembly(assembly);
-            // Pipeline order is the law: logging wraps everything; validation
-            // precedes every handler. Authorization slots in between in Phase 1.
+            // Pipeline order is the law: tracing wraps logging wraps everything;
+            // validation precedes every handler.
+            cfg.AddOpenBehavior(typeof(TracingBehavior<,>));
             cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));
             cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
         });

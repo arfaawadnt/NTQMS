@@ -31,4 +31,11 @@ public sealed class OutboxEvent
 
     /// <summary>Processing lease (OPS-002): the row belongs to one claimant until this expires.</summary>
     public DateTimeOffset? ClaimedUntilUtc { get; set; }
+
+    /// <summary>
+    /// W3C traceparent of the operation that wrote the row (OBS-002) — the
+    /// processor parents the delivery span on it, so one trace spans the
+    /// HTTP request and the async outbox work.
+    /// </summary>
+    public string? TraceParent { get; init; }
 }

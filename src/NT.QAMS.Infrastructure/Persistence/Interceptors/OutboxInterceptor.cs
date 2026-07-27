@@ -62,6 +62,9 @@ public sealed class OutboxInterceptor(IClock clock) : SaveChangesInterceptor
                     EventType = $"{eventType.FullName}, {eventType.Assembly.GetName().Name}",
                     Payload = JsonSerializer.Serialize(domainEvent, eventType, SerializerOptions),
                     OccurredAtUtc = clock.UtcNow,
+                    // OBS-002: carry the writing trace across the async boundary
+                    // so the processor's delivery span joins the same trace.
+                    TraceParent = System.Diagnostics.Activity.Current?.Id,
                 });
             }
 

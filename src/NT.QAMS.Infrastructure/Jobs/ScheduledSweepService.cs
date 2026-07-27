@@ -67,9 +67,19 @@ public sealed partial class ScheduledSweepService(
         // OPS-002: leader election — with more than one instance, exactly one
         // runs a sweep round; the others skip (the next interval retries).
         var result = (Due: 0, Locked: 0, Expired: 0, Suspended: 0);
-        await AdvisoryLock.TryRunExclusiveAsync(
+        var ran = await AdvisoryLock.TryRunExclusiveAsync(
             db, AdvisoryLockKeys.ComplianceSweep,
-            async () => result = await SweepAsync(db, ct), ct);
+            async () =>
+            {
+                using var activity = Observability.QamsDiagnostics.Jobs.StartActivity("job compliance-sweep");
+                result = await SweepAsync(db, ct);
+            }, ct);
+        if (ran)
+        {
+            // OBS-003: liveness gauge — the "sweep hasn't run" alert source.
+            Observability.QamsMetrics.RecordJobSuccess("compliance-sweep", clock.UtcNow);
+        }
+
         return result;
     }
 

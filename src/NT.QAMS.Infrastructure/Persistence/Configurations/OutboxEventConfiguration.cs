@@ -14,6 +14,8 @@ public sealed class OutboxEventConfiguration : IEntityTypeConfiguration<OutboxEv
 
         builder.Property(e => e.EventType).HasMaxLength(400);
         builder.Property(e => e.LastError).HasMaxLength(2000);
+        // W3C traceparent is 55 chars; headroom for future tracestate-style forms.
+        builder.Property(e => e.TraceParent).HasMaxLength(100);
 
         // The processor's only read path: the live (not processed, not
         // dead-lettered) frontier, claimed oldest-first.
