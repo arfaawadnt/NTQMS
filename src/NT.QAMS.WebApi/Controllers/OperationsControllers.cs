@@ -15,8 +15,11 @@ namespace NT.QAMS.WebApi.Controllers;
 public sealed class ArchivesController(ISender sender) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> List([FromQuery] string? state, CancellationToken ct) =>
-        Ok(await sender.Send(new GetArchivesQuery(state), ct));
+    public async Task<IActionResult> List(
+        [FromQuery] string? state,
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 50,
+        CancellationToken ct = default) =>
+        Ok(await sender.Send(new GetArchivesQuery(state, page, pageSize), ct));
 
     [HttpPost]
     public async Task<IActionResult> Archive(ArchiveRecordRequest request, CancellationToken ct) =>
@@ -85,10 +88,12 @@ public sealed class SlaDefinitionsController(ISender sender) : ControllerBase
 public sealed class WorkTasksController(ISender sender) : ControllerBase
 {
     [HttpGet("mine")]
-    public async Task<IActionResult> Mine(CancellationToken ct)
+    public async Task<IActionResult> Mine(
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 50,
+        CancellationToken ct = default)
     {
         var role = User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
-        return Ok(await sender.Send(new GetMyTasksQuery(role), ct));
+        return Ok(await sender.Send(new GetMyTasksQuery(role, page, pageSize), ct));
     }
 
     [HttpPost]

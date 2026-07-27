@@ -49,13 +49,14 @@ public sealed class GetNotificationRulesHandler(IAppDbContext db)
 }
 
 /// <summary>The signed-in user's in-app notification feed.</summary>
-public sealed record GetMyNotificationsQuery(bool UnreadOnly = false)
-    : IQuery<IReadOnlyList<NotificationFeedItemDto>>;
+public sealed record GetMyNotificationsQuery(
+    bool UnreadOnly = false, int Page = 1, int PageSize = PageRequest.DefaultPageSize)
+    : IQuery<Contracts.Common.PagedResponse<NotificationFeedItemDto>>;
 
 public sealed class GetMyNotificationsHandler(IAppDbContext db, ICurrentUser user)
-    : IQueryHandler<GetMyNotificationsQuery, IReadOnlyList<NotificationFeedItemDto>>
+    : IQueryHandler<GetMyNotificationsQuery, Contracts.Common.PagedResponse<NotificationFeedItemDto>>
 {
-    public async Task<IReadOnlyList<NotificationFeedItemDto>> Handle(
+    public async Task<Contracts.Common.PagedResponse<NotificationFeedItemDto>> Handle(
         GetMyNotificationsQuery q, CancellationToken ct)
     {
         var userId = user.UserId ?? throw new DomainException("AUTH-003", "An authenticated user is required.");
@@ -68,13 +69,13 @@ public sealed class GetMyNotificationsHandler(IAppDbContext db, ICurrentUser use
             query = query.Where(d => !d.ReadByRecipient);
         }
 
+        // API-004: pagination envelope — no silent cap; the client sees the total.
         return await query
             .OrderByDescending(d => d.CreatedAtUtc)
-            .Take(200)
             .Select(d => new NotificationFeedItemDto(
                 d.Id, d.EventKey, d.Subject, d.Body, d.ReadByRecipient,
                 d.EmailStatus.ToString(), d.CreatedAtUtc))
-            .ToListAsync(ct);
+            .ToPagedAsync(PageRequest.Normalized(q.Page, q.PageSize), ct);
     }
 }
 
@@ -96,13 +97,14 @@ public sealed class MarkNotificationReadHandler(IAppDbContext db, ICurrentUser u
 }
 
 /// <summary>Delivery monitor for administrators (email statuses, errors).</summary>
-public sealed record GetDispatchMonitorQuery(string? Status = null)
-    : IQuery<IReadOnlyList<DispatchMonitorItemDto>>;
+public sealed record GetDispatchMonitorQuery(
+    string? Status = null, int Page = 1, int PageSize = PageRequest.DefaultPageSize)
+    : IQuery<Contracts.Common.PagedResponse<DispatchMonitorItemDto>>;
 
 public sealed class GetDispatchMonitorHandler(IAppDbContext db)
-    : IQueryHandler<GetDispatchMonitorQuery, IReadOnlyList<DispatchMonitorItemDto>>
+    : IQueryHandler<GetDispatchMonitorQuery, Contracts.Common.PagedResponse<DispatchMonitorItemDto>>
 {
-    public async Task<IReadOnlyList<DispatchMonitorItemDto>> Handle(
+    public async Task<Contracts.Common.PagedResponse<DispatchMonitorItemDto>> Handle(
         GetDispatchMonitorQuery q, CancellationToken ct)
     {
         var query = db.NotificationDispatches.AsNoTracking();
@@ -111,12 +113,12 @@ public sealed class GetDispatchMonitorHandler(IAppDbContext db)
             query = query.Where(d => d.EmailStatus.ToString() == q.Status);
         }
 
+        // API-004: pagination envelope — no silent cap; the client sees the total.
         return await query
             .OrderByDescending(d => d.CreatedAtUtc)
-            .Take(500)
             .Select(d => new DispatchMonitorItemDto(
                 d.Id, d.EventKey, d.RecipientUserId, d.RecipientEmail,
                 d.Subject, d.EmailStatus.ToString(), d.Error, d.CreatedAtUtc))
-            .ToListAsync(ct);
+            .ToPagedAsync(PageRequest.Normalized(q.Page, q.PageSize), ct);
     }
 }

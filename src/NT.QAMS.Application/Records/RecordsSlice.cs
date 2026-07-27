@@ -133,12 +133,14 @@ public sealed class ReleaseLegalHoldHandler(IAppDbContext db, ICurrentUser user)
     }
 }
 
-public sealed record GetArchivesQuery(string? State = null) : IQuery<IReadOnlyList<ArchiveListItemDto>>;
+public sealed record GetArchivesQuery(
+    string? State = null, int Page = 1, int PageSize = PageRequest.DefaultPageSize)
+    : IQuery<Contracts.Common.PagedResponse<ArchiveListItemDto>>;
 
 public sealed class GetArchivesHandler(IAppDbContext db)
-    : IQueryHandler<GetArchivesQuery, IReadOnlyList<ArchiveListItemDto>>
+    : IQueryHandler<GetArchivesQuery, Contracts.Common.PagedResponse<ArchiveListItemDto>>
 {
-    public async Task<IReadOnlyList<ArchiveListItemDto>> Handle(GetArchivesQuery q, CancellationToken ct)
+    public async Task<Contracts.Common.PagedResponse<ArchiveListItemDto>> Handle(GetArchivesQuery q, CancellationToken ct)
     {
         var query = db.ArchiveEntries.AsNoTracking();
         if (!string.IsNullOrWhiteSpace(q.State))
@@ -146,11 +148,11 @@ public sealed class GetArchivesHandler(IAppDbContext db)
             query = query.Where(a => a.State.ToString() == q.State);
         }
 
+        // API-004: pagination envelope — no silent cap; the client sees the total.
         return await query.OrderByDescending(a => a.ArchivedOn)
-            .Take(500)
             .Select(a => new ArchiveListItemDto(
                 a.Id, a.ArchiveRef, a.SourceModule, a.SourceRef,
                 a.RetentionClass.ToString(), a.ArchivedOn, a.RetentionExpiry, a.State.ToString(), a.IsOnLegalHold))
-            .ToListAsync(ct);
+            .ToPagedAsync(PageRequest.Normalized(q.Page, q.PageSize), ct);
     }
 }

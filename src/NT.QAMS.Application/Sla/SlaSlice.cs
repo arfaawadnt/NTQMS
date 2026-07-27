@@ -92,26 +92,27 @@ public sealed class CompleteTaskHandler(IAppDbContext db, IClock clock) : IComma
 }
 
 /// <summary>"My Tasks": pending tasks assigned to me directly or to my role.</summary>
-public sealed record GetMyTasksQuery(string MyRole) : IQuery<IReadOnlyList<WorkTaskDto>>;
+public sealed record GetMyTasksQuery(
+    string MyRole, int Page = 1, int PageSize = PageRequest.DefaultPageSize)
+    : IQuery<Contracts.Common.PagedResponse<WorkTaskDto>>;
 
 public sealed class GetMyTasksHandler(IAppDbContext db, ICurrentUser user, IClock clock)
-    : IQueryHandler<GetMyTasksQuery, IReadOnlyList<WorkTaskDto>>
+    : IQueryHandler<GetMyTasksQuery, Contracts.Common.PagedResponse<WorkTaskDto>>
 {
-    public async Task<IReadOnlyList<WorkTaskDto>> Handle(GetMyTasksQuery q, CancellationToken ct)
+    public async Task<Contracts.Common.PagedResponse<WorkTaskDto>> Handle(GetMyTasksQuery q, CancellationToken ct)
     {
         var userId = user.UserId ?? throw new DomainException("AUTH-003", "An authenticated user is required.");
         var today = DateOnly.FromDateTime(clock.UtcNow.UtcDateTime);
 
-        var tasks = await db.WorkTasks.AsNoTracking()
+        // API-004: pagination envelope — no silent cap; the client sees the total.
+        return await db.WorkTasks.AsNoTracking()
             .Where(t => t.Status == WorkTaskStatus.Pending
                         && (t.AssigneeUserId == userId || t.AssigneeRole == q.MyRole))
             .OrderBy(t => t.DueDate)
-            .Take(500)
-            .ToListAsync(ct);
-
-        return tasks.Select(t => new WorkTaskDto(
-            t.Id, t.Subject, t.SubjectRef, t.AssigneeUserId, t.AssigneeRole,
-            t.DueDate, t.Status.ToString(), t.DueDate < today)).ToList();
+            .Select(t => new WorkTaskDto(
+                t.Id, t.Subject, t.SubjectRef, t.AssigneeUserId, t.AssigneeRole,
+                t.DueDate, t.Status.ToString(), t.DueDate < today))
+            .ToPagedAsync(PageRequest.Normalized(q.Page, q.PageSize), ct);
     }
 }
 

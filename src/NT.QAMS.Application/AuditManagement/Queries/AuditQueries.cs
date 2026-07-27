@@ -5,12 +5,14 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.AuditManagement.Queries;
 
-public sealed record GetAuditsQuery(string? Status = null) : IQuery<IReadOnlyList<AuditListItemDto>>;
+public sealed record GetAuditsQuery(
+    string? Status = null, int Page = 1, int PageSize = PageRequest.DefaultPageSize)
+    : IQuery<Contracts.Common.PagedResponse<AuditListItemDto>>;
 
 public sealed class GetAuditsHandler(IAppDbContext db)
-    : IQueryHandler<GetAuditsQuery, IReadOnlyList<AuditListItemDto>>
+    : IQueryHandler<GetAuditsQuery, Contracts.Common.PagedResponse<AuditListItemDto>>
 {
-    public async Task<IReadOnlyList<AuditListItemDto>> Handle(GetAuditsQuery q, CancellationToken ct)
+    public async Task<Contracts.Common.PagedResponse<AuditListItemDto>> Handle(GetAuditsQuery q, CancellationToken ct)
     {
         var query = db.Audits.AsNoTracking();
 
@@ -19,13 +21,13 @@ public sealed class GetAuditsHandler(IAppDbContext db)
             query = query.Where(a => a.Status.ToString() == q.Status);
         }
 
+        // API-004: pagination envelope — no silent cap; the client sees the total.
         return await query
             .OrderByDescending(a => a.PlannedDate)
-            .Take(500)
             .Select(a => new AuditListItemDto(
                 a.Id, a.AuditRef, a.Title, a.Type.ToString(), a.Status.ToString(),
                 a.LeadAuditorId, a.PlannedDate, a.CreatedAtUtc, a.BranchId, a.DepartmentId))
-            .ToListAsync(ct);
+            .ToPagedAsync(PageRequest.Normalized(q.Page, q.PageSize), ct);
     }
 }
 

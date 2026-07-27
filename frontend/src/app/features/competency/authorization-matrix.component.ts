@@ -210,7 +210,7 @@ export class AuthorizationMatrixComponent implements OnInit {
       this.form.controls.competencyRecordId.setValue('');
       if (!userId) { this.evidence.set([]); return; }
       void firstValueFrom(this.competencyApi.listCompetencies(userId, 'Authorized'))
-        .then((records) => this.evidence.set(records))
+        .then((records) => this.evidence.set(records.items))
         .catch(() => this.evidence.set([]));
     });
   }

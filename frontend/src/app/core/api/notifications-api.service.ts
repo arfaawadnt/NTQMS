@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   CreatedResource, DispatchMonitorItem, NotificationFeedItem, NotificationRule,
-  UpsertNotificationRuleRequest,
+  Paged, UpsertNotificationRuleRequest,
 } from '../models';
 
 /**
@@ -16,8 +16,8 @@ export class NotificationsApiService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiBaseUrl}/notifications`;
 
-  mine(unreadOnly = false): Observable<NotificationFeedItem[]> {
-    return this.http.get<NotificationFeedItem[]>(`${this.base}/mine?unreadOnly=${unreadOnly}`);
+  mine(unreadOnly = false): Observable<Paged<NotificationFeedItem>> {
+    return this.http.get<Paged<NotificationFeedItem>>(`${this.base}/mine?unreadOnly=${unreadOnly}`);
   }
 
   markRead(id: string): Observable<void> {
@@ -32,9 +32,9 @@ export class NotificationsApiService {
     return this.http.post<CreatedResource>(`${this.base}/rules`, body);
   }
 
-  monitor(status?: string): Observable<DispatchMonitorItem[]> {
+  monitor(status?: string): Observable<Paged<DispatchMonitorItem>> {
     let params = new HttpParams();
     if (status) { params = params.set('status', status); }
-    return this.http.get<DispatchMonitorItem[]>(`${this.base}/monitor`, { params });
+    return this.http.get<Paged<DispatchMonitorItem>>(`${this.base}/monitor`, { params });
   }
 }

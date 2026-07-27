@@ -204,6 +204,9 @@ export interface NotificationFeedItem {
 /** Server identifier envelope returned by create endpoints (e.g. { id }). */
 export interface CreatedResource { id: string; }
 
+/** Pagination envelope returned by list endpoints; mirrors the backend PagedResponse (EA finding API-004). */
+export interface Paged<T> { items: T[]; total: number; page: number; pageSize: number; hasMore: boolean; }
+
 // ── Document Control ─────────────────────────────────────────────────────────
 
 /** Semantic-version bump kinds accepted by the backend for a new document version. */

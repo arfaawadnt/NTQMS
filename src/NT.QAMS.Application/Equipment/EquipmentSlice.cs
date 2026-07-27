@@ -154,12 +154,14 @@ public sealed class RecordIntermediateCheckHandler(IAppDbContext db, ICurrentUse
 
 // â”€â”€ Queries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-public sealed record GetEquipmentQuery(string? Status = null) : IQuery<IReadOnlyList<EquipmentListItemDto>>;
+public sealed record GetEquipmentQuery(
+    string? Status = null, int Page = 1, int PageSize = PageRequest.DefaultPageSize)
+    : IQuery<Contracts.Common.PagedResponse<EquipmentListItemDto>>;
 
 public sealed class GetEquipmentHandler(IAppDbContext db)
-    : IQueryHandler<GetEquipmentQuery, IReadOnlyList<EquipmentListItemDto>>
+    : IQueryHandler<GetEquipmentQuery, Contracts.Common.PagedResponse<EquipmentListItemDto>>
 {
-    public async Task<IReadOnlyList<EquipmentListItemDto>> Handle(GetEquipmentQuery q, CancellationToken ct)
+    public async Task<Contracts.Common.PagedResponse<EquipmentListItemDto>> Handle(GetEquipmentQuery q, CancellationToken ct)
     {
         var query = db.EquipmentItems.AsNoTracking();
         if (!string.IsNullOrWhiteSpace(q.Status))
@@ -167,13 +169,13 @@ public sealed class GetEquipmentHandler(IAppDbContext db)
             query = query.Where(e => e.Status.ToString() == q.Status);
         }
 
+        // API-004: pagination envelope — no silent cap; the client sees the total.
         return await query
             .OrderBy(e => e.Code)
-            .Take(500)
             .Select(e => new EquipmentListItemDto(
                 e.Id, e.Code, e.Name, e.SerialNumber, e.Location,
                 e.Status.ToString(), e.NextCalibrationDue, e.BranchId, e.DepartmentId))
-            .ToListAsync(ct);
+            .ToPagedAsync(PageRequest.Normalized(q.Page, q.PageSize), ct);
     }
 }
 

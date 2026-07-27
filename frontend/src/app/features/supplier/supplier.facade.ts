@@ -20,12 +20,18 @@ export class SupplierFacade {
   private readonly files = inject(FilesApiService);
 
   private readonly _list = signal<SupplierListItem[]>([]);
+  private readonly _total = signal(0);
+  private readonly _hasMore = signal(false);
   private readonly _selected = signal<SupplierDetail | null>(null);
   private readonly _evaluations = signal<SupplierEvaluation[]>([]);
   private readonly _loading = signal(false);
   private readonly _error = signal('');
 
   readonly list = this._list.asReadonly();
+  /** Total matching records on the server (pagination envelope, API-004). */
+  readonly total = this._total.asReadonly();
+  /** True when more pages exist beyond the loaded slice. */
+  readonly hasMore = this._hasMore.asReadonly();
   readonly selected = this._selected.asReadonly();
   readonly evaluations = this._evaluations.asReadonly();
   readonly loading = this._loading.asReadonly();
@@ -34,7 +40,12 @@ export class SupplierFacade {
   downloadUrl(fileId: string): string { return this.files.downloadUrl(fileId); }
 
   async loadList(status?: string): Promise<void> {
-    await this.run(async () => this._list.set(await firstValueFrom(this.api.list(status))));
+    await this.run(async () => {
+      const page = await firstValueFrom(this.api.list(status));
+      this._list.set(page.items);
+      this._total.set(page.total);
+      this._hasMore.set(page.hasMore);
+    });
   }
 
   /** Loads the supplier and its evaluation history together. */

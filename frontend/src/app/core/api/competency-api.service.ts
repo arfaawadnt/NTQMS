@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   AssignCompetencyRequest, AssignTrainingRequest, CompetencyDetail, CompetencyListItem,
-  CreatedResource, RevokeCompetencyRequest, ScoreAssessmentRequest, TrainingAssignment,
+  CreatedResource, Paged, RevokeCompetencyRequest, ScoreAssessmentRequest, TrainingAssignment,
 } from '../models';
 
 /**
@@ -18,11 +18,11 @@ export class CompetencyApiService {
   private readonly competencies = `${environment.apiBaseUrl}/competencies`;
   private readonly training = `${environment.apiBaseUrl}/training-assignments`;
 
-  listCompetencies(traineeId?: string, status?: string): Observable<CompetencyListItem[]> {
+  listCompetencies(traineeId?: string, status?: string): Observable<Paged<CompetencyListItem>> {
     let params = new HttpParams();
     if (traineeId) { params = params.set('traineeId', traineeId); }
     if (status) { params = params.set('status', status); }
-    return this.http.get<CompetencyListItem[]>(this.competencies, { params });
+    return this.http.get<Paged<CompetencyListItem>>(this.competencies, { params });
   }
 
   getCompetency(id: string): Observable<CompetencyDetail> {
@@ -45,10 +45,10 @@ export class CompetencyApiService {
     return this.http.post<void>(`${this.competencies}/${id}/revoke`, body);
   }
 
-  listTraining(traineeId?: string, includeCompleted = false): Observable<TrainingAssignment[]> {
+  listTraining(traineeId?: string, includeCompleted = false): Observable<Paged<TrainingAssignment>> {
     let params = new HttpParams().set('includeCompleted', includeCompleted);
     if (traineeId) { params = params.set('traineeId', traineeId); }
-    return this.http.get<TrainingAssignment[]>(this.training, { params });
+    return this.http.get<Paged<TrainingAssignment>>(this.training, { params });
   }
 
   assignTraining(body: AssignTrainingRequest): Observable<CreatedResource> {

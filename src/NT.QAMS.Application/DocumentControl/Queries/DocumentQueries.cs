@@ -6,13 +6,15 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.DocumentControl.Queries;
 
-public sealed record GetDocumentsQuery(string? Status = null, string? Search = null)
-    : IQuery<IReadOnlyList<DocumentListItemDto>>;
+public sealed record GetDocumentsQuery(
+    string? Status = null, string? Search = null,
+    int Page = 1, int PageSize = PageRequest.DefaultPageSize)
+    : IQuery<Contracts.Common.PagedResponse<DocumentListItemDto>>;
 
 public sealed class GetDocumentsHandler(IAppDbContext db)
-    : IQueryHandler<GetDocumentsQuery, IReadOnlyList<DocumentListItemDto>>
+    : IQueryHandler<GetDocumentsQuery, Contracts.Common.PagedResponse<DocumentListItemDto>>
 {
-    public async Task<IReadOnlyList<DocumentListItemDto>> Handle(GetDocumentsQuery q, CancellationToken ct)
+    public async Task<Contracts.Common.PagedResponse<DocumentListItemDto>> Handle(GetDocumentsQuery q, CancellationToken ct)
     {
         var query = db.Documents.AsNoTracking();
 
@@ -27,9 +29,9 @@ public sealed class GetDocumentsHandler(IAppDbContext db)
             query = query.Where(d => d.Title.Contains(term) || d.Code.Contains(term));
         }
 
+        // API-004: pagination envelope — no silent cap; the client sees the total.
         return await query
             .OrderBy(d => d.Code)
-            .Take(500)
             .Select(d => new DocumentListItemDto(
                 d.Id, d.Code, d.Title, d.Category, d.Status.ToString(),
                 d.Versions
@@ -37,7 +39,7 @@ public sealed class GetDocumentsHandler(IAppDbContext db)
                     .Select(v => v.Major + "." + v.Minor)
                     .FirstOrDefault(),
                 d.CreatedAtUtc))
-            .ToListAsync(ct);
+            .ToPagedAsync(PageRequest.Normalized(q.Page, q.PageSize), ct);
     }
 }
 

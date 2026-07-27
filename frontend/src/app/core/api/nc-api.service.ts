@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
-  ConfirmEffectivenessRequest, CreatedResource, NcDetail, NcListItem,
+  ConfirmEffectivenessRequest, CreatedResource, NcDetail, NcListItem, Paged,
   PlanCapaActionRequest, RaiseNcRequest, RecordRcaRequest, RejectNcRequest,
   TriageNcRequest, VerifyNcRequest,
 } from '../models';
@@ -18,12 +18,12 @@ export class NcApiService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiBaseUrl}/nonconformances`;
 
-  list(status?: string, search?: string): Observable<NcListItem[]> {
+  list(status?: string, search?: string): Observable<Paged<NcListItem>> {
     const params = new URLSearchParams();
     if (status) { params.set('status', status); }
     if (search) { params.set('search', search); }
     const query = params.toString();
-    return this.http.get<NcListItem[]>(query ? `${this.base}?${query}` : this.base);
+    return this.http.get<Paged<NcListItem>>(query ? `${this.base}?${query}` : this.base);
   }
 
   getById(id: string): Observable<NcDetail> {

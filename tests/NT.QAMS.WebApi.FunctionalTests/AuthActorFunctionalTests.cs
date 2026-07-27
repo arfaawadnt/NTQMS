@@ -218,8 +218,9 @@ public sealed class AuthActorFunctionalTests(QamsWebAppFactory factory)
         created!.id.Should().NotBe(Guid.Empty);
 
         // 5. It is persisted and tenant-scoped (the stamp interceptor ran).
-        var list = await tenant.GetFromJsonAsync<List<Dictionary<string, object>>>("/api/nonconformances");
-        list.Should().NotBeNull();
-        list!.Should().HaveCountGreaterThanOrEqualTo(1);
+        //    API-004: list endpoints answer with the pagination envelope.
+        var list = await tenant.GetFromJsonAsync<System.Text.Json.JsonElement>("/api/nonconformances");
+        list.GetProperty("items").GetArrayLength().Should().BeGreaterThanOrEqualTo(1);
+        list.GetProperty("total").GetInt32().Should().BeGreaterThanOrEqualTo(1);
     }
 }

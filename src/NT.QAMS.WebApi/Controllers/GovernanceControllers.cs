@@ -13,8 +13,11 @@ namespace NT.QAMS.WebApi.Controllers;
 public sealed class RisksController(ISender sender) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> List([FromQuery] string? status, CancellationToken ct) =>
-        Ok(await sender.Send(new GetRisksQuery(status), ct));
+    public async Task<IActionResult> List(
+        [FromQuery] string? status,
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 50,
+        CancellationToken ct = default) =>
+        Ok(await sender.Send(new GetRisksQuery(status, page, pageSize), ct));
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct) =>
@@ -64,8 +67,11 @@ public sealed class RisksController(ISender sender) : ControllerBase
 public sealed class ChangeRequestsController(ISender sender) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> List([FromQuery] string? status, CancellationToken ct) =>
-        Ok(await sender.Send(new GetChangesQuery(status), ct));
+    public async Task<IActionResult> List(
+        [FromQuery] string? status,
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 50,
+        CancellationToken ct = default) =>
+        Ok(await sender.Send(new GetChangesQuery(status, page, pageSize), ct));
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct) =>
@@ -125,8 +131,10 @@ public sealed class ChangeRequestsController(ISender sender) : ControllerBase
 public sealed class ManagementReviewsController(ISender sender) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> List(CancellationToken ct) =>
-        Ok(await sender.Send(new GetReviewsQuery(), ct));
+    public async Task<IActionResult> List(
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 50,
+        CancellationToken ct = default) =>
+        Ok(await sender.Send(new GetReviewsQuery(page, pageSize), ct));
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct) =>
@@ -163,8 +171,11 @@ public sealed class ManagementReviewsController(ISender sender) : ControllerBase
 public sealed class SuppliersController(ISender sender) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> List([FromQuery] string? status, CancellationToken ct) =>
-        Ok(await sender.Send(new GetSuppliersQuery(status), ct));
+    public async Task<IActionResult> List(
+        [FromQuery] string? status,
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 50,
+        CancellationToken ct = default) =>
+        Ok(await sender.Send(new GetSuppliersQuery(status, page, pageSize), ct));
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct) =>

@@ -85,8 +85,9 @@ public sealed class IdempotencyTests(QamsWebAppFactory factory)
         var secondId = (await second.Content.ReadFromJsonAsync<IdResponse>())!.id;
         secondId.Should().Be(firstId, "the retry replays the first execution's response");
 
-        var list = await client.GetFromJsonAsync<List<Dictionary<string, object>>>("/api/nonconformances");
-        list!.Count(nc => nc["title"].ToString() == "Duplicate-submit guard")
+        var list = await client.GetFromJsonAsync<System.Text.Json.JsonElement>("/api/nonconformances");
+        list.GetProperty("items").EnumerateArray()
+            .Count(nc => nc.GetProperty("title").GetString() == "Duplicate-submit guard")
             .Should().Be(1, "exactly one NC exists despite two submits");
     }
 }

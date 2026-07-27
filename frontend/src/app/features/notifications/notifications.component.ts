@@ -60,7 +60,7 @@ export class NotificationsComponent implements OnInit {
   private async load(): Promise<void> {
     this.loading.set(true);
     try {
-      this.items.set(await firstValueFrom(this.api.mine()));
+      this.items.set((await firstValueFrom(this.api.mine())).items);
     } finally {
       this.loading.set(false);
     }

@@ -21,8 +21,10 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> List(
-        [FromQuery] string? status, [FromQuery] string? search, CancellationToken ct) =>
-        Ok(await sender.Send(new GetDocumentsQuery(status, search), ct));
+        [FromQuery] string? status, [FromQuery] string? search,
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 50,
+        CancellationToken ct = default) =>
+        Ok(await sender.Send(new GetDocumentsQuery(status, search, page, pageSize), ct));
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct) =>

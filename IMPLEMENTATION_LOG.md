@@ -435,3 +435,46 @@ cross-tenant denial functional test suite (merge gate from day one).
   probes exempt ✓.
 - **Phases 0–3 complete → every production blocker from the EA audit is
   cleared; the release condition is now unconditional.**
+
+## EA Remediation Phase 4 (v1.42.0, 2026-07-28) ✅ — API & application-pipeline polish
+
+- **API-003 — one error contract.** ProblemResponse is the single writer:
+  RFC 7807 + application/problem+json + stable `code` + traceId/correlationId
+  on EVERY path — ActiveSession/ChangeReason/MfaGate middlewares dropped their
+  anonymous-object shapes; DomainExceptionHandler (incl. the CONCURRENCY-409)
+  routes through it. Contract locked by ProblemContractTests.
+- **API-005 — file hardening.** FileContentPolicy: evidence extension
+  allow-list + magic-byte sniffing (renamed executables fail), text formats
+  refuse binary, and the STORED content type is the canonical sniffed one —
+  the client's claim is never trusted. 422 FILE-415 on refusal; downloads
+  remain Content-Disposition: attachment. Proven over the real pipeline.
+- **API-001 — versioning (ADR-0004).** Asp.Versioning.Mvc 8.1: one central
+  VersionedRouteConvention adds api/v1/... beside every literal api/... route
+  (41 controllers untouched, implicitly v1.0); legacy paths serve the default
+  version; supported versions reported; unsupported versions refused.
+  Contract-evolution policy in ADR-0004.
+- **CQRS-003 — deny-by-default command authorization.** Every one of the 211
+  commands carries exactly one policy marker: [RequireInternalActor] (write
+  default — the read-only ExternalAuditor can no longer invoke ungated write
+  commands), [RequireAuthenticatedActor] (self-service MFA/PIN),
+  [AllowUnauthenticated] (login/password rotation), [RequireRole] (tenant
+  provisioning → PlatformAdmin; e-sign publish → QM/TenantAdmin).
+  AuthorizationBehavior fails closed (AUTHZ-000/001/002); ICurrentUser now
+  carries the token role; an architecture test makes a missing policy a CI
+  failure.
+- **CQRS-004 — Idempotency-Key replay protection.** Opt-in per request: first
+  execution's response stored per (actor, key, command type) in
+  qams.idempotency_record (24h retention, purged in the outbox cycle, DELETE
+  grant scoped); a retry replays the stored response — the double-submit nets
+  exactly one NC (proven end-to-end).
+- **API-004 — pagination envelope.** All 14 silently-capped list queries
+  (13× Take(500) + the notifications feed's Take(200)) now return
+  PagedResponse{items,total,page,pageSize,hasMore} with clamped page size
+  (max 200) and stable ordering; controllers accept page/pageSize. The
+  Part 11 NC-register export walks EVERY page (no truncation). Frontend:
+  Paged<T> model, 13 api-service methods, 12 facades unwrap + expose
+  total/hasMore signals (pager UI is a UX follow-up — the contract and
+  plumbing are done). Boundary/navigation/clamp functional tests.
+- Migration Phase4IdempotencyRecords. Suite: **330 backend green, 0 skipped**
+  (was 301) + 37 frontend unit + 3 Playwright e2e (live against the running
+  API). Live: envelope on legacy + api/v1 routes with true totals ✓.

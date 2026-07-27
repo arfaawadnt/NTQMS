@@ -123,13 +123,15 @@ public sealed class CompleteTrainingHandler(IAppDbContext db, IClock clock)
 
 // â”€â”€ Queries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-public sealed record GetCompetenciesQuery(Guid? TraineeId = null, string? Status = null)
-    : IQuery<IReadOnlyList<CompetencyListItemDto>>;
+public sealed record GetCompetenciesQuery(
+    Guid? TraineeId = null, string? Status = null,
+    int Page = 1, int PageSize = PageRequest.DefaultPageSize)
+    : IQuery<Contracts.Common.PagedResponse<CompetencyListItemDto>>;
 
 public sealed class GetCompetenciesHandler(IAppDbContext db)
-    : IQueryHandler<GetCompetenciesQuery, IReadOnlyList<CompetencyListItemDto>>
+    : IQueryHandler<GetCompetenciesQuery, Contracts.Common.PagedResponse<CompetencyListItemDto>>
 {
-    public async Task<IReadOnlyList<CompetencyListItemDto>> Handle(
+    public async Task<Contracts.Common.PagedResponse<CompetencyListItemDto>> Handle(
         GetCompetenciesQuery q, CancellationToken ct)
     {
         var query = db.Competencies.AsNoTracking();
@@ -143,12 +145,12 @@ public sealed class GetCompetenciesHandler(IAppDbContext db)
             query = query.Where(x => x.Status.ToString() == q.Status);
         }
 
+        // API-004: pagination envelope — no silent cap; the client sees the total.
         return await query
             .OrderBy(x => x.Subject)
-            .Take(500)
             .Select(x => new CompetencyListItemDto(
                 x.Id, x.TraineeId, x.Subject, x.Status.ToString(), x.ExpiresAt))
-            .ToListAsync(ct);
+            .ToPagedAsync(PageRequest.Normalized(q.Page, q.PageSize), ct);
     }
 }
 
@@ -174,13 +176,15 @@ public sealed class GetCompetencyByIdHandler(IAppDbContext db)
     }
 }
 
-public sealed record GetTrainingQueueQuery(Guid? TraineeId = null, bool IncludeCompleted = false)
-    : IQuery<IReadOnlyList<TrainingAssignmentDto>>;
+public sealed record GetTrainingQueueQuery(
+    Guid? TraineeId = null, bool IncludeCompleted = false,
+    int Page = 1, int PageSize = PageRequest.DefaultPageSize)
+    : IQuery<Contracts.Common.PagedResponse<TrainingAssignmentDto>>;
 
 public sealed class GetTrainingQueueHandler(IAppDbContext db)
-    : IQueryHandler<GetTrainingQueueQuery, IReadOnlyList<TrainingAssignmentDto>>
+    : IQueryHandler<GetTrainingQueueQuery, Contracts.Common.PagedResponse<TrainingAssignmentDto>>
 {
-    public async Task<IReadOnlyList<TrainingAssignmentDto>> Handle(
+    public async Task<Contracts.Common.PagedResponse<TrainingAssignmentDto>> Handle(
         GetTrainingQueueQuery q, CancellationToken ct)
     {
         var query = db.TrainingAssignments.AsNoTracking();
@@ -194,11 +198,11 @@ public sealed class GetTrainingQueueHandler(IAppDbContext db)
             query = query.Where(t => !t.Completed);
         }
 
+        // API-004: pagination envelope — no silent cap; the client sees the total.
         return await query
             .OrderBy(t => t.DueDate)
-            .Take(500)
             .Select(t => new TrainingAssignmentDto(
                 t.Id, t.TraineeId, t.Subject, t.DocumentId, t.DueDate, t.Completed, t.CompletedAtUtc))
-            .ToListAsync(ct);
+            .ToPagedAsync(PageRequest.Normalized(q.Page, q.PageSize), ct);
     }
 }

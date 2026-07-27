@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
-  AddCertificateRequest, CreatedResource, RecordEvaluationRequest, RegisterSupplierRequest,
+  AddCertificateRequest, CreatedResource, Paged, RecordEvaluationRequest, RegisterSupplierRequest,
   SupplierDetail, SupplierEvaluation, SupplierListItem, SuspendSupplierRequest,
 } from '../models';
 
@@ -13,10 +13,10 @@ export class SuppliersApiService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiBaseUrl}/suppliers`;
 
-  list(status?: string): Observable<SupplierListItem[]> {
+  list(status?: string): Observable<Paged<SupplierListItem>> {
     let params = new HttpParams();
     if (status) { params = params.set('status', status); }
-    return this.http.get<SupplierListItem[]>(this.base, { params });
+    return this.http.get<Paged<SupplierListItem>>(this.base, { params });
   }
 
   getById(id: string): Observable<SupplierDetail> {

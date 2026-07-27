@@ -105,12 +105,14 @@ public sealed class CloseRiskHandler(IAppDbContext db) : ICommandHandler<CloseRi
     }
 }
 
-public sealed record GetRisksQuery(string? Status = null) : IQuery<IReadOnlyList<RiskListItemDto>>;
+public sealed record GetRisksQuery(
+    string? Status = null, int Page = 1, int PageSize = PageRequest.DefaultPageSize)
+    : IQuery<Contracts.Common.PagedResponse<RiskListItemDto>>;
 
 public sealed class GetRisksHandler(IAppDbContext db)
-    : IQueryHandler<GetRisksQuery, IReadOnlyList<RiskListItemDto>>
+    : IQueryHandler<GetRisksQuery, Contracts.Common.PagedResponse<RiskListItemDto>>
 {
-    public async Task<IReadOnlyList<RiskListItemDto>> Handle(GetRisksQuery q, CancellationToken ct)
+    public async Task<Contracts.Common.PagedResponse<RiskListItemDto>> Handle(GetRisksQuery q, CancellationToken ct)
     {
         var query = db.Risks.AsNoTracking();
         if (!string.IsNullOrWhiteSpace(q.Status))
@@ -118,12 +120,12 @@ public sealed class GetRisksHandler(IAppDbContext db)
             query = query.Where(r => r.Status.ToString() == q.Status);
         }
 
+        // API-004: pagination envelope — no silent cap; the client sees the total.
         return await query
             .OrderByDescending(r => r.Rpn)
-            .Take(500)
             .Select(r => new RiskListItemDto(
                 r.Id, r.RiskRef, r.Title, r.Category, r.Status.ToString(), r.Rpn, r.ResidualRpn, r.BranchId, r.DepartmentId))
-            .ToListAsync(ct);
+            .ToPagedAsync(PageRequest.Normalized(q.Page, q.PageSize), ct);
     }
 }
 
@@ -256,12 +258,14 @@ public sealed class ReviewChangeHandler(IAppDbContext db, ICurrentUser user, ICl
     }
 }
 
-public sealed record GetChangesQuery(string? Status = null) : IQuery<IReadOnlyList<ChangeListItemDto>>;
+public sealed record GetChangesQuery(
+    string? Status = null, int Page = 1, int PageSize = PageRequest.DefaultPageSize)
+    : IQuery<Contracts.Common.PagedResponse<ChangeListItemDto>>;
 
 public sealed class GetChangesHandler(IAppDbContext db)
-    : IQueryHandler<GetChangesQuery, IReadOnlyList<ChangeListItemDto>>
+    : IQueryHandler<GetChangesQuery, Contracts.Common.PagedResponse<ChangeListItemDto>>
 {
-    public async Task<IReadOnlyList<ChangeListItemDto>> Handle(GetChangesQuery q, CancellationToken ct)
+    public async Task<Contracts.Common.PagedResponse<ChangeListItemDto>> Handle(GetChangesQuery q, CancellationToken ct)
     {
         var query = db.ChangeRequests.AsNoTracking();
         if (!string.IsNullOrWhiteSpace(q.Status))
@@ -269,11 +273,11 @@ public sealed class GetChangesHandler(IAppDbContext db)
             query = query.Where(x => x.Status.ToString() == q.Status);
         }
 
+        // API-004: pagination envelope — no silent cap; the client sees the total.
         return await query
             .OrderByDescending(x => x.CreatedAtUtc)
-            .Take(500)
             .Select(x => new ChangeListItemDto(x.Id, x.ChangeRef, x.Title, x.Status.ToString(), x.RiskItemId, x.BranchId, x.DepartmentId))
-            .ToListAsync(ct);
+            .ToPagedAsync(PageRequest.Normalized(q.Page, q.PageSize), ct);
     }
 }
 
@@ -351,18 +355,19 @@ public sealed class CloseReviewHandler(IAppDbContext db, ICurrentUser user)
     }
 }
 
-public sealed record GetReviewsQuery : IQuery<IReadOnlyList<ReviewListItemDto>>;
+public sealed record GetReviewsQuery(int Page = 1, int PageSize = PageRequest.DefaultPageSize)
+    : IQuery<Contracts.Common.PagedResponse<ReviewListItemDto>>;
 
 public sealed class GetReviewsHandler(IAppDbContext db)
-    : IQueryHandler<GetReviewsQuery, IReadOnlyList<ReviewListItemDto>>
+    : IQueryHandler<GetReviewsQuery, Contracts.Common.PagedResponse<ReviewListItemDto>>
 {
-    public async Task<IReadOnlyList<ReviewListItemDto>> Handle(GetReviewsQuery q, CancellationToken ct) =>
+    // API-004: pagination envelope — no silent cap; the client sees the total.
+    public async Task<Contracts.Common.PagedResponse<ReviewListItemDto>> Handle(GetReviewsQuery q, CancellationToken ct) =>
         await db.ManagementReviews.AsNoTracking()
             .OrderByDescending(r => r.ReviewDate)
-            .Take(500)
             .Select(r => new ReviewListItemDto(
                 r.Id, r.ReviewRef, r.Title, r.ReviewDate, r.Status.ToString(), r.Decisions.Count, r.BranchId, r.DepartmentId))
-            .ToListAsync(ct);
+            .ToPagedAsync(PageRequest.Normalized(q.Page, q.PageSize), ct);
 }
 
 public sealed record GetReviewByIdQuery(Guid ReviewId) : IQuery<ReviewDetailDto>;

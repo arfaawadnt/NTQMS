@@ -93,8 +93,10 @@ public sealed class LovsController(ISender sender) : ControllerBase
 public sealed class NotificationsController(ISender sender) : ControllerBase
 {
     [HttpGet("mine")]
-    public async Task<IActionResult> Mine([FromQuery] bool unreadOnly, CancellationToken ct) =>
-        Ok(await sender.Send(new GetMyNotificationsQuery(unreadOnly), ct));
+    public async Task<IActionResult> Mine(
+        [FromQuery] bool unreadOnly, [FromQuery] int page = 1, [FromQuery] int pageSize = 50,
+        CancellationToken ct = default) =>
+        Ok(await sender.Send(new GetMyNotificationsQuery(unreadOnly, page, pageSize), ct));
 
     [HttpPost("{id:guid}/read")]
     public async Task<IActionResult> MarkRead(Guid id, CancellationToken ct)
@@ -117,6 +119,9 @@ public sealed class NotificationsController(ISender sender) : ControllerBase
 
     [HttpGet("monitor")]
     [Authorize(Roles = Roles.QmOrAdmin)]
-    public async Task<IActionResult> Monitor([FromQuery] string? status, CancellationToken ct) =>
-        Ok(await sender.Send(new GetDispatchMonitorQuery(status), ct));
+    public async Task<IActionResult> Monitor(
+        [FromQuery] string? status,
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 50,
+        CancellationToken ct = default) =>
+        Ok(await sender.Send(new GetDispatchMonitorQuery(status, page, pageSize), ct));
 }

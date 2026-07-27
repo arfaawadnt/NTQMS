@@ -103,12 +103,14 @@ public sealed class RecordEvaluationHandler(IAppDbContext db, ICurrentUser user)
     }
 }
 
-public sealed record GetSuppliersQuery(string? Status = null) : IQuery<IReadOnlyList<SupplierListItemDto>>;
+public sealed record GetSuppliersQuery(
+    string? Status = null, int Page = 1, int PageSize = PageRequest.DefaultPageSize)
+    : IQuery<Contracts.Common.PagedResponse<SupplierListItemDto>>;
 
 public sealed class GetSuppliersHandler(IAppDbContext db)
-    : IQueryHandler<GetSuppliersQuery, IReadOnlyList<SupplierListItemDto>>
+    : IQueryHandler<GetSuppliersQuery, Contracts.Common.PagedResponse<SupplierListItemDto>>
 {
-    public async Task<IReadOnlyList<SupplierListItemDto>> Handle(GetSuppliersQuery q, CancellationToken ct)
+    public async Task<Contracts.Common.PagedResponse<SupplierListItemDto>> Handle(GetSuppliersQuery q, CancellationToken ct)
     {
         var query = db.Suppliers.AsNoTracking();
         if (!string.IsNullOrWhiteSpace(q.Status))
@@ -116,12 +118,12 @@ public sealed class GetSuppliersHandler(IAppDbContext db)
             query = query.Where(s => s.Status.ToString() == q.Status);
         }
 
+        // API-004: pagination envelope — no silent cap; the client sees the total.
         return await query
             .OrderBy(s => s.Name)
-            .Take(500)
             .Select(s => new SupplierListItemDto(
                 s.Id, s.SupplierRef, s.Name, s.SupplierType, s.Status.ToString(), s.BranchId, s.DepartmentId))
-            .ToListAsync(ct);
+            .ToPagedAsync(PageRequest.Normalized(q.Page, q.PageSize), ct);
     }
 }
 

@@ -3,7 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, firstValueFrom } from 'rxjs';
 import { ArchivesApiService } from '../../core/api/archives-api.service';
 import { FilesApiService } from '../../core/api/files-api.service';
-import { ArchiveListItem, RetentionClass } from '../../core/models';
+import { ArchiveListItem, Paged, RetentionClass } from '../../core/models';
 
 /**
  * Signal store for Records & Retention: the archive register and its
@@ -17,18 +17,24 @@ export class RecordsFacade {
   private readonly files = inject(FilesApiService);
 
   private readonly _list = signal<ArchiveListItem[]>([]);
+  private readonly _total = signal(0);
+  private readonly _hasMore = signal(false);
   private readonly _loading = signal(false);
   private readonly _error = signal('');
   /** Active state filter, reused to refresh the list after every mutation. */
   private stateFilter?: string;
 
   readonly list = this._list.asReadonly();
+  /** Total matching records on the server (pagination envelope, API-004). */
+  readonly total = this._total.asReadonly();
+  /** True when more pages exist beyond the loaded slice. */
+  readonly hasMore = this._hasMore.asReadonly();
   readonly loading = this._loading.asReadonly();
   readonly error = this._error.asReadonly();
 
   async loadList(state?: string): Promise<void> {
     this.stateFilter = state;
-    await this.run(async () => this._list.set(await firstValueFrom(this.api.list(state))));
+    await this.run(async () => this.applyPage(await firstValueFrom(this.api.list(state))));
   }
 
   /**
@@ -44,7 +50,7 @@ export class RecordsFacade {
     return await this.run(async () => {
       const snapshotFileId = (await firstValueFrom(this.files.upload(snapshot))).id;
       await firstValueFrom(this.api.archive({ sourceModule, sourceRef, snapshotFileId, retentionClass }));
-      this._list.set(await firstValueFrom(this.api.list(this.stateFilter)));
+      this.applyPage(await firstValueFrom(this.api.list(this.stateFilter)));
       return true;
     }) ?? false;
   }
@@ -64,8 +70,15 @@ export class RecordsFacade {
   private async mutate(call: () => Observable<void>): Promise<void> {
     await this.run(async () => {
       await firstValueFrom(call());
-      this._list.set(await firstValueFrom(this.api.list(this.stateFilter)));
+      this.applyPage(await firstValueFrom(this.api.list(this.stateFilter)));
     });
+  }
+
+  /** Unwraps a pagination envelope into the list signals. */
+  private applyPage(page: Paged<ArchiveListItem>): void {
+    this._list.set(page.items);
+    this._total.set(page.total);
+    this._hasMore.set(page.hasMore);
   }
 
   private async run<T>(operation: () => Promise<T>): Promise<T | null> {

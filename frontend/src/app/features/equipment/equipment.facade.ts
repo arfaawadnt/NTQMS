@@ -15,11 +15,17 @@ export class EquipmentFacade {
   private readonly files = inject(FilesApiService);
 
   private readonly _list = signal<EquipmentListItem[]>([]);
+  private readonly _total = signal(0);
+  private readonly _hasMore = signal(false);
   private readonly _selected = signal<EquipmentDetail | null>(null);
   private readonly _loading = signal(false);
   private readonly _error = signal('');
 
   readonly list = this._list.asReadonly();
+  /** Total matching records on the server (pagination envelope, API-004). */
+  readonly total = this._total.asReadonly();
+  /** True when more pages exist beyond the loaded slice. */
+  readonly hasMore = this._hasMore.asReadonly();
   readonly selected = this._selected.asReadonly();
   readonly loading = this._loading.asReadonly();
   readonly error = this._error.asReadonly();
@@ -27,7 +33,12 @@ export class EquipmentFacade {
   downloadUrl(fileId: string): string { return this.files.downloadUrl(fileId); }
 
   async loadList(status?: string): Promise<void> {
-    await this.run(async () => this._list.set(await firstValueFrom(this.api.list(status))));
+    await this.run(async () => {
+      const page = await firstValueFrom(this.api.list(status));
+      this._list.set(page.items);
+      this._total.set(page.total);
+      this._hasMore.set(page.hasMore);
+    });
   }
 
   async loadDetail(id: string): Promise<void> {

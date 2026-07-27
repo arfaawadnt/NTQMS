@@ -17,12 +17,18 @@ export class NcFacade {
   private readonly api = inject(NcApiService);
 
   private readonly _list = signal<NcListItem[]>([]);
+  private readonly _total = signal(0);
+  private readonly _hasMore = signal(false);
   private readonly _selected = signal<NcDetail | null>(null);
   private readonly _loading = signal(false);
   private readonly _error = signal('');
 
   /** Current nonconformance list (filtered server-side). */
   readonly list = this._list.asReadonly();
+  /** Total matching records on the server (pagination envelope, API-004). */
+  readonly total = this._total.asReadonly();
+  /** True when more pages exist beyond the loaded slice. */
+  readonly hasMore = this._hasMore.asReadonly();
   /** Currently loaded detail, or null. */
   readonly selected = this._selected.asReadonly();
   /** True while any request is in flight. */
@@ -38,7 +44,12 @@ export class NcFacade {
 
   /** Loads the list, optionally filtered by status/search text. */
   async loadList(status?: string, search?: string): Promise<void> {
-    await this.run(async () => this._list.set(await firstValueFrom(this.api.list(status, search))));
+    await this.run(async () => {
+      const page = await firstValueFrom(this.api.list(status, search));
+      this._list.set(page.items);
+      this._total.set(page.total);
+      this._hasMore.set(page.hasMore);
+    });
   }
 
   /** Loads a single nonconformance into `selected`. */

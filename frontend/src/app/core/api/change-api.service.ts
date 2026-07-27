@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   ChangeDetail, ChangeListItem, CloseChangeRequest, CreatedResource, LinkRiskRequest,
-  ProposeChangeRequest, RejectChangeRequest, ReviewChangeRequest,
+  Paged, ProposeChangeRequest, RejectChangeRequest, ReviewChangeRequest,
 } from '../models';
 
 /** Typed client for the Change Control API (one method per backend endpoint). */
@@ -13,10 +13,10 @@ export class ChangeApiService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiBaseUrl}/changes`;
 
-  list(status?: string): Observable<ChangeListItem[]> {
+  list(status?: string): Observable<Paged<ChangeListItem>> {
     let params = new HttpParams();
     if (status) { params = params.set('status', status); }
-    return this.http.get<ChangeListItem[]>(this.base, { params });
+    return this.http.get<Paged<ChangeListItem>>(this.base, { params });
   }
 
   getById(id: string): Observable<ChangeDetail> {

@@ -214,7 +214,7 @@ export class NotificationAdminComponent implements OnInit {
   }
 
   private async loadMonitor(): Promise<void> {
-    this.monitor.set(await firstValueFrom(this.api.monitor(this.statusFilter() || undefined)));
+    this.monitor.set((await firstValueFrom(this.api.monitor(this.statusFilter() || undefined))).items);
   }
 
   private describe(err: unknown): string {

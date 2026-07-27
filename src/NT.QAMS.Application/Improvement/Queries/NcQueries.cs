@@ -6,13 +6,15 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.Improvement.Queries;
 
-public sealed record GetNcsQuery(string? Status = null, string? Search = null, string? EventType = null)
-    : IQuery<IReadOnlyList<NcListItemDto>>;
+public sealed record GetNcsQuery(
+    string? Status = null, string? Search = null, string? EventType = null,
+    int Page = 1, int PageSize = PageRequest.DefaultPageSize)
+    : IQuery<Contracts.Common.PagedResponse<NcListItemDto>>;
 
 public sealed class GetNcsHandler(IAppDbContext db)
-    : IQueryHandler<GetNcsQuery, IReadOnlyList<NcListItemDto>>
+    : IQueryHandler<GetNcsQuery, Contracts.Common.PagedResponse<NcListItemDto>>
 {
-    public async Task<IReadOnlyList<NcListItemDto>> Handle(GetNcsQuery q, CancellationToken ct)
+    public async Task<Contracts.Common.PagedResponse<NcListItemDto>> Handle(GetNcsQuery q, CancellationToken ct)
     {
         var query = db.Nonconformances.AsNoTracking();
 
@@ -33,13 +35,13 @@ public sealed class GetNcsHandler(IAppDbContext db)
             query = query.Where(n => n.EventType == eventType);
         }
 
+        // API-004: pagination envelope — no silent cap; the client sees the total.
         return await query
             .OrderByDescending(n => n.CreatedAtUtc)
-            .Take(500)
             .Select(n => new NcListItemDto(
                 n.Id, n.NcRef, n.Title, n.Status.ToString(), n.Severity, n.Rpn,
                 n.SourceType.ToString(), n.CreatedAtUtc, n.EventType.ToString(), n.BranchId, n.DepartmentId))
-            .ToListAsync(ct);
+            .ToPagedAsync(PageRequest.Normalized(q.Page, q.PageSize), ct);
     }
 }
 

@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
-  AddMitigationRequest, AssessRiskRequest, CreatedResource, ResidualAssessmentRequest,
+  AddMitigationRequest, AssessRiskRequest, CreatedResource, Paged, ResidualAssessmentRequest,
   RiskDetail, RiskListItem,
 } from '../models';
 
@@ -13,10 +13,10 @@ export class RiskApiService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiBaseUrl}/risks`;
 
-  list(status?: string): Observable<RiskListItem[]> {
+  list(status?: string): Observable<Paged<RiskListItem>> {
     let params = new HttpParams();
     if (status) { params = params.set('status', status); }
-    return this.http.get<RiskListItem[]>(this.base, { params });
+    return this.http.get<Paged<RiskListItem>>(this.base, { params });
   }
 
   getById(id: string): Observable<RiskDetail> {

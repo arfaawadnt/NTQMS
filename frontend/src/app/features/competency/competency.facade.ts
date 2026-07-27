@@ -4,7 +4,7 @@ import { Observable, firstValueFrom } from 'rxjs';
 import { CompetencyApiService } from '../../core/api/competency-api.service';
 import {
   AssignCompetencyRequest, AssignTrainingRequest, CompetencyDetail, CompetencyListItem,
-  TrainingAssignment,
+  Paged, TrainingAssignment,
 } from '../../core/models';
 
 /**
@@ -17,19 +17,36 @@ export class CompetencyFacade {
   private readonly api = inject(CompetencyApiService);
 
   private readonly _list = signal<CompetencyListItem[]>([]);
+  private readonly _total = signal(0);
+  private readonly _hasMore = signal(false);
   private readonly _selected = signal<CompetencyDetail | null>(null);
   private readonly _training = signal<TrainingAssignment[]>([]);
+  private readonly _trainingTotal = signal(0);
+  private readonly _trainingHasMore = signal(false);
   private readonly _loading = signal(false);
   private readonly _error = signal('');
 
   readonly list = this._list.asReadonly();
+  /** Total matching competency records on the server (pagination envelope, API-004). */
+  readonly total = this._total.asReadonly();
+  /** True when more competency pages exist beyond the loaded slice. */
+  readonly hasMore = this._hasMore.asReadonly();
   readonly selected = this._selected.asReadonly();
   readonly training = this._training.asReadonly();
+  /** Total matching training assignments on the server (pagination envelope, API-004). */
+  readonly trainingTotal = this._trainingTotal.asReadonly();
+  /** True when more training pages exist beyond the loaded slice. */
+  readonly trainingHasMore = this._trainingHasMore.asReadonly();
   readonly loading = this._loading.asReadonly();
   readonly error = this._error.asReadonly();
 
   async loadList(status?: string): Promise<void> {
-    await this.run(async () => this._list.set(await firstValueFrom(this.api.listCompetencies(undefined, status))));
+    await this.run(async () => {
+      const page = await firstValueFrom(this.api.listCompetencies(undefined, status));
+      this._list.set(page.items);
+      this._total.set(page.total);
+      this._hasMore.set(page.hasMore);
+    });
   }
 
   async loadDetail(id: string): Promise<void> {
@@ -53,7 +70,7 @@ export class CompetencyFacade {
   }
 
   async loadTraining(includeCompleted: boolean): Promise<void> {
-    await this.run(async () => this._training.set(await firstValueFrom(this.api.listTraining(undefined, includeCompleted))));
+    await this.run(async () => this.applyTraining(await firstValueFrom(this.api.listTraining(undefined, includeCompleted))));
   }
 
   async assignTraining(request: AssignTrainingRequest): Promise<string | null> {
@@ -64,8 +81,15 @@ export class CompetencyFacade {
   async completeTraining(id: string, includeCompleted: boolean): Promise<void> {
     await this.run(async () => {
       await firstValueFrom(this.api.completeTraining(id));
-      this._training.set(await firstValueFrom(this.api.listTraining(undefined, includeCompleted)));
+      this.applyTraining(await firstValueFrom(this.api.listTraining(undefined, includeCompleted)));
     });
+  }
+
+  /** Unwraps a training-queue pagination envelope into the training signals. */
+  private applyTraining(page: Paged<TrainingAssignment>): void {
+    this._training.set(page.items);
+    this._trainingTotal.set(page.total);
+    this._trainingHasMore.set(page.hasMore);
   }
 
   private async mutate(id: string, call: () => Observable<void>): Promise<void> {

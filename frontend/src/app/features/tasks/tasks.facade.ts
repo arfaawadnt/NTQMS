@@ -2,7 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { TasksApiService } from '../../core/api/tasks-api.service';
-import { CreateTaskRequest, SlaDefinition, UpsertSlaRequest, WorkTask } from '../../core/models';
+import { CreateTaskRequest, Paged, SlaDefinition, UpsertSlaRequest, WorkTask } from '../../core/models';
 
 /**
  * Signal store for the work-task queue and SLA definitions. "My tasks" covers
@@ -14,23 +14,29 @@ export class TasksFacade {
   private readonly api = inject(TasksApiService);
 
   private readonly _tasks = signal<WorkTask[]>([]);
+  private readonly _total = signal(0);
+  private readonly _hasMore = signal(false);
   private readonly _sla = signal<SlaDefinition[]>([]);
   private readonly _loading = signal(false);
   private readonly _error = signal('');
 
   readonly tasks = this._tasks.asReadonly();
+  /** Total matching tasks on the server (pagination envelope, API-004). */
+  readonly total = this._total.asReadonly();
+  /** True when more pages exist beyond the loaded slice. */
+  readonly hasMore = this._hasMore.asReadonly();
   readonly sla = this._sla.asReadonly();
   readonly loading = this._loading.asReadonly();
   readonly error = this._error.asReadonly();
 
   async loadTasks(): Promise<void> {
-    await this.run(async () => this._tasks.set(await firstValueFrom(this.api.mine())));
+    await this.run(async () => this.applyPage(await firstValueFrom(this.api.mine())));
   }
 
   async createTask(request: CreateTaskRequest): Promise<boolean> {
     return await this.run(async () => {
       await firstValueFrom(this.api.create(request));
-      this._tasks.set(await firstValueFrom(this.api.mine()));
+      this.applyPage(await firstValueFrom(this.api.mine()));
       return true;
     }) ?? false;
   }
@@ -38,8 +44,15 @@ export class TasksFacade {
   async completeTask(id: string): Promise<void> {
     await this.run(async () => {
       await firstValueFrom(this.api.complete(id));
-      this._tasks.set(await firstValueFrom(this.api.mine()));
+      this.applyPage(await firstValueFrom(this.api.mine()));
     });
+  }
+
+  /** Unwraps a pagination envelope into the task signals. */
+  private applyPage(page: Paged<WorkTask>): void {
+    this._tasks.set(page.items);
+    this._total.set(page.total);
+    this._hasMore.set(page.hasMore);
   }
 
   async loadSla(): Promise<void> {

@@ -21,8 +21,9 @@ public sealed class NonconformancesController(ISender sender) : ControllerBase
     [HttpGet]
     public async Task<IActionResult> List(
         [FromQuery] string? status, [FromQuery] string? search, [FromQuery] string? eventType,
-        CancellationToken ct) =>
-        Ok(await sender.Send(new GetNcsQuery(status, search, eventType), ct));
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 50,
+        CancellationToken ct = default) =>
+        Ok(await sender.Send(new GetNcsQuery(status, search, eventType, page, pageSize), ct));
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct) =>

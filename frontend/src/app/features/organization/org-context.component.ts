@@ -223,7 +223,7 @@ export class OrgContextComponent implements OnInit {
 
   ngOnInit(): void {
     void this.load();
-    void firstValueFrom(this.riskApi.list()).then((r) => this.risks.set(r)).catch(() => this.risks.set([]));
+    void firstValueFrom(this.riskApi.list()).then((r) => this.risks.set(r.items)).catch(() => this.risks.set([]));
   }
 
   riskRef(id: string): string { return this.risks().find((r) => r.id === id)?.riskRef ?? id.slice(0, 8); }

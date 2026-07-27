@@ -14,8 +14,11 @@ namespace NT.QAMS.WebApi.Controllers;
 public sealed class AuditsController(ISender sender) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> List([FromQuery] string? status, CancellationToken ct) =>
-        Ok(await sender.Send(new GetAuditsQuery(status), ct));
+    public async Task<IActionResult> List(
+        [FromQuery] string? status,
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 50,
+        CancellationToken ct = default) =>
+        Ok(await sender.Send(new GetAuditsQuery(status, page, pageSize), ct));
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct) =>

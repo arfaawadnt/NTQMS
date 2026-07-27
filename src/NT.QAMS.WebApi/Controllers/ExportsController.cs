@@ -28,7 +28,17 @@ public sealed class ExportsController(
     [HttpGet("nonconformances.xlsx")]
     public async Task<IActionResult> NcRegister(CancellationToken ct)
     {
-        var items = await sender.Send(new GetNcsQuery(null), ct);
+        // Part 11 §11.10(b): a register export must be COMPLETE — walk every
+        // page of the API-004 envelope rather than truncating at one page.
+        var items = new List<Contracts.Improvement.NcListItemDto>();
+        Contracts.Common.PagedResponse<Contracts.Improvement.NcListItemDto> page;
+        var pageNumber = 1;
+        do
+        {
+            page = await sender.Send(new GetNcsQuery(null, Page: pageNumber++, PageSize: PageRequest.MaxPageSize), ct);
+            items.AddRange(page.Items);
+        }
+        while (page.HasMore);
         var pack = await PackAsync("Nonconformance Register", ct,
             new ExportTable(
                 "Nonconformances",

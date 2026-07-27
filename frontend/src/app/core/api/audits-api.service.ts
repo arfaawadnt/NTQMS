@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   AnswerChecklistItemRequest, AuditDetail, AuditListItem, CreatedResource,
-  RaiseFindingRequest, ScheduleAuditRequest,
+  Paged, RaiseFindingRequest, ScheduleAuditRequest,
 } from '../models';
 
 /** Typed client for the Audit Management API (one method per backend endpoint). */
@@ -13,8 +13,8 @@ export class AuditsApiService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiBaseUrl}/audits`;
 
-  list(status?: string): Observable<AuditListItem[]> {
-    return this.http.get<AuditListItem[]>(status ? `${this.base}?status=${encodeURIComponent(status)}` : this.base);
+  list(status?: string): Observable<Paged<AuditListItem>> {
+    return this.http.get<Paged<AuditListItem>>(status ? `${this.base}?status=${encodeURIComponent(status)}` : this.base);
   }
 
   getById(id: string): Observable<AuditDetail> {

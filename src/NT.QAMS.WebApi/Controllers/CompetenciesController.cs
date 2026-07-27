@@ -13,8 +13,10 @@ public sealed class CompetenciesController(ISender sender) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> List(
-        [FromQuery] Guid? traineeId, [FromQuery] string? status, CancellationToken ct) =>
-        Ok(await sender.Send(new GetCompetenciesQuery(traineeId, status), ct));
+        [FromQuery] Guid? traineeId, [FromQuery] string? status,
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 50,
+        CancellationToken ct = default) =>
+        Ok(await sender.Send(new GetCompetenciesQuery(traineeId, status, page, pageSize), ct));
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct) =>
@@ -61,8 +63,10 @@ public sealed class TrainingAssignmentsController(ISender sender) : ControllerBa
 {
     [HttpGet]
     public async Task<IActionResult> Queue(
-        [FromQuery] Guid? traineeId, [FromQuery] bool includeCompleted, CancellationToken ct) =>
-        Ok(await sender.Send(new GetTrainingQueueQuery(traineeId, includeCompleted), ct));
+        [FromQuery] Guid? traineeId, [FromQuery] bool includeCompleted,
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 50,
+        CancellationToken ct = default) =>
+        Ok(await sender.Send(new GetTrainingQueueQuery(traineeId, includeCompleted, page, pageSize), ct));
 
     [HttpPost]
     [Authorize(Roles = Roles.QmDeptAdmin)]

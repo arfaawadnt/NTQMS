@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
-  AddDecisionRequest, CloseReviewRequest, CreatedResource, ReviewDetail, ReviewListItem,
+  AddDecisionRequest, CloseReviewRequest, CreatedResource, Paged, ReviewDetail, ReviewListItem,
   ScheduleReviewRequest,
 } from '../models';
 
@@ -13,8 +13,8 @@ export class ReviewApiService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiBaseUrl}/management-reviews`;
 
-  list(): Observable<ReviewListItem[]> {
-    return this.http.get<ReviewListItem[]>(this.base);
+  list(): Observable<Paged<ReviewListItem>> {
+    return this.http.get<Paged<ReviewListItem>>(this.base);
   }
 
   getById(id: string): Observable<ReviewDetail> {
