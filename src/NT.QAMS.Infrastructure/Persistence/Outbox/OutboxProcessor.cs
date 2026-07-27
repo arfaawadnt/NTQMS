@@ -252,6 +252,12 @@ public sealed partial class OutboxProcessor(
         {
             LogPurged(logger, purged, options.RetentionDays);
         }
+
+        // CQRS-004: expired idempotency replay records ride the same cycle.
+        var idempotencyCutoff = clock.UtcNow - Idempotency.IdempotencyRecord.Retention;
+        await db.Set<Idempotency.IdempotencyRecord>()
+            .Where(r => r.CreatedAtUtc < idempotencyCutoff)
+            .ExecuteDeleteAsync(cancellationToken);
     }
 
     /// <summary>

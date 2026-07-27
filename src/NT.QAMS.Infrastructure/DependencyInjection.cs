@@ -50,6 +50,11 @@ public static class DependencyInjection
 
         services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());
 
+        // CQRS-004: replayed-command store; the WebApi overrides the accessor
+        // with the Idempotency-Key header reader (background scopes have none).
+        services.AddScoped<IIdempotencyStore, Persistence.Idempotency.EfIdempotencyStore>();
+        services.AddSingleton<IIdempotencyKeyAccessor, Persistence.Idempotency.NullIdempotencyKeyAccessor>();
+
         services.AddSingleton<IPasswordHasher, Security.IdentityPasswordHasher>();
         services.AddSingleton(new PasswordPolicyOptions(
             int.TryParse(configuration["PasswordPolicy:MaxAgeDays"], out var maxAge) ? maxAge : 90,

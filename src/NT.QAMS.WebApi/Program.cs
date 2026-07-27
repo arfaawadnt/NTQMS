@@ -97,6 +97,8 @@ builder.Services.AddInfrastructure(builder.Configuration);
 // The HTTP-facing identity implementations override Infrastructure's defaults.
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
+// CQRS-004: the Idempotency-Key header feeds the replay-protection behavior.
+builder.Services.AddSingleton<NT.QAMS.Application.Abstractions.IIdempotencyKeyAccessor, HeaderIdempotencyKeyAccessor>();
 
 var jwtSecret = builder.Configuration["Jwt:Secret"]
     ?? throw new InvalidOperationException("Jwt:Secret is not configured (set the Jwt__Secret environment variable).");

@@ -58,6 +58,9 @@ REVOKE DELETE ON ALL TABLES IN SCHEMA qams, audit, read, saas, ref FROM qams_app
 --    regulated record — processed events live on in the hash-chained audit
 --    ledger. The retention purge deletes processed rows past the window.
 GRANT DELETE ON qams.outbox_event TO qams_app;
+--    Exception (CQRS-004): idempotency replay records are transport state with
+--    a 24h life — the same retention purge removes them.
+GRANT DELETE ON qams.idempotency_record TO qams_app;
 
 -- 5. Sequences (reference-number counters etc.) ------------------------------
 GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA qams, saas, ref TO qams_app;
