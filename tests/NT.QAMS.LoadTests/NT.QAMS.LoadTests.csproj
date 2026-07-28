@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    EA remediation Road-to-100 Phase 8 (TEST/perf): a dependency-free
+    concurrent load harness. BCL only — no NBomber/k6 binary to install — so
+    it runs anywhere the .NET SDK is present, against a RUNNING API. Not part
+    of the solution's test suite; invoked explicitly (see README.md).
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+</Project>

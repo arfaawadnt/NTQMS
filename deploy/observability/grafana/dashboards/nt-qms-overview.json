@@ -1,0 +1,71 @@
+{
+  "title": "NT.QMS — Service Overview",
+  "uid": "ntqms-overview",
+  "schemaVersion": 39,
+  "editable": true,
+  "time": { "from": "now-6h", "to": "now" },
+  "refresh": "30s",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Request rate (RED)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        { "expr": "sum(rate(http_server_request_duration_seconds_count[5m])) by (http_route)",
+          "legendFormat": "{{http_route}}" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Error rate (5xx %)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        { "expr": "100 * sum(rate(http_server_request_duration_seconds_count{http_response_status_code=~\"5..\"}[5m])) / sum(rate(http_server_request_duration_seconds_count[5m]))",
+          "legendFormat": "5xx %" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Latency p50 / p95 / p99 (s)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        { "expr": "histogram_quantile(0.50, sum(rate(http_server_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p50" },
+        { "expr": "histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p95" },
+        { "expr": "histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p99" }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Outbox dead-letters",
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 8 },
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [
+        { "color": "green", "value": null }, { "color": "red", "value": 1 } ] } } },
+      "targets": [ { "expr": "qams_outbox_dead_letters" } ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Outbox backlog & oldest-pending age (s)",
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 8 },
+      "targets": [
+        { "expr": "qams_outbox_backlog", "legendFormat": "backlog" },
+        { "expr": "qams_outbox_oldest_pending_age_seconds", "legendFormat": "oldest age (s)" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Job liveness — minutes since last success",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "targets": [
+        { "expr": "(time() - qams_job_last_success_timestamp_seconds) / 60", "legendFormat": "{{job}}" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Npgsql connection pool",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "targets": [
+        { "expr": "db_client_connections_usage", "legendFormat": "{{state}}" }
+      ]
+    }
+  ]
+}

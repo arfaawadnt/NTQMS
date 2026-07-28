@@ -1,0 +1,50 @@
+# NT.QMS observability stack (Road-to-100 Phase 8) — collector + Prometheus +
+# Grafana. Runs ALONGSIDE compose.production.yml on the same Docker network so
+# the API's OTLP export (set Otlp__Endpoint=http://otel-collector:4317) and its
+# /metrics endpoint feed real dashboards and alerts.
+#
+#   docker compose -f compose.observability.yml up -d
+#
+# NOTE: not run on the Docker-less dev workstation — verified by review; the
+# first staging host brings it up (closure-report residual R-7).
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.109.0
+    command: ["--config=/etc/otel-collector.yaml"]
+    volumes:
+      - ./otel-collector.yaml:/etc/otel-collector.yaml:ro
+    ports:
+      - "4317:4317"   # OTLP gRPC (traces/metrics/logs from the API)
+      - "8889:8889"   # Prometheus exposition of collector-received metrics
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./alert.rules.yml:/etc/prometheus/alert.rules.yml:ro
+      - prom-data:/prometheus
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_ADMIN_PASSWORD:?set GRAFANA_ADMIN_PASSWORD}"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  prom-data:
+  grafana-data:

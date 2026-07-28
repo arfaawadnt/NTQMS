@@ -1,0 +1,7 @@
+apiVersion: 1
+providers:
+  - name: NT.QMS
+    folder: NT.QMS
+    type: file
+    options:
+      path: /var/lib/grafana/dashboards

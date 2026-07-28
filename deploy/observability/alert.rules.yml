@@ -1,0 +1,59 @@
+# NT.QMS alerting rules — the OBSERVABILITY.md alert set as executable PromQL.
+# Metric names follow the OpenTelemetry -> Prometheus convention (dots become
+# underscores); tune thresholds per site after the first production soak (R-5).
+groups:
+  - name: nt-qams
+    rules:
+      - alert: OutboxDeadLetter
+        # Phase-1 dead-letter condition -> operator triage (highest signal).
+        expr: qams_outbox_dead_letters > 0
+        for: 1m
+        labels: { severity: page }
+        annotations:
+          summary: "Outbox events are dead-lettered"
+          description: "Triage qams.outbox_event WHERE dead_lettered_at_utc IS NOT NULL; fix, then clear dead_lettered_at_utc + attempts to replay."
+
+      - alert: OutboxBacklogAge
+        expr: qams_outbox_oldest_pending_age_seconds > 600
+        for: 5m
+        labels: { severity: page }
+        annotations:
+          summary: "Outbox backlog is aging"
+          description: "Oldest unprocessed outbox row > 10 min — the processor is stuck or crashed."
+
+      - alert: ComplianceSweepStalled
+        # Liveness: > 2x the hourly interval since the last successful run.
+        expr: time() - qams_job_last_success_timestamp_seconds{job="compliance-sweep"} > 7200
+        for: 10m
+        labels: { severity: page }
+        annotations:
+          summary: "Compliance sweep has not run"
+          description: "No successful compliance sweep in over 2 hours — check leader election / errors."
+
+      - alert: KpiSnapshotStalled
+        expr: time() - qams_job_last_success_timestamp_seconds{job="kpi-snapshot"} > 43200
+        for: 30m
+        labels: { severity: warn }
+        annotations:
+          summary: "KPI snapshot has not run"
+          description: "No successful KPI snapshot in over 12 hours (2x the 6h interval)."
+
+      - alert: HighServerErrorRate
+        expr: |
+          sum(rate(http_server_request_duration_seconds_count{http_response_status_code=~"5.."}[5m]))
+            / sum(rate(http_server_request_duration_seconds_count[5m])) > 0.05
+        for: 5m
+        labels: { severity: page }
+        annotations:
+          summary: "5xx error rate above 5%"
+          description: "Investigate recent deploy and database health."
+
+      - alert: HighRequestLatencyP95
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(http_server_request_duration_seconds_bucket[5m])) by (le)) > 2
+        for: 10m
+        labels: { severity: warn }
+        annotations:
+          summary: "Request p95 latency above 2s"
+          description: "Check slow queries and connection-pool wait."

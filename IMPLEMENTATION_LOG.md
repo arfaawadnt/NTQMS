@@ -597,3 +597,29 @@ cross-tenant denial functional test suite (merge gate from day one).
   and the whole family revoked. (Live refresh over plain-HTTP localhost needs a
   manual non-secure cookie because the Secure flag blocks the jar — production
   is HTTPS; functional tests are the authoritative proof.)
+
+## Road-to-100 Phase 8 (v1.47.0, 2026-07-28) - evidence at scale [PARTIAL - see residuals]
+
+- Load harness (tests/NT.QAMS.LoadTests, BCL-only concurrent generator, kept
+  out of the solution). Ran live vs the running API, 50 users x 30s, read mix:
+  p95 86-105ms, p99 95-179ms, ~750-800 rps/scenario, 0.00% errors -> PASS
+  (docs/reference/NT_QMS_Load_Test_Report.md). Finding: the global rate limit
+  (300/min per IP) is an ABUSE ceiling, not a concurrency ceiling - measured
+  capacity needs it raised to a load-test profile; production must size it to
+  expected peak legitimate concurrency (labs behind shared NAT).
+- Failure drills (scripts/failure-drills.ps1) run live: Drill 2 poison outbox
+  event -> dead-lettered at MaxAttempts within a couple of poll cycles,
+  end-to-end against the running processor (injected pre-aged, auto-cleaned).
+  Drill 1 (stop PG -> readiness 503 -> recover) gracefully SKIPPED without an
+  elevated shell; that behaviour stays proven by ReadinessAndTopologyTests +
+  HealthEndpointTests.
+- Observability stack (deploy/observability/): compose (otel-collector +
+  Prometheus + Grafana), OTLP->Prometheus collector config, alert.rules.yml
+  (the OBSERVABILITY.md set as PromQL: dead-letter, backlog age, sweep/snapshot
+  liveness, 5xx rate, p95 latency), provisioned Grafana datasource + RED/outbox/
+  job-liveness/pool dashboard. Metric names verified live against /metrics.
+  NOT run here (no Docker) -> new residual R-7 (host bring-up + drill-fires-alert
+  confirmation).
+- Backend suite unchanged: 364 green, 0 skipped. Residual R-5 (perf on a
+  prod-like host, incl. 24h soak) partially addressed by the committed harness +
+  dev-box baseline; the authoritative staging run remains external.
