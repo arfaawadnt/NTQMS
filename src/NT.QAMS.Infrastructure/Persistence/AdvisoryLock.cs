@@ -28,26 +28,33 @@ public static class AdvisoryLock
             return true;
         }
 
-        await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
-
-        var command = db.Database.GetDbConnection().CreateCommand();
-        await using (command)
+        // OPS-009: with EnableRetryOnFailure active, user-initiated transactions
+        // must run inside the execution strategy — the whole locked unit of work
+        // is the retry granularity.
+        var strategy = db.Database.CreateExecutionStrategy();
+        return await strategy.ExecuteAsync(async () =>
         {
-            command.CommandText = "SELECT pg_try_advisory_xact_lock(@key)";
-            var parameter = command.CreateParameter();
-            parameter.ParameterName = "key";
-            parameter.Value = key;
-            command.Parameters.Add(parameter);
-            command.Transaction = transaction.GetDbTransaction();
+            await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
 
-            if (!(bool)(await command.ExecuteScalarAsync(cancellationToken))!)
+            var command = db.Database.GetDbConnection().CreateCommand();
+            await using (command)
             {
-                return false; // another instance leads this round — skip, don't duplicate
-            }
-        }
+                command.CommandText = "SELECT pg_try_advisory_xact_lock(@key)";
+                var parameter = command.CreateParameter();
+                parameter.ParameterName = "key";
+                parameter.Value = key;
+                command.Parameters.Add(parameter);
+                command.Transaction = transaction.GetDbTransaction();
 
-        await action();
-        await transaction.CommitAsync(cancellationToken);
-        return true;
+                if (!(bool)(await command.ExecuteScalarAsync(cancellationToken))!)
+                {
+                    return false; // another instance leads this round — skip, don't duplicate
+                }
+            }
+
+            await action();
+            await transaction.CommitAsync(cancellationToken);
+            return true;
+        });
     }
 }

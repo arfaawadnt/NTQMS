@@ -1,0 +1,66 @@
+# NT.QMS — production container orchestration manifest (DEPLOY-003).
+# The reference deployment for container hosts (docker compose / Swarm; the
+# same shape maps 1:1 onto a k8s Deployment). Secrets come from the
+# environment/secret store — NEVER from this file.
+#
+#   docker compose -f compose.production.yml up -d
+#
+# Topology: exactly ONE api replica per database until the horizontal-scale
+# controls are re-validated at load (ADR-0001; the Phase-1 SKIP LOCKED claim +
+# leader election make >1 safe, but 1 remains the supported default).
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: src/NT.QAMS.WebApi/Dockerfile
+    image: ntqams-webapi:1.43
+    read_only: true                    # DEPLOY-002: immutable runtime filesystem…
+    tmpfs:
+      - /tmp
+    volumes:
+      - ntqams-files:/app/data/files   # …except the evidence store
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Postgres: "Host=postgres;Port=5432;Database=ntqams;Username=qams_app;Password=${QAMS_APP_PASSWORD:?set QAMS_APP_PASSWORD}"
+      Jwt__Secret: "${QAMS_JWT_SECRET:?set QAMS_JWT_SECRET (>=32 chars)}"
+      Database__MigrateOnStartup: "false"   # migrations run as qams_owner (DEPLOY.md §1)
+      Otlp__Endpoint: "${QAMS_OTLP_ENDPOINT:-}"
+    ports:
+      - "127.0.0.1:5000:8080"          # loopback only — TLS terminates at the proxy (ADR-0002)
+    depends_on:
+      postgres:
+        condition: service_healthy
+    deploy:
+      replicas: 1                      # OPS-002 / ADR-0001
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1g
+        reservations:
+          cpus: "0.5"
+          memory: 256m
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ntqams
+      POSTGRES_USER: qams_owner
+      POSTGRES_PASSWORD: "${QAMS_OWNER_PASSWORD:?set QAMS_OWNER_PASSWORD}"
+    volumes:
+      - ntqams-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U qams_owner -d ntqams"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2g
+    restart: unless-stopped
+
+volumes:
+  ntqams-files:
+  ntqams-pgdata:

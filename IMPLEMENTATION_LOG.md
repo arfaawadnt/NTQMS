@@ -478,3 +478,32 @@ cross-tenant denial functional test suite (merge gate from day one).
 - Migration Phase4IdempotencyRecords. Suite: **330 backend green, 0 skipped**
   (was 301) + 37 frontend unit + 3 Playwright e2e (live against the running
   API). Live: envelope on legacy + api/v1 routes with true totals ✓.
+
+## EA Remediation Phase 5 (v1.43.0, 2026-07-28) - DB integrity, configuration & container [DONE]
+
+- DB-005 - CHECK constraints (migration Phase5CheckConstraints): nonconformance
+  severity/likelihood 1-5 + rpn 1-25 + status IN NcStatus domain; risk_item
+  scores 1-5 / rpn 1-25 incl. residuals; equipment interval > 0, grace >= 0;
+  supplier_evaluation weighted_total >= 0; date-ordering on work_task /
+  training_assignment / audit (completion never precedes creation). Proven:
+  a domain-valid NC cannot be corrupted by direct SQL (23514, savepoint-proof
+  per probe); reversible Down().
+- CFG-001/002 - fail-fast config: ConfigGuard (ReadInt/Bool/Decimal) throws on
+  PRESENT-but-invalid values, names the key; swapped into PasswordPolicy,
+  Security:RequireMfa, Westgard, Outbox retention, Jwt:ExpiryMinutes,
+  RateLimit:* (silent TryParse defaults eliminated). Jwt:Secret + connection
+  string already failed fast. ConfigGuardTests lock the contract.
+- OPS-009 - Npgsql EnableRetryOnFailure(5, 10s) + CommandTimeout(30) on the DI
+  context; AdvisoryLock wraps its user-initiated transaction in the execution
+  strategy (retry granularity = whole locked unit). SMTP resilience deferred
+  by design: LoggingEmailSender/SmtpEmailSender is best-effort after in-app
+  delivery persists (delivery monitor is the record).
+- DEPLOY-002/003 - Dockerfile runs as the aspnet image's unprivileged app user
+  (USER $APP_UID) with a chowned /app/data/files volume mount + canonical
+  FileStorage__RootPath; deploy/compose.production.yml = reference manifest
+  (replicas 1 per ADR-0001, CPU/memory limits, read_only rootfs + tmpfs,
+  loopback-only publish behind the TLS proxy, secrets from env, readiness
+  healthcheck). NOTE (honest gap): no Docker on this dev machine - the image
+  was NOT built/run here; manifest verified by review only, first CI/host
+  build must confirm.
+- Suite: 337 tests green, 0 skipped (was 330); build 0 warnings.

@@ -56,7 +56,7 @@ public sealed class JwtTokenService : IJwtTokenService
             Issuer = configuration["Jwt:Issuer"] ?? "nt-qams",
             Audience = configuration["Jwt:Audience"] ?? "nt-qams",
             Secret = configuration["Jwt:Secret"] ?? string.Empty,
-            ExpiryMinutes = int.TryParse(configuration["Jwt:ExpiryMinutes"], out var minutes) ? minutes : 60,
+            ExpiryMinutes = Configuration.ConfigGuard.ReadInt(configuration, "Jwt:ExpiryMinutes", 60),
         };
         _clock = clock;
 

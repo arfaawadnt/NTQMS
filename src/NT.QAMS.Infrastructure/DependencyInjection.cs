@@ -36,7 +36,13 @@ public static class DependencyInjection
         services.AddDbContext<AppDbContext>((sp, options) =>
         {
             options
-                .UseNpgsql(configuration.GetConnectionString("Postgres"))
+                // OPS-009: transient faults retry with backoff; every command
+                // carries a hard timeout so a hung statement can't wedge a
+                // request thread. User-initiated transactions wrap in the
+                // execution strategy (see AdvisoryLock).
+                .UseNpgsql(configuration.GetConnectionString("Postgres"), npgsql => npgsql
+                    .EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(10), errorCodesToAdd: null)
+                    .CommandTimeout(30))
                 .UseSnakeCaseNamingConvention()
                 .AddInterceptors(
                     // Layer-2 isolation runs first: the tenant GUCs must be set on
@@ -56,21 +62,23 @@ public static class DependencyInjection
         services.AddSingleton<IIdempotencyKeyAccessor, Persistence.Idempotency.NullIdempotencyKeyAccessor>();
 
         services.AddSingleton<IPasswordHasher, Security.IdentityPasswordHasher>();
+        // CFG-001/002: present-but-invalid values REFUSE startup (ConfigGuard)
+        // instead of silently applying the default.
         services.AddSingleton(new PasswordPolicyOptions(
-            int.TryParse(configuration["PasswordPolicy:MaxAgeDays"], out var maxAge) ? maxAge : 90,
-            int.TryParse(configuration["PasswordPolicy:HistoryDepth"], out var depth) ? depth : 5));
+            Configuration.ConfigGuard.ReadInt(configuration, "PasswordPolicy:MaxAgeDays", 90),
+            Configuration.ConfigGuard.ReadInt(configuration, "PasswordPolicy:HistoryDepth", 5)));
         services.AddSingleton(new SecurityOptions(
-            bool.TryParse(configuration["Security:RequireMfaForPrivilegedRoles"], out var requireMfa) && requireMfa));
+            Configuration.ConfigGuard.ReadBool(configuration, "Security:RequireMfaForPrivilegedRoles", false)));
 
         // F-16: QC acceptance limits are a controlled parameter set — configurable
         // (AnalyticalQuality:Westgard:*) rather than hard-coded, defaulting to the
         // standard Westgard multi-rule thresholds. Validated at startup so a bad
         // configuration fails fast instead of silently mis-grading QC.
         services.AddSingleton(new WestgardLimits(
-            decimal.TryParse(configuration["AnalyticalQuality:Westgard:WarningSd"], out var warn) ? warn : 2m,
-            decimal.TryParse(configuration["AnalyticalQuality:Westgard:RejectSd"], out var reject) ? reject : 3m,
-            decimal.TryParse(configuration["AnalyticalQuality:Westgard:RangeSd"], out var range) ? range : 4m,
-            int.TryParse(configuration["AnalyticalQuality:Westgard:RunLength"], out var run) ? run : 10).Validated());
+            Configuration.ConfigGuard.ReadDecimal(configuration, "AnalyticalQuality:Westgard:WarningSd", 2m),
+            Configuration.ConfigGuard.ReadDecimal(configuration, "AnalyticalQuality:Westgard:RejectSd", 3m),
+            Configuration.ConfigGuard.ReadDecimal(configuration, "AnalyticalQuality:Westgard:RangeSd", 4m),
+            Configuration.ConfigGuard.ReadInt(configuration, "AnalyticalQuality:Westgard:RunLength", 10)).Validated());
         services.AddSingleton<IJwtTokenService, Security.JwtTokenService>();
         services.AddSingleton<ITotpService, Security.TotpService>();
         services.AddScoped<IReferenceNumberGenerator, PostgresReferenceNumberGenerator>();
@@ -93,7 +101,7 @@ public static class DependencyInjection
         // MSG-007: processed outbox rows are transport, not the record (the
         // hash-chained ledger keeps the history) — purge after the window.
         services.AddSingleton(new OutboxOptions(
-            int.TryParse(configuration["Outbox:RetentionDays"], out var retention) ? retention : 30).Validated());
+            Configuration.ConfigGuard.ReadInt(configuration, "Outbox:RetentionDays", 30)).Validated());
 
         services.AddHostedService<OutboxProcessor>();
         services.AddHostedService<Jobs.ScheduledSweepService>();

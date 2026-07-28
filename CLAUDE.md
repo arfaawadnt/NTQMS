@@ -31,7 +31,7 @@ NT.QMS is a **multi-tenant SaaS Quality Management System** for ISO 17025 / 1518
    messages with `Co-Authored-By: Claude <noreply@anthropic.com>` (use the current model).
 
 ## 3. Current state (as of 2026-07-28)
-- Code at tag **`v1.42.0`** (EA remediation Phases 0–4 shipped — **all production blockers cleared at v1.41**; `restore-point-20260727` = v1.37.0). Repo: `github.com/arfaawadnt/NTQMS`.
+- Code at tag **`v1.43.0`** (EA remediation Phases 0–5 shipped — **all production blockers cleared at v1.41**; `restore-point-20260727` = v1.37.0). Repo: `github.com/arfaawadnt/NTQMS`.
 - **All 18 CSV/regulatory-audit findings are CLOSED** (release train v1.25→v1.37): tenant
   RLS, signed-record immutability, MFA, SoD, reason-for-change, session revocation,
   e-sig logging, integration tests, backup/DR, governance modules, exports, password
@@ -49,7 +49,7 @@ has acceptance criteria + a proving test. Summary:
 - **Phase 2 (P1, v1.40): ✅ SHIPPED** — JSON logs + canonical request log; OTel traces HTTP→MediatR→EF→Outbox (traceparent persisted on outbox rows); X-Correlation-Id + ProblemDetails traceId; /metrics + alert set (deploy/OBSERVABILITY.md).
 - **Phase 3 (P1/P2, v1.41): ✅ SHIPPED** — rate limiting (global + auth/e-sign partitions, 429); security headers + locked CSP; TLS-at-proxy + in-app HSTS (ADR-0002); token-storage risk acceptance + 60-min tokens (ADR-0003).
 - **Phase 4 (P2, v1.42): ✅ SHIPPED** — problem+json everywhere; pagination envelope (API+SPA); file allow-list/sniffing; deny-by-default command authorization (211 annotated + CI gate); Idempotency-Key replay; api/v1 versioning (ADR-0004).
-- **Phase 5 (P2, v1.43):** DB CHECK constraints, `ValidateOnStart` options, non-root container, DB retry.
+- **Phase 5 (P2, v1.43): ✅ SHIPPED** — CHECK constraints on regulated tables; ConfigGuard fail-fast config; Npgsql retry+timeout (execution-strategy-safe locks); non-root container + compose.production.yml.
 - **Phase 6 (P2/P3, v1.44):** test-coverage gaps, ADRs, module-boundary arch test, frontend a11y polish.
 Completing **Phases 0–3** clears every production blocker → unconditional release.
 

@@ -18,9 +18,9 @@ public sealed record RateLimitSettings(
             : throw new InvalidOperationException("RateLimit:* permits must all be positive.");
 
     public static RateLimitSettings From(IConfiguration configuration) => new(
-        int.TryParse(configuration["RateLimit:GlobalPermitPerMinute"], out var global) ? global : 300,
-        int.TryParse(configuration["RateLimit:AuthPermitPerMinute"], out var auth) ? auth : 10,
-        int.TryParse(configuration["RateLimit:ESignaturePermitPerMinute"], out var esign) ? esign : 10);
+        NT.QAMS.Infrastructure.Configuration.ConfigGuard.ReadInt(configuration, "RateLimit:GlobalPermitPerMinute", 300),
+        NT.QAMS.Infrastructure.Configuration.ConfigGuard.ReadInt(configuration, "RateLimit:AuthPermitPerMinute", 10),
+        NT.QAMS.Infrastructure.Configuration.ConfigGuard.ReadInt(configuration, "RateLimit:ESignaturePermitPerMinute", 10));
 }
 
 /// <summary>
