@@ -31,7 +31,8 @@ NT.QMS is a **multi-tenant SaaS Quality Management System** for ISO 17025 / 1518
    messages with `Co-Authored-By: Claude <noreply@anthropic.com>` (use the current model).
 
 ## 3. Current state (as of 2026-07-28)
-- Code at tag **`v1.44.0`** — **EA remediation COMPLETE (Phases 0–6, all findings closed)**; production blockers cleared at v1.41; `restore-point-20260727` = v1.37.0. Repo: `github.com/arfaawadnt/NTQMS`. Closure report: `docs/reference/NT_QMS_EA_Remediation_Closure_Report.md`.
+- Code at tag **`v1.46.0`** — EA remediation COMPLETE (Phases 0–6) + Road-to-100 backlog #1 (v1.45) + **Phase 7 session-security** (v1.46); production blockers cleared at v1.41; `restore-point-20260727` = v1.37.0. Repo: `github.com/arfaawadnt/NTQMS`. Closure report: `docs/reference/NT_QMS_EA_Remediation_Closure_Report.md`; road-to-100: `docs/reference/NT_QMS_Road_to_100_Plan.md`.
+- **Auth model (ADR-0009, supersedes ADR-0003):** access JWT in SPA memory (15-min default); rotating httpOnly `Secure SameSite=Strict` refresh cookie `qams_rt` (Path=/api/auth) with reuse-detection family revocation; `POST /api/auth/refresh` + `/logout`; silent refresh on 401 and at SPA bootstrap.
 - **All 18 CSV/regulatory-audit findings are CLOSED** (release train v1.25→v1.37): tenant
   RLS, signed-record immutability, MFA, SoD, reason-for-change, session revocation,
   e-sig logging, integration tests, backup/DR, governance modules, exports, password
