@@ -11,11 +11,10 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
 
 /** Training queue: assign training (role-gated), toggle completed, and mark items complete. */
 @Component({
-  selector: 'qams-training-queue',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, UserSelectComponent, LoadMoreComponent],
-  template: `
+    selector: 'qams-training-queue',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, UserSelectComponent, LoadMoreComponent],
+    template: `
     <qams-page-header [title]="i18n.t('train.title')">
       <label class="inline"><input type="checkbox" [checked]="includeCompleted()" (change)="onToggle($event)" /> {{ i18n.t('train.showCompleted') }}</label>
       @if (perms.canAssignTraining()) {
@@ -72,7 +71,7 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
                       [loading]="facade.loading()" (more)="facade.loadMoreTraining()" />
     }
   `,
-  styles: [`
+    styles: [`
     .form { margin-bottom: 1rem; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .5rem 1rem; }
     .col-2 { grid-column: span 2; }
@@ -83,7 +82,7 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
     .overdue td { color: var(--nt-red, #b42318); }
     .link { width: auto; background: none; color: var(--nt-blue); padding: 0; }
     button, select { width: auto; }
-  `],
+  `]
 })
 export class TrainingQueueComponent implements OnInit {
   readonly facade = inject(CompetencyFacade);

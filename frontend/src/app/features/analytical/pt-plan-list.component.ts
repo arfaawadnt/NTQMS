@@ -11,11 +11,10 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
 
 /** Annual PT/EQA plan register: one plan per year, coverage = fulfilled vs planned cycles (§7.7.2). */
 @Component({
-  selector: 'qams-pt-plan-list',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent],
-  template: `
+    selector: 'qams-pt-plan-list',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent],
+    template: `
     <qams-page-header [title]="i18n.t('ptp.title')" [subtitle]="i18n.t('ptp.subtitle')">
       @if (perms.canAssignTraining()) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('ptp.new') }}</button>
@@ -73,14 +72,14 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
       <router-outlet (activate)="detailOpen.set(true)" (deactivate)="detailOpen.set(false)" />
     </qams-drawer>
   `,
-  styles: [`
+    styles: [`
     .row { display: flex; gap: .6rem; margin-top: 1rem; }
     .clickable { cursor: pointer; }
     button { width: auto; }
     .coverage { display: flex; align-items: center; gap: 8px; }
     .bar { width: 110px; height: 8px; border-radius: 4px; background: var(--nt-filter-grey); overflow: hidden; }
     .fill { height: 100%; background: var(--nt-teal); border-radius: 4px; }
-  `],
+  `]
 })
 export class PtPlanListComponent implements OnInit {
   readonly facade = inject(PtPlansFacade);

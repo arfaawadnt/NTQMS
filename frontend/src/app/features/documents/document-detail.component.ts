@@ -22,11 +22,10 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
  * both the role and the author≠reviewer≠approver segregation-of-duties rules).
  */
 @Component({
-  selector: 'qams-document-detail',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, FormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
-  template: `
+    selector: 'qams-document-detail',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, FormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+    template: `
     @if (doc(); as d) {
       <qams-page-header [title]="d.code + ' — ' + d.title" [subtitle]="d.category">
         <a routerLink="/documents" class="ghost-link">← {{ i18n.t('doc.backToList') }}</a>
@@ -213,7 +212,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
   `,
-  styles: [`
+    styles: [`
     .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; align-items: start; }
     .meta { display: flex; flex-wrap: wrap; gap: 1.25rem; margin-bottom: 1rem; }
     .meta span.muted { display: block; font-size: .75rem; }
@@ -231,7 +230,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
     .mono { font-family: var(--nt-mono); font-size: 10.5px; color: var(--nt-grey-m); }
     h3 { margin-top: 1rem; }
     @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
-  `],
+  `]
 })
 export class DocumentDetailComponent implements OnInit {
   readonly facade = inject(DocumentsFacade);

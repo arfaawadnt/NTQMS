@@ -17,11 +17,10 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
  * The approver cannot be the author (segregation of duties).
  */
 @Component({
-  selector: 'qams-quality-policy',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, DatePipe, PageHeaderComponent],
-  template: `
+    selector: 'qams-quality-policy',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [FormsModule, DatePipe, PageHeaderComponent],
+    template: `
     <qams-page-header [title]="i18n.t('qp.title')" [subtitle]="i18n.t('qp.subtitle')">
       @if (perms.canApprove()) {
         <button (click)="showDraft.set(!showDraft())">{{ i18n.t('qp.newVersion') }}</button>
@@ -89,7 +88,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
       }
     }
   `,
-  styles: [`
+    styles: [`
     .policy { border-left: 3px solid var(--nt-blue); }
     .policy-meta { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
     .badge { background: rgba(24,128,56,.1); color: var(--nt-green); font-weight: 700; font-size: 11px; padding: 3px 10px; border-radius: 999px; }
@@ -101,7 +100,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
     .actions input { max-width: 160px; }
     .truncate { max-width: 340px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     button, select { width: auto; }
-  `],
+  `]
 })
 export class QualityPolicyComponent implements OnInit {
   readonly i18n = inject(I18nService);

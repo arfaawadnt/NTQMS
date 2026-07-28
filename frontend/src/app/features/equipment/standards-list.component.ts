@@ -14,11 +14,10 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
 
 /** Reference standard / CRM register: statistics, filtration, and registration (§6.5). */
 @Component({
-  selector: 'qams-standards-list',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent],
-  template: `
+    selector: 'qams-standards-list',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent],
+    template: `
     <qams-page-header [title]="i18n.t('std.title')" [subtitle]="i18n.t('std.subtitle')">
       @if (perms.canAssignTraining()) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('std.new') }}</button>
@@ -100,13 +99,13 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
       <router-outlet (activate)="detailOpen.set(true)" (deactivate)="detailOpen.set(false)" />
     </qams-drawer>
   `,
-  styles: [`
+    styles: [`
     .filterbar { display: flex; gap: 10px; align-items: center; padding: 10px 14px; margin-bottom: 14px; flex-wrap: wrap; }
     .search { max-width: 280px; }
     .row { display: flex; gap: .6rem; margin-top: 1rem; }
     .clickable { cursor: pointer; }
     button, select { width: auto; }
-  `],
+  `]
 })
 export class StandardsListComponent implements OnInit {
   readonly facade = inject(StandardsFacade);

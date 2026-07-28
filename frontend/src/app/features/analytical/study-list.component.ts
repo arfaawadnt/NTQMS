@@ -10,11 +10,10 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 
 /** Method-validation study register: state-filterable list + configure form. */
 @Component({
-  selector: 'qams-study-list',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent],
-  template: `
+    selector: 'qams-study-list',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent],
+    template: `
     <qams-page-header [title]="i18n.t('val.title')">
       <select [value]="stateFilter()" (change)="onFilter($event)" aria-label="State filter">
         <option value="">{{ i18n.t('nc.allStatuses') }}</option>
@@ -73,13 +72,13 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
       <router-outlet (activate)="detailOpen.set(true)" (deactivate)="detailOpen.set(false)" />
     </qams-drawer>
   `,
-  styles: [`
+    styles: [`
     .form { margin-bottom: 1rem; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: .5rem 1rem; }
     .row { display: flex; gap: .6rem; margin-top: 1rem; }
     .clickable { cursor: pointer; }
     button, select { width: auto; }
-  `],
+  `]
 })
 export class StudyListComponent implements OnInit {
   readonly facade = inject(ValidationFacade);

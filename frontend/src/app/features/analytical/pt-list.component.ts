@@ -14,11 +14,10 @@ import { LovSelectComponent } from '../../shared/ui/lov-select.component';
  * result auto-raises a nonconformance (PT→NC saga), noted in the banner.
  */
 @Component({
-  selector: 'qams-pt-list',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DecimalPipe, PageHeaderComponent, DrawerComponent, StatusPillComponent, LovSelectComponent],
-  template: `
+    selector: 'qams-pt-list',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DecimalPipe, PageHeaderComponent, DrawerComponent, StatusPillComponent, LovSelectComponent],
+    template: `
     <qams-page-header [title]="i18n.t('pt.title')" [subtitle]="i18n.t('pt.sagaNote')">
       <select [value]="performanceFilter()" (change)="onFilter($event)" aria-label="Performance filter">
         <option value="">{{ i18n.t('nc.allStatuses') }}</option>
@@ -85,7 +84,7 @@ import { LovSelectComponent } from '../../shared/ui/lov-select.component';
       </div>
     }
   `,
-  styles: [`
+    styles: [`
     .form { margin-bottom: 1rem; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: .5rem 1rem; }
     .row { display: flex; gap: .6rem; margin-top: 1rem; }
@@ -93,7 +92,7 @@ import { LovSelectComponent } from '../../shared/ui/lov-select.component';
     .inline { display: flex; gap: 8px; align-items: center; padding: 4px 0; }
     .inline input { max-width: 160px; }
     button, select { width: auto; }
-  `],
+  `]
 })
 export class PtListComponent implements OnInit {
   readonly facade = inject(PtFacade);

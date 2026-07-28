@@ -17,11 +17,10 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
  * against the allowable limit.
  */
 @Component({
-  selector: 'qams-instrument-comparability-detail',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
-  template: `
+    selector: 'qams-instrument-comparability-detail',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+    template: `
     @if (item(); as s) {
       <qams-page-header [title]="s.studyRef + ' — ' + s.analyte" [subtitle]="i18n.t('icp.reference') + ': ' + s.referenceInstrument">
         <a routerLink="/instrument-comparabilities" class="ghost-link">← {{ i18n.t('icp.backToList') }}</a>
@@ -117,7 +116,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
   `,
-  styles: [`
+    styles: [`
     .meta { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; margin-bottom: 1rem; }
     .meta span.muted { display: block; font-size: .75rem; }
     section { margin-bottom: 1rem; }
@@ -134,7 +133,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
     form button { width: auto; margin-top: .5rem; }
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
     @media (max-width: 800px) { .triple { grid-template-columns: 1fr; } }
-  `],
+  `]
 })
 export class InstrumentComparabilityDetailComponent implements OnInit {
   readonly facade = inject(InstrumentComparabilityFacade);

@@ -19,11 +19,10 @@ import { CsvColumn, CsvImportComponent } from '../../shared/ui/csv-import.compon
  * per-run means table. Statistics come from the backend ANOVA.
  */
 @Component({
-  selector: 'qams-precision-detail',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, CsvImportComponent],
-  template: `
+    selector: 'qams-precision-detail',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, CsvImportComponent],
+    template: `
     @if (item(); as s) {
       <qams-page-header [title]="s.studyRef + ' — ' + s.analyte" [subtitle]="s.level">
         <a routerLink="/precision-studies" class="ghost-link">← {{ i18n.t('prc.backToList') }}</a>
@@ -155,7 +154,7 @@ import { CsvColumn, CsvImportComponent } from '../../shared/ui/csv-import.compon
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
   `,
-  styles: [`
+    styles: [`
     .meta { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; margin-bottom: 1rem; }
     .meta span.muted { display: block; font-size: .75rem; }
     .components { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
@@ -181,7 +180,7 @@ import { CsvColumn, CsvImportComponent } from '../../shared/ui/csv-import.compon
     form button { width: auto; margin-top: .5rem; }
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
     @media (max-width: 800px) { .components, .pair { grid-template-columns: 1fr; } }
-  `],
+  `]
 })
 export class PrecisionDetailComponent implements OnInit {
   readonly facade = inject(PrecisionFacade);

@@ -16,11 +16,10 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
 
 /** Quality objectives register: measurable targets with live on-target verdicts (§6.2 / §8.2). */
 @Component({
-  selector: 'qams-objective-list',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, UserSelectComponent, ListStatsComponent],
-  template: `
+    selector: 'qams-objective-list',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, UserSelectComponent, ListStatsComponent],
+    template: `
     <qams-page-header [title]="i18n.t('obj.title')" [subtitle]="i18n.t('obj.subtitle')">
       @if (perms.canAssignTraining()) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('obj.new') }}</button>
@@ -109,7 +108,7 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
       <router-outlet (activate)="detailOpen.set(true)" (deactivate)="detailOpen.set(false)" />
     </qams-drawer>
   `,
-  styles: [`
+    styles: [`
     .filterbar { display: flex; gap: 10px; align-items: center; padding: 10px 14px; margin-bottom: 14px; flex-wrap: wrap; }
     .search { max-width: 280px; }
     .row { display: flex; gap: .6rem; margin-top: 1rem; }
@@ -117,7 +116,7 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
     button, select { width: auto; }
     .good { color: var(--nt-green); }
     .bad { color: var(--nt-red); }
-  `],
+  `]
 })
 export class ObjectiveListComponent implements OnInit {
   readonly facade = inject(ObjectivesFacade);

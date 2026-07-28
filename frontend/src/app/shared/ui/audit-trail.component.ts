@@ -14,11 +14,10 @@ import { AuditTrailEntry, FieldChange } from '../../core/models';
  * of a broken call.
  */
 @Component({
-  selector: 'qams-audit-trail',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe],
-  template: `
+    selector: 'qams-audit-trail',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [DatePipe],
+    template: `
     <section class="card">
       <h3>{{ i18n.t('trail.title') }}</h3>
       @if (!perms.canViewCompliance()) {
@@ -76,7 +75,7 @@ import { AuditTrailEntry, FieldChange } from '../../core/models';
       }
     </section>
   `,
-  styles: [`
+    styles: [`
     .timeline { list-style: none; margin: 0; padding: 0; }
     .timeline li { display: flex; gap: 12px; position: relative; padding-bottom: 14px; }
     .timeline li:not(:last-child)::before {
@@ -100,7 +99,7 @@ import { AuditTrailEntry, FieldChange } from '../../core/models';
     .sub { margin-top: 16px; }
     .fc { font-size: 11.5px; }
     .fc .val { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--nt-mono); font-size: 10.5px; }
-  `],
+  `]
 })
 export class AuditTrailComponent implements OnInit {
   readonly i18n = inject(I18nService);

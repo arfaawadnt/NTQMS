@@ -18,11 +18,10 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
  * functional-sensitivity decision is visible. Statistics come from the backend.
  */
 @Component({
-  selector: 'qams-detection-limit-detail',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
-  template: `
+    selector: 'qams-detection-limit-detail',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+    template: `
     @if (item(); as s) {
       <qams-page-header [title]="s.studyRef + ' — ' + s.analyte" [subtitle]="s.method">
         <a routerLink="/detection-limits" class="ghost-link">← {{ i18n.t('dl.backToList') }}</a>
@@ -170,7 +169,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
   `,
-  styles: [`
+    styles: [`
     .meta { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; margin-bottom: 1rem; }
     .meta span.muted { display: block; font-size: .75rem; }
     .results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
@@ -205,7 +204,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
     form button { width: auto; margin-top: .5rem; }
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
     @media (max-width: 900px) { .results, .grid, .quad { grid-template-columns: 1fr; } }
-  `],
+  `]
 })
 export class DetectionLimitDetailComponent implements OnInit {
   readonly facade = inject(DetectionLimitFacade);

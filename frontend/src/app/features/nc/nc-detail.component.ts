@@ -19,11 +19,10 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
  * actions are hidden for non-approvers (server still enforces).
  */
 @Component({
-  selector: 'qams-nc-detail',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, NgTemplateOutlet, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, UserSelectComponent],
-  template: `
+    selector: 'qams-nc-detail',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, NgTemplateOutlet, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, UserSelectComponent],
+    template: `
     @if (nc(); as n) {
       <qams-page-header [title]="n.ncRef + ' — ' + n.title">
         <a routerLink="/nonconformances" class="ghost-link">← {{ i18n.t('nc.backToList') }}</a>
@@ -143,7 +142,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
   `,
-  styles: [`
+    styles: [`
     .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; align-items: start; }
     .meta { display: flex; flex-wrap: wrap; gap: 1.25rem; margin-bottom: 1rem; }
     .meta span.muted { display: block; font-size: .75rem; }
@@ -154,7 +153,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
     h3 { margin-top: 1rem; }
     @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
-  `],
+  `]
 })
 export class NcDetailComponent implements OnInit {
   readonly facade = inject(NcFacade);

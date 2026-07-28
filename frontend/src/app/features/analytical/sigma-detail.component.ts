@@ -17,11 +17,10 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
  * sigma and grade come from the backend.
  */
 @Component({
-  selector: 'qams-sigma-detail',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
-  template: `
+    selector: 'qams-sigma-detail',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+    template: `
     @if (item(); as s) {
       <qams-page-header [title]="s.assessmentRef + ' — ' + s.analyte" [subtitle]="i18n.t('sig.subtitle')">
         <a routerLink="/sigma-metrics" class="ghost-link">← {{ i18n.t('sig.backToList') }}</a>
@@ -93,7 +92,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
   `,
-  styles: [`
+    styles: [`
     .hero { display: flex; flex-wrap: wrap; gap: 2rem; align-items: center; margin-bottom: 1rem; }
     .gauge { flex: 1; min-width: 260px; }
     .value { font-size: 2.6rem; font-weight: 800; line-height: 1; }
@@ -124,7 +123,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
     .actions button { width: auto; }
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
     @media (max-width: 700px) { .trio { grid-template-columns: 1fr; } }
-  `],
+  `]
 })
 export class SigmaDetailComponent implements OnInit {
   readonly facade = inject(SigmaFacade);

@@ -17,11 +17,10 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
  * Approved. Closed and rejected changes are read-only.
  */
 @Component({
-  selector: 'qams-change-detail',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
-  template: `
+    selector: 'qams-change-detail',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+    template: `
     @if (item(); as c) {
       <qams-page-header [title]="c.changeRef + ' — ' + c.title" [subtitle]="i18n.t('chg.proposedBy') + ': ' + c.proposedBy">
         <a routerLink="/changes" class="ghost-link">← {{ i18n.t('chg.backToList') }}</a>
@@ -120,7 +119,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
   `,
-  styles: [`
+    styles: [`
     .meta { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; margin-bottom: 1rem; }
     .meta span.muted { display: block; font-size: .75rem; }
     .pre { white-space: pre-wrap; margin: 0; }
@@ -133,7 +132,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
     .pir.ok { border-left: 3px solid var(--nt-green); }
     .pir.bad { border-left: 3px solid var(--nt-red); }
-  `],
+  `]
 })
 export class ChangeDetailComponent implements OnInit {
   readonly facade = inject(ChangeFacade);

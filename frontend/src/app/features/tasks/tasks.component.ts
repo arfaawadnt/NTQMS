@@ -24,11 +24,10 @@ function assigneeRequired(group: AbstractControl): ValidationErrors | null {
  * backend escalation sweep (QM/TenantAdmin only).
  */
 @Component({
-  selector: 'qams-tasks',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent, UserSelectComponent, LoadMoreComponent],
-  template: `
+    selector: 'qams-tasks',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent, UserSelectComponent, LoadMoreComponent],
+    template: `
     <qams-page-header [title]="i18n.t('task.title')" [subtitle]="i18n.t('task.subtitle')">
       @if (perms.canAssignTraining()) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('task.new') }}</button>
@@ -122,7 +121,7 @@ function assigneeRequired(group: AbstractControl): ValidationErrors | null {
       </section>
     }
   `,
-  styles: [`
+    styles: [`
     .row { display: flex; gap: .6rem; margin-top: 1rem; }
     .overdue td { color: var(--nt-red); }
     .over-tag {
@@ -135,7 +134,7 @@ function assigneeRequired(group: AbstractControl): ValidationErrors | null {
     form { border-top: 1px solid var(--nt-border); padding-top: .75rem; margin-top: .75rem; }
     form button { width: auto; margin-top: .5rem; }
     button, select { width: auto; }
-  `],
+  `]
 })
 export class TasksComponent implements OnInit {
   readonly facade = inject(TasksFacade);

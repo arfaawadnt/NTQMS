@@ -13,11 +13,10 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
  * page.
  */
 @Component({
-  selector: 'qams-security-settings',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PageHeaderComponent],
-  template: `
+    selector: 'qams-security-settings',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [PageHeaderComponent],
+    template: `
     <qams-page-header [title]="i18n.t('sec.title')" [subtitle]="i18n.t('sec.subtitle')" />
 
     <section class="card">
@@ -42,7 +41,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
       </section>
     }
   `,
-  styles: [`
+    styles: [`
     section { margin-bottom: 16px; }
     h3 { margin: 0 0 6px; font-size: 15px; }
     .muted { font-size: 13px; margin-bottom: 12px; }
@@ -50,7 +49,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
     .toggle { display: inline-flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
     .toggle input { width: 18px; height: 18px; }
     .ok { color: var(--nt-green, #1f8a54); font-size: 13px; font-weight: 700; margin-inline-start: 12px; }
-  `],
+  `]
 })
 export class SecuritySettingsComponent implements OnInit {
   readonly i18n = inject(I18nService);

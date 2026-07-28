@@ -18,11 +18,10 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
  * allowable limit.
  */
 @Component({
-  selector: 'qams-interference-detail',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
-  template: `
+    selector: 'qams-interference-detail',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+    template: `
     @if (item(); as s) {
       <qams-page-header [title]="s.studyRef + ' — ' + s.analyte" [subtitle]="i18n.t('inf.allowable') + ': ' + s.allowableBiasPct + '%'">
         <a routerLink="/interference-studies" class="ghost-link">← {{ i18n.t('inf.backToList') }}</a>
@@ -123,7 +122,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
   `,
-  styles: [`
+    styles: [`
     .meta { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; margin-bottom: 1rem; }
     .meta span.muted { display: block; font-size: .75rem; }
     section { margin-bottom: 1rem; }
@@ -139,7 +138,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
     form button { width: auto; margin-top: .5rem; }
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
     @media (max-width: 800px) { .triple { grid-template-columns: 1fr; } }
-  `],
+  `]
 })
 export class InterferenceDetailComponent implements OnInit {
   readonly facade = inject(InterferenceFacade);

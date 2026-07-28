@@ -17,11 +17,10 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
  * backend when the latest measurement misses the target.
  */
 @Component({
-  selector: 'qams-objective-detail',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
-  template: `
+    selector: 'qams-objective-detail',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+    template: `
     @if (item(); as o) {
       <qams-page-header [title]="o.objectiveRef + ' — ' + o.title" [subtitle]="o.metric">
         <a routerLink="/quality-objectives" class="ghost-link">← {{ i18n.t('obj.backToList') }}</a>
@@ -106,7 +105,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
   `,
-  styles: [`
+    styles: [`
     .meta { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; margin-bottom: 1rem; }
     .meta span.muted { display: block; font-size: .75rem; }
     section { margin-bottom: 1rem; }
@@ -118,7 +117,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
     form button { width: auto; margin-top: .5rem; }
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
     @media (max-width: 800px) { .trio, .pair { grid-template-columns: 1fr; } }
-  `],
+  `]
 })
 export class ObjectiveDetailComponent implements OnInit {
   readonly facade = inject(ObjectivesFacade);

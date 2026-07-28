@@ -3,10 +3,9 @@ import { RouterOutlet } from '@angular/router';
 import { I18nService } from './core/i18n.service';
 
 @Component({
-  selector: 'qams-root',
-  standalone: true,
-  imports: [RouterOutlet],
-  template: '<router-outlet />',
+    selector: 'qams-root',
+    imports: [RouterOutlet],
+    template: '<router-outlet />'
 })
 export class AppComponent {
   private readonly i18n = inject(I18nService);

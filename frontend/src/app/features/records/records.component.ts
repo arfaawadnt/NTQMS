@@ -18,11 +18,10 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
  * is refused by the backend and surfaced here (ARC-013/014).
  */
 @Component({
-  selector: 'qams-records',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent, LoadMoreComponent],
-  template: `
+    selector: 'qams-records',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent, LoadMoreComponent],
+    template: `
     <qams-page-header [title]="i18n.t('arc.title')" [subtitle]="i18n.t('arc.subtitle')">
       <select [value]="stateFilter()" (change)="onFilter($event)" aria-label="State filter">
         <option value="">{{ i18n.t('nc.allStatuses') }}</option>
@@ -104,14 +103,14 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
                       [loading]="facade.loading()" (more)="facade.loadMore()" />
     }
   `,
-  styles: [`
+    styles: [`
     .row { display: flex; gap: .6rem; margin-top: 1rem; }
     .actions { white-space: nowrap; }
     .danger-link { color: var(--nt-red); }
     .hint { font-size: 11.5px; color: var(--nt-slate); margin: 2px 0 0; }
     .hold { margin-left: 6px; font-size: 11px; font-weight: 700; color: var(--nt-red); white-space: nowrap; }
     button, select { width: auto; }
-  `],
+  `]
 })
 export class RecordsComponent implements OnInit {
   readonly facade = inject(RecordsFacade);

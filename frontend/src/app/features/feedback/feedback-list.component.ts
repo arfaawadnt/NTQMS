@@ -14,11 +14,10 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
 
 /** General feedback register: compliments, suggestions, dissatisfaction + satisfaction trend (§8.6.2). */
 @Component({
-  selector: 'qams-feedback-list',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, LovSelectComponent, ListStatsComponent],
-  template: `
+    selector: 'qams-feedback-list',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, LovSelectComponent, ListStatsComponent],
+    template: `
     <qams-page-header [title]="i18n.t('fbk.title')" [subtitle]="i18n.t('fbk.subtitle')">
       <button (click)="showForm.set(!showForm())">{{ i18n.t('fbk.new') }}</button>
     </qams-page-header>
@@ -105,7 +104,7 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
       <router-outlet (activate)="detailOpen.set(true)" (deactivate)="detailOpen.set(false)" />
     </qams-drawer>
   `,
-  styles: [`
+    styles: [`
     .filterbar { display: flex; gap: 10px; align-items: center; padding: 10px 14px; margin-bottom: 14px; flex-wrap: wrap; }
     .search { max-width: 280px; }
     .row { display: flex; gap: .6rem; margin-top: 1rem; }
@@ -113,7 +112,7 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
     button, select { width: auto; }
     .good { color: var(--nt-green); font-weight: 600; }
     .bad { color: var(--nt-red); font-weight: 600; }
-  `],
+  `]
 })
 export class FeedbackListComponent implements OnInit {
   readonly facade = inject(FeedbackFacade);

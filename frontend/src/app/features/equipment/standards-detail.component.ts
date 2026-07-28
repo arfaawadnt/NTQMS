@@ -17,11 +17,10 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
  * Expiry is latched by the backend sweep, never by the client.
  */
 @Component({
-  selector: 'qams-standards-detail',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
-  template: `
+    selector: 'qams-standards-detail',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+    template: `
     @if (item(); as s) {
       <qams-page-header [title]="s.standardRef + ' — ' + s.name" [subtitle]="i18n.t('std.type' + s.type)">
         <a routerLink="/reference-standards" class="ghost-link">← {{ i18n.t('std.backToList') }}</a>
@@ -76,7 +75,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
   `,
-  styles: [`
+    styles: [`
     .meta { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; margin-bottom: 1rem; }
     .meta span.muted { display: block; font-size: .75rem; }
     .meta button { width: auto; margin-inline-start: auto; }
@@ -87,7 +86,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
     .warn { color: var(--nt-red); }
     form button, section > button { width: auto; margin-top: .5rem; }
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
-  `],
+  `]
 })
 export class StandardsDetailComponent implements OnInit {
   readonly facade = inject(StandardsFacade);

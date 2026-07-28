@@ -18,11 +18,10 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
  * backend (sweep + saga), never from the client.
  */
 @Component({
-  selector: 'qams-authorization-detail',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
-  template: `
+    selector: 'qams-authorization-detail',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+    template: `
     @if (item(); as a) {
       <qams-page-header
         [title]="org.userName(a.userId) || i18n.t('authz.person')"
@@ -77,7 +76,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
   `,
-  styles: [`
+    styles: [`
     .meta { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; margin-bottom: 1rem; }
     .meta span.muted { display: block; font-size: .75rem; }
     section { margin-bottom: 1rem; }
@@ -86,7 +85,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
     form button, section > button { width: auto; margin-top: .5rem; }
     .danger { background: var(--nt-red); color: #fff; }
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
-  `],
+  `]
 })
 export class AuthorizationDetailComponent implements OnInit {
   readonly facade = inject(AuthorizationsFacade);

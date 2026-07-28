@@ -18,11 +18,10 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
  * states that consequence.
  */
 @Component({
-  selector: 'qams-monitoring-detail',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
-  template: `
+    selector: 'qams-monitoring-detail',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+    template: `
     @if (item(); as p) {
       <qams-page-header [title]="p.pointRef + ' — ' + p.name" [subtitle]="p.parameter + ' · ' + (p.location ?? '')">
         <a routerLink="/monitoring" class="ghost-link">← {{ i18n.t('env.backToList') }}</a>
@@ -114,7 +113,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
   `,
-  styles: [`
+    styles: [`
     .meta { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; margin-bottom: 1rem; }
     .meta span.muted { display: block; font-size: .75rem; }
     .lifecycle { display: flex; gap: .5rem; margin-inline-start: auto; }
@@ -126,7 +125,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
     form button { width: auto; margin-top: .5rem; }
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
     @media (max-width: 700px) { .pair { grid-template-columns: 1fr; } }
-  `],
+  `]
 })
 export class MonitoringDetailComponent implements OnInit {
   readonly facade = inject(MonitoringFacade);

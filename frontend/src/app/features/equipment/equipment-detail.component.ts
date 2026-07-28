@@ -21,11 +21,10 @@ import { LovSelectComponent } from '../../shared/ui/lov-select.component';
  * to service; the out-of-service/lockout status comes from the backend sweep.
  */
 @Component({
-  selector: 'qams-equipment-detail',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, LovSelectComponent],
-  template: `
+    selector: 'qams-equipment-detail',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, LovSelectComponent],
+    template: `
     @if (item(); as e) {
       <qams-page-header [title]="e.code + ' — ' + e.name" [subtitle]="e.serialNumber">
         <a routerLink="/equipment" class="ghost-link">← {{ i18n.t('equip.backToList') }}</a>
@@ -145,7 +144,7 @@ import { LovSelectComponent } from '../../shared/ui/lov-select.component';
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
   `,
-  styles: [`
+    styles: [`
     .meta { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; margin-bottom: 1rem; }
     .meta span.muted { display: block; font-size: .75rem; }
     .meta button { width: auto; margin-inline-start: auto; }
@@ -159,7 +158,7 @@ import { LovSelectComponent } from '../../shared/ui/lov-select.component';
     form button { width: auto; margin-top: .5rem; }
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
     @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
-  `],
+  `]
 })
 export class EquipmentDetailComponent implements OnInit {
   readonly facade = inject(EquipmentFacade);

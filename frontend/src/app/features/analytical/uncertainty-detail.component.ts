@@ -17,11 +17,10 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
  * server-side on Calculate, target verdict, and the QM approval freeze.
  */
 @Component({
-  selector: 'qams-uncertainty-detail',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
-  template: `
+    selector: 'qams-uncertainty-detail',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+    template: `
     @if (item(); as b) {
       <qams-page-header [title]="b.budgetRef + ' — ' + b.analyte" [subtitle]="b.method + ' · ' + b.level">
         <a routerLink="/uncertainty" class="ghost-link">← {{ i18n.t('mu.backToList') }}</a>
@@ -110,7 +109,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
   `,
-  styles: [`
+    styles: [`
     .meta { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; margin-bottom: 1rem; }
     .meta span.muted { display: block; font-size: .75rem; }
     .good { color: var(--nt-green); }
@@ -124,7 +123,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
     form button { width: auto; margin-top: .5rem; }
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
     @media (max-width: 900px) { .quad { grid-template-columns: 1fr 1fr; } }
-  `],
+  `]
 })
 export class UncertaintyDetailComponent implements OnInit {
   readonly facade = inject(UncertaintyFacade);

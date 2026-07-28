@@ -22,11 +22,10 @@ import { UserSelectComponent } from '../../shared/ui/user-select.component';
  * person — the drawer only offers those.
  */
 @Component({
-  selector: 'qams-authorization-matrix',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, ListStatsComponent, UserSelectComponent],
-  template: `
+    selector: 'qams-authorization-matrix',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, ListStatsComponent, UserSelectComponent],
+    template: `
     <qams-page-header [title]="i18n.t('authz.title')" [subtitle]="i18n.t('authz.subtitle')">
       @if (perms.canAssignTraining()) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('authz.new') }}</button>
@@ -116,7 +115,7 @@ import { UserSelectComponent } from '../../shared/ui/user-select.component';
       <router-outlet (activate)="detailOpen.set(true)" (deactivate)="detailOpen.set(false)" />
     </qams-drawer>
   `,
-  styles: [`
+    styles: [`
     .filterbar { display: flex; gap: 10px; align-items: center; padding: 10px 14px; margin-bottom: 14px; flex-wrap: wrap; }
     .search { max-width: 280px; }
     .row { display: flex; gap: .6rem; margin-top: 1rem; }
@@ -132,7 +131,7 @@ import { UserSelectComponent } from '../../shared/ui/user-select.component';
     .chip.expired { background: var(--nt-slate, #3B4658); }
     .chip.revoked { background: var(--nt-red, #c62828); }
     .legend { margin-top: .5rem; font-size: .8rem; }
-  `],
+  `]
 })
 export class AuthorizationMatrixComponent implements OnInit {
   readonly facade = inject(AuthorizationsFacade);

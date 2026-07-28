@@ -12,11 +12,10 @@ import { I18nService } from '../../core/i18n.service';
  * enrollment-scoped session that is barred from every other endpoint.
  */
 @Component({
-  selector: 'qams-mfa-setup',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule],
-  template: `
+    selector: 'qams-mfa-setup',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [FormsModule],
+    template: `
     <div class="wrap">
       <div class="card">
         <div class="head">
@@ -59,7 +58,7 @@ import { I18nService } from '../../core/i18n.service';
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     .wrap { min-height: 100vh; display: grid; place-items: center; padding: 1.5rem;
             background: linear-gradient(135deg, #10263e 0%, #16314f 55%, #0d3a4a 100%); }
     .card { width: 460px; max-width: 100%; background: var(--nt-surface);
@@ -81,7 +80,7 @@ import { I18nService } from '../../core/i18n.service';
     .cancel { display: block; margin: 14px auto 0; }
     .ok { background: var(--nt-ok-bg, #e6f4ec); color: var(--nt-green, #1f8a54); border-radius: 8px; padding: 12px 14px;
           font-size: 13px; font-weight: 600; margin-bottom: 16px; }
-  `],
+  `]
 })
 export class MfaSetupComponent implements OnInit {
   readonly i18n = inject(I18nService);

@@ -14,11 +14,10 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
  * multi-user setup that segregation-of-duties workflows require.
  */
 @Component({
-  selector: 'qams-users',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, StatusPillComponent],
-  template: `
+    selector: 'qams-users',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, StatusPillComponent],
+    template: `
     <qams-page-header [title]="i18n.t('users.title')">
       <button (click)="showForm.set(!showForm())">{{ i18n.t('users.new') }}</button>
     </qams-page-header>
@@ -92,14 +91,14 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
       </div>
     }
   `,
-  styles: [`
+    styles: [`
     .form { margin-bottom: 1rem; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .5rem 1rem; }
     .row { display: flex; gap: .6rem; margin-top: 1rem; }
     .row-actions { display: flex; gap: .4rem; }
     button, select { width: auto; }
     td select { min-width: 150px; }
-  `],
+  `]
 })
 export class UsersComponent implements OnInit {
   readonly facade = inject(UsersFacade);

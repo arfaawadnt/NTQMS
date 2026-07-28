@@ -17,11 +17,10 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
 
 /** Audit register + a schedule form with a dynamic ISO-clause checklist (FormArray). */
 @Component({
-  selector: 'qams-audit-list',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent, UserSelectComponent, LoadMoreComponent],
-  template: `
+    selector: 'qams-audit-list',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent, UserSelectComponent, LoadMoreComponent],
+    template: `
     <qams-page-header [title]="i18n.t('audit.title')">
       @if (perms.canApprove()) { <button (click)="showForm.set(!showForm())">{{ i18n.t('audit.new') }}</button> }
     </qams-page-header>
@@ -104,7 +103,7 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
       <router-outlet (activate)="detailOpen.set(true)" (deactivate)="detailOpen.set(false)" />
     </qams-drawer>
   `,
-  styles: [`
+    styles: [`
     .filterbar { display: flex; gap: 10px; align-items: center; padding: 10px 14px; margin-bottom: 14px; flex-wrap: wrap; }
     .search { max-width: 280px; }
     .form { margin-bottom: 1rem; }
@@ -116,7 +115,7 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
     .row { display: flex; gap: .6rem; margin-top: 1rem; }
     .clickable { cursor: pointer; }
     button { width: auto; }
-  `],
+  `]
 })
 export class AuditListComponent implements OnInit {
   readonly facade = inject(AuditsFacade);

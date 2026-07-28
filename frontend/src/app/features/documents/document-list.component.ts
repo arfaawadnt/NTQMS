@@ -12,11 +12,10 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
 
 /** Controlled-document register: list + a create form that uploads the initial file. */
 @Component({
-  selector: 'qams-document-list',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, LovSelectComponent, LoadMoreComponent],
-  template: `
+    selector: 'qams-document-list',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, LovSelectComponent, LoadMoreComponent],
+    template: `
     <qams-page-header [title]="i18n.t('doc.title')">
       <button (click)="showForm.set(!showForm())">{{ i18n.t('doc.new') }}</button>
     </qams-page-header>
@@ -88,14 +87,14 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
       <router-outlet (activate)="detailOpen.set(true)" (deactivate)="detailOpen.set(false)" />
     </qams-drawer>
   `,
-  styles: [`
+    styles: [`
     .form { margin-bottom: 1rem; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: .5rem 1rem; }
     .col-2 { grid-column: span 2; }
     .row { display: flex; gap: .6rem; margin-top: 1rem; }
     .clickable { cursor: pointer; }
     button { width: auto; }
-  `],
+  `]
 })
 export class DocumentListComponent implements OnInit {
   readonly facade = inject(DocumentsFacade);

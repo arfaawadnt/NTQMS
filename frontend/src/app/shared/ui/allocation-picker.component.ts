@@ -12,11 +12,10 @@ import { Department } from '../../core/models';
  * labs skip allocation).
  */
 @Component({
-  selector: 'qams-allocation-picker',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule],
-  template: `
+    selector: 'qams-allocation-picker',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule],
+    template: `
     <div class="pair">
       <div>
         <label>{{ i18n.t('alloc.branch') }}</label>
@@ -38,11 +37,11 @@ import { Department } from '../../core/models';
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     select { width: 100%; }
     label { margin-top: 12px; }
-  `],
+  `]
 })
 export class AllocationPickerComponent implements OnInit {
   readonly i18n = inject(I18nService);

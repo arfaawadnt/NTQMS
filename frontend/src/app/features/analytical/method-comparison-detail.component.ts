@@ -21,11 +21,10 @@ interface Pt { x: number; y: number; }
  * mean-bias and 95% limit-of-agreement bands. Statistics come from the backend.
  */
 @Component({
-  selector: 'qams-method-comparison-detail',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, CsvImportComponent],
-  template: `
+    selector: 'qams-method-comparison-detail',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, CsvImportComponent],
+    template: `
     @if (item(); as s) {
       <qams-page-header [title]="s.studyRef + ' — ' + s.analyte" [subtitle]="s.testMethod + ' vs ' + s.referenceMethod">
         <a routerLink="/method-comparisons" class="ghost-link">← {{ i18n.t('mc.backToList') }}</a>
@@ -163,7 +162,7 @@ interface Pt { x: number; y: number; }
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
   `,
-  styles: [`
+    styles: [`
     .meta { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; margin-bottom: 1rem; }
     .meta span.muted { display: block; font-size: .75rem; }
     .warn { color: var(--nt-red); font-weight: 600; }
@@ -192,7 +191,7 @@ interface Pt { x: number; y: number; }
     form button { width: auto; margin-top: .5rem; }
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
     @media (max-width: 900px) { .plots, .trio { grid-template-columns: 1fr; } }
-  `],
+  `]
 })
 export class MethodComparisonDetailComponent implements OnInit {
   readonly facade = inject(MethodComparisonFacade);

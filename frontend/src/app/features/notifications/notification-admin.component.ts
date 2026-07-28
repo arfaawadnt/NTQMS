@@ -19,11 +19,10 @@ import { DrawerComponent } from '../../shared/ui/drawer.component';
  * emails with their errors.
  */
 @Component({
-  selector: 'qams-notification-admin',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent],
-  template: `
+    selector: 'qams-notification-admin',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent],
+    template: `
     <qams-page-header [title]="i18n.t('nrule.title')" [subtitle]="i18n.t('nrule.subtitle')">
       <button (click)="showForm.set(!showForm())">{{ i18n.t('nrule.new') }}</button>
     </qams-page-header>
@@ -115,7 +114,7 @@ import { DrawerComponent } from '../../shared/ui/drawer.component';
       }
     </section>
   `,
-  styles: [`
+    styles: [`
     section { margin-bottom: 1rem; }
     .roles { display: flex; flex-wrap: wrap; gap: 12px; margin: 4px 0; }
     .inline { display: inline-flex; align-items: center; gap: 6px; margin: 0; font-weight: 400; }
@@ -126,7 +125,7 @@ import { DrawerComponent } from '../../shared/ui/drawer.component';
     .clickable { cursor: pointer; }
     .err-cell { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--nt-red); }
     button, select { width: auto; }
-  `],
+  `]
 })
 export class NotificationAdminComponent implements OnInit {
   readonly i18n = inject(I18nService);

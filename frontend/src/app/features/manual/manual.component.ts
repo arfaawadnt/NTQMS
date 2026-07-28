@@ -19,11 +19,10 @@ interface ManualSection {
  * help popup, so the manual and the popups never drift apart.
  */
 @Component({
-  selector: 'qams-manual',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, PageHeaderComponent, HelpBodyComponent],
-  template: `
+    selector: 'qams-manual',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [RouterLink, PageHeaderComponent, HelpBodyComponent],
+    template: `
     <qams-page-header [title]="i18n.t('nav.manual')" [subtitle]="i18n.t('manual.subtitle')" />
 
     <div class="toolbar card">
@@ -68,7 +67,7 @@ interface ManualSection {
       </section>
     }
   `,
-  styles: [`
+    styles: [`
     .toolbar { display: flex; align-items: center; gap: 12px; padding: 10px 14px; margin-bottom: 16px; }
     .search { flex: 1; max-width: 360px; }
     .count { font-size: 12px; color: var(--nt-grey-m); font-variant-numeric: tabular-nums; }
@@ -105,7 +104,7 @@ interface ManualSection {
       color: var(--nt-blue); text-decoration: none;
     }
     .goto:hover { text-decoration: underline; }
-  `],
+  `]
 })
 export class ManualComponent {
   readonly i18n = inject(I18nService);

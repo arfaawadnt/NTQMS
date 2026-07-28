@@ -37,10 +37,9 @@ const GROUPS_STATE_KEY = 'qams.sidebar.groups';
  * use until the user chooses otherwise.
  */
 @Component({
-  selector: 'qams-shell',
-  standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, PageHelpComponent, ChangeReasonDialogComponent, TextPromptDialogComponent],
-  template: `
+    selector: 'qams-shell',
+    imports: [RouterOutlet, RouterLink, RouterLinkActive, PageHelpComponent, ChangeReasonDialogComponent, TextPromptDialogComponent],
+    template: `
     <div class="app">
       <header class="hdr">
         <button class="hbtn burger" (click)="toggleSidebar()" [attr.aria-label]="i18n.t('nav.toggleSidebar')" [attr.title]="i18n.t('nav.toggleSidebar')">
@@ -134,7 +133,7 @@ const GROUPS_STATE_KEY = 'qams.sidebar.groups';
     <!-- Accessible text/password prompt modal (R-4), overlaying every screen. -->
     <qams-text-prompt-dialog />
   `,
-  styles: [`
+    styles: [`
     .app { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
     /* ---------- signature-gradient header ---------- */
@@ -224,7 +223,7 @@ const GROUPS_STATE_KEY = 'qams.sidebar.groups';
 
     main { flex: 1; overflow-y: auto; }
     .wrap { padding: 20px 24px 48px; }
-  `],
+  `]
 })
 export class ShellComponent {
   readonly auth = inject(AuthService);

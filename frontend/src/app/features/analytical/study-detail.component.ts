@@ -16,11 +16,10 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
  * total allowable error → QM sign-off freezes the study.
  */
 @Component({
-  selector: 'qams-study-detail',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
-  template: `
+    selector: 'qams-study-detail',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+    template: `
     @if (item(); as s) {
       <qams-page-header [title]="s.studyRef + ' — ' + s.analyte" [subtitle]="s.protocol + ' · TEa ' + s.totalAllowableError + '%'">
         <a routerLink="/validation-studies" class="ghost-link">← {{ i18n.t('val.backToList') }}</a>
@@ -87,7 +86,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
   `,
-  styles: [`
+    styles: [`
     .meta { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; margin-bottom: 1rem; }
     .meta span.muted { display: block; font-size: .75rem; }
     section { margin-bottom: 1rem; }
@@ -97,7 +96,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
     form { border-top: 1px solid var(--nt-border); padding-top: .75rem; margin-top: .75rem; }
     form button { width: auto; margin-top: .5rem; }
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
-  `],
+  `]
 })
 export class StudyDetailComponent implements OnInit {
   readonly facade = inject(ValidationFacade);

@@ -13,10 +13,9 @@ import { I18nService, Lang } from '../../core/i18n.service';
  * platform administrator.
  */
 @Component({
-  selector: 'qams-login',
-  standalone: true,
-  imports: [FormsModule],
-  template: `
+    selector: 'qams-login',
+    imports: [FormsModule],
+    template: `
     <div class="wrap">
       <div class="panel">
         <!-- brand side -->
@@ -93,7 +92,7 @@ import { I18nService, Lang } from '../../core/i18n.service';
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     .wrap { min-height: 100vh; display: grid; place-items: center; padding: 1.5rem;
             background: linear-gradient(135deg, #10263e 0%, #16314f 55%, #0d3a4a 100%); }
     .panel {
@@ -162,7 +161,7 @@ import { I18nService, Lang } from '../../core/i18n.service';
       .brand { padding: 28px 28px 24px; }
       .brandfoot { padding-top: 20px; }
     }
-  `],
+  `]
 })
 export class LoginComponent {
   readonly i18n = inject(I18nService);

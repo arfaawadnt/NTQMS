@@ -13,11 +13,10 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
 
 /** Competency matrix: status-filterable list + an assign form (role-gated). */
 @Component({
-  selector: 'qams-competency-list',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, UserSelectComponent, LoadMoreComponent],
-  template: `
+    selector: 'qams-competency-list',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, UserSelectComponent, LoadMoreComponent],
+    template: `
     <qams-page-header [title]="i18n.t('comp.title')">
       <select [value]="statusFilter()" (change)="onFilter($event)" aria-label="Status filter">
         <option value="">{{ i18n.t('nc.allStatuses') }}</option>
@@ -75,7 +74,7 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
       <router-outlet (activate)="detailOpen.set(true)" (deactivate)="detailOpen.set(false)" />
     </qams-drawer>
   `,
-  styles: [`
+    styles: [`
     .form { margin-bottom: 1rem; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .5rem 1rem; }
     .col-2 { grid-column: span 2; }
@@ -83,7 +82,7 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
     .clickable { cursor: pointer; }
     .mono { font-family: var(--nt-mono, monospace); font-size: .82rem; }
     button, select { width: auto; }
-  `],
+  `]
 })
 export class CompetencyListComponent implements OnInit {
   readonly facade = inject(CompetencyFacade);

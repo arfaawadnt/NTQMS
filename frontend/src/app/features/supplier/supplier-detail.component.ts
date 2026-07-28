@@ -26,11 +26,10 @@ interface CriterionForm {
  * cannot approve their own supplier (enforced by the backend, surfaced here).
  */
 @Component({
-  selector: 'qams-supplier-detail',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, LovSelectComponent],
-  template: `
+    selector: 'qams-supplier-detail',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, LovSelectComponent],
+    template: `
     @if (item(); as s) {
       <qams-page-header [title]="s.supplierRef + ' — ' + s.name" [subtitle]="s.supplierType">
         <a routerLink="/suppliers" class="ghost-link">← {{ i18n.t('sup.backToList') }}</a>
@@ -129,7 +128,7 @@ interface CriterionForm {
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
   `,
-  styles: [`
+    styles: [`
     .meta { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; margin-bottom: 1rem; }
     .meta span.muted { display: block; font-size: .75rem; }
     .meta button { margin-inline-start: auto; }
@@ -144,7 +143,7 @@ interface CriterionForm {
     form button { width: auto; margin-top: .5rem; }
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
     @media (max-width: 800px) { .grid2 { grid-template-columns: 1fr; } }
-  `],
+  `]
 })
 export class SupplierDetailComponent implements OnInit {
   readonly facade = inject(SupplierFacade);

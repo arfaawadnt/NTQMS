@@ -16,11 +16,10 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
 
 /** Management review list: live statistics, filterable list + a schedule form (QM-gated). */
 @Component({
-  selector: 'qams-review-list',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent, UserSelectComponent, LoadMoreComponent],
-  template: `
+    selector: 'qams-review-list',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent, UserSelectComponent, LoadMoreComponent],
+    template: `
     <qams-page-header [title]="i18n.t('mrv.title')">
       @if (perms.canApprove()) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('mrv.new') }}</button>
@@ -88,7 +87,7 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
       <router-outlet (activate)="detailOpen.set(true)" (deactivate)="detailOpen.set(false)" />
     </qams-drawer>
   `,
-  styles: [`
+    styles: [`
     .filterbar { display: flex; gap: 10px; align-items: center; padding: 10px 14px; margin-bottom: 14px; flex-wrap: wrap; }
     .search { max-width: 280px; }
     .form { margin-bottom: 1rem; }
@@ -98,7 +97,7 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
     .row { display: flex; gap: .6rem; margin-top: 1rem; }
     .clickable { cursor: pointer; }
     button, select { width: auto; }
-  `],
+  `]
 })
 export class ReviewListComponent implements OnInit {
   readonly facade = inject(ReviewFacade);

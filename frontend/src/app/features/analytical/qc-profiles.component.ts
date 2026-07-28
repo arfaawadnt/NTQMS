@@ -11,11 +11,10 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 
 /** QC control profiles register + a create form (QM-gated). */
 @Component({
-  selector: 'qams-qc-profiles',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DecimalPipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent],
-  template: `
+    selector: 'qams-qc-profiles',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DecimalPipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent],
+    template: `
     <qams-page-header [title]="i18n.t('qc.title')" [subtitle]="i18n.t('qc.subtitle')">
       @if (perms.canApprove()) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('qc.new') }}</button>
@@ -68,13 +67,13 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
       <router-outlet (activate)="detailOpen.set(true)" (deactivate)="detailOpen.set(false)" />
     </qams-drawer>
   `,
-  styles: [`
+    styles: [`
     .form { margin-bottom: 1rem; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .5rem 1rem; }
     .row { display: flex; gap: .6rem; margin-top: 1rem; }
     .clickable { cursor: pointer; }
     button { width: auto; }
-  `],
+  `]
 })
 export class QcProfilesComponent implements OnInit {
   readonly facade = inject(QcFacade);

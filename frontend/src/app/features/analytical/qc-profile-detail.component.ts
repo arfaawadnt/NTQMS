@@ -17,11 +17,10 @@ import { LeveyJenningsChartComponent } from './levey-jennings-chart.component';
  * troubleshooting note (the backend refuses notes on in-control runs).
  */
 @Component({
-  selector: 'qams-qc-profile-detail',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, LeveyJenningsChartComponent],
-  template: `
+    selector: 'qams-qc-profile-detail',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, LeveyJenningsChartComponent],
+    template: `
     @if (facade.selected(); as p) {
       <qams-page-header [title]="p.analyte + ' — ' + p.instrument" [subtitle]="i18n.t('qc.lot') + ': ' + p.controlLot + ' · μ=' + p.targetMean + ' σ=' + p.targetSd">
         <a routerLink="/qc" class="ghost-link">← {{ i18n.t('qc.backToList') }}</a>
@@ -92,7 +91,7 @@ import { LeveyJenningsChartComponent } from './levey-jennings-chart.component';
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
   `,
-  styles: [`
+    styles: [`
     section { margin-bottom: 1rem; }
     .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .bad { color: var(--nt-red); font-weight: 700; }
@@ -101,7 +100,7 @@ import { LeveyJenningsChartComponent } from './levey-jennings-chart.component';
     form { border-top: 1px solid var(--nt-border); padding-top: .75rem; margin-top: .75rem; }
     form button { width: auto; margin-top: .5rem; }
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
-  `],
+  `]
 })
 export class QcProfileDetailComponent implements OnInit {
   readonly facade = inject(QcFacade);

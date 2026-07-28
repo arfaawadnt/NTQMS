@@ -21,11 +21,10 @@ type LedgerTab = 'trail' | 'signatures' | 'security' | 'reviews';
  * recomputes the whole chain server-side and reports the first break, if any.
  */
 @Component({
-  selector: 'qams-compliance',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, DatePipe, PageHeaderComponent],
-  template: `
+    selector: 'qams-compliance',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [FormsModule, DatePipe, PageHeaderComponent],
+    template: `
     <qams-page-header [title]="i18n.t('cmp.title')" [subtitle]="i18n.t('cmp.subtitle')">
       <button class="secondary" (click)="exports.auditTrailXlsx()">{{ i18n.t('exp.xlsx') }}</button>
       <button (click)="verify()" [disabled]="verifying()">{{ i18n.t('cmp.verifyChain') }}</button>
@@ -187,7 +186,7 @@ type LedgerTab = 'trail' | 'signatures' | 'security' | 'reviews';
       </div>
     }
   `,
-  styles: [`
+    styles: [`
     .chain { margin-bottom: 1rem; font-weight: 600; }
     .openrow { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
     .openrow input { max-width: 170px; }
@@ -214,7 +213,7 @@ type LedgerTab = 'trail' | 'signatures' | 'security' | 'reviews';
       font-family: var(--nt-mono); white-space: pre-wrap; word-break: break-word;
     }
     button { width: auto; }
-  `],
+  `]
 })
 export class ComplianceComponent implements OnInit {
   readonly i18n = inject(I18nService);

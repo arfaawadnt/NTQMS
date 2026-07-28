@@ -19,11 +19,10 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
  * LOV-backed category and organizational allocation.
  */
 @Component({
-  selector: 'qams-risk-list',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent, LovSelectComponent, LoadMoreComponent],
-  template: `
+    selector: 'qams-risk-list',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent, LovSelectComponent, LoadMoreComponent],
+    template: `
     <qams-page-header [title]="i18n.t('risk.title')">
       <button (click)="showForm.set(!showForm())">{{ i18n.t('risk.new') }}</button>
     </qams-page-header>
@@ -100,7 +99,7 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
       <router-outlet (activate)="detailOpen.set(true)" (deactivate)="detailOpen.set(false)" />
     </qams-drawer>
   `,
-  styles: [`
+    styles: [`
     .filterbar { display: flex; gap: 10px; align-items: center; padding: 10px 14px; margin-bottom: 14px; flex-wrap: wrap; }
     .search { max-width: 280px; }
     .form { margin-bottom: 1rem; }
@@ -111,7 +110,7 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
     .rpn { font-weight: 700; }
     .rpn.high { color: var(--nt-red, #b42318); }
     button, select { width: auto; }
-  `],
+  `]
 })
 export class RiskListComponent implements OnInit {
   readonly facade = inject(RiskFacade);

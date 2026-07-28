@@ -15,11 +15,10 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
  * is computed from real rows or not shown at all.
  */
 @Component({
-  selector: 'qams-dashboard',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, DatePipe, DecimalPipe, PageHeaderComponent],
-  template: `
+    selector: 'qams-dashboard',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [RouterLink, DatePipe, DecimalPipe, PageHeaderComponent],
+    template: `
     <qams-page-header [title]="i18n.t('dash.title')"
         [subtitle]="kpis() ? i18n.t('dash.computedAt') + ' ' + ((kpis()!.computedAtUtc | date:'medium') ?? '') : ''" />
 
@@ -101,7 +100,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
       </section>
     }
   `,
-  styles: [`
+    styles: [`
     .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
     .kpi {
       border-radius: var(--nt-radius-card); padding: 14px 16px; color: #fff;
@@ -128,7 +127,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
     .legend { display: flex; gap: 18px; margin-top: 8px; font-size: 11.5px; color: var(--nt-grey-d); }
     .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-inline-end: 5px; }
     @media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
-  `],
+  `]
 })
 export class DashboardComponent implements OnInit {
   readonly i18n = inject(I18nService);

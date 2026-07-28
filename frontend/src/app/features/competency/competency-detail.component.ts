@@ -17,11 +17,10 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
  * it has been authorized — both mirror the backend role gates.
  */
 @Component({
-  selector: 'qams-competency-detail',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
-  template: `
+    selector: 'qams-competency-detail',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+    template: `
     @if (item(); as c) {
       <qams-page-header [title]="c.subject" [subtitle]="i18n.t('comp.trainee') + ': ' + c.traineeId">
         <a routerLink="/competencies" class="ghost-link">← {{ i18n.t('comp.backToList') }}</a>
@@ -88,7 +87,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
   `,
-  styles: [`
+    styles: [`
     .meta { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; margin-bottom: 1rem; }
     .meta span.muted { display: block; font-size: .75rem; }
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
@@ -99,7 +98,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
     form button { width: auto; margin-top: .5rem; }
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
     @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
-  `],
+  `]
 })
 export class CompetencyDetailComponent implements OnInit {
   readonly facade = inject(CompetencyFacade);

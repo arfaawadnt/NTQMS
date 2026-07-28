@@ -19,11 +19,10 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
  * QM closure with the coverage summary. Unfulfilled lines stay visible as gaps.
  */
 @Component({
-  selector: 'qams-pt-plan-detail',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
-  template: `
+    selector: 'qams-pt-plan-detail',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+    template: `
     @if (item(); as p) {
       <qams-page-header [title]="p.planRef + ' — ' + p.year" [subtitle]="i18n.t('ptp.subtitle')">
         <a routerLink="/pt-plans" class="ghost-link">← {{ i18n.t('ptp.backToList') }}</a>
@@ -138,7 +137,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
   `,
-  styles: [`
+    styles: [`
     .meta { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; margin-bottom: 1rem; }
     .meta span.muted { display: block; font-size: .75rem; }
     .meta button { width: auto; margin-inline-start: auto; }
@@ -152,7 +151,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
     form button { width: auto; margin-top: .5rem; }
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
     @media (max-width: 900px) { .grid5, .pair { grid-template-columns: 1fr 1fr; } }
-  `],
+  `]
 })
 export class PtPlanDetailComponent implements OnInit {
   readonly facade = inject(PtPlansFacade);

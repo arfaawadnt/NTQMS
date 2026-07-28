@@ -11,11 +11,10 @@ import { HelpBodyComponent } from './help-body.component';
  * and links through to the full User Manual module.
  */
 @Component({
-  selector: 'qams-page-help',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, DrawerComponent, HelpBodyComponent],
-  template: `
+    selector: 'qams-page-help',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [RouterLink, DrawerComponent, HelpBodyComponent],
+    template: `
     <qams-drawer
       [open]="!!help.topic()"
       [title]="title()"
@@ -27,13 +26,13 @@ import { HelpBodyComponent } from './help-body.component';
       }
     </qams-drawer>
   `,
-  styles: [`
+    styles: [`
     .all {
       display: inline-block; margin-top: 1.25rem; font-size: 12.5px; font-weight: 600;
       color: var(--nt-blue); text-decoration: none;
     }
     .all:hover { text-decoration: underline; }
-  `],
+  `]
 })
 export class PageHelpComponent {
   readonly help = inject(HelpService);

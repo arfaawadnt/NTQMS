@@ -17,11 +17,10 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
  * links the records and ends this one).
  */
 @Component({
-  selector: 'qams-feedback-detail',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
-  template: `
+    selector: 'qams-feedback-detail',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+    template: `
     @if (item(); as f) {
       <qams-page-header [title]="f.feedbackRef + ' — ' + f.subject" [subtitle]="i18n.t('fbk.type' + f.type) + ' · ' + f.source + ' · ' + f.channel">
         <a routerLink="/feedback" class="ghost-link">← {{ i18n.t('fbk.backToList') }}</a>
@@ -91,7 +90,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
   `,
-  styles: [`
+    styles: [`
     .meta { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; margin-bottom: 1rem; }
     .meta span.muted { display: block; font-size: .75rem; }
     section { margin-bottom: 1rem; }
@@ -100,7 +99,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
     form { margin-top: .75rem; }
     form button { width: auto; margin-top: .5rem; }
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
-  `],
+  `]
 })
 export class FeedbackDetailComponent implements OnInit {
   readonly facade = inject(FeedbackFacade);

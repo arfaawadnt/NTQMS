@@ -18,11 +18,10 @@ type RefTab = 'branches' | 'departments' | 'tests' | 'lovs';
  * deactivation of org units is TenantAdmin-only — both mirroring the backend.
  */
 @Component({
-  selector: 'qams-reference-data',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, ReactiveFormsModule, PageHeaderComponent, DrawerComponent, StatusPillComponent],
-  template: `
+    selector: 'qams-reference-data',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [FormsModule, ReactiveFormsModule, PageHeaderComponent, DrawerComponent, StatusPillComponent],
+    template: `
     <qams-page-header [title]="i18n.t('ref.title')" [subtitle]="i18n.t('ref.subtitle')">
       @if (perms.canApprove()) {
         <button (click)="openForm()">{{ addLabel() }}</button>
@@ -204,7 +203,7 @@ type RefTab = 'branches' | 'departments' | 'tests' | 'lovs';
       </form>
     </qams-drawer>
   `,
-  styles: [`
+    styles: [`
     .tabs { display: flex; gap: 0; margin-bottom: 12px; background: var(--nt-filter-grey); border-radius: 8px; padding: 3px; width: fit-content; }
     .tab { background: transparent; color: var(--nt-slate); font-size: 12.5px; padding: 7px 16px; border-radius: 6px; }
     .tab:hover { background: rgba(255,255,255,.6); }
@@ -214,7 +213,7 @@ type RefTab = 'branches' | 'departments' | 'tests' | 'lovs';
     .row { display: flex; gap: .6rem; margin-top: 1rem; }
     .danger-link { color: var(--nt-red); }
     button, select { width: auto; }
-  `],
+  `]
 })
 export class ReferenceDataComponent implements OnInit {
   readonly i18n = inject(I18nService);

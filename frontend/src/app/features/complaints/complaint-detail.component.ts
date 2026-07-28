@@ -19,11 +19,10 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
  * view-confidential privilege.
  */
 @Component({
-  selector: 'qams-complaint-detail',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
-  template: `
+    selector: 'qams-complaint-detail',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+    template: `
     @if (item(); as c) {
       <qams-page-header [title]="c.complaintRef + ' — ' + c.subject" [subtitle]="c.channel + ' · ' + ((c.loggedAtUtc | date:'medium') ?? '')">
         <a routerLink="/complaints" class="ghost-link">← {{ i18n.t('cmpl.backToList') }}</a>
@@ -119,7 +118,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
   `,
-  styles: [`
+    styles: [`
     .meta { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; margin-bottom: 1rem; }
     .meta span.muted { display: inline; font-size: .78rem; }
     .pre { white-space: pre-wrap; margin: 0; }
@@ -129,7 +128,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
     form button, section button { width: auto; margin-top: .5rem; }
     .small { font-size: .78rem; margin-top: .4rem; }
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
-  `],
+  `]
 })
 export class ComplaintDetailComponent implements OnInit {
   readonly facade = inject(ComplaintsFacade);

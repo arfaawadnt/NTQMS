@@ -15,11 +15,10 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
  * completed review — with the count of accounts recertified — is the evidence.
  */
 @Component({
-  selector: 'qams-access-reviews',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, DatePipe, PageHeaderComponent],
-  template: `
+    selector: 'qams-access-reviews',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [FormsModule, DatePipe, PageHeaderComponent],
+    template: `
     <qams-page-header [title]="i18n.t('uar.title')" [subtitle]="i18n.t('uar.subtitle')">
       <button (click)="open()" [disabled]="loading()">{{ i18n.t('uar.open') }}</button>
     </qams-page-header>
@@ -67,7 +66,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
       </div>
     }
   `,
-  styles: [`
+    styles: [`
     .completerow { display: flex; gap: 10px; align-items: center; padding: 6px 0; flex-wrap: wrap; }
     .completerow .grow { flex: 1; min-width: 240px; }
     .chk { display: flex; gap: 6px; align-items: center; white-space: nowrap; }
@@ -76,7 +75,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
     .bad { color: var(--nt-red); font-weight: 600; }
     .hint { font-size: 11.5px; color: var(--nt-slate); margin-top: 10px; }
     button { width: auto; }
-  `],
+  `]
 })
 export class AccessReviewsComponent implements OnInit {
   readonly i18n = inject(I18nService);

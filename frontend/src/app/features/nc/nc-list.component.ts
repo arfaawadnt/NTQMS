@@ -19,11 +19,10 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
  * allocation.
  */
 @Component({
-  selector: 'qams-nc-list',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent, LoadMoreComponent],
-  template: `
+    selector: 'qams-nc-list',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent, LoadMoreComponent],
+    template: `
     <qams-page-header [title]="i18n.t('nc.title')">
       <button class="secondary" (click)="exports.ncRegisterXlsx()">{{ i18n.t('exp.xlsx') }}</button>
       <button (click)="showForm.set(!showForm())">{{ i18n.t('nc.new') }}</button>
@@ -123,7 +122,7 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
       <router-outlet (activate)="detailOpen.set(true)" (deactivate)="detailOpen.set(false)" />
     </qams-drawer>
   `,
-  styles: [`
+    styles: [`
     .filterbar { display: flex; gap: 10px; align-items: center; padding: 10px 14px; margin-bottom: 14px; flex-wrap: wrap; }
     .search { max-width: 280px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .5rem 1rem; }
@@ -132,7 +131,7 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
     .clickable { cursor: pointer; }
     .danger-text { color: var(--nt-danger); font-weight: 700; }
     select, button { width: auto; }
-  `],
+  `]
 })
 export class NcListComponent implements OnInit {
   readonly facade = inject(NcFacade);

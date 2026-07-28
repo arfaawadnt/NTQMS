@@ -19,11 +19,10 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
  * and every mitigation action is complete — the same rule the domain enforces.
  */
 @Component({
-  selector: 'qams-risk-detail',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, UserSelectComponent],
-  template: `
+    selector: 'qams-risk-detail',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, UserSelectComponent],
+    template: `
     @if (item(); as r) {
       <qams-page-header [title]="r.riskRef + ' — ' + r.title" [subtitle]="r.category">
         <a routerLink="/risks" class="ghost-link">← {{ i18n.t('risk.backToList') }}</a>
@@ -102,7 +101,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
   `,
-  styles: [`
+    styles: [`
     .meta { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; margin-bottom: 1rem; }
     .meta span.muted { display: block; font-size: .75rem; }
     .rpn.high { color: var(--nt-red, #b42318); }
@@ -121,7 +120,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
     .link { width: auto; background: none; color: var(--nt-blue); padding: 0; }
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
     @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
-  `],
+  `]
 })
 export class RiskDetailComponent implements OnInit {
   readonly facade = inject(RiskFacade);

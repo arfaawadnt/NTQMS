@@ -14,11 +14,10 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
 
 /** Environmental monitoring register: points, latest readings, excursion counts (§6.3). */
 @Component({
-  selector: 'qams-monitoring-list',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, LovSelectComponent, ListStatsComponent],
-  template: `
+    selector: 'qams-monitoring-list',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, LovSelectComponent, ListStatsComponent],
+    template: `
     <qams-page-header [title]="i18n.t('env.title')" [subtitle]="i18n.t('env.subtitle')">
       @if (perms.canAssignTraining()) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('env.new') }}</button>
@@ -103,7 +102,7 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
       <router-outlet (activate)="detailOpen.set(true)" (deactivate)="detailOpen.set(false)" />
     </qams-drawer>
   `,
-  styles: [`
+    styles: [`
     .filterbar { display: flex; gap: 10px; align-items: center; padding: 10px 14px; margin-bottom: 14px; flex-wrap: wrap; }
     .search { max-width: 280px; }
     .row { display: flex; gap: .6rem; margin-top: 1rem; }
@@ -112,7 +111,7 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
     .good { color: var(--nt-green); }
     .bad { color: var(--nt-red); }
     .count.bad { font-weight: 700; }
-  `],
+  `]
 })
 export class MonitoringListComponent implements OnInit {
   readonly facade = inject(MonitoringFacade);

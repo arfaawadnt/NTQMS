@@ -17,11 +17,10 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
  * the lab out-of-band. PlatformAdmin-only, mirroring the backend gate.
  */
 @Component({
-  selector: 'qams-tenants',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent],
-  template: `
+    selector: 'qams-tenants',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent],
+    template: `
     <qams-page-header [title]="i18n.t('tenants.title')" [subtitle]="i18n.t('tenants.subtitle')">
       <button (click)="showForm.set(!showForm())">{{ i18n.t('tenants.new') }}</button>
     </qams-page-header>
@@ -91,7 +90,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
       </div>
     }
   `,
-  styles: [`
+    styles: [`
     .form { margin-bottom: 1rem; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: .5rem 1rem; }
     .row { display: flex; gap: .6rem; margin-top: 1rem; }
@@ -100,7 +99,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
       background: rgba(24, 128, 56, .08); border-color: rgba(24, 128, 56, .3);
     }
     button { width: auto; }
-  `],
+  `]
 })
 export class TenantsComponent implements OnInit {
   readonly i18n = inject(I18nService);

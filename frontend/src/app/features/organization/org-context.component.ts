@@ -26,11 +26,10 @@ type ContextTab = 'parties' | 'issues';
  * deleted.
  */
 @Component({
-  selector: 'qams-org-context',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent, LovSelectComponent, AuditTrailComponent, ListStatsComponent],
-  template: `
+    selector: 'qams-org-context',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent, LovSelectComponent, AuditTrailComponent, ListStatsComponent],
+    template: `
     <qams-page-header [title]="i18n.t('ctx.title')" [subtitle]="i18n.t('ctx.subtitle')">
       @if (perms.canAssignTraining()) {
         <button (click)="openCreate()">{{ tab() === 'parties' ? i18n.t('ctx.newParty') : i18n.t('ctx.newIssue') }}</button>
@@ -165,7 +164,7 @@ type ContextTab = 'parties' | 'issues';
       }
     </qams-drawer>
   `,
-  styles: [`
+    styles: [`
     .tabs { display: flex; gap: 0; margin-bottom: 12px; background: var(--nt-filter-grey); border-radius: 8px; padding: 3px; width: fit-content; }
     .tab { background: transparent; color: var(--nt-slate); font-size: 12.5px; padding: 7px 16px; border-radius: 6px; width: auto; }
     .tab.active { background: #fff; color: var(--nt-blue); box-shadow: var(--nt-shadow-xs); font-weight: 700; }
@@ -178,7 +177,7 @@ type ContextTab = 'parties' | 'issues';
     .linkrow select, .linkrow input { flex: 1; }
     .linkrow button { width: auto; }
     button { width: auto; }
-  `],
+  `]
 })
 export class OrgContextComponent implements OnInit {
   readonly i18n = inject(I18nService);

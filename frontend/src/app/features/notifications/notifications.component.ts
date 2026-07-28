@@ -9,11 +9,10 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
 
 /** The signed-in user's in-app notification feed with mark-as-read and a load-more pager (R-3). */
 @Component({
-  selector: 'qams-notifications',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, PageHeaderComponent, LoadMoreComponent],
-  template: `
+    selector: 'qams-notifications',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [DatePipe, PageHeaderComponent, LoadMoreComponent],
+    template: `
     <qams-page-header [title]="i18n.t('notif.title')" />
     @if (loading() && items().length === 0) {
       <p class="muted">{{ i18n.t('common.loading') }}</p>
@@ -41,13 +40,13 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
                       [loading]="loading()" (more)="loadMore()" />
     }
   `,
-  styles: [`
+    styles: [`
     .feed { display: flex; flex-direction: column; gap: .6rem; }
     .item { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
     .item.unread { border-inline-start: 3px solid var(--nt-teal); }
     .subject { font-weight: 600; color: var(--nt-navy); }
     .meta { display: flex; gap: .6rem; align-items: center; margin-top: .4rem; }
-  `],
+  `]
 })
 export class NotificationsComponent implements OnInit {
   readonly i18n = inject(I18nService);

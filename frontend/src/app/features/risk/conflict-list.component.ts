@@ -16,11 +16,10 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
 
 /** Impartiality / conflict-of-interest register (ISO 17025 §4.1). */
 @Component({
-  selector: 'qams-conflict-list',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, UserSelectComponent, ListStatsComponent],
-  template: `
+    selector: 'qams-conflict-list',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, UserSelectComponent, ListStatsComponent],
+    template: `
     <qams-page-header [title]="i18n.t('coi.title')" [subtitle]="i18n.t('coi.subtitle')">
       <button (click)="showForm.set(!showForm())">{{ i18n.t('coi.new') }}</button>
     </qams-page-header>
@@ -88,7 +87,7 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
       <router-outlet (activate)="detailOpen.set(true)" (deactivate)="detailOpen.set(false)" />
     </qams-drawer>
   `,
-  styles: [`
+    styles: [`
     .filterbar { display: flex; gap: 10px; align-items: center; padding: 10px 14px; margin-bottom: 14px; flex-wrap: wrap; }
     .search { max-width: 280px; }
     .row { display: flex; gap: .6rem; margin-top: 1rem; }
@@ -98,7 +97,7 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
     .risk.low { color: var(--nt-green); }
     .risk.medium { color: var(--nt-orange, #ef6c00); }
     .risk.high { color: var(--nt-red); }
-  `],
+  `]
 })
 export class ConflictListComponent implements OnInit {
   readonly i18n = inject(I18nService);

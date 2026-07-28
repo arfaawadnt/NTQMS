@@ -19,11 +19,10 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
  * the backend authorization.
  */
 @Component({
-  selector: 'qams-review-detail',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, UserSelectComponent],
-  template: `
+    selector: 'qams-review-detail',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, UserSelectComponent],
+    template: `
     @if (item(); as r) {
       <qams-page-header [title]="r.reviewRef + ' — ' + r.title" [subtitle]="(r.reviewDate | date:'fullDate') ?? ''">
         @if (perms.canApprove()) {
@@ -83,7 +82,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
   `,
-  styles: [`
+    styles: [`
     .meta { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; margin-bottom: 1rem; }
     .meta span.muted { display: block; font-size: .75rem; }
     .pre { white-space: pre-wrap; margin: 0; }
@@ -92,7 +91,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
     form textarea { width: 100%; }
     form button { width: auto; margin-top: .5rem; }
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
-  `],
+  `]
 })
 export class ReviewDetailComponent implements OnInit {
   readonly facade = inject(ReviewFacade);

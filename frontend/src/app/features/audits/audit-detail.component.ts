@@ -20,11 +20,10 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
  * NC finding is acknowledged. Sign-off is approver-gated.
  */
 @Component({
-  selector: 'qams-audit-detail',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
-  template: `
+    selector: 'qams-audit-detail',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+    template: `
     @if (audit(); as a) {
       <qams-page-header [title]="a.auditRef + ' — ' + a.title" [subtitle]="a.type">
         <a routerLink="/audits" class="ghost-link">← {{ i18n.t('audit.backToList') }}</a>
@@ -101,7 +100,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
   `,
-  styles: [`
+    styles: [`
     .meta { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; margin-bottom: 1rem; }
     .meta span.muted { display: block; font-size: .75rem; }
     .meta button { width: auto; margin-inline-start: auto; }
@@ -112,7 +111,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
     .hint { font-size: .8rem; }
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
     @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
-  `],
+  `]
 })
 export class AuditDetailComponent implements OnInit {
   readonly facade = inject(AuditsFacade);
