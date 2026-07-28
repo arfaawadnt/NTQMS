@@ -168,14 +168,16 @@ jobs:
       - name: Assert the evidence volume is writable by the runtime user
         run: docker run --rm --entrypoint sh ntqams-webapi:ci -c 'touch /app/data/files/.ci-probe && rm /app/data/files/.ci-probe'
 
-      # SEC-002: scan the built image for OS/library CVEs. Fails on HIGH/CRITICAL
-      # that have an available fix (ignore-unfixed avoids flapping on base-image
-      # CVEs with no upstream patch yet — re-evaluated as the base image updates).
+      # SEC-002: scan the built image for OS/library CVEs. Uses the Trivy CLI
+      # directly (no action-tag to drift). Fails on HIGH/CRITICAL that have an
+      # available fix (--ignore-unfixed avoids flapping on base-image CVEs with
+      # no upstream patch yet — re-evaluated as the base image updates).
+      - name: Install Trivy
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
+            | sh -s -- -b /usr/local/bin
+          trivy --version
       - name: Trivy image vulnerability scan
-        uses: aquasecurity/trivy-action@0.24.0
-        with:
-          image-ref: ntqams-webapi:ci
-          severity: HIGH,CRITICAL
-          ignore-unfixed: true
-          exit-code: '1'
-          vuln-type: os,library
+        run: |
+          trivy image --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed \
+            --exit-code 1 --no-progress ntqams-webapi:ci
