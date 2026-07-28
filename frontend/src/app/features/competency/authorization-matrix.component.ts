@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterOutlet } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -142,6 +143,7 @@ export class AuthorizationMatrixComponent implements OnInit {
   private readonly competencyApi = inject(CompetencyApiService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly statuses = ['Active', 'Suspended', 'Expired', 'Revoked'];
   readonly scopes = AUTHORIZATION_SCOPES;
@@ -205,8 +207,8 @@ export class AuthorizationMatrixComponent implements OnInit {
     void firstValueFrom(this.referenceApi.testCatalog())
       .then((tests) => this.tests.set(tests))
       .catch(() => this.tests.set([]));
-    // The evidence dropdown tracks the picked person.
-    this.form.controls.userId.valueChanges.subscribe((userId) => {
+    // The evidence dropdown tracks the picked person; unsubscribed with the component.
+    this.form.controls.userId.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((userId) => {
       this.form.controls.competencyRecordId.setValue('');
       if (!userId) { this.evidence.set([]); return; }
       void firstValueFrom(this.competencyApi.listCompetencies(userId, 'Authorized'))

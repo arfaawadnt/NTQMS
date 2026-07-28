@@ -134,6 +134,11 @@ builder.Services.AddAuthorization(options =>
         .RequireAuthenticatedUser()
         .Build();
 });
+// API-003: role-gate 403s and credential 401s speak problem+json like every
+// other error path — no more bare framework status codes.
+builder.Services.AddSingleton<
+    Microsoft.AspNetCore.Authorization.IAuthorizationMiddlewareResultHandler,
+    ProblemAuthorizationResultHandler>();
 
 // SEC-012: TLS terminates at the reverse proxy (ADR-0002); honour its
 // X-Forwarded-For/Proto (loopback-trusted by default) so the client address

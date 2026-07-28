@@ -31,7 +31,7 @@ NT.QMS is a **multi-tenant SaaS Quality Management System** for ISO 17025 / 1518
    messages with `Co-Authored-By: Claude <noreply@anthropic.com>` (use the current model).
 
 ## 3. Current state (as of 2026-07-28)
-- Code at tag **`v1.43.0`** (EA remediation Phases 0–5 shipped — **all production blockers cleared at v1.41**; `restore-point-20260727` = v1.37.0). Repo: `github.com/arfaawadnt/NTQMS`.
+- Code at tag **`v1.44.0`** — **EA remediation COMPLETE (Phases 0–6, all findings closed)**; production blockers cleared at v1.41; `restore-point-20260727` = v1.37.0. Repo: `github.com/arfaawadnt/NTQMS`. Closure report: `docs/reference/NT_QMS_EA_Remediation_Closure_Report.md`.
 - **All 18 CSV/regulatory-audit findings are CLOSED** (release train v1.25→v1.37): tenant
   RLS, signed-record immutability, MFA, SoD, reason-for-change, session revocation,
   e-sig logging, integration tests, backup/DR, governance modules, exports, password
@@ -50,8 +50,8 @@ has acceptance criteria + a proving test. Summary:
 - **Phase 3 (P1/P2, v1.41): ✅ SHIPPED** — rate limiting (global + auth/e-sign partitions, 429); security headers + locked CSP; TLS-at-proxy + in-app HSTS (ADR-0002); token-storage risk acceptance + 60-min tokens (ADR-0003).
 - **Phase 4 (P2, v1.42): ✅ SHIPPED** — problem+json everywhere; pagination envelope (API+SPA); file allow-list/sniffing; deny-by-default command authorization (211 annotated + CI gate); Idempotency-Key replay; api/v1 versioning (ADR-0004).
 - **Phase 5 (P2, v1.43): ✅ SHIPPED** — CHECK constraints on regulated tables; ConfigGuard fail-fast config; Npgsql retry+timeout (execution-strategy-safe locks); non-root container + compose.production.yml.
-- **Phase 6 (P2/P3, v1.44):** test-coverage gaps, ADRs, module-boundary arch test, frontend a11y polish.
-Completing **Phases 0–3** clears every production blocker → unconditional release.
+- **Phase 6 (P2/P3, v1.44): ✅ SHIPPED** — module-boundary + API-surface snapshot merge gates; migration round-trip + audit-tamper tests; perf smoke; AUTHZ→403 + problem+json on framework 401/403; accessible change-reason dialog; ADR-0005…0008.
+**The remediation train is COMPLETE — all EA-audit findings closed (v1.38→v1.44); production blockers were cleared at v1.41.** Next work comes from the product backlog (e.g. list-pager UI over the API-004 envelope, refresh-token flow per ADR-0003's revisit trigger).
 
 ## 5. Reusable lessons / conventions (must-follow)
 - **New `ITenantScoped` table ⇒ add RLS in its OWN migration** (EF won't). In `Up()` after

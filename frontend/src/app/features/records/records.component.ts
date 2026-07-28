@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@ang
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { RecordsFacade } from './records.facade';
+import { ChangeReasonService } from '../../core/change-reason.service';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
 import { ARCHIVE_SOURCE_MODULES, RETENTION_CLASSES, RetentionClass } from '../../core/models';
@@ -114,6 +115,7 @@ export class RecordsComponent implements OnInit {
   readonly i18n = inject(I18nService);
   readonly perms = inject(PermissionsService);
   private readonly fb = inject(FormBuilder);
+  private readonly reasons = inject(ChangeReasonService);
 
   readonly states = ['Archived', 'Retrieved', 'Disposed'];
   readonly modules = ARCHIVE_SOURCE_MODULES;
@@ -137,10 +139,10 @@ export class RecordsComponent implements OnInit {
 
   onFile(event: Event): void { this.snapshot.set((event.target as HTMLInputElement).files?.[0] ?? null); }
 
-  /** Legal hold requires a reason (litigation/investigation ref) — captured before the call. */
-  placeHold(id: string): void {
-    const reason = window.prompt(this.i18n.t('arc.placeHoldPrompt'));
-    if (reason && reason.trim()) { void this.facade.placeLegalHold(id, reason.trim()); }
+  /** Legal hold requires a reason (litigation/investigation ref) — captured in the Part 11 modal. */
+  async placeHold(id: string): Promise<void> {
+    const reason = await this.reasons.request('arc.placeHold');
+    if (reason) { void this.facade.placeLegalHold(id, reason); }
   }
 
   async archive(): Promise<void> {

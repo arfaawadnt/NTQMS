@@ -507,3 +507,44 @@ cross-tenant denial functional test suite (merge gate from day one).
   was NOT built/run here; manifest verified by review only, first CI/host
   build must confirm.
 - Suite: 337 tests green, 0 skipped (was 330); build 0 warnings.
+
+## EA Remediation Phase 6 (v1.44.0, 2026-07-28) - Test coverage & governance [DONE]
+
+- TEST-001/002/003 - remaining gaps closed: migration UP/DOWN round-trip smoke
+  (last migration reverts + reapplies against real PG); mid-chain audit-tamper
+  detection (3-entry chain, trigger-disabled insider edit of sequence 2 ->
+  VerifyChain reports broken AT 2; timestamps whole-second because PG stores
+  microseconds and production only ever hashes DB-read values);
+  scripts/perf-smoke.ps1 baseline tripwire - live numbers on this dev box:
+  /health/ready p95 20.6ms, login p95 69.6ms (hash-bound), paged NC list p95
+  6.3ms (threshold 800ms). ProblemDetails/concurrency/outbox/dedup tests
+  already existed from Phases 1-4.
+- ARCH-004 - ModuleBoundaryTests: 18 domain modules, each proven to reference
+  NO other module's types (NetArchTest, per-module theory) - the modular
+  monolith boundary is now a merge gate. Zero violations found.
+- ARCH-005 - ApiSurfaceSnapshotTests: 620-line route+method baseline
+  (ApiSurface.approved.txt) from the OpenAPI document; unreviewed surface
+  drift fails CI; intentional changes update the snapshot in the same commit
+  (ADR-0004 policy).
+- ARCH-006 - ADR set complete: ADR-0005 xmin concurrency, ADR-0006 outbox
+  reliability model, ADR-0007 same-origin/no-CORS, ADR-0008 EF DbSet
+  persistence port (0001-0004 shipped in earlier phases).
+- SEC-003 - confirmed: analytical reading/study deletes are gated by
+  [RequireInternalActor] + X-Change-Reason + field-change ledger + signed-
+  record immutability (pre-lock deletion by internal lab roles is the intended
+  workflow). Hardened the HTTP layer: AUTHZ-* codes now map to 403 (not 422),
+  and ProblemAuthorizationResultHandler gives role-gate 403s and credential
+  401s the same problem+json body as every other error (they were BARE status
+  codes - an API-003 gap found by the new test). AuditorDenyMatrixTests: the
+  ExternalAuditor reads registers but every flagged write (raise NC, configure
+  screening, create document) is 403 + AUTHZ-*.
+- UI-008/014 - authorization-matrix valueChanges now takeUntilDestroyed (only
+  unmanaged subscription in the SPA); Part-11 change-reason window.prompt
+  replaced by an accessible dialog (role=dialog, aria-modal, labelled, focus
+  to textarea, Escape/cancel, confirm disabled when blank, EN/AR/FR keys)
+  driven by ChangeReasonService; async interceptor attaches the header or
+  silently aborts on cancel; records legal-hold uses the same dialog.
+  +8 frontend specs (45 total) incl. 7 dialog a11y specs.
+- Gates: backend 359 green 0 skipped (was 337) - 211 domain / 57 app / 24 arch
+  / 18 integration / 49 functional; frontend build + 45 unit specs; 3 e2e
+  against the live API; perf smoke PASS. Build 0 warnings.

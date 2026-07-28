@@ -4,6 +4,7 @@ import { AuthService } from '../core/auth.service';
 import { I18nService, Lang } from '../core/i18n.service';
 import { PermissionsService } from '../core/permissions.service';
 import { NAV_ICONS } from '../core/nav-icons';
+import { ChangeReasonDialogComponent } from '../core/change-reason-dialog.component';
 import { PageHelpComponent } from '../shared/ui/page-help.component';
 
 /** One sidebar destination: route, i18n label key, and its descriptive icon. */
@@ -37,7 +38,7 @@ const GROUPS_STATE_KEY = 'qams.sidebar.groups';
 @Component({
   selector: 'qams-shell',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, PageHelpComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, PageHelpComponent, ChangeReasonDialogComponent],
   template: `
     <div class="app">
       <header class="hdr">
@@ -125,6 +126,9 @@ const GROUPS_STATE_KEY = 'qams.sidebar.groups';
 
     <!-- Global per-page help popup, opened from the page-header ? icon. -->
     <qams-page-help />
+
+    <!-- Part 11 reason-for-change modal (UI-014), overlaying every screen. -->
+    <qams-change-reason-dialog />
   `,
   styles: [`
     .app { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }

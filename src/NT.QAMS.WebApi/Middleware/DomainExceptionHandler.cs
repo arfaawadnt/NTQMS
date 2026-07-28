@@ -57,6 +57,15 @@ public sealed class DomainExceptionHandler : IExceptionHandler
                 Title = auth.Message,
                 Extensions = { ["code"] = auth.Code },
             },
+            // SEC-003: application-layer authorization refusals (AUTHZ-*) are
+            // 403 Forbidden — an authenticated actor lacking permission is
+            // neither a session problem (401) nor a business-rule failure (422).
+            DomainException authz when authz.Code.StartsWith("AUTHZ-", StringComparison.Ordinal) => new ProblemDetails
+            {
+                Status = StatusCodes.Status403Forbidden,
+                Title = authz.Message,
+                Extensions = { ["code"] = authz.Code },
+            },
             DomainException notFound when notFound.Code.EndsWith("-404", StringComparison.Ordinal) => new ProblemDetails
             {
                 Status = StatusCodes.Status404NotFound,
