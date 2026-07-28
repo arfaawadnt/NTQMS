@@ -79,6 +79,9 @@ public static class DependencyInjection
             Configuration.ConfigGuard.ReadDecimal(configuration, "AnalyticalQuality:Westgard:RejectSd", 3m),
             Configuration.ConfigGuard.ReadDecimal(configuration, "AnalyticalQuality:Westgard:RangeSd", 4m),
             Configuration.ConfigGuard.ReadInt(configuration, "AnalyticalQuality:Westgard:RunLength", 10)).Validated());
+        // ADR-0009: rotating refresh sessions; lifetime is the sign-in horizon.
+        services.AddSingleton(new Application.IdentityAccess.Commands.RefreshSessionOptions(
+            Configuration.ConfigGuard.ReadInt(configuration, "Auth:RefreshTokenDays", 14)).Validated());
         services.AddSingleton<IJwtTokenService, Security.JwtTokenService>();
         services.AddSingleton<ITotpService, Security.TotpService>();
         services.AddScoped<IReferenceNumberGenerator, PostgresReferenceNumberGenerator>();

@@ -47,6 +47,7 @@ public sealed class QamsWebAppFactory : WebApplicationFactory<Program>
         Environment.SetEnvironmentVariable("RateLimit__GlobalPermitPerMinute", "100000");
         Environment.SetEnvironmentVariable("RateLimit__AuthPermitPerMinute", "100000");
         Environment.SetEnvironmentVariable("RateLimit__ESignaturePermitPerMinute", "100000");
+        Environment.SetEnvironmentVariable("RateLimit__RefreshPermitPerMinute", "100000");
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)

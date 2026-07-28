@@ -244,8 +244,10 @@ POST /api/audits/{id}/sign-off
 POST /api/audits/{id}/start
 POST /api/auth/change-password
 POST /api/auth/login
+POST /api/auth/logout
 POST /api/auth/mfa/confirm
 POST /api/auth/mfa/enroll
+POST /api/auth/refresh
 POST /api/auth/signature-pin
 POST /api/branches
 POST /api/branches/{id}/deactivate
@@ -432,8 +434,10 @@ POST /api/v{version}/audits/{id}/sign-off
 POST /api/v{version}/audits/{id}/start
 POST /api/v{version}/auth/change-password
 POST /api/v{version}/auth/login
+POST /api/v{version}/auth/logout
 POST /api/v{version}/auth/mfa/confirm
 POST /api/v{version}/auth/mfa/enroll
+POST /api/v{version}/auth/refresh
 POST /api/v{version}/auth/signature-pin
 POST /api/v{version}/branches
 POST /api/v{version}/branches/{id}/deactivate

@@ -15,13 +15,71 @@ namespace NT.QAMS.WebApi.Controllers;
 [EnableRateLimiting(RateLimiting.AuthPolicy)]
 public sealed class AuthController(ISender sender) : ControllerBase
 {
+    /// <summary>
+    /// Refresh cookie name and its constant attributes (ADR-0009): httpOnly so
+    /// script can never read it, Secure + SameSite=Strict so it is CSRF-inert,
+    /// and Path-scoped to the refresh endpoint so it rides no other request.
+    /// </summary>
+    private const string RefreshCookieName = "qams_rt";
+    private const string RefreshCookiePath = "/api/auth";
+
     [HttpPost("login")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> Login(LoginRequest request, CancellationToken ct) =>
-        Ok(await sender.Send(new LoginCommand(
-            request.TenantIdentifier, request.Email, request.Password, request.MfaCode), ct));
+    public async Task<IActionResult> Login(LoginRequest request, CancellationToken ct)
+    {
+        var result = await sender.Send(new LoginCommand(
+            request.TenantIdentifier, request.Email, request.Password, request.MfaCode), ct);
+        return AuthResult(result);
+    }
+
+    /// <summary>
+    /// Silent refresh (ADR-0009): reads the httpOnly refresh cookie, rotates
+    /// it, and returns a fresh access token. Anonymous — the cookie IS the
+    /// credential; the access token is expected to be expired here.
+    /// </summary>
+    [HttpPost("refresh")]
+    [AllowAnonymous]
+    [EnableRateLimiting(RateLimiting.RefreshPolicy)]
+    public async Task<IActionResult> Refresh(CancellationToken ct)
+    {
+        var presented = Request.Cookies[RefreshCookieName];
+        var result = await sender.Send(new RefreshTokenCommand(presented), ct);
+        return AuthResult(result);
+    }
+
+    /// <summary>Revokes the refresh family server-side and clears the cookie.</summary>
+    [HttpPost("logout")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Logout(CancellationToken ct)
+    {
+        await sender.Send(new LogoutCommand(Request.Cookies[RefreshCookieName]), ct);
+        Response.Cookies.Delete(RefreshCookieName, new CookieOptions { Path = RefreshCookiePath });
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Emits the access-token body and, when the outcome carries a refresh
+    /// grant, sets the hardened cookie. The token secret never enters the body.
+    /// </summary>
+    private IActionResult AuthResult(LoginResult result)
+    {
+        if (result.Refresh is { } grant)
+        {
+            Response.Cookies.Append(RefreshCookieName, grant.Token, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Path = RefreshCookiePath,
+                Expires = grant.ExpiresAtUtc,
+                IsEssential = true,
+            });
+        }
+
+        return Ok(result.Response);
+    }
 
     /// <summary>
     /// Self-service password rotation — anonymous by design so an EXPIRED

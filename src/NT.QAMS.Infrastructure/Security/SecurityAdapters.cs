@@ -30,11 +30,11 @@ public sealed class JwtOptions
     public string Secret { get; set; } = string.Empty;
 
     /// <summary>
-    /// SEC-017 (ADR-0003): with the access token held in SPA web storage, a
-    /// short lifetime bounds the exposure window of a stolen token. Raise via
-    /// Jwt:ExpiryMinutes only with a documented risk acceptance.
+    /// ADR-0009: the access token lives in SPA memory only and is silently
+    /// refreshed, so its lifetime is short by default — a stolen token expires
+    /// fast and the rotating refresh cookie carries session continuity.
     /// </summary>
-    public int ExpiryMinutes { get; set; } = 60;
+    public int ExpiryMinutes { get; set; } = 15;
 }
 
 /// <summary>
@@ -56,7 +56,7 @@ public sealed class JwtTokenService : IJwtTokenService
             Issuer = configuration["Jwt:Issuer"] ?? "nt-qams",
             Audience = configuration["Jwt:Audience"] ?? "nt-qams",
             Secret = configuration["Jwt:Secret"] ?? string.Empty,
-            ExpiryMinutes = Configuration.ConfigGuard.ReadInt(configuration, "Jwt:ExpiryMinutes", 60),
+            ExpiryMinutes = Configuration.ConfigGuard.ReadInt(configuration, "Jwt:ExpiryMinutes", 15),
         };
         _clock = clock;
 

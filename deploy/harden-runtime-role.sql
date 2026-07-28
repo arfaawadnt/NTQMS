@@ -61,6 +61,11 @@ GRANT DELETE ON qams.outbox_event TO qams_app;
 --    Exception (CQRS-004): idempotency replay records are transport state with
 --    a 24h life — the same retention purge removes them.
 GRANT DELETE ON qams.idempotency_record TO qams_app;
+--    Exception (ADR-0009): refresh sessions are session state, not a regulated
+--    record — logout/rotation revoke them and the retention purge deletes the
+--    long-dead ones. (Security events for every login/logout live in the
+--    append-only audit ledger, which the app cannot delete.)
+GRANT DELETE ON qams.refresh_session TO qams_app;
 
 -- 5. Sequences (reference-number counters etc.) ------------------------------
 GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA qams, saas, ref TO qams_app;

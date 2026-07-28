@@ -16,7 +16,7 @@ namespace NT.QAMS.Application.IdentityAccess.Commands;
 /// </summary>
 [AllowUnauthenticated]
 public sealed record LoginCommand(string? TenantIdentifier, string Email, string Password, string? MfaCode)
-    : ICommand<AuthResponse>;
+    : ICommand<LoginResult>;
 
 public sealed class LoginValidator : AbstractValidator<LoginCommand>
 {
@@ -30,12 +30,12 @@ public sealed class LoginValidator : AbstractValidator<LoginCommand>
 public sealed class LoginHandler(
     IAppDbContext db, IPasswordHasher hasher, IJwtTokenService jwt,
     ITotpService totp, ISecurityEventLog security, IClock clock, PasswordPolicyOptions passwordPolicy,
-    SecurityOptions securityOptions)
-    : ICommandHandler<LoginCommand, AuthResponse>
+    SecurityOptions securityOptions, RefreshSessionOptions refreshOptions)
+    : ICommandHandler<LoginCommand, LoginResult>
 {
     private const string InvalidCredentials = "Invalid credentials.";
 
-    public async Task<AuthResponse> Handle(LoginCommand command, CancellationToken ct)
+    public async Task<LoginResult> Handle(LoginCommand command, CancellationToken ct)
     {
         Guid? tenantId = null;
         // MFA enforcement is decided per tenant for tenant users (their own opt-in
@@ -93,7 +93,9 @@ public sealed class LoginHandler(
             {
                 // Password OK but MFA required â€” signal the client to collect a code.
                 await security.WriteAsync("LOGIN_MFA_REQUIRED", tenantId, email, null, ct);
-                return new AuthResponse(string.Empty, default, user.Role.ToString(), user.DisplayName, user.TenantId, MfaRequired: true);
+                return new LoginResult(
+                    new AuthResponse(string.Empty, default, user.Role.ToString(), user.DisplayName, user.TenantId, MfaRequired: true),
+                    Refresh: null);
             }
 
             if (!totp.Verify(user.MfaSecret!, command.MfaCode, clock.UtcNow))
@@ -112,13 +114,28 @@ public sealed class LoginHandler(
             && user.Role is UserRole.PlatformAdmin or UserRole.TenantAdmin;
 
         user.RegisterSuccessfulLogin();
+
+        // ADR-0009: a FULL session starts a fresh refresh-token family; the
+        // enrollment-scoped intermediate gets none (it must not outlive setup).
+        RefreshGrant? refresh = null;
+        if (!mustEnrollMfa)
+        {
+            var (refreshToken, hash, sessionId) = RefreshTokenFormat.Mint();
+            var refreshSession = RefreshSession.Start(
+                sessionId, user.Id, Guid.CreateVersion7(), hash, clock.UtcNow, refreshOptions.Lifetime);
+            db.RefreshSessions.Add(refreshSession);
+            refresh = new RefreshGrant(refreshToken, refreshSession.ExpiresAtUtc);
+        }
+
         await db.SaveChangesAsync(ct);
         await security.WriteAsync(mustEnrollMfa ? "LOGIN_MFA_ENROLL_REQUIRED" : "LOGIN_SUCCESS", tenantId, email, null, ct);
 
         var (token, expires) = jwt.Issue(user, enrollmentOnly: mustEnrollMfa);
-        return new AuthResponse(
-            token, expires, user.Role.ToString(), user.DisplayName, user.TenantId,
-            MfaRequired: false, MfaEnrollmentRequired: mustEnrollMfa);
+        return new LoginResult(
+            new AuthResponse(
+                token, expires, user.Role.ToString(), user.DisplayName, user.TenantId,
+                MfaRequired: false, MfaEnrollmentRequired: mustEnrollMfa),
+            refresh);
     }
 
     private async Task<DomainException> FailAsync(

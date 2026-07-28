@@ -38,6 +38,7 @@ public sealed class AppDbContext(
     public DbSet<Tenant> Tenants => Set<Tenant>();
     public DbSet<UserAccount> Users => Set<UserAccount>();
     public DbSet<PasswordHistoryEntry> PasswordHistory => Set<PasswordHistoryEntry>();
+    public DbSet<RefreshSession> RefreshSessions => Set<RefreshSession>();
     public DbSet<Nonconformance> Nonconformances => Set<Nonconformance>();
     public DbSet<Complaint> Complaints => Set<Complaint>();
     public DbSet<QualityObjective> QualityObjectives => Set<QualityObjective>();

@@ -258,7 +258,18 @@ public sealed partial class OutboxProcessor(
         await db.Set<Idempotency.IdempotencyRecord>()
             .Where(r => r.CreatedAtUtc < idempotencyCutoff)
             .ExecuteDeleteAsync(cancellationToken);
+
+        // ADR-0009: prune long-dead refresh sessions (expired, or revoked more
+        // than a lifetime ago so reuse-detection on a stolen token still fires
+        // within the window).
+        var refreshCutoff = clock.UtcNow - TimeSpan.FromDays(RefreshSessionRetentionDays);
+        await db.Set<Domain.IdentityAccess.RefreshSession>()
+            .Where(s => s.ExpiresAtUtc < refreshCutoff)
+            .ExecuteDeleteAsync(cancellationToken);
     }
+
+    /// <summary>Grace beyond a refresh session's own expiry before the purge removes it.</summary>
+    private const int RefreshSessionRetentionDays = 7;
 
     /// <summary>
     /// MSG-007: deletes processed rows older than the cutoff. Delivered events

@@ -20,6 +20,10 @@ describe('TextPromptDialogComponent', () => {
     fixture.detectChanges();
   });
 
+  // Destroy the fixture so its attached dialog cannot linger in the document
+  // and steal focus from the next (randomly-ordered) spec's focus assertion.
+  afterEach(() => fixture.destroy());
+
   function requestPassword(): Promise<string | null> {
     const promise = svc.request({
       titleKey: 'users.resetPassword',

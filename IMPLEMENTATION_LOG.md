@@ -567,3 +567,33 @@ cross-tenant denial functional test suite (merge gate from day one).
 - Gates: backend 359 green 0 skipped; frontend build + 58 specs (+13); 3 e2e
   vs live API. Closure report residual register updated (R-3/R-4 closed,
   R-1 CI-enforced).
+
+## Road-to-100 Phase 7 (v1.46.0, 2026-07-28) — session-security completion (retires R-2/ADR-0003) [DONE]
+
+- ADR-0009 (supersedes ADR-0003): access token → SPA MEMORY only, default
+  lifetime 15 min; session continuity via a rotating, httpOnly Secure
+  SameSite=Strict refresh cookie (qams_rt, Path=/api/auth).
+- Backend: RefreshSession aggregate + qams.refresh_session (migration
+  Phase7RefreshSessions; only SHA-256 of the secret stored). Commands:
+  RefreshTokenCommand (rotate + reuse-detection → revoke whole family +
+  REFRESH_REUSE_DETECTED event), LogoutCommand (revoke family). LoginHandler
+  starts a family on full sign-in (not on the MFA/enrollment interstitial).
+  AuthController: /refresh + /logout, hardened cookie set server-side, token
+  never in the body's cookie. Refresh rate-limit policy (60/min per client).
+  Retention purge extended to dead refresh sessions; DELETE grant added.
+- Frontend: auth.service holds the token in memory only (web storage removed);
+  single-flight refresh(); APP_INITIALIZER hydrate() → reload keeps the
+  session; auth interceptor does one silent refresh + retry on 401, login only
+  if that fails; logout revokes server-side.
+- Tests: +5 functional (RefreshSessionTests: cookie flags, rotation, reuse→
+  family revocation, logout, no-cookie 401), +9 frontend (auth.service 5 incl.
+  "never in web storage" + single-flight; auth.interceptor 4). Hardened two
+  pre-existing dialog specs (fixture.destroy in afterEach) to kill a
+  random-order focus flake. API-surface snapshot re-approved (+/refresh,
+  +/logout on legacy and v1).
+- Gates: backend 365 green 0 skipped; frontend build + 67 specs; 3 e2e vs live
+  API; build 0 warnings. Live: cookie flags httponly+secure+samesite=strict+
+  path=/api/auth; rotation issues a new cookie; replaying a rotated token → 401
+  and the whole family revoked. (Live refresh over plain-HTTP localhost needs a
+  manual non-secure cookie because the Secure flag blocks the jar — production
+  is HTTPS; functional tests are the authoritative proof.)

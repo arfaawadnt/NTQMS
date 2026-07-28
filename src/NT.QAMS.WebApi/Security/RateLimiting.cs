@@ -10,17 +10,20 @@ namespace NT.QAMS.WebApi.Security;
 public sealed record RateLimitSettings(
     int GlobalPermitPerMinute,
     int AuthPermitPerMinute,
-    int ESignaturePermitPerMinute)
+    int ESignaturePermitPerMinute,
+    int RefreshPermitPerMinute)
 {
     public RateLimitSettings Validated() =>
-        GlobalPermitPerMinute > 0 && AuthPermitPerMinute > 0 && ESignaturePermitPerMinute > 0
+        GlobalPermitPerMinute > 0 && AuthPermitPerMinute > 0
+        && ESignaturePermitPerMinute > 0 && RefreshPermitPerMinute > 0
             ? this
             : throw new InvalidOperationException("RateLimit:* permits must all be positive.");
 
     public static RateLimitSettings From(IConfiguration configuration) => new(
         NT.QAMS.Infrastructure.Configuration.ConfigGuard.ReadInt(configuration, "RateLimit:GlobalPermitPerMinute", 300),
         NT.QAMS.Infrastructure.Configuration.ConfigGuard.ReadInt(configuration, "RateLimit:AuthPermitPerMinute", 10),
-        NT.QAMS.Infrastructure.Configuration.ConfigGuard.ReadInt(configuration, "RateLimit:ESignaturePermitPerMinute", 10));
+        NT.QAMS.Infrastructure.Configuration.ConfigGuard.ReadInt(configuration, "RateLimit:ESignaturePermitPerMinute", 10),
+        NT.QAMS.Infrastructure.Configuration.ConfigGuard.ReadInt(configuration, "RateLimit:RefreshPermitPerMinute", 60));
 }
 
 /// <summary>
@@ -37,6 +40,13 @@ public static class RateLimiting
 
     /// <summary>Policy for password+PIN signing ceremonies — applied per signing endpoint.</summary>
     public const string ESignaturePolicy = "esignature";
+
+    /// <summary>
+    /// Policy for the silent-refresh endpoint (ADR-0009): more generous than
+    /// the credential budget because whole labs share NAT addresses and every
+    /// signed-in tab refreshes every ~15 minutes.
+    /// </summary>
+    public const string RefreshPolicy = "refresh";
 
     private static readonly TimeSpan Window = TimeSpan.FromMinutes(1);
 
@@ -62,6 +72,14 @@ public static class RateLimiting
             RateLimitPartition.GetFixedWindowLimiter(ClientKey(context), _ => new FixedWindowRateLimiterOptions
             {
                 PermitLimit = settings.AuthPermitPerMinute,
+                Window = Window,
+                QueueLimit = 0,
+            }));
+
+        options.AddPolicy(RefreshPolicy, context =>
+            RateLimitPartition.GetFixedWindowLimiter(ClientKey(context), _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = settings.RefreshPermitPerMinute,
                 Window = Window,
                 QueueLimit = 0,
             }));

@@ -1,6 +1,6 @@
 # ADR-0003 — Access-token storage in the SPA (risk acceptance)
 
-- **Status:** Accepted (2026-07-28) — risk-acceptance, with a revisit trigger
+- **Status:** SUPERSEDED (2026-07-28) by [ADR-0009](ADR-0009-refresh-token-session-model.md) — the refresh-cookie flow was implemented in Road-to-100 Phase 7, retiring this risk acceptance. Retained for history.
 - **Finding:** SEC-017 (Enterprise Architecture remediation plan, Phase 3)
 - **Related:** SEC-011 (CSP), SEC-013 (rate limiting)
 

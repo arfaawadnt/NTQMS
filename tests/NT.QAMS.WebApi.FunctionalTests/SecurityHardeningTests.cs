@@ -47,7 +47,7 @@ public sealed class SecurityHardeningTests(QamsWebAppFactory factory)
         // generous limits the rest of the suite relies on.
         using var throttled = factory.WithWebHostBuilder(builder =>
             builder.ConfigureTestServices(services => services.AddSingleton(
-                new RateLimitSettings(100000, AuthPermitPerMinute: 3, 100000))));
+                new RateLimitSettings(100000, AuthPermitPerMinute: 3, 100000, 100000))));
         var client = throttled.CreateClient();
 
         var statuses = new List<HttpStatusCode>();
@@ -75,7 +75,7 @@ public sealed class SecurityHardeningTests(QamsWebAppFactory factory)
     {
         using var throttled = factory.WithWebHostBuilder(builder =>
             builder.ConfigureTestServices(services => services.AddSingleton(
-                new RateLimitSettings(GlobalPermitPerMinute: 2, 100000, 100000))));
+                new RateLimitSettings(GlobalPermitPerMinute: 2, 100000, 100000, 100000))));
         var client = throttled.CreateClient();
 
         for (var i = 0; i < 10; i++)
