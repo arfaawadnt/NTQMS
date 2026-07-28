@@ -1,10 +1,10 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
-  AddDecisionRequest, CloseReviewRequest, CreatedResource, Paged, ReviewDetail, ReviewListItem,
-  ScheduleReviewRequest,
+  AddDecisionRequest, CloseReviewRequest, CreatedResource, DEFAULT_PAGE_SIZE, Paged,
+  ReviewDetail, ReviewListItem, ScheduleReviewRequest,
 } from '../models';
 
 /** Typed client for the Management Review API (one method per backend endpoint). */
@@ -13,8 +13,9 @@ export class ReviewApiService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiBaseUrl}/management-reviews`;
 
-  list(): Observable<Paged<ReviewListItem>> {
-    return this.http.get<Paged<ReviewListItem>>(this.base);
+  list(page = 1, pageSize = DEFAULT_PAGE_SIZE): Observable<Paged<ReviewListItem>> {
+    const params = new HttpParams().set('page', page).set('pageSize', pageSize);
+    return this.http.get<Paged<ReviewListItem>>(this.base, { params });
   }
 
   getById(id: string): Observable<ReviewDetail> {

@@ -3,8 +3,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
-  AddMitigationRequest, AssessRiskRequest, CreatedResource, Paged, ResidualAssessmentRequest,
-  RiskDetail, RiskListItem,
+  AddMitigationRequest, AssessRiskRequest, CreatedResource, DEFAULT_PAGE_SIZE, Paged,
+  ResidualAssessmentRequest, RiskDetail, RiskListItem,
 } from '../models';
 
 /** Typed client for the Risk register API (one method per backend endpoint). */
@@ -13,8 +13,8 @@ export class RiskApiService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiBaseUrl}/risks`;
 
-  list(status?: string): Observable<Paged<RiskListItem>> {
-    let params = new HttpParams();
+  list(status?: string, page = 1, pageSize = DEFAULT_PAGE_SIZE): Observable<Paged<RiskListItem>> {
+    let params = new HttpParams().set('page', page).set('pageSize', pageSize);
     if (status) { params = params.set('status', status); }
     return this.http.get<Paged<RiskListItem>>(this.base, { params });
   }

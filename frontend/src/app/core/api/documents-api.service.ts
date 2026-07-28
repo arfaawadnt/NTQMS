@@ -3,8 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
-  ControlledCopy, CreateDocumentRequest, CreatedResource, DocumentAcknowledgement, DocumentDetail, DocumentListItem,
-  DraftNewVersionRequest, MyDocumentAcknowledgement, Paged, PublishDocumentRequest, RejectVersionRequest, SignatureRecord,
+  ControlledCopy, CreateDocumentRequest, CreatedResource, DEFAULT_PAGE_SIZE, DocumentAcknowledgement,
+  DocumentDetail, DocumentListItem, DraftNewVersionRequest, MyDocumentAcknowledgement, Paged,
+  PublishDocumentRequest, RejectVersionRequest, SignatureRecord,
 } from '../models';
 
 /** Typed client for the Document Control API (one method per backend endpoint). */
@@ -13,12 +14,13 @@ export class DocumentsApiService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiBaseUrl}/documents`;
 
-  list(status?: string, search?: string): Observable<Paged<DocumentListItem>> {
+  list(status?: string, search?: string, page = 1, pageSize = DEFAULT_PAGE_SIZE): Observable<Paged<DocumentListItem>> {
     const params = new URLSearchParams();
     if (status) { params.set('status', status); }
     if (search) { params.set('search', search); }
-    const query = params.toString();
-    return this.http.get<Paged<DocumentListItem>>(query ? `${this.base}?${query}` : this.base);
+    params.set('page', String(page));
+    params.set('pageSize', String(pageSize));
+    return this.http.get<Paged<DocumentListItem>>(`${this.base}?${params.toString()}`);
   }
 
   getById(id: string): Observable<DocumentDetail> {

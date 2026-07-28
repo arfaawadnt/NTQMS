@@ -9,13 +9,14 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { UserSelectComponent } from '../../shared/ui/user-select.component';
+import { LoadMoreComponent } from '../../shared/ui/load-more.component';
 
 /** Competency matrix: status-filterable list + an assign form (role-gated). */
 @Component({
   selector: 'qams-competency-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, UserSelectComponent],
+  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, UserSelectComponent, LoadMoreComponent],
   template: `
     <qams-page-header [title]="i18n.t('comp.title')">
       <select [value]="statusFilter()" (change)="onFilter($event)" aria-label="Status filter">
@@ -65,6 +66,8 @@ import { UserSelectComponent } from '../../shared/ui/user-select.component';
           </tbody>
         </table>
       </div>
+      <qams-load-more [shown]="facade.list().length" [total]="facade.total()" [hasMore]="facade.hasMore()"
+                      [loading]="facade.loading()" (more)="facade.loadMore()" />
     }
 
     <!-- Record workspace: the routed detail renders in a wide drawer over the list. -->

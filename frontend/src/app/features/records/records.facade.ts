@@ -21,6 +21,8 @@ export class RecordsFacade {
   private readonly _hasMore = signal(false);
   private readonly _loading = signal(false);
   private readonly _error = signal('');
+  /** 1-based page of the last fetched slice (R-3 load-more pager). */
+  private readonly _page = signal(1);
   /** Active state filter, reused to refresh the list after every mutation. */
   private stateFilter?: string;
 
@@ -34,7 +36,20 @@ export class RecordsFacade {
 
   async loadList(state?: string): Promise<void> {
     this.stateFilter = state;
-    await this.run(async () => this.applyPage(await firstValueFrom(this.api.list(state))));
+    await this.run(async () => this.applyFirstPage(await firstValueFrom(this.api.list(state))));
+  }
+
+  /** Appends the next page under the current filter (R-3); no-op while loading or exhausted. */
+  async loadMore(): Promise<void> {
+    if (this._loading() || !this._hasMore()) { return; }
+    await this.run(async () => {
+      const next = this._page() + 1;
+      const page = await firstValueFrom(this.api.list(this.stateFilter, next));
+      this._page.set(next);
+      this._list.update((items) => [...items, ...page.items]);
+      this._total.set(page.total);
+      this._hasMore.set(page.hasMore);
+    });
   }
 
   /**
@@ -50,7 +65,7 @@ export class RecordsFacade {
     return await this.run(async () => {
       const snapshotFileId = (await firstValueFrom(this.files.upload(snapshot))).id;
       await firstValueFrom(this.api.archive({ sourceModule, sourceRef, snapshotFileId, retentionClass }));
-      this.applyPage(await firstValueFrom(this.api.list(this.stateFilter)));
+      this.applyFirstPage(await firstValueFrom(this.api.list(this.stateFilter)));
       return true;
     }) ?? false;
   }
@@ -70,12 +85,13 @@ export class RecordsFacade {
   private async mutate(call: () => Observable<void>): Promise<void> {
     await this.run(async () => {
       await firstValueFrom(call());
-      this.applyPage(await firstValueFrom(this.api.list(this.stateFilter)));
+      this.applyFirstPage(await firstValueFrom(this.api.list(this.stateFilter)));
     });
   }
 
-  /** Unwraps a pagination envelope into the list signals. */
-  private applyPage(page: Paged<ArchiveListItem>): void {
+  /** Unwraps a first-page envelope into the list signals, resetting the pager. */
+  private applyFirstPage(page: Paged<ArchiveListItem>): void {
+    this._page.set(1);
     this._list.set(page.items);
     this._total.set(page.total);
     this._hasMore.set(page.hasMore);

@@ -19,6 +19,8 @@ export class TasksFacade {
   private readonly _sla = signal<SlaDefinition[]>([]);
   private readonly _loading = signal(false);
   private readonly _error = signal('');
+  /** 1-based page of the last fetched slice (R-3 load-more pager). */
+  private readonly _page = signal(1);
 
   readonly tasks = this._tasks.asReadonly();
   /** Total matching tasks on the server (pagination envelope, API-004). */
@@ -30,13 +32,26 @@ export class TasksFacade {
   readonly error = this._error.asReadonly();
 
   async loadTasks(): Promise<void> {
-    await this.run(async () => this.applyPage(await firstValueFrom(this.api.mine())));
+    await this.run(async () => this.applyFirstPage(await firstValueFrom(this.api.mine())));
+  }
+
+  /** Appends the next page of my tasks (R-3); no-op while loading or exhausted. */
+  async loadMore(): Promise<void> {
+    if (this._loading() || !this._hasMore()) { return; }
+    await this.run(async () => {
+      const next = this._page() + 1;
+      const page = await firstValueFrom(this.api.mine(next));
+      this._page.set(next);
+      this._tasks.update((items) => [...items, ...page.items]);
+      this._total.set(page.total);
+      this._hasMore.set(page.hasMore);
+    });
   }
 
   async createTask(request: CreateTaskRequest): Promise<boolean> {
     return await this.run(async () => {
       await firstValueFrom(this.api.create(request));
-      this.applyPage(await firstValueFrom(this.api.mine()));
+      this.applyFirstPage(await firstValueFrom(this.api.mine()));
       return true;
     }) ?? false;
   }
@@ -44,12 +59,13 @@ export class TasksFacade {
   async completeTask(id: string): Promise<void> {
     await this.run(async () => {
       await firstValueFrom(this.api.complete(id));
-      this.applyPage(await firstValueFrom(this.api.mine()));
+      this.applyFirstPage(await firstValueFrom(this.api.mine()));
     });
   }
 
-  /** Unwraps a pagination envelope into the task signals. */
-  private applyPage(page: Paged<WorkTask>): void {
+  /** Unwraps a first-page envelope into the task signals, resetting the pager. */
+  private applyFirstPage(page: Paged<WorkTask>): void {
+    this._page.set(1);
     this._tasks.set(page.items);
     this._total.set(page.total);
     this._hasMore.set(page.hasMore);

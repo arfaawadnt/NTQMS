@@ -9,6 +9,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { UserSelectComponent } from '../../shared/ui/user-select.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
+import { LoadMoreComponent } from '../../shared/ui/load-more.component';
 
 /** Group-level validator: a task must name a user or a role (mirrors TASK-002). */
 function assigneeRequired(group: AbstractControl): ValidationErrors | null {
@@ -26,7 +27,7 @@ function assigneeRequired(group: AbstractControl): ValidationErrors | null {
   selector: 'qams-tasks',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent, UserSelectComponent],
+  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent, UserSelectComponent, LoadMoreComponent],
   template: `
     <qams-page-header [title]="i18n.t('task.title')" [subtitle]="i18n.t('task.subtitle')">
       @if (perms.canAssignTraining()) {
@@ -92,6 +93,8 @@ function assigneeRequired(group: AbstractControl): ValidationErrors | null {
           </tbody>
         </table>
       </div>
+      <qams-load-more [shown]="facade.tasks().length" [total]="facade.total()" [hasMore]="facade.hasMore()"
+                      [loading]="facade.loading()" (more)="facade.loadMore()" />
     }
 
     @if (perms.canApprove()) {

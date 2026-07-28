@@ -207,6 +207,9 @@ export interface CreatedResource { id: string; }
 /** Pagination envelope returned by list endpoints; mirrors the backend PagedResponse (EA finding API-004). */
 export interface Paged<T> { items: T[]; total: number; page: number; pageSize: number; hasMore: boolean; }
 
+/** Default page size requested by list screens (matches the API-004 envelope default). */
+export const DEFAULT_PAGE_SIZE = 50;
+
 // ── Document Control ─────────────────────────────────────────────────────────
 
 /** Semantic-version bump kinds accepted by the backend for a new document version. */

@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
-  CreatedResource, DispatchMonitorItem, NotificationFeedItem, NotificationRule,
+  CreatedResource, DEFAULT_PAGE_SIZE, DispatchMonitorItem, NotificationFeedItem, NotificationRule,
   Paged, UpsertNotificationRuleRequest,
 } from '../models';
 
@@ -16,8 +16,9 @@ export class NotificationsApiService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiBaseUrl}/notifications`;
 
-  mine(unreadOnly = false): Observable<Paged<NotificationFeedItem>> {
-    return this.http.get<Paged<NotificationFeedItem>>(`${this.base}/mine?unreadOnly=${unreadOnly}`);
+  mine(unreadOnly = false, page = 1, pageSize = DEFAULT_PAGE_SIZE): Observable<Paged<NotificationFeedItem>> {
+    const params = new HttpParams().set('unreadOnly', unreadOnly).set('page', page).set('pageSize', pageSize);
+    return this.http.get<Paged<NotificationFeedItem>>(`${this.base}/mine`, { params });
   }
 
   markRead(id: string): Observable<void> {

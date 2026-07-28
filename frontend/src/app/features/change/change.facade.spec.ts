@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ChangeFacade } from './change.facade';
-import { ChangeDetail } from '../../core/models';
+import { ChangeDetail, ChangeListItem, Paged } from '../../core/models';
 import { environment } from '../../../environments/environment';
 
 /**
@@ -56,5 +56,59 @@ describe('ChangeFacade — post-implementation review', () => {
     await done;
 
     expect(facade.error()).toBe('Post-implementation review notes are required.');
+  });
+
+  // ── R-3 load-more pager over the API-004 envelope ─────────────────────────
+
+  function item(id: string): ChangeListItem {
+    return {
+      id, changeRef: `CHG-2026-${id}`, title: `Change ${id}`, status: 'Proposed',
+      riskItemId: null, branchId: null, departmentId: null,
+    };
+  }
+
+  function envelope(items: ChangeListItem[], page: number, total: number, hasMore: boolean): Paged<ChangeListItem> {
+    return { items, total, page, pageSize: 50, hasMore };
+  }
+
+  it('loadMore fetches the next page with the same filter and appends it', async () => {
+    const first = facade.loadList('Proposed');
+    http.expectOne((r) => r.url === base && r.params.get('page') === '1' && r.params.get('status') === 'Proposed')
+      .flush(envelope([item('a'), item('b')], 1, 3, true));
+    await first;
+
+    const more = facade.loadMore();
+    http.expectOne((r) => r.url === base && r.params.get('page') === '2' && r.params.get('status') === 'Proposed')
+      .flush(envelope([item('c')], 2, 3, false));
+    await more;
+
+    expect(facade.list().map((c) => c.id)).toEqual(['a', 'b', 'c']);
+    expect(facade.total()).toBe(3);
+    expect(facade.hasMore()).toBeFalse();
+  });
+
+  it('a reload resets to page 1 and replaces the accumulated list', async () => {
+    const first = facade.loadList();
+    http.expectOne((r) => r.url === base && r.params.get('page') === '1')
+      .flush(envelope([item('a')], 1, 2, true));
+    await first;
+
+    const more = facade.loadMore();
+    http.expectOne((r) => r.url === base && r.params.get('page') === '2')
+      .flush(envelope([item('b')], 2, 2, false));
+    await more;
+    expect(facade.list().length).toBe(2);
+
+    // Filter change → loadList again: back to page 1, list replaced not appended.
+    const reload = facade.loadList('Closed');
+    http.expectOne((r) => r.url === base && r.params.get('page') === '1' && r.params.get('status') === 'Closed')
+      .flush(envelope([item('z')], 1, 1, false));
+    await reload;
+
+    expect(facade.list().map((c) => c.id)).toEqual(['z']);
+
+    // And a subsequent loadMore is a no-op because no more pages exist.
+    await facade.loadMore();
+    http.expectNone((r) => r.url === base && r.params.get('page') === '2');
   });
 });

@@ -9,6 +9,7 @@ import { ARCHIVE_SOURCE_MODULES, RETENTION_CLASSES, RetentionClass } from '../..
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
+import { LoadMoreComponent } from '../../shared/ui/load-more.component';
 
 /**
  * Records & Retention register: archived record snapshots with per-row
@@ -20,7 +21,7 @@ import { DrawerComponent } from '../../shared/ui/drawer.component';
   selector: 'qams-records',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent],
+  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent, LoadMoreComponent],
   template: `
     <qams-page-header [title]="i18n.t('arc.title')" [subtitle]="i18n.t('arc.subtitle')">
       <select [value]="stateFilter()" (change)="onFilter($event)" aria-label="State filter">
@@ -99,6 +100,8 @@ import { DrawerComponent } from '../../shared/ui/drawer.component';
           </tbody>
         </table>
       </div>
+      <qams-load-more [shown]="facade.list().length" [total]="facade.total()" [hasMore]="facade.hasMore()"
+                      [loading]="facade.loading()" (more)="facade.loadMore()" />
     }
   `,
   styles: [`

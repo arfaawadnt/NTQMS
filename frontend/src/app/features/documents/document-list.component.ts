@@ -8,13 +8,14 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { LovSelectComponent } from '../../shared/ui/lov-select.component';
+import { LoadMoreComponent } from '../../shared/ui/load-more.component';
 
 /** Controlled-document register: list + a create form that uploads the initial file. */
 @Component({
   selector: 'qams-document-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, LovSelectComponent],
+  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, LovSelectComponent, LoadMoreComponent],
   template: `
     <qams-page-header [title]="i18n.t('doc.title')">
       <button (click)="showForm.set(!showForm())">{{ i18n.t('doc.new') }}</button>
@@ -78,6 +79,8 @@ import { LovSelectComponent } from '../../shared/ui/lov-select.component';
           </tbody>
         </table>
       </div>
+      <qams-load-more [shown]="facade.list().length" [total]="facade.total()" [hasMore]="facade.hasMore()"
+                      [loading]="facade.loading()" (more)="facade.loadMore()" />
     }
 
     <!-- Record workspace: the routed detail renders in a wide drawer over the list. -->

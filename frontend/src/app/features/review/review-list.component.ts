@@ -12,13 +12,14 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { UserSelectComponent } from '../../shared/ui/user-select.component';
 import { AllocationPickerComponent } from '../../shared/ui/allocation-picker.component';
 import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
+import { LoadMoreComponent } from '../../shared/ui/load-more.component';
 
 /** Management review list: live statistics, filterable list + a schedule form (QM-gated). */
 @Component({
   selector: 'qams-review-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent, UserSelectComponent],
+  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent, UserSelectComponent, LoadMoreComponent],
   template: `
     <qams-page-header [title]="i18n.t('mrv.title')">
       @if (perms.canApprove()) {
@@ -78,6 +79,8 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
           </tbody>
         </table>
       </div>
+      <qams-load-more [shown]="facade.list().length" [total]="facade.total()" [hasMore]="facade.hasMore()"
+                      [loading]="facade.loading()" (more)="facade.loadMore()" />
     }
 
     <!-- Record workspace: the routed detail renders in a wide drawer over the list. -->

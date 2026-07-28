@@ -11,6 +11,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { AllocationPickerComponent } from '../../shared/ui/allocation-picker.component';
 import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
 import { LovSelectComponent } from '../../shared/ui/lov-select.component';
+import { LoadMoreComponent } from '../../shared/ui/load-more.component';
 
 /**
  * Risk register: live statistics, professional filtration (text search +
@@ -21,7 +22,7 @@ import { LovSelectComponent } from '../../shared/ui/lov-select.component';
   selector: 'qams-risk-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent, LovSelectComponent],
+  imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent, LovSelectComponent, LoadMoreComponent],
   template: `
     <qams-page-header [title]="i18n.t('risk.title')">
       <button (click)="showForm.set(!showForm())">{{ i18n.t('risk.new') }}</button>
@@ -90,6 +91,8 @@ import { LovSelectComponent } from '../../shared/ui/lov-select.component';
           </tbody>
         </table>
       </div>
+      <qams-load-more [shown]="facade.list().length" [total]="facade.total()" [hasMore]="facade.hasMore()"
+                      [loading]="facade.loading()" (more)="facade.loadMore()" />
     }
 
     <!-- Record workspace: the routed detail renders in a wide drawer over the list. -->

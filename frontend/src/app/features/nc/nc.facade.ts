@@ -22,6 +22,11 @@ export class NcFacade {
   private readonly _selected = signal<NcDetail | null>(null);
   private readonly _loading = signal(false);
   private readonly _error = signal('');
+  /** 1-based page of the last fetched slice (R-3 load-more pager). */
+  private readonly _page = signal(1);
+  /** Filters of the last loadList, reused verbatim by loadMore. */
+  private lastStatus?: string;
+  private lastSearch?: string;
 
   /** Current nonconformance list (filtered server-side). */
   readonly list = this._list.asReadonly();
@@ -42,11 +47,27 @@ export class NcFacade {
   /** High-risk (RPN > 12) count, for dashboards. */
   readonly highRpnCount = computed(() => this._list().filter((n) => n.rpn > 12).length);
 
-  /** Loads the list, optionally filtered by status/search text. */
+  /** Loads the first page, optionally filtered by status/search text (replaces the list). */
   async loadList(status?: string, search?: string): Promise<void> {
+    this.lastStatus = status;
+    this.lastSearch = search;
     await this.run(async () => {
       const page = await firstValueFrom(this.api.list(status, search));
+      this._page.set(1);
       this._list.set(page.items);
+      this._total.set(page.total);
+      this._hasMore.set(page.hasMore);
+    });
+  }
+
+  /** Appends the next page under the current filters (R-3); no-op while loading or exhausted. */
+  async loadMore(): Promise<void> {
+    if (this._loading() || !this._hasMore()) { return; }
+    await this.run(async () => {
+      const next = this._page() + 1;
+      const page = await firstValueFrom(this.api.list(this.lastStatus, this.lastSearch, next));
+      this._page.set(next);
+      this._list.update((items) => [...items, ...page.items]);
       this._total.set(page.total);
       this._hasMore.set(page.hasMore);
     });

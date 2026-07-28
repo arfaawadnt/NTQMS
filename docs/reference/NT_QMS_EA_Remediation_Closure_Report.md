@@ -86,10 +86,10 @@ Each finding below lists the release that closed it, the implementation evidence
 
 | # | Item | Status |
 |---|---|---|
-| **R-1** | The hardened container image and compose manifest were **not built/run during remediation** — this dev machine has no Docker. Verified by review only; the first CI or host build must confirm non-root startup, volume permissions, and healthcheck. | Open task for the deployment pipeline |
+| **R-1** | The hardened container was not buildable on the Docker-less dev machine. **Addendum (v1.45.0):** CI now builds the image on every push and asserts a non-root runtime uid plus evidence-volume writability (`ci.yml` job `container`). Closed once the first Actions run is green — check the run for commit `v1.45.0`. | **CI-enforced** (verify first run) |
 | **R-2** | Token storage remains SPA web storage under the ADR-0003 **risk acceptance** (strict CSP + 60-min tokens + revocation). Revisit trigger: refresh-cookie flow on customer/regulatory demand or any production XSS finding. | Accepted, ADR-0003 |
-| **R-3** | List screens consume the pagination envelope but ship without pager UI (facades already expose total/hasMore) — users see page 1 of up to 200 with the true total available. | UX backlog item |
-| **R-4** | `users.component.ts` still collects the admin-set reset password via `window.prompt` — out of UI-014's scope (not a change-reason), but the new dialog pattern is the natural replacement. | Observation for the backlog |
+| **R-3** | ~~No pager UI over the envelope.~~ **Closed (v1.45.0):** all 13 paged lists ship a shared accessible load-more footer ("showing X of Y", aria-live) with append-on-demand and reset-on-filter; 12 facades track pages; +6 specs. | **Closed** |
+| **R-4** | ~~Reset-password via `window.prompt`.~~ **Closed (v1.45.0):** accessible text-prompt dialog (masked input, full a11y contract of the change-reason dialog) replaces the prompt in user management; +7 specs. | **Closed** |
 | **R-5** | Load/perf coverage is a smoke tripwire, not a load test; numbers above are from the dev workstation. Run `scripts/perf-smoke.ps1` against a production-like host and record results at go-live. | Ops checklist |
 | **R-6** | Formal CSV re-validation of changed areas (IQ/OQ/PQ, RTM updates) is a downstream QA activity per the plan's explicit non-goals. | QA/validation queue |
 

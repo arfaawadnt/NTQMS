@@ -115,3 +115,28 @@ jobs:
 
       - name: E2E smoke (auth gate)
         run: npx playwright test e2e/auth.spec.ts
+
+  # DEPLOY-002 verification (closure report R-1): the hardened image must
+  # actually build, and its runtime user must be unprivileged. The dev
+  # machines have no Docker, so CI is where this is proven.
+  container:
+    name: Container (build + non-root assertion)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -f src/NT.QAMS.WebApi/Dockerfile -t ntqams-webapi:ci .
+
+      - name: Assert the runtime user is not root
+        run: |
+          uid=$(docker run --rm --entrypoint id ntqams-webapi:ci -u)
+          echo "runtime uid: $uid"
+          if [ "$uid" = "0" ]; then
+            echo "::error::container runs as root — DEPLOY-002 violated"
+            exit 1
+          fi
+
+      - name: Assert the evidence volume is writable by the runtime user
+        run: docker run --rm --entrypoint sh ntqams-webapi:ci -c 'touch /app/data/files/.ci-probe && rm /app/data/files/.ci-probe'

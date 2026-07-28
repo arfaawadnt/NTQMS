@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@ang
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UsersFacade } from './users.facade';
 import { I18nService } from '../../core/i18n.service';
+import { TextPromptService } from '../../core/text-prompt.service';
 import { TENANT_ROLES, TenantRole, UserAccount } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
@@ -104,6 +105,7 @@ export class UsersComponent implements OnInit {
   readonly facade = inject(UsersFacade);
   readonly i18n = inject(I18nService);
   private readonly fb = inject(FormBuilder);
+  private readonly prompts = inject(TextPromptService);
 
   readonly roles = TENANT_ROLES;
   readonly showForm = signal(false);
@@ -136,8 +138,13 @@ export class UsersComponent implements OnInit {
     }
   }
 
-  resetPassword(user: UserAccount): void {
-    const password = window.prompt(this.i18n.t('users.resetPrompt'));
+  /** Collects the admin-set new password in the accessible masked prompt (R-4). */
+  async resetPassword(user: UserAccount): Promise<void> {
+    const password = await this.prompts.request({
+      titleKey: 'users.resetPassword',
+      labelKey: 'users.resetPrompt',
+      inputType: 'password',
+    });
     if (password) {
       void this.facade.resetPassword(user.id, { newPassword: password });
     }

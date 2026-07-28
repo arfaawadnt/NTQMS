@@ -7,13 +7,14 @@ import { PermissionsService } from '../../core/permissions.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { UserSelectComponent } from '../../shared/ui/user-select.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
+import { LoadMoreComponent } from '../../shared/ui/load-more.component';
 
 /** Training queue: assign training (role-gated), toggle completed, and mark items complete. */
 @Component({
   selector: 'qams-training-queue',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, UserSelectComponent],
+  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, UserSelectComponent, LoadMoreComponent],
   template: `
     <qams-page-header [title]="i18n.t('train.title')">
       <label class="inline"><input type="checkbox" [checked]="includeCompleted()" (change)="onToggle($event)" /> {{ i18n.t('train.showCompleted') }}</label>
@@ -67,6 +68,8 @@ import { DrawerComponent } from '../../shared/ui/drawer.component';
           </tbody>
         </table>
       </div>
+      <qams-load-more [shown]="facade.training().length" [total]="facade.trainingTotal()" [hasMore]="facade.trainingHasMore()"
+                      [loading]="facade.loading()" (more)="facade.loadMoreTraining()" />
     }
   `,
   styles: [`

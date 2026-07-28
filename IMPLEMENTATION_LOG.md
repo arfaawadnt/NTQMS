@@ -548,3 +548,22 @@ cross-tenant denial functional test suite (merge gate from day one).
 - Gates: backend 359 green 0 skipped (was 337) - 211 domain / 57 app / 24 arch
   / 18 integration / 49 functional; frontend build + 45 unit specs; 3 e2e
   against the live API; perf smoke PASS. Build 0 warnings.
+
+## Post-remediation backlog #1 (v1.45.0, 2026-07-28) [DONE]
+
+- R-1 (container verification): ci.yml gains a `container` job - builds the
+  hardened image on every push, asserts the runtime uid is non-root and the
+  evidence volume is writable by the app user. Proven by the Actions run for
+  this push (no Docker on dev machines).
+- R-3 (pager UI): shared accessible qams-load-more footer (showing X of Y,
+  aria-live, load-more button) on all 13 paged lists; services take
+  page/pageSize; facades track pages, append on loadMore, reset on
+  filter/reload, guard concurrent loads; notifications feed paged in-component.
+  i18n common.showingOf/loadMore (+confirm/cancel) EN/AR/FR.
+- R-4 (reset-password prompt): generic accessible text-prompt dialog
+  (titleKey/labelKey/inputType incl. password masking; same a11y contract as
+  the change-reason dialog) hosted in shell; users.component drops
+  window.prompt.
+- Gates: backend 359 green 0 skipped; frontend build + 58 specs (+13); 3 e2e
+  vs live API. Closure report residual register updated (R-3/R-4 closed,
+  R-1 CI-enforced).

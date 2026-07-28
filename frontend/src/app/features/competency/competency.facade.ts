@@ -25,6 +25,13 @@ export class CompetencyFacade {
   private readonly _trainingHasMore = signal(false);
   private readonly _loading = signal(false);
   private readonly _error = signal('');
+  /** 1-based page of the last fetched competency slice (R-3 load-more pager). */
+  private readonly _page = signal(1);
+  /** 1-based page of the last fetched training slice (R-3 load-more pager). */
+  private readonly _trainingPage = signal(1);
+  /** Filters of the last loads, reused verbatim by the loadMore methods. */
+  private lastStatus?: string;
+  private lastIncludeCompleted = false;
 
   readonly list = this._list.asReadonly();
   /** Total matching competency records on the server (pagination envelope, API-004). */
@@ -41,9 +48,24 @@ export class CompetencyFacade {
   readonly error = this._error.asReadonly();
 
   async loadList(status?: string): Promise<void> {
+    this.lastStatus = status;
     await this.run(async () => {
       const page = await firstValueFrom(this.api.listCompetencies(undefined, status));
+      this._page.set(1);
       this._list.set(page.items);
+      this._total.set(page.total);
+      this._hasMore.set(page.hasMore);
+    });
+  }
+
+  /** Appends the next competency page under the current filter (R-3). */
+  async loadMore(): Promise<void> {
+    if (this._loading() || !this._hasMore()) { return; }
+    await this.run(async () => {
+      const next = this._page() + 1;
+      const page = await firstValueFrom(this.api.listCompetencies(undefined, this.lastStatus, next));
+      this._page.set(next);
+      this._list.update((items) => [...items, ...page.items]);
       this._total.set(page.total);
       this._hasMore.set(page.hasMore);
     });
@@ -70,7 +92,24 @@ export class CompetencyFacade {
   }
 
   async loadTraining(includeCompleted: boolean): Promise<void> {
-    await this.run(async () => this.applyTraining(await firstValueFrom(this.api.listTraining(undefined, includeCompleted))));
+    this.lastIncludeCompleted = includeCompleted;
+    await this.run(async () => {
+      this._trainingPage.set(1);
+      this.applyTraining(await firstValueFrom(this.api.listTraining(undefined, includeCompleted)));
+    });
+  }
+
+  /** Appends the next training page under the current filter (R-3). */
+  async loadMoreTraining(): Promise<void> {
+    if (this._loading() || !this._trainingHasMore()) { return; }
+    await this.run(async () => {
+      const next = this._trainingPage() + 1;
+      const page = await firstValueFrom(this.api.listTraining(undefined, this.lastIncludeCompleted, next));
+      this._trainingPage.set(next);
+      this._training.update((items) => [...items, ...page.items]);
+      this._trainingTotal.set(page.total);
+      this._trainingHasMore.set(page.hasMore);
+    });
   }
 
   async assignTraining(request: AssignTrainingRequest): Promise<string | null> {
@@ -79,8 +118,10 @@ export class CompetencyFacade {
 
   /** Marks a training assignment complete and refreshes the queue keeping the current filter. */
   async completeTraining(id: string, includeCompleted: boolean): Promise<void> {
+    this.lastIncludeCompleted = includeCompleted;
     await this.run(async () => {
       await firstValueFrom(this.api.completeTraining(id));
+      this._trainingPage.set(1);
       this.applyTraining(await firstValueFrom(this.api.listTraining(undefined, includeCompleted)));
     });
   }

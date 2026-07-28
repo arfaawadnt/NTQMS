@@ -9,13 +9,14 @@ import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { AllocationPickerComponent } from '../../shared/ui/allocation-picker.component';
 import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
+import { LoadMoreComponent } from '../../shared/ui/load-more.component';
 
 /** Change Control register: live statistics, filterable list + a propose form. */
 @Component({
   selector: 'qams-change-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent],
+  imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent, LoadMoreComponent],
   template: `
     <qams-page-header [title]="i18n.t('chg.title')">
       <button (click)="showForm.set(!showForm())">{{ i18n.t('chg.new') }}</button>
@@ -74,6 +75,8 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
           </tbody>
         </table>
       </div>
+      <qams-load-more [shown]="facade.list().length" [total]="facade.total()" [hasMore]="facade.hasMore()"
+                      [loading]="facade.loading()" (more)="facade.loadMore()" />
     }
 
     <!-- Record workspace: the routed detail renders in a wide drawer over the list. -->

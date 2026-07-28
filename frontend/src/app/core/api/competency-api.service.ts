@@ -4,7 +4,8 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   AssignCompetencyRequest, AssignTrainingRequest, CompetencyDetail, CompetencyListItem,
-  CreatedResource, Paged, RevokeCompetencyRequest, ScoreAssessmentRequest, TrainingAssignment,
+  CreatedResource, DEFAULT_PAGE_SIZE, Paged, RevokeCompetencyRequest, ScoreAssessmentRequest,
+  TrainingAssignment,
 } from '../models';
 
 /**
@@ -18,8 +19,8 @@ export class CompetencyApiService {
   private readonly competencies = `${environment.apiBaseUrl}/competencies`;
   private readonly training = `${environment.apiBaseUrl}/training-assignments`;
 
-  listCompetencies(traineeId?: string, status?: string): Observable<Paged<CompetencyListItem>> {
-    let params = new HttpParams();
+  listCompetencies(traineeId?: string, status?: string, page = 1, pageSize = DEFAULT_PAGE_SIZE): Observable<Paged<CompetencyListItem>> {
+    let params = new HttpParams().set('page', page).set('pageSize', pageSize);
     if (traineeId) { params = params.set('traineeId', traineeId); }
     if (status) { params = params.set('status', status); }
     return this.http.get<Paged<CompetencyListItem>>(this.competencies, { params });
@@ -45,8 +46,8 @@ export class CompetencyApiService {
     return this.http.post<void>(`${this.competencies}/${id}/revoke`, body);
   }
 
-  listTraining(traineeId?: string, includeCompleted = false): Observable<Paged<TrainingAssignment>> {
-    let params = new HttpParams().set('includeCompleted', includeCompleted);
+  listTraining(traineeId?: string, includeCompleted = false, page = 1, pageSize = DEFAULT_PAGE_SIZE): Observable<Paged<TrainingAssignment>> {
+    let params = new HttpParams().set('includeCompleted', includeCompleted).set('page', page).set('pageSize', pageSize);
     if (traineeId) { params = params.set('traineeId', traineeId); }
     return this.http.get<Paged<TrainingAssignment>>(this.training, { params });
   }

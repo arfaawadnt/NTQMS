@@ -17,6 +17,10 @@ export class AuditsFacade {
   private readonly _selected = signal<AuditDetail | null>(null);
   private readonly _loading = signal(false);
   private readonly _error = signal('');
+  /** 1-based page of the last fetched slice (R-3 load-more pager). */
+  private readonly _page = signal(1);
+  /** Filter of the last loadList, reused verbatim by loadMore. */
+  private lastStatus?: string;
 
   readonly list = this._list.asReadonly();
   /** Total matching records on the server (pagination envelope, API-004). */
@@ -28,9 +32,24 @@ export class AuditsFacade {
   readonly error = this._error.asReadonly();
 
   async loadList(status?: string): Promise<void> {
+    this.lastStatus = status;
     await this.run(async () => {
       const page = await firstValueFrom(this.api.list(status));
+      this._page.set(1);
       this._list.set(page.items);
+      this._total.set(page.total);
+      this._hasMore.set(page.hasMore);
+    });
+  }
+
+  /** Appends the next page under the current filter (R-3); no-op while loading or exhausted. */
+  async loadMore(): Promise<void> {
+    if (this._loading() || !this._hasMore()) { return; }
+    await this.run(async () => {
+      const next = this._page() + 1;
+      const page = await firstValueFrom(this.api.list(this.lastStatus, next));
+      this._page.set(next);
+      this._list.update((items) => [...items, ...page.items]);
       this._total.set(page.total);
       this._hasMore.set(page.hasMore);
     });

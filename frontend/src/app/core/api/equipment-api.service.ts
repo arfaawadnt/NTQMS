@@ -1,9 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
-  CreatedResource, EquipmentDetail, EquipmentListItem, LogCalibrationRequest,
+  CreatedResource, DEFAULT_PAGE_SIZE, EquipmentDetail, EquipmentListItem, LogCalibrationRequest,
   LogMaintenanceRequest, Paged, RecordIntermediateCheckRequest, RegisterEquipmentRequest,
 } from '../models';
 
@@ -13,8 +13,10 @@ export class EquipmentApiService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiBaseUrl}/equipment`;
 
-  list(status?: string): Observable<Paged<EquipmentListItem>> {
-    return this.http.get<Paged<EquipmentListItem>>(status ? `${this.base}?status=${encodeURIComponent(status)}` : this.base);
+  list(status?: string, page = 1, pageSize = DEFAULT_PAGE_SIZE): Observable<Paged<EquipmentListItem>> {
+    let params = new HttpParams().set('page', page).set('pageSize', pageSize);
+    if (status) { params = params.set('status', status); }
+    return this.http.get<Paged<EquipmentListItem>>(this.base, { params });
   }
 
   getById(id: string): Observable<EquipmentDetail> {
