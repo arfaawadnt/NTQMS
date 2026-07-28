@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NT.QMS — Automated Security Assessment (dev instance, v1.48.0)</title>
+<style>
+  :root{
+    --bg:#f6f7fb; --panel:#fff; --ink:#16202c; --muted:#5b6878; --line:#dfe4ec;
+    --accent:#1f6feb; --accent-soft:#e8f0fe; --ok:#1a7f37; --warn:#d97706; --crit:#c62828; --info:#3b6ea5;
+    --shadow:0 1px 3px rgba(22,32,44,.08);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0e1420; --panel:#161e2c; --ink:#e7edf5; --muted:#9aa8ba; --line:#2a3548;
+      --accent:#5b9dff; --accent-soft:#16273f; --ok:#4ade80; --warn:#fbbf24; --crit:#f87171; --info:#7db2e8;
+      --shadow:0 1px 3px rgba(0,0,0,.4);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 "Segoe UI",system-ui,-apple-system,sans-serif}
+  .wrap{max-width:1040px;margin:0 auto;padding:40px 24px 80px}
+  header .id{color:var(--muted);font-size:12.5px;letter-spacing:.06em;text-transform:uppercase}
+  h1{font-size:clamp(23px,4vw,32px);line-height:1.2;margin:6px 0 4px}
+  .sub{color:var(--muted);max-width:90ch}
+  .scope{background:color-mix(in srgb,var(--warn) 10%,var(--panel));border:1px solid color-mix(in srgb,var(--warn) 35%,transparent);
+    border-left:5px solid var(--warn);border-radius:12px;padding:16px 20px;margin:22px 0}
+  .scope b{color:var(--warn)}
+  .verdict{background:linear-gradient(180deg,var(--accent-soft),transparent),var(--panel);
+    border:1px solid var(--line);border-left:5px solid var(--ok);border-radius:14px;padding:22px 26px;box-shadow:var(--shadow);margin:20px 0 34px}
+  .verdict .tag{color:var(--ok);font-weight:700;font-size:13px;letter-spacing:.05em;text-transform:uppercase}
+  .verdict h2{margin:8px 0 8px;font-size:clamp(18px,3vw,24px)}
+  .bignums{display:flex;flex-wrap:wrap;gap:26px;margin-top:12px}
+  .bignums b{display:block;font-size:24px}.bignums span{color:var(--muted);font-size:12.5px}
+  h2.sec{font-size:19px;margin:42px 0 6px;padding-top:10px;border-top:2px solid var(--line)}
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);margin:14px 0}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--panel);min-width:680px}
+  th{background:color-mix(in srgb,var(--line) 40%,var(--panel));text-align:left;padding:9px 13px;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+  td{padding:9px 13px;border-top:1px solid var(--line);vertical-align:top}
+  .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+  .p-ok{color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,transparent)}
+  .p-open{color:var(--warn);background:color-mix(in srgb,var(--warn) 15%,transparent)}
+  code{font:12px/1.5 Consolas,"Cascadia Mono",monospace;background:color-mix(in srgb,var(--line) 45%,transparent);padding:1px 5px;border-radius:5px}
+  ul{margin:8px 0;padding-left:22px}li{margin:3px 0}
+  footer{margin-top:52px;color:var(--muted);font-size:12.5px;border-top:1px solid var(--line);padding-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="id">NTQMS-SEC-ASSESS-001 · 2026-07-28 · target tag <code>v1.48.0</code></div>
+  <h1>NT.QMS — Automated Adversarial Security Assessment</h1>
+  <p class="sub">An executed, black/grey-box security probe of the running NT.QMS API, exercising the attack
+  classes the system is designed to defend (OWASP API Security Top-10 aligned). Fifteen adversarial checks were
+  fired at a live instance and their defences verified.</p>
+</header>
+
+<div class="scope">
+  <b>Scope &amp; honesty statement — read first.</b> This is an <b>automated assessment against a local
+  development instance</b>, executed by the engineering harness (<code>scripts/security-probe.ps1</code>). It is
+  <b>NOT</b> a penetration test against a staging deployment, and it does <b>not</b> discharge that external
+  activity. No staging environment exists yet (closure-report residual R-7), and a defensible penetration-test
+  attestation for a 21 CFR Part 11 system must be performed by a qualified independent party against a
+  production-like deployment. This report’s purpose is to <b>de-risk and pre-empt</b> that engagement by proving
+  the in-code defences hold under real attack traffic. The authoritative pen test remains OPEN
+  (see §D).
+</div>
+
+<div class="verdict">
+  <span class="tag">Result — no weaknesses found in scope</span>
+  <h2>15 / 15 adversarial checks passed · 0 findings</h2>
+  <div class="bignums">
+    <div><b>15 / 15</b><span>checks passed</span></div>
+    <div><b>0</b><span>critical / high / medium findings</span></div>
+    <div><b>9</b><span>attack classes exercised</span></div>
+    <div><b>OPEN</b><span>external pen test (§D)</span></div>
+  </div>
+</div>
+
+<h2 class="sec">A · Executed checks (live traffic against the running API)</h2>
+<div class="tablewrap"><table>
+  <tr><th>#</th><th>Class (OWASP API)</th><th>Attack fired</th><th>Observed defence</th><th></th></tr>
+  <tr><td>A1</td><td>Broken auth (API2)</td><td>Unauthenticated read of a protected resource</td><td>401 — deny-by-default fallback policy</td><td><span class="pill p-ok">Pass</span></td></tr>
+  <tr><td>A2</td><td>Broken auth (API2)</td><td>Garbage bearer token</td><td>401</td><td><span class="pill p-ok">Pass</span></td></tr>
+  <tr><td>A3</td><td>Broken auth (API2)</td><td>Signature-stripped JWT (alg-none style)</td><td>401 — signature validation enforced</td><td><span class="pill p-ok">Pass</span></td></tr>
+  <tr><td>B1</td><td>Injection (API8)</td><td>SQLi payload <code>' OR 1=1--</code> in the list filter</td><td>Filtered set did not widen (parameterized EF + RLS); 0 rows</td><td><span class="pill p-ok">Pass</span></td></tr>
+  <tr><td>B2</td><td>Injection / traversal</td><td>Path traversal in the file-download id (<code>../../../etc/passwd</code>)</td><td>404 — id is a GUID route, no filesystem path built from input</td><td><span class="pill p-ok">Pass</span></td></tr>
+  <tr><td>C1</td><td>BOLA / tenant isolation (API1)</td><td>Client-supplied <code>tenantId</code> in the create body</td><td>Ignored — tenant is stamped from the JWT claim only (body field not bound); record created in the caller's tenant</td><td><span class="pill p-ok">Pass</span></td></tr>
+  <tr><td>D1</td><td>Broken function-level authz / mass-assignment (API3/API5)</td><td>TenantAdmin registering a <code>PlatformAdmin</code> (privilege escalation)</td><td>400 — role validated; platform role not mintable by a tenant</td><td><span class="pill p-ok">Pass</span></td></tr>
+  <tr><td>F1–F3</td><td>Security misconfiguration (API7)</td><td>Header inspection</td><td>CSP <code>default-src 'none'</code>, <code>X-Content-Type-Options: nosniff</code>, <code>X-Frame-Options: DENY</code> present on every response</td><td><span class="pill p-ok">Pass</span></td></tr>
+  <tr><td>G1</td><td>Improper error handling (API7)</td><td>Bad-password login — enumeration probe</td><td>Generic "Invalid credentials." — no user/factor disclosure</td><td><span class="pill p-ok">Pass</span></td></tr>
+  <tr><td>G2</td><td>Improper error handling</td><td>Error content-type + shape</td><td><code>application/problem+json</code>, code <code>AUTH-001</code>, traceId — uniform contract</td><td><span class="pill p-ok">Pass</span></td></tr>
+  <tr><td>G3</td><td>Improper error handling</td><td>Internal leakage in error body</td><td>No stack trace / exception type / internals leaked</td><td><span class="pill p-ok">Pass</span></td></tr>
+  <tr><td>H1</td><td>Improper inventory / verb tampering</td><td>Unsupported <code>DELETE</code> on a collection route</td><td>400 — not 500, no unhandled fault</td><td><span class="pill p-ok">Pass</span></td></tr>
+  <tr><td>E1</td><td>Unrestricted resource consumption (API4)</td><td>Credential-stuffing burst on <code>/api/auth/login</code></td><td>429 Too Many Requests after the configured budget (rate limiter)</td><td><span class="pill p-ok">Pass</span></td></tr>
+</table></div>
+
+<h2 class="sec">B · Method &amp; artefacts</h2>
+<ul>
+  <li><b>Harness:</b> <code>scripts/security-probe.ps1</code> — re-runnable, prints PASS/FAIL per check, exits
+  non-zero on any failure (suitable as a pre-release gate against a deployed URL).</li>
+  <li><b>Target:</b> the running API at <code>v1.48.0</code> against a real PostgreSQL 17 with FORCE RLS and the
+  hardened runtime role, i.e. the real data-layer defences are in the loop — not mocked.</li>
+  <li><b>Corroborating deterministic tests</b> (the assessment confirms live what these prove in CI):
+  <code>RlsTenantIsolationTests</code> (tenant isolation / fail-closed), <code>RoleEndpointMatrixTests</code>
+  (6-role × endpoint deny matrix), <code>SignedRecordImmutabilityTests</code>, <code>ProblemContractTests</code>,
+  <code>SecurityHardeningTests</code> (headers + 429), <code>FileHardeningTests</code> (upload sniffing).</li>
+</ul>
+
+<h2 class="sec">C · Assessment notes (not findings)</h2>
+<ul>
+  <li><b>HSTS</b> is intentionally absent in the Development environment and emitted only outside it (ADR-0002);
+  verify its presence on the TLS-terminated staging/production host.</li>
+  <li>The probe's ordering matters: the credential-burst check (E1) exhausts the per-IP auth rate-limit budget,
+  so it runs LAST — an earlier version mis-flagged the subsequent auth-shape checks; corrected and re-verified.</li>
+  <li>The BOLA check (C1) creates one draft nonconformance in the dev tenant (regulated records are never
+  hard-deleted); harmless on a dev instance, but run destructive-write probes against disposable data only.</li>
+</ul>
+
+<h2 class="sec">D · The authoritative external activity — still OPEN</h2>
+<div class="tablewrap"><table>
+  <tr><th>Item</th><th>Why this assessment does not replace it</th><th>Owner</th></tr>
+  <tr><td><b>Independent penetration test against staging</b></td>
+    <td>A qualified third party testing a production-like, TLS-terminated deployment covers what an automated in-house probe cannot: business-logic abuse chains, session/refresh-cookie attacks against the real ADR-0009 flow over HTTPS, infrastructure and TLS configuration, authenticated multi-step exploitation, and an independent attestation of record. This assessment is a precursor, not a substitute.</td>
+    <td><span class="pill p-open">External vendor</span></td></tr>
+</table></div>
+<p style="color:var(--muted);font-size:13.5px">Recommended sequence: stand up staging (<code>deploy/compose.production.yml</code> + <code>deploy/observability/</code>,
+residuals R-5/R-7) → point this harness at the staging URL as a smoke gate → engage the pen-test vendor against
+that environment → remediate findings → only then claim the security dimension at 100% in a final audit, with the
+vendor report attached.</p>
+
+<footer>
+  NT.QMS Automated Security Assessment · NTQMS-SEC-ASSESS-001 · 2026-07-28 · target v1.48.0.
+  Companion to EA-AUD-NTQMS-003 (engineering-ceiling audit) and the Road-to-100 plan. This document is an
+  engineering assessment, not a penetration-test attestation; it does not constitute a security certification of
+  a production deployment.
+</footer>
+
+</div>
+</body>
+</html>
