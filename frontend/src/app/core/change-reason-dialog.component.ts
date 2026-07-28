@@ -81,7 +81,7 @@ export class ChangeReasonDialogComponent {
         this.previouslyFocused.focus();
         this.previouslyFocused = null;
       }
-    }, { allowSignalWrites: true });
+    });
   }
 
   @HostListener('document:keydown.escape')
