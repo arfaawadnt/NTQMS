@@ -69,11 +69,11 @@
 
 <div class="verdict">
   <span class="tag">Result — no weaknesses found in scope</span>
-  <h2>15 / 15 adversarial checks passed · 0 findings</h2>
+  <h2>24 / 24 adversarial checks passed · 0 findings (fast + deep waves)</h2>
   <div class="bignums">
-    <div><b>15 / 15</b><span>checks passed</span></div>
+    <div><b>24 / 24</b><span>checks passed (15 fast + 9 deep)</span></div>
     <div><b>0</b><span>critical / high / medium findings</span></div>
-    <div><b>9</b><span>attack classes exercised</span></div>
+    <div><b>13</b><span>attack classes exercised</span></div>
     <div><b>OPEN</b><span>external pen test (§D)</span></div>
   </div>
 </div>
@@ -95,6 +95,26 @@
   <tr><td>H1</td><td>Improper inventory / verb tampering</td><td>Unsupported <code>DELETE</code> on a collection route</td><td>400 — not 500, no unhandled fault</td><td><span class="pill p-ok">Pass</span></td></tr>
   <tr><td>E1</td><td>Unrestricted resource consumption (API4)</td><td>Credential-stuffing burst on <code>/api/auth/login</code></td><td>429 Too Many Requests after the configured budget (rate limiter)</td><td><span class="pill p-ok">Pass</span></td></tr>
 </table></div>
+
+<h2 class="sec">A2 · Deep wave — stateful session &amp; cross-tenant attacks (<code>security-probe-deep.ps1</code>)</h2>
+<div class="tablewrap"><table>
+  <tr><th>#</th><th>Class (OWASP API)</th><th>Attack fired</th><th>Observed defence</th><th></th></tr>
+  <tr><td>J1</td><td>BOLA / tenant isolation (API1)</td><td>Two real tenants; tenant B reads tenant A's record by id</td><td>404 — RLS fail-closed; owner control read succeeds (200)</td><td><span class="pill p-ok">Pass</span></td></tr>
+  <tr><td>I1</td><td>Broken session (API2) — ADR-0009</td><td>Valid refresh cookie replayed</td><td>200 — rotates to a new token</td><td><span class="pill p-ok">Pass</span></td></tr>
+  <tr><td>I2</td><td>Stolen-token reuse</td><td>The rotated (stale) refresh token replayed</td><td>401 — rejected</td><td><span class="pill p-ok">Pass</span></td></tr>
+  <tr><td>I3</td><td>Stolen-token reuse — family kill</td><td>The successor token used after the reuse was detected</td><td>401 — the WHOLE family is revoked (reuse-detection working end-to-end)</td><td><span class="pill p-ok">Pass</span></td></tr>
+  <tr><td>K1</td><td>Broken auth (API2)</td><td>Refresh with no cookie</td><td>401, not 500</td><td><span class="pill p-ok">Pass</span></td></tr>
+  <tr><td>L1</td><td>Security misconfiguration (API7)</td><td>Foreign <code>Origin</code> header on a request</td><td>No <code>Access-Control-Allow-Origin</code> reflected (ADR-0007 same-origin, no CORS)</td><td><span class="pill p-ok">Pass</span></td></tr>
+  <tr><td>M1</td><td>Improper error handling</td><td>Defensive headers on an AUTHENTICATED 403</td><td>CSP + nosniff present on the 403, not only on 200s</td><td><span class="pill p-ok">Pass</span></td></tr>
+  <tr><td>N1</td><td>Cross-site tracing (XST)</td><td>TRACE with a marker request header</td><td>Not echoed — no request-header reflection</td><td><span class="pill p-ok">Pass</span></td></tr>
+</table></div>
+<div class="note"><b>Two probe self-corrections during this run (not app findings):</b> (1) the credential-burst check
+exhausts the per-IP auth rate-limit budget, so it was reordered to run last after an earlier version mis-flagged
+the subsequent auth-shape checks; (2) PowerShell's <code>Invoke-WebRequest</code> silently drops a manually-set
+<code>Cookie</code> header and mangles inline JSON to a native <code>curl</code>, which first read as a refresh
+failure — the refresh flow was proven correct via <code>curl</code> (HTTP 200 rotate) and the 5 in-process
+<code>RefreshSessionTests</code>, and the probe switched to a faithful transport. Both were harness bugs; the
+application behaved correctly throughout.</div>
 
 <h2 class="sec">B · Method &amp; artefacts</h2>
 <ul>
