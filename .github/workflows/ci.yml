@@ -101,10 +101,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node 22
+      # Node 24 = the toolchain that generated package-lock.json (npm 11).
+      # npm 10 (bundled with Node 22) rejects npm-11 nested lock entries
+      # ("Missing: chokidar@5.0.0 from lock file") even though the lock is
+      # in sync — keep CI on the same major as the dev boxes.
+      - name: Setup Node 24
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
