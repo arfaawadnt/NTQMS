@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NT.QMS — Enterprise Application Architecture Compliance Audit</title>
+<style>
+  :root{
+    --bg:#f6f7fb;--panel:#fff;--ink:#16202c;--muted:#5b6878;--line:#dfe4ec;
+    --accent:#1f6feb;--accent-soft:#e8f0fe;--ok:#1a7f37;--warn:#d97706;--crit:#c62828;--info:#3b6ea5;--low:#6b7f94;
+    --shadow:0 1px 3px rgba(22,32,44,.08);
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#0e1420;--panel:#161e2c;--ink:#e7edf5;--muted:#9aa8ba;--line:#2a3548;
+    --accent:#5b9dff;--accent-soft:#16273f;--ok:#4ade80;--warn:#fbbf24;--crit:#f87171;--info:#7db2e8;--low:#8ea3b8;
+    --shadow:0 1px 3px rgba(0,0,0,.4);}}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 "Segoe UI",system-ui,-apple-system,sans-serif}
+  .wrap{max-width:1120px;margin:0 auto;padding:40px 24px 90px}
+  header .id{color:var(--muted);font-size:12.5px;letter-spacing:.06em;text-transform:uppercase}
+  h1{font-size:clamp(24px,4vw,34px);line-height:1.2;margin:6px 0 4px}
+  .sub{color:var(--muted);max-width:92ch}
+  h2.sec{font-size:20px;margin:44px 0 8px;padding-top:12px;border-top:2px solid var(--line)}
+  h2.sec .n{color:var(--muted);font-weight:500}
+  h3{font-size:15.5px;margin:22px 0 6px}
+  .verdict{background:linear-gradient(180deg,var(--accent-soft),transparent),var(--panel);border:1px solid var(--line);
+    border-left:5px solid var(--warn);border-radius:14px;padding:22px 26px;box-shadow:var(--shadow);margin:22px 0 30px}
+  .verdict .tag{color:var(--warn);font-weight:700;font-size:13px;letter-spacing:.05em;text-transform:uppercase}
+  .verdict h2{margin:8px 0;font-size:clamp(18px,3vw,24px);border:0;padding:0}
+  .bignums{display:flex;flex-wrap:wrap;gap:24px;margin-top:12px}
+  .bignums b{display:block;font-size:23px}.bignums span{color:var(--muted);font-size:12px}
+  .scope{background:color-mix(in srgb,var(--warn) 10%,var(--panel));border:1px solid color-mix(in srgb,var(--warn) 35%,transparent);
+    border-left:5px solid var(--warn);border-radius:12px;padding:14px 18px;margin:18px 0;font-size:13.5px}
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);margin:12px 0}
+  table{width:100%;border-collapse:collapse;font-size:13px;background:var(--panel);min-width:680px}
+  th{background:color-mix(in srgb,var(--line) 40%,var(--panel));text-align:left;padding:9px 12px;font-size:11.5px;
+    letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+  td{padding:9px 12px;border-top:1px solid var(--line);vertical-align:top}
+  .score{font-variant-numeric:tabular-nums;font-weight:700;text-align:center}
+  .pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap}
+  .p-ok{color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,transparent)}
+  .p-part{color:var(--warn);background:color-mix(in srgb,var(--warn) 15%,transparent)}
+  .p-non{color:var(--crit);background:color-mix(in srgb,var(--crit) 14%,transparent)}
+  .p-na{color:var(--info);background:color-mix(in srgb,var(--info) 14%,transparent)}
+  .p-nv{color:var(--low);background:color-mix(in srgb,var(--low) 16%,transparent)}
+  .finding{border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin:14px 0;background:var(--panel);box-shadow:var(--shadow)}
+  .finding h4{margin:0 0 8px;font-size:14.5px}
+  .finding .meta{font-size:12px;color:var(--muted);margin-bottom:8px}
+  .finding dt{font-weight:600;font-size:12.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin-top:8px}
+  .finding dd{margin:2px 0 0}
+  code{font:12px/1.5 Consolas,"Cascadia Mono",monospace;background:color-mix(in srgb,var(--line) 45%,transparent);padding:1px 5px;border-radius:5px}
+  ul{margin:6px 0;padding-left:22px}li{margin:2px 0}
+  .sev-crit{color:var(--crit);font-weight:700}.sev-high{color:var(--warn);font-weight:700}.sev-med{color:var(--info);font-weight:600}.sev-low{color:var(--low)}
+  footer{margin-top:52px;color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="id">MODE: Enterprise Application Compliance Assessment · EAC-NTQMS-001 · 2026-07-29 · target tag <code>v1.48.0</code></div>
+  <h1>NT.QMS — Enterprise Application Architecture Compliance Audit</h1>
+  <p class="sub">Evidence-based assessment of the NT.QMS system (.NET 9 · PostgreSQL 17 · Angular 18 · Clean
+  Architecture + CQRS) against the 22-section Enterprise Application Architecture checklist. Compliance is
+  validated from concrete artifacts and <b>executed</b> results (build, full automated suite against real
+  PostgreSQL 17, running application, adversarial probes) — not from folder names, comments, or intent.</p>
+</header>
+
+<div class="scope">
+  <b>Scope note on the supplied "standard".</b> The uploaded <code>Enterprise_Application_Development_Standard.txt</code>
+  does <b>not</b> contain enterprise standards — its content is a short <i>Implementation Mode</i> brief to build a
+  "Patient Registration" module (create/update/search patients, duplicate detection), an unrelated task for a
+  different system. It is therefore <b>not</b> a usable audit baseline for NT.QMS (a Quality Management System).
+  This audit is conducted against the <b>self-contained 22-section checklist embedded in the audit prompt</b>. The
+  file mismatch is recorded as <b>OPEN QUESTION</b> below.
+</div>
+
+<div class="verdict">
+  <span class="tag">Production Decision — Approved with Conditions</span>
+  <h2>Overall ≈ 88% · Verification coverage ≈ 87% (High confidence) · 0 critical findings · 0 P0 blockers</h2>
+  <p style="color:var(--muted);margin:6px 0 0;max-width:88ch">All critical controls — tenant isolation, backend
+  authorization, database integrity, signed-record immutability — are implemented <b>and verified by executed
+  tests</b>. No cross-tenant exposure was found. The gap to full alignment is external/operational validation
+  (independent penetration test, staging observability + load/soak, dependency &amp; container vulnerability
+  scanning) plus minor currency deviations — none of which are P0.</p>
+  <div class="bignums">
+    <div><b>≈ 88%</b><span>overall compliance</span></div>
+    <div><b>≈ 87%</b><span>verification coverage (High)</span></div>
+    <div><b>0</b><span>critical findings</span></div>
+    <div><b>0</b><span>P0 production blockers</span></div>
+    <div><b>368+67+6</b><span>backend / frontend / e2e tests — executed, 0 skipped</span></div>
+  </div>
+</div>
+
+<!-- 1–5 -->
+<h2 class="sec"><span class="n">1–3 ·</span> Objective, artifacts reviewed, artifacts not provided</h2>
+<p><b>Objective &amp; scope.</b> Determine how closely NT.QMS complies with the enterprise architecture checklist,
+across business alignment, architecture, DDD, CQRS, API, security, multi-tenancy, database, messaging, background
+processing, real-time, frontend, validation, audit/e-signatures, observability, configuration, resilience,
+deployment, testing, and documentation.</p>
+<h3>Artifacts reviewed (evidence base)</h3>
+<ul>
+  <li><b>Source repository</b> — <code>src/NT.QAMS.{Domain,Application,Infrastructure,WebApi,Contracts,SharedKernel}</code>,
+  <code>frontend/</code>, 5 test projects; <code>NT.QAMS.sln</code>.</li>
+  <li><b>Executed this assessment:</b> <code>dotnet build</code> (0 warnings/0 errors); <code>dotnet test</code>
+  → <b>368 backend tests pass, 0 skipped</b> (211 Domain / 57 Application / 24 Architecture / 18 Integration on real
+  PostgreSQL 17 / 58 WebApi Functional); the application run and queried live; adversarial probes
+  <code>scripts/security-probe.ps1</code> + <code>security-probe-deep.ps1</code> (24/24, 0 findings); all 20+ EF
+  migrations applied to a real PostgreSQL 17 DB.</li>
+  <li><b>Verified earlier this session (same build):</b> frontend production build + <b>67 unit specs</b>;
+  <b>6 Playwright e2e</b> (incl. 2 axe a11y scans) against the live API; CI green (Build &amp; Test with real PG ·
+  Container non-root · Frontend).</li>
+  <li><b>EF configs/migrations, PostgreSQL schema</b> (queried live: tables, RLS, constraints, roles).</li>
+  <li><b>Docs:</b> <code>docs/reference/</code> (architecture, closure report, prior audits), <code>docs/adr/ADR-0001…0009</code>,
+  <code>docs/validation/</code> (VMP/URS/FRA/QP/RTM/VSR + re-validation delta), <code>deploy/</code> (Dockerfile,
+  compose, DEPLOY, OBSERVABILITY, BACKUP-RESTORE-DR), <code>IMPLEMENTATION_LOG.md</code>, <code>.github/workflows/ci.yml</code>.</li>
+</ul>
+<h3>Artifacts not provided / not applicable</h3>
+<ul>
+  <li><b>NOT VERIFIED — production/staging runtime:</b> no deployed staging exists (no Docker host); TLS/HSTS on a
+  real host, live Grafana/Prometheus alerts firing, and a 24 h soak could not be executed.</li>
+  <li><b>NOT VERIFIED — independent penetration test:</b> only an in-house automated assessment exists.</li>
+  <li><b>NOT VERIFIED — dependency/container vulnerability scan:</b> not configured in CI.</li>
+  <li><b>NOT APPLICABLE — SignalR / real-time:</b> the system has no real-time requirement (explicitly out of
+  scope); no hubs present. <b>Hangfire:</b> not used — background work uses .NET <code>BackgroundService</code>
+  hosted services (assessed against §11 intent).</li>
+</ul>
+
+<h2 class="sec"><span class="n">4–5 ·</span> Assumptions &amp; open questions</h2>
+<ul>
+  <li><b>ASSUMPTION:</b> the tenant-isolation, auth, and integrity behaviours proven against the real dev
+  PostgreSQL 17 hold identically on a production PostgreSQL 17 with the same migrations + <code>harden-runtime-role.sql</code>
+  applied (the RLS/role model is schema-level, not environment-specific).</li>
+  <li><b>ASSUMPTION:</b> CI results for commit <code>v1.48.0</code> reflect the audited code (verified: the same
+  tree builds and tests green locally this session).</li>
+  <li><b>OPEN QUESTION:</b> the uploaded standard file describes a Patient Registration module, not NT.QMS and not a
+  standard. Which document is the authoritative enterprise standard? (This audit used the prompt's embedded checklist.)</li>
+  <li><b>OPEN QUESTION:</b> the checklist specifies Angular 19 and Serilog; NT.QMS uses Angular 18.2 and
+  Microsoft.Extensions JSON logging + OpenTelemetry. Are these named technologies mandatory, or is functional
+  equivalence acceptable? (Assessed as equivalent, deviations noted.)</li>
+</ul>
+
+<!-- 6 -->
+<h2 class="sec"><span class="n">6 ·</span> Executive summary</h2>
+<p>NT.QMS is a mature, well-architected multi-tenant SaaS QMS whose <b>highest-risk controls are implemented and
+proven by executed automated tests</b>. Clean Architecture and module boundaries are enforced as merge gates
+(<code>LayerRulesTests</code>, <code>ModuleBoundaryTests</code>); the domain is framework-free; CQRS is real
+(separate commands/queries, a tested behaviour pipeline, DTO projection, no leaked <code>IQueryable</code>);
+tenant isolation is enforced at <b>both</b> the EF query filter and PostgreSQL FORCE RLS and validated against a
+real database, including a live cross-tenant IDOR probe that returned 404; authorization is deny-by-default at
+both the HTTP fallback policy and the command pipeline, proven by a 6-role × endpoint matrix; the audit trail is
+hash-chained with executed tamper-detection; e-signatures bind the full Part-11 evidence set; the session model
+uses a rotating, reuse-detecting refresh cookie (ADR-0009). The database is normalized with FK/unique/CHECK
+constraints, tenant-scoped uniqueness, optimistic concurrency (<code>xmin</code>), and reversible migrations. The
+outbox is durable, retry-safe, dead-lettering, and horizontally safe (SKIP LOCKED + leader election).</p>
+<p>The material gaps are <b>operational and external</b>, not architectural: no independent penetration test; no
+staging run of the (authored) observability stack, load, or soak; no dependency/container vulnerability scanning
+in CI; and currency deviations (Angular 18 vs 19; MS-JSON+OTel vs Serilog by name). Several validation
+(OQ/PQ) cases remain QA-execution templates. None of these are cross-tenant, authorization, data-corruption, or
+secret-exposure defects — so none is a P0 blocker. The system is <b>approved with conditions</b>.</p>
+
+<!-- 7,8 -->
+<h2 class="sec"><span class="n">7–8 ·</span> Overall compliance &amp; verification coverage</h2>
+<p><b>Overall compliance ≈ 88%</b> (earned 74 / 84 applicable points; §12 SignalR excluded as N/A) — "Generally
+aligned; material improvements required." <b>Verification coverage ≈ 87%</b> — <b>High confidence</b>: code-level
+controls were executed against a real database and a running app; the ~13% unverified is production-runtime
+evidence that requires a deployed host or an independent party (pen test, staging alerts/soak, vuln scan).</p>
+
+<!-- 9 Executive scorecard -->
+<h2 class="sec"><span class="n">9 · A ·</span> Executive scorecard</h2>
+<div class="tablewrap"><table>
+  <tr><th>#</th><th>Category</th><th>Score</th><th>Max</th><th>Compliance</th><th>Coverage</th><th>Crit</th><th>High</th><th>Status</th></tr>
+  <tr><td>1</td><td>Business &amp; functional alignment</td><td class="score">3</td><td class="score">4</td><td>75%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-part">Partial</span></td></tr>
+  <tr><td>2</td><td>Solution architecture</td><td class="score">4</td><td class="score">4</td><td>100%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-ok">Compliant</span></td></tr>
+  <tr><td>3</td><td>SOLID &amp; code structure</td><td class="score">3</td><td class="score">4</td><td>75%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-ok">Compliant</span></td></tr>
+  <tr><td>4</td><td>Domain-driven design</td><td class="score">4</td><td class="score">4</td><td>100%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-ok">Compliant</span></td></tr>
+  <tr><td>5</td><td>CQRS &amp; MediatR</td><td class="score">4</td><td class="score">4</td><td>100%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-ok">Compliant</span></td></tr>
+  <tr><td>6</td><td>API design</td><td class="score">4</td><td class="score">4</td><td>100%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-ok">Compliant</span></td></tr>
+  <tr><td>7</td><td>Authentication &amp; authorization</td><td class="score">4</td><td class="score">4</td><td>100%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-ok">Compliant</span></td></tr>
+  <tr><td>8</td><td>Multi-tenancy</td><td class="score">4</td><td class="score">4</td><td>100%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-ok">Compliant</span></td></tr>
+  <tr><td>9</td><td>Database &amp; EF Core</td><td class="score">4</td><td class="score">4</td><td>100%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-ok">Compliant</span></td></tr>
+  <tr><td>10</td><td>Transactions, consistency, messaging</td><td class="score">3</td><td class="score">4</td><td>75%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-ok">Compliant</span></td></tr>
+  <tr><td>11</td><td>Background processing (no Hangfire)</td><td class="score">3</td><td class="score">4</td><td>75%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-ok">Compliant</span></td></tr>
+  <tr><td>12</td><td>SignalR / real-time</td><td class="score">N/A</td><td class="score">—</td><td>—</td><td>—</td><td>0</td><td>0</td><td><span class="pill p-na">Not applicable</span></td></tr>
+  <tr><td>13</td><td>Angular frontend</td><td class="score">3</td><td class="score">4</td><td>75%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-part">Partial</span></td></tr>
+  <tr><td>14</td><td>Validation &amp; error handling</td><td class="score">4</td><td class="score">4</td><td>100%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-ok">Compliant</span></td></tr>
+  <tr><td>15</td><td>Audit &amp; e-signatures</td><td class="score">4</td><td class="score">4</td><td>100%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-ok">Compliant</span></td></tr>
+  <tr><td>16</td><td>Security architecture (STRIDE)</td><td class="score">3</td><td class="score">4</td><td>75%</td><td>Med</td><td>0</td><td>0</td><td><span class="pill p-part">Partial</span></td></tr>
+  <tr><td>17</td><td>Logging &amp; observability</td><td class="score">3</td><td class="score">4</td><td>75%</td><td>Med</td><td>0</td><td>0</td><td><span class="pill p-part">Partial</span></td></tr>
+  <tr><td>18</td><td>Configuration &amp; secrets</td><td class="score">3</td><td class="score">4</td><td>75%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-ok">Compliant</span></td></tr>
+  <tr><td>19</td><td>Health, resilience, operations</td><td class="score">3</td><td class="score">4</td><td>75%</td><td>Med</td><td>0</td><td>0</td><td><span class="pill p-part">Partial</span></td></tr>
+  <tr><td>20</td><td>Docker &amp; deployment</td><td class="score">3</td><td class="score">4</td><td>75%</td><td>Med</td><td>0</td><td>0</td><td><span class="pill p-part">Partial</span></td></tr>
+  <tr><td>21</td><td>Testing</td><td class="score">4</td><td class="score">4</td><td>100%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-ok">Compliant</span></td></tr>
+  <tr><td>22</td><td>Documentation &amp; traceability</td><td class="score">4</td><td class="score">4</td><td>100%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-ok">Compliant</span></td></tr>
+  <tr style="font-weight:700"><td></td><td>TOTAL (21 applicable)</td><td class="score">74</td><td class="score">84</td><td>88%</td><td>≈87%</td><td>0</td><td>0</td><td><span class="pill p-part">Approved w/ conditions</span></td></tr>
+</table></div>
+
+<!-- 10 Mandatory rule -->
+<h2 class="sec"><span class="n">10 · B ·</span> Mandatory-rule compliance</h2>
+<div class="tablewrap"><table>
+  <tr><th>Rule</th><th>Status</th><th>Score</th><th>Evidence (executed)</th><th>Main gap</th><th>Blocker</th></tr>
+  <tr><td>Clean-Architecture dependency direction; domain framework-free</td><td><span class="pill p-ok">Compliant</span></td><td class="score">4</td><td><code>Architecture.Tests/LayerRulesTests</code> (pass); Domain refs SharedKernel only</td><td>—</td><td>No</td></tr>
+  <tr><td>Module boundaries enforced by automated tests; no cycles</td><td><span class="pill p-ok">Compliant</span></td><td class="score">4</td><td><code>ModuleBoundaryTests</code> (18 modules, 0 violations, pass)</td><td>—</td><td>No</td></tr>
+  <tr><td>Aggregates protect state; invariants in domain; no entity exposure</td><td><span class="pill p-ok">Compliant</span></td><td class="score">4</td><td>211 <code>Domain.UnitTests</code> pass; private setters + factories; DTOs in <code>Contracts</code></td><td>—</td><td>No</td></tr>
+  <tr><td>Commands mutate / queries don't; no <code>IQueryable</code> exposed; behaviour pipeline</td><td><span class="pill p-ok">Compliant</span></td><td class="score">4</td><td><code>Application/Behaviors/*</code> (Tracing→Logging→Authorization→Idempotency→Validation); handlers return DTOs</td><td>—</td><td>No</td></tr>
+  <tr><td>Tenant from trusted claim only; body TenantId never trusted; EF filter + FORCE RLS; cross-tenant denial tested</td><td><span class="pill p-ok">Compliant</span></td><td class="score">4</td><td><code>IntegrationTests/RlsTenantIsolationTests</code> (real PG, pass); live IDOR probe → 404; <code>TenantResolutionMiddleware</code> (claim only)</td><td>—</td><td>No</td></tr>
+  <tr><td>Deny-by-default backend authorization for every protected op</td><td><span class="pill p-ok">Compliant</span></td><td class="score">4</td><td>HTTP fallback policy + <code>AuthorizationBehavior</code> (AUTHZ-000 fail-closed); <code>RoleEndpointMatrixTests</code>, <code>AuditorDenyMatrixTests</code>, <code>CommandPolicyTests</code> (pass)</td><td>—</td><td>No</td></tr>
+  <tr><td>Signed records immutable; audit trail append-only + tamper-evident</td><td><span class="pill p-ok">Compliant</span></td><td class="score">4</td><td><code>IntegrationTests/SignedRecordImmutabilityTests</code>, <code>GovernanceTests</code> (tamper at exact sequence, pass); DB triggers + least-priv role</td><td>—</td><td>No</td></tr>
+  <tr><td>Optimistic concurrency on contested records → 409</td><td><span class="pill p-ok">Compliant</span></td><td class="score">4</td><td><code>xmin</code> token (ADR-0005); <code>OptimisticConcurrencyTests</code>, <code>ConcurrencyConflictMappingTests</code> (pass)</td><td>—</td><td>No</td></tr>
+  <tr><td>Reliable integration events (Outbox, retry-safe, poison handling)</td><td><span class="pill p-ok">Compliant</span></td><td class="score">4</td><td><code>OutboxProcessorTests</code>, <code>OutboxResilienceTests</code> (SKIP LOCKED, dead-letter, backoff, purge — pass); ADR-0006</td><td>—</td><td>No</td></tr>
+  <tr><td>problem+json everywhere; no stack traces / secrets leaked</td><td><span class="pill p-ok">Compliant</span></td><td class="score">4</td><td><code>ProblemContractTests</code> (pass); probe G1–G3 (generic errors, no stack trace)</td><td>—</td><td>No</td></tr>
+  <tr><td>Secrets not in code/bundle/image/logs; from a store</td><td><span class="pill p-ok">Compliant</span></td><td class="score">3</td><td>user-secrets (<code>deploy/DEV-SECRETS.md</code>); Dockerfile injects at runtime; redaction interceptor</td><td>No automated secret-scan gate</td><td>No</td></tr>
+  <tr><td>Independent security validation of the deployed system</td><td><span class="pill p-part">Partially</span></td><td class="score">2</td><td>In-house adversarial assessment 24/24 (<code>security-probe*.ps1</code>)</td><td>No independent pen test on staging</td><td>No (condition)</td></tr>
+  <tr><td>Dependency &amp; container vulnerability scanning</td><td><span class="pill p-non">Non-compliant</span></td><td class="score">1</td><td>CI builds the image + asserts non-root; no vuln scan step</td><td>No Trivy/Dependabot/SCA gate</td><td>No (P2)</td></tr>
+  <tr><td>Structured logging + OTel across async boundaries</td><td><span class="pill p-ok">Compliant</span></td><td class="score">3</td><td><code>ObservabilityMiddleware</code>, <code>TracePropagationTests</code> (pass); MS-JSON+OTel (not Serilog by name)</td><td>Serilog not used; dashboards unrun on staging</td><td>No</td></tr>
+</table></div>
+
+<!-- 11 Production blockers -->
+<h2 class="sec"><span class="n">11 · C ·</span> Production blockers</h2>
+<p><b>No P0 production blockers.</b> Every applicable critical control (tenant isolation, backend authorization,
+database integrity, signed-record immutability, e-signatures) is implemented and verified by executed tests; no
+cross-tenant exposure, auth bypass, secret leak, or data-corruption path was found. The items below are the
+<b>conditions</b> attached to approval (P1/P2), not hard blockers.</p>
+<div class="tablewrap"><table>
+  <tr><th>ID</th><th>Condition</th><th>Severity</th><th>Priority</th><th>Risk if shipped without it</th></tr>
+  <tr><td>SEC-001</td><td>Independent penetration test on a staging deployment</td><td class="sev-high">High</td><td>P1</td><td>Security posture is code-/test-verified but not independently validated against a live TLS deployment (business-logic abuse, session attacks over HTTPS)</td></tr>
+  <tr><td>OPS-001</td><td>Staging bring-up: observability stack + alerts firing + 24 h soak (R-5/R-7)</td><td class="sev-med">Medium</td><td>P1</td><td>Production diagnosability and capacity are authored but never exercised under real load/telemetry</td></tr>
+  <tr><td>SEC-002</td><td>Dependency + container vulnerability scanning in CI</td><td class="sev-med">Medium</td><td>P2</td><td>Known-vulnerable transitive packages / base-image CVEs could ship undetected</td></tr>
+  <tr><td>DOC-001</td><td>QA execution + sign-off of the CSV re-validation (OQ/PQ templates)</td><td class="sev-med">Medium</td><td>P1</td><td>Regulated (21 CFR Part 11) formal validation incomplete for the v1.38→v1.48 changes</td></tr>
+</table></div>
+
+<!-- 12 Detailed findings -->
+<h2 class="sec"><span class="n">12 ·</span> Detailed findings (material items)</h2>
+<p>Compliant categories are evidenced in §B and §13–19; the findings below record the material gaps and the
+strongest verified controls, in the required format.</p>
+
+<div class="finding">
+  <h4>TENANT-001: Multi-tenant isolation enforced and verified end-to-end</h4>
+  <div class="meta">Category: Multi-tenancy · Status: <b>COMPLIANT</b> · Score: 4 · Severity: Informational · Priority: — · Production blocker: No · Confidence: High</div>
+  <dl>
+    <dt>Evidence</dt><dd>Tenant from JWT <code>tenant_id</code> claim only (<code>WebApi/Middleware/RequestIdentity.cs</code> <code>TenantResolutionMiddleware</code>); EF global query filter on every <code>ITenantScoped</code> entity (<code>AppDbContext.OnModelCreating</code>); PostgreSQL FORCE RLS with <code>tenant_isolation</code> policies; <code>IntegrationTests/RlsTenantIsolationTests</code> (real PG, fail-closed + WITH CHECK, <b>pass</b>); live cross-tenant IDOR probe (two tenants) → 404 (<code>security-probe-deep.ps1</code> [J]); background jobs elevate via <code>ICurrentTenantSetter.Elevate()</code>.</dd>
+    <dt>Observed implementation</dt><dd>Defence-in-depth: application filter AND database RLS; the DB read as another tenant returns nothing even with the filter bypassed. Files are tenant-scoped by storage path + query filter.</dd>
+    <dt>Compliance analysis</dt><dd>Satisfies §8 fully, including the "never infer isolation from a TenantId property" integrity rule — isolation is proven by execution against a real database, not asserted.</dd>
+    <dt>Risk</dt><dd>None observed. No cross-tenant exposure across reads/writes/updates/deletes/exports/jobs.</dd>
+    <dt>Required remediation</dt><dd>None. Maintain the RLS-in-own-migration convention for new tenant tables.</dd>
+    <dt>Required tests</dt><dd>Already present; extend the cross-tenant matrix to any new tenant table (IQ-05/06 verify RLS present).</dd>
+    <dt>Relevant standard</dt><dd>Checklist §8; integrity rule "treat verified cross-tenant exposure as CRITICAL/P0" — none found.</dd>
+  </dl>
+</div>
+
+<div class="finding">
+  <h4>SEC-001: Independent penetration test not performed</h4>
+  <div class="meta">Category: Security architecture · Status: <b>PARTIALLY COMPLIANT</b> · Score: 2 · Severity: <span class="sev-high">High</span> · Priority: P1 · Production blocker: No (condition) · Confidence: High</div>
+  <dl>
+    <dt>Evidence</dt><dd>In-house automated adversarial assessment (24/24 checks, 0 findings — <code>docs/reference/NT_QMS_Security_Assessment_Report.html</code>); pen-test SOW + readiness checklist prepared (<code>docs/reference/NT_QMS_PenTest_SOW.md</code>). No independent third-party test; no deployed staging target exists.</dd>
+    <dt>Observed implementation</dt><dd>STRIDE controls implemented (headers/CSP, TLS-at-proxy design, rate limits, file hardening, injection/traversal/mass-assignment defences) and probe-verified on the dev instance.</dd>
+    <dt>Compliance analysis</dt><dd>§16 controls are present and code-verified, but the integrity rule "never claim secure from static inspection" and enterprise practice require an independent test of the deployed system before a security sign-off.</dd>
+    <dt>Risk</dt><dd>Business-logic abuse chains, session attacks over real HTTPS, and infra/TLS misconfig could remain undiscovered.</dd>
+    <dt>Required remediation</dt><dd>Stand up staging (<code>deploy/bring-up-staging.md</code>); engage a qualified vendor per the SOW; remediate + retest.</dd>
+    <dt>Required tests</dt><dd>Vendor test plan (ASVS L2/L3, OWASP API/Web); point <code>scripts/staging-smoke.ps1</code> at staging as a regression gate.</dd>
+    <dt>Relevant standard</dt><dd>Checklist §16; §7 (auditable authorization).</dd>
+  </dl>
+</div>
+
+<div class="finding">
+  <h4>SEC-002: No dependency / container vulnerability scanning in CI</h4>
+  <div class="meta">Category: Docker &amp; deployment / Security · Status: <b>NON-COMPLIANT</b> · Score: 1 · Severity: <span class="sev-med">Medium</span> · Priority: P2 · Production blocker: No · Confidence: High</div>
+  <dl>
+    <dt>Evidence</dt><dd><code>.github/workflows/ci.yml</code> builds the image and asserts non-root uid + volume writability, but contains no SCA (Dependabot/NuGet audit) or image scan (Trivy/Grype) step.</dd>
+    <dt>Observed implementation</dt><dd>Base images are supported (<code>mcr.microsoft.com/dotnet/aspnet:9.0</code>); packages are largely pinned; multi-stage build; non-root runtime.</dd>
+    <dt>Compliance analysis</dt><dd>§20 requires images scanned for vulnerabilities and §16 dependency scanning configured — currently absent.</dd>
+    <dt>Risk</dt><dd>A vulnerable transitive dependency or base-image CVE could ship undetected.</dd>
+    <dt>Required remediation</dt><dd>Add <code>dotnet list package --vulnerable</code> (or Dependabot) + a Trivy image scan job to CI, failing on High/Critical.</dd>
+    <dt>Required tests</dt><dd>CI job that fails on a seeded vulnerable package; passing baseline scan on the current tree.</dd>
+    <dt>Relevant standard</dt><dd>Checklist §16, §20.</dd>
+  </dl>
+</div>
+
+<div class="finding">
+  <h4>OPS-001: Observability stack, load, and soak authored but not executed on a host</h4>
+  <div class="meta">Category: Observability / Operations · Status: <b>PARTIALLY COMPLIANT</b> · Score: 3 · Severity: <span class="sev-med">Medium</span> · Priority: P1 · Production blocker: No · Confidence: High</div>
+  <dl>
+    <dt>Evidence</dt><dd>Structured logging + OTel proven in-code (<code>ObservabilityMiddleware</code>, <code>TracePropagationTests</code> pass, <code>/metrics</code> live); alert rules + Grafana dashboards authored (<code>deploy/observability/</code>); load harness + dev-box baseline (<code>docs/reference/NT_QMS_Load_Test_Report.md</code>, p95 86–105 ms). Not run on a Docker host; alerts never fired; no 24 h soak.</dd>
+    <dt>Compliance analysis</dt><dd>§17/§19 diagnosability and resilience are implemented and unit/integration-verified, but "dashboards support production diagnosis" and "alerts are actionable" are unproven until run against staging under real telemetry/load.</dd>
+    <dt>Risk</dt><dd>An alert threshold or dashboard query could be wrong; capacity headroom is a dev-box estimate.</dd>
+    <dt>Required remediation</dt><dd>Execute <code>deploy/bring-up-staging.md</code> §4/§6/§7 (stack up, drill fires alert, load + soak); record PQ results.</dd>
+    <dt>Required tests</dt><dd>PQ-PERF-01/02, PQ-OBS-01 in the re-validation delta.</dd>
+    <dt>Relevant standard</dt><dd>Checklist §17, §19.</dd>
+  </dl>
+</div>
+
+<div class="finding">
+  <h4>UI-001: Angular is v18.2 (checklist specifies v19); component-spec ratio is thin</h4>
+  <div class="meta">Category: Angular frontend · Status: <b>PARTIALLY COMPLIANT</b> · Score: 3 · Severity: <span class="sev-low">Low</span> · Priority: P2/P3 · Production blocker: No · Confidence: High</div>
+  <dl>
+    <dt>Evidence</dt><dd><code>frontend/package.json</code> → <code>@angular/core ^18.2.0</code>. Standalone components, signals, typed reactive forms, strict TS, lazy routes, facades, centralized typed API services, i18n centralized, memory-only token (ADR-0009), axe a11y in CI — all present. 67 unit specs + 6 e2e executed; component coverage is lighter than service/facade coverage.</dd>
+    <dt>Compliance analysis</dt><dd>All §13 <i>behaviours</i> are satisfied; only the major-version number and spec breadth deviate. No security control depends on the UI (visibility is affordance-only).</dd>
+    <dt>Risk</dt><dd>Version currency (support window); some regulated-flow components rely on e2e rather than unit specs.</dd>
+    <dt>Required remediation</dt><dd>Plan the Angular 18→19 upgrade (low risk — standalone/signals already in use); expand component specs on the NC/CAPA/publish/audit flows.</dd>
+    <dt>Required tests</dt><dd>Post-upgrade full frontend build + specs + e2e green; added component specs.</dd>
+    <dt>Relevant standard</dt><dd>Checklist §13.</dd>
+  </dl>
+</div>
+
+<div class="finding">
+  <h4>MSG-001: No inbox/dedup pattern — justified (no inbound external messaging)</h4>
+  <div class="meta">Category: Transactions &amp; messaging · Status: <b>NOT APPLICABLE</b> (dedup requirement met differently) · Score: 3 · Severity: Informational · Priority: P3 · Confidence: High</div>
+  <dl>
+    <dt>Evidence</dt><dd>No inbound message consumer exists (no external broker integration). Internal event dedup is DB-enforced by natural keys (<code>ux_nonconformance_source</code>) and per-policy idempotency; the outbox is the only messaging path.</dd>
+    <dt>Compliance analysis</dt><dd>§10's inbox/dedup requirement targets <i>incoming</i> messages; with none, it is N/A. Redelivery idempotency is nonetheless proven (<code>OutboxProcessorTests</code> redelivery).</dd>
+    <dt>Risk</dt><dd>None today; if an inbound integration is added later, add a processed-message inbox.</dd>
+    <dt>Required remediation</dt><dd>None now; ADR to record the decision if/when inbound messaging is introduced.</dd>
+    <dt>Relevant standard</dt><dd>Checklist §10, §21.</dd>
+  </dl>
+</div>
+
+<div class="finding">
+  <h4>OBS-001: Logging uses Microsoft JSON + OpenTelemetry, not Serilog by name</h4>
+  <div class="meta">Category: Logging &amp; observability · Status: <b>PARTIALLY COMPLIANT</b> · Score: 3 · Severity: <span class="sev-low">Low</span> · Priority: P3 · Production blocker: No · Confidence: High</div>
+  <dl>
+    <dt>Evidence</dt><dd><code>Program.cs</code> uses the built-in JSON console formatter + OTLP export; the canonical request record carries service/environment/tenant/user/operation/status/outcome/duration/correlation (<code>ObservabilityMiddleware</code>; <code>ObservabilityTests</code> log-shape, pass). No <code>Serilog</code> package.</dd>
+    <dt>Compliance analysis</dt><dd>§17's <i>required properties and behaviours</i> are all met; only the named library differs. Functionally equivalent (structured, sinks via OTLP, no secrets logged).</dd>
+    <dt>Risk</dt><dd>Minimal — a tooling/standardization preference, not a capability gap. Confirm with the standard owner whether Serilog is mandatory.</dd>
+    <dt>Required remediation</dt><dd>None functionally; if Serilog is mandated, swap the provider (behaviour-preserving).</dd>
+    <dt>Relevant standard</dt><dd>Checklist §17 (OPEN QUESTION on named library).</dd>
+  </dl>
+</div>
+
+<!-- 13-19 assessments -->
+<h2 class="sec"><span class="n">13 ·</span> Aggregate &amp; domain-model assessment</h2>
+<p>Aggregates are explicit (<code>AggregateRoot : Entity</code>, ~50 roots), each <code>sealed</code> with private
+setters, a private EF ctor, static factories (<code>Create/Configure/Raise/Draft</code>), guarded state machines,
+and invariants thrown as coded <code>DomainException</code>s inside the aggregate — never in validators/handlers.
+Value objects (e.g. <code>TenantSlug</code>) validate/equal by value; money is <code>decimal</code>; time is
+<code>DateTimeOffset</code> from an injected <code>IClock</code>. Domain events are meaningful facts raised inside
+aggregates and drained to the outbox. Concurrency is <code>xmin</code> per root (ADR-0005). Tenant ownership via
+<code>ITenantScoped</code>; audit via the hash-chained ledger. <b>211 domain unit tests pass.</b> Per-aggregate
+detail (root, invariants, transitions, events, concurrency, tenant, audit) is captured in
+<code>docs/reference/NT_QAMS_Domain_Model.md</code> + RTM-NTQMS-001. <b>Compliant (§4).</b></p>
+
+<h2 class="sec"><span class="n">14 ·</span> Database &amp; tenant-isolation assessment</h2>
+<p>Schema is normalized (~3NF) across <code>qams</code>/<code>audit</code>/<code>read</code>/<code>saas</code>/<code>ref</code>
+schemas; UUIDv7 PKs (<code>ValueGeneratedNever</code>); FKs by Id (no cross-tenant navigation); tenant-scoped
+unique indexes; CHECK constraints on regulated tables (<code>Phase5CheckConstraints</code>, verified rejecting
+direct-SQL corruption with SQLSTATE 23514 in <code>CheckConstraintTests</code>); optimistic concurrency; reversible
+migrations (<code>GovernanceTests</code> up/down round-trip, pass). Persistence uses <code>IAppDbContext</code>
+exposing <code>DbSet&lt;T&gt;</code> (ADR-0008) — <b>no generic repository, no UoW wrapper, no leaked
+<code>IQueryable</code></b> (queries project to DTOs). Least-privilege runtime role (no DELETE except scoped
+outbox/idempotency; NOSUPERUSER/NOBYPASSRLS) — verified by <code>RuntimeRolePrivilegeTests</code> + IQ checks.
+Tenant isolation: EF filter + FORCE RLS, executed-verified (above). <b>Compliant (§8, §9). Tenant isolation:
+VERIFIED. Database integrity: VERIFIED.</b></p>
+
+<h2 class="sec"><span class="n">15 ·</span> Security &amp; STRIDE assessment</h2>
+<p><b>Spoofing:</b> JWT validated for issuer/audience/signature/lifetime; forged/stripped tokens → 401 (probe A1–A3).
+<b>Tampering:</b> hash-chained audit trail + immutability triggers + xmin; tamper detected at exact sequence.
+<b>Repudiation:</b> security-event ledger, per-request correlation, e-signature evidence set.
+<b>Information disclosure:</b> generic auth errors (no enumeration), problem+json, no stack traces (probe G1–G3);
+tenant isolation. <b>DoS:</b> global + auth + e-sign rate limits → 429 (probe E1). <b>Elevation:</b>
+deny-by-default at HTTP + command pipeline; role×endpoint matrix; TenantAdmin cannot mint PlatformAdmin (probe D1);
+refresh reuse revokes the family (probe I). Headers/CSP present on every response incl. errors; CORS not reflected
+(ADR-0007); no XST. Secrets externalized. <b>Open:</b> independent pen test (SEC-001), dependency/container
+scanning (SEC-002), HSTS/TLS confirmation on a real host. <b>Partially compliant (§16); backend authorization:
+VERIFIED.</b></p>
+
+<h2 class="sec"><span class="n">16 ·</span> API assessment</h2>
+<p>DTOs only (entities never exposed); resource routes + explicit business-action endpoints; correct HTTP verbs;
+<code>api/v1/…</code> versioning + evolution policy (ADR-0004) with a 620-route surface-snapshot gate; uniform
+<code>application/problem+json</code> with stable codes on validation/authz/concurrency/not-found (incl. framework
+401/403 via <code>ProblemAuthorizationResultHandler</code>); pagination envelope with clamped page size and
+allow-listed filters; Idempotency-Key replay; rate limiting; file endpoints validate size/type (magic-byte sniff),
+force attachment, and are tenant-scoped; correlation/trace ids returned safely; no stack traces. Endpoint tests
+cover success/validation/authz/tenancy/concurrency/not-found (<code>WebApi.FunctionalTests</code>, 58 pass).
+<b>Compliant (§6, §14).</b></p>
+
+<h2 class="sec"><span class="n">17 ·</span> Angular assessment</h2>
+<p>Angular <b>18.2</b> (deviation from v19), standalone components, signals, typed reactive forms, strict TS, lazy
+routes, facade/store orchestration, centralized typed API services, i18n (EN/AR-RTL/FR) centralized, loading/empty/
+error/validation states, load-more pagination, memory-only access token + silent refresh (ADR-0009), axe-core a11y
+in CI (0 serious/critical on login). UI authorization is affordance-only (not a security control). Duplicate submit
+guarded. 67 unit specs + 6 e2e executed. Gaps: version currency; thinner component-spec ratio. <b>Partially
+compliant (§13).</b></p>
+
+<h2 class="sec"><span class="n">18 ·</span> Testing &amp; quality assessment</h2>
+<p><b>Executed this assessment:</b> 368 backend tests (0 skipped) — Domain unit/value/aggregate/state (211),
+command/query/validation/authorization/idempotency behaviours (57), architecture boundary + command-policy (24),
+EF/PostgreSQL constraint + RLS + immutability + concurrency + outbox + migration + tamper (18, real PG), API/
+problem-details/pagination/file/versioning/role-matrix/contract/observability (58); plus 67 frontend specs and 6
+e2e (incl. axe). Acceptance→Test→Evidence→Result mapping exists in RTM-NTQMS-001. <b>Not present (justified):</b>
+inbox/dedup tests (no inbound messaging — natural-key dedup tested instead); SignalR tests (N/A). <b>Pending:</b>
+staging load/soak (PQ). <b>Compliant (§21).</b> Coverage is behaviour-based, not coverage-% theatre.</p>
+
+<h2 class="sec"><span class="n">19 ·</span> Observability &amp; operational assessment</h2>
+<p>Liveness/readiness split (<code>/health/live</code>, DB-backed <code>/health/ready</code> → 503 when down);
+structured JSON logs with the full property set; OTel traces HTTP→MediatR→EF→Outbox/jobs with correlation +
+persisted <code>traceparent</code> across the async boundary; <code>/metrics</code> (RED + Npgsql pool + outbox
+backlog/dead-letter + job liveness); alert rules + Grafana dashboards authored; Npgsql retry + command timeout;
+graceful shutdown via hosted services; backup/restore/DR runbook (RPO≤5 min/RTO≤4 h); tagged-release rollback;
+failure drills executed live (poison→dead-letter). <b>Open:</b> run the stack + alerts + 24 h soak on a host
+(OPS-001); no circuit breakers (not currently justified — few synchronous external calls). <b>Partially compliant
+(§17, §19).</b></p>
+
+<!-- 20 Risk register -->
+<h2 class="sec"><span class="n">20 · D ·</span> Risk register</h2>
+<div class="tablewrap"><table>
+  <tr><th>ID</th><th>Risk</th><th>Likelihood</th><th>Impact</th><th>Severity</th><th>Owner</th><th>Mitigation</th></tr>
+  <tr><td>SEC-001</td><td>Undiscovered vuln absent an independent pen test</td><td>Medium</td><td>High</td><td class="sev-high">High</td><td>Unassigned (Security)</td><td>Staging + vendor pen test per SOW; retest</td></tr>
+  <tr><td>SEC-002</td><td>Vulnerable dependency / base-image CVE ships undetected</td><td>Medium</td><td>Medium</td><td class="sev-med">Medium</td><td>Unassigned (DevOps)</td><td>Add SCA + Trivy gate to CI</td></tr>
+  <tr><td>OPS-001</td><td>Alert/dashboard misconfig or capacity shortfall unseen until production</td><td>Medium</td><td>Medium</td><td class="sev-med">Medium</td><td>Unassigned (Ops)</td><td>Staging stack + drill + load/soak (R-5/R-7)</td></tr>
+  <tr><td>DOC-001</td><td>Part-11 formal validation incomplete for v1.38→v1.48</td><td>High</td><td>Medium</td><td class="sev-med">Medium</td><td>Unassigned (QA)</td><td>Execute REVAL-NTQMS-001 OQ/PQ; sign VSR addendum</td></tr>
+  <tr><td>UI-001</td><td>Angular 18 support-window / thinner component specs</td><td>Low</td><td>Low</td><td class="sev-low">Low</td><td>Unassigned (Frontend)</td><td>Plan v19 upgrade; expand regulated-flow specs</td></tr>
+  <tr><td>OBS-001</td><td>Serilog not used (standard names it)</td><td>Low</td><td>Low</td><td class="sev-low">Low</td><td>Unassigned</td><td>Confirm equivalence with standard owner; swap provider if mandated</td></tr>
+</table></div>
+
+<!-- 21 Remediation backlog -->
+<h2 class="sec"><span class="n">21 · E ·</span> Prioritized remediation backlog</h2>
+<p>Ordered per the required precedence (cross-tenant/authz first — none open — then availability, integrity gaps,
+scanning, tests, maintainability).</p>
+<div class="tablewrap"><table>
+  <tr><th>Priority</th><th>ID</th><th>Corrective action</th><th>Affected components</th><th>Required tests</th><th>Dependencies</th></tr>
+  <tr><td>P1</td><td>SEC-001</td><td>Independent pen test on staging; remediate + retest</td><td>Deployed app + infra</td><td>Vendor plan (ASVS L2/L3); <code>staging-smoke.ps1</code> gate</td><td>Staging host</td></tr>
+  <tr><td>P1</td><td>OPS-001</td><td>Bring up observability stack; confirm drills fire alerts; run load + 24 h soak</td><td><code>deploy/observability/</code>, <code>compose.production.yml</code></td><td>PQ-PERF-01/02, PQ-OBS-01</td><td>Docker host</td></tr>
+  <tr><td>P1</td><td>DOC-001</td><td>QA executes + signs the CSV re-validation (OQ/PQ)</td><td><code>docs/validation/06-Revalidation-Delta</code></td><td>OQ/PQ templates → executed</td><td>Qualified environment</td></tr>
+  <tr><td>P2</td><td>SEC-002</td><td>Add dependency (SCA) + container (Trivy) scanning to CI, failing on High/Critical</td><td><code>.github/workflows/ci.yml</code></td><td>Seeded-vuln CI test; clean baseline</td><td>—</td></tr>
+  <tr><td>P2</td><td>UI-001</td><td>Angular 18→19 upgrade; expand component specs on regulated flows</td><td><code>frontend/</code></td><td>Full FE build + specs + e2e green</td><td>—</td></tr>
+  <tr><td>P3</td><td>OBS-001</td><td>Confirm Serilog requirement with standard owner; swap provider if mandated</td><td><code>WebApi/Program.cs</code></td><td>Log-shape tests remain green</td><td>Standard decision</td></tr>
+  <tr><td>P3</td><td>MSG-001</td><td>If inbound messaging is added, implement a processed-message inbox + ADR</td><td>Future integration</td><td>Inbox dedup/idempotency tests</td><td>New requirement</td></tr>
+</table></div>
+
+<!-- 22 sequence, 23 ADRs, F evidence -->
+<h2 class="sec"><span class="n">22 ·</span> Recommended implementation sequence</h2>
+<ol>
+  <li>Stand up staging from <code>deploy/bring-up-staging.md</code> (unblocks SEC-001, OPS-001, DOC-001 PQ).</li>
+  <li>Add CI SCA + container scanning (SEC-002) — independent, do immediately.</li>
+  <li>Run observability drills + load/soak on staging; record PQ (OPS-001).</li>
+  <li>Engage the pen-test vendor against staging; remediate + retest (SEC-001).</li>
+  <li>QA executes the CSV re-validation OQ/PQ; sign the VSR addendum (DOC-001).</li>
+  <li>Backlog: Angular 19 upgrade + component specs (UI-001); Serilog decision (OBS-001).</li>
+</ol>
+
+<h2 class="sec"><span class="n">23 ·</span> Required ADRs</h2>
+<p>Present and current: <b>ADR-0001</b> topology, <b>0002</b> TLS/HSTS, <b>0003</b> token storage (superseded by
+0009), <b>0004</b> API versioning, <b>0005</b> xmin concurrency, <b>0006</b> outbox reliability, <b>0007</b>
+same-origin/no-CORS, <b>0008</b> EF persistence port, <b>0009</b> refresh-session model. <b>Recommended new
+ADRs:</b> (a) dependency/container scanning policy; (b) logging-provider decision (MS-JSON+OTel vs Serilog) if the
+standard mandates a library; (c) Angular version-currency policy; (d) — if inbound messaging is added — an inbox
+pattern ADR.</p>
+
+<h2 class="sec"><span class="n">24 · F ·</span> Evidence coverage</h2>
+<div class="tablewrap"><table>
+  <tr><th>Area</th><th>Evidence reviewed</th><th>Missing evidence</th><th>Confidence</th></tr>
+  <tr><td>Architecture / DDD / CQRS</td><td>Source + executed LayerRules/ModuleBoundary/CommandPolicy tests</td><td>—</td><td>High</td></tr>
+  <tr><td>Multi-tenancy / DB integrity</td><td>Real-PG RLS/immutability/constraint tests + live IDOR probe + schema queries</td><td>Production PG instance</td><td>High</td></tr>
+  <tr><td>AuthN/Z / API / validation</td><td>58 functional tests + probes; running app</td><td>—</td><td>High</td></tr>
+  <tr><td>Audit / e-signatures</td><td>Tamper-detection + immutability tests (executed)</td><td>—</td><td>High</td></tr>
+  <tr><td>Security (STRIDE)</td><td>24 adversarial checks; headers/rate-limit/injection verified live</td><td>Independent pen test; TLS/HSTS on host; SCA/image scan</td><td>Medium</td></tr>
+  <tr><td>Observability / resilience</td><td>Log-shape + trace-propagation tests; /metrics live; drills executed</td><td>Staging alerts firing; 24 h soak; load at scale</td><td>Medium</td></tr>
+  <tr><td>Frontend</td><td>67 specs + 6 e2e executed; source</td><td>Broader component specs</td><td>High</td></tr>
+  <tr><td>Deployment</td><td>Dockerfile/compose reviewed; CI container job green</td><td>Vuln scan; run on a real orchestrator</td><td>Medium</td></tr>
+</table></div>
+
+<!-- 25 -->
+<h2 class="sec"><span class="n">25 ·</span> Limitations &amp; unverified areas</h2>
+<ul>
+  <li>No deployed staging/production: TLS/HSTS presence on a real host, live alert firing, and 24 h soak are
+  <b>NOT VERIFIED</b> (behaviour is unit/integration-verified only).</li>
+  <li>Independent penetration test: <b>NOT VERIFIED</b> (in-house automated assessment only).</li>
+  <li>Dependency/container vulnerability posture: <b>NOT VERIFIED</b> (no scan configured).</li>
+  <li>Formal CSV OQ/PQ execution + sign-off: <b>NOT VERIFIED</b> (QA-pending templates).</li>
+  <li>The supplied standard file is unrelated (Patient Registration brief); the authoritative enterprise standard
+  was not provided — audit ran against the prompt's embedded checklist.</li>
+</ul>
+
+<!-- Mandatory conclusions -->
+<h2 class="sec">Compliance Status (mandatory conclusion)</h2>
+<div class="tablewrap"><table>
+  <tr><td><b>Overall score</b></td><td>≈ 88% (74 / 84 applicable) — "Generally aligned; material improvements required"</td></tr>
+  <tr><td><b>Verification coverage</b></td><td>≈ 87%</td></tr>
+  <tr><td><b>Confidence level</b></td><td><b>High</b> (coverage ≥ 85%)</td></tr>
+  <tr><td><b>Critical findings</b></td><td>0</td></tr>
+  <tr><td><b>High findings</b></td><td>1 (SEC-001 — independent pen test; a condition, not a P0 blocker)</td></tr>
+  <tr><td><b>P0 production blockers</b></td><td>0</td></tr>
+  <tr><td><b>Tenant isolation verified?</b></td><td><b>Yes</b> — EF filter + FORCE RLS, executed against real PostgreSQL + live IDOR probe (404)</td></tr>
+  <tr><td><b>Backend authorization verified?</b></td><td><b>Yes</b> — deny-by-default HTTP + command pipeline; role×endpoint matrix executed</td></tr>
+  <tr><td><b>Database integrity verified?</b></td><td><b>Yes</b> — constraints/immutability/concurrency/migrations tested on real PostgreSQL</td></tr>
+  <tr><td><b>Automated tests sufficient evidence?</b></td><td><b>Yes for code-level controls</b> (368 backend + 67 FE + 6 e2e, 0 skipped, executed); insufficient for production-runtime/pen-test claims</td></tr>
+  <tr><td><b>Can it reasonably proceed to production?</b></td><td>Yes, once the four conditions (SEC-001, OPS-001, SEC-002, DOC-001) are met</td></tr>
+</table></div>
+<p style="font-size:16px;margin-top:16px"><b>PRODUCTION DECISION: APPROVED WITH CONDITIONS.</b> All applicable
+critical controls are implemented and tested with executed evidence, and no cross-tenant, authorization,
+data-corruption, or secret-exposure defect was found. Approval is conditioned on: (SEC-001) an independent
+penetration test against a staging deployment; (OPS-001) staging observability + alert-firing + load/soak; (SEC-002)
+dependency &amp; container vulnerability scanning in CI; and (DOC-001) QA execution and sign-off of the CSV
+re-validation. None is a P0 blocker; all are P1/P2.</p>
+
+<h3>Incomplete items (partially compliant / non-compliant / unverified)</h3>
+<ul>
+  <li><b>Partially compliant:</b> §1 business acceptance-criteria templates; §3 a few grouped multi-controller files;
+  §13 Angular v18 + spec breadth; §16 independent pen test; §17 Serilog-by-name + staging dashboards; §19 no
+  circuit breakers / unrun soak; §20 no image scan.</li>
+  <li><b>Non-compliant:</b> §16/§20 dependency + container vulnerability scanning (SEC-002).</li>
+  <li><b>Not verified:</b> production TLS/HSTS, live alerts, 24 h soak, independent pen test, formal OQ/PQ sign-off.</li>
+  <li><b>Not applicable:</b> §12 SignalR (no real-time requirement); Hangfire (uses hosted services); inbox pattern
+  (no inbound messaging).</li>
+</ul>
+
+<footer>
+  Enterprise Application Architecture Compliance Assessment · EAC-NTQMS-001 · 2026-07-29 · target NT.QMS v1.48.0.
+  Evidence executed this assessment: <code>dotnet build</code> (0 warn/0 err) + <code>dotnet test</code> (368
+  backend, 0 skipped, real PostgreSQL 17) + running app + adversarial probes (24/24). Companion documents:
+  NT_QMS_Enterprise_Architecture_Compliance_Audit_v1.48.html, NT_QMS_EA_Remediation_Closure_Report.md,
+  NT_QMS_Security_Assessment_Report.html, docs/validation/*, docs/adr/ADR-0001…0009. This is an engineering
+  compliance assessment; it is not a penetration-test attestation or a regulatory CSV sign-off.
+</footer>
+
+</div>
+</body>
+</html>
