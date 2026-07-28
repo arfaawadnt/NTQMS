@@ -86,7 +86,7 @@ Each finding below lists the release that closed it, the implementation evidence
 
 | # | Item | Status |
 |---|---|---|
-| **R-1** | The hardened container was not buildable on the Docker-less dev machine. **Addendum (v1.45.0):** CI now builds the image on every push and asserts a non-root runtime uid plus evidence-volume writability (`ci.yml` job `container`). Closed once the first Actions run is green — check the run for commit `v1.45.0`. | **CI-enforced** (verify first run) |
+| **R-1** | The hardened container was not buildable on the Docker-less dev machine. **Addendum (v1.45.0):** CI builds the image on every push and asserts a non-root runtime uid plus evidence-volume writability (`ci.yml` job `container`). **Verified: the Actions run for commit `e83741b` (v1.45.0) completed with `Container (build + non-root assertion): success`.** | **Closed** |
 | **R-2** | Token storage remains SPA web storage under the ADR-0003 **risk acceptance** (strict CSP + 60-min tokens + revocation). Revisit trigger: refresh-cookie flow on customer/regulatory demand or any production XSS finding. | Accepted, ADR-0003 |
 | **R-3** | ~~No pager UI over the envelope.~~ **Closed (v1.45.0):** all 13 paged lists ship a shared accessible load-more footer ("showing X of Y", aria-live) with append-on-demand and reset-on-filter; 12 facades track pages; +6 specs. | **Closed** |
 | **R-4** | ~~Reset-password via `window.prompt`.~~ **Closed (v1.45.0):** accessible text-prompt dialog (masked input, full a11y contract of the change-reason dialog) replaces the prompt in user management; +7 specs. | **Closed** |
