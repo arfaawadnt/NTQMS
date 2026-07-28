@@ -77,19 +77,20 @@
 
 <div class="verdict">
   <span class="tag">Production Decision — Approved with Conditions</span>
-  <h2>Overall ≈ 87% · Verification coverage ≈ 87% (High confidence) · 0 critical findings · 2 high findings · 0 P0 blockers</h2>
+  <h2>Overall ≈ 88% · Verification coverage ≈ 87% (High confidence) · 0 critical findings · 1 high finding · 0 P0 blockers</h2>
   <p style="color:var(--muted);margin:6px 0 0;max-width:88ch">All critical controls — tenant isolation, backend
   authorization, database integrity, signed-record immutability — are implemented <b>and verified by executed
-  tests</b>. No cross-tenant exposure was found. The gap to full alignment is external/operational validation
-  (independent penetration test, staging observability + load/soak) plus two High findings: the pending pen test
-  and — surfaced by the newly-added SCA gate — <b>10 high-severity Angular-18 framework advisories requiring the
-  version upgrade</b> (interim-compensated by the strict CSP). None is a P0 blocker. Dependency &amp; container
-  scanning (SEC-002) was <b>implemented during this assessment</b>.</p>
+  tests</b>. No cross-tenant exposure was found. Two findings were <b>remediated during this assessment</b>:
+  SEC-002 (CI now runs .NET SCA + npm SCA + Trivy gates) and UI-001 (the SCA surfaced 10 high-severity Angular-18
+  framework advisories; the frontend was upgraded 18.2 → <b>22.0.8</b>, and <code>npm audit</code> on shipped
+  dependencies is now <b>completely clean</b> with an empty exception register). The remaining gap to full
+  alignment is external/operational validation: the independent penetration test (the one High finding) and
+  staging observability + load/soak. Neither is a P0 blocker.</p>
   <div class="bignums">
-    <div><b>≈ 87%</b><span>overall compliance (73/84)</span></div>
+    <div><b>≈ 88%</b><span>overall compliance (74/84)</span></div>
     <div><b>≈ 87%</b><span>verification coverage (High)</span></div>
     <div><b>0</b><span>critical findings</span></div>
-    <div><b>2</b><span>high findings (both non-P0)</span></div>
+    <div><b>1</b><span>high finding (SEC-001, non-P0)</span></div>
     <div><b>0</b><span>P0 production blockers</span></div>
     <div><b>368+67+6</b><span>backend / frontend / e2e tests — executed, 0 skipped</span></div>
   </div>
@@ -164,7 +165,7 @@ secret-exposure defects — so none is a P0 blocker. The system is <b>approved w
 
 <!-- 7,8 -->
 <h2 class="sec"><span class="n">7–8 ·</span> Overall compliance &amp; verification coverage</h2>
-<p><b>Overall compliance ≈ 87%</b> (earned 73 / 84 applicable points; §12 SignalR excluded as N/A) — "Generally
+<p><b>Overall compliance ≈ 88%</b> (earned 74 / 84 applicable points; §12 SignalR excluded as N/A) — "Generally
 aligned; material improvements required." <b>Verification coverage ≈ 87%</b> — <b>High confidence</b>: code-level
 controls were executed against a real database and a running app; the ~13% unverified is production-runtime
 evidence that requires a deployed host or an independent party (pen test, staging alerts/soak, vuln scan).</p>
@@ -185,7 +186,7 @@ evidence that requires a deployed host or an independent party (pen test, stagin
   <tr><td>10</td><td>Transactions, consistency, messaging</td><td class="score">3</td><td class="score">4</td><td>75%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-ok">Compliant</span></td></tr>
   <tr><td>11</td><td>Background processing (no Hangfire)</td><td class="score">3</td><td class="score">4</td><td>75%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-ok">Compliant</span></td></tr>
   <tr><td>12</td><td>SignalR / real-time</td><td class="score">N/A</td><td class="score">—</td><td>—</td><td>—</td><td>0</td><td>0</td><td><span class="pill p-na">Not applicable</span></td></tr>
-  <tr><td>13</td><td>Angular frontend</td><td class="score">2</td><td class="score">4</td><td>50%</td><td>High</td><td>0</td><td>1</td><td><span class="pill p-part">Partial</span></td></tr>
+  <tr><td>13</td><td>Angular frontend</td><td class="score">3</td><td class="score">4</td><td>75%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-ok">Compliant (v22, remediated)</span></td></tr>
   <tr><td>14</td><td>Validation &amp; error handling</td><td class="score">4</td><td class="score">4</td><td>100%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-ok">Compliant</span></td></tr>
   <tr><td>15</td><td>Audit &amp; e-signatures</td><td class="score">4</td><td class="score">4</td><td>100%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-ok">Compliant</span></td></tr>
   <tr><td>16</td><td>Security architecture (STRIDE)</td><td class="score">3</td><td class="score">4</td><td>75%</td><td>Med</td><td>0</td><td>0</td><td><span class="pill p-part">Partial</span></td></tr>
@@ -195,7 +196,7 @@ evidence that requires a deployed host or an independent party (pen test, stagin
   <tr><td>20</td><td>Docker &amp; deployment</td><td class="score">3</td><td class="score">4</td><td>75%</td><td>Med</td><td>0</td><td>0</td><td><span class="pill p-part">Partial</span></td></tr>
   <tr><td>21</td><td>Testing</td><td class="score">4</td><td class="score">4</td><td>100%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-ok">Compliant</span></td></tr>
   <tr><td>22</td><td>Documentation &amp; traceability</td><td class="score">4</td><td class="score">4</td><td>100%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-ok">Compliant</span></td></tr>
-  <tr style="font-weight:700"><td></td><td>TOTAL (21 applicable)</td><td class="score">73</td><td class="score">84</td><td>87%</td><td>≈87%</td><td>0</td><td>2</td><td><span class="pill p-part">Approved w/ conditions</span></td></tr>
+  <tr style="font-weight:700"><td></td><td>TOTAL (21 applicable)</td><td class="score">74</td><td class="score">84</td><td>88%</td><td>≈87%</td><td>0</td><td>1</td><td><span class="pill p-part">Approved w/ conditions</span></td></tr>
 </table></div>
 
 <!-- 10 Mandatory rule -->
@@ -228,9 +229,9 @@ cross-tenant exposure, auth bypass, secret leak, or data-corruption path was fou
   <tr><th>ID</th><th>Condition</th><th>Severity</th><th>Priority</th><th>Risk if shipped without it</th></tr>
   <tr><td>SEC-001</td><td>Independent penetration test on a staging deployment</td><td class="sev-high">High</td><td>P1</td><td>Security posture is code-/test-verified but not independently validated against a live TLS deployment (business-logic abuse, session attacks over HTTPS)</td></tr>
   <tr><td>OPS-001</td><td>Staging bring-up: observability stack + alerts firing + 24 h soak (R-5/R-7)</td><td class="sev-med">Medium</td><td>P1</td><td>Production diagnosability and capacity are authored but never exercised under real load/telemetry</td></tr>
-  <tr><td>UI-001</td><td>Angular 18 → current-LTS upgrade (clears 10 high-severity framework advisories)</td><td class="sev-high">High</td><td>P1</td><td>Known Angular XSS/DoS/info-leak CVEs ship with the SPA; interim-mitigated by strict CSP but not fixed</td></tr>
   <tr><td>DOC-001</td><td>QA execution + sign-off of the CSV re-validation (OQ/PQ templates)</td><td class="sev-med">Medium</td><td>P1</td><td>Regulated (21 CFR Part 11) formal validation incomplete for the v1.38→v1.48 changes</td></tr>
-  <tr><td>SEC-002</td><td><s>Add dependency + container scanning</s> — <b>implemented this assessment</b></td><td class="sev-low">Low</td><td>Done</td><td>Closed: CI SCA + Trivy gates live; residual folded into UI-001</td></tr>
+  <tr><td>UI-001</td><td><s>Angular 18 → LTS upgrade</s> — <b>done: 18.2 → 22.0.8</b>, one major at a time, all gates green</td><td class="sev-low">Closed</td><td>Done</td><td>Closed: all 10 advisories cleared; npm audit (prod) = 0; SCA exception register empty</td></tr>
+  <tr><td>SEC-002</td><td><s>Add dependency + container scanning</s> — <b>implemented this assessment</b></td><td class="sev-low">Low</td><td>Done</td><td>Closed: CI SCA + Trivy gates live; UI-001 residual also now closed</td></tr>
 </table></div>
 
 <!-- 12 Detailed findings -->
@@ -273,8 +274,8 @@ strongest verified controls, in the required format.</p>
     <dt>Evidence</dt><dd><code>.github/workflows/ci.yml</code> now runs: <b>.NET SCA</b> (<code>dotnet list package --vulnerable --include-transitive</code>, fails on High/Critical — the .NET tree is <b>clean</b>, executed); <b>npm SCA</b> (prod deps, fails on high/critical outside a documented exception register, <code>.github/npm-audit-allowlist.txt</code>); <b>Trivy</b> image scan (HIGH/CRITICAL, <code>ignore-unfixed</code>).</dd>
     <dt>Observed implementation</dt><dd>Gate implemented and locally validated (npm gate returns PASS: 10 known advisories allow-listed, 0 unexpected). <b>The scan surfaced a real finding</b> (see UI-001): 10 high-severity advisories in Angular 18 framework packages.</dd>
     <dt>Compliance analysis</dt><dd>§16/§20 scanning requirement now met; the gate catches new/non-Angular high-critical vulns and records the known Angular exceptions transparently with compensating controls and a tracked P1 fix.</dd>
-    <dt>Risk</dt><dd>Reduced: supply-chain regressions now fail CI. Residual risk = the allow-listed Angular advisories, moved to UI-001 (P1).</dd>
-    <dt>Required remediation</dt><dd>Done for the gate. Follow-through: the Angular upgrade (UI-001) to clear the allowlist.</dd>
+    <dt>Risk</dt><dd>Reduced: supply-chain regressions now fail CI. The Angular advisories the gate surfaced (UI-001) were subsequently <b>closed by the 18→22.0.8 upgrade</b>; the exception register is now empty.</dd>
+    <dt>Required remediation</dt><dd>Done — gate live and exception register empty.</dd>
     <dt>Required tests</dt><dd>Present: CI SCA jobs; re-run npm SCA at every dependency bump and prune the allowlist.</dd>
     <dt>Relevant standard</dt><dd>Checklist §16, §20.</dd>
   </dl>
@@ -294,15 +295,15 @@ strongest verified controls, in the required format.</p>
 </div>
 
 <div class="finding">
-  <h4>UI-001: Angular 18.2 carries 10 high-severity framework advisories — upgrade required (ELEVATED)</h4>
-  <div class="meta">Category: Angular frontend / Security · Status: <b>PARTIALLY COMPLIANT</b> · Score: 2 · Severity: <span class="sev-high">High</span> · Priority: <b>P1</b> · Production blocker: No (CSP-compensated) · Confidence: High</div>
+  <h4>UI-001: Angular framework advisories — REMEDIATED (upgraded 18.2 → 22.0.8)</h4>
+  <div class="meta">Category: Angular frontend / Security · Status: <b>COMPLIANT (remediated)</b> · Score: 3 · Severity: <span class="sev-low">Closed</span> · Priority: Done (P1 closed) · Production blocker: No · Confidence: High</div>
   <dl>
-    <dt>Evidence</dt><dd><code>frontend/package.json</code> → <code>@angular/core ^18.2.0</code>. The SEC-002 npm SCA surfaced <b>10 high-severity advisories</b> in <code>@angular/{common,compiler,core}</code> ≤ 18.2.14: XSS (SVG script/animation, i18n attribute bindings, DOM clobbering — GHSA-jrmj-c5cx-3cw6, -v4hv-rgfq-gp49, -g93w-mfhg-p222, -prjf-86w9-mfqv, -rgjc-h3x7-9mwg), DoS/OOM (Date/Number pipes), XSRF token leakage, weak cache-key hashing, HTTP cache info-leak (@angular/common). <b>npm reports every fix as semver-major</b> (Angular 20/22) — no 18.x backport. Registered in <code>.github/npm-audit-allowlist.txt</code>.</dd>
-    <dt>Observed implementation</dt><dd>Standalone/signals/typed-forms/strict-TS/facades/i18n/memory-only-token/axe-a11y all present; behaviourally §13-compliant. But the framework version itself is vulnerable.</dd>
-    <dt>Compliance analysis</dt><dd>What was "version currency" is, on evidence, a real security exposure. Not a production blocker because the app's strict CSP (<code>script-src 'self'</code>, no inline/eval — verified every response) forecloses the XSS class, rate limiting bounds the DoS class, and same-origin/no-CORS + TLS bound the cache/XSRF class — but these are compensations, not fixes.</dd>
-    <dt>Risk</dt><dd>Residual XSS/DoS/info-leak risk if a CSP gap or an un-compensated path exists; regulatory scrutiny of shipping a framework with known high-severity CVEs.</dd>
-    <dt>Required remediation</dt><dd><b>P1:</b> upgrade Angular 18 → current LTS (clears all 10 + the allowlist). Standalone/signals already in use lowers the risk; full re-test required.</dd>
-    <dt>Required tests</dt><dd>Post-upgrade full FE build + 67+ specs + 6 e2e green; npm SCA allowlist emptied; axe a11y still 0 serious/critical.</dd>
+    <dt>Evidence</dt><dd>The SEC-002 npm SCA had surfaced <b>10 high-severity advisories</b> in <code>@angular/{common,compiler,core}</code> ≤ 18.2.14 (XSS via SVG/i18n/DOM-clobbering, pipe DoS/OOM, XSRF token leakage, cache info-leak), all fixable only by semver-major upgrade. <b>Remediated:</b> <code>frontend/package.json</code> → <code>@angular/* ^22.0.8</code>, upgraded one major at a time (18→19→20→21→22) via <code>ng update</code> with build + full unit suite green after each step.</dd>
+    <dt>Observed implementation</dt><dd><b>Executed post-upgrade verification:</b> <code>npm audit --omit=dev</code> = <b>0 advisories of any severity</b> (was 10 high); the SCA exception register (<code>.github/npm-audit-allowlist.txt</code>) is now <b>empty</b> — the CI gate enforces zero exceptions. Production AOT build green; 67 unit specs green; auth + axe-a11y e2e green (0 serious/critical). TypeScript 6.0.3, zone.js 0.15.1. Code changes required were minimal (2 deprecated <code>allowSignalWrites</code> removals; migrations otherwise automatic — standalone/signals adoption paid off).</dd>
+    <dt>Compliance analysis</dt><dd>§13 framework-currency and §16/§20 vulnerability posture now met on current evidence. Residual §13 note: component-spec breadth on regulated flows remains lighter than service/facade coverage (unchanged, Low).</dd>
+    <dt>Risk</dt><dd>Closed for the advisory class. Ongoing: keep the (now-empty) allowlist empty; re-run SCA every dependency bump (CI-enforced).</dd>
+    <dt>Required remediation</dt><dd>Done. Optional follow-through: expand regulated-flow component specs (P3).</dd>
+    <dt>Required tests</dt><dd>Executed: FE production build, 67 unit specs, auth + a11y e2e — all green post-v22.</dd>
     <dt>Relevant standard</dt><dd>Checklist §13, §16, §20.</dd>
   </dl>
 </div>
@@ -409,7 +410,7 @@ failure drills executed live (poison→dead-letter). <b>Open:</b> run the stack 
 <div class="tablewrap"><table>
   <tr><th>ID</th><th>Risk</th><th>Likelihood</th><th>Impact</th><th>Severity</th><th>Owner</th><th>Mitigation</th></tr>
   <tr><td>SEC-001</td><td>Undiscovered vuln absent an independent pen test</td><td>Medium</td><td>High</td><td class="sev-high">High</td><td>Unassigned (Security)</td><td>Staging + vendor pen test per SOW; retest</td></tr>
-  <tr><td>UI-001</td><td><b>10 high-severity Angular 18 framework advisories</b> (XSS/DoS/info-leak); fix = major upgrade</td><td>Medium</td><td>High</td><td class="sev-high">High</td><td>Unassigned (Frontend)</td><td>Angular 18→LTS upgrade (P1); interim: strict CSP + rate limit + same-origin compensations (allowlisted, reviewed each release)</td></tr>
+  <tr><td>UI-001</td><td><s>10 high-severity Angular 18 framework advisories</s> — <b>closed by the 18→22.0.8 upgrade</b></td><td>—</td><td>—</td><td class="sev-low">Closed</td><td>Frontend</td><td><b>Done:</b> npm audit (prod) = 0 advisories; exception register empty; build/67 specs/auth+a11y e2e green post-v22</td></tr>
   <tr><td>SEC-002</td><td>Supply-chain regressions ship undetected</td><td>Low</td><td>Medium</td><td class="sev-low">Low (remediated)</td><td>DevOps</td><td><b>Done:</b> .NET SCA + npm SCA + Trivy gates in CI</td></tr>
   <tr><td>OPS-001</td><td>Alert/dashboard misconfig or capacity shortfall unseen until production</td><td>Medium</td><td>Medium</td><td class="sev-med">Medium</td><td>Unassigned (Ops)</td><td>Staging stack + drill + load/soak (R-5/R-7)</td></tr>
   <tr><td>DOC-001</td><td>Part-11 formal validation incomplete for v1.38→v1.48</td><td>High</td><td>Medium</td><td class="sev-med">Medium</td><td>Unassigned (QA)</td><td>Execute REVAL-NTQMS-001 OQ/PQ; sign VSR addendum</td></tr>
@@ -478,11 +479,11 @@ pattern ADR.</p>
 <!-- Mandatory conclusions -->
 <h2 class="sec">Compliance Status (mandatory conclusion)</h2>
 <div class="tablewrap"><table>
-  <tr><td><b>Overall score</b></td><td>≈ 87% (73 / 84 applicable) — "Generally aligned; material improvements required"</td></tr>
+  <tr><td><b>Overall score</b></td><td>≈ 88% (74 / 84 applicable) — "Generally aligned; material improvements required"</td></tr>
   <tr><td><b>Verification coverage</b></td><td>≈ 87%</td></tr>
   <tr><td><b>Confidence level</b></td><td><b>High</b> (coverage ≥ 85%)</td></tr>
   <tr><td><b>Critical findings</b></td><td>0</td></tr>
-  <tr><td><b>High findings</b></td><td>2 — SEC-001 (independent pen test pending) and UI-001 (10 high-severity Angular-18 framework advisories; CSP-compensated, fix = version upgrade). Both are conditions, not P0 blockers.</td></tr>
+  <tr><td><b>High findings</b></td><td>1 — SEC-001 (independent pen test pending; a condition, not a P0 blocker). UI-001 was High during this assessment (10 Angular-18 advisories surfaced by the new SCA gate) and was <b>closed by the Angular 18→22.0.8 upgrade</b>: npm audit now clean, exception register empty.</td></tr>
   <tr><td><b>P0 production blockers</b></td><td>0</td></tr>
   <tr><td><b>Tenant isolation verified?</b></td><td><b>Yes</b> — EF filter + FORCE RLS, executed against real PostgreSQL + live IDOR probe (404)</td></tr>
   <tr><td><b>Backend authorization verified?</b></td><td><b>Yes</b> — deny-by-default HTTP + command pipeline; role×endpoint matrix executed</td></tr>
