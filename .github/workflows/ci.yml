@@ -107,14 +107,15 @@ jobs:
       - name: Production build (AOT)
         run: npm run build
 
-      # Playwright e2e (F-18). The backend-free auth/route-guard smoke runs on
-      # every push; the tenant-scoped workflow spec runs where a seeded API is
-      # available (see e2e/README.md).
+      # Playwright e2e (F-18). The backend-free auth/route-guard smoke and the
+      # axe-core accessibility scan (Road-to-100 Phase 9) run on every push;
+      # the tenant-scoped workflow spec runs where a seeded API is available
+      # (see e2e/README.md).
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: E2E smoke (auth gate)
-        run: npx playwright test e2e/auth.spec.ts
+      - name: E2E smoke (auth gate + a11y scan)
+        run: npx playwright test e2e/auth.spec.ts e2e/a11y.spec.ts
 
   # DEPLOY-002 verification (closure report R-1): the hardened image must
   # actually build, and its runtime user must be unprivileged. The dev

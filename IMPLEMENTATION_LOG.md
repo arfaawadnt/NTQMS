@@ -623,3 +623,28 @@ cross-tenant denial functional test suite (merge gate from day one).
 - Backend suite unchanged: 364 green, 0 skipped. Residual R-5 (perf on a
   prod-like host, incl. 24h soak) partially addressed by the committed harness +
   dev-box baseline; the authoritative staging run remains external.
+
+## Road-to-100 Phase 9 (v1.48.0, 2026-07-28) - assurance depth [DONE]
+
+- Role x endpoint deny matrix (RoleEndpointMatrixTests): all 6 roles driven
+  against the distinct role-gates; two invariants proven for every cell - never
+  401/5xx (authenticated callers), and every 403 is problem+json with an AUTH*
+  code (no bare status, no silent leakage). Plus explicit deny assertions
+  (auditor/analyst/dept-head off the admin + platform surface).
+- Contract coverage (ContractCoverageTests): 13 list endpoints return the
+  API-004 envelope on BOTH legacy and api/v1 routes; 5 by-id reads of a missing
+  resource return problem+json 404 with a stable *-404 code + traceId.
+- Frontend a11y: @axe-core/playwright scans of the platform + tenant login
+  pages (zero serious/critical), wired into the always-on CI frontend job.
+  The scan found and we FIXED real violations: a critical missing label
+  association (4 inputs) + 3 serious color-contrast failures on the login
+  screen (local color overrides; shared tokens untouched). e2e: load-more
+  pagination journey added; auditor journey documented-skipped (no seeded
+  auditor login). Fixed a pre-existing i18n spec order-flake (localStorage
+  leak) via afterEach cleanup.
+- Gates: backend 370 green 0 skipped (211 domain / 57 app / 24 arch / 18
+  integration / 58 functional); frontend build + 67 unit specs; 6 e2e vs live
+  API (incl. 2 axe scans + pagination journey). Build 0 warnings.
+- Engineering ceiling reached (~98%). Remaining to 100% is the EXTERNAL track
+  only: penetration test (staging, after the v1.46 auth model), CSV
+  re-validation (R-6), and the staging telemetry/soak confirmation (R-5/R-7).

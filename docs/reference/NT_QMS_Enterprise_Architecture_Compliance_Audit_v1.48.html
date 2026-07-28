@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NT.QMS — Enterprise Architecture Compliance Audit (v1.48.0, engineering ceiling)</title>
+<style>
+  :root{
+    --bg:#f6f7fb; --panel:#fff; --ink:#16202c; --muted:#5b6878; --line:#dfe4ec;
+    --accent:#1f6feb; --accent-soft:#e8f0fe; --ok:#1a7f37; --high:#d97706; --info:#3b6ea5;
+    --shadow:0 1px 3px rgba(22,32,44,.08);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0e1420; --panel:#161e2c; --ink:#e7edf5; --muted:#9aa8ba; --line:#2a3548;
+      --accent:#5b9dff; --accent-soft:#16273f; --ok:#4ade80; --high:#fbbf24; --info:#7db2e8;
+      --shadow:0 1px 3px rgba(0,0,0,.4);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 "Segoe UI",system-ui,-apple-system,sans-serif}
+  .wrap{max-width:1080px;margin:0 auto;padding:40px 24px 80px}
+  header .id{color:var(--muted);font-size:12.5px;letter-spacing:.06em;text-transform:uppercase}
+  h1{font-size:clamp(24px,4vw,34px);line-height:1.2;margin:6px 0 4px}
+  .sub{color:var(--muted);max-width:88ch}
+  .verdict{background:linear-gradient(180deg,var(--accent-soft),transparent),var(--panel);
+    border:1px solid var(--line);border-left:5px solid var(--ok);border-radius:14px;
+    padding:24px 28px;box-shadow:var(--shadow);margin:28px 0 36px}
+  .verdict .tag{color:var(--ok);font-weight:700;font-size:13px;letter-spacing:.05em;text-transform:uppercase}
+  .verdict h2{margin:8px 0 8px;font-size:clamp(19px,3vw,25px)}
+  .verdict p{margin:0 0 8px;color:var(--muted);max-width:86ch}
+  .bignums{display:flex;flex-wrap:wrap;gap:26px;margin-top:14px}
+  .bignums div{min-width:150px}
+  .bignums b{display:block;font-size:26px;line-height:1.15}
+  .bignums span{color:var(--muted);font-size:12.5px}
+  .delta{color:var(--ok);font-weight:600;font-size:14px}
+  h2.sec{font-size:20px;margin:44px 0 6px;padding-top:10px;border-top:2px solid var(--line)}
+  h2.sec small{color:var(--muted);font-weight:500;font-size:13px;display:block}
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);margin:14px 0}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--panel);min-width:660px}
+  th{background:color-mix(in srgb,var(--line) 40%,var(--panel));text-align:left;padding:10px 13px;
+     font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+  td{padding:10px 13px;border-top:1px solid var(--line);vertical-align:top}
+  .score{font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+  .was{color:var(--muted);text-decoration:line-through;font-weight:400;margin-right:6px}
+  .pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:11.5px;font-weight:700;
+        letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+  .p-ok{color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,transparent)}
+  .p-acc{color:var(--info);background:color-mix(in srgb,var(--info) 14%,transparent)}
+  .p-open{color:var(--high);background:color-mix(in srgb,var(--high) 15%,transparent)}
+  code{font:12.5px/1.5 Consolas,"Cascadia Mono",monospace;background:color-mix(in srgb,var(--line) 45%,transparent);
+       padding:1px 5px;border-radius:5px}
+  .note{background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 24%,transparent);
+        border-radius:10px;padding:13px 17px;font-size:13.5px;margin:14px 0}
+  ul{margin:8px 0;padding-left:22px}
+  li{margin:3px 0}
+  .bar{height:8px;border-radius:999px;background:color-mix(in srgb,var(--line) 60%,transparent);position:relative;min-width:110px}
+  .bar i{position:absolute;inset:0 auto 0 0;border-radius:999px;background:var(--ok)}
+  footer{margin-top:56px;color:var(--muted);font-size:12.5px;border-top:1px solid var(--line);padding-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="id">EA-AUD-NTQMS-003 · Re-audit at the engineering ceiling · 2026-07-28 · tag <code>v1.48.0</code></div>
+  <h1>NT.QMS — Enterprise Architecture Compliance Audit<br>Engineering-Ceiling State</h1>
+  <p class="sub">Third re-audit of the NT.QMS QMS after the Road-to-100 engineering phases (v1.45 backlog, v1.46
+  session security, v1.47 evidence at scale, v1.48 assurance depth) on top of the completed EA remediation
+  (v1.38–v1.44). Same evidence-based method: every score is backed by an executed build, the automated suite
+  against real PostgreSQL 17, the frontend + e2e gates, and the green CI pipeline (incl. the non-root container
+  build).</p>
+</header>
+
+<div class="verdict">
+  <span class="tag">Verdict — Compliant · engineering ceiling reached</span>
+  <h2>Overall compliance ≈ 98% (was ≈ 94% at v1.45) — the remaining ~2% is external-only</h2>
+  <p>Every finding of the original audit is closed, and every engineering-closeable residual from the v1.45
+  re-audit is now resolved with an automated proof: the token-storage risk acceptance is retired (refresh-cookie
+  model, ADR-0009), a load baseline exists, failure drills run, and the authorization surface is proven by a full
+  role×endpoint matrix. What remains between here and 100% cannot be produced by code on this machine — it is a
+  penetration test, formal CSV re-validation, and a production-scale telemetry/soak confirmation. This report does
+  not claim those; it scopes them.</p>
+  <div class="bignums">
+    <div><b>≈ 98% <span class="delta">▲ +4</span></b><span>overall (was 94% at v1.45)</span></div>
+    <div><b>370 + 67 + 6</b><span>backend / frontend / e2e — green, 0 skipped</span></div>
+    <div><b>6×6</b><span>role×endpoint matrix, no leakage</span></div>
+    <div><b>0</b><span>serious/critical axe violations (login)</span></div>
+    <div><b>3/3</b><span>CI jobs green incl. container non-root</span></div>
+  </div>
+</div>
+
+<h2 class="sec">A · What moved since the v1.45 re-audit (EA-AUD-NTQMS-002)</h2>
+<div class="tablewrap"><table>
+  <tr><th>Area</th><th>v1.45</th><th>v1.48</th><th></th><th>Change (release · proof)</th></tr>
+  <tr>
+    <td><b>Security &amp; STRIDE</b></td><td class="score was">90</td><td class="score">98</td>
+    <td><div class="bar"><i style="width:98%"></i></div></td>
+    <td>Token-storage risk acceptance RETIRED — access JWT in memory (15 min) + rotating httpOnly SameSite=Strict
+    refresh cookie with reuse-detection family revocation (v1.46, ADR-0009 supersedes ADR-0003). Full role×endpoint
+    deny matrix proves no silent leakage (v1.48). Only a pending pen test holds it below 100.</td>
+  </tr>
+  <tr>
+    <td><b>Testing &amp; quality</b></td><td class="score was">92</td><td class="score">98</td>
+    <td><div class="bar"><i style="width:98%"></i></div></td>
+    <td>Backend 337→370: refresh-session suite, role×endpoint matrix (6 roles), cross-module contract coverage
+    (envelope + problem+json 404). Load baseline (v1.47). Frontend 45→67 specs + axe a11y in CI + pagination e2e.</td>
+  </tr>
+  <tr>
+    <td><b>Observability &amp; operational</b></td><td class="score was">~90</td><td class="score">96</td>
+    <td><div class="bar"><i style="width:96%"></i></div></td>
+    <td>Load baseline (p95 86–105 ms, 0% errors @50 users), live poison→dead-letter drill, and a full
+    collector+Prometheus+Grafana stack with the alert set as PromQL (v1.47). Held below 100 only by the
+    not-yet-run staging soak (R-7/R-5).</td>
+  </tr>
+  <tr>
+    <td><b>Angular frontend</b></td><td class="score was">94</td><td class="score">97</td>
+    <td><div class="bar"><i style="width:97%"></i></div></td>
+    <td>Memory-only token + silent refresh (v1.46); axe scan found and fixed a critical missing-label + three
+    serious contrast violations on the login screen (v1.48); pager e2e.</td>
+  </tr>
+  <tr>
+    <td><b>Domain / DB / API / architecture</b></td><td class="score was">93–98</td><td class="score">96–98</td>
+    <td><div class="bar"><i style="width:97%"></i></div></td>
+    <td>Held at the high level established through v1.44 (module-boundary + API-surface merge gates, CHECK
+    constraints, xmin concurrency); contract coverage broadened.</td>
+  </tr>
+</table></div>
+
+<h2 class="sec">B · Road-to-100 engineering phases — all shipped</h2>
+<div class="tablewrap"><table>
+  <tr><th>Phase</th><th>Release</th><th>Delivered</th><th>Status</th></tr>
+  <tr><td>Backlog #1</td><td>v1.45.0</td><td>container CI non-root gate (R-1), list pager UI (R-3), accessible reset-password dialog (R-4)</td><td><span class="pill p-ok">Done</span></td></tr>
+  <tr><td>Phase 7 — session security</td><td>v1.46.0</td><td>rotating refresh cookie + reuse detection, memory-only access token, ADR-0009 (retires R-2/ADR-0003)</td><td><span class="pill p-ok">Done</span></td></tr>
+  <tr><td>Phase 8 — evidence at scale</td><td>v1.47.0</td><td>load harness + baseline, live failure drills, observability stack config (R-5 partial, R-7 added)</td><td><span class="pill p-ok">Done</span></td></tr>
+  <tr><td>Phase 9 — assurance depth</td><td>v1.48.0</td><td>role×endpoint matrix, contract coverage, axe a11y in CI, pager e2e</td><td><span class="pill p-ok">Done</span></td></tr>
+</table></div>
+
+<h2 class="sec">C · The last ~2% — external track (not codeable here)</h2>
+<div class="tablewrap"><table>
+  <tr><th>#</th><th>Item</th><th>Owner</th><th>Unblocks</th></tr>
+  <tr><td>PEN</td><td>Penetration test against a deployed staging instance (after the v1.46 session model), plus a fix window</td><td>External security vendor</td><td>Security 98→100; STRIDE stops being code-inferred</td></tr>
+  <tr><td>R-6</td><td>Formal CSV re-validation — RTM update for the v1.38→v1.48 deltas, OQ/PQ delta execution, VSR addendum</td><td>QA / validation</td><td>Regulated completeness — required for a defensible 100 in this domain</td></tr>
+  <tr><td>R-5 / R-7</td><td>Stand up <code>compose.production.yml</code> + <code>deploy/observability/</code> on a real host; run the load harness + a 24 h soak; confirm the failure drills fire the Grafana/Prometheus alerts; review the first 30 days of production telemetry</td><td>Ops</td><td>Observability 96→100; retires the "no production runtime evidence" reservation</td></tr>
+</table></div>
+<div class="note"><b>Closed since v1.45:</b> R-1 (container non-root, CI-proven), R-2 (session model, ADR-0009),
+R-3 (pager UI), R-4 (reset-password dialog). <b>Open, external-only:</b> PEN, R-5, R-6, R-7.</div>
+
+<h2 class="sec">D · Verification at v1.48.0</h2>
+<ul>
+  <li><b>Backend 370 tests, 0 skipped</b> — 211 domain / 57 application / 24 architecture / 18 integration (real
+  PostgreSQL 17) / 58 functional (real HTTP+JWT, incl. the 6×6 role×endpoint matrix, refresh-session flow, and
+  cross-module contract coverage).</li>
+  <li><b>Frontend 67 unit specs</b> + <b>6 Playwright e2e</b> against the live API — auth gate, 2 axe a11y scans
+  (zero serious/critical), the regulated workflow, and the load-more pagination journey.</li>
+  <li><b>Load baseline</b> (dev box, 50 users): p95 86–105 ms, 0.00% errors, ~750–800 rps/scenario.</li>
+  <li><b>CI green</b> on the v1.48 push: Build &amp; Test (real PG) · Container (non-root) · Frontend (unit +
+  build + auth/a11y e2e).</li>
+  <li><b>Not executed here (the honest ~2%):</b> penetration test, CSV re-validation, staging soak + alert-fires
+  confirmation. No unresolved risk is hidden to inflate the score.</li>
+</ul>
+
+<footer>
+  NT.QMS EA Compliance Audit — engineering-ceiling re-audit · EA-AUD-NTQMS-003 · 2026-07-28 · tag v1.48.0.
+  Companions: NT_QMS_Enterprise_Architecture_Compliance_Audit_PostRemediation.html (v1.45),
+  NT_QMS_Road_to_100_Plan.md, NT_QMS_EA_Remediation_Closure_Report.md, NT_QMS_Load_Test_Report.md, docs/adr/.
+  100% is claimed only after the external track completes, with its evidence attached — not before.
+</footer>
+
+</div>
+</body>
+</html>

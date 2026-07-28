@@ -64,22 +64,22 @@ import { I18nService, Lang } from '../../core/i18n.service';
           }
 
           <form (ngSubmit)="submit()">
-            <label>{{ i18n.t('login.email') }}</label>
-            <input name="email" type="email" [(ngModel)]="email" autocomplete="username" required />
+            <label for="email">{{ i18n.t('login.email') }}</label>
+            <input id="email" name="email" type="email" [(ngModel)]="email" autocomplete="username" required />
 
-            <label>{{ i18n.t('login.password') }}</label>
-            <input name="password" type="password" [(ngModel)]="password" autocomplete="current-password" required />
+            <label for="password">{{ i18n.t('login.password') }}</label>
+            <input id="password" name="password" type="password" [(ngModel)]="password" autocomplete="current-password" required />
 
             @if (passwordExpired()) {
               <div class="error">{{ i18n.t('login.expired') }}</div>
-              <label>{{ i18n.t('login.newPassword') }}</label>
-              <input name="newPassword" type="password" [(ngModel)]="newPassword" autocomplete="new-password" />
+              <label for="newPassword">{{ i18n.t('login.newPassword') }}</label>
+              <input id="newPassword" name="newPassword" type="password" [(ngModel)]="newPassword" autocomplete="new-password" />
               <div class="muted hint">{{ i18n.t('login.newPasswordHint') }}</div>
             }
 
             @if (mfaRequired()) {
-              <label>{{ i18n.t('login.mfa') }}</label>
-              <input name="mfa" inputmode="numeric" [(ngModel)]="mfaCode" autocomplete="one-time-code" />
+              <label for="mfa">{{ i18n.t('login.mfa') }}</label>
+              <input id="mfa" name="mfa" inputmode="numeric" [(ngModel)]="mfaCode" autocomplete="one-time-code" />
               <div class="muted hint">{{ i18n.t('login.mfaPrompt') }}</div>
             }
 
@@ -136,12 +136,17 @@ import { I18nService, Lang } from '../../core/i18n.service';
     .tenantline { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
     .tenantchip {
       display: inline-flex; align-items: center; gap: 7px;
-      background: var(--nt-brand-soft); color: var(--nt-blue);
+      /* Darker blue than --nt-blue: the token fails WCAG AA (4.14:1) on the
+         soft-blue chip; #00639e clears 4.5:1 while keeping the brand hue. */
+      background: var(--nt-brand-soft); color: #00639e;
       font-size: 12.5px; font-weight: 700; border-radius: 999px; padding: 5px 14px;
     }
     .tenantchip svg { width: 14px; height: 14px; }
     .tenantline .muted { font-size: 11.5px; }
-    .platformline { font-size: 13px; font-weight: 700; color: var(--nt-teal); margin-bottom: 4px; }
+    /* Slightly darker than --nt-grey-m (#797979 = 4.35:1) so muted hints clear WCAG AA on white. */
+    .muted { color: #6e6e6e; }
+    /* Darker than --nt-teal (2.64:1 on white); #007c74 clears 4.5:1 for this bold label. */
+    .platformline { font-size: 13px; font-weight: 700; color: #007c74; margin-bottom: 4px; }
     .hint { margin: 2px 0 14px; }
     .platformswitch { width: auto; background: transparent; color: var(--nt-blue); font-size: 12px; font-weight: 700; padding: 0 0 12px; }
     .platformswitch:hover { text-decoration: underline; }

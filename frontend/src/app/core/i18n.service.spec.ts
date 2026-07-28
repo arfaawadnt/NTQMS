@@ -10,6 +10,13 @@ describe('I18nService', () => {
     service = TestBed.inject(I18nService);
   });
 
+  // setLang persists to localStorage, which the service re-reads on construction.
+  // Clear it so a randomized Jasmine order can't leak the chosen language into
+  // other specs (e.g. LoadMoreComponent's "Showing X of Y" assertion).
+  afterEach(() => {
+    localStorage.removeItem('qams.lang');
+  });
+
   it('defaults to English', () => {
     expect(service.lang()).toBe('en');
     expect(service.isRtl()).toBeFalse();
