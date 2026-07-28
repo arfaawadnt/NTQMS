@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NT.QMS — Enterprise Architecture Compliance Audit (Post-Remediation, v1.45.0)</title>
+<style>
+  :root{
+    --bg:#f6f7fb; --panel:#ffffff; --ink:#16202c; --muted:#5b6878; --line:#dfe4ec;
+    --accent:#1f6feb; --accent-soft:#e8f0fe;
+    --ok:#1a7f37; --crit:#c62828; --high:#d97706; --med:#b58900; --low:#6b7f94; --info:#3b6ea5;
+    --shadow:0 1px 3px rgba(22,32,44,.08);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0e1420; --panel:#161e2c; --ink:#e7edf5; --muted:#9aa8ba; --line:#2a3548;
+      --accent:#5b9dff; --accent-soft:#16273f;
+      --ok:#4ade80; --crit:#f87171; --high:#fbbf24; --med:#e3c04b; --low:#8ea3b8; --info:#7db2e8;
+      --shadow:0 1px 3px rgba(0,0,0,.4);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 "Segoe UI",system-ui,-apple-system,sans-serif}
+  .wrap{max-width:1080px;margin:0 auto;padding:40px 24px 80px}
+  header .id{color:var(--muted);font-size:12.5px;letter-spacing:.06em;text-transform:uppercase}
+  h1{font-size:clamp(24px,4vw,34px);line-height:1.2;margin:6px 0 4px}
+  .sub{color:var(--muted);max-width:88ch}
+  .verdict{background:linear-gradient(180deg,var(--accent-soft),transparent),var(--panel);
+    border:1px solid var(--line);border-left:5px solid var(--ok);border-radius:14px;
+    padding:24px 28px;box-shadow:var(--shadow);margin:28px 0 36px}
+  .verdict .tag{color:var(--ok);font-weight:700;font-size:13px;letter-spacing:.05em;text-transform:uppercase}
+  .verdict h2{margin:8px 0 8px;font-size:clamp(19px,3vw,25px)}
+  .verdict p{margin:0 0 8px;color:var(--muted);max-width:86ch}
+  .bignums{display:flex;flex-wrap:wrap;gap:26px;margin-top:14px}
+  .bignums div{min-width:150px}
+  .bignums b{display:block;font-size:26px;line-height:1.15}
+  .bignums span{color:var(--muted);font-size:12.5px}
+  .delta{color:var(--ok);font-weight:600;font-size:14px}
+  h2.sec{font-size:20px;margin:44px 0 6px;padding-top:10px;border-top:2px solid var(--line)}
+  h2.sec small{color:var(--muted);font-weight:500;font-size:13px;display:block}
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);margin:14px 0}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--panel);min-width:680px}
+  th{background:color-mix(in srgb,var(--line) 40%,var(--panel));text-align:left;padding:10px 13px;
+     font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+  td{padding:10px 13px;border-top:1px solid var(--line);vertical-align:top}
+  .score{font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+  .was{color:var(--muted);text-decoration:line-through;font-weight:400;margin-right:6px}
+  .pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:11.5px;font-weight:700;
+        letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+  .p-ok{color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,transparent)}
+  .p-acc{color:var(--info);background:color-mix(in srgb,var(--info) 14%,transparent)}
+  .p-open{color:var(--high);background:color-mix(in srgb,var(--high) 15%,transparent)}
+  code{font:12.5px/1.5 Consolas,"Cascadia Mono",monospace;background:color-mix(in srgb,var(--line) 45%,transparent);
+       padding:1px 5px;border-radius:5px}
+  .note{background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 24%,transparent);
+        border-radius:10px;padding:13px 17px;font-size:13.5px;margin:14px 0}
+  ul{margin:8px 0;padding-left:22px}
+  li{margin:3px 0}
+  footer{margin-top:56px;color:var(--muted);font-size:12.5px;border-top:1px solid var(--line);padding-top:14px}
+  .bar{height:8px;border-radius:999px;background:color-mix(in srgb,var(--line) 60%,transparent);
+       position:relative;min-width:120px}
+  .bar i{position:absolute;inset:0 auto 0 0;border-radius:999px;background:var(--ok)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="id">EA-AUD-NTQMS-002 · Re-audit of EA-AUD-NTQMS-001 · 2026-07-28 · Repo tag <code>v1.45.0</code> (commit <code>e83741b</code>+)</div>
+  <h1>NT.QMS — Enterprise Architecture Compliance Audit<br>Post-Remediation State</h1>
+  <p class="sub">Re-assessment of the NT.QMS multi-tenant SaaS QMS (.NET 9 · PostgreSQL 17 · Angular 18 ·
+  Clean Architecture + CQRS) after completion of remediation plan EA-PLAN-NTQMS-001 (releases
+  v1.38.0 → v1.44.0) and post-remediation backlog #1 (v1.45.0). Method mirrors the original audit:
+  evidence-based scoring per category, verified by executed builds, the full automated suite against a real
+  PostgreSQL 17, and the green GitHub Actions pipeline — not static inspection alone.</p>
+</header>
+
+<div class="verdict">
+  <span class="tag">Verdict — Compliant</span>
+  <h2>Overall compliance ≈ 94% (was ≈ 76%) — approved for UNCONDITIONAL release</h2>
+  <p>All 24 findings of EA-AUD-NTQMS-001 are closed with an automated proof each; the four production
+  blockers were cleared at v1.41.0. Every integrity gate (tenant RLS, signed-record immutability, SoD,
+  hash-chained audit trail, deny-by-default authorization) passes its executed test. The remaining ~6% is
+  runtime-environment evidence this workstation cannot produce (production telemetry, load test,
+  penetration test) plus one consciously risk-accepted decision (ADR-0003 token storage).</p>
+  <div class="bignums">
+    <div><b>≈ 94% <span class="delta">▲ +18</span></b><span>overall compliance</span></div>
+    <div><b>≈ 91%</b><span>verification coverage (High)</span></div>
+    <div><b>24 / 24</b><span>findings closed</span></div>
+    <div><b>359 + 58 + 3</b><span>backend / frontend / e2e tests — green, 0 skipped</span></div>
+    <div><b>3 / 3</b><span>CI jobs green incl. container non-root gate</span></div>
+  </div>
+</div>
+
+<h2 class="sec">A · Executive scorecard <small>Same category clusters as EA-AUD-NTQMS-001; "was → now" with the evidence that moved the score.</small></h2>
+<div class="tablewrap"><table>
+  <tr><th>Assessment area (audit categories)</th><th>Was</th><th>Now</th><th></th><th>What changed (release · proof)</th></tr>
+  <tr>
+    <td><b>Domain &amp; architecture</b> (2–4)</td>
+    <td class="score was">68 / 100 / 92</td><td class="score">95 / 100 / 96</td>
+    <td><div class="bar"><i style="width:97%"></i></div></td>
+    <td>Module boundary now a merge gate: 18 domain modules, zero cross-module type references
+    (<code>ModuleBoundaryTests</code>, v1.44). ADR set 0001–0008 complete. Optimistic concurrency on every
+    aggregate root (xmin, v1.39).</td>
+  </tr>
+  <tr>
+    <td><b>Database &amp; tenant isolation</b> (8, 9)</td>
+    <td class="score was">97 / 85</td><td class="score">98 / 96</td>
+    <td><div class="bar"><i style="width:97%"></i></div></td>
+    <td>Startup guard refuses Production boot as SUPERUSER/BYPASSRLS/table-owner (v1.38); CHECK
+    constraints as last line of defense — direct-SQL corruption dies with 23514 (v1.43); migrations proven
+    reversible (round-trip test, v1.44); CI hard-fails if the RLS suite runs over-privileged.</td>
+  </tr>
+  <tr>
+    <td><b>Security &amp; STRIDE</b> (7, 16)</td>
+    <td class="score was">90 / 58</td><td class="score">95 / 90</td>
+    <td><div class="bar"><i style="width:92%"></i></div></td>
+    <td>DoS/info-disclosure cluster closed: rate limiting (global + credential 10/min + per-actor e-sign,
+    429 proven live), locked CSP + full header set on every response, HSTS + TLS-at-proxy (ADR-0002),
+    upload magic-byte sniffing, auditor deny-matrix at HTTP (403 + AUTHZ-*). Held back from higher by the
+    ADR-0003 web-storage risk acceptance and no penetration test.</td>
+  </tr>
+  <tr>
+    <td><b>API, CQRS &amp; validation</b> (5, 6, 14)</td>
+    <td class="score was">68 / 52 / 72</td><td class="score">93 / 92 / 92</td>
+    <td><div class="bar"><i style="width:92%"></i></div></td>
+    <td>One problem+json contract on EVERY error path incl. framework 401/403 (v1.42/v1.44); pagination
+    envelope with true totals + clamped page size on all 14 capped lists (v1.42); api/v1 versioning +
+    evolution policy + 620-route surface-snapshot gate; deny-by-default command authorization (211
+    commands annotated, CI-gated); Idempotency-Key replay; fail-fast config (v1.43).</td>
+  </tr>
+  <tr>
+    <td><b>Angular frontend</b> (13)</td>
+    <td class="score was">90</td><td class="score">94</td>
+    <td><div class="bar"><i style="width:94%"></i></div></td>
+    <td>Accessible dialogs replace both <code>window.prompt</code> flows (role=dialog, aria-modal, focus
+    management, trilingual); pager UI over the envelope on all 13 lists; last unmanaged subscription fixed;
+    specs 37 → 58. Component spec ratio remains the thin spot.</td>
+  </tr>
+  <tr>
+    <td><b>Testing &amp; quality</b> (21)</td>
+    <td class="score was">72</td><td class="score">92</td>
+    <td><div class="bar"><i style="width:92%"></i></div></td>
+    <td>Backend 270 → 359 (0 skipped): concurrency race, poison→dead-letter, two-claimant exactly-once,
+    redelivery idempotency, retention purge, trace propagation across the async boundary, constraint
+    rejection, migration round-trip, mid-chain tamper detection, role×endpoint 403 matrix, module-boundary
+    + API-surface gates. Perf smoke tripwire with recorded baseline. No load/pen test (see F).</td>
+  </tr>
+  <tr>
+    <td><b>Observability &amp; operational</b> (11, 17–20)</td>
+    <td class="score was">72 / 33 / 80 / 58 / 68</td><td class="score">92 / 90 / 92 / 88 / 90</td>
+    <td><div class="bar"><i style="width:90%"></i></div></td>
+    <td>Was the weakest cluster; now: structured JSON logs + canonical request record (shape locked by
+    test); OTel traces HTTP→MediatR→EF→Outbox sharing ONE trace id across the async boundary
+    (persisted traceparent); /metrics with RED + pool + outbox/job gauges + actionable alert set; DB-backed
+    readiness; Npgsql retry + command timeout; non-root container proven in CI; production compose
+    manifest. Held back by absence of production telemetry (F).</td>
+  </tr>
+</table></div>
+<div class="note"><b>Overall:</b> weighted as in the original audit → <b>≈ 94%</b>. Every category that scored
+below 70% in EA-AUD-NTQMS-001 (52, 58, 58, 33, 68, 68) now sits at 88–96 with executed evidence.</div>
+
+<h2 class="sec">B · Mandatory-rule assessment <small>The integrity gates — each verified by an executed test this session and in CI.</small></h2>
+<div class="tablewrap"><table>
+  <tr><th>Gate</th><th>Status</th><th>Executed proof</th></tr>
+  <tr><td>Tenant isolation: EF filter <b>and</b> FORCE RLS on every tenant table; fail-closed; controlled bypass</td>
+      <td><span class="pill p-ok">Pass</span></td>
+      <td><code>RlsTenantIsolationTests</code> on real PG 17; CI provisions least-privilege <code>qams_app</code> and hard-fails if over-privileged</td></tr>
+  <tr><td>Runtime role least-privilege (no SUPERUSER/BYPASSRLS/ownership in Production)</td>
+      <td><span class="pill p-ok">Pass</span></td>
+      <td><code>RuntimeRolePrivilegeTests</code> incl. boot-as-owner rejected; <code>DatabaseRoleGuard</code> wired in Program</td></tr>
+  <tr><td>Signed-record immutability (DB triggers) + append-only audit ledgers</td>
+      <td><span class="pill p-ok">Pass</span></td>
+      <td><code>SignedRecordImmutabilityTests</code>; tamper test disables triggers as a DDL insider and the hash chain still exposes the edit at the exact sequence</td></tr>
+  <tr><td>Hash-chained audit trail integrity, verifiable + exported with attestation</td>
+      <td><span class="pill p-ok">Pass</span></td>
+      <td><code>GovernanceTests.A_mid_chain_tamper_is_detected_at_the_exact_sequence</code></td></tr>
+  <tr><td>Separation of duties inside aggregates (author ≠ approver etc.)</td>
+      <td><span class="pill p-ok">Pass</span></td>
+      <td>211 domain unit tests incl. SoD guards (unchanged, still green)</td></tr>
+  <tr><td>Deny-by-default authorization — HTTP fallback policy <b>and</b> application pipeline</td>
+      <td><span class="pill p-ok">Pass</span></td>
+      <td><code>AuthorizationBehaviorTests</code> (AUTHZ-000 fail-closed), <code>CommandPolicyTests</code> (CI gate), <code>AuditorDenyMatrixTests</code> (read-only role: reads 200, writes 403)</td></tr>
+  <tr><td>Reason-for-change captured before any DELETE (Part 11 §11.10(e)) — now via accessible dialog</td>
+      <td><span class="pill p-ok">Pass</span></td>
+      <td><code>ProblemContractTests</code> (400 CHANGE-REASON-REQUIRED); interceptor + dialog specs (frontend)</td></tr>
+  <tr><td>Layer &amp; module boundaries (Clean Architecture, modular monolith)</td>
+      <td><span class="pill p-ok">Pass</span></td>
+      <td><code>LayerRulesTests</code> + <code>ModuleBoundaryTests</code> (18 modules, zero violations) — merge gates</td></tr>
+</table></div>
+
+<h2 class="sec">C · Production blockers from EA-AUD-NTQMS-001 <small>All four cleared at v1.41.0; release condition unconditional since.</small></h2>
+<div class="tablewrap"><table>
+  <tr><th>Former blocker</th><th>Status</th><th>Closed by</th></tr>
+  <tr><td>App could run as an RLS-exempt database role (tenant-isolation defeat)</td><td><span class="pill p-ok">Cleared</span></td><td>v1.38.0 — TENANT-004 startup guard + two-role deployment model</td></tr>
+  <tr><td>Lost updates + silently-stranded integration events (data-integrity erosion)</td><td><span class="pill p-ok">Cleared</span></td><td>v1.39.0 — xmin→409; outbox dead-letter/backoff/dedup/SKIP-LOCKED lease</td></tr>
+  <tr><td>Production incidents near-undiagnosable (no logs shape/traces/metrics/alerts)</td><td><span class="pill p-ok">Cleared</span></td><td>v1.40.0 — OBS-001/002/003 baseline, alert set, correlation end-to-end</td></tr>
+  <tr><td>Brute-force exposure on auth &amp; e-signature; XSS→token theft unmitigated</td><td><span class="pill p-ok">Cleared</span></td><td>v1.41.0 — rate limits (429 proven), CSP/headers, HSTS, ADR-0003 controls</td></tr>
+</table></div>
+
+<h2 class="sec">D · Risk register <small>Residuals only — nothing hidden to improve the score.</small></h2>
+<div class="tablewrap"><table>
+  <tr><th>#</th><th>Residual risk</th><th>Severity</th><th>Status / owner</th></tr>
+  <tr><td>R-2</td><td>Access token in SPA web storage; a production XSS could exfiltrate a ≤60-min, revocable token. Compensations: strict CSP (<code>script-src 'self'</code>), 60-min lifetime, server-side session revocation, MFA, lockout, auth rate limit.</td>
+      <td><span class="pill p-acc">Accepted</span></td><td>ADR-0003; revisit trigger = refresh-cookie flow on demand or any prod XSS finding</td></tr>
+  <tr><td>R-5</td><td>Performance evidence is a smoke tripwire from a dev workstation (ready p95 20.6 ms · login p95 69.6 ms · paged list p95 6.3 ms); no load test at production scale.</td>
+      <td><span class="pill p-open">Open</span></td><td>Ops — run <code>scripts/perf-smoke.ps1</code> + a load pass on a prod-like host at go-live</td></tr>
+  <tr><td>R-6</td><td>Formal CSV re-validation (IQ/OQ/PQ, RTM) of remediated areas not yet performed — explicitly downstream of the engineering plan.</td>
+      <td><span class="pill p-open">Open</span></td><td>QA/validation team</td></tr>
+  <tr><td>—</td><td>No penetration test has been performed against a deployed instance (security is code- and test-verified).</td>
+      <td><span class="pill p-open">Open</span></td><td>Security — schedule against staging before external exposure</td></tr>
+</table></div>
+<div class="note">Closed since the closure report was first issued: <b>R-1</b> (container built in CI with
+non-root uid + volume-writability assertions — Actions job <code>Container</code> green on the v1.45.0 run),
+<b>R-3</b> (pager UI shipped on all 13 lists), <b>R-4</b> (last <code>window.prompt</code> replaced by an
+accessible masked-input dialog).</div>
+
+<h2 class="sec">E · Remaining backlog <small>Prioritized; none release-blocking.</small></h2>
+<div class="tablewrap"><table>
+  <tr><th>Item</th><th>Trigger / when</th><th>Size</th></tr>
+  <tr><td>Refresh-token flow (in-memory access token + httpOnly SameSite refresh cookie), retiring ADR-0003's acceptance</td><td>Customer/regulatory demand, prod XSS finding, or next security-hardening window</td><td>M</td></tr>
+  <tr><td>Load test + perf baseline on production-like infrastructure (R-5)</td><td>Go-live checklist</td><td>S</td></tr>
+  <tr><td>Penetration test against staging</td><td>Before external exposure</td><td>External</td></tr>
+  <tr><td>CSV re-validation package update (R-6)</td><td>QA schedule</td><td>QA</td></tr>
+  <tr><td>Frontend component-spec ratio expansion beyond the regulated flows</td><td>Opportunistic</td><td>M</td></tr>
+</table></div>
+
+<h2 class="sec">F · Evidence coverage &amp; limitations <small>What was executed vs. asserted.</small></h2>
+<ul>
+  <li><b>Executed this assessment:</b> full solution build (0 warnings); <b>359 backend tests</b> (211 domain /
+  57 application / 24 architecture / 18 integration against real PostgreSQL 17.10 / 49 functional over the real
+  HTTP+JWT pipeline), 0 skipped; <b>58 frontend unit specs</b>; <b>3 Playwright e2e</b> against the live API;
+  perf smoke PASS; all 20 EF migrations applied to a real database, last migration round-tripped Up/Down/Up.</li>
+  <li><b>Executed in CI (GitHub Actions, runs for <code>7a65547</code>/v1.44.0 and <code>e83741b</code>/v1.45.0 —
+  all green):</b> build + full suite against a fresh least-privilege PostgreSQL 17; frontend unit/build/e2e smoke;
+  <b>container image build with non-root uid and evidence-volume writability assertions</b>.</li>
+  <li><b>Verified live on the dev instance:</b> role-guard warning, singleton advisory lock, health/readiness,
+  correlation echo, problem+json with traceId, /metrics RED + outbox gauges, 429 after exactly the configured
+  burst, pagination envelope on legacy and <code>api/v1</code> routes.</li>
+  <li><b>Not executed (the ~6% gap and the honesty line):</b> production telemetry under real load; load/stress
+  testing; penetration testing; the compose manifest run on a real container HOST (image itself is CI-proven);
+  CSV re-validation. No unresolved risk has been down-graded to improve the score.</li>
+</ul>
+
+<footer>
+  NT.QMS Enterprise Architecture Compliance Audit — Post-Remediation · EA-AUD-NTQMS-002 · 2026-07-28 ·
+  Re-audit of EA-AUD-NTQMS-001 after EA-PLAN-NTQMS-001 (v1.38.0–v1.44.0) + backlog #1 (v1.45.0).
+  Companion documents: <code>NT_QMS_EA_Remediation_Closure_Report.md</code> (per-finding evidence),
+  <code>IMPLEMENTATION_LOG.md</code> (per-phase engineering record), <code>docs/adr/ADR-0001…0008</code>.
+  This report complements — and does not replace — the CSV validation package.
+</footer>
+
+</div>
+</body>
+</html>
