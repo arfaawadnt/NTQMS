@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 
@@ -11,6 +11,7 @@ import { AuthService } from '../../core/auth.service';
 @Component({
   selector: 'qams-tenant-entry',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: '',
 })
 export class TenantEntryComponent {

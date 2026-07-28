@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -92,6 +92,7 @@ import { I18nService, Lang } from '../../core/i18n.service';
       </div>
     </div>
   `,
+    changeDetection: ChangeDetectionStrategy.Eager,
     styles: [`
     .wrap { min-height: 100vh; display: grid; place-items: center; padding: 1.5rem;
             background: linear-gradient(135deg, #10263e 0%, #16314f 55%, #0d3a4a 100%); }

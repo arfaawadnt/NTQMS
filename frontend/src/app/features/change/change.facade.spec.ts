@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ChangeFacade } from './change.facade';
 import { ChangeDetail, ChangeListItem, Paged } from '../../core/models';
@@ -24,7 +24,7 @@ describe('ChangeFacade — post-implementation review', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(withXhr()), provideHttpClientTesting()],
     });
     facade = TestBed.inject(ChangeFacade);
     http = TestBed.inject(HttpTestingController);

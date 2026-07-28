@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../core/auth.service';
 import { I18nService, Lang } from '../core/i18n.service';
@@ -133,6 +133,7 @@ const GROUPS_STATE_KEY = 'qams.sidebar.groups';
     <!-- Accessible text/password prompt modal (R-4), overlaying every screen. -->
     <qams-text-prompt-dialog />
   `,
+    changeDetection: ChangeDetectionStrategy.Eager,
     styles: [`
     .app { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 

@@ -1,5 +1,5 @@
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
+import { HttpClient, provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { changeReasonInterceptor } from './change-reason.interceptor';
 import { ChangeReasonService } from './change-reason.service';
@@ -18,7 +18,7 @@ describe('changeReasonInterceptor', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        provideHttpClient(withInterceptors([changeReasonInterceptor])),
+        provideHttpClient(withXhr(), withInterceptors([changeReasonInterceptor])),
         provideHttpClientTesting(),
       ],
     });
