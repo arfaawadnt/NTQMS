@@ -1,0 +1,39 @@
+# npm-audit allowlist / exception register — high/critical PROD advisories the
+# npm-scan CI gate tolerates, each with a documented reason + compensating
+# control + tracked fix. One advisory URL per line (# = comment). This file IS
+# the auditable exception record: review it at EVERY dependency bump and delete
+# an entry the moment its fix ships. An advisory NOT listed here fails the build.
+#
+# ===========================================================================
+# Angular 18.2 framework advisories (SEC-002 / UI-001) — 10 high-severity.
+# ---------------------------------------------------------------------------
+# ROOT CAUSE: all are in @angular/{common,compiler,core} at <= 18.2.14.
+# FIX: none exists inside the Angular 18.x line — every advisory's only fix is
+#   a SEMVER-MAJOR Angular upgrade (npm audit reports 20.x/22.x). The
+#   remediation is therefore the Angular 18 -> latest-LTS upgrade, tracked as
+#   backlog item UI-001, ELEVATED TO P1 by these advisories.
+# RISK ACCEPTANCE (interim, re-assessed each release) with compensating controls:
+#   * XSS class (SVG script/animation, i18n attribute bindings, DOM clobbering):
+#     the app serves a strict CSP (script-src 'self', no inline/eval — verified
+#     on every response by SecurityHardeningTests), which forecloses the script-
+#     injection vector these sanitization bypasses rely on.
+#   * DoS/OOM (Date/Number pipes): bounded by the API rate limiter (SEC-013) and
+#     the reverse proxy; the SPA is a thin client over a paginated API.
+#   * XSRF token leakage / HTTP cache info-leak / weak cache-key hashing: the
+#     deployment is SAME-ORIGIN with no CORS (ADR-0007) and TLS-only (ADR-0002);
+#     the SPA does not rely on Angular's protocol-relative XSRF or shared HTTP
+#     caching across origins. Residual risk accepted pending the upgrade.
+#
+# @angular/compiler — XSS
+https://github.com/advisories/GHSA-jrmj-c5cx-3cw6
+https://github.com/advisories/GHSA-v4hv-rgfq-gp49
+https://github.com/advisories/GHSA-g93w-mfhg-p222
+# @angular/core — XSS / hydration
+https://github.com/advisories/GHSA-prjf-86w9-mfqv
+https://github.com/advisories/GHSA-rgjc-h3x7-9mwg
+# @angular/common — DoS / info-leak / XSRF / cache
+https://github.com/advisories/GHSA-58c5-g7wp-6w37
+https://github.com/advisories/GHSA-48r7-hpm6-gfxm
+https://github.com/advisories/GHSA-39pv-4j6c-2g6v
+https://github.com/advisories/GHSA-p3vc-36g9-x9gr
+https://github.com/advisories/GHSA-q6f4-qqrg-jv6x

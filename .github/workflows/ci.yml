@@ -48,6 +48,17 @@ jobs:
       - name: Build
         run: dotnet build NT.QAMS.sln --configuration Release --no-restore
 
+      # SEC-002: Software Composition Analysis. Fail the build on any known-
+      # vulnerable NuGet package (direct or transitive) — the DB as last line
+      # of defense has a supply-chain analogue here.
+      - name: Dependency vulnerability scan (.NET SCA)
+        run: |
+          dotnet list NT.QAMS.sln package --vulnerable --include-transitive 2>&1 | tee vuln.txt
+          if grep -qiE '\b(Critical|High)\b' vuln.txt; then
+            echo "::error::High/Critical vulnerable NuGet package(s) found — see log."
+            exit 1
+          fi
+
       - name: Provision non-superuser role + CI database
         env:
           PGPASSWORD: postgres
@@ -100,6 +111,21 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # SEC-002: SCA for the SHIPPED frontend (prod deps). Fails on any
+      # high/critical advisory EXCEPT those explicitly allow-listed (with a
+      # documented reason + compensating control) in
+      # .github/npm-audit-allowlist.txt — reviewed every dependency bump.
+      - name: Dependency vulnerability scan (npm SCA)
+        run: |
+          npm audit --omit=dev --json > audit.json || true
+          allow=$(grep -vE '^\s*#|^\s*$' ../.github/npm-audit-allowlist.txt | sort -u)
+          found=$(jq -r '[.vulnerabilities[]?.via[]? | select(type=="object") | select(.severity=="high" or .severity=="critical") | .url] | unique | .[]' audit.json | sort -u)
+          unexpected=$(comm -23 <(echo "$found") <(echo "$allow") | grep -v '^$' || true)
+          if [ -n "$unexpected" ]; then
+            echo "::error::Un-allowlisted high/critical npm advisories:"; echo "$unexpected"; exit 1
+          fi
+          echo "npm SCA: no high/critical advisories outside the reviewed allowlist."
+
       # Karma/Jasmine component + service unit tests (F-18), headless Chrome.
       - name: Unit tests
         run: npm run test:ci
@@ -141,3 +167,15 @@ jobs:
 
       - name: Assert the evidence volume is writable by the runtime user
         run: docker run --rm --entrypoint sh ntqams-webapi:ci -c 'touch /app/data/files/.ci-probe && rm /app/data/files/.ci-probe'
+
+      # SEC-002: scan the built image for OS/library CVEs. Fails on HIGH/CRITICAL
+      # that have an available fix (ignore-unfixed avoids flapping on base-image
+      # CVEs with no upstream patch yet — re-evaluated as the base image updates).
+      - name: Trivy image vulnerability scan
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: ntqams-webapi:ci
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+          vuln-type: os,library
