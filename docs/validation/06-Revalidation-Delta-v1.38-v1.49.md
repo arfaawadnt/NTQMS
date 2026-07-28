@@ -1,11 +1,11 @@
-# CSV Re-Validation Delta — v1.38.0 → v1.48.0
+# CSV Re-Validation Delta — v1.38.0 → v1.49.0
 
 | Field | Value |
 | ----- | ----- |
-| Document ID | REVAL-NTQMS-001 |
+| Document ID | REVAL-NTQMS-001 (rev 2 — extended to v1.49.0) |
 | System | NT.QMS |
 | Baseline validated version | 1.0 (VMP/URS/FRA/QP/RTM/VSR — docs 00–05) |
-| Scope of this delta | Changes across releases **v1.38.0 → v1.48.0** (EA-remediation Phases 0–6 + Road-to-100 backlog/Phases 7–9) |
+| Scope of this delta | Changes across releases **v1.38.0 → v1.49.0** (EA-remediation Phases 0–6 + Road-to-100 backlog/Phases 7–9 + v1.49.0 supply-chain assurance & Angular 22 upgrade) |
 | Parent | VMP-NTQMS-001; URS-NTQMS-001; RTM-NTQMS-001; QP-NTQMS-001; VSR-NTQMS-001 |
 | Status | **DRAFT for QA execution.** Engineering-prepared traceability + qualification stubs; **QA owns, executes, witnesses, and signs.** |
 
@@ -28,9 +28,10 @@
 | Approved by (System Owner) | | | |
 
 **Change-control provenance.** Each release below is a tagged, green CI build (Build & Test
-with real PostgreSQL 17 · Container non-root · Frontend). Engineering record:
-`IMPLEMENTATION_LOG.md`; decisions: `docs/adr/ADR-0001…0009`; audits:
-`docs/reference/NT_QMS_EA_Remediation_Closure_Report.md`, `…_Compliance_Audit_v1.48.html`.
+with real PostgreSQL 17 · Container non-root + Trivy scan · Frontend incl. SCA gates). Engineering
+record: `IMPLEMENTATION_LOG.md`; decisions: `docs/adr/ADR-0001…0009`; audits:
+`docs/reference/NT_QMS_EA_Remediation_Closure_Report.md`, `…_Compliance_Audit_v1.48.html`,
+`…_Enterprise_Application_Compliance_Audit.html` (EAC-NTQMS-001, covers v1.49.0).
 
 ---
 
@@ -100,6 +101,25 @@ Verification legend as in RTM-NTQMS-001 (**AUTO** automated test, **OQ/PQ** scri
 | URS-084 | Part-11 reason-for-change capture shall be accessible (no `window.prompt`); unmanaged subscriptions removed. | `frontend/core/change-reason-dialog.component.ts` + service/interceptor; `takeUntilDestroyed` fix | Frontend spec (`change-reason-dialog.component.spec.ts`); axe scan `e2e/a11y.spec.ts`; OQ-UI-01 | Template |
 | URS-085 | The sign-in surface shall have no serious/critical accessibility violations. | `frontend/e2e/a11y.spec.ts` (@axe-core/playwright); login-component fixes | AUTO (CI, every push); OQ-UI-02 | Template |
 
+### A.7 Supply-chain assurance & framework currency (v1.49)
+
+> **Change assessment (v1.49.0).** Two changes: (1) CI vulnerability-scan gates added
+> (build-pipeline only — no application code touched); (2) the SPA framework upgraded
+> **Angular 18.2.14 → 22.0.8**, one major at a time via the vendor migration path
+> (18→19→20→21→22). The upgrade is **UI-framework only**: no change to the validated
+> domain model, database schema (no new migration), or API contracts
+> (`ApiSurface.approved.txt` unchanged). Impact is bounded to the presentation layer, so
+> the regression evidence is the full frontend gate set plus the unchanged backend suite —
+> re-executed green per major and at the final version (production AOT build; 67 unit
+> specs; auth + a11y e2e; CI run `1beb3bf` all three jobs green). Toolchain deltas:
+> TypeScript 5.5→6.0.3, zone.js 0.15, build/CI Node 24 (npm 11).
+
+| URS | Requirement (delta) | Design element(s) | Verification | Status |
+| --- | ------------------- | ----------------- | ------------ | ------ |
+| URS-086 | Every CI build shall gate on software-composition analysis: known High/Critical vulnerabilities in backend NuGet packages (direct + transitive) and in shipped frontend npm packages shall fail the pipeline; any tolerated advisory shall be recorded in a documented exception register with compensating controls and a tracked fix. | `.github/workflows/ci.yml` (".NET SCA", "npm SCA" steps); `.github/npm-audit-allowlist.txt` (exception register — **currently empty**) | AUTO (CI, every push); IQ-24; OQ-SCA-01 | Template |
+| URS-087 | Every CI build shall scan the runtime container image for OS/library CVEs and fail on fixable High/Critical findings. | `.github/workflows/ci.yml` ("Install Trivy" + "Trivy image vulnerability scan", `--severity HIGH,CRITICAL --ignore-unfixed`) | AUTO (CI, every push); IQ-24 | Template |
+| URS-088 | The shipped SPA framework shall carry no known high/critical advisories; framework currency shall be maintained on a supported release line. | `frontend/package.json` → `@angular/* ^22.0.8`; upgrade evidence: commits `bc5ed96`→`93f8816` (one per major, gates green per step) | AUTO npm SCA (CI); OQ-SCA-02; INSP `npm audit --omit=dev` = 0 advisories | Template |
+
 ---
 
 ## Part B — Installation Qualification (IQ) delta
@@ -116,6 +136,8 @@ Append to QP-NTQMS-001 Part 1. Templates for execution in the qualified environm
 | IQ-21 | Refresh-session + idempotency schema | `qams.refresh_session` and `qams.idempotency_record` tables present per migrations `Phase7RefreshSessions` + `Phase4IdempotencyRecords` | | | `\dt qams.*`; `dotnet ef migrations list` |
 | IQ-22 | Metrics endpoint | `GET /metrics` returns Prometheus text (RED + `qams_outbox_*` + `qams_job_*`) | | | `/metrics` sample |
 | IQ-23 | Observability stack (if deployed) | Collector/Prometheus/Grafana up; targets UP; alert rules loaded | | | `deploy/observability/`; Prometheus `/targets`, `/alerts` |
+| IQ-24 | CI vulnerability-scan gates active | The deployed build's CI run shows ".NET SCA", "npm SCA", and "Trivy image vulnerability scan" steps executed and green; exception register reviewed (currently empty) | | | GitHub Actions run log; `.github/npm-audit-allowlist.txt` |
+| IQ-25 | Frontend framework version | Deployed SPA built from `@angular/* 22.0.8` on the Node 24 / npm 11 toolchain; build artifact matches the tagged release (v1.49.0+) | | | `frontend/package.json` + lock; CI "Setup Node 24" + AOT build log |
 
 ---
 
@@ -134,6 +156,7 @@ witnessed manual confirmation is recorded per baseline convention.
 | `Architecture.Tests` (added) | Command-policy completeness, module boundary | Design-integrity control |
 | Frontend (added) | axe a11y scans, load-more pager, change-reason dialog specs | OQ-UI |
 | `scripts/security-probe.ps1`, `security-probe-deep.ps1`, `failure-drills.ps1` | Executed adversarial + operational drills (24/24 checks, live poison→dead-letter) | Supplementary OQ evidence |
+| CI SCA/Trivy gates (added, v1.49) | .NET SCA + npm SCA (vs exception register) + Trivy image scan, every push | OQ-SCA |
 
 ### OQ manual/witnessed cases (templates)
 
@@ -153,6 +176,8 @@ witnessed manual confirmation is recorded per baseline convention.
 | OQ-API-05 | Submit the same command twice with one Idempotency-Key | One record; second call replays the first response | | |
 | OQ-OBS-02 | Issue one request; inspect logs/trace | Correlated log + trace id; `traceId` echoed in errors | | |
 | OQ-UI-01 | Delete a record in the SPA | Accessible reason dialog (role=dialog, focus, Escape); reason sent as `X-Change-Reason` | | |
+| OQ-SCA-01 | Run `npm audit --omit=dev` against the shipped `frontend/package-lock.json`; inspect `.github/npm-audit-allowlist.txt` | 0 high/critical advisories; exception register empty (or every entry carries a documented reason, compensating control, and tracked fix) | | |
+| OQ-SCA-02 | Smoke the upgraded SPA on the qualified host: sign in, open an NC list (load-more pager), delete with reason dialog, sign out | All regulated-flow UI behaviours unchanged post-Angular-22; no console errors | | |
 
 ---
 
@@ -171,9 +196,10 @@ witnessed manual confirmation is recorded per baseline convention.
 
 ## Part E — Validation Summary Report (VSR) addendum
 
-Append to VSR-NTQMS-001. The change program v1.38→v1.48 is hardening + assurance evidence
+Append to VSR-NTQMS-001. The change program v1.38→v1.49 is hardening + assurance evidence
 on top of the validated 1.0 baseline; it introduces no change to the validated domain model,
-database design, or public API contracts (additive only — ADR-0004).
+database design, or public API contracts (additive only — ADR-0004). The v1.49.0 Angular
+upgrade is presentation-layer only (no migration; API surface snapshot unchanged).
 
 | Program item | Area | Resolution (evidence) |
 | ------------ | ---- | --------------------- |
@@ -187,6 +213,7 @@ database design, or public API contracts (additive only — ADR-0004).
 | Session security (Ph 7) | Security | Rotating refresh cookie + reuse detection; memory-only token (URS-074; ADR-0009 supersedes ADR-0003) |
 | Evidence at scale (Ph 8) | Performance/ops | Load baseline + failure drills + observability stack (PQ-PERF/OBS) |
 | Assurance depth (Ph 9) | Assurance/UX | Role×endpoint matrix, contract coverage, a11y in CI (URS-083..085) |
+| Supply-chain assurance (v1.49) | Security/assurance | CI SCA (.NET + npm w/ exception register) + Trivy image scan; Angular 18.2→22.0.8 — 10 high-severity framework advisories cleared, `npm audit` (prod) = 0, register empty (URS-086..088; IQ-24/25) |
 
 **Independent security validation.** An in-house automated adversarial assessment executed 24
 checks with 0 findings (`docs/reference/NT_QMS_Security_Assessment_Report.html`). An
@@ -196,16 +223,17 @@ closed.
 
 **Overall (delta).** Subject to QA execution and sign-off of Parts A–D, and completion of the
 external activities (independent pen test; staging PQ/soak; this re-validation), NT.QMS at
-v1.48.0 is validated for its intended use with the change program as documented hardening
+v1.49.0 is validated for its intended use with the change program as documented hardening
 evidence.
 
 ---
 
 ## Part F — Execution checklist for QA (what "done" requires)
 
-- [ ] Environment qualified (baseline IQ + Part B IQ-16..23) on the target/staging host.
-- [ ] Automated evidence engines attached: a green CI run + local `dotnet test` (370 backend,
-      0 skipped) + frontend (67 specs) + e2e (6, incl. a11y) transcripts.
+- [ ] Environment qualified (baseline IQ + Part B IQ-16..25) on the target/staging host.
+- [ ] Automated evidence engines attached: a green CI run (incl. the SCA + Trivy gates) +
+      local `dotnet test` (370 backend, 0 skipped) + frontend (67 specs, Angular 22) +
+      e2e (6, incl. a11y) transcripts.
 - [ ] Part C OQ manual/witnessed cases executed and signed.
 - [ ] Part D PQ executed on staging (load + soak + alert-fires drill).
 - [ ] RTM delta statuses moved Template → Verified/Executed with evidence references.
