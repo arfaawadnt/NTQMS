@@ -5,65 +5,63 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../core/auth.service';
 import { I18nService, Lang } from '../../core/i18n.service';
 
+/** Persisted key for the sign-in surface's light/dark preference. */
+const THEME_KEY = 'qams.login.theme';
+
 /**
- * Sign-in page. Two panels on a soft-blue field: a brand/value panel (logo,
- * platform line, headline, capability list) beside the credentials card.
- * The laboratory comes exclusively from its own URL (/t/{lab}) — the form
- * carries no tenant field; without a lab address the page signs in the
- * platform administrator.
+ * Sign-in page, built to the supplied design: a full-width white header band
+ * (logo card, brand lockup, workspace pill, language switch, theme toggle) over
+ * a soft-blue field holding the value panel and the credentials card, closed by
+ * a white footer band.
  *
- * Accessibility notes (the sign-in surface is an axe gate in CI): two design
- * colours are deliberately darkened here because the supplied values fail WCAG
- * AA on this background — see the comments on `.eyebrow` and `.muted`.
+ * The laboratory comes exclusively from its own URL (/t/{lab}) — the form
+ * carries no tenant field; without a lab address the page signs in the platform
+ * administrator.
+ *
+ * Accessibility note (this surface is an axe gate in CI): the design's teal
+ * (#00B2A9) is ~2.4:1 on the white band, far under WCAG AA, so the eyebrow uses
+ * a darkened tone of the same hue. Every other colour is the design's own.
  */
 @Component({
     selector: 'qams-login',
     imports: [FormsModule],
     template: `
-    <div class="page">
-      <div class="shell">
-        <!-- brand / value panel -->
-        <section class="hero">
-          <img class="logo" src="assets/nt-qms-logo.svg" alt="NT.QMS" />
-          <p class="eyebrow">{{ i18n.t('app.subtitle') }}</p>
-          <p class="platformtag">{{ i18n.t('login.platformTag') }}</p>
+    <div class="page" [class.dark]="dark()">
+      <!-- ---------------------------------------------------- header band -->
+      <header class="band top">
+        <div class="inner">
+          <div class="brandrow">
+            <span class="logocard"><img src="assets/nt-qms-logo.svg" alt="NT.QMS" /></span>
+            <span class="brandlines">
+              <span class="eyebrow">{{ i18n.t('app.subtitle') }}</span>
+              <span class="platformtag">{{ i18n.t('login.platformTag') }}</span>
+              <!-- Platform sign-in reads as a third brand line: it stays left with
+                   the lockup and never shifts the right-hand control group, which
+                   sits exactly where the design puts it. -->
+              @if (tenantSlug()) {
+                <button type="button" class="link platformswitch" (click)="switchToPlatform()">
+                  {{ i18n.t('login.platformSwitch') }} &rarr;
+                </button>
+              }
+            </span>
+          </div>
 
-          <h1>{{ i18n.t('login.heroTitle') }}</h1>
-          <p class="herobody">{{ i18n.t('login.heroBody') }}</p>
-
-          <ul class="features">
-            @for (f of features; track f) {
-              <li>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M20 6 9 17l-5-5" />
-                </svg>
-                {{ i18n.t(f) }}
-              </li>
-            }
-          </ul>
-        </section>
-
-        <!-- credentials card -->
-        <section class="card">
-          <div class="cardtop">
-            @if (tenantSlug(); as slug) {
-              <div class="workspace">
-                <span class="avatar" aria-hidden="true">{{ tenantInitials() }}</span>
-                <span class="wsmeta">
+          <div class="controlrow">
+            <div class="wsblock">
+              @if (tenantSlug()) {
+                <span class="wspill">
+                  <span class="avatar" aria-hidden="true">{{ tenantInitials() }}</span>
                   <span class="wsname">{{ tenantName() }}</span>
-                  <span class="muted">{{ i18n.t('login.workspaceHint') }}</span>
                 </span>
-              </div>
-            } @else {
-              <div class="workspace">
-                <span class="avatar platform" aria-hidden="true">NT</span>
-                <span class="wsmeta">
+                <span class="wshint">{{ i18n.t('login.workspaceHint') }}</span>
+              } @else {
+                <span class="wspill">
+                  <span class="avatar" aria-hidden="true">NT</span>
                   <span class="wsname">{{ i18n.t('login.platformMode') }}</span>
-                  <span class="muted">{{ i18n.t('login.labUrlHint') }}</span>
                 </span>
-              </div>
-            }
+                <span class="wshint">{{ i18n.t('login.labUrlHint') }}</span>
+              }
+            </div>
 
             <div class="langswitch" role="group" [attr.aria-label]="i18n.t('common.language')">
               @for (l of langs; track l.code) {
@@ -72,163 +70,269 @@ import { I18nService, Lang } from '../../core/i18n.service';
                         (click)="i18n.setLang(l.code)">{{ l.label }}</button>
               }
             </div>
+
+            <button type="button" class="themetoggle" [attr.aria-label]="i18n.t('login.themeToggle')"
+                    [attr.aria-pressed]="dark()" (click)="toggleTheme()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z" />
+              </svg>
+            </button>
           </div>
+        </div>
+      </header>
 
-          <h2>{{ i18n.t('login.title') }}</h2>
-          <p class="cardhint">{{ i18n.t('login.cardHint') }}</p>
+      <!-- ------------------------------------------------------------ body -->
+      <main class="body">
+        <div class="cols"><div class="colgrid">
+          <section class="hero">
+            <h1>{{ i18n.t('login.heroTitle') }}</h1>
+            <p class="herobody">{{ i18n.t('login.heroBody') }}</p>
+            <ul class="features">
+              @for (f of features; track f) {
+                <li>{{ i18n.t(f) }}</li>
+              }
+            </ul>
+          </section>
 
-          @if (tenantSlug()) {
-            <button type="button" class="link platformswitch" (click)="switchToPlatform()">
-              {{ i18n.t('login.platformSwitch') }} &rarr;
-            </button>
-          }
+          <section class="card">
+            <h2>{{ i18n.t('login.title') }}</h2>
+            <p class="cardhint">{{ i18n.t('login.cardHint') }}</p>
 
-          <form (ngSubmit)="submit()">
-            <label for="email">{{ i18n.t('login.email') }}</label>
-            <input id="email" name="email" type="email" [(ngModel)]="email"
-                   [placeholder]="i18n.t('login.emailPlaceholder')"
-                   autocomplete="username" required />
+            <form (ngSubmit)="submit()">
+              <label for="email">{{ i18n.t('login.email') }}</label>
+              <input id="email" name="email" type="email" [(ngModel)]="email"
+                     [placeholder]="i18n.t('login.emailPlaceholder')"
+                     autocomplete="username" required />
 
-            <label for="password">{{ i18n.t('login.password') }}</label>
-            <input id="password" name="password" type="password" [(ngModel)]="password"
-                   placeholder="••••••••" autocomplete="current-password" required />
+              <label for="password">{{ i18n.t('login.password') }}</label>
+              <input id="password" name="password" type="password" [(ngModel)]="password"
+                     placeholder="••••••••" autocomplete="current-password" required />
 
-            @if (passwordExpired()) {
-              <div class="error">{{ i18n.t('login.expired') }}</div>
-              <label for="newPassword">{{ i18n.t('login.newPassword') }}</label>
-              <input id="newPassword" name="newPassword" type="password" [(ngModel)]="newPassword" autocomplete="new-password" />
-              <div class="muted hint">{{ i18n.t('login.newPasswordHint') }}</div>
-            }
+              @if (passwordExpired()) {
+                <div class="error">{{ i18n.t('login.expired') }}</div>
+                <label for="newPassword">{{ i18n.t('login.newPassword') }}</label>
+                <input id="newPassword" name="newPassword" type="password" [(ngModel)]="newPassword" autocomplete="new-password" />
+                <div class="hint">{{ i18n.t('login.newPasswordHint') }}</div>
+              }
 
-            @if (mfaRequired()) {
-              <label for="mfa">{{ i18n.t('login.mfa') }}</label>
-              <input id="mfa" name="mfa" inputmode="numeric" [(ngModel)]="mfaCode" autocomplete="one-time-code" />
-              <div class="muted hint">{{ i18n.t('login.mfaPrompt') }}</div>
-            }
+              @if (mfaRequired()) {
+                <label for="mfa">{{ i18n.t('login.mfa') }}</label>
+                <input id="mfa" name="mfa" inputmode="numeric" [(ngModel)]="mfaCode" autocomplete="one-time-code" />
+                <div class="hint">{{ i18n.t('login.mfaPrompt') }}</div>
+              }
 
-            <button type="submit" class="signin" [disabled]="busy()">
-              {{ busy() ? i18n.t('common.loading') : i18n.t('login.submit') }}
-            </button>
+              <button type="submit" class="signin" [disabled]="busy()">
+                {{ busy() ? i18n.t('common.loading') : i18n.t('login.submit') }}
+              </button>
 
-            @if (error()) { <div class="error" role="alert">{{ error() }}</div> }
-          </form>
+              @if (error()) { <div class="error" role="alert">{{ error() }}</div> }
+            </form>
 
-          <p class="authnote">{{ i18n.t('login.authorizedOnly') }}</p>
-        </section>
-      </div>
+            <p class="authnote">{{ i18n.t('login.authorizedOnly') }}</p>
+          </section>
+        </div></div>
+      </main>
 
-      <footer class="pagefoot">
-        <span>&copy; {{ year }} National Technology &middot; NT.QMS</span>
-        <span aria-hidden="true">&middot;</span>
-        <span>ISO/IEC 17025</span>
+      <!-- ---------------------------------------------------- footer band -->
+      <footer class="band bottom">
+        <div class="footinner">
+          <span>&copy; {{ year }} National Technology &middot; NT.QMS</span>
+          <span aria-hidden="true">&middot;</span>
+          <span>ISO/IEC 17025</span>
+        </div>
       </footer>
     </div>
   `,
     changeDetection: ChangeDetectionStrategy.Eager,
     styles: [`
-    /* The design's field colour; --nt-brand-soft (#E0F2FE) is its sibling. */
+    /* Design palette. --slate is the design's own muted tone (#3B4658); --accent
+       is its teal darkened from #00B2A9 for WCAG AA on white (see class docs). */
     .page {
-      min-height: 100vh; background: #E3F2FD;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      padding: 40px 24px 20px; gap: 22px;
+      --field:  #E3F2FD;
+      --band:   #FFFFFF;
+      --line:   #C1C1C6;
+      --ink:    #1E3A5F;
+      --ink2:   #1B365D;
+      --slate:  #3B4658;
+      --accent: #00706A;
+      --pill:   #93C9EE;
+      --chipbg: #FFFFFF;
+      --inputbg:#FFFFFF;
+      --link:   #0064A6;
+
+      min-height: 100vh; background: var(--field);
+      display: flex; flex-direction: column;
     }
-    .shell {
-      width: 100%; max-width: 1180px;
-      display: grid; grid-template-columns: 1fr 420px; gap: 64px; align-items: center;
+    /* Dark variant for the header toggle. Derived from the app's navy tokens;
+       every pair below was contrast-checked for AA. */
+    .page.dark {
+      --field:  #0F1B2D;
+      --band:   #16273F;
+      --line:   #2A3B55;
+      --ink:    #E7EDF5;
+      --ink2:   #D7E2F0;
+      --slate:  #A8B6C8;
+      --accent: #35D0C6;
+      --pill:   #2F4A6B;
+      --chipbg: transparent;
+      --inputbg:#0F1B2D;
+      --link:   #7FC0F5;
     }
 
-    /* ---------------------------------------------------------- hero panel */
-    .hero { min-width: 0; }
-    .logo { height: 62px; display: block; }
-    /* --nt-teal (#00B2A9) is 2.2:1 on this field — well under AA for 12px text.
-       #00706A keeps the accent hue and clears 4.5:1. */
+    .band { background: var(--band); }
+    .band.top { border-bottom: 1px solid var(--line); padding: 28px 0 29px; }
+    .band.bottom { border-top: 1px solid var(--line); padding: 14px 0; margin-top: auto; }
+
+    /* The header is ONE row: brand group left, controls group right, both centred
+       on the logo card. It wraps to a second (left-aligned) row only when the
+       viewport is too narrow to hold both — which is exactly what the mockup
+       shows at 1280px. */
+    .inner {
+      width: 100%; padding: 0 56px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 24px; flex-wrap: wrap;
+    }
+    /* The two-column block is a fixed 946px wide and centred at every viewport
+       (design: 160px gutters at 1280, 327px at 1600). */
+    .cols { width: 100%; max-width: 946px; margin: 0 auto; }
+    .footinner { width: 100%; max-width: 1265px; margin: 0 auto; padding: 0 56px; }
+
+    /* ------------------------------------------------------- brand lockup */
+    .brandrow { display: flex; align-items: center; gap: 28px; }
+    .logocard {
+      flex: none; background: var(--band); border-radius: 14px; padding: 12px 22px;
+      box-shadow: 0 1px 2px rgba(59, 70, 88, .06); display: inline-flex;
+    }
+    .page.dark .logocard { background: #FFFFFF; }
+    .logocard img { height: 88px; display: block; }
+    .brandlines { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
     .eyebrow {
-      margin: 22px 0 0; font-size: 12px; font-weight: 700; letter-spacing: .16em;
-      text-transform: uppercase; color: #00706A;
+      font-size: 12px; font-weight: 700; letter-spacing: 1.92px;
+      text-transform: uppercase; color: var(--accent);
     }
-    .platformtag { margin: 4px 0 0; font-size: 13px; font-weight: 600; color: var(--nt-navy-deep); }
-    .hero h1 {
-      margin: 20px 0 0; font-size: 32px; line-height: 1.25; font-weight: 800;
-      color: var(--nt-navy); letter-spacing: -.01em; max-width: 22ch;
-    }
-    .herobody { margin: 14px 0 0; font-size: 14.5px; line-height: 1.65; color: #4A5768; max-width: 54ch; }
-    .features {
-      list-style: none; margin: 26px 0 0; padding: 0;
-      display: flex; flex-wrap: wrap; gap: 10px 26px;
-    }
-    .features li {
-      display: inline-flex; align-items: center; gap: 8px;
-      font-size: 12.5px; font-weight: 700; color: var(--nt-navy-deep);
-    }
-    .features svg { width: 15px; height: 15px; color: #00706A; flex: none; }
+    .platformtag { font-size: 22px; font-weight: 800; color: var(--ink); line-height: 1.25; }
 
-    /* --------------------------------------------------------------- card */
-    .card {
-      background: var(--nt-surface); border: 1px solid var(--nt-border);
-      border-radius: 10px; box-shadow: 0 4px 12px rgba(59, 70, 88, .12);
-      padding: 32px 36px 26px;
+    /* ------------------------------------------------------- control row */
+    .controlrow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    /* The hint is taken out of flow so the PILL is what gets centred in the
+       control row (the mockup centres the pill and floats the hint under it). */
+    .wsblock { position: relative; display: flex; min-width: 0; }
+    .wspill {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--chipbg); border: 1px solid var(--line); border-radius: 999px;
+      padding: 6px 16px 6px 6px;
+      /* The design's pill is wider than its content (216px). */
+      min-width: 216px; box-sizing: border-box;
     }
-    .cardtop {
-      display: flex; align-items: flex-start; justify-content: space-between;
-      gap: 12px; padding-bottom: 18px; border-bottom: 1px solid var(--nt-border);
-    }
-    .workspace { display: flex; align-items: center; gap: 10px; min-width: 0; }
     .avatar {
       flex: none; width: 34px; height: 34px; border-radius: 999px;
       display: grid; place-items: center;
-      background: var(--nt-brand-soft); color: #00639e;
-      font-size: 12px; font-weight: 800; letter-spacing: .02em;
+      background: #1E3A5F; color: #FFFFFF; font-size: 12px; font-weight: 800;
     }
-    .avatar.platform { background: #E4EEF7; color: var(--nt-navy-deep); }
-    .wsmeta { display: flex; flex-direction: column; min-width: 0; }
+    .page.dark .avatar { background: #2E5A8C; }
     .wsname {
-      font-size: 13.5px; font-weight: 700; color: var(--nt-navy);
+      font-size: 13px; font-weight: 700; color: var(--ink);
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
-    /* --nt-muted (#797979) is ~4.0:1 on white at 11px; #5A6472 clears AA. */
-    .muted { color: #5A6472; font-size: 11.5px; }
-
-    .langswitch { flex: none; display: inline-flex; background: var(--nt-filter-grey); border-radius: 999px; padding: 3px; }
-    .langswitch button {
-      width: auto; background: transparent; color: #4A5768;
-      font-size: 11.5px; font-weight: 700; padding: 5px 11px; border-radius: 999px;
+    .wshint {
+      position: absolute; top: 100%; inset-inline-start: 51px; margin-top: 4px;
+      font-size: 10.5px; font-weight: 500; line-height: 1.25; color: var(--slate); white-space: nowrap;
     }
-    .langswitch button.active { background: var(--nt-surface); color: var(--nt-blue); box-shadow: var(--nt-shadow-xs); }
 
-    h2 { margin: 20px 0 0; font-size: 21px; font-weight: 800; color: var(--nt-navy); }
-    .cardhint { margin: 4px 0 0; font-size: 13px; color: #4A5768; }
+    /* The pill/switch/toggle are optically centred on the 48px workspace pill,
+       matching the design's y offsets (pill 170, switch 175, toggle 176). */
+    .langswitch {
+      flex: none; display: inline-flex; background: #EDEFF3; border-radius: 999px;
+      padding: 3px;
+    }
+    .page.dark .langswitch { background: #0F1B2D; }
+    .langswitch button {
+      width: auto; background: transparent; color: var(--slate);
+      font-size: 12px; font-weight: 600; padding: 8px 12px; border-radius: 999px; line-height: 1.25;
+    }
+    .langswitch button.active {
+      background: var(--band); color: var(--ink); font-weight: 700;
+      box-shadow: 0 1px 2px rgba(59, 70, 88, .15);
+    }
+
+    .themetoggle {
+      flex: none; width: 36px; height: 36px; padding: 0; border-radius: 999px;
+      background: var(--chipbg); border: 1px solid var(--line); color: var(--slate);
+      display: grid; place-items: center;
+    }
+    .themetoggle svg { width: 15px; height: 15px; }
+
+    /* --------------------------------------------------------------- body */
+    .body { flex: 1; display: flex; align-items: center; padding: 48px 0; }
+    .colgrid { display: grid; grid-template-columns: minmax(0, 1fr) 502px; gap: 66px; align-items: center; }
+
+    .hero h1 {
+      margin: 0; font-size: 32px; line-height: 1.25; font-weight: 800;
+      color: var(--ink); letter-spacing: -.01em; max-width: 20ch;
+    }
+    .herobody {
+      margin: 20px 0 0; font-size: 14px; font-weight: 500; line-height: 1.5;
+      color: var(--slate); max-width: 40ch;
+    }
+    .features { list-style: none; margin: 22px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 7px; }
+    .features li {
+      background: var(--chipbg); border: 1px solid var(--pill); border-radius: 999px;
+      padding: 5px 12px; font-size: 12px; font-weight: 600; color: var(--ink2); line-height: 1.25;
+    }
+
+    /* --------------------------------------------------------------- card */
+    .card {
+      background: var(--band); border: 1px solid var(--line); border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(59, 70, 88, .12);
+      padding: 36px 40px;
+    }
+    /* Explicit line-heights: the inherited 1.4+ rhythm inflates each row and the
+       card drifts ~13px taller than the design. */
+    h2 { margin: 0; font-size: 21px; font-weight: 800; line-height: 1.28; color: var(--ink); }
+    .cardhint { margin: 4px 0 0; font-size: 13px; font-weight: 500; line-height: 1.23; color: var(--slate); }
+    /* Colour comes from the theme's --link so the dark variant cannot be beaten
+       by the global button.link rule. */
     .platformswitch {
-      width: auto; background: transparent; color: var(--nt-blue);
-      font-size: 12px; font-weight: 700; padding: 10px 0 0;
+      align-self: flex-start; width: auto; background: transparent; color: var(--link);
+      font-size: 12px; font-weight: 700; padding: 0; margin-top: 8px; text-align: start;
     }
     .platformswitch:hover { text-decoration: underline; }
 
-    form { margin-top: 18px; }
-    label { margin-top: 14px; font-size: 14px; font-weight: 600; color: var(--nt-navy); }
-    input { border-radius: var(--nt-radius-input); font-size: 14px; padding: 12px 14px; }
+    /* The design uses a uniform 18px gap above every field label and 6px between
+       label and control, so the spacing lives entirely on the label. */
+    form { margin-top: 0; }
+    label { margin: 18px 0 6px; font-size: 14px; font-weight: 600; line-height: 1.2; color: var(--ink); }
+    input {
+      border-radius: 10px; border: 1px solid var(--line); background: var(--inputbg);
+      color: var(--ink); font-size: 14px; padding: 12px 14px;
+    }
     .signin {
-      margin-top: 22px; width: 100%; border-radius: var(--nt-radius-login);
+      margin-top: 22px; width: 100%; min-height: 46px; border-radius: 15px;
       padding: 14px 16px; font-size: 15px; font-weight: 700;
     }
-    .hint { margin: 2px 0 0; }
+    .hint { margin: 2px 0 0; font-size: 11.5px; color: var(--slate); }
     .authnote {
-      margin: 20px 0 0; padding-top: 16px; border-top: 1px solid var(--nt-border);
-      font-size: 11.5px; line-height: 1.5; color: #5A6472; text-align: center;
+      margin: 18px 0 0; font-size: 11px; font-weight: 500; line-height: 1.2;
+      color: var(--slate); text-align: center;
     }
 
-    /* --------------------------------------------------------- page footer */
-    .pagefoot {
+    /* ------------------------------------------------------- footer band */
+    .footinner {
       display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
-      font-size: 11.5px; font-weight: 600; color: #4A5768;
+      font-size: 12px; font-weight: 700; color: var(--slate);
     }
 
+    @media (max-width: 1180px) {
+      .colgrid { gap: 40px; }
+    }
     @media (max-width: 940px) {
-      .shell { grid-template-columns: 1fr; gap: 30px; max-width: 480px; }
-      .hero { text-align: center; }
-      .hero h1 { font-size: 26px; margin-inline: auto; }
-      .herobody { margin-inline: auto; }
-      .logo { margin-inline: auto; }
-      .features { justify-content: center; }
+      .inner, .footinner { padding: 0 28px; }
+      .cols { max-width: 520px; padding: 0 28px; }
+      .colgrid { grid-template-columns: minmax(0, 1fr); }
+      .logocard img { height: 64px; }
+      .platformtag { font-size: 18px; }
+      .hero h1 { font-size: 26px; }
       .card { padding: 26px 22px 22px; }
     }
   `]
@@ -244,7 +348,7 @@ export class LoginComponent {
     { code: 'fr', label: 'FR' },
   ];
 
-  /** Capability list shown on the hero panel, as i18n keys. */
+  /** Capability pills on the value panel, as i18n keys. */
   readonly features = [
     'login.featureDocs',
     'login.featureCapa',
@@ -253,6 +357,9 @@ export class LoginComponent {
   ] as const;
 
   readonly year = new Date().getFullYear();
+
+  /** Sign-in surface theme; remembered so the choice survives a reload. */
+  readonly dark = signal(localStorage.getItem(THEME_KEY) === 'dark');
 
   /** The lab pinned by its /t/{slug} address — null means platform sign-in. */
   readonly tenantSlug = computed(() => this.auth.tenantSlug());
@@ -285,6 +392,12 @@ export class LoginComponent {
   readonly error = signal('');
   readonly mfaRequired = signal(false);
   readonly passwordExpired = signal(false);
+
+  toggleTheme(): void {
+    const next = !this.dark();
+    this.dark.set(next);
+    localStorage.setItem(THEME_KEY, next ? 'dark' : 'light');
+  }
 
   /** Clear the pinned lab so the form signs in the platform administrator. */
   switchToPlatform(): void {

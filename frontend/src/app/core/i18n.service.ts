@@ -1218,6 +1218,7 @@ export class I18nService {
     'login.cardHint': { en: 'Use your laboratory credentials.', ar: 'استخدم بيانات دخول المختبر الخاصة بك.', fr: 'Utilisez les identifiants de votre laboratoire.' },
     'login.workspaceHint': { en: 'Workspace set by your lab URL', ar: 'مساحة العمل محددة بواسطة رابط المختبر', fr: 'Espace de travail défini par l’adresse de votre laboratoire' },
     'login.emailPlaceholder': { en: 'name@lab.com', ar: 'name@lab.com', fr: 'nom@labo.com' },
+    'login.themeToggle': { en: 'Toggle dark mode', ar: 'تبديل الوضع الليلي', fr: 'Basculer le mode sombre' },
     'login.authorizedOnly': { en: 'Authorized personnel only · Sessions are logged for quality records', ar: 'للمصرّح لهم فقط · تُسجَّل الجلسات في سجلات الجودة', fr: 'Personnel autorisé uniquement · Les sessions sont journalisées pour les enregistrements qualité' },
     'login.email': { en: 'Email or Username', ar: 'البريد الإلكتروني أو اسم المستخدم', fr: 'Courriel ou nom d’utilisateur' },
     'login.password': { en: 'Password', ar: 'كلمة المرور', fr: 'Mot de passe' },
