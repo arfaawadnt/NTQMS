@@ -39,6 +39,20 @@
   --nt-warn:    #F15A29;
   --nt-danger:  #DC3545;
 
+  /* ---------- Statistic-tile inks ----------
+     The tone tokens above are fill colours: as a categorical set they fail the
+     palette checks (gold 1.80:1 and teal 2.58:1 against a white surface, and
+     red↔orange only ΔE 8.9 apart for normal vision). Statistic tiles therefore
+     wear these darkened steps of the SAME hues, each ≥4.5:1 on --nt-surface, so
+     a value or a meter fill can carry the tone without failing contrast. */
+  --nt-ink-info:    #00639E;   /* blue   */
+  --nt-ink-teal:    #00706A;   /* teal   */
+  --nt-ink-ok:      #12631F;   /* green  */
+  --nt-ink-warn:    #8A5A00;   /* gold   */
+  --nt-ink-serious: #B4430F;   /* orange */
+  --nt-ink-crit:    #B3202D;   /* red    */
+  --nt-ink-neutral: #4A5768;   /* slate  */
+
   /* ---------- Signature gradient ---------- */
   --nt-header-grad: linear-gradient(90deg, #1E3A5F 0%, #0077C2 55%, #00B2A9 100%);
 

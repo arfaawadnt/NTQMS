@@ -101,18 +101,29 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
     }
   `,
     styles: [`
-    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    /* KPI tiles share the statistic-tile language of qams-list-stats: a surface
+       card with the tone on a leading rail rather than a saturated block, the
+       value in text ink, and proportional figures at display size.
+       No meters here on purpose — DashboardKpis carries twelve bare counts with
+       no denominator, and an invented ratio would be worse than an honest count. */
+    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(158px, 1fr)); gap: 12px; margin-bottom: 16px; }
     .kpi {
-      border-radius: var(--nt-radius-card); padding: 14px 16px; color: #fff;
-      box-shadow: var(--nt-shadow-xs); text-decoration: none; display: block; transition: filter .12s;
+      background: var(--nt-surface); border: 1px solid var(--nt-border);
+      border-inline-start: 3px solid var(--nt-ink-neutral);
+      border-radius: var(--nt-radius-input); padding: 13px 16px 14px;
+      box-shadow: var(--nt-shadow-xs); text-decoration: none; display: block;
+      transition: box-shadow .12s, transform .12s;
     }
-    .kpi:hover { filter: brightness(1.06); }
-    .kpi.blue { background: var(--nt-blue); } .kpi.red { background: var(--nt-red); }
-    .kpi.teal { background: var(--nt-teal); } .kpi.orange { background: var(--nt-orange); }
-    .kpi.gold { background: var(--nt-gold); color: #3a2c00; } .kpi.green { background: var(--nt-green); }
-    .kpi.slate { background: var(--nt-slate); }
-    .n { font-size: 26px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
-    .l { font-size: 12px; font-weight: 600; margin-top: 7px; opacity: .96; }
+    .kpi:hover { box-shadow: var(--nt-shadow-md); transform: translateY(-1px); }
+    .kpi.blue   { border-inline-start-color: var(--nt-ink-info); }
+    .kpi.red    { border-inline-start-color: var(--nt-ink-crit); }
+    .kpi.teal   { border-inline-start-color: var(--nt-ink-teal); }
+    .kpi.orange { border-inline-start-color: var(--nt-ink-serious); }
+    .kpi.gold   { border-inline-start-color: var(--nt-ink-warn); }
+    .kpi.green  { border-inline-start-color: var(--nt-ink-ok); }
+    .kpi.slate  { border-inline-start-color: var(--nt-ink-neutral); }
+    .n { font-size: 26px; font-weight: 800; line-height: 1.05; color: var(--nt-navy); }
+    .l { font-size: 12px; font-weight: 600; margin-top: 7px; color: var(--nt-slate); }
     .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; margin-bottom: 1rem; }
     .bars { display: flex; flex-direction: column; gap: 8px; }
     .barrow { display: grid; grid-template-columns: 120px 1fr 40px; gap: 10px; align-items: center; font-size: 12px; }

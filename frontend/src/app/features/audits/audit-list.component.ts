@@ -25,7 +25,7 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
       @if (perms.canApprove()) { <button (click)="showForm.set(!showForm())">{{ i18n.t('audit.new') }}</button> }
     </qams-page-header>
 
-    <qams-list-stats [stats]="stats()" />
+    <qams-list-stats [stats]="stats()" ratioFromFirst />
 
     <div class="filterbar card">
       <input class="search" [value]="search()" (input)="search.set($any($event.target).value)" [placeholder]="i18n.t('common.search')" />

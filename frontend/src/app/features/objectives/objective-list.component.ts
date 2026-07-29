@@ -26,7 +26,7 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
       }
     </qams-page-header>
 
-    <qams-list-stats [stats]="stats()" />
+    <qams-list-stats [stats]="stats()" ratioFromFirst />
 
     <div class="filterbar card">
       <input class="search" [value]="search()" (input)="search.set($any($event.target).value)" [placeholder]="i18n.t('common.search')" />
