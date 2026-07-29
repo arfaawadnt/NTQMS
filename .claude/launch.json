@@ -2,8 +2,17 @@
   "version": "0.0.1",
   "configurations": [
     {
+      "name": "qams-api",
+      "runtimeExecutable": "cmd.exe",
+      "runtimeArgs": [
+        "/c",
+        "set ASPNETCORE_ENVIRONMENT=Development&& set ASPNETCORE_URLS=http://localhost:5080&& set Database__MigrateOnStartup=true&& C:\\Users\\a.awad\\AppData\\Local\\Microsoft\\dotnet\\dotnet.exe run --project src\\NT.QAMS.WebApi --no-launch-profile"
+      ],
+      "port": 5080
+    },
+    {
       "name": "qams-frontend",
-      "runtimeExecutable": "C:\\Users\\a.awad\\AppData\\Local\\nodejs-portable\\node-v20.18.1-win-x64\\npm.cmd",
+      "runtimeExecutable": "C:\\Program Files\\nodejs\\npm.cmd",
       "runtimeArgs": ["start", "--prefix", "frontend", "--", "--proxy-config", "proxy.conf.json"],
       "port": 4200
     }
