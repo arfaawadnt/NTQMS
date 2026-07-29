@@ -56,10 +56,27 @@ public sealed class GetDashboardKpisHandler(IAppDbContext db, IClock clock)
         var publishedDocs = await db.Documents
             .CountAsync(d => d.Status == DocumentStatus.Published, ct);
 
+        // The population behind each KPI, so the dashboard can state a proportion
+        // rather than a bare count. Real row counts only — a KPI without a
+        // genuine population would be left un-metered rather than given a
+        // plausible-looking denominator.
+        var totals = new DashboardKpiTotalsDto(
+            Nonconformances: await db.Nonconformances.CountAsync(ct),
+            CapaActions: await db.Nonconformances.SelectMany(n => n.CapaActions).CountAsync(ct),
+            Complaints: await db.Complaints.CountAsync(ct),
+            Audits: await db.Audits.CountAsync(ct),
+            EquipmentItems: await db.EquipmentItems.CountAsync(ct),
+            Risks: await db.Risks.CountAsync(ct),
+            WorkTasks: await db.WorkTasks.CountAsync(ct),
+            PtEnrollments: await db.PtEnrollments.CountAsync(ct),
+            TrainingAssignments: await db.TrainingAssignments.CountAsync(ct),
+            Suppliers: await db.Suppliers.CountAsync(ct),
+            Documents: await db.Documents.CountAsync(ct));
+
         return new DashboardKpisDto(
             openNcs, overdueCapa, openComplaints, auditsInProgress,
             outOfService, needsCalibration, highResidual, overdueTasks,
-            ptUnsatisfactory, pendingTraining, suspendedSuppliers, publishedDocs, now);
+            ptUnsatisfactory, pendingTraining, suspendedSuppliers, publishedDocs, now, totals);
     }
 }
 

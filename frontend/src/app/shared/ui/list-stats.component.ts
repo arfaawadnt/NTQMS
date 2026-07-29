@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 /** One statistic tile: a real computed value with a label and a semantic tone. */
 export interface ListStat {
@@ -12,6 +14,8 @@ export interface ListStat {
    * ratio. Overrides {@link ListStatsComponent.ratioFromFirst}.
    */
   of?: number;
+  /** Route this tile drills into. Omit for a non-interactive tile. */
+  link?: string;
 }
 
 /** A tile prepared for rendering: the meter is resolved, never guessed. */
@@ -40,23 +44,35 @@ interface RenderedStat extends ListStat {
 @Component({
   selector: 'qams-list-stats',
   standalone: true,
+  imports: [NgTemplateOutlet, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="stats">
       @for (s of rendered(); track s.label) {
-        <div class="stat" [class]="'stat ' + s.tone" [class.zero]="s.value === 0">
-          <div class="v">{{ s.value }}</div>
-          <div class="l">{{ s.label }}</div>
-          @if (s.percent !== null) {
-            <div class="meter" role="img"
-                 [attr.aria-label]="s.label + ': ' + s.value + ' of ' + s.whole">
-              <div class="track"><div class="fill" [style.width.%]="s.percent"></div></div>
-            </div>
-            <div class="cap">{{ s.value }} / {{ s.whole }}</div>
-          }
-        </div>
+        <!-- A linked tile is an anchor so it is keyboard-reachable and announced
+             as a link; an unlinked one stays a plain div. -->
+        @if (s.link) {
+          <a class="stat" [class]="'stat ' + s.tone" [class.zero]="s.value === 0" [routerLink]="s.link">
+            <ng-container [ngTemplateOutlet]="body" [ngTemplateOutletContext]="{ s: s }" />
+          </a>
+        } @else {
+          <div class="stat" [class]="'stat ' + s.tone" [class.zero]="s.value === 0">
+            <ng-container [ngTemplateOutlet]="body" [ngTemplateOutletContext]="{ s: s }" />
+          </div>
+        }
       }
     </div>
+
+    <ng-template #body let-s="s">
+      <div class="v">{{ s.value }}</div>
+      <div class="l">{{ s.label }}</div>
+      @if (s.percent !== null) {
+        <div class="meter" role="img" [attr.aria-label]="s.label + ': ' + s.value + ' of ' + s.whole">
+          <div class="track"><div class="fill" [style.width.%]="s.percent"></div></div>
+        </div>
+        <div class="cap">{{ s.value }} / {{ s.whole }}</div>
+      }
+    </ng-template>
   `,
   styles: [`
     .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(146px, 1fr)); gap: 10px; margin-bottom: 14px; }
@@ -64,7 +80,12 @@ interface RenderedStat extends ListStat {
       background: var(--nt-surface); border: 1px solid var(--nt-border);
       border-radius: var(--nt-radius-input); padding: 11px 14px 12px;
       box-shadow: var(--nt-shadow-xs);
+      /* Linked tiles are anchors: keep the card look, not link styling. */
+      display: block; text-decoration: none; color: inherit;
     }
+    a.stat { transition: box-shadow .12s, transform .12s; }
+    a.stat:hover { box-shadow: var(--nt-shadow-md); transform: translateY(-1px); }
+    a.stat:focus-visible { outline: 2px solid var(--nt-blue); outline-offset: 2px; }
     /* Proportional figures on purpose: tabular-nums makes a display-size number
        look loose. Tabular is for columns that must align vertically. */
     .v { font-size: 21px; font-weight: 800; line-height: 1.1; color: var(--nt-navy); }

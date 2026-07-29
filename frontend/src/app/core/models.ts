@@ -117,6 +117,22 @@ export interface DashboardKpis {
   suspendedSuppliers: number;
   publishedDocuments: number;
   computedAtUtc: string;
+  totals: DashboardKpiTotals;
+}
+
+/** The population each dashboard KPI is a subset of, for proportion tiles. */
+export interface DashboardKpiTotals {
+  nonconformances: number;
+  capaActions: number;
+  complaints: number;
+  audits: number;
+  equipmentItems: number;
+  risks: number;
+  workTasks: number;
+  ptEnrollments: number;
+  trainingAssignments: number;
+  suppliers: number;
+  documents: number;
 }
 
 export interface KpiHistoryPoint {

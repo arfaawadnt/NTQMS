@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ReportsApiService } from '../../core/api/reports-api.service';
 import { I18nService } from '../../core/i18n.service';
 import { DashboardKpis, KpiHistoryPoint, NcParetoBucket, SlaCompliance } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
+import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
 
 /**
  * Quality dashboard fed by the Reporting read side: live KPI tiles with
@@ -17,7 +17,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 @Component({
     selector: 'qams-dashboard',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [RouterLink, DatePipe, DecimalPipe, PageHeaderComponent],
+    imports: [DatePipe, DecimalPipe, PageHeaderComponent, ListStatsComponent],
     template: `
     <qams-page-header [title]="i18n.t('dash.title')"
         [subtitle]="kpis() ? i18n.t('dash.computedAt') + ' ' + ((kpis()!.computedAtUtc | date:'medium') ?? '') : ''" />
@@ -26,20 +26,10 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
     @if (kpis(); as k) {
-      <div class="kpis">
-        <a class="kpi blue" routerLink="/nonconformances"><div class="n">{{ k.openNcs }}</div><div class="l">{{ i18n.t('dash.openNc') }}</div></a>
-        <a class="kpi red" routerLink="/nonconformances"><div class="n">{{ k.overdueCapaActions }}</div><div class="l">{{ i18n.t('dash.overdueCapa') }}</div></a>
-        <a class="kpi orange" routerLink="/complaints"><div class="n">{{ k.openComplaints }}</div><div class="l">{{ i18n.t('dash.openComplaints') }}</div></a>
-        <a class="kpi teal" routerLink="/audits"><div class="n">{{ k.auditsInProgress }}</div><div class="l">{{ i18n.t('dash.auditsInProgress') }}</div></a>
-        <a class="kpi red" routerLink="/equipment"><div class="n">{{ k.equipmentOutOfService }}</div><div class="l">{{ i18n.t('dash.equipOos') }}</div></a>
-        <a class="kpi gold" routerLink="/equipment"><div class="n">{{ k.equipmentNeedsCalibration }}</div><div class="l">{{ i18n.t('dash.equipDue') }}</div></a>
-        <a class="kpi orange" routerLink="/risks"><div class="n">{{ k.highResidualRisks }}</div><div class="l">{{ i18n.t('dash.highRisks') }}</div></a>
-        <a class="kpi red" routerLink="/tasks"><div class="n">{{ k.overdueTasks }}</div><div class="l">{{ i18n.t('dash.overdueTasks') }}</div></a>
-        <a class="kpi slate" routerLink="/proficiency-tests"><div class="n">{{ k.ptUnsatisfactory }}</div><div class="l">{{ i18n.t('dash.ptUnsat') }}</div></a>
-        <a class="kpi gold" routerLink="/training"><div class="n">{{ k.pendingTrainingAssignments }}</div><div class="l">{{ i18n.t('dash.pendingTraining') }}</div></a>
-        <a class="kpi slate" routerLink="/suppliers"><div class="n">{{ k.suspendedSuppliers }}</div><div class="l">{{ i18n.t('dash.suspendedSuppliers') }}</div></a>
-        <a class="kpi green" routerLink="/documents"><div class="n">{{ k.publishedDocuments }}</div><div class="l">{{ i18n.t('dash.publishedDocs') }}</div></a>
-      </div>
+      <!-- The KPI strip is the shared statistic tile, so the dashboard and the
+           28 module registers cannot drift apart. Each tile carries the real
+           population it is drawn from, so the count reads as a proportion. -->
+      <qams-list-stats [stats]="kpiStats(k)" />
 
       <div class="grid2">
         <section class="card">
@@ -101,29 +91,6 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
     }
   `,
     styles: [`
-    /* KPI tiles share the statistic-tile language of qams-list-stats: a surface
-       card with the tone on a leading rail rather than a saturated block, the
-       value in text ink, and proportional figures at display size.
-       No meters here on purpose — DashboardKpis carries twelve bare counts with
-       no denominator, and an invented ratio would be worse than an honest count. */
-    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(158px, 1fr)); gap: 12px; margin-bottom: 16px; }
-    .kpi {
-      background: var(--nt-surface); border: 1px solid var(--nt-border);
-      border-inline-start: 3px solid var(--nt-ink-neutral);
-      border-radius: var(--nt-radius-input); padding: 13px 16px 14px;
-      box-shadow: var(--nt-shadow-xs); text-decoration: none; display: block;
-      transition: box-shadow .12s, transform .12s;
-    }
-    .kpi:hover { box-shadow: var(--nt-shadow-md); transform: translateY(-1px); }
-    .kpi.blue   { border-inline-start-color: var(--nt-ink-info); }
-    .kpi.red    { border-inline-start-color: var(--nt-ink-crit); }
-    .kpi.teal   { border-inline-start-color: var(--nt-ink-teal); }
-    .kpi.orange { border-inline-start-color: var(--nt-ink-serious); }
-    .kpi.gold   { border-inline-start-color: var(--nt-ink-warn); }
-    .kpi.green  { border-inline-start-color: var(--nt-ink-ok); }
-    .kpi.slate  { border-inline-start-color: var(--nt-ink-neutral); }
-    .n { font-size: 26px; font-weight: 800; line-height: 1.05; color: var(--nt-navy); }
-    .l { font-size: 12px; font-weight: 600; margin-top: 7px; color: var(--nt-slate); }
     .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; margin-bottom: 1rem; }
     .bars { display: flex; flex-direction: column; gap: 8px; }
     .barrow { display: grid; grid-template-columns: 120px 1fr 40px; gap: 10px; align-items: center; font-size: 12px; }
@@ -141,6 +108,29 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
   `]
 })
 export class DashboardComponent implements OnInit {
+
+  /**
+   * The KPI strip. Every tile states the population it is a subset of, taken
+   * from the reporting read side — so "1 of 9 tasks overdue" is a real ratio of
+   * real rows, never a plausible-looking denominator.
+   */
+  protected kpiStats(k: DashboardKpis): ListStat[] {
+    const t = k.totals;
+    return [
+      { label: this.i18n.t('dash.openNc'), value: k.openNcs, tone: 'blue', of: t.nonconformances, link: '/nonconformances' },
+      { label: this.i18n.t('dash.overdueCapa'), value: k.overdueCapaActions, tone: 'red', of: t.capaActions, link: '/nonconformances' },
+      { label: this.i18n.t('dash.openComplaints'), value: k.openComplaints, tone: 'orange', of: t.complaints, link: '/complaints' },
+      { label: this.i18n.t('dash.auditsInProgress'), value: k.auditsInProgress, tone: 'teal', of: t.audits, link: '/audits' },
+      { label: this.i18n.t('dash.equipOos'), value: k.equipmentOutOfService, tone: 'red', of: t.equipmentItems, link: '/equipment' },
+      { label: this.i18n.t('dash.equipDue'), value: k.equipmentNeedsCalibration, tone: 'gold', of: t.equipmentItems, link: '/equipment' },
+      { label: this.i18n.t('dash.highRisks'), value: k.highResidualRisks, tone: 'orange', of: t.risks, link: '/risks' },
+      { label: this.i18n.t('dash.overdueTasks'), value: k.overdueTasks, tone: 'red', of: t.workTasks, link: '/tasks' },
+      { label: this.i18n.t('dash.ptUnsat'), value: k.ptUnsatisfactory, tone: 'slate', of: t.ptEnrollments, link: '/proficiency-tests' },
+      { label: this.i18n.t('dash.pendingTraining'), value: k.pendingTrainingAssignments, tone: 'gold', of: t.trainingAssignments, link: '/training' },
+      { label: this.i18n.t('dash.suspendedSuppliers'), value: k.suspendedSuppliers, tone: 'slate', of: t.suppliers, link: '/suppliers' },
+      { label: this.i18n.t('dash.publishedDocs'), value: k.publishedDocuments, tone: 'green', of: t.documents, link: '/documents' },
+    ];
+  }
   readonly i18n = inject(I18nService);
   private readonly api = inject(ReportsApiService);
 

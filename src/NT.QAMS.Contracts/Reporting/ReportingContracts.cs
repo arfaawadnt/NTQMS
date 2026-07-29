@@ -19,7 +19,29 @@ public sealed record DashboardKpisDto(
     int PendingTrainingAssignments,
     int SuspendedSuppliers,
     int PublishedDocuments,
-    DateTimeOffset ComputedAtUtc);
+    DateTimeOffset ComputedAtUtc,
+    DashboardKpiTotalsDto Totals);
+
+/// <summary>
+/// The population each KPI above is a subset of, so a count can be shown as a
+/// proportion ("5 of 17") instead of a bare number. Every field is a real row
+/// count for the tenant — no derived or assumed whole. A KPI is only ever
+/// metered against the population it is genuinely drawn from: equipment out of
+/// service and awaiting calibration share <see cref="EquipmentItems"/>, and the
+/// remaining KPIs each pair with their own entity total.
+/// </summary>
+public sealed record DashboardKpiTotalsDto(
+    int Nonconformances,
+    int CapaActions,
+    int Complaints,
+    int Audits,
+    int EquipmentItems,
+    int Risks,
+    int WorkTasks,
+    int PtEnrollments,
+    int TrainingAssignments,
+    int Suppliers,
+    int Documents);
 
 /// <summary>One day of real KPI history from read.kpi_snapshot.</summary>
 public sealed record KpiHistoryPointDto(
