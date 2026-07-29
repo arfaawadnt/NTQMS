@@ -58,12 +58,36 @@
 <div class="wrap">
 
 <header>
-  <div class="id">MODE: Enterprise Application Compliance Assessment · EAC-NTQMS-001 · 2026-07-29 · target tag <code>v1.48.0</code></div>
+  <div class="id">MODE: Enterprise Application Compliance Assessment · EAC-NTQMS-001 <b>rev 2</b> · issued 2026-07-29,
+  re-issued 2026-07-29 · target tag <code>v1.49.1</code> (commit <code>aa919f7</code>, CI all-green)</div>
   <h1>NT.QMS — Enterprise Application Architecture Compliance Audit</h1>
-  <p class="sub">Evidence-based assessment of the NT.QMS system (.NET 9 · PostgreSQL 17 · Angular 18 · Clean
+  <p class="sub">Evidence-based assessment of the NT.QMS system (.NET 9 · PostgreSQL 17 · Angular 22 · Clean
   Architecture + CQRS) against the 22-section Enterprise Application Architecture checklist. Compliance is
   validated from concrete artifacts and <b>executed</b> results (build, full automated suite against real
-  PostgreSQL 17, running application, adversarial probes) — not from folder names, comments, or intent.</p>
+  PostgreSQL 17, running application, adversarial probes, witnessed OQ session) — not from folder names,
+  comments, or intent.</p>
+
+  <div class="scope" style="margin-top:14px">
+    <b>Revision 2 — what changed since the first issue (all within 2026-07-29).</b> Three of the original findings
+    were <b>remediated during and after the assessment</b>, and executing the validation protocol <b>found one new
+    defect, which was then fixed</b>:
+    <ul style="margin:8px 0 0 18px">
+      <li><b>SEC-002 closed</b> — CI now gates on .NET SCA + npm SCA (against a documented exception register) +
+        Trivy image scan.</li>
+      <li><b>UI-001 closed</b> — the npm gate surfaced <b>10 high-severity Angular-18 framework advisories</b>
+        (XSS/DoS/info-leak, fixable only by major upgrade), so the SPA was upgraded <b>18.2.14 → 22.0.8</b> one major
+        at a time. <code>npm audit --omit=dev</code> is now <b>0 advisories</b> and the exception register is empty.</li>
+      <li><b>OPS-010 raised and closed (new)</b> — a witnessed OQ session found that a <b>cold start with PostgreSQL
+        unreachable crashed</b> instead of serving <code>/health/ready</code> 503. Every prior readiness test took the
+        database down <i>after</i> startup, so nothing had caught it. Fixed in v1.49.1 and re-tested end-to-end
+        (including recovery without restart), with 6 regression tests.</li>
+      <li><b>Verification coverage rose ≈87% → ≈90%</b> — 18 OQ cases were executed with actual results transcribed
+        (<code>docs/validation/09…</code>, <code>10…</code>, <code>11…</code>); the backend suite grew 368 → 374.</li>
+    </ul>
+    The <b>overall score is deliberately unchanged at ≈88%</b>: the closed findings were already scored, and the
+    remaining gap is external/operational (independent pen test, qualified-environment validation, staging
+    observability + load/soak) — none of which this work advances. Scores were not raised to reflect effort.
+  </div>
 </header>
 
 <div class="scope">
@@ -77,22 +101,24 @@
 
 <div class="verdict">
   <span class="tag">Production Decision — Approved with Conditions</span>
-  <h2>Overall ≈ 88% · Verification coverage ≈ 87% (High confidence) · 0 critical findings · 1 high finding · 0 P0 blockers</h2>
+  <h2>Overall ≈ 88% · Verification coverage ≈ 90% (High confidence) · 0 critical findings · 1 high finding · 0 P0 blockers</h2>
   <p style="color:var(--muted);margin:6px 0 0;max-width:88ch">All critical controls — tenant isolation, backend
   authorization, database integrity, signed-record immutability — are implemented <b>and verified by executed
-  tests</b>. No cross-tenant exposure was found. Two findings were <b>remediated during this assessment</b>:
-  SEC-002 (CI now runs .NET SCA + npm SCA + Trivy gates) and UI-001 (the SCA surfaced 10 high-severity Angular-18
+  tests</b>. No cross-tenant exposure was found. Three findings were <b>remediated during this assessment</b>:
+  SEC-002 (CI now runs .NET SCA + npm SCA + Trivy gates), UI-001 (the SCA surfaced 10 high-severity Angular-18
   framework advisories; the frontend was upgraded 18.2 → <b>22.0.8</b>, and <code>npm audit</code> on shipped
-  dependencies is now <b>completely clean</b> with an empty exception register). The remaining gap to full
-  alignment is external/operational validation: the independent penetration test (the one High finding) and
-  staging observability + load/soak. Neither is a P0 blocker.</p>
+  dependencies is now <b>completely clean</b> with an empty exception register), and <b>OPS-010</b> — a cold-start
+  crash when PostgreSQL is unreachable, <b>found by executing the validation protocol</b> and fixed in v1.49.1.
+  The remaining gap to full alignment is external/operational validation: the independent penetration test (the one
+  High finding) and staging observability + load/soak. Neither is a P0 blocker.</p>
   <div class="bignums">
     <div><b>≈ 88%</b><span>overall compliance (74/84)</span></div>
-    <div><b>≈ 87%</b><span>verification coverage (High)</span></div>
+    <div><b>≈ 90%</b><span>verification coverage (High)</span></div>
     <div><b>0</b><span>critical findings</span></div>
     <div><b>1</b><span>high finding (SEC-001, non-P0)</span></div>
     <div><b>0</b><span>P0 production blockers</span></div>
-    <div><b>368+67+6</b><span>backend / frontend / e2e tests — executed, 0 skipped</span></div>
+    <div><b>374+67+6</b><span>backend / frontend / e2e tests — executed, 0 skipped</span></div>
+    <div><b>18</b><span>OQ cases executed &amp; transcribed (dev env)</span></div>
   </div>
 </div>
 
@@ -107,13 +133,21 @@ deployment, testing, and documentation.</p>
   <li><b>Source repository</b> — <code>src/NT.QAMS.{Domain,Application,Infrastructure,WebApi,Contracts,SharedKernel}</code>,
   <code>frontend/</code>, 5 test projects; <code>NT.QAMS.sln</code>.</li>
   <li><b>Executed this assessment:</b> <code>dotnet build</code> (0 warnings/0 errors); <code>dotnet test</code>
-  → <b>368 backend tests pass, 0 skipped</b> (211 Domain / 57 Application / 24 Architecture / 18 Integration on real
-  PostgreSQL 17 / 58 WebApi Functional); the application run and queried live; adversarial probes
-  <code>scripts/security-probe.ps1</code> + <code>security-probe-deep.ps1</code> (24/24, 0 findings); all 20+ EF
-  migrations applied to a real PostgreSQL 17 DB.</li>
-  <li><b>Verified earlier this session (same build):</b> frontend production build + <b>67 unit specs</b>;
-  <b>6 Playwright e2e</b> (incl. 2 axe a11y scans) against the live API; CI green (Build &amp; Test with real PG ·
-  Container non-root · Frontend).</li>
+  → <b>374 backend tests pass, 0 skipped</b> (211 Domain / 57 Application / 24 Architecture / 18 Integration on real
+  PostgreSQL 17 / 64 WebApi Functional); the application run and queried live; adversarial probes
+  <code>scripts/security-probe.ps1</code> + <code>security-probe-deep.ps1</code> (24/24, 0 findings); failure drills
+  re-executed live (poison → dead-letter at MaxAttempts=5); all 20+ EF migrations applied to a real PostgreSQL 17 DB.</li>
+  <li><b>Witnessed OQ execution (rev 2):</b> <b>18 protocol cases executed</b> against the running instance with
+  actual results transcribed verbatim — problem+json contract, pagination clamp (100000 → 200), magic-byte upload
+  rejection (<code>FILE-415</code>), idempotent replay proven in the database, security headers on success <i>and</i>
+  error, <code>AUTHZ-403</code> shape, correlation/traceId, rate limit 429 + <code>Retry-After</code>, fail-fast
+  config refusal, Production role-guard boot refusal, refresh-reuse family revocation, Part-11 reason dialog with
+  <code>X-Change-Reason</code> captured on the wire and persisted per field, session model, and audit hash-chain
+  continuity (<b>83 entries, 0 breaks</b>). Records: <code>docs/validation/09-OQ-Execution-Record-v1.49.md</code>,
+  <code>10-…Addendum-A-v1.49.md</code>, <code>11-…Addendum-B-OPS-010-v1.49.1.md</code>.</li>
+  <li><b>Verified this session (same build):</b> frontend production build + <b>67 unit specs</b> on Angular 22.0.8;
+  <b>6 Playwright e2e</b> (incl. 2 axe a11y scans, 0 serious/critical) against the live API; CI green for
+  <code>aa919f7</code> (Build &amp; Test with real PG + SCA · Container non-root + Trivy · Frontend + npm SCA).</li>
   <li><b>EF configs/migrations, PostgreSQL schema</b> (queried live: tables, RLS, constraints, roles).</li>
   <li><b>Docs:</b> <code>docs/reference/</code> (architecture, closure report, prior audits), <code>docs/adr/ADR-0001…0009</code>,
   <code>docs/validation/</code> (VMP/URS/FRA/QP/RTM/VSR + re-validation delta), <code>deploy/</code> (Dockerfile,
@@ -121,10 +155,15 @@ deployment, testing, and documentation.</p>
 </ul>
 <h3>Artifacts not provided / not applicable</h3>
 <ul>
-  <li><b>NOT VERIFIED — production/staging runtime:</b> no deployed staging exists (no Docker host); TLS/HSTS on a
-  real host, live Grafana/Prometheus alerts firing, and a 24 h soak could not be executed.</li>
+  <li><b>NOT VERIFIED — production/staging runtime:</b> no deployed staging exists (no Docker host); TLS terminating
+  at a real reverse proxy, live Grafana/Prometheus alerts firing, and a 24 h soak could not be executed. (The
+  application's own HSTS emission <i>was</i> verified in a non-Development environment — see §19.)</li>
   <li><b>NOT VERIFIED — independent penetration test:</b> only an in-house automated assessment exists.</li>
-  <li><b>NOT VERIFIED — dependency/container vulnerability scan:</b> not configured in CI.</li>
+  <li><b>NOT VERIFIED — live database-service outage:</b> stopping the PostgreSQL service requires elevation that was
+  denied in this environment; the readiness behaviour is instead covered by executed automated tests and, for the
+  cold-start path, by the OPS-010 re-test. No workaround was attempted.</li>
+  <li><b>RESOLVED in rev 2 — dependency/container vulnerability scan:</b> was "not configured in CI"; now
+  implemented (.NET SCA + npm SCA + Trivy). See SEC-002.</li>
   <li><b>NOT APPLICABLE — SignalR / real-time:</b> the system has no real-time requirement (explicitly out of
   scope); no hubs present. <b>Hangfire:</b> not used — background work uses .NET <code>BackgroundService</code>
   hosted services (assessed against §11 intent).</li>
@@ -135,13 +174,13 @@ deployment, testing, and documentation.</p>
   <li><b>ASSUMPTION:</b> the tenant-isolation, auth, and integrity behaviours proven against the real dev
   PostgreSQL 17 hold identically on a production PostgreSQL 17 with the same migrations + <code>harden-runtime-role.sql</code>
   applied (the RLS/role model is schema-level, not environment-specific).</li>
-  <li><b>ASSUMPTION:</b> CI results for commit <code>v1.48.0</code> reflect the audited code (verified: the same
-  tree builds and tests green locally this session).</li>
+  <li><b>ASSUMPTION:</b> CI results for commit <code>aa919f7</code> (tag <code>v1.49.1</code>) reflect the audited
+  code (verified: the same tree builds and tests green locally this session).</li>
   <li><b>OPEN QUESTION:</b> the uploaded standard file describes a Patient Registration module, not NT.QMS and not a
   standard. Which document is the authoritative enterprise standard? (This audit used the prompt's embedded checklist.)</li>
-  <li><b>OPEN QUESTION:</b> the checklist specifies Angular 19 and Serilog; NT.QMS uses Angular 18.2 and
-  Microsoft.Extensions JSON logging + OpenTelemetry. Are these named technologies mandatory, or is functional
-  equivalence acceptable? (Assessed as equivalent, deviations noted.)</li>
+  <li><b>OPEN QUESTION:</b> the checklist specifies Angular 19 and Serilog; NT.QMS now runs Angular <b>22.0.8</b>
+  (ahead of the checklist since rev 2) and Microsoft.Extensions JSON logging + OpenTelemetry. Are these named
+  technologies mandatory, or is functional equivalence acceptable? (Assessed as equivalent, deviations noted.)</li>
 </ul>
 
 <!-- 6 -->
@@ -157,18 +196,34 @@ hash-chained with executed tamper-detection; e-signatures bind the full Part-11 
 uses a rotating, reuse-detecting refresh cookie (ADR-0009). The database is normalized with FK/unique/CHECK
 constraints, tenant-scoped uniqueness, optimistic concurrency (<code>xmin</code>), and reversible migrations. The
 outbox is durable, retry-safe, dead-lettering, and horizontally safe (SKIP LOCKED + leader election).</p>
-<p>The material gaps are <b>operational and external</b>, not architectural: no independent penetration test; no
-staging run of the (authored) observability stack, load, or soak; no dependency/container vulnerability scanning
-in CI; and currency deviations (Angular 18 vs 19; MS-JSON+OTel vs Serilog by name). Several validation
-(OQ/PQ) cases remain QA-execution templates. None of these are cross-tenant, authorization, data-corruption, or
-secret-exposure defects — so none is a P0 blocker. The system is <b>approved with conditions</b>.</p>
+<p>The material gaps are <b>operational and external</b>, not architectural: no independent penetration test, and no
+staging run of the (authored) observability stack, load, or soak. <b>Closed since the first issue:</b> CI
+dependency/container vulnerability scanning is now in place (SEC-002), and the Angular currency deviation is gone —
+the SPA runs <b>22.0.8</b>, <i>ahead</i> of the checklist's Angular 19, with zero known advisories in shipped
+dependencies (UI-001). The logging deviation (MS-JSON + OpenTelemetry rather than Serilog by name) stands as
+functional equivalence. Validation (OQ/PQ) cases are no longer untouched templates: <b>18 were executed</b> with
+actual results recorded on the development environment — but they remain templates for <i>formal</i> purposes until
+QA repeats them on a qualified environment and signs (DOC-001).</p>
+<p><b>Executing the protocol paid for itself:</b> it uncovered <b>OPS-010</b> — a cold start against an unreachable
+database crashed the process instead of serving <code>/health/ready</code> 503 — a gap every prior readiness test had
+missed because they all took the database down <i>after</i> startup. It was fixed in v1.49.1 and re-tested, including
+recovery without a restart. That is the concrete argument for finishing the remaining external validation rather than
+treating green automated suites as sufficient.</p>
+<p>None of the open items is a cross-tenant, authorization, data-corruption, or secret-exposure defect — so none is a
+P0 blocker. The system remains <b>approved with conditions</b>.</p>
 
 <!-- 7,8 -->
 <h2 class="sec"><span class="n">7–8 ·</span> Overall compliance &amp; verification coverage</h2>
 <p><b>Overall compliance ≈ 88%</b> (earned 74 / 84 applicable points; §12 SignalR excluded as N/A) — "Generally
-aligned; material improvements required." <b>Verification coverage ≈ 87%</b> — <b>High confidence</b>: code-level
-controls were executed against a real database and a running app; the ~13% unverified is production-runtime
-evidence that requires a deployed host or an independent party (pen test, staging alerts/soak, vuln scan).</p>
+aligned; material improvements required." <b>Verification coverage ≈ 90%</b> (rev 2, up from ≈87%) — <b>High
+confidence</b>: code-level controls were executed against a real database and a running app, and rev 2 added 18
+manually executed OQ cases with transcribed actuals plus 6 new regression tests. The remaining ~10% unverified is
+production-runtime evidence that requires a deployed host or an independent party: the pen test, TLS at a real
+reverse proxy, the deployed container instance, staging alerts/soak, and the live database-service-stop drill.</p>
+<p><b>Why the overall score did not move.</b> The three findings closed in rev 2 (SEC-002, UI-001, OPS-010) either
+restored a claim already scored or closed a gap discovered during the same revision; the dimensions they sit in
+(§13, §19, §20) remain capped by the still-open external items. Raising the total would misrepresent progress on
+work that has not been done — the score is unchanged at 74/84 by deliberate choice.</p>
 
 <!-- 9 Executive scorecard -->
 <h2 class="sec"><span class="n">9 · A ·</span> Executive scorecard</h2>
@@ -192,11 +247,11 @@ evidence that requires a deployed host or an independent party (pen test, stagin
   <tr><td>16</td><td>Security architecture (STRIDE)</td><td class="score">3</td><td class="score">4</td><td>75%</td><td>Med</td><td>0</td><td>0</td><td><span class="pill p-part">Partial</span></td></tr>
   <tr><td>17</td><td>Logging &amp; observability</td><td class="score">3</td><td class="score">4</td><td>75%</td><td>Med</td><td>0</td><td>0</td><td><span class="pill p-part">Partial</span></td></tr>
   <tr><td>18</td><td>Configuration &amp; secrets</td><td class="score">3</td><td class="score">4</td><td>75%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-ok">Compliant</span></td></tr>
-  <tr><td>19</td><td>Health, resilience, operations</td><td class="score">3</td><td class="score">4</td><td>75%</td><td>Med</td><td>0</td><td>0</td><td><span class="pill p-part">Partial</span></td></tr>
+  <tr><td>19</td><td>Health, resilience, operations</td><td class="score">3</td><td class="score">4</td><td>75%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-part">Partial</span></td></tr>
   <tr><td>20</td><td>Docker &amp; deployment</td><td class="score">3</td><td class="score">4</td><td>75%</td><td>Med</td><td>0</td><td>0</td><td><span class="pill p-part">Partial</span></td></tr>
   <tr><td>21</td><td>Testing</td><td class="score">4</td><td class="score">4</td><td>100%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-ok">Compliant</span></td></tr>
   <tr><td>22</td><td>Documentation &amp; traceability</td><td class="score">4</td><td class="score">4</td><td>100%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-ok">Compliant</span></td></tr>
-  <tr style="font-weight:700"><td></td><td>TOTAL (21 applicable)</td><td class="score">74</td><td class="score">84</td><td>88%</td><td>≈87%</td><td>0</td><td>1</td><td><span class="pill p-part">Approved w/ conditions</span></td></tr>
+  <tr style="font-weight:700"><td></td><td>TOTAL (21 applicable)</td><td class="score">74</td><td class="score">84</td><td>88%</td><td>≈90%</td><td>0</td><td>1</td><td><span class="pill p-part">Approved w/ conditions</span></td></tr>
 </table></div>
 
 <!-- 10 Mandatory rule -->
@@ -388,13 +443,21 @@ guarded. 67 unit specs + 6 e2e executed. Gaps: version currency; thinner compone
 compliant (§13).</b></p>
 
 <h2 class="sec"><span class="n">18 ·</span> Testing &amp; quality assessment</h2>
-<p><b>Executed this assessment:</b> 368 backend tests (0 skipped) — Domain unit/value/aggregate/state (211),
+<p><b>Executed this assessment:</b> <b>374</b> backend tests (0 skipped) — Domain unit/value/aggregate/state (211),
 command/query/validation/authorization/idempotency behaviours (57), architecture boundary + command-policy (24),
 EF/PostgreSQL constraint + RLS + immutability + concurrency + outbox + migration + tamper (18, real PG), API/
-problem-details/pagination/file/versioning/role-matrix/contract/observability (58); plus 67 frontend specs and 6
-e2e (incl. axe). Acceptance→Test→Evidence→Result mapping exists in RTM-NTQMS-001. <b>Not present (justified):</b>
-inbox/dedup tests (no inbound messaging — natural-key dedup tested instead); SignalR tests (N/A). <b>Pending:</b>
-staging load/soak (PQ). <b>Compliant (§21).</b> Coverage is behaviour-based, not coverage-% theatre.</p>
+problem-details/pagination/file/versioning/role-matrix/contract/observability/<b>startup-resilience</b> (64); plus 67
+frontend specs (Angular 22) and 6 e2e (incl. axe). Acceptance→Test→Evidence→Result mapping exists in RTM-NTQMS-001.
+<b>Added in rev 2:</b> <code>StartupSeedingResilienceTests</code> (6 cases) locking in the OPS-010 fix, and a
+<b>witnessed manual OQ session</b> (18 cases, actual results transcribed) that automated suites had not covered.
+<b>Not present (justified):</b> inbox/dedup tests (no inbound messaging — natural-key dedup tested instead); SignalR
+tests (N/A). <b>Pending:</b> staging load/soak (PQ). <b>Compliant (§21).</b> Coverage is behaviour-based, not
+coverage-% theatre.</p>
+<p><b>Honest limitation the rev-2 work exposed:</b> a green suite is not the same as a covered scenario. The
+functional host substitutes EF InMemory, so its "database down" tests only break the health check — the real
+cold-start-with-database-down path was never exercised until the OQ session ran it manually, and it failed
+(OPS-010). Where a test double stands in for infrastructure, the substituted behaviour needs its own explicit
+check.</p>
 
 <h2 class="sec"><span class="n">19 ·</span> Observability &amp; operational assessment</h2>
 <p>Liveness/readiness split (<code>/health/live</code>, DB-backed <code>/health/ready</code> → 503 when the
@@ -425,7 +488,7 @@ breakers (not currently justified — few synchronous external calls). <b>Partia
   <tr><td>SEC-002</td><td>Supply-chain regressions ship undetected</td><td>Low</td><td>Medium</td><td class="sev-low">Low (remediated)</td><td>DevOps</td><td><b>Done:</b> .NET SCA + npm SCA + Trivy gates in CI</td></tr>
   <tr><td>OPS-010</td><td><s>Cold start with PostgreSQL unreachable crashes instead of serving <code>/health/ready</code> 503</s> — <b>fixed in v1.49.1</b></td><td>Low</td><td>Low</td><td class="sev-low">Closed</td><td>Backend/Ops</td><td><b>Done:</b> seeding defers to a retrying background seeder; re-tested (host starts, live 200 / ready 503, recovers without restart); 6 regression tests; 374-test suite green. Residual by design: <code>MigrateOnStartup=true</code> still fails fast (keep it off in production)</td></tr>
   <tr><td>OPS-001</td><td>Alert/dashboard misconfig or capacity shortfall unseen until production</td><td>Medium</td><td>Medium</td><td class="sev-med">Medium</td><td>Unassigned (Ops)</td><td>Staging stack + drill + load/soak (R-5/R-7)</td></tr>
-  <tr><td>DOC-001</td><td>Part-11 formal validation incomplete for v1.38→v1.48</td><td>High</td><td>Medium</td><td class="sev-med">Medium</td><td>Unassigned (QA)</td><td>Execute REVAL-NTQMS-001 OQ/PQ; sign VSR addendum</td></tr>
+  <tr><td>DOC-001</td><td>Part-11 formal validation incomplete for v1.38→v1.49.1</td><td>Medium (was High)</td><td>Medium</td><td class="sev-med">Medium</td><td>Unassigned (QA)</td><td><b>Advanced:</b> 18 OQ cases executed on dev with transcribed actuals (docs 09/10/11) + engineering dry-run (doc 07). <b>Remaining:</b> repeat on a qualified environment, execute PQ, sign the VSR addendum</td></tr>
   <tr><td>OBS-001</td><td>Serilog not used (standard names it)</td><td>Low</td><td>Low</td><td class="sev-low">Low</td><td>Unassigned</td><td>Confirm equivalence with standard owner; swap provider if mandated</td></tr>
 </table></div>
 
@@ -492,42 +555,55 @@ pattern ADR.</p>
 <h2 class="sec">Compliance Status (mandatory conclusion)</h2>
 <div class="tablewrap"><table>
   <tr><td><b>Overall score</b></td><td>≈ 88% (74 / 84 applicable) — "Generally aligned; material improvements required"</td></tr>
-  <tr><td><b>Verification coverage</b></td><td>≈ 87%</td></tr>
+  <tr><td><b>Verification coverage</b></td><td>≈ 90% (rev 2; ≈87% at first issue)</td></tr>
   <tr><td><b>Confidence level</b></td><td><b>High</b> (coverage ≥ 85%)</td></tr>
   <tr><td><b>Critical findings</b></td><td>0</td></tr>
   <tr><td><b>High findings</b></td><td>1 — SEC-001 (independent pen test pending; a condition, not a P0 blocker). UI-001 was High during this assessment (10 Angular-18 advisories surfaced by the new SCA gate) and was <b>closed by the Angular 18→22.0.8 upgrade</b>: npm audit now clean, exception register empty.</td></tr>
+  <tr><td><b>Findings raised &amp; closed during the assessment</b></td><td>3 — SEC-002 (scanning implemented), UI-001 (Angular 22 upgrade), <b>OPS-010</b> (cold-start crash on unreachable DB; found by executing the OQ protocol, fixed in v1.49.1 with 6 regression tests and an end-to-end re-test incl. recovery without restart)</td></tr>
+  <tr><td><b>Open defects</b></td><td>0 (OPS-010 was the only one found and it is closed; one deliberate constraint documented: <code>MigrateOnStartup=true</code> still fails fast — keep it off in production)</td></tr>
   <tr><td><b>P0 production blockers</b></td><td>0</td></tr>
   <tr><td><b>Tenant isolation verified?</b></td><td><b>Yes</b> — EF filter + FORCE RLS, executed against real PostgreSQL + live IDOR probe (404)</td></tr>
   <tr><td><b>Backend authorization verified?</b></td><td><b>Yes</b> — deny-by-default HTTP + command pipeline; role×endpoint matrix executed</td></tr>
   <tr><td><b>Database integrity verified?</b></td><td><b>Yes</b> — constraints/immutability/concurrency/migrations tested on real PostgreSQL</td></tr>
-  <tr><td><b>Automated tests sufficient evidence?</b></td><td><b>Yes for code-level controls</b> (368 backend + 67 FE + 6 e2e, 0 skipped, executed); insufficient for production-runtime/pen-test claims</td></tr>
-  <tr><td><b>Can it reasonably proceed to production?</b></td><td>Yes, once the four conditions (SEC-001, OPS-001, SEC-002, DOC-001) are met</td></tr>
+  <tr><td><b>Automated tests sufficient evidence?</b></td><td><b>Yes for code-level controls</b> (374 backend + 67 FE + 6 e2e, 0 skipped, executed) — but <b>demonstrably not sufficient alone</b>: OPS-010 slipped past a fully green suite because the functional host substitutes EF InMemory. Insufficient for production-runtime/pen-test claims.</td></tr>
+  <tr><td><b>Can it reasonably proceed to production?</b></td><td>Yes, once the remaining conditions are met — <b>SEC-001</b> (independent pen test), <b>OPS-001</b> (staging observability + load/soak), <b>DOC-001</b> (qualified-environment validation + signatures). SEC-002 is closed.</td></tr>
 </table></div>
 <p style="font-size:16px;margin-top:16px"><b>PRODUCTION DECISION: APPROVED WITH CONDITIONS.</b> All applicable
 critical controls are implemented and tested with executed evidence, and no cross-tenant, authorization,
-data-corruption, or secret-exposure defect was found. Approval is conditioned on: (SEC-001) an independent
-penetration test against a staging deployment; (OPS-001) staging observability + alert-firing + load/soak; (SEC-002)
-dependency &amp; container vulnerability scanning in CI; and (DOC-001) QA execution and sign-off of the CSV
-re-validation. None is a P0 blocker; all are P1/P2.</p>
+data-corruption, or secret-exposure defect was found. <b>Rev 2:</b> two of the original four conditions are now
+closed — SEC-002 (scanning implemented) and the Angular currency finding UI-001 (upgraded to 22.0.8, zero shipped
+advisories) — and the one defect the validation protocol uncovered (OPS-010) is fixed and re-tested. Approval remains
+conditioned on: <b>(SEC-001)</b> an independent penetration test against a staging deployment; <b>(OPS-001)</b>
+staging observability + alert-firing + load/soak; and <b>(DOC-001)</b> QA execution and sign-off of the CSV
+re-validation on a qualified environment. None is a P0 blocker; all are P1/P2.</p>
 
-<h3>Incomplete items (partially compliant / non-compliant / unverified)</h3>
+<h3>Incomplete items (partially compliant / non-compliant / unverified) — rev 2</h3>
 <ul>
   <li><b>Partially compliant:</b> §1 business acceptance-criteria templates; §3 a few grouped multi-controller files;
-  §13 Angular v18 + spec breadth; §16 independent pen test; §17 Serilog-by-name + staging dashboards; §19 no
-  circuit breakers / unrun soak; §20 no image scan.</li>
-  <li><b>Non-compliant:</b> §16/§20 dependency + container vulnerability scanning (SEC-002).</li>
-  <li><b>Not verified:</b> production TLS/HSTS, live alerts, 24 h soak, independent pen test, formal OQ/PQ sign-off.</li>
+  §13 component-spec breadth on regulated flows (the version deviation is resolved — Angular 22.0.8); §16 independent
+  pen test; §17 Serilog-by-name + staging dashboards; §19 no circuit breakers / unrun soak; §20 deployed-instance
+  container verification (CI-proven per build, no deployed host).</li>
+  <li><b>Non-compliant:</b> <s>§16/§20 dependency + container vulnerability scanning (SEC-002)</s> — <b>none remaining;
+  SEC-002 was the only non-compliant item and it is now implemented.</b></li>
+  <li><b>Not verified:</b> TLS at a real reverse proxy (the app's own HSTS emission <i>was</i> verified), live alerts
+  firing, 24 h soak, independent pen test, live database-service-stop drill (elevation denied), formal OQ/PQ sign-off
+  on a qualified environment.</li>
+  <li><b>Closed during rev 2:</b> SEC-002, UI-001, OPS-010 (raised and fixed within the revision).</li>
   <li><b>Not applicable:</b> §12 SignalR (no real-time requirement); Hangfire (uses hosted services); inbox pattern
   (no inbound messaging).</li>
 </ul>
 
 <footer>
-  Enterprise Application Architecture Compliance Assessment · EAC-NTQMS-001 · 2026-07-29 · target NT.QMS v1.48.0.
-  Evidence executed this assessment: <code>dotnet build</code> (0 warn/0 err) + <code>dotnet test</code> (368
-  backend, 0 skipped, real PostgreSQL 17) + running app + adversarial probes (24/24). Companion documents:
+  Enterprise Application Architecture Compliance Assessment · EAC-NTQMS-001 <b>rev 2</b> · 2026-07-29 · target
+  NT.QMS <b>v1.49.1</b> (commit <code>aa919f7</code>). Evidence executed this assessment: <code>dotnet build</code>
+  (0 warn/0 err) + <code>dotnet test</code> (<b>374</b> backend, 0 skipped, real PostgreSQL 17) + running app +
+  adversarial probes (24/24) + failure drills + a witnessed 18-case OQ session. Companion documents:
   NT_QMS_Enterprise_Architecture_Compliance_Audit_v1.48.html, NT_QMS_EA_Remediation_Closure_Report.md,
-  NT_QMS_Security_Assessment_Report.html, docs/validation/*, docs/adr/ADR-0001…0009. This is an engineering
-  compliance assessment; it is not a penetration-test attestation or a regulatory CSV sign-off.
+  NT_QMS_Security_Assessment_Report.html, <code>.github/npm-audit-allowlist.txt</code> (empty exception register),
+  docs/validation/06…11 (re-validation delta, dry-run, release decision, OQ execution records), docs/adr/ADR-0001…0009.
+  This is an engineering compliance assessment; it is <b>not</b> a penetration-test attestation and <b>not</b> a
+  regulatory CSV sign-off — the OQ records it cites were executed on a development environment and carry no QA or
+  System Owner signature.
 </footer>
 
 </div>
