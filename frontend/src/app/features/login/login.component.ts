@@ -6,68 +6,92 @@ import { AuthService } from '../../core/auth.service';
 import { I18nService, Lang } from '../../core/i18n.service';
 
 /**
- * Split-panel sign-in per the QAMS Design System: a signature-gradient brand
- * panel (logo, tagline, compliance chips) beside a 15px-radius form card.
+ * Sign-in page. Two panels on a soft-blue field: a brand/value panel (logo,
+ * platform line, headline, capability list) beside the credentials card.
  * The laboratory comes exclusively from its own URL (/t/{lab}) — the form
  * carries no tenant field; without a lab address the page signs in the
  * platform administrator.
+ *
+ * Accessibility notes (the sign-in surface is an axe gate in CI): two design
+ * colours are deliberately darkened here because the supplied values fail WCAG
+ * AA on this background — see the comments on `.eyebrow` and `.muted`.
  */
 @Component({
     selector: 'qams-login',
     imports: [FormsModule],
     template: `
-    <div class="wrap">
-      <div class="panel">
-        <!-- brand side -->
-        <aside class="brand">
-          <div class="logocard"><img src="assets/nt-qms-logo.svg" alt="NT.QMS" /></div>
-          <h1>{{ i18n.t('app.subtitle') }}</h1>
-          <p class="tagline">{{ i18n.t('login.tagline') }}</p>
-          <div class="chips">
-            <span class="chip">ISO/IEC 17025</span>
-            <span class="chip">ISO 15189</span>
-            <span class="chip">ISO 9001</span>
-            <span class="chip">21 CFR Part 11</span>
-            <span class="chip">GMP</span>
-          </div>
-          <div class="brandfoot">National Technology · NT.QMS</div>
-        </aside>
+    <div class="page">
+      <div class="shell">
+        <!-- brand / value panel -->
+        <section class="hero">
+          <img class="logo" src="assets/nt-qms-logo.svg" alt="NT.QMS" />
+          <p class="eyebrow">{{ i18n.t('app.subtitle') }}</p>
+          <p class="platformtag">{{ i18n.t('login.platformTag') }}</p>
 
-        <!-- form side -->
-        <section class="form">
-          <div class="formhead">
-            <h2>{{ i18n.t('login.title') }}</h2>
-            <div class="langswitch" role="group" aria-label="Language">
+          <h1>{{ i18n.t('login.heroTitle') }}</h1>
+          <p class="herobody">{{ i18n.t('login.heroBody') }}</p>
+
+          <ul class="features">
+            @for (f of features; track f) {
+              <li>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
+                {{ i18n.t(f) }}
+              </li>
+            }
+          </ul>
+        </section>
+
+        <!-- credentials card -->
+        <section class="card">
+          <div class="cardtop">
+            @if (tenantSlug(); as slug) {
+              <div class="workspace">
+                <span class="avatar" aria-hidden="true">{{ tenantInitials() }}</span>
+                <span class="wsmeta">
+                  <span class="wsname">{{ tenantName() }}</span>
+                  <span class="muted">{{ i18n.t('login.workspaceHint') }}</span>
+                </span>
+              </div>
+            } @else {
+              <div class="workspace">
+                <span class="avatar platform" aria-hidden="true">NT</span>
+                <span class="wsmeta">
+                  <span class="wsname">{{ i18n.t('login.platformMode') }}</span>
+                  <span class="muted">{{ i18n.t('login.labUrlHint') }}</span>
+                </span>
+              </div>
+            }
+
+            <div class="langswitch" role="group" [attr.aria-label]="i18n.t('common.language')">
               @for (l of langs; track l.code) {
-                <button type="button" [class.active]="i18n.lang() === l.code" (click)="i18n.setLang(l.code)">{{ l.label }}</button>
+                <button type="button" [class.active]="i18n.lang() === l.code"
+                        [attr.aria-pressed]="i18n.lang() === l.code"
+                        (click)="i18n.setLang(l.code)">{{ l.label }}</button>
               }
             </div>
           </div>
 
-          @if (tenantSlug(); as slug) {
-            <div class="tenantline">
-              <span class="tenantchip" [title]="i18n.t('login.tenantChipHint')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M3 21h18 M5 21V7l8-4v18 M19 21V11l-6-4 M9 9v.01 M9 12v.01 M9 15v.01 M9 18v.01" />
-                </svg>
-                {{ slug }}
-              </span>
-              <span class="muted">{{ i18n.t('login.notYourLab') }}</span>
-            </div>
+          <h2>{{ i18n.t('login.title') }}</h2>
+          <p class="cardhint">{{ i18n.t('login.cardHint') }}</p>
+
+          @if (tenantSlug()) {
             <button type="button" class="link platformswitch" (click)="switchToPlatform()">
-              {{ i18n.t('login.platformSwitch') }} →
+              {{ i18n.t('login.platformSwitch') }} &rarr;
             </button>
-          } @else {
-            <div class="platformline">{{ i18n.t('login.platformMode') }}</div>
-            <div class="muted hint">{{ i18n.t('login.labUrlHint') }}</div>
           }
 
           <form (ngSubmit)="submit()">
             <label for="email">{{ i18n.t('login.email') }}</label>
-            <input id="email" name="email" type="email" [(ngModel)]="email" autocomplete="username" required />
+            <input id="email" name="email" type="email" [(ngModel)]="email"
+                   [placeholder]="i18n.t('login.emailPlaceholder')"
+                   autocomplete="username" required />
 
             <label for="password">{{ i18n.t('login.password') }}</label>
-            <input id="password" name="password" type="password" [(ngModel)]="password" autocomplete="current-password" required />
+            <input id="password" name="password" type="password" [(ngModel)]="password"
+                   placeholder="••••••••" autocomplete="current-password" required />
 
             @if (passwordExpired()) {
               <div class="error">{{ i18n.t('login.expired') }}</div>
@@ -86,81 +110,126 @@ import { I18nService, Lang } from '../../core/i18n.service';
               {{ busy() ? i18n.t('common.loading') : i18n.t('login.submit') }}
             </button>
 
-            @if (error()) { <div class="error">{{ error() }}</div> }
+            @if (error()) { <div class="error" role="alert">{{ error() }}</div> }
           </form>
+
+          <p class="authnote">{{ i18n.t('login.authorizedOnly') }}</p>
         </section>
       </div>
+
+      <footer class="pagefoot">
+        <span>&copy; {{ year }} National Technology &middot; NT.QMS</span>
+        <span aria-hidden="true">&middot;</span>
+        <span>ISO/IEC 17025</span>
+      </footer>
     </div>
   `,
     changeDetection: ChangeDetectionStrategy.Eager,
     styles: [`
-    .wrap { min-height: 100vh; display: grid; place-items: center; padding: 1.5rem;
-            background: linear-gradient(135deg, #10263e 0%, #16314f 55%, #0d3a4a 100%); }
-    .panel {
-      width: 880px; max-width: 100%; display: grid; grid-template-columns: 1.05fr 1fr;
-      background: var(--nt-surface); border-radius: var(--nt-radius-login);
-      box-shadow: var(--nt-shadow-pop); overflow: hidden;
+    /* The design's field colour; --nt-brand-soft (#E0F2FE) is its sibling. */
+    .page {
+      min-height: 100vh; background: #E3F2FD;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 40px 24px 20px; gap: 22px;
+    }
+    .shell {
+      width: 100%; max-width: 1180px;
+      display: grid; grid-template-columns: 1fr 420px; gap: 64px; align-items: center;
     }
 
-    /* brand side */
-    .brand {
-      background: var(--nt-header-grad); color: #fff; padding: 44px 36px;
-      display: flex; flex-direction: column; align-items: flex-start;
+    /* ---------------------------------------------------------- hero panel */
+    .hero { min-width: 0; }
+    .logo { height: 62px; display: block; }
+    /* --nt-teal (#00B2A9) is 2.2:1 on this field — well under AA for 12px text.
+       #00706A keeps the accent hue and clears 4.5:1. */
+    .eyebrow {
+      margin: 22px 0 0; font-size: 12px; font-weight: 700; letter-spacing: .16em;
+      text-transform: uppercase; color: #00706A;
     }
-    .logocard { background: #fff; border-radius: 10px; padding: 12px 18px; }
-    .logocard img { height: 54px; display: block; }
-    /* Explicit white: the global heading palette must not bleed into the gradient panel. */
-    .brand h1 { font-size: 20px; font-weight: 800; margin: 26px 0 0; letter-spacing: .01em; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.18); }
-    .tagline { font-size: 13px; color: #fff; opacity: .95; margin: 10px 0 0; line-height: 1.6; }
-    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
-    .chip {
-      font-size: 11px; font-weight: 700; letter-spacing: .03em;
-      border: 1px solid rgba(255,255,255,.45); border-radius: 999px; padding: 4px 12px;
-      background: rgba(255,255,255,.08);
+    .platformtag { margin: 4px 0 0; font-size: 13px; font-weight: 600; color: var(--nt-navy-deep); }
+    .hero h1 {
+      margin: 20px 0 0; font-size: 32px; line-height: 1.25; font-weight: 800;
+      color: var(--nt-navy); letter-spacing: -.01em; max-width: 22ch;
     }
-    .brandfoot { margin-top: auto; padding-top: 32px; font-size: 11.5px; opacity: .75; font-weight: 600; }
+    .herobody { margin: 14px 0 0; font-size: 14.5px; line-height: 1.65; color: #4A5768; max-width: 54ch; }
+    .features {
+      list-style: none; margin: 26px 0 0; padding: 0;
+      display: flex; flex-wrap: wrap; gap: 10px 26px;
+    }
+    .features li {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 12.5px; font-weight: 700; color: var(--nt-navy-deep);
+    }
+    .features svg { width: 15px; height: 15px; color: #00706A; flex: none; }
 
-    /* form side */
-    .form { padding: 36px 34px 30px; }
-    .formhead { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
-    h2 { font-size: 17px; font-weight: 800; color: var(--nt-navy-deep); margin: 0; }
-    .langswitch {
-      display: inline-flex; background: var(--nt-filter-grey); border-radius: 999px; padding: 3px;
+    /* --------------------------------------------------------------- card */
+    .card {
+      background: var(--nt-surface); border: 1px solid var(--nt-border);
+      border-radius: 10px; box-shadow: 0 4px 12px rgba(59, 70, 88, .12);
+      padding: 32px 36px 26px;
     }
-    .langswitch button {
-      width: auto; background: transparent; color: var(--nt-slate);
-      font-size: 11.5px; font-weight: 700; padding: 5px 12px; border-radius: 999px;
+    .cardtop {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 12px; padding-bottom: 18px; border-bottom: 1px solid var(--nt-border);
     }
-    .langswitch button.active { background: #fff; color: var(--nt-blue); box-shadow: var(--nt-shadow-xs); }
-
-    .tenantline { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
-    .tenantchip {
-      display: inline-flex; align-items: center; gap: 7px;
-      /* Darker blue than --nt-blue: the token fails WCAG AA (4.14:1) on the
-         soft-blue chip; #00639e clears 4.5:1 while keeping the brand hue. */
+    .workspace { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .avatar {
+      flex: none; width: 34px; height: 34px; border-radius: 999px;
+      display: grid; place-items: center;
       background: var(--nt-brand-soft); color: #00639e;
-      font-size: 12.5px; font-weight: 700; border-radius: 999px; padding: 5px 14px;
+      font-size: 12px; font-weight: 800; letter-spacing: .02em;
     }
-    .tenantchip svg { width: 14px; height: 14px; }
-    .tenantline .muted { font-size: 11.5px; }
-    /* Slightly darker than --nt-grey-m (#797979 = 4.35:1) so muted hints clear WCAG AA on white. */
-    .muted { color: #6e6e6e; }
-    /* Darker than --nt-teal (2.64:1 on white); #007c74 clears 4.5:1 for this bold label. */
-    .platformline { font-size: 13px; font-weight: 700; color: #007c74; margin-bottom: 4px; }
-    .hint { margin: 2px 0 14px; }
-    .platformswitch { width: auto; background: transparent; color: var(--nt-blue); font-size: 12px; font-weight: 700; padding: 0 0 12px; }
+    .avatar.platform { background: #E4EEF7; color: var(--nt-navy-deep); }
+    .wsmeta { display: flex; flex-direction: column; min-width: 0; }
+    .wsname {
+      font-size: 13.5px; font-weight: 700; color: var(--nt-navy);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    /* --nt-muted (#797979) is ~4.0:1 on white at 11px; #5A6472 clears AA. */
+    .muted { color: #5A6472; font-size: 11.5px; }
+
+    .langswitch { flex: none; display: inline-flex; background: var(--nt-filter-grey); border-radius: 999px; padding: 3px; }
+    .langswitch button {
+      width: auto; background: transparent; color: #4A5768;
+      font-size: 11.5px; font-weight: 700; padding: 5px 11px; border-radius: 999px;
+    }
+    .langswitch button.active { background: var(--nt-surface); color: var(--nt-blue); box-shadow: var(--nt-shadow-xs); }
+
+    h2 { margin: 20px 0 0; font-size: 21px; font-weight: 800; color: var(--nt-navy); }
+    .cardhint { margin: 4px 0 0; font-size: 13px; color: #4A5768; }
+    .platformswitch {
+      width: auto; background: transparent; color: var(--nt-blue);
+      font-size: 12px; font-weight: 700; padding: 10px 0 0;
+    }
     .platformswitch:hover { text-decoration: underline; }
 
-    label { margin-top: 12px; }
+    form { margin-top: 18px; }
+    label { margin-top: 14px; font-size: 14px; font-weight: 600; color: var(--nt-navy); }
+    input { border-radius: var(--nt-radius-input); font-size: 14px; padding: 12px 14px; }
     .signin {
-      margin-top: 22px; width: 100%; border-radius: 10px;
-      padding: 12px 16px; font-size: 14px; font-weight: 700;
+      margin-top: 22px; width: 100%; border-radius: var(--nt-radius-login);
+      padding: 14px 16px; font-size: 15px; font-weight: 700;
+    }
+    .hint { margin: 2px 0 0; }
+    .authnote {
+      margin: 20px 0 0; padding-top: 16px; border-top: 1px solid var(--nt-border);
+      font-size: 11.5px; line-height: 1.5; color: #5A6472; text-align: center;
     }
 
-    @media (max-width: 760px) {
-      .panel { grid-template-columns: 1fr; }
-      .brand { padding: 28px 28px 24px; }
-      .brandfoot { padding-top: 20px; }
+    /* --------------------------------------------------------- page footer */
+    .pagefoot {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+      font-size: 11.5px; font-weight: 600; color: #4A5768;
+    }
+
+    @media (max-width: 940px) {
+      .shell { grid-template-columns: 1fr; gap: 30px; max-width: 480px; }
+      .hero { text-align: center; }
+      .hero h1 { font-size: 26px; margin-inline: auto; }
+      .herobody { margin-inline: auto; }
+      .logo { margin-inline: auto; }
+      .features { justify-content: center; }
+      .card { padding: 26px 22px 22px; }
     }
   `]
 })
@@ -171,12 +240,41 @@ export class LoginComponent {
 
   readonly langs: { code: Lang; label: string }[] = [
     { code: 'en', label: 'EN' },
-    { code: 'ar', label: 'ع' },
+    { code: 'ar', label: 'العربية' },
     { code: 'fr', label: 'FR' },
   ];
 
+  /** Capability list shown on the hero panel, as i18n keys. */
+  readonly features = [
+    'login.featureDocs',
+    'login.featureCapa',
+    'login.featureAudits',
+    'login.featureRisk',
+  ] as const;
+
+  readonly year = new Date().getFullYear();
+
   /** The lab pinned by its /t/{slug} address — null means platform sign-in. */
   readonly tenantSlug = computed(() => this.auth.tenantSlug());
+
+  /** Slug rendered as a lab name: "arfa-lab" -> "Arfa Lab". */
+  readonly tenantName = computed(() => {
+    const slug = this.tenantSlug();
+    if (!slug) { return ''; }
+    return slug
+      .split(/[-_\s]+/)
+      .filter((part) => part.length > 0)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
+  });
+
+  /** Up to two initials for the workspace avatar: "Arfa Lab" -> "AL". */
+  readonly tenantInitials = computed(() => {
+    const words = this.tenantName().split(' ').filter((w) => w.length > 0);
+    if (words.length === 0) { return '?'; }
+    const initials = words.slice(0, 2).map((w) => w.charAt(0).toUpperCase()).join('');
+    return initials.length > 1 ? initials : words[0].slice(0, 2).toUpperCase();
+  });
 
   email = '';
   password = '';
