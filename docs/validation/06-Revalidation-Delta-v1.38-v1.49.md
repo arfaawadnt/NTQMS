@@ -160,6 +160,15 @@ witnessed manual confirmation is recorded per baseline convention.
 
 ### OQ manual/witnessed cases (templates)
 
+> **Execution status (2026-07-29).** A witnessed session executed 12 of these cases on the
+> **development** environment against v1.49.0 — actual results transcribed in
+> [`09-OQ-Execution-Record-v1.49.md`](09-OQ-Execution-Record-v1.49.md) (OQ-EXEC-NTQMS-001):
+> 12 passed, 0 failed, 1 deviation (DEV-01), 0 defects. That record states its own
+> limitations — development environment, limited independence, Part D not executed, and the
+> IQ steps needing a deployed host still open. The cells below remain **Template** until QA
+> executes on a **qualified** environment and signs; the dev-session record attaches as
+> supporting evidence, not as the qualification itself.
+
 | Case | Procedure | Expected | Actual | P/F |
 | ---- | --------- | -------- | ------ | --- |
 | OQ-DEP-01 | Point config at an over-privileged role in Production; start | Boot refused; message cites `harden-runtime-role.sql` | | |
