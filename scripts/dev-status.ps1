@@ -44,7 +44,16 @@ if ($apiUp) {
 
 # PostgreSQL is the dependency most likely to be the real cause.
 $pg = Get-Service -Name 'postgresql*' -ErrorAction SilentlyContinue
-if ($pg) { foreach ($s in $pg) { Write-Host ("  PG     {0,-11} {1}" -f $s.Name, $s.Status) -ForegroundColor (if ($s.Status -eq 'Running') { 'Green' } else { 'Red' }) } }
+# Note: PowerShell 5.1 rejects "(if ...)" as an argument value at RUNTIME (it
+# parses, then fails with "the term 'if' is not recognized"), so the colour is
+# resolved into a variable first. Same reason ternaries are avoided throughout.
+if ($pg) {
+    foreach ($s in $pg) {
+        $pgColour = 'Red'
+        if ($s.Status -eq 'Running') { $pgColour = 'Green' }
+        Write-Host ("  PG     {0,-11} {1}" -f $s.Name, $s.Status) -ForegroundColor $pgColour
+    }
+}
 
 Write-Host ""
 if ($apiUp -and $feUp)      { Write-Host "Both up. Open http://localhost:4200/t/demo-lab" -ForegroundColor Cyan }
