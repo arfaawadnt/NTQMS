@@ -160,13 +160,17 @@ witnessed manual confirmation is recorded per baseline convention.
 
 ### OQ manual/witnessed cases (templates)
 
-> **Execution status (2026-07-29).** A witnessed session executed 12 of these cases on the
-> **development** environment against v1.49.0 — actual results transcribed in
-> [`09-OQ-Execution-Record-v1.49.md`](09-OQ-Execution-Record-v1.49.md) (OQ-EXEC-NTQMS-001):
-> 12 passed, 0 failed, 1 deviation (DEV-01), 0 defects. That record states its own
-> limitations — development environment, limited independence, Part D not executed, and the
-> IQ steps needing a deployed host still open. The cells below remain **Template** until QA
-> executes on a **qualified** environment and signs; the dev-session record attaches as
+> **Execution status (2026-07-29).** A witnessed session executed **18 cases** on the
+> **development** environment against v1.49.0, transcribed in
+> [`09-OQ-Execution-Record-v1.49.md`](09-OQ-Execution-Record-v1.49.md) (12 cases) and
+> [`10-OQ-Execution-Record-Addendum-A-v1.49.md`](10-OQ-Execution-Record-Addendum-A-v1.49.md)
+> (6 more + 1 partial). Cumulative: **18 passed, 0 failed, 1 deviation (DEV-01),
+> 1 observation closed (OBS-01), and 1 NEW FINDING — OPS-010 (Medium/P2, open):** on a cold
+> start with PostgreSQL unreachable the API crashes instead of reporting `/health/ready` 503.
+> **OPS-010 must be dispositioned before these cases support a validation claim.**
+> Five items remain environment-blocked (live DB service-stop, TLS-at-proxy, deployed
+> container, observability stack, PQ load/soak). The cells below remain **Template** until QA
+> executes on a **qualified** environment and signs; the dev-session records attach as
 > supporting evidence, not as the qualification itself.
 
 | Case | Procedure | Expected | Actual | P/F |

@@ -229,7 +229,8 @@ cross-tenant exposure, auth bypass, secret leak, or data-corruption path was fou
   <tr><th>ID</th><th>Condition</th><th>Severity</th><th>Priority</th><th>Risk if shipped without it</th></tr>
   <tr><td>SEC-001</td><td>Independent penetration test on a staging deployment</td><td class="sev-high">High</td><td>P1</td><td>Security posture is code-/test-verified but not independently validated against a live TLS deployment (business-logic abuse, session attacks over HTTPS)</td></tr>
   <tr><td>OPS-001</td><td>Staging bring-up: observability stack + alerts firing + 24 h soak (R-5/R-7)</td><td class="sev-med">Medium</td><td>P1</td><td>Production diagnosability and capacity are authored but never exercised under real load/telemetry</td></tr>
-  <tr><td>DOC-001</td><td>QA execution + sign-off of the CSV re-validation (OQ/PQ templates)</td><td class="sev-med">Medium</td><td>P1</td><td>Regulated (21 CFR Part 11) formal validation incomplete for the v1.38→v1.48 changes</td></tr>
+  <tr><td>OPS-010</td><td>Make cold start resilient to an unreachable database (defer/guard the two startup DB reads), then re-run the OQ-DEP-02 cold-start leg</td><td class="sev-med">Medium</td><td>P2</td><td>Found by witnessed OQ execution 2026-07-29: the process crashes rather than starting unready, so a DB outage during a restart becomes a crash-loop</td></tr>
+  <tr><td>DOC-001</td><td>QA execution + sign-off of the CSV re-validation (OQ/PQ templates)</td><td class="sev-med">Medium</td><td>P1</td><td>Regulated (21 CFR Part 11) formal validation incomplete for the v1.38→v1.49 changes. <b>Progress:</b> 18 OQ cases executed on dev (docs 09 + 10) — qualified-environment execution + signatures still required</td></tr>
   <tr><td>UI-001</td><td><s>Angular 18 → LTS upgrade</s> — <b>done: 18.2 → 22.0.8</b>, one major at a time, all gates green</td><td class="sev-low">Closed</td><td>Done</td><td>Closed: all 10 advisories cleared; npm audit (prod) = 0; SCA exception register empty</td></tr>
   <tr><td>SEC-002</td><td><s>Add dependency + container scanning</s> — <b>implemented this assessment</b></td><td class="sev-low">Low</td><td>Done</td><td>Closed: CI SCA + Trivy gates live; UI-001 residual also now closed</td></tr>
 </table></div>
@@ -396,14 +397,21 @@ inbox/dedup tests (no inbound messaging — natural-key dedup tested instead); S
 staging load/soak (PQ). <b>Compliant (§21).</b> Coverage is behaviour-based, not coverage-% theatre.</p>
 
 <h2 class="sec"><span class="n">19 ·</span> Observability &amp; operational assessment</h2>
-<p>Liveness/readiness split (<code>/health/live</code>, DB-backed <code>/health/ready</code> → 503 when down);
+<p>Liveness/readiness split (<code>/health/live</code>, DB-backed <code>/health/ready</code> → 503 when the
+database goes down <i>at runtime</i> — verified by executed tests; see the OPS-010 caveat below for cold start);
 structured JSON logs with the full property set; OTel traces HTTP→MediatR→EF→Outbox/jobs with correlation +
 persisted <code>traceparent</code> across the async boundary; <code>/metrics</code> (RED + Npgsql pool + outbox
 backlog/dead-letter + job liveness); alert rules + Grafana dashboards authored; Npgsql retry + command timeout;
 graceful shutdown via hosted services; backup/restore/DR runbook (RPO≤5 min/RTO≤4 h); tagged-release rollback;
-failure drills executed live (poison→dead-letter). <b>Open:</b> run the stack + alerts + 24 h soak on a host
-(OPS-001); no circuit breakers (not currently justified — few synchronous external calls). <b>Partially compliant
-(§17, §19).</b></p>
+failure drills executed live (poison→dead-letter, re-executed 2026-07-29).
+<b>OPS-010 (new, Medium/P2, open — found by witnessed OQ execution 2026-07-29):</b> on a <b>cold start</b> with
+PostgreSQL unreachable the process <b>crashes instead of starting and reporting unready</b> — two unconditional
+DB-dependent startup steps (<code>Program.cs:247</code> platform-admin bootstrap, <code>Program.cs:264</code> LOV
+backfill) run before the host listens. Availability/robustness only (no data-integrity or security impact); a
+DB outage coinciding with a restart yields a crash-loop rather than an interrogable unready instance. See
+<code>docs/validation/10-OQ-Execution-Record-Addendum-A-v1.49.md</code> §3.
+<b>Open:</b> OPS-010 remediation/disposition; run the stack + alerts + 24 h soak on a host (OPS-001); no circuit
+breakers (not currently justified — few synchronous external calls). <b>Partially compliant (§17, §19).</b></p>
 
 <!-- 20 Risk register -->
 <h2 class="sec"><span class="n">20 · D ·</span> Risk register</h2>
@@ -412,6 +420,7 @@ failure drills executed live (poison→dead-letter). <b>Open:</b> run the stack 
   <tr><td>SEC-001</td><td>Undiscovered vuln absent an independent pen test</td><td>Medium</td><td>High</td><td class="sev-high">High</td><td>Unassigned (Security)</td><td>Staging + vendor pen test per SOW; retest</td></tr>
   <tr><td>UI-001</td><td><s>10 high-severity Angular 18 framework advisories</s> — <b>closed by the 18→22.0.8 upgrade</b></td><td>—</td><td>—</td><td class="sev-low">Closed</td><td>Frontend</td><td><b>Done:</b> npm audit (prod) = 0 advisories; exception register empty; build/67 specs/auth+a11y e2e green post-v22</td></tr>
   <tr><td>SEC-002</td><td>Supply-chain regressions ship undetected</td><td>Low</td><td>Medium</td><td class="sev-low">Low (remediated)</td><td>DevOps</td><td><b>Done:</b> .NET SCA + npm SCA + Trivy gates in CI</td></tr>
+  <tr><td>OPS-010</td><td><b>Cold start with PostgreSQL unreachable crashes</b> instead of serving <code>/health/ready</code> 503 → crash-loop during a DB outage, no interrogable unready state</td><td>Medium</td><td>Medium</td><td class="sev-med">Medium</td><td>Unassigned (Backend/Ops)</td><td><b>Open (found 2026-07-29 by witnessed OQ):</b> defer/guard the two startup DB reads (<code>Program.cs:247</code>, <code>:264</code>) so connectivity failure is logged, not fatal; then re-run the OQ-DEP-02 cold-start leg</td></tr>
   <tr><td>OPS-001</td><td>Alert/dashboard misconfig or capacity shortfall unseen until production</td><td>Medium</td><td>Medium</td><td class="sev-med">Medium</td><td>Unassigned (Ops)</td><td>Staging stack + drill + load/soak (R-5/R-7)</td></tr>
   <tr><td>DOC-001</td><td>Part-11 formal validation incomplete for v1.38→v1.48</td><td>High</td><td>Medium</td><td class="sev-med">Medium</td><td>Unassigned (QA)</td><td>Execute REVAL-NTQMS-001 OQ/PQ; sign VSR addendum</td></tr>
   <tr><td>OBS-001</td><td>Serilog not used (standard names it)</td><td>Low</td><td>Low</td><td class="sev-low">Low</td><td>Unassigned</td><td>Confirm equivalence with standard owner; swap provider if mandated</td></tr>
