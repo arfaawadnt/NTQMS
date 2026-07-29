@@ -33,4 +33,8 @@
     <ProjectReference Include="..\NT.QAMS.Infrastructure\NT.QAMS.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="NT.QAMS.WebApi.FunctionalTests" />
+  </ItemGroup>
+
 </Project>

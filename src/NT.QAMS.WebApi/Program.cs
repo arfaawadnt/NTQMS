@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using NT.QAMS.Infrastructure.Security;
 using NT.QAMS.WebApi.Middleware;
 using NT.QAMS.WebApi.Security;
+using NT.QAMS.WebApi.Startup;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -192,6 +193,11 @@ builder.Services.AddHealthChecks()
         HealthStatus.Unhealthy,
         [PostgresReadinessHealthCheck.ReadyTag]);
 
+// OPS-010: startup seeding state + the background retry that finishes the job
+// when a cold start found the database unreachable.
+builder.Services.AddSingleton<StartupSeedingState>();
+builder.Services.AddHostedService<DeferredStartupSeeder>();
+
 var app = builder.Build();
 
 // TENANT-004: deployment safety gate. Production refuses to boot when the DB
@@ -233,47 +239,13 @@ if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
     await db.Database.MigrateAsync();
 }
 
-// Bootstrap the platform administrator from configuration (idempotent).
-// Required once per environment; without it no one can provision tenants.
-var bootstrapEmail = app.Configuration["PlatformAdmin:Email"];
-var bootstrapPassword = app.Configuration["PlatformAdmin:Password"];
-if (!string.IsNullOrWhiteSpace(bootstrapEmail) && !string.IsNullOrWhiteSpace(bootstrapPassword))
-{
-    using var scope = app.Services.CreateScope();
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
-
-    var email = bootstrapEmail.Trim().ToLowerInvariant();
-    var exists = await db.Users.AnyAsync(u => u.TenantId == null && u.Email == email);
-    if (!exists)
-    {
-        db.Users.Add(UserAccount.Create(
-            null, email, "Platform Administrator", hasher.Hash(bootstrapPassword), UserRole.PlatformAdmin));
-        await db.SaveChangesAsync();
-    }
-}
-
-// Backfill the starter list-of-values for tenants provisioned before the
-// default catalog existed (or before a category was added to it). Additive and
-// per-category idempotent — curated lists are never touched.
-{
-    using var scope = app.Services.CreateScope();
-    // Cross-tenant backfill runs as trusted infrastructure — elevate past RLS.
-    scope.ServiceProvider.GetRequiredService<NT.QAMS.Application.Abstractions.ICurrentTenantSetter>().Elevate();
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    var tenantIds = await db.Tenants.Select(t => t.Id).ToListAsync();
-    var seeded = 0;
-    foreach (var tenantId in tenantIds)
-    {
-        seeded += await NT.QAMS.Application.Organization.DefaultLovCatalog.SeedMissingAsync(db, tenantId, CancellationToken.None);
-    }
-
-    if (seeded > 0)
-    {
-        await db.SaveChangesAsync();
-        app.Logger.LogInformation("LOV backfill: {Count} starter entries added across {Tenants} tenant(s)", seeded, tenantIds.Count);
-    }
-}
+// Idempotent startup data: platform-administrator bootstrap + starter
+// list-of-values backfill. OPS-010 — attempted here so a healthy boot seeds
+// before the first request, but an unreachable database only DEFERS the work
+// (DeferredStartupSeeder retries) instead of killing the process: readiness,
+// not a crash-loop, is how a database outage must surface.
+app.Services.GetRequiredService<StartupSeedingState>().Completed =
+    await StartupSeeding.TryRunAsync(app.Services, app.Configuration, app.Logger, CancellationToken.None);
 
 app.UseForwardedHeaders();
 // First in the pipeline: correlation + the canonical completion log cover
