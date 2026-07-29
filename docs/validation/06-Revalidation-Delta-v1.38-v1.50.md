@@ -1,11 +1,11 @@
-# CSV Re-Validation Delta — v1.38.0 → v1.49.0
+# CSV Re-Validation Delta — v1.38.0 → v1.50.0
 
 | Field | Value |
 | ----- | ----- |
-| Document ID | REVAL-NTQMS-001 (rev 2 — extended to v1.49.0) |
+| Document ID | REVAL-NTQMS-001 (rev 3 — extended to v1.50.0) |
 | System | NT.QMS |
 | Baseline validated version | 1.0 (VMP/URS/FRA/QP/RTM/VSR — docs 00–05) |
-| Scope of this delta | Changes across releases **v1.38.0 → v1.49.0** (EA-remediation Phases 0–6 + Road-to-100 backlog/Phases 7–9 + v1.49.0 supply-chain assurance & Angular 22 upgrade) |
+| Scope of this delta | Changes across releases **v1.38.0 → v1.50.0** (EA-remediation Phases 0–6 + Road-to-100 backlog/Phases 7–9 + v1.49 supply-chain assurance & Angular 22 upgrade + v1.50 sign-in surface & statistic presentation) |
 | Parent | VMP-NTQMS-001; URS-NTQMS-001; RTM-NTQMS-001; QP-NTQMS-001; VSR-NTQMS-001 |
 | Status | **DRAFT for QA execution.** Engineering-prepared traceability + qualification stubs; **QA owns, executes, witnesses, and signs.** |
 
@@ -30,8 +30,8 @@
 **Change-control provenance.** Each release below is a tagged, green CI build (Build & Test
 with real PostgreSQL 17 · Container non-root + Trivy scan · Frontend incl. SCA gates). Engineering
 record: `IMPLEMENTATION_LOG.md`; decisions: `docs/adr/ADR-0001…0009`; audits:
-`docs/reference/NT_QMS_EA_Remediation_Closure_Report.md`, `…_Compliance_Audit_v1.49.1.html`,
-`…_Enterprise_Application_Compliance_Audit.html` (EAC-NTQMS-001, covers v1.49.0).
+`docs/reference/NT_QMS_EA_Remediation_Closure_Report.md`, `…_Compliance_Audit_v1.50.0.html`,
+`…_Enterprise_Application_Compliance_Audit.html` (EAC-NTQMS-001 rev 3, covers v1.50.0).
 
 ---
 
@@ -120,6 +120,25 @@ Verification legend as in RTM-NTQMS-001 (**AUTO** automated test, **OQ/PQ** scri
 | URS-087 | Every CI build shall scan the runtime container image for OS/library CVEs and fail on fixable High/Critical findings. | `.github/workflows/ci.yml` ("Install Trivy" + "Trivy image vulnerability scan", `--severity HIGH,CRITICAL --ignore-unfixed`) | AUTO (CI, every push); IQ-24 | Template |
 | URS-088 | The shipped SPA framework shall carry no known high/critical advisories; framework currency shall be maintained on a supported release line. | `frontend/package.json` → `@angular/* ^22.0.8`; upgrade evidence: commits `bc5ed96`→`93f8816` (one per major, gates green per step) | AUTO npm SCA (CI); OQ-SCA-02; INSP `npm audit --omit=dev` = 0 advisories | Template |
 
+### A.8 Sign-in surface & statistic presentation (v1.50)
+
+> **Change assessment (v1.50.0).** Presentation-layer rework plus **one new unauthenticated
+> endpoint**. No change to the validated domain model, no migration, and no change to any
+> existing API contract (the reporting DTO gained a member additively; `ApiSurface.approved.txt`
+> grew by the new route and its versioned twin only). The regulated significance is (a) a new
+> anonymous read surface, which is a security control question, and (b) the numbers displayed on
+> every register and the dashboard now assert a *proportion*, so a wrong denominator would be a
+> misstatement of quality data — hence URS-091's explicit prohibition on inferred denominators.
+
+| URS | Requirement (delta) | Design element(s) | Verification | Status |
+| --- | ------------------- | ----------------- | ------------ | ------ |
+| URS-089 | A laboratory shall be identified on its own sign-in page by its registered **name**, resolved from the address slug before authentication; the identifier shall not be presented as the name. | `Application/Tenancy/Queries/GetWorkspace.cs`; `AuthController.Workspace`; `frontend/core/api/workspace-api.service.ts`; `login.component.ts` | AUTO `WebApi.FunctionalTests/WorkspaceLookupTests`; OQ-UI-03 | Template |
+| URS-090 | The pre-authentication workspace lookup shall disclose the laboratory name and nothing further, and shall not reveal whether a slug is unknown, malformed or belongs to a non-active tenant. | `GetWorkspaceQuery` (Active-only projection of `Name`); uniform `404 problem+json`; strict auth rate-limit partition | AUTO `WorkspaceLookupTests` (payload-shape assertion: exactly one JSON property; 3 indistinguishable-miss cases); OQ-SEC-16 | Template |
+| URS-091 | Where a statistic is presented as a proportion, the denominator shall be a real counted population; the system shall **not** infer a denominator, and shall present a plain count where no population exists. | `shared/ui/list-stats.component.ts` (`of`, opt-in `ratioFromFirst`, refusal guards); `Reporting/ReportingQueries.cs` (`DashboardKpiTotalsDto`, 11 real counts) | AUTO `list-stats.component.spec.ts` (7 cases incl. refusal), `WebApi.FunctionalTests/DashboardKpiTotalsTests` (3 cases); OQ-UI-04 | Template |
+| URS-092 | No displayed proportion shall exceed its own population. | `DashboardKpiTotalsDto` pairing (each KPI to the population it is drawn from); component guard `value <= whole` | AUTO `DashboardKpiTotalsTests.No_kpi_ever_exceeds_its_own_population`; `list-stats` refusal case | Template |
+| URS-093 | The sign-in surface and statistic tiles shall meet WCAG AA contrast; brand tones that fail as text or marks shall be replaced by compliant steps of the same hue rather than used as-is. | `styles.css` `--nt-ink-*` tokens; documented deviations in `login.component.ts` and `list-stats.component.ts` | AUTO axe scan `e2e/a11y.spec.ts` (0 serious/critical); INSP measured ratios (value 11.5:1, label/caption 9.5:1, meter fills ≥3:1) | Template |
+| URS-094 | Platform (administrator) sign-in shall be visually and textually distinct from a laboratory workspace sign-in. | `login.component.ts` platform variant (shield mark, `login.adminPortal`, admin-specific copy) | OQ-UI-05 | Template |
+
 ---
 
 ## Part B — Installation Qualification (IQ) delta
@@ -173,7 +192,9 @@ witnessed manual confirmation is recorded per baseline convention.
 > suite 374 passed / 0 skipped). Residual by design: `Database:MigrateOnStartup=true` still
 > fails fast, so keep it off where readiness-reports-outage is required.
 > Five items remain environment-blocked (live DB service-stop, TLS-at-proxy, deployed
-> container, observability stack, PQ load/soak). The cells below remain **Template** until QA
+> container, observability stack, PQ load/soak). **The v1.50 cases added in A.8 (OQ-UI-03/04/05,
+> OQ-SEC-16) have NOT been executed as protocol** — the underlying behaviour is covered by the
+> automated suites and was observed during development, but no witnessed run exists. The cells below remain **Template** until QA
 > executes on a **qualified** environment and signs; the dev-session records attach as
 > supporting evidence, not as the qualification itself.
 
@@ -195,6 +216,10 @@ witnessed manual confirmation is recorded per baseline convention.
 | OQ-UI-01 | Delete a record in the SPA | Accessible reason dialog (role=dialog, focus, Escape); reason sent as `X-Change-Reason` | | |
 | OQ-SCA-01 | Run `npm audit --omit=dev` against the shipped `frontend/package-lock.json`; inspect `.github/npm-audit-allowlist.txt` | 0 high/critical advisories; exception register empty (or every entry carries a documented reason, compensating control, and tracked fix) | | |
 | OQ-SCA-02 | Smoke the upgraded SPA on the qualified host: sign in, open an NC list (load-more pager), delete with reason dialog, sign out | All regulated-flow UI behaviours unchanged post-Angular-22; no console errors | | |
+| OQ-UI-03 | Open `/t/{slug}` for a known active laboratory | The pill shows the laboratory's registered NAME (not the slug); initials derive from that name | | |
+| OQ-SEC-16 | `GET /api/auth/workspace/{slug}` for (a) an active lab, (b) an unknown slug, (c) a malformed slug, (d) a suspended lab — unauthenticated | (a) 200 with `{"name":…}` and no other property; (b)(c)(d) identical `404 problem+json`, indistinguishable from each other | | |
+| OQ-UI-04 | On a register, compare each tile's caption with the list contents; then open a register whose strip has no total | Every "N / M" matches a real count of loaded rows; the strip without a population shows plain counts and NO meter | | |
+| OQ-UI-05 | Sign in at `/login` with no laboratory pinned | Platform-administration identity is shown (shield mark, admin wording); laboratory credentials wording is absent | | |
 
 ---
 

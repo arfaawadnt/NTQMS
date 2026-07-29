@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>NT.QMS — Consolidated Compliance Status Report (v1.49.1)</title>
+<title>NT.QMS — Consolidated Compliance Status Report (v1.50.0)</title>
 <style>
   :root{
     --bg:#f6f7fb; --panel:#fff; --ink:#16202c; --muted:#5b6878; --line:#dfe4ec;
@@ -96,7 +96,7 @@
 <div class="wrap">
 
 <header>
-  <div class="id">CSR-NTQMS-001 · Consolidated compliance status · 2026-07-29 · NT.QMS <code>v1.49.1</code> (commit <code>aa919f7</code>)</div>
+  <div class="id">CSR-NTQMS-001 <b>rev 2</b> · Consolidated compliance status · 2026-07-29 · NT.QMS <code>v1.50.0</code> (commit <code>d2cf1e5</code>)</div>
   <h1>NT.QMS — Consolidated Compliance Status Report</h1>
   <p class="sub">A single status snapshot across every compliance stream: regulatory (21 CFR Part 11 / GAMP 5 CSV),
   quality-standard support (ISO/IEC 17025, ISO 15189, ISO 9001, GMP), enterprise architecture, and security. It
@@ -137,7 +137,7 @@
     <div><b>0</b><span>critical findings · 0 P0 blockers</span></div>
     <div><b>0</b><span>open defects</span></div>
     <div><b>3</b><span>open conditions (external / environment)</span></div>
-    <div><b>374 + 67 + 6</b><span>backend / frontend / e2e tests — 0 skipped</span></div>
+    <div><b>382 + 74 + 6</b><span>backend / frontend / e2e tests — 0 skipped</span></div>
     <div><b>18</b><span>OQ cases executed (dev, unsigned)</span></div>
     <div><b>0</b><span>known vulnerabilities in shipped deps</span></div>
   </div>
@@ -146,7 +146,7 @@
 <h2 class="sec"><span class="n">1 ·</span> System identification</h2>
 <div class="tablewrap"><table>
   <tr><td style="width:230px"><b>System</b></td><td>NT.QMS — multi-tenant SaaS Quality Management System for accredited laboratories</td></tr>
-  <tr><td><b>Version assessed</b></td><td><code>v1.49.1</code> · commit <code>aa919f7</code> · CI all-green (3/3 jobs)</td></tr>
+  <tr><td><b>Version assessed</b></td><td><code>v1.50.0</code> · commit <code>d2cf1e5</code> · CI all-green (3/3 jobs)</td></tr>
   <tr><td><b>Technology</b></td><td>.NET 9 · PostgreSQL 17 · Angular 22.0.8 · Clean Architecture + CQRS (modular monolith)</td></tr>
   <tr><td><b>Intended use</b></td><td>Quality management for ISO/IEC 17025, ISO 15189, ISO 9001, 21 CFR Part 11 and GMP laboratory environments</td></tr>
   <tr><td><b>GAMP 5 category</b></td><td>Category 5 (configured/bespoke application) — full lifecycle documentation set maintained in <code>docs/validation/</code></td></tr>
@@ -158,7 +158,7 @@
   <tr><th>Stream</th><th>Assessment</th><th>Result</th><th>Status</th></tr>
   <tr>
     <td><b>21 CFR Part 11 / data integrity</b></td>
-    <td>Validation audit → 18 findings (v1.25–v1.37); controls re-verified at v1.49.1</td>
+    <td>Validation audit → 18 findings (v1.25–v1.37); controls re-verified at v1.50.0</td>
     <td>All 18 findings closed. Controls verified live: hash-chained audit trail (<b>85 entries, 0 chain breaks</b>),
       electronic signatures with full evidence set, reason-for-change captured and persisted per changed field,
       immutability triggers on signed records, MFA, segregation of duties, session revocation.</td>
@@ -249,16 +249,17 @@ qualified environment, wait out the lockout or use a disposable account.</div>
   <tr><td>Record integrity</td><td>Hash-chained audit trail + immutability triggers + optimistic concurrency</td><td><span class="pill p-ok">Verified</span> — 85 entries, 0 chain breaks; mid-chain tamper detected at the exact sequence</td></tr>
   <tr><td>Edge hardening</td><td>Locked CSP, nosniff, frame-deny, referrer, HSTS outside Development; rate limiting; account lockout; file magic-byte sniffing</td><td><span class="pill p-ok">Verified</span> — headers present on success <i>and</i> error; 429 + <code>Retry-After</code>; renamed executable rejected <code>422 FILE-415</code></td></tr>
   <tr><td>Supply chain</td><td>CI: .NET SCA + npm SCA (against an exception register) + Trivy image scan</td><td><span class="pill p-ok">Clean</span> — 0 npm advisories at any severity; exception register empty; image clean of fixable HIGH/CRITICAL</td></tr>
+  <tr><td>Anonymous read surface</td><td><code>GET /api/auth/workspace/{slug}</code> (v1.50.0) — must be anonymous, it is read before any credential exists</td><td><span class="pill p-acc">Bounded &amp; tested</span> — returns a laboratory NAME only (no id/status/settings); unknown, malformed and non-active slugs answer 404 alike; behind the strict auth rate limiter. Accepted residual: a already-guessed slug can be confirmed as a real lab — the slug is public in the URL customers circulate</td></tr>
   <tr><td>Independent penetration test</td><td>—</td><td><span class="pill p-no">Not performed</span> — SEC-001, the one High finding</td></tr>
 </table></div>
 
-<h2 class="sec"><span class="n">6 ·</span> Verification evidence executed at v1.49.1</h2>
+<h2 class="sec"><span class="n">6 ·</span> Verification evidence executed at v1.50.0</h2>
 <ul>
   <li><b>Build:</b> <code>dotnet build</code> — succeeded, <b>0 warnings</b>, 0 errors.</li>
-  <li><b>Backend suite:</b> <b>374 tests passed, 0 failed, 0 skipped</b> — 211 domain / 57 application / 24
+  <li><b>Backend suite:</b> <b>382 tests passed, 0 failed, 0 skipped</b> — 211 domain / 57 application / 24
     architecture (boundary + command-policy merge gates) / 18 integration against <b>real PostgreSQL 17</b> as the
     least-privilege role / 64 functional over real HTTP+JWT.</li>
-  <li><b>Frontend:</b> production AOT build + <b>67 unit specs</b> on Angular 22.0.8; <b>6 Playwright e2e</b>
+  <li><b>Frontend:</b> production AOT build + <b>74 unit specs</b> on Angular 22.0.8; <b>6 Playwright e2e</b>
     including 2 axe accessibility scans with <b>0 serious/critical</b> violations.</li>
   <li><b>CI:</b> green on <code>aa919f7</code> — Build &amp; Test (real PostgreSQL + .NET SCA) · Container (non-root +
     volume writable + Trivy) · Frontend (npm SCA + specs + build + e2e).</li>
@@ -276,7 +277,7 @@ qualified environment, wait out the lockout or use a disposable account.</div>
 <div class="tablewrap"><table>
   <tr><th>ID</th><th>Condition</th><th>Severity</th><th>Owner</th><th>Blocked by</th><th>Closes</th></tr>
   <tr><td><b>SEC-001</b></td><td>Independent penetration test against a deployed staging instance, plus a fix window for anything it finds</td><td><span class="pill p-open">High</span></td><td>External security vendor</td><td>No staging host; independence cannot be self-supplied</td><td>Security dimension stops being code-inferred</td></tr>
-  <tr><td><b>DOC-001</b></td><td>Formal CSV re-validation on a <b>qualified</b> environment: repeat IQ/OQ, execute PQ, sign the VSR addendum</td><td><span class="pill p-open">Medium</span></td><td>QA / validation</td><td>Qualified environment + independent witness</td><td>Regulated completeness for v1.38→v1.49.1</td></tr>
+  <tr><td><b>DOC-001</b></td><td>Formal CSV re-validation on a <b>qualified</b> environment: repeat IQ/OQ, execute PQ, sign the VSR addendum</td><td><span class="pill p-open">Medium</span></td><td>QA / validation</td><td>Qualified environment + independent witness</td><td>Regulated completeness for v1.38→v1.50.0</td></tr>
   <tr><td><b>OPS-001</b><br>(R-5/R-7)</td><td>Stand up the production compose + observability stack on a real host; run load ≥100 VU and a 24-hour soak; confirm the drills fire Grafana/Prometheus alerts</td><td><span class="pill p-open">Medium</span></td><td>Ops</td><td>No Docker/staging host</td><td>Production runtime evidence; retires the telemetry reservation</td></tr>
 </table></div>
 <div class="note"><b>Everything on this list needs a party or a machine that engineering does not have.</b> No item is
@@ -311,15 +312,15 @@ workstation, and simulating it would create fabricated compliance records.</div>
 <h2 class="sec"><span class="n">10 ·</span> Document register</h2>
 <div class="tablewrap"><table>
   <tr><th>Artifact</th><th>Purpose</th></tr>
-  <tr><td><code>NT_QMS_Compliance_Status_Report_v1.49.1.html</code></td><td><b>This document</b> — consolidated status</td></tr>
+  <tr><td><code>NT_QMS_Compliance_Status_Report_v1.50.0.html</code></td><td><b>This document</b> — consolidated status</td></tr>
   <tr><td><code>NT_QMS_Enterprise_Application_Compliance_Audit.html</code></td><td>EAC-NTQMS-001 rev 2 — 22-section enterprise checklist (≈88%)</td></tr>
-  <tr><td><code>NT_QMS_Enterprise_Architecture_Compliance_Audit_v1.49.1.html</code></td><td>EA-AUD-NTQMS-004 — architecture programme (≈98%)</td></tr>
+  <tr><td><code>NT_QMS_Enterprise_Architecture_Compliance_Audit_v1.50.0.html</code></td><td>EA-AUD-NTQMS-005 — architecture programme (≈98%)</td></tr>
   <tr><td><code>NT_QMS_EA_Remediation_Closure_Report.md</code></td><td>Per-finding closure evidence for the 24 EA findings + residual register</td></tr>
   <tr><td><code>NT_QMS_Security_Assessment_Report.html</code></td><td>In-house adversarial assessment (dev-instance scope, explicitly not a pen test)</td></tr>
   <tr><td><code>NT_QMS_PenTest_SOW.md</code> · <code>NT_QMS_PenTest_Readiness_Checklist.md</code></td><td>Scope of work + readiness gate for SEC-001</td></tr>
   <tr><td><code>NT_QMS_Load_Test_Report.md</code></td><td>Dev-box load baseline (informational; PQ is staging)</td></tr>
   <tr><td><code>docs/validation/00–05</code></td><td>VMP · URS · FRA · QP (IQ/OQ/PQ) · RTM · VSR</td></tr>
-  <tr><td><code>docs/validation/06-Revalidation-Delta-v1.38-v1.49.md</code></td><td>REVAL-NTQMS-001 rev 2 — RTM delta + IQ/OQ/PQ additions to v1.49</td></tr>
+  <tr><td><code>docs/validation/06-Revalidation-Delta-v1.38-v1.50.md</code></td><td>REVAL-NTQMS-001 rev 2 — RTM delta + IQ/OQ/PQ additions to v1.49</td></tr>
   <tr><td><code>docs/validation/07-Engineering-DryRun-Evidence-v1.49.md</code></td><td>Engineering pre-execution results (unwitnessed)</td></tr>
   <tr><td><code>docs/validation/08-System-Owner-Release-Decision-v1.49.md</code></td><td>SODR-NTQMS-001 — conditional release approval with risk acceptance (unsigned)</td></tr>
   <tr><td><code>docs/validation/09/10/11-OQ-Execution-Record*</code></td><td>OQ execution transcript + Addendum A (remaining cases, OPS-010 raised) + Addendum B (OPS-010 fix &amp; re-test)</td></tr>
@@ -351,7 +352,7 @@ validation is not certified.</p>
 Owner's, or the Quality Manager's behalf. Unsigned, this document is a status statement, not an approval.</p>
 
 <footer>
-  NT.QMS Consolidated Compliance Status Report · CSR-NTQMS-001 · 2026-07-29 · v1.49.1 (commit <code>aa919f7</code>).
+  NT.QMS Consolidated Compliance Status Report · CSR-NTQMS-001 · 2026-07-29 · v1.50.0 (commit <code>d2cf1e5</code>).
   All quantitative claims herein were executed and observed on the stated date; figures marked as not executed are
   not claimed. This is an engineering compliance status report — not a regulatory approval, not a CSV sign-off, and
   not a penetration-test attestation. Repository: <code>github.com/arfaawadnt/NTQMS</code>.

@@ -58,8 +58,8 @@
 <div class="wrap">
 
 <header>
-  <div class="id">MODE: Enterprise Application Compliance Assessment · EAC-NTQMS-001 <b>rev 2</b> · issued 2026-07-29,
-  re-issued 2026-07-29 · target tag <code>v1.49.1</code> (commit <code>aa919f7</code>, CI all-green)</div>
+  <div class="id">MODE: Enterprise Application Compliance Assessment · EAC-NTQMS-001 <b>rev 3</b> · issued 2026-07-29,
+  re-issued 2026-07-29 · target tag <code>v1.50.0</code> (commit <code>d2cf1e5</code>, CI all-green)</div>
   <h1>NT.QMS — Enterprise Application Architecture Compliance Audit</h1>
   <p class="sub">Evidence-based assessment of the NT.QMS system (.NET 9 · PostgreSQL 17 · Angular 22 · Clean
   Architecture + CQRS) against the 22-section Enterprise Application Architecture checklist. Compliance is
@@ -87,6 +87,40 @@
     The <b>overall score is deliberately unchanged at ≈88%</b>: the closed findings were already scored, and the
     remaining gap is external/operational (independent pen test, qualified-environment validation, staging
     observability + load/soak) — none of which this work advances. Scores were not raised to reflect effort.
+  </div>
+
+  <div class="scope" style="margin-top:14px">
+    <b>Revision 3 — v1.50.0 (UI modernization + workspace lookup).</b> Presentation-layer work plus <b>one new
+    unauthenticated endpoint</b>, which is the security-relevant part and is recorded here rather than only in the
+    commit history:
+    <ul style="margin:8px 0 0 18px">
+      <li><b>New anonymous endpoint <code>GET /api/auth/workspace/{slug}</code></b> — resolves a laboratory's display
+        NAME from the slug in its own sign-in address so the login page can name the lab instead of echoing its
+        identifier. It <b>must</b> be anonymous (it is read before any credential exists). Disclosure boundary,
+        deliberate and tested: the response carries <b>the name and nothing else</b> — no id, status or settings — and
+        unknown, malformed and non-active slugs all answer <code>404 problem+json</code> alike, so tenant state cannot
+        be probed. It sits behind the strict auth rate-limit partition. <b>Accepted residual:</b> someone who already
+        guessed a slug can confirm it belongs to a real laboratory; the slug is public in the URL customers circulate,
+        and naming the lab on its own login page is the requirement. Covered by
+        <code>WorkspaceLookupTests</code> (6 cases, incl. a payload-shape assertion that the JSON has exactly one
+        property) and added to <code>ApiSurface.approved.txt</code> per ADR-0004.</li>
+      <li><b>Sign-in page rebuilt</b> to the supplied design; the platform (admin) portal is now a distinct identity
+        rather than laboratory wording. Two design colours were darkened because the supplied values fail WCAG AA on
+        that background — recorded in the component, not silently changed. Both axe scans still report
+        <b>0 serious/critical</b>.</li>
+      <li><b>Statistic tiles modernized system-wide</b> (dashboard + 28 module registers). The seven tone tokens were
+        being used as a categorical set and <b>fail the palette checks</b> — gold 1.80:1 and teal 2.58:1 against a
+        white surface, and red↔orange only ΔE 8.9 apart for normal vision, so two tiles were genuinely hard to tell
+        apart. Tones now appear as meter fills and rails using new <code>--nt-ink-*</code> steps that each clear
+        4.5:1; values wear text ink. Counts are shown as proportions <b>only where a real denominator exists</b> — the
+        dashboard read model gained eleven genuine population counts for that purpose, and a KPI whose population is
+        zero renders with no meter rather than an invented ratio.</li>
+      <li><b>Suite grew 374 → 382 backend and 67 → 74 frontend</b>, including 3 tests pinning the invariant the new
+        meters depend on (no KPI may exceed its own population).</li>
+    </ul>
+    <b>Score unchanged again at ≈88%.</b> This is presentation and read-side work: it closes no open condition
+    (SEC-001, DOC-001, OPS-001 all stand) and it introduces no new finding. The one new attack surface is scored as
+    an accepted, tested residual above rather than as a deduction.
   </div>
 </header>
 
@@ -117,7 +151,7 @@
     <div><b>0</b><span>critical findings</span></div>
     <div><b>1</b><span>high finding (SEC-001, non-P0)</span></div>
     <div><b>0</b><span>P0 production blockers</span></div>
-    <div><b>374+67+6</b><span>backend / frontend / e2e tests — executed, 0 skipped</span></div>
+    <div><b>382+74+6</b><span>backend / frontend / e2e tests — executed, 0 skipped</span></div>
     <div><b>18</b><span>OQ cases executed &amp; transcribed (dev env)</span></div>
   </div>
 </div>
@@ -133,8 +167,8 @@ deployment, testing, and documentation.</p>
   <li><b>Source repository</b> — <code>src/NT.QAMS.{Domain,Application,Infrastructure,WebApi,Contracts,SharedKernel}</code>,
   <code>frontend/</code>, 5 test projects; <code>NT.QAMS.sln</code>.</li>
   <li><b>Executed this assessment:</b> <code>dotnet build</code> (0 warnings/0 errors); <code>dotnet test</code>
-  → <b>374 backend tests pass, 0 skipped</b> (211 Domain / 57 Application / 24 Architecture / 18 Integration on real
-  PostgreSQL 17 / 64 WebApi Functional); the application run and queried live; adversarial probes
+  → <b>382 backend tests pass, 0 skipped</b> (211 Domain / 57 Application / 24 Architecture / 18 Integration on real
+  PostgreSQL 17 / 72 WebApi Functional); the application run and queried live; adversarial probes
   <code>scripts/security-probe.ps1</code> + <code>security-probe-deep.ps1</code> (24/24, 0 findings); failure drills
   re-executed live (poison → dead-letter at MaxAttempts=5); all 20+ EF migrations applied to a real PostgreSQL 17 DB.</li>
   <li><b>Witnessed OQ execution (rev 2):</b> <b>18 protocol cases executed</b> against the running instance with
@@ -145,7 +179,7 @@ deployment, testing, and documentation.</p>
   <code>X-Change-Reason</code> captured on the wire and persisted per field, session model, and audit hash-chain
   continuity (<b>83 entries, 0 breaks</b>). Records: <code>docs/validation/09-OQ-Execution-Record-v1.49.md</code>,
   <code>10-…Addendum-A-v1.49.md</code>, <code>11-…Addendum-B-OPS-010-v1.49.1.md</code>.</li>
-  <li><b>Verified this session (same build):</b> frontend production build + <b>67 unit specs</b> on Angular 22.0.8;
+  <li><b>Verified this session (same build):</b> frontend production build + <b>74 unit specs</b> on Angular 22.0.8;
   <b>6 Playwright e2e</b> (incl. 2 axe a11y scans, 0 serious/critical) against the live API; CI green for
   <code>aa919f7</code> (Build &amp; Test with real PG + SCA · Container non-root + Trivy · Frontend + npm SCA).</li>
   <li><b>EF configs/migrations, PostgreSQL schema</b> (queried live: tables, RLS, constraints, roles).</li>
@@ -416,7 +450,7 @@ VERIFIED. Database integrity: VERIFIED.</b></p>
 <p><b>Spoofing:</b> JWT validated for issuer/audience/signature/lifetime; forged/stripped tokens → 401 (probe A1–A3).
 <b>Tampering:</b> hash-chained audit trail + immutability triggers + xmin; tamper detected at exact sequence.
 <b>Repudiation:</b> security-event ledger, per-request correlation, e-signature evidence set.
-<b>Information disclosure:</b> generic auth errors (no enumeration), problem+json, no stack traces (probe G1–G3);
+<b>Information disclosure:</b> generic auth errors (no enumeration), problem+json, no stack traces (probe G1–G3); the one anonymous read surface (<code>GET /api/auth/workspace/{slug}</code>, v1.50.0) returns a laboratory NAME and nothing else and answers 404 identically for unknown, malformed and non-active slugs, so it leaks no tenant state (see rev 3 above for the accepted residual);
 tenant isolation. <b>DoS:</b> global + auth + e-sign rate limits → 429 (probe E1). <b>Elevation:</b>
 deny-by-default at HTTP + command pipeline; role×endpoint matrix; TenantAdmin cannot mint PlatformAdmin (probe D1);
 refresh reuse revokes the family (probe I). Headers/CSP present on every response incl. errors; CORS not reflected
@@ -439,14 +473,14 @@ cover success/validation/authz/tenancy/concurrency/not-found (<code>WebApi.Funct
 routes, facade/store orchestration, centralized typed API services, i18n (EN/AR-RTL/FR) centralized, loading/empty/
 error/validation states, load-more pagination, memory-only access token + silent refresh (ADR-0009), axe-core a11y
 in CI (0 serious/critical on login). UI authorization is affordance-only (not a security control). Duplicate submit
-guarded. 67 unit specs + 6 e2e executed. Gaps: version currency; thinner component-spec ratio. <b>Partially
+guarded. 74 unit specs + 6 e2e executed. Gaps: thinner component-spec ratio. <b>Partially
 compliant (§13).</b></p>
 
 <h2 class="sec"><span class="n">18 ·</span> Testing &amp; quality assessment</h2>
-<p><b>Executed this assessment:</b> <b>374</b> backend tests (0 skipped) — Domain unit/value/aggregate/state (211),
+<p><b>Executed this assessment:</b> <b>382</b> backend tests (0 skipped) — Domain unit/value/aggregate/state (211),
 command/query/validation/authorization/idempotency behaviours (57), architecture boundary + command-policy (24),
 EF/PostgreSQL constraint + RLS + immutability + concurrency + outbox + migration + tamper (18, real PG), API/
-problem-details/pagination/file/versioning/role-matrix/contract/observability/<b>startup-resilience</b> (64); plus 67
+problem-details/pagination/file/versioning/role-matrix/contract/observability/<b>startup-resilience</b>/<b>workspace-lookup</b>/<b>kpi-populations</b> (72); plus 74
 frontend specs (Angular 22) and 6 e2e (incl. axe). Acceptance→Test→Evidence→Result mapping exists in RTM-NTQMS-001.
 <b>Added in rev 2:</b> <code>StartupSeedingResilienceTests</code> (6 cases) locking in the OPS-010 fix, and a
 <b>witnessed manual OQ session</b> (18 cases, actual results transcribed) that automated suites had not covered.
@@ -535,7 +569,7 @@ pattern ADR.</p>
   <tr><td>Audit / e-signatures</td><td>Tamper-detection + immutability tests (executed)</td><td>—</td><td>High</td></tr>
   <tr><td>Security (STRIDE)</td><td>24 adversarial checks; headers/rate-limit/injection verified live</td><td>Independent pen test; TLS/HSTS on host; SCA/image scan</td><td>Medium</td></tr>
   <tr><td>Observability / resilience</td><td>Log-shape + trace-propagation tests; /metrics live; drills executed</td><td>Staging alerts firing; 24 h soak; load at scale</td><td>Medium</td></tr>
-  <tr><td>Frontend</td><td>67 specs + 6 e2e executed; source</td><td>Broader component specs</td><td>High</td></tr>
+  <tr><td>Frontend</td><td>74 specs + 6 e2e executed; source</td><td>Broader component specs</td><td>High</td></tr>
   <tr><td>Deployment</td><td>Dockerfile/compose reviewed; CI container job green</td><td>Vuln scan; run on a real orchestrator</td><td>Medium</td></tr>
 </table></div>
 
@@ -565,7 +599,7 @@ pattern ADR.</p>
   <tr><td><b>Tenant isolation verified?</b></td><td><b>Yes</b> — EF filter + FORCE RLS, executed against real PostgreSQL + live IDOR probe (404)</td></tr>
   <tr><td><b>Backend authorization verified?</b></td><td><b>Yes</b> — deny-by-default HTTP + command pipeline; role×endpoint matrix executed</td></tr>
   <tr><td><b>Database integrity verified?</b></td><td><b>Yes</b> — constraints/immutability/concurrency/migrations tested on real PostgreSQL</td></tr>
-  <tr><td><b>Automated tests sufficient evidence?</b></td><td><b>Yes for code-level controls</b> (374 backend + 67 FE + 6 e2e, 0 skipped, executed) — but <b>demonstrably not sufficient alone</b>: OPS-010 slipped past a fully green suite because the functional host substitutes EF InMemory. Insufficient for production-runtime/pen-test claims.</td></tr>
+  <tr><td><b>Automated tests sufficient evidence?</b></td><td><b>Yes for code-level controls</b> (382 backend + 74 FE + 6 e2e, 0 skipped, executed) — but <b>demonstrably not sufficient alone</b>: OPS-010 slipped past a fully green suite because the functional host substitutes EF InMemory. Insufficient for production-runtime/pen-test claims.</td></tr>
   <tr><td><b>Can it reasonably proceed to production?</b></td><td>Yes, once the remaining conditions are met — <b>SEC-001</b> (independent pen test), <b>OPS-001</b> (staging observability + load/soak), <b>DOC-001</b> (qualified-environment validation + signatures). SEC-002 is closed.</td></tr>
 </table></div>
 <p style="font-size:16px;margin-top:16px"><b>PRODUCTION DECISION: APPROVED WITH CONDITIONS.</b> All applicable
@@ -598,7 +632,7 @@ re-validation on a qualified environment. None is a P0 blocker; all are P1/P2.</
   NT.QMS <b>v1.49.1</b> (commit <code>aa919f7</code>). Evidence executed this assessment: <code>dotnet build</code>
   (0 warn/0 err) + <code>dotnet test</code> (<b>374</b> backend, 0 skipped, real PostgreSQL 17) + running app +
   adversarial probes (24/24) + failure drills + a witnessed 18-case OQ session. Companion documents:
-  NT_QMS_Enterprise_Architecture_Compliance_Audit_v1.49.1.html (EA-AUD-NTQMS-004, the architecture-programme frame —
+  NT_QMS_Enterprise_Architecture_Compliance_Audit_v1.50.0.html (EA-AUD-NTQMS-005, the architecture-programme frame —
   ≈98% against a narrower scope; see its closing note on reading the two together),
   NT_QMS_EA_Remediation_Closure_Report.md,
   NT_QMS_Security_Assessment_Report.html, <code>.github/npm-audit-allowlist.txt</code> (empty exception register),

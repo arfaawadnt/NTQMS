@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>NT.QMS — Enterprise Architecture Compliance Audit (v1.49.1, current state)</title>
+<title>NT.QMS — Enterprise Architecture Compliance Audit (v1.50.0, current state)</title>
 <style>
   :root{
     --bg:#f6f7fb; --panel:#fff; --ink:#16202c; --muted:#5b6878; --line:#dfe4ec;
@@ -67,9 +67,9 @@
 <div class="wrap">
 
 <header>
-  <div class="id">EA-AUD-NTQMS-004 · Current-state re-audit · 2026-07-29 · tag <code>v1.49.1</code> (commit <code>aa919f7</code>)</div>
-  <h1>NT.QMS — Enterprise Architecture Compliance Audit<br>Current State (v1.49.1)</h1>
-  <p class="sub">Fourth re-audit, superseding EA-AUD-NTQMS-003 (v1.48.0). It covers what changed after the
+  <div class="id">EA-AUD-NTQMS-005 · Current-state re-audit · 2026-07-29 · tag <code>v1.50.0</code> (commit <code>d2cf1e5</code>)</div>
+  <h1>NT.QMS — Enterprise Architecture Compliance Audit<br>Current State (v1.50.0)</h1>
+  <p class="sub">Fifth re-audit, superseding EA-AUD-NTQMS-004 (v1.49.1). It covers what changed after the
   engineering ceiling was reached: CI supply-chain scanning, the Angular 18→22 security upgrade, a witnessed
   execution of the validation protocol — and the <b>real defect that execution uncovered</b> (OPS-010), now fixed.
   Same evidence-based method: every score is backed by an executed build, the automated suite against real
@@ -87,7 +87,7 @@
   engineering gaps that were previously scored as met does not buy percentage points.</p>
   <div class="bignums">
     <div><b>≈ 98% <span class="flat">▬ flat</span></b><span>overall (same remainder as v1.48)</span></div>
-    <div><b>374 + 67 + 6</b><span>backend / frontend / e2e — green, 0 skipped</span></div>
+    <div><b>382 + 74 + 6</b><span>backend / frontend / e2e — green, 0 skipped</span></div>
     <div><b>0</b><span>npm advisories in shipped deps (was 10 high)</span></div>
     <div><b>18</b><span>OQ cases executed, actuals transcribed</span></div>
     <div><b>1 → 0</b><span>defects found by that execution → open</span></div>
@@ -105,9 +105,18 @@
   remains open, not because the correction was cost-free.
 </div>
 
+<div class="note"><b>Added since v1.49.1 (tag v1.50.0).</b> Presentation-layer modernization — the sign-in page
+rebuilt to the supplied design with a distinct platform-admin portal, and statistic tiles reworked across the
+dashboard and 28 module registers so counts read as proportions of real populations (the seven tone tokens failed the
+palette checks as a categorical set, so tones moved to meter fills using new AA-clearing <code>--nt-ink-*</code>
+steps). One <b>new anonymous endpoint</b>, <code>GET /api/auth/workspace/{slug}</code>, returns a laboratory NAME and
+nothing else, answering 404 alike for unknown, malformed and non-active slugs; it is the only new attack surface and
+is covered by <code>WorkspaceLookupTests</code>. Suite 374→382 backend, 67→74 frontend. <b>No score movement:</b> this
+work closes none of PEN / R-5 / R-6 / R-7.</div>
+
 <h2 class="sec">A · What moved since v1.48 (EA-AUD-NTQMS-003)</h2>
 <div class="tablewrap"><table>
-  <tr><th>Area</th><th>v1.48</th><th>v1.49.1</th><th></th><th>Change (release · proof)</th></tr>
+  <tr><th>Area</th><th>v1.48</th><th>now</th><th></th><th>Change (release · proof)</th></tr>
   <tr>
     <td><b>Supply chain &amp; build</b><br><span style="color:var(--muted);font-size:12px">new dimension</span></td>
     <td class="score was">—</td><td class="score">98</td>
@@ -181,10 +190,10 @@ the same four as at v1.48, which is why the headline number did not move.</div>
 
 <h2 class="sec">D · Verification at v1.49.1 <small>every figure below was executed, not estimated</small></h2>
 <ul>
-  <li><b>Backend 374 tests, 0 skipped</b> — 211 domain / 57 application / 24 architecture / 18 integration (real
-  PostgreSQL 17) / 64 functional (real HTTP+JWT, incl. the 6-role×endpoint matrix, refresh-session flow, contract
+  <li><b>Backend 382 tests, 0 skipped</b> — 211 domain / 57 application / 24 architecture / 18 integration (real
+  PostgreSQL 17) / 72 functional (real HTTP+JWT, incl. the 6-role×endpoint matrix, refresh-session flow, contract
   coverage, and the new startup-resilience suite). Build: 0 warnings.</li>
-  <li><b>Frontend 67 unit specs on Angular 22.0.8</b> + <b>6 Playwright e2e</b> — auth gate, 2 axe a11y scans (zero
+  <li><b>Frontend 74 unit specs on Angular 22.0.8</b> + <b>6 Playwright e2e</b> — auth gate, 2 axe a11y scans (zero
   serious/critical), regulated workflow, load-more pagination.</li>
   <li><b>Supply chain</b> — <code>npm audit --omit=dev</code>: <code>{"high":0,"critical":0,"total":0}</code>;
   .NET vulnerable-package scan clean; Trivy image scan clean of fixable HIGH/CRITICAL.</li>
