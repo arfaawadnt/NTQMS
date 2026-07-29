@@ -30,7 +30,7 @@
 **Change-control provenance.** Each release below is a tagged, green CI build (Build & Test
 with real PostgreSQL 17 · Container non-root + Trivy scan · Frontend incl. SCA gates). Engineering
 record: `IMPLEMENTATION_LOG.md`; decisions: `docs/adr/ADR-0001…0009`; audits:
-`docs/reference/NT_QMS_EA_Remediation_Closure_Report.md`, `…_Compliance_Audit_v1.48.html`,
+`docs/reference/NT_QMS_EA_Remediation_Closure_Report.md`, `…_Compliance_Audit_v1.49.1.html`,
 `…_Enterprise_Application_Compliance_Audit.html` (EAC-NTQMS-001, covers v1.49.0).
 
 ---
