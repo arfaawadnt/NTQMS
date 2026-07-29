@@ -1947,3 +1947,8 @@ export interface ChainVerification {
   verifiedEntries: number;
   brokenAtSequence: number | null;
 }
+
+/** Pre-authentication branding for a laboratory's own sign-in address. */
+export interface Workspace {
+  name: string;
+}

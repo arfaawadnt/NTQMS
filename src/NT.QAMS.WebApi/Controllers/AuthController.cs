@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using NT.QAMS.Application.IdentityAccess.Commands;
+using NT.QAMS.Application.Tenancy.Queries;
 using NT.QAMS.Contracts.IdentityAccess;
+using NT.QAMS.Contracts.Tenancy;
 using NT.QAMS.WebApi.Security;
 
 namespace NT.QAMS.WebApi.Controllers;
@@ -32,6 +34,25 @@ public sealed class AuthController(ISender sender) : ControllerBase
         var result = await sender.Send(new LoginCommand(
             request.TenantIdentifier, request.Email, request.Password, request.MfaCode), ct);
         return AuthResult(result);
+    }
+
+    /// <summary>
+    /// Resolves the laboratory NAME behind a sign-in address (/t/{slug}) so the
+    /// login page can name the lab instead of echoing its identifier. Anonymous
+    /// by necessity — it is read before any credential exists — and deliberately
+    /// returns nothing but the name. Unknown, malformed and non-active slugs all
+    /// answer 404 alike, so tenant state cannot be probed.
+    /// </summary>
+    [HttpGet("workspace/{slug}")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(WorkspaceResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Workspace(string slug, CancellationToken ct)
+    {
+        var workspace = await sender.Send(new GetWorkspaceQuery(slug), ct);
+        return workspace is null
+            ? Problem(statusCode: StatusCodes.Status404NotFound, title: "Workspace not found.")
+            : Ok(workspace);
     }
 
     /// <summary>

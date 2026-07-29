@@ -20,3 +20,9 @@ public sealed record TenantDto(
     string Name,
     string Status,
     DateTimeOffset CreatedAtUtc);
+
+/// <summary>
+/// Public, pre-authentication branding for a laboratory's own sign-in address.
+/// Carries the display NAME only — never ids, status or settings.
+/// </summary>
+public sealed record WorkspaceResponse(string Name);

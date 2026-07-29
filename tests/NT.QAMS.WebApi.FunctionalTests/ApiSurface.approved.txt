@@ -28,6 +28,7 @@ GET /api/access-reviews
 GET /api/archives
 GET /api/audits
 GET /api/audits/{id}
+GET /api/auth/workspace/{slug}
 GET /api/branches
 GET /api/carryover-studies
 GET /api/carryover-studies/{id}
@@ -131,6 +132,7 @@ GET /api/v{version}/access-reviews
 GET /api/v{version}/archives
 GET /api/v{version}/audits
 GET /api/v{version}/audits/{id}
+GET /api/v{version}/auth/workspace/{slug}
 GET /api/v{version}/branches
 GET /api/v{version}/carryover-studies
 GET /api/v{version}/carryover-studies/{id}

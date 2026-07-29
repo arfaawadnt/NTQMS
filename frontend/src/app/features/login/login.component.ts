@@ -1,9 +1,11 @@
-import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, DestroyRef, effect, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../core/auth.service';
 import { I18nService, Lang } from '../../core/i18n.service';
+import { WorkspaceApiService } from '../../core/api/workspace-api.service';
 
 /** Persisted key for the sign-in surface's light/dark preference. */
 const THEME_KEY = 'qams.login.theme';
@@ -47,21 +49,22 @@ const THEME_KEY = 'qams.login.theme';
           </div>
 
           <div class="controlrow">
-            <div class="wsblock">
-              @if (tenantSlug()) {
-                <span class="wspill">
-                  <span class="avatar" aria-hidden="true">{{ tenantInitials() }}</span>
-                  <span class="wsname">{{ tenantName() }}</span>
+            @if (tenantSlug()) {
+              <span class="wspill">
+                <span class="avatar" aria-hidden="true">{{ workspaceInitials() }}</span>
+                <span class="wsname">{{ workspaceName() }}</span>
+              </span>
+            } @else {
+              <span class="wspill admin">
+                <span class="avatar admin" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 3l7 3v6c0 4.2-2.9 7.7-7 9-4.1-1.3-7-4.8-7-9V6l7-3z" />
+                  </svg>
                 </span>
-                <span class="wshint">{{ i18n.t('login.workspaceHint') }}</span>
-              } @else {
-                <span class="wspill">
-                  <span class="avatar" aria-hidden="true">NT</span>
-                  <span class="wsname">{{ i18n.t('login.platformMode') }}</span>
-                </span>
-                <span class="wshint">{{ i18n.t('login.labUrlHint') }}</span>
-              }
-            </div>
+                <span class="wsname">{{ i18n.t('login.adminPortal') }}</span>
+              </span>
+            }
 
             <div class="langswitch" role="group" [attr.aria-label]="i18n.t('common.language')">
               @for (l of langs; track l.code) {
@@ -86,10 +89,10 @@ const THEME_KEY = 'qams.login.theme';
       <main class="body">
         <div class="cols"><div class="colgrid">
           <section class="hero">
-            <h1>{{ i18n.t('login.heroTitle') }}</h1>
-            <p class="herobody">{{ i18n.t('login.heroBody') }}</p>
+            <h1>{{ i18n.t(tenantSlug() ? 'login.heroTitle' : 'login.adminHeroTitle') }}</h1>
+            <p class="herobody">{{ i18n.t(tenantSlug() ? 'login.heroBody' : 'login.adminHeroBody') }}</p>
             <ul class="features">
-              @for (f of features; track f) {
+              @for (f of features(); track f) {
                 <li>{{ i18n.t(f) }}</li>
               }
             </ul>
@@ -97,7 +100,10 @@ const THEME_KEY = 'qams.login.theme';
 
           <section class="card">
             <h2>{{ i18n.t('login.title') }}</h2>
-            <p class="cardhint">{{ i18n.t('login.cardHint') }}</p>
+            <p class="cardhint">{{ i18n.t(tenantSlug() ? 'login.cardHint' : 'login.adminCardHint') }}</p>
+            @if (!tenantSlug()) {
+              <p class="cardnote">{{ i18n.t('login.labUrlHint') }}</p>
+            }
 
             <form (ngSubmit)="submit()">
               <label for="email">{{ i18n.t('login.email') }}</label>
@@ -215,9 +221,6 @@ const THEME_KEY = 'qams.login.theme';
 
     /* ------------------------------------------------------- control row */
     .controlrow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-    /* The hint is taken out of flow so the PILL is what gets centred in the
-       control row (the mockup centres the pill and floats the hint under it). */
-    .wsblock { position: relative; display: flex; min-width: 0; }
     .wspill {
       display: inline-flex; align-items: center; gap: 10px;
       background: var(--chipbg); border: 1px solid var(--line); border-radius: 999px;
@@ -234,10 +237,6 @@ const THEME_KEY = 'qams.login.theme';
     .wsname {
       font-size: 13px; font-weight: 700; color: var(--ink);
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    }
-    .wshint {
-      position: absolute; top: 100%; inset-inline-start: 51px; margin-top: 4px;
-      font-size: 10.5px; font-weight: 500; line-height: 1.25; color: var(--slate); white-space: nowrap;
     }
 
     /* The pill/switch/toggle are optically centred on the 48px workspace pill,
@@ -291,6 +290,7 @@ const THEME_KEY = 'qams.login.theme';
        card drifts ~13px taller than the design. */
     h2 { margin: 0; font-size: 21px; font-weight: 800; line-height: 1.28; color: var(--ink); }
     .cardhint { margin: 4px 0 0; font-size: 13px; font-weight: 500; line-height: 1.23; color: var(--slate); }
+    .cardnote { margin: 8px 0 0; font-size: 11.5px; line-height: 1.45; color: var(--slate); }
     /* Colour comes from the theme's --link so the dark variant cannot be beaten
        by the global button.link rule. */
     .platformswitch {
@@ -341,6 +341,8 @@ export class LoginComponent {
   readonly i18n = inject(I18nService);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly workspaces = inject(WorkspaceApiService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly langs: { code: Lang; label: string }[] = [
     { code: 'en', label: 'EN' },
@@ -348,13 +350,17 @@ export class LoginComponent {
     { code: 'fr', label: 'FR' },
   ];
 
-  /** Capability pills on the value panel, as i18n keys. */
-  readonly features = [
-    'login.featureDocs',
-    'login.featureCapa',
-    'login.featureAudits',
-    'login.featureRisk',
-  ] as const;
+  private static readonly LabFeatures = [
+    'login.featureDocs', 'login.featureCapa', 'login.featureAudits', 'login.featureRisk',
+  ];
+
+  private static readonly AdminFeatures = [
+    'login.adminFeatureTenants', 'login.adminFeatureSecurity', 'login.adminFeatureAudit',
+  ];
+
+  /** Capability pills on the value panel, as i18n keys — per sign-in variant. */
+  readonly features = computed(() =>
+    this.tenantSlug() ? LoginComponent.LabFeatures : LoginComponent.AdminFeatures);
 
   readonly year = new Date().getFullYear();
 
@@ -364,8 +370,25 @@ export class LoginComponent {
   /** The lab pinned by its /t/{slug} address — null means platform sign-in. */
   readonly tenantSlug = computed(() => this.auth.tenantSlug());
 
-  /** Slug rendered as a lab name: "arfa-lab" -> "Arfa Lab". */
-  readonly tenantName = computed(() => {
+  /**
+   * The laboratory's real name, resolved from its slug before sign-in. Null while
+   * the lookup is in flight or when the slug matches no active laboratory — the
+   * slug-derived label below then stands in, so the pill is never empty.
+   */
+  private readonly resolvedName = signal<string | null>(null);
+
+  /** What the workspace pill shows: the real laboratory name when known. */
+  readonly workspaceName = computed(() => this.resolvedName() ?? this.slugLabel());
+
+  readonly workspaceInitials = computed(() => {
+    const words = this.workspaceName().split(/\s+/).filter((w) => w.length > 0);
+    if (words.length === 0) { return '?'; }
+    const initials = words.slice(0, 2).map((w) => w.charAt(0).toUpperCase()).join('');
+    return initials.length > 1 ? initials : words[0].slice(0, 2).toUpperCase();
+  });
+
+  /** Fallback label derived from the slug: "arfa-lab" -> "Arfa Lab". */
+  private readonly slugLabel = computed(() => {
     const slug = this.tenantSlug();
     if (!slug) { return ''; }
     return slug
@@ -373,14 +396,6 @@ export class LoginComponent {
       .filter((part) => part.length > 0)
       .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
       .join(' ');
-  });
-
-  /** Up to two initials for the workspace avatar: "Arfa Lab" -> "AL". */
-  readonly tenantInitials = computed(() => {
-    const words = this.tenantName().split(' ').filter((w) => w.length > 0);
-    if (words.length === 0) { return '?'; }
-    const initials = words.slice(0, 2).map((w) => w.charAt(0).toUpperCase()).join('');
-    return initials.length > 1 ? initials : words[0].slice(0, 2).toUpperCase();
   });
 
   email = '';
@@ -392,6 +407,21 @@ export class LoginComponent {
   readonly error = signal('');
   readonly mfaRequired = signal(false);
   readonly passwordExpired = signal(false);
+
+  constructor() {
+    // Resolve the laboratory name for whichever lab the address pins, and again
+    // if the visitor switches to the platform portal and back.
+    effect(() => {
+      const slug = this.tenantSlug();
+      this.resolvedName.set(null);
+      if (!slug) { return; }
+      this.workspaces.get(slug).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: (workspace) => this.resolvedName.set(workspace.name),
+        // 404 = unknown/inactive lab: keep the slug-derived label, say nothing.
+        error: () => this.resolvedName.set(null),
+      });
+    });
+  }
 
   toggleTheme(): void {
     const next = !this.dark();
