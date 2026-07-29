@@ -69,7 +69,29 @@ has acceptance criteria + a proving test. Summary:
 - **Secrets** (not in git — F-17): provision per `deploy/DEV-SECRETS.md` (user-secrets id `nt-qams-webapi`): `ConnectionStrings:Postgres`, `Jwt:Secret`, `PlatformAdmin:Email/Password`.
 - **Dev logins (dev-only):** tenant `demo-lab` → `admin@demo-lab.local` / `Demo-Admin-Pass-2!`; platform admin → `platform-admin@localhost` / `Dev-Only-Platform-Pass-1!`.
 
-### Run / test commands
+### Running the dev stack — USE THE SCRIPTS (added 2026-07-29)
+The app "randomly stopping" was **not** an app defect. Three structural causes, now fixed:
+1. Both dev servers used to be started ad-hoc as children of whatever shell launched them,
+   so they died when that shell/session ended. The scripts start them **detached**.
+2. The running WebApi **locks its own DLLs**, so every `dotnet build`/`test`/`ef` needs the
+   API stopped first — and it stayed down whenever someone forgot to restart it.
+   `dev-rebuild.ps1` does stop → build → **always restart**, even if the build fails.
+3. Blanket `taskkill /IM dotnet.exe` killed unrelated tooling. `dev-down.ps1` stops only the
+   process owning the port.
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\dev-status.ps1   # FIRST when "app not working"
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\dev-up.ps1       # start both (idempotent)
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\dev-rebuild.ps1  # after code changes (-Test, -Migrate)
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\dev-down.ps1     # stop both (-ApiOnly)
+```
+`dev-status.ps1` separates the three look-alike failures: port DOWN (browser shows
+ERR_CONNECTION_REFUSED) · API up but readiness **503** (PostgreSQL unreachable) · both healthy
+(so the problem is credentials/tenant, not the stack). Logs: `%TEMP%\ntqms-dev\`.
+**Angular 22 needs Node >= 20.19** — use system Node at `C:\Program Files\nodejs` (Node 24);
+the old portable Node 20.18.1 in `.claude/launch.json` could not start the upgraded SPA.
+
+### Run / test commands (manual equivalents — prefer the scripts above)
 ```bash
 # API (Development) — hold this running for the app / e2e
 ASPNETCORE_ENVIRONMENT=Development ASPNETCORE_URLS=http://localhost:5080 Database__MigrateOnStartup=true \
