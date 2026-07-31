@@ -227,7 +227,74 @@ Re-open this decision if any of the following becomes true:
 
 ---
 
-## 9. Follow-up backlog (reported, not implemented)
+## 9. Dispositioned — historical RP-D1 ledger rows (was B10)
+
+**Decision: kept as-is.** Dispositioned by A. Awad (System Owner) on 2026-08-01.
+
+**Scope, measured.** `audit.audit_trail` holds **50** rows stamped with the nil tenant
+(`00000000-…`), spanning 2026-07-25 … 2026-07-31. Of these:
+
+| Event type | Rows | Assessment |
+| ---------- | ---- | ---------- |
+| `TenantProvisioned` | 18 | **Correct, not a defect.** Provisioning happens before the tenant exists; these are genuinely platform-level |
+| `UserRoleAssigned` | 29 | RP-D1 residue |
+| `UserScopeChanged` | 2 | RP-D1 residue |
+| `UserLockedOut` | 1 | RP-D1 residue — pre-dates the Role Privilege module |
+
+So **32 rows** are actual RP-D1 residue, out of 353 audit-trail rows.
+
+**Why keeping them is the right disposition.** The ledger is append-only and hash-chained:
+`audit.reject_mutation()` refuses UPDATE and DELETE, and rewriting a `tenant_id` would either
+break the chain or require re-computing it — which is precisely the tamper an auditor looks for.
+A ledger that can be corrected is not a ledger. The rows are not lost: they remain fully
+readable under elevation (`app.bypass_rls`), so an investigation can still reach them.
+
+**Residual effect, stated plainly.** For those 32 events, a tenant's own compliance view does not
+show the access-control change; the platform view does. Events written after v1.51.1 are stamped
+correctly (verified live at ledger sequences 14/15). The window is closed and cannot recur.
+
+---
+
+## 10. NEW FINDING — field-change ledger rows invisible to their tenant (open, needs a decision)
+
+Measured while dispositioning B10, and **not covered by that decision** — it is a different,
+larger and *ongoing* condition, so it is recorded separately rather than folded into "keep as-is".
+
+**What was measured.** `audit.field_change` holds **21,209** rows with a NULL `tenant_id` against
+2,371 with one. `GetFieldChangesHandler` filters `f.TenantId == tenant.TenantId`, so **none of
+those 21,209 rows is visible to any tenant**. By entity:
+
+| Entity | Rows | What it is |
+| ------ | ---- | ---------- |
+| `RolePermission` | 19,296 | Field-level detail of privilege grants and revocations |
+| `LocalizedText` | 1,116 | Same-row owned value objects |
+| `RefreshSession` | 320 | Not tenant-scoped by design |
+| `UserAccount` | 202 | Optional tenant by design |
+| `ReferenceSample` | 80 | Owned child |
+
+**This is not historical.** The newest such row is **2026-08-01 00:46** — after the RP-D1 fix.
+
+**Root cause.** `FieldChangeInterceptor` line 109 stamps
+`(entry.Entity as ITenantScoped)?.TenantId ?? currentTenant.TenantId`. Owned children are not
+`ITenantScoped` CLR types — since Phase 4 they carry a **shadow** `TenantId` the cast cannot see —
+so the expression falls through to the request tenant, which is null on elevated paths (startup
+seeding, provisioning). The bulk of the 19,296 is the role-permission seeding across 18 dev
+tenants; a request-scoped edit does get stamped correctly, because `currentTenant` is set.
+
+**Why it matters.** It is the same class of defect as RP-D1: a change to who-may-do-what that is
+invisible in the audit view of the tenant it affects. The `RolePermissionsChanged` *event* is
+correctly tenant-stamped in `audit_trail` (verified during the OQ), so the change is not
+unrecorded — but its field-level detail is unreachable for that tenant.
+
+**Recommended fix (not applied — your call).** Give the interceptor the same fallback
+`TenantStampInterceptor` already uses: read the shadow property when the CLR type is not
+`ITenantScoped`, then the owner, then the request tenant. One line of the same shape as the
+RP-D1 fix, plus a pin test. Existing rows would stay as-is under the same append-only reasoning
+as §9.
+
+---
+
+## 11. Follow-up backlog (reported, not implemented)
 
 | # | Item | Rationale |
 | - | ---- | --------- |
@@ -239,13 +306,20 @@ Re-open this decision if any of the following becomes true:
 | B6 | Populate `security_event.ip_address` | The column is `inet` and correct, but nothing writes it. GDPR note: IPs are personal data — needs a retention rule |
 | B7 | Type `QcRun.Outcome` as `WestgardOutcome` | Closes the string/enum gap the Phase-3 CHECK papers over |
 | B8 | Composite FK `user_account(role_id) → role` | No FK exists today; deferred because `user_account` keeps a single-column PK |
-| B10 | Disposition pre-RP-D1 ledger rows with an empty tenant | Append-only ledger, not restated — QA decision |
 
-## 10. Status
+## 12. Status
 
 The eight requested changes are delivered, verified by introspection and by live use, and
 committed. **B9 is closed** — permanently accepted as a documented deviation (§8), with
-compensating controls verified rather than asserted. One item still needs your decision rather
-than more engineering: **B10**, the historical ledger rows written with an empty tenant before
-the RP-D1 fix (append-only, so they cannot be restated). Nothing in this programme has been
-executed on a qualified environment — that remains open, as it was before it started.
+compensating controls verified rather than asserted, and now enforced at build time by
+`UserAccountTenantBoundTests`. **B10 is closed** — the 32 historical RP-D1 ledger rows are kept
+as-is (§9).
+
+**One new item needs your decision (§10):** 21,209 `audit.field_change` rows carry a NULL tenant
+and are therefore invisible to every tenant's compliance view — 19,296 of them the field-level
+detail of privilege changes. Unlike B10 this is **ongoing**, not historical, with a one-line
+root cause and fix. It was measured while dispositioning B10 and is deliberately **not** covered
+by that decision.
+
+Nothing in this programme has been executed on a qualified environment — that remains open, as it
+was before it started.
