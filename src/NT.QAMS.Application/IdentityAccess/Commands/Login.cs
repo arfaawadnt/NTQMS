@@ -30,7 +30,8 @@ public sealed class LoginValidator : AbstractValidator<LoginCommand>
 public sealed class LoginHandler(
     IAppDbContext db, IPasswordHasher hasher, IJwtTokenService jwt,
     ITotpService totp, ISecurityEventLog security, IClock clock, PasswordPolicyOptions passwordPolicy,
-    SecurityOptions securityOptions, RefreshSessionOptions refreshOptions)
+    SecurityOptions securityOptions, RefreshSessionOptions refreshOptions,
+    ICurrentTenantSetter tenantScope)
     : ICommandHandler<LoginCommand, LoginResult>
 {
     private const string InvalidCredentials = "Invalid credentials.";
@@ -48,6 +49,13 @@ public sealed class LoginHandler(
             var tenant = await db.Tenants.AsNoTracking()
                 .SingleOrDefaultAsync(t => t.Slug == slug, ct)
                 ?? throw await FailAsync("AUTH-001", InvalidCredentials, null, command.Email, "unknown-tenant", ct);
+
+            // The request declared its workspace; scope it now, BEFORE any path
+            // that writes a tenant-stamped security event - the security_event
+            // RLS WITH CHECK (Phase 2) requires the connection to carry the
+            // tenant it writes for. This also makes failed logins visible to
+            // the tenant's own compliance view, where they belong.
+            tenantScope.Set(tenant.Id);
 
             if (tenant.Status != TenantStatus.Active)
             {
@@ -171,7 +179,7 @@ public sealed class ChangePasswordValidator : AbstractValidator<ChangePasswordCo
 /// </summary>
 public sealed class ChangePasswordHandler(
     IAppDbContext db, IPasswordHasher hasher, ISecurityEventLog security,
-    IClock clock, PasswordPolicyOptions passwordPolicy)
+    IClock clock, PasswordPolicyOptions passwordPolicy, ICurrentTenantSetter tenantScope)
     : ICommandHandler<ChangePasswordCommand>
 {
     public async Task Handle(ChangePasswordCommand command, CancellationToken ct)
@@ -182,6 +190,9 @@ public sealed class ChangePasswordHandler(
             var slug = TenantSlug.Create(command.TenantIdentifier);
             tenantId = (await db.Tenants.AsNoTracking().SingleOrDefaultAsync(t => t.Slug == slug, ct)
                 ?? throw new DomainException("AUTH-001", "Invalid credentials.")).Id;
+            // Same reasoning as LoginHandler: the PASSWORD_CHANGED security event
+            // is tenant-stamped and must be written under that tenant's context.
+            tenantScope.Set(tenantId.Value);
         }
 
         var email = command.Email.Trim().ToLowerInvariant();

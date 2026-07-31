@@ -189,9 +189,21 @@ public sealed class ComplianceLedgerStore(AppDbContext db, ICurrentTenant tenant
             .OrderBy(s => s.SignedAtUtc)
             .ToListAsync(ct);
 
-    public async Task<IReadOnlyList<SecurityEvent>> GetSecurityEventsAsync(int take, CancellationToken ct) =>
-        await db.Set<SecurityEvent>().AsNoTracking()
-            .OrderByDescending(s => s.OccurredAtUtc).Take(take).ToListAsync(ct);
+    public async Task<IReadOnlyList<SecurityEvent>> GetSecurityEventsAsync(int take, CancellationToken ct)
+    {
+        // Defence-in-depth parity with its siblings (schema hardening Phase 2):
+        // this was the one ledger read without a tenant filter, returning every
+        // tenant's events to any compliance viewer. RLS now scopes it at the
+        // database as well; pre-auth (null-tenant) events are platform-level and
+        // do not appear in tenant views.
+        var query = db.Set<SecurityEvent>().AsNoTracking();
+        if (tenant.TenantId is { } tid)
+        {
+            query = query.Where(s => s.TenantId == tid);
+        }
+
+        return await query.OrderByDescending(s => s.OccurredAtUtc).Take(take).ToListAsync(ct);
+    }
 
     /// <summary>Recomputes the chain for a tenant and reports the first break, if any.</summary>
     public async Task<(bool Ok, long Verified, long? BrokenAtSequence)> VerifyChainAsync(Guid tenantId, CancellationToken ct)
