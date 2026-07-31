@@ -72,8 +72,8 @@ each phase re-verified that they still fire.
 
 | Item | Status |
 | ---- | ------ |
-| `qams.user_account` — no RLS | **Accepted.** Its tenant is nullable (platform administrators have none), so a `tenant_id`-based policy cannot express its rule. Authentication is the access control; handlers always filter `(TenantId, Email)` explicitly |
-| `qams.outbox_event` — no RLS | **Accepted.** Nullable tenant; written and drained only by elevated infrastructure |
+| `qams.user_account` — no RLS | **Permanently accepted** by the System Owner, 2026-08-01. Its tenant is nullable (platform administrators have none), so a `tenant_id`-based policy cannot express its rule — and applying one would break authentication, which necessarily runs before a tenant is resolved. Compensating controls verified across all 27 access sites: every read is either explicitly tenant-filtered, keyed by the authenticated actor's own id from the JWT, or keyed by an id set already derived from a tenant-filtered query. Full record and residual risk: `SCHEMA-HARDENING-REPORT.md` §8 |
+| `qams.outbox_event` — no RLS | **Permanently accepted** by the System Owner, 2026-08-01. Nullable tenant; only three code paths touch it and the processor runs deliberately cross-tenant under `Elevate()`. No tenant-facing read surface. Same record, §8 |
 | Historical `audit.field_change` / `security_event` rows with an empty tenant | **Open — QA disposition.** Written before defect RP-D1 was fixed (v1.51.1). The ledger is append-only and is not restated; the rows remain queryable platform-side |
 | `audit.security_event.ip_address` never populated | **Open.** The column is `inet` and correct, but no writer sets it — `ISecurityEventLog.WriteAsync` takes no IP parameter |
 | Independent penetration test | **Open external activity** |

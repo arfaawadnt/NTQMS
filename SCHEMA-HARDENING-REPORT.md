@@ -141,7 +141,78 @@ and must be re-verified on a role-split installation.
 - Pre-flight scripts kept re-runnable: `scripts/preflight-data-checks.sql` (33 checks),
   `scripts/preflight-enum-domains.sql` (67 checks).
 
-## 8. Follow-up backlog (reported, not implemented)
+## 8. Accepted deviation — RLS on `user_account` and `outbox_event` (was B9)
+
+**Decision: permanently accepted.** Accepted by A. Awad (System Owner) on 2026-08-01, on the
+engineering analysis below. This closes B9; it is no longer a backlog item.
+
+### What the deviation is
+
+Two tables carry a `tenant_id` but have **no** row-level security: `qams.user_account` and
+`qams.outbox_event`. Every other tenant-carrying table (90 of them) has RLS enabled, forced and
+policied. These two are pre-existing — they were not introduced by this programme.
+
+### Why RLS cannot express their rule
+
+Both columns are **nullable by design**, and the `tenant_isolation` policy predicate
+(`tenant_id = current_setting('app.current_tenant')`) is *false* for NULL. Applying it would:
+
+- **`user_account`** — make every platform administrator invisible to the platform itself, and
+  break authentication, which necessarily runs *before* a tenant is resolved (Phase 2 already
+  demonstrated this failure mode on `security_event`: login returned HTTP 500 until the handler
+  was changed to scope the tenant as soon as the slug resolves — a fix that is impossible here,
+  because a platform admin has no slug).
+- **`outbox_event`** — stop the outbox processor draining events, since it runs cross-tenant by
+  design.
+
+A null-tolerant policy (`tenant_id IS NULL OR tenant_id = …`) would not isolate anything: it
+would make every platform-level row visible to every tenant.
+
+### Compensating controls (verified 2026-08-01, not asserted)
+
+**`user_account`** — all 27 access sites were read. Every one falls into exactly one of three
+shapes, and none lists users without a bound:
+
+| Shape | Sites | Example |
+| ----- | ----- | ------- |
+| Explicit tenant predicate | `GetUsersHandler`, user directory | `.Where(u => u.TenantId == tenantId)` |
+| Keyed by the authenticated actor's own id, taken from the validated JWT `sub` | MFA/PIN, refresh, `PrivilegeResolver`, `ActiveSessionMiddleware` | `.Where(u => u.Id == userId)` |
+| Keyed by an id set already derived from a tenant-filtered query | acknowledgement names, role member counts, the `roles.manage` lockout guard | `userIds.Contains(u.Id)` where `userIds` came from tenant-filtered rows |
+
+Plus: authentication itself is the gate (handlers resolve by `(TenantId, Email)`);
+`ActiveSessionMiddleware` re-checks the account on **every** authenticated request; and
+`users.view` / `users.manage` privileges gate the administrative surface.
+
+**`outbox_event`** — only three code paths touch the table (`OutboxInterceptor` writes,
+`OutboxProcessor` drains, its EF configuration). The processor runs under
+`ICurrentTenantSetter.Elevate()`, i.e. deliberately cross-tenant. It is never reachable from a
+request-scoped path, and it carries no tenant-facing read surface.
+
+### Residual risk, stated plainly
+
+These controls are **discipline, not structure**. A future query that lists `user_account`
+without a bound would leak across tenants and nothing in the database would stop it — which is
+precisely the class of defect RLS exists to make impossible, and precisely what Phase 4 fixed for
+the 30 owned children. The risk is accepted on the basis that the surface is small (27 sites),
+enumerated above, and gated by privileges.
+
+**Recommended (not implemented — outside this programme's scope):** an architecture test that
+fails the build if a new `db.Users` query has neither a tenant predicate nor an id-equality
+bound. That would convert the discipline back into a structural guarantee at compile time. Say
+the word and I will add it.
+
+### Revisit triggers
+
+Re-open this decision if any of the following becomes true:
+
+1. `user_account` is split into platform and tenant tables (the tenant half could then be
+   fully RLS-fenced).
+2. A user-listing endpoint is added that is not privilege-gated.
+3. An external assessor or the independent penetration test flags it.
+
+---
+
+## 9. Follow-up backlog (reported, not implemented)
 
 | # | Item | Rationale |
 | - | ---- | --------- |
@@ -153,12 +224,13 @@ and must be re-verified on a role-split installation.
 | B6 | Populate `security_event.ip_address` | The column is `inet` and correct, but nothing writes it. GDPR note: IPs are personal data — needs a retention rule |
 | B7 | Type `QcRun.Outcome` as `WestgardOutcome` | Closes the string/enum gap the Phase-3 CHECK papers over |
 | B8 | Composite FK `user_account(role_id) → role` | No FK exists today; deferred because `user_account` keeps a single-column PK |
-| B9 | RLS for `user_account` / `outbox_event` | Needs a policy shape that tolerates a null tenant, or a structural split of platform vs tenant accounts |
 | B10 | Disposition pre-RP-D1 ledger rows with an empty tenant | Append-only ledger, not restated — QA decision |
 
-## 9. Status
+## 10. Status
 
 The eight requested changes are delivered, verified by introspection and by live use, and
-committed. Two items need your decision rather than more engineering: **B10** (the historical
-ledger rows) and whether **B9** is accepted permanently or scheduled. Nothing in this programme
-has been executed on a qualified environment — that remains open, as it was before it started.
+committed. **B9 is closed** — permanently accepted as a documented deviation (§8), with
+compensating controls verified rather than asserted. One item still needs your decision rather
+than more engineering: **B10**, the historical ledger rows written with an empty tenant before
+the RP-D1 fix (append-only, so they cannot be restated). Nothing in this programme has been
+executed on a qualified environment — that remains open, as it was before it started.
