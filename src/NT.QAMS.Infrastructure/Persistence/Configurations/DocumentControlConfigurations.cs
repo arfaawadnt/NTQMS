@@ -26,8 +26,8 @@ public sealed class ControlledDocumentConfiguration : IEntityTypeConfiguration<C
             version.WithOwner().HasForeignKey("document_id");
             version.HasKey(v => v.Id);
             version.Property(v => v.State).HasConversion<string>().HasMaxLength(20);
-            version.Property(v => v.ChangeSummary).HasMaxLength(1000);
-            version.Property(v => v.RejectionReason).HasMaxLength(1000);
+            version.Property(v => v.ChangeSummary);
+            version.Property(v => v.RejectionReason);
             version.Ignore(v => v.VersionLabel);
         });
 
@@ -46,7 +46,11 @@ public sealed class DocumentAcknowledgementConfiguration : IEntityTypeConfigurat
         builder.Property(a => a.DocumentCode).HasMaxLength(60);
         builder.Property(a => a.VersionLabel).HasMaxLength(20);
         // One receipt per (document version, user): re-acknowledging is idempotent.
-        builder.HasIndex(a => new { a.TenantId, a.DocumentId, a.VersionLabel, a.UserId }).IsUnique();
+        // Pinned name (schema hardening 1.4): the EF default exceeded PostgreSQL's
+        // 63-byte identifier limit and was silently truncated mid-word.
+        builder.HasIndex(a => new { a.TenantId, a.DocumentId, a.VersionLabel, a.UserId })
+            .IsUnique()
+            .HasDatabaseName("ux_doc_ack_tenant_document_version_user");
         builder.HasIndex(a => new { a.TenantId, a.UserId });
         builder.Ignore(a => a.DomainEvents);
     }
@@ -62,7 +66,9 @@ public sealed class DocumentControlledCopyConfiguration : IEntityTypeConfigurati
         builder.Property(c => c.VersionLabel).HasMaxLength(20);
         builder.Property(c => c.Holder).HasMaxLength(200);
         builder.Property(c => c.Status).HasConversion<string>().HasMaxLength(20);
-        builder.HasIndex(c => new { c.TenantId, c.DocumentId, c.CopyNumber }).IsUnique();
+        builder.HasIndex(c => new { c.TenantId, c.DocumentId, c.CopyNumber })
+            .IsUnique()
+            .HasDatabaseName("ux_doc_copy_tenant_document_number");
         builder.HasIndex(c => new { c.TenantId, c.Status });
         builder.Ignore(c => c.DomainEvents);
     }

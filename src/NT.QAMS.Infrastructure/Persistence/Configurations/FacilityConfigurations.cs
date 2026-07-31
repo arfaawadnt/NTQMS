@@ -26,7 +26,7 @@ public sealed class MonitoringPointConfiguration : IEntityTypeConfiguration<Moni
             reading.ToTable("environmental_reading", "qams");
             reading.WithOwner().HasForeignKey("point_id");
             reading.HasKey(r => r.Id);
-            reading.Property(r => r.Remark).HasMaxLength(1000);
+            reading.Property(r => r.Remark);
             reading.HasIndex("point_id", nameof(EnvironmentalReading.RecordedAtUtc));
         });
 

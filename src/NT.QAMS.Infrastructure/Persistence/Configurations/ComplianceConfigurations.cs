@@ -45,7 +45,11 @@ public sealed class SecurityEventConfiguration : IEntityTypeConfiguration<Securi
         builder.HasKey(e => e.Id);
         builder.Property(e => e.EventType).HasMaxLength(40);
         builder.Property(e => e.Actor).HasMaxLength(320);
-        builder.Property(e => e.IpAddress).HasMaxLength(60);
+        // Stored as PostgreSQL inet (schema hardening 1.1): the DB validates the
+        // address; the CLR/wire type stays string so the API contract is unchanged.
+        builder.Property(e => e.IpAddress)
+            .HasConversion(v => System.Net.IPAddress.Parse(v!), v => v!.ToString())
+            .HasColumnType("inet");
         builder.Property(e => e.Detail).HasMaxLength(500);
         builder.HasIndex(e => e.OccurredAtUtc);
     }
@@ -62,10 +66,7 @@ public sealed class FieldChangeRecordConfiguration : IEntityTypeConfiguration<Fi
         builder.Property(f => f.EntityId).HasMaxLength(200);
         builder.Property(f => f.Action).HasMaxLength(20);
         builder.Property(f => f.Property).HasMaxLength(150);
-        builder.Property(f => f.OldValue).HasMaxLength(4000);
-        builder.Property(f => f.NewValue).HasMaxLength(4000);
         builder.Property(f => f.Actor).HasMaxLength(300);
-        builder.Property(f => f.Reason).HasMaxLength(1000);
         builder.HasIndex(f => new { f.TenantId, f.EntityId });
         builder.HasIndex(f => f.OccurredAtUtc);
     }
@@ -79,7 +80,6 @@ public sealed class AuditTrailReviewConfiguration : IEntityTypeConfiguration<Aud
         builder.HasKey(r => r.Id);
         builder.Property(r => r.ReviewRef).HasMaxLength(30);
         builder.Property(r => r.Status).HasConversion<string>().HasMaxLength(20);
-        builder.Property(r => r.Conclusion).HasMaxLength(4000);
         builder.HasIndex(r => new { r.TenantId, r.ReviewRef }).IsUnique();
         builder.HasIndex(r => new { r.TenantId, r.Status });
         builder.Ignore(r => r.DomainEvents);

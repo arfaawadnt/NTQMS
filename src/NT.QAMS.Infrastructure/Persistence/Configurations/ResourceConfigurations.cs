@@ -36,7 +36,7 @@ public sealed class EquipmentItemConfiguration : IEntityTypeConfiguration<Equipm
             m.ToTable("maintenance_record", "qams");
             m.WithOwner().HasForeignKey("equipment_id");
             m.HasKey(x => x.Id);
-            m.Property(x => x.WorkDescription).HasMaxLength(2000);
+            m.Property(x => x.WorkDescription);
         });
 
         builder.OwnsMany(e => e.IntermediateChecks, check =>
@@ -45,7 +45,7 @@ public sealed class EquipmentItemConfiguration : IEntityTypeConfiguration<Equipm
             check.WithOwner().HasForeignKey("equipment_id");
             check.HasKey(x => x.Id);
             check.Property(x => x.CheckType).HasMaxLength(200);
-            check.Property(x => x.Remarks).HasMaxLength(2000);
+            check.Property(x => x.Remarks);
         });
 
         builder.Ignore(e => e.DomainEvents);
@@ -69,7 +69,6 @@ public sealed class ReferenceStandardConfiguration : IEntityTypeConfiguration<Re
         builder.Property(s => s.CertifiedValue).HasMaxLength(200);
         builder.Property(s => s.UncertaintyStatement).HasMaxLength(200);
         builder.Property(s => s.Status).HasConversion<string>().HasMaxLength(20);
-        builder.Property(s => s.QuarantineReason).HasMaxLength(1000);
 
         builder.HasIndex(s => new { s.TenantId, s.StandardRef }).IsUnique();
         builder.HasIndex(s => new { s.TenantId, s.Status });
@@ -87,8 +86,6 @@ public sealed class TestAuthorizationConfiguration : IEntityTypeConfiguration<Te
 
         builder.Property(a => a.Scope).HasConversion<string>().HasMaxLength(20);
         builder.Property(a => a.Status).HasConversion<string>().HasMaxLength(20);
-        builder.Property(a => a.SuspensionReason).HasMaxLength(1000);
-        builder.Property(a => a.RevocationReason).HasMaxLength(1000);
 
         builder.HasIndex(a => new { a.TenantId, a.UserId });
         builder.HasIndex(a => new { a.TenantId, a.TestCatalogItemId });
@@ -108,7 +105,6 @@ public sealed class CompetencyRecordConfiguration : IEntityTypeConfiguration<Com
 
         builder.Property(c => c.Subject).HasMaxLength(300);
         builder.Property(c => c.Status).HasConversion<string>().HasMaxLength(20);
-        builder.Property(c => c.RevocationReason).HasMaxLength(1000);
 
         builder.HasIndex(c => new { c.TenantId, c.TraineeId });
         builder.HasIndex(c => new { c.TenantId, c.Status });

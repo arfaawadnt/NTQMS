@@ -18,6 +18,15 @@ public sealed record AssessConflictCommand(Guid ConflictId, string RiskLevel, st
 [RequireInternalActor]
 public sealed record CloseConflictCommand(Guid ConflictId, string Outcome, string ClosureNote) : ICommand;
 
+// The former varchar bound, kept at the API layer now the column is text (schema hardening 1.2/Q6).
+public sealed class CloseConflictValidator : AbstractValidator<CloseConflictCommand>
+{
+    public CloseConflictValidator()
+    {
+        RuleFor(x => x.ClosureNote).NotEmpty().MaximumLength(2000);
+    }
+}
+
 public sealed class DeclareConflictValidator : AbstractValidator<DeclareConflictCommand>
 {
     public DeclareConflictValidator()

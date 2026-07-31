@@ -57,6 +57,15 @@ public sealed record RecordObjectiveProgressCommand(
 [RequireInternalActor]
 public sealed record CloseObjectiveCommand(Guid ObjectiveId, string Outcome, string Note) : ICommand;
 
+// The former varchar bound, kept at the API layer now the column is text (schema hardening 1.2/Q6).
+public sealed class CloseObjectiveValidator : AbstractValidator<CloseObjectiveCommand>
+{
+    public CloseObjectiveValidator()
+    {
+        RuleFor(x => x.Note).NotEmpty().MaximumLength(2000);
+    }
+}
+
 public sealed class RecordObjectiveProgressValidator : AbstractValidator<RecordObjectiveProgressCommand>
 {
     public RecordObjectiveProgressValidator()

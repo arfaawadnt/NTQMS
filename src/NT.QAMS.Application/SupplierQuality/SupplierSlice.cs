@@ -46,6 +46,21 @@ public sealed record RecordEvaluationCommand(
     Guid SupplierId, DateOnly PeriodStart, DateOnly PeriodEnd,
     IReadOnlyList<(string Criterion, decimal Weight, decimal Score)> Criteria) : ICommand<Guid>;
 
+// The former varchar bound, kept at the API layer now the column is text (schema hardening 1.2/Q6).
+public sealed class RecordEvaluationValidator : AbstractValidator<RecordEvaluationCommand>
+{
+    public RecordEvaluationValidator()
+    {
+        // Bounds the serialized jsonb document indirectly: at most 50 criteria,
+        // each name <= 200 chars.
+        RuleFor(x => x.Criteria).NotEmpty().Must(c => c.Count <= 50)
+            .WithMessage("An evaluation may carry at most 50 criteria.");
+        RuleForEach(x => x.Criteria)
+            .Must(c => !string.IsNullOrWhiteSpace(c.Criterion) && c.Criterion.Length <= 200)
+            .WithMessage("Each criterion name is required and may not exceed 200 characters.");
+    }
+}
+
 internal static class SupplierLoader
 {
     public static async Task<Supplier> LoadAsync(IAppDbContext db, Guid id, CancellationToken ct) =>
@@ -158,6 +173,6 @@ public sealed class GetEvaluationsHandler(IAppDbContext db)
             .OrderByDescending(e => e.PeriodEnd)
             .Select(e => new SupplierEvaluationDto(
                 e.Id, e.SupplierId, e.PeriodStart, e.PeriodEnd,
-                e.WeightedTotal, e.EvaluatedBy, e.CriteriaJson))
+                e.WeightedTotal, e.EvaluatedBy, e.Criteria))
             .ToListAsync(ct);
 }

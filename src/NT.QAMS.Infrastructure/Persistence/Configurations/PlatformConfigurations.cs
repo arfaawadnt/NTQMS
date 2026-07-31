@@ -78,7 +78,6 @@ public sealed class NotificationRuleConfiguration : IEntityTypeConfiguration<Not
         builder.Property(r => r.EventKey).HasMaxLength(50);
         builder.Property(r => r.RecipientRoles).HasMaxLength(300);
         builder.Property(r => r.SubjectTemplate).HasMaxLength(300);
-        builder.Property(r => r.BodyTemplate).HasMaxLength(4000);
         builder.HasIndex(r => new { r.TenantId, r.EventKey });
         builder.Ignore(r => r.DomainEvents);
     }
@@ -93,12 +92,12 @@ public sealed class NotificationDispatchConfiguration : IEntityTypeConfiguration
         builder.Property(d => d.EventKey).HasMaxLength(50);
         builder.Property(d => d.RecipientEmail).HasMaxLength(320);
         builder.Property(d => d.Subject).HasMaxLength(400);
-        builder.Property(d => d.Body).HasMaxLength(8000);
         builder.Property(d => d.EmailStatus).HasConversion<string>().HasMaxLength(10);
-        builder.Property(d => d.Error).HasMaxLength(1500);
 
         builder.HasIndex(d => d.SourceEventId);
-        builder.HasIndex(d => new { d.TenantId, d.RecipientUserId, d.ReadByRecipient });
+        // Pinned name (schema hardening 1.4): EF default was truncated at 62 chars.
+        builder.HasIndex(d => new { d.TenantId, d.RecipientUserId, d.ReadByRecipient })
+            .HasDatabaseName("ix_notif_dispatch_tenant_recipient_read");
 
         builder.Ignore(d => d.DomainEvents);
     }
@@ -113,8 +112,6 @@ public sealed class InterestedPartyConfiguration : IEntityTypeConfiguration<Inte
         builder.Property(p => p.PartyRef).HasMaxLength(30);
         builder.Property(p => p.Name).HasMaxLength(200);
         builder.Property(p => p.Category).HasMaxLength(100);
-        builder.Property(p => p.NeedsAndExpectations).HasMaxLength(4000);
-        builder.Property(p => p.RelevantRequirements).HasMaxLength(4000);
         builder.Property(p => p.Status).HasConversion<string>().HasMaxLength(20);
         builder.HasIndex(p => new { p.TenantId, p.PartyRef }).IsUnique();
         builder.Ignore(p => p.DomainEvents);
@@ -130,10 +127,7 @@ public sealed class ContextIssueConfiguration : IEntityTypeConfiguration<Context
         builder.Property(i => i.IssueRef).HasMaxLength(30);
         builder.Property(i => i.Type).HasConversion<string>().HasMaxLength(10);
         builder.Property(i => i.Category).HasMaxLength(100);
-        builder.Property(i => i.Description).HasMaxLength(4000);
-        builder.Property(i => i.Impact).HasMaxLength(4000);
         builder.Property(i => i.Status).HasConversion<string>().HasMaxLength(20);
-        builder.Property(i => i.Resolution).HasMaxLength(4000);
         builder.HasIndex(i => new { i.TenantId, i.IssueRef }).IsUnique();
         builder.Ignore(i => i.DomainEvents);
     }

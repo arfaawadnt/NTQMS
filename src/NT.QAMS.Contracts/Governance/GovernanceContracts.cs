@@ -72,7 +72,7 @@ public sealed record SupplierDetailDto(
 
 public sealed record SupplierEvaluationDto(
     Guid Id, Guid SupplierId, DateOnly PeriodStart, DateOnly PeriodEnd,
-    decimal WeightedTotal, Guid EvaluatedBy, string CriteriaJson);
+    decimal WeightedTotal, Guid EvaluatedBy, string Criteria);
 
 // ── Impartiality / Conflict-of-Interest Register (ISO 17025 §4.1) ───────────
 

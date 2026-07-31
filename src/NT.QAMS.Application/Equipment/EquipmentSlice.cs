@@ -62,6 +62,15 @@ public sealed record LogCalibrationCommand(
 public sealed record LogMaintenanceCommand(Guid EquipmentId, DateOnly PerformedAt, string WorkDescription)
     : ICommand;
 
+// The former varchar bound, kept at the API layer now the column is text (schema hardening 1.2/Q6).
+public sealed class LogMaintenanceValidator : AbstractValidator<LogMaintenanceCommand>
+{
+    public LogMaintenanceValidator()
+    {
+        RuleFor(x => x.WorkDescription).NotEmpty().MaximumLength(2000);
+    }
+}
+
 [RequireInternalActor]
 public sealed record RetireEquipmentCommand(Guid EquipmentId) : ICommand;
 

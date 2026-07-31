@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.Platform;
 using NT.QAMS.Domain.Notifications;
@@ -10,6 +11,17 @@ namespace NT.QAMS.Application.Notifications;
 public sealed record UpsertNotificationRuleCommand(
     string EventKey, string RecipientRoles, bool EmailEnabled,
     string SubjectTemplate, string BodyTemplate) : ICommand<Guid>;
+
+// The former varchar bound, kept at the API layer now the column is text (schema hardening 1.2/Q6).
+public sealed class UpsertNotificationRuleValidator : AbstractValidator<UpsertNotificationRuleCommand>
+{
+    public UpsertNotificationRuleValidator()
+    {
+        RuleFor(x => x.EventKey).NotEmpty().MaximumLength(50);
+        RuleFor(x => x.SubjectTemplate).NotEmpty().MaximumLength(400);
+        RuleFor(x => x.BodyTemplate).NotEmpty().MaximumLength(4000);
+    }
+}
 
 public sealed class UpsertNotificationRuleHandler(IAppDbContext db)
     : ICommandHandler<UpsertNotificationRuleCommand, Guid>

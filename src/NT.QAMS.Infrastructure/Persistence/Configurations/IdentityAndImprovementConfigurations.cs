@@ -53,11 +53,9 @@ public sealed class NonconformanceConfiguration : IEntityTypeConfiguration<Nonco
 
         builder.Property(n => n.NcRef).HasMaxLength(30);
         builder.Property(n => n.Title).HasMaxLength(300);
-        builder.Property(n => n.Description).HasMaxLength(4000);
         builder.Property(n => n.Status).HasConversion<string>().HasMaxLength(30);
         builder.Property(n => n.SourceType).HasConversion<string>().HasMaxLength(30);
         builder.Property(n => n.EventType).HasConversion<string>().HasMaxLength(30);
-        builder.Property(n => n.RejectionReason).HasMaxLength(1000);
 
         builder.HasIndex(n => new { n.TenantId, n.NcRef }).IsUnique();
         builder.HasIndex(n => new { n.TenantId, n.Status });
@@ -69,7 +67,7 @@ public sealed class NonconformanceConfiguration : IEntityTypeConfiguration<Nonco
             action.HasKey(a => a.Id);
             action.Property(a => a.Type).HasConversion<string>().HasMaxLength(20);
             action.Property(a => a.Status).HasConversion<string>().HasMaxLength(20);
-            action.Property(a => a.Details).HasMaxLength(2000);
+            action.Property(a => a.Details);
         });
 
         builder.OwnsMany(n => n.RcaRecords, rca =>
@@ -78,7 +76,7 @@ public sealed class NonconformanceConfiguration : IEntityTypeConfiguration<Nonco
             rca.WithOwner().HasForeignKey("nc_id");
             rca.HasKey(r => r.Id);
             rca.Property(r => r.Method).HasConversion<string>().HasMaxLength(20);
-            rca.Property(r => r.Analysis).HasMaxLength(8000);
+            rca.Property(r => r.Analysis);
         });
 
         builder.Ignore(n => n.DomainEvents);
@@ -108,11 +106,7 @@ public sealed class ComplaintConfiguration : IEntityTypeConfiguration<Complaint>
         builder.Property(c => c.ComplainantName).HasMaxLength(300);
         builder.Property(c => c.ComplainantContact).HasMaxLength(300);
         builder.Property(c => c.Subject).HasMaxLength(300);
-        builder.Property(c => c.Description).HasMaxLength(4000);
         builder.Property(c => c.Status).HasConversion<string>().HasMaxLength(20);
-        builder.Property(c => c.ValidationVerdict).HasMaxLength(2000);
-        builder.Property(c => c.InvestigationOutcome).HasMaxLength(4000);
-        builder.Property(c => c.Resolution).HasMaxLength(4000);
 
         builder.HasIndex(c => new { c.TenantId, c.ComplaintRef }).IsUnique();
         builder.HasIndex(c => new { c.TenantId, c.Status });
@@ -139,12 +133,10 @@ public sealed class QualityObjectiveConfiguration : IEntityTypeConfiguration<Qua
         builder.HasKey(o => o.Id);
         builder.Property(o => o.ObjectiveRef).HasMaxLength(30);
         builder.Property(o => o.Title).HasMaxLength(300);
-        builder.Property(o => o.Description).HasMaxLength(2000);
         builder.Property(o => o.Metric).HasMaxLength(300);
         builder.Property(o => o.Unit).HasMaxLength(30);
         builder.Property(o => o.Direction).HasConversion<string>().HasMaxLength(10);
         builder.Property(o => o.Status).HasConversion<string>().HasMaxLength(20);
-        builder.Property(o => o.ClosureNote).HasMaxLength(2000);
         builder.HasIndex(o => new { o.TenantId, o.ObjectiveRef }).IsUnique();
         builder.HasIndex(o => new { o.TenantId, o.Status });
         builder.Ignore(o => o.CurrentValue);
@@ -155,7 +147,7 @@ public sealed class QualityObjectiveConfiguration : IEntityTypeConfiguration<Qua
             update.ToTable("objective_progress", "qams");
             update.WithOwner().HasForeignKey("objective_id");
             update.HasKey(u => u.Id);
-            update.Property(u => u.Comment).HasMaxLength(1000);
+            update.Property(u => u.Comment);
         });
 
         builder.Ignore(o => o.DomainEvents);
@@ -170,7 +162,6 @@ public sealed class UserAccessReviewConfiguration : IEntityTypeConfiguration<Use
         builder.HasKey(r => r.Id);
         builder.Property(r => r.ReviewRef).HasMaxLength(30);
         builder.Property(r => r.Status).HasConversion<string>().HasMaxLength(20);
-        builder.Property(r => r.Conclusion).HasMaxLength(4000);
         builder.HasIndex(r => new { r.TenantId, r.ReviewRef }).IsUnique();
         builder.HasIndex(r => new { r.TenantId, r.Status });
         builder.Ignore(r => r.DomainEvents);
@@ -184,7 +175,6 @@ public sealed class QualityPolicyConfiguration : IEntityTypeConfiguration<Qualit
         builder.ToTable("quality_policy", "qams");
         builder.HasKey(p => p.Id);
         builder.Property(p => p.PolicyRef).HasMaxLength(30);
-        builder.Property(p => p.Statement).HasMaxLength(8000);
         builder.Property(p => p.Status).HasConversion<string>().HasMaxLength(20);
         builder.HasIndex(p => new { p.TenantId, p.PolicyRef }).IsUnique();
         builder.HasIndex(p => new { p.TenantId, p.Version }).IsUnique();
@@ -204,10 +194,7 @@ public sealed class FeedbackEntryConfiguration : IEntityTypeConfiguration<Feedba
         builder.Property(f => f.Channel).HasMaxLength(100);
         builder.Property(f => f.Type).HasConversion<string>().HasMaxLength(20);
         builder.Property(f => f.Subject).HasMaxLength(300);
-        builder.Property(f => f.Details).HasMaxLength(4000);
         builder.Property(f => f.Status).HasConversion<string>().HasMaxLength(20);
-        builder.Property(f => f.ReviewNotes).HasMaxLength(2000);
-        builder.Property(f => f.ActionSummary).HasMaxLength(2000);
         builder.HasIndex(f => new { f.TenantId, f.FeedbackRef }).IsUnique();
         builder.HasIndex(f => new { f.TenantId, f.Status });
         builder.Ignore(f => f.DomainEvents);

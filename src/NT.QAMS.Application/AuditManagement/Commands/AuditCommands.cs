@@ -21,6 +21,9 @@ public sealed class ScheduleAuditValidator : AbstractValidator<ScheduleAuditComm
         RuleFor(x => x.LeadAuditorId).NotEmpty();
         RuleFor(x => x.Checklist).NotEmpty()
             .WithMessage("An audit needs at least one checklist item.");
+        RuleForEach(x => x.Checklist)
+            .Must(i => !string.IsNullOrEmpty(i.Question) && i.Question.Length <= 1000)
+            .WithMessage("Each checklist question is required and may not exceed 1000 characters.");
     }
 }
 
@@ -55,6 +58,15 @@ public sealed record StartAuditCommand(Guid AuditId) : ICommand;
 [RequireInternalActor]
 public sealed record AnswerChecklistItemCommand(
     Guid AuditId, Guid ItemId, ChecklistVerdict Verdict, string? Evidence) : ICommand;
+
+// The former varchar bound, kept at the API layer now the column is text (schema hardening 1.2/Q6).
+public sealed class AnswerChecklistItemValidator : AbstractValidator<AnswerChecklistItemCommand>
+{
+    public AnswerChecklistItemValidator()
+    {
+        RuleFor(x => x.Evidence).MaximumLength(2000);
+    }
+}
 [RequireInternalActor]
 public sealed record RaiseFindingCommand(Guid AuditId, FindingGrade Grade, string Description)
     : ICommand<Guid>;

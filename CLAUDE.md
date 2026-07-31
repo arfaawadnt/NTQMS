@@ -61,6 +61,17 @@ has acceptance criteria + a proving test. Summary:
 - **After adding EF columns**, run `dotnet ef database update` (Development env) against the dev DB **before** integration tests, or they fail on model↔schema drift.
 - **Build discipline:** the WebApi locks its DLLs while running — **stop the running API before `dotnet build`/`dotnet ef`**, then restart it.
 - Audit `audit.*` rows are RLS-hidden in psql unless you `SELECT set_config('app.bypass_rls','on',false);` first.
+- **Index naming (schema hardening 1.4):** PostgreSQL truncates identifiers at 63 bytes and EF
+  truncates client-side at 62 - silently, mid-word. Any index whose EF-default name would exceed
+  62 chars MUST be pinned with `HasDatabaseName()` using the abbreviation map:
+  `document_acknowledgement->doc_ack` , `document_controlled_copy->doc_copy` ,
+  `notification_dispatch->notif_dispatch` , `document_version->doc_ver` ,
+  `supplier_evaluation->sup_eval` , `instrument_comparability_study->icp_study` ,
+  `user_department_access->user_dept_access`. Unique indexes use the `ux_` prefix.
+- **Column sizing (schema hardening 1.2):** free-text columns sized >=1000 are `text` - the bound
+  lives in the command validator (`MaximumLength`), not the column. Bounded codes, refs, enum
+  strings and hashes keep explicit `varchar(n)` under 1000. Never drop a varchar bound without a
+  matching validator rule.
 
 ## 6. Dev environment setup (Windows)
 - **.NET 9 SDK** (user-local): invoke as `"$LOCALAPPDATA/Microsoft/dotnet/dotnet.exe"`.

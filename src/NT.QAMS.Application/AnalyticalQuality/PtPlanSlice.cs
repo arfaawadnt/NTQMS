@@ -24,6 +24,15 @@ public sealed record RecordPtPlanFulfilmentCommand(Guid PlanId, Guid ItemId, Gui
 [RequireInternalActor]
 public sealed record ClosePtPlanCommand(Guid PlanId, string ClosureSummary) : ICommand;
 
+// The former varchar bound, kept at the API layer now the column is text (schema hardening 1.2/Q6).
+public sealed class ClosePtPlanValidator : AbstractValidator<ClosePtPlanCommand>
+{
+    public ClosePtPlanValidator()
+    {
+        RuleFor(x => x.ClosureSummary).NotEmpty().MaximumLength(4000);
+    }
+}
+
 public sealed class AddPtPlanItemValidator : AbstractValidator<AddPtPlanItemCommand>
 {
     public AddPtPlanItemValidator()

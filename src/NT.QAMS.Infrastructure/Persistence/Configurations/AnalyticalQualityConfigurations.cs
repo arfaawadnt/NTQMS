@@ -32,7 +32,6 @@ public sealed class QcRunConfiguration : IEntityTypeConfiguration<QcRun>
         builder.Property(r => r.Outcome).HasMaxLength(15);
         builder.Property(r => r.ViolatedRules).HasMaxLength(60);
         builder.Property(r => r.Operator).HasMaxLength(150);
-        builder.Property(r => r.TroubleshootingNote).HasMaxLength(2000);
         // The hot query path: recent runs for a profile (Levey-Jennings window).
         builder.HasIndex(r => new { r.TenantId, r.ProfileId, r.MeasuredAtUtc });
         builder.Ignore(r => r.DomainEvents);
@@ -124,7 +123,6 @@ public sealed class PtPlanConfiguration : IEntityTypeConfiguration<PtPlan>
         builder.HasKey(p => p.Id);
         builder.Property(p => p.PlanRef).HasMaxLength(30);
         builder.Property(p => p.Status).HasConversion<string>().HasMaxLength(20);
-        builder.Property(p => p.ClosureSummary).HasMaxLength(4000);
         builder.HasIndex(p => new { p.TenantId, p.PlanRef }).IsUnique();
         builder.HasIndex(p => new { p.TenantId, p.Year }).IsUnique();
 
@@ -137,7 +135,7 @@ public sealed class PtPlanConfiguration : IEntityTypeConfiguration<PtPlan>
             item.Property(i => i.Analyte).HasMaxLength(200);
             item.Property(i => i.Provider).HasMaxLength(200);
             item.Property(i => i.LastEnrollmentRef).HasMaxLength(30);
-            item.Property(i => i.Notes).HasMaxLength(1000);
+            item.Property(i => i.Notes);
         });
 
         builder.Ignore(p => p.DomainEvents);

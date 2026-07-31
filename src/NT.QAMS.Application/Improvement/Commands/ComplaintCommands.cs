@@ -62,8 +62,26 @@ public sealed record ValidateComplaintCommand(Guid ComplaintId, bool Justified, 
 public sealed record StartComplaintInvestigationCommand(Guid ComplaintId) : ICommand;
 [RequireInternalActor]
 public sealed record LogComplaintOutcomeCommand(Guid ComplaintId, string Outcome) : ICommand;
+
+// The former varchar bound, kept at the API layer now the column is text (schema hardening 1.2/Q6).
+public sealed class LogComplaintOutcomeValidator : AbstractValidator<LogComplaintOutcomeCommand>
+{
+    public LogComplaintOutcomeValidator()
+    {
+        RuleFor(x => x.Outcome).NotEmpty().MaximumLength(4000);
+    }
+}
 [RequireInternalActor]
 public sealed record ResolveComplaintCommand(Guid ComplaintId, string Resolution) : ICommand;
+
+// The former varchar bound, kept at the API layer now the column is text (schema hardening 1.2/Q6).
+public sealed class ResolveComplaintValidator : AbstractValidator<ResolveComplaintCommand>
+{
+    public ResolveComplaintValidator()
+    {
+        RuleFor(x => x.Resolution).NotEmpty().MaximumLength(4000);
+    }
+}
 [RequireInternalActor]
 public sealed record CloseComplaintCommand(Guid ComplaintId) : ICommand;
 

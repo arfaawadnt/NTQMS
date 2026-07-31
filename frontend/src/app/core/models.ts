@@ -1690,7 +1690,7 @@ export interface SupplierEvaluation {
   periodEnd: string;
   weightedTotal: number;
   evaluatedBy: string;
-  criteriaJson: string;
+  criteria: string;
 }
 
 export interface RegisterSupplierRequest { name: string; supplierType: string; branchId: string | null; departmentId: string | null; }

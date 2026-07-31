@@ -186,8 +186,26 @@ public sealed record LinkRiskCommand(Guid ChangeId, Guid RiskItemId) : ICommand;
 public sealed record ApproveChangeCommand(Guid ChangeId) : ICommand;
 [RequireInternalActor]
 public sealed record RejectChangeCommand(Guid ChangeId, string Reason) : ICommand;
+
+// The former varchar bound, kept at the API layer now the column is text (schema hardening 1.2/Q6).
+public sealed class RejectChangeValidator : AbstractValidator<RejectChangeCommand>
+{
+    public RejectChangeValidator()
+    {
+        RuleFor(x => x.Reason).NotEmpty().MaximumLength(1000);
+    }
+}
 [RequireInternalActor]
 public sealed record CloseChangeCommand(Guid ChangeId, string ImplementationNotes) : ICommand;
+
+// The former varchar bound, kept at the API layer now the column is text (schema hardening 1.2/Q6).
+public sealed class CloseChangeValidator : AbstractValidator<CloseChangeCommand>
+{
+    public CloseChangeValidator()
+    {
+        RuleFor(x => x.ImplementationNotes).NotEmpty().MaximumLength(4000);
+    }
+}
 [RequireInternalActor]
 public sealed record ReviewChangeCommand(Guid ChangeId, bool Effective, string Notes) : ICommand;
 
@@ -307,6 +325,16 @@ public sealed record ScheduleReviewCommand(string Title, DateOnly ReviewDate, st
     Guid? BranchId = null, Guid? DepartmentId = null)
     : ICommand<Guid>;
 
+// The former varchar bound, kept at the API layer now the column is text (schema hardening 1.2/Q6).
+public sealed class ScheduleReviewValidator : AbstractValidator<ScheduleReviewCommand>
+{
+    public ScheduleReviewValidator()
+    {
+        RuleFor(x => x.Title).NotEmpty().MaximumLength(300);
+        RuleFor(x => x.Participants).NotEmpty().MaximumLength(2000);
+    }
+}
+
 public sealed class ScheduleReviewHandler(
     IAppDbContext db, ICurrentTenant tenant, IReferenceNumberGenerator refs)
     : ICommandHandler<ScheduleReviewCommand, Guid>
@@ -328,6 +356,15 @@ public sealed record AddDecisionCommand(Guid ReviewId, string Description, Guid 
     : ICommand<Guid>;
 [RequireInternalActor]
 public sealed record CloseReviewCommand(Guid ReviewId, string Minutes) : ICommand;
+
+// The former varchar bound, kept at the API layer now the column is text (schema hardening 1.2/Q6).
+public sealed class CloseReviewValidator : AbstractValidator<CloseReviewCommand>
+{
+    public CloseReviewValidator()
+    {
+        RuleFor(x => x.Minutes).NotEmpty().MaximumLength(20000);
+    }
+}
 
 public sealed class AddDecisionHandler(IAppDbContext db) : ICommandHandler<AddDecisionCommand, Guid>
 {

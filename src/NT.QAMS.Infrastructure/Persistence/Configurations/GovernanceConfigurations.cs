@@ -23,7 +23,7 @@ public sealed class RiskItemConfiguration : IEntityTypeConfiguration<RiskItem>
             a.ToTable("mitigation_action", "qams");
             a.WithOwner().HasForeignKey("risk_id");
             a.HasKey(x => x.Id);
-            a.Property(x => x.Description).HasMaxLength(2000);
+            a.Property(x => x.Description);
         });
 
         builder.Ignore(r => r.DomainEvents);
@@ -38,10 +38,7 @@ public sealed class ChangeRequestConfiguration : IEntityTypeConfiguration<Change
         builder.HasKey(c => c.Id);
         builder.Property(c => c.ChangeRef).HasMaxLength(30);
         builder.Property(c => c.Title).HasMaxLength(300);
-        builder.Property(c => c.ImpactAnalysis).HasMaxLength(4000);
         builder.Property(c => c.Status).HasConversion<string>().HasMaxLength(20);
-        builder.Property(c => c.RejectionReason).HasMaxLength(1000);
-        builder.Property(c => c.ImplementationNotes).HasMaxLength(4000);
         builder.HasIndex(c => new { c.TenantId, c.ChangeRef }).IsUnique();
         builder.Ignore(c => c.DomainEvents);
     }
@@ -55,9 +52,7 @@ public sealed class ManagementReviewConfiguration : IEntityTypeConfiguration<Man
         builder.HasKey(r => r.Id);
         builder.Property(r => r.ReviewRef).HasMaxLength(30);
         builder.Property(r => r.Title).HasMaxLength(300);
-        builder.Property(r => r.Participants).HasMaxLength(2000);
         builder.Property(r => r.Status).HasConversion<string>().HasMaxLength(20);
-        builder.Property(r => r.Minutes).HasMaxLength(20000);
         builder.HasIndex(r => new { r.TenantId, r.ReviewRef }).IsUnique();
 
         builder.OwnsMany(r => r.Decisions, d =>
@@ -65,7 +60,7 @@ public sealed class ManagementReviewConfiguration : IEntityTypeConfiguration<Man
             d.ToTable("review_decision", "qams");
             d.WithOwner().HasForeignKey("review_id");
             d.HasKey(x => x.Id);
-            d.Property(x => x.Description).HasMaxLength(2000);
+            d.Property(x => x.Description);
         });
 
         builder.Ignore(r => r.DomainEvents);
@@ -104,7 +99,9 @@ public sealed class SupplierEvaluationConfiguration : IEntityTypeConfiguration<S
     {
         builder.ToTable("supplier_evaluation", "qams");
         builder.HasKey(e => e.Id);
-        builder.Property(e => e.CriteriaJson).HasMaxLength(8000);
+        // jsonb (schema hardening 1.3): the DB validates and indexes the document;
+        // the domain keeps a string and owns serialization.
+        builder.Property(e => e.Criteria).HasColumnType("jsonb");
         builder.Property(e => e.WeightedTotal).HasPrecision(5, 2);
         builder.HasIndex(e => new { e.TenantId, e.SupplierId });
         builder.Ignore(e => e.DomainEvents);
@@ -118,13 +115,10 @@ public sealed class ConflictDeclarationConfiguration : IEntityTypeConfiguration<
         builder.ToTable("conflict_declaration", "qams");
         builder.HasKey(c => c.Id);
         builder.Property(c => c.ConflictRef).HasMaxLength(30);
-        builder.Property(c => c.Description).HasMaxLength(2000);
         builder.Property(c => c.RelatedParty).HasMaxLength(300);
         builder.Property(c => c.Status).HasConversion<string>().HasMaxLength(20);
         builder.Property(c => c.RiskLevel).HasConversion<string>().HasMaxLength(10);
         builder.Property(c => c.Outcome).HasConversion<string>().HasMaxLength(20);
-        builder.Property(c => c.Mitigation).HasMaxLength(2000);
-        builder.Property(c => c.ClosureNote).HasMaxLength(2000);
         builder.HasIndex(c => new { c.TenantId, c.ConflictRef }).IsUnique();
         builder.HasIndex(c => new { c.TenantId, c.Status });
         builder.Ignore(c => c.DomainEvents);

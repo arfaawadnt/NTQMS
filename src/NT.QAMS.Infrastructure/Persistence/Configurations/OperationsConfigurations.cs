@@ -16,7 +16,6 @@ public sealed class ArchiveEntryConfiguration : IEntityTypeConfiguration<Archive
         builder.Property(a => a.SourceRef).HasMaxLength(60);
         builder.Property(a => a.RetentionClass).HasConversion<string>().HasMaxLength(20);
         builder.Property(a => a.State).HasConversion<string>().HasMaxLength(15);
-        builder.Property(a => a.LegalHoldReason).HasMaxLength(1000);
         builder.HasIndex(a => new { a.TenantId, a.SourceModule, a.SourceRef }).IsUnique();
         builder.HasIndex(a => new { a.TenantId, a.State });
         builder.Ignore(a => a.DomainEvents);

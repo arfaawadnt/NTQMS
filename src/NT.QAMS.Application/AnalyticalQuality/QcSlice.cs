@@ -99,6 +99,15 @@ public sealed class UpdateQcTargetsHandler(IAppDbContext db, IClock clock)
 [RequireInternalActor]
 public sealed record LogQcTroubleshootingCommand(Guid RunId, string Note) : ICommand;
 
+// The former varchar bound, kept at the API layer now the column is text (schema hardening 1.2/Q6).
+public sealed class LogQcTroubleshootingValidator : AbstractValidator<LogQcTroubleshootingCommand>
+{
+    public LogQcTroubleshootingValidator()
+    {
+        RuleFor(x => x.Note).NotEmpty().MaximumLength(2000);
+    }
+}
+
 public sealed class LogQcTroubleshootingHandler(IAppDbContext db)
     : ICommandHandler<LogQcTroubleshootingCommand>
 {

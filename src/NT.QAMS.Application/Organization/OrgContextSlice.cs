@@ -96,6 +96,15 @@ public sealed record LinkContextIssueRiskCommand(Guid IssueId, Guid RiskId) : IC
 [RequireInternalActor]
 public sealed record CloseContextIssueCommand(Guid IssueId, string Resolution) : ICommand;
 
+// The former varchar bound, kept at the API layer now the column is text (schema hardening 1.2/Q6).
+public sealed class CloseContextIssueValidator : AbstractValidator<CloseContextIssueCommand>
+{
+    public CloseContextIssueValidator()
+    {
+        RuleFor(x => x.Resolution).NotEmpty().MaximumLength(4000);
+    }
+}
+
 public sealed class RegisterContextIssueValidator : AbstractValidator<RegisterContextIssueCommand>
 {
     public RegisterContextIssueValidator()

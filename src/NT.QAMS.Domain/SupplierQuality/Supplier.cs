@@ -142,15 +142,15 @@ public sealed class SupplierEvaluation : AggregateRoot, ITenantScoped
 {
     private SupplierEvaluation()
     {
-        CriteriaJson = null!;
+        Criteria = null!;
     }
 
     public Guid TenantId { get; set; }
     public Guid SupplierId { get; private set; }
     public DateOnly PeriodStart { get; private set; }
     public DateOnly PeriodEnd { get; private set; }
-    /// <summary>Criterion name → (weight, score) captured as JSON evidence; the total is the record.</summary>
-    public string CriteriaJson { get; private set; }
+    /// <summary>Criterion name → (weight, score) captured as a JSON document; the total is the record.</summary>
+    public string Criteria { get; private set; }
     public decimal WeightedTotal { get; private set; }
     public Guid EvaluatedBy { get; private set; }
 
@@ -185,7 +185,7 @@ public sealed class SupplierEvaluation : AggregateRoot, ITenantScoped
             SupplierId = supplierId,
             PeriodStart = periodStart,
             PeriodEnd = periodEnd,
-            CriteriaJson = System.Text.Json.JsonSerializer.Serialize(
+            Criteria = System.Text.Json.JsonSerializer.Serialize(
                 criteria.Select(c => new { c.Criterion, c.Weight, c.Score })),
             WeightedTotal = Math.Round(criteria.Sum(c => c.Weight * c.Score) / totalWeight, 2),
             EvaluatedBy = evaluatedBy,

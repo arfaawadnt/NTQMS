@@ -43,6 +43,15 @@ public sealed record AuthorizeCompetencyCommand(Guid CompetencyId) : ICommand;
 [RequireInternalActor]
 public sealed record RevokeCompetencyCommand(Guid CompetencyId, string Reason) : ICommand;
 
+// The former varchar bound, kept at the API layer now the column is text (schema hardening 1.2/Q6).
+public sealed class RevokeCompetencyValidator : AbstractValidator<RevokeCompetencyCommand>
+{
+    public RevokeCompetencyValidator()
+    {
+        RuleFor(x => x.Reason).NotEmpty().MaximumLength(1000);
+    }
+}
+
 internal static class CompetencyLoader
 {
     public static async Task<CompetencyRecord> LoadAsync(IAppDbContext db, Guid id, CancellationToken ct) =>

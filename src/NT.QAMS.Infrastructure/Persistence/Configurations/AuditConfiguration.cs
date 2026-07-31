@@ -25,9 +25,9 @@ public sealed class AuditConfiguration : IEntityTypeConfiguration<Audit>
             item.WithOwner().HasForeignKey("audit_id");
             item.HasKey(i => i.Id);
             item.Property(i => i.IsoClause).HasMaxLength(30);
-            item.Property(i => i.Question).HasMaxLength(1000);
+            item.Property(i => i.Question);
             item.Property(i => i.Verdict).HasConversion<string>().HasMaxLength(20);
-            item.Property(i => i.Evidence).HasMaxLength(2000);
+            item.Property(i => i.Evidence);
         });
 
         builder.OwnsMany(a => a.Findings, finding =>
@@ -36,7 +36,7 @@ public sealed class AuditConfiguration : IEntityTypeConfiguration<Audit>
             finding.WithOwner().HasForeignKey("audit_id");
             finding.HasKey(f => f.Id);
             finding.Property(f => f.Grade).HasConversion<string>().HasMaxLength(20);
-            finding.Property(f => f.Description).HasMaxLength(4000);
+            finding.Property(f => f.Description);
         });
 
         builder.Ignore(a => a.DomainEvents);
