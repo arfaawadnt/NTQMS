@@ -319,7 +319,45 @@ tables (outbox, counters, read models) into the domain model. Verified: provisio
 
 ---
 
-## 11. Follow-up backlog (reported, not implemented)
+## 11. VER-001 closed — the regulated flows now run against a real database
+
+The audit finding this programme produced was that regulated behaviour is tested on an in-memory
+provider, where RLS, foreign keys and CHECK constraints do not exist — so the three defects above
+passed a green suite and were caught only by hand. That gap is now closed in code, not in prose.
+
+`RegulatedFlowRealDatabaseTests` (+ `RealDatabaseWebAppFactory`) boots the **real WebApi host
+against real PostgreSQL** — production Npgsql provider, the tenant-GUC connection interceptor and
+the raw-SQL reference generator all intact, only background jobs removed — and drives the four
+flows over HTTP:
+
+| Test | Guards |
+| ---- | ------ |
+| `Provisioning_a_tenant_succeeds_against_real_foreign_keys` | SH-D2 |
+| `Signing_in_writes_its_security_event_through_row_level_security` | SH-D1 |
+| `Owned_child_changes_are_visible_in_the_owning_tenants_field_change_ledger` | RP-D1 / URS-106 |
+| `A_tenant_sees_only_its_own_users_over_http` | URS-100/101 through the full stack |
+
+**Mutation-tested against all three defects** — a guard that cannot fail is decoration:
+
+| Reverted fix | Result |
+| ------------ | ------ |
+| Tenant FK made non-deferrable (SH-D2) | **4 / 4 fail** |
+| `LoginHandler` tenant scoping removed (SH-D1) | **3 / 4 fail** (provisioning correctly still passes — it does not sign in as a tenant user) |
+| Shadow-tenant read removed from `FieldChangeInterceptor` (RP-D1) | **1 / 4 fails** — precisely the ledger test |
+
+The fixture also refuses to run against a database without FORCE RLS, so it can never pass while
+proving nothing; and it skips (not fails) with no database, so a developer without PostgreSQL
+still gets a green local run while CI always executes it.
+
+**A real bug in the first version of this harness, worth recording.** The two factories configure
+their hosts through *process-global* environment variables, so in parallel they raced: whichever
+constructed last decided the other's connection string and JWT secret. The new tests passed alone
+and failed in the suite (`password authentication failed for user "x"`, then 401). Fixed by
+host-scoped configuration plus `DisableTestParallelization` for the assembly. Suite 442 → **446**.
+
+---
+
+## 12. Follow-up backlog (reported, not implemented)
 
 | # | Item | Rationale |
 | - | ---- | --------- |
@@ -332,7 +370,7 @@ tables (outbox, counters, read models) into the domain model. Verified: provisio
 | B7 | Type `QcRun.Outcome` as `WestgardOutcome` | Closes the string/enum gap the Phase-3 CHECK papers over |
 | B8 | Composite FK `user_account(role_id) → role` | No FK exists today; deferred because `user_account` keeps a single-column PK |
 
-## 12. Status
+## 13. Status
 
 The eight requested changes are delivered, verified by introspection and by live use, and
 committed. **B9 is closed** — permanently accepted as a documented deviation (§8), with

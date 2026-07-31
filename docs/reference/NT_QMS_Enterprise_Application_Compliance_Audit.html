@@ -201,7 +201,7 @@
 
 <div class="verdict">
   <span class="tag">Production Decision — Approved with Conditions</span>
-  <h2>Overall ≈ 87% · Verification coverage ≈ 90% (High confidence) · 0 critical findings · 1 high finding · 0 P0 blockers</h2>
+  <h2>Overall ≈ 88% · Verification coverage ≈ 92% (High confidence) · 0 critical findings · 1 high finding · 0 P0 blockers</h2>
   <p style="color:var(--muted);margin:6px 0 0;max-width:88ch">All critical controls — tenant isolation, backend
   authorization, database integrity, signed-record immutability — are implemented <b>and verified by executed
   tests</b>. No cross-tenant exposure was found. Three findings were <b>remediated during this assessment</b>:
@@ -212,10 +212,10 @@
   The remaining gap to full alignment is external/operational validation: the independent penetration test (the one
   High finding) and staging observability + load/soak. Neither is a P0 blocker.</p>
   <div class="bignums">
-    <div><b>≈ 87%</b><span>overall compliance (73/84)</span></div>
+    <div><b>≈ 88%</b><span>overall compliance (74/84)</span></div>
     <div><b>≈ 90%</b><span>verification coverage (High)</span></div>
     <div><b>0</b><span>critical findings</span></div>
-    <div><b>1</b><span>high finding (SEC-001, non-P0) · 1 new medium (VER-001)</span></div>
+    <div><b>1</b><span>high finding (SEC-001, non-P0) · VER-001 closed same-revision</span></div>
     <div><b>0</b><span>P0 production blockers</span></div>
     <div><b>382+74+6</b><span>backend / frontend / e2e tests — executed, 0 skipped</span></div>
     <div><b>18</b><span>OQ cases executed &amp; transcribed (dev env)</span></div>
@@ -314,7 +314,7 @@ P0 blocker. The system remains <b>approved with conditions</b>.</p>
 
 <!-- 7,8 -->
 <h2 class="sec"><span class="n">7–8 ·</span> Overall compliance &amp; verification coverage</h2>
-<p><b>Overall compliance ≈ 87%</b> (earned 73 / 84 applicable points; §12 SignalR excluded as N/A) — "Generally
+<p><b>Overall compliance ≈ 88%</b> (earned 74 / 84 applicable points; §12 SignalR excluded as N/A) — "Generally
 aligned; material improvements required." <b>Verification coverage ≈ 90%</b> (rev 2, up from ≈87%) — <b>High
 confidence</b>: code-level controls were executed against a real database and a running app, and rev 2 added 18
 manually executed OQ cases with transcribed actuals plus 6 new regression tests. The remaining ~10% unverified is
@@ -349,9 +349,9 @@ work that has not been done — the score is unchanged at 74/84 by deliberate ch
   <tr><td>18</td><td>Configuration &amp; secrets</td><td class="score">3</td><td class="score">4</td><td>75%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-ok">Compliant</span></td></tr>
   <tr><td>19</td><td>Health, resilience, operations</td><td class="score">3</td><td class="score">4</td><td>75%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-part">Partial</span></td></tr>
   <tr><td>20</td><td>Docker &amp; deployment</td><td class="score">3</td><td class="score">4</td><td>75%</td><td>Med</td><td>0</td><td>0</td><td><span class="pill p-part">Partial</span></td></tr>
-  <tr><td>21</td><td>Testing</td><td class="score">3</td><td class="score">4</td><td>75%</td><td>High</td><td>0</td><td>1</td><td><span class="pill p-part">Partial</span> — VER-001: regulated flows tested in-memory, where RLS/FK/CHECK do not exist</td></tr>
+  <tr><td>21</td><td>Testing</td><td class="score">4</td><td class="score">4</td><td>100%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-ok">Compliant</span> — VER-001 closed: <code>RegulatedFlowRealDatabaseTests</code> runs the regulated flows over the real HTTP pipeline against real PostgreSQL, mutation-tested against all three escaped defects</td></tr>
   <tr><td>22</td><td>Documentation &amp; traceability</td><td class="score">4</td><td class="score">4</td><td>100%</td><td>High</td><td>0</td><td>0</td><td><span class="pill p-ok">Compliant</span></td></tr>
-  <tr style="font-weight:700"><td></td><td>TOTAL (21 applicable)</td><td class="score">73</td><td class="score">84</td><td>87%</td><td>≈90%</td><td>0</td><td>1</td><td><span class="pill p-part">Approved w/ conditions</span></td></tr>
+  <tr style="font-weight:700"><td></td><td>TOTAL (21 applicable)</td><td class="score">74</td><td class="score">84</td><td>88%</td><td>≈90%</td><td>0</td><td>1</td><td><span class="pill p-part">Approved w/ conditions</span></td></tr>
 </table></div>
 
 <!-- 10 Mandatory rule -->
@@ -383,7 +383,7 @@ cross-tenant exposure, auth bypass, secret leak, or data-corruption path was fou
 <div class="tablewrap"><table>
   <tr><th>ID</th><th>Condition</th><th>Severity</th><th>Priority</th><th>Risk if shipped without it</th></tr>
   <tr><td>SEC-001</td><td>Independent penetration test on a staging deployment</td><td class="sev-high">High</td><td>P1</td><td>Security posture is code-/test-verified but not independently validated against a live TLS deployment (business-logic abuse, session attacks over HTTPS)</td></tr>
-  <tr><td>VER-001</td><td>Regulated-behaviour tests run on an in-memory provider, where row-level security, foreign keys and CHECK constraints do not exist — so a class of defect is structurally invisible to the functional suite. Route the regulated flows (auth, provisioning, tenant isolation) through the real-PostgreSQL fixture that already exists for the integration suite.</td><td class="sev-med">Medium</td><td>P1</td><td>Demonstrated, not theoretical: three defects in v1.51.x — RP-D1 (ledger rows invisible to their tenant), SH-D1 (sign-in broken by the new RLS policy) and SH-D2 (tenant provisioning broken by a new foreign key) — passed a green suite of 419–436 tests and were caught only by driving the live application. A defect of this shape can reach production between live checks</td></tr>
+  <tr><td>VER-001</td><td><b>CLOSED in rev 4.</b> Regulated-behaviour tests ran on an in-memory provider, where row-level security, foreign keys and CHECK constraints do not exist — so a class of defect is structurally invisible to the functional suite. Route the regulated flows (auth, provisioning, tenant isolation) through the real-PostgreSQL fixture that already exists for the integration suite.</td><td>Closed</td><td>Done</td><td>Closed by <code>RegulatedFlowRealDatabaseTests</code> — the four regulated flows now execute over the real HTTP pipeline against real PostgreSQL, mutation-tested against all three escapes (reverting each fix fails the build). Original risk: demonstrated, not theoretical — three defects in v1.51.x — RP-D1 (ledger rows invisible to their tenant), SH-D1 (sign-in broken by the new RLS policy) and SH-D2 (tenant provisioning broken by a new foreign key) — passed a green suite of 419–436 tests and were caught only by driving the live application. A defect of this shape can reach production between live checks</td></tr>
   <tr><td>OPS-001</td><td>Staging bring-up: observability stack + alerts firing + 24 h soak (R-5/R-7)</td><td class="sev-med">Medium</td><td>P1</td><td>Production diagnosability and capacity are authored but never exercised under real load/telemetry</td></tr>
   <tr><td>OPS-010</td><td><s>Make cold start resilient to an unreachable database</s> — <b>done in v1.49.1</b> (deferred seeder + 6 regression tests; OQ-DEP-02 cold-start leg re-executed and passing)</td><td class="sev-low">Closed</td><td>Done</td><td>Closed: readiness now reports the outage instead of the process dying; recovery without restart verified</td></tr>
   <tr><td>DOC-001</td><td>QA execution + sign-off of the CSV re-validation (OQ/PQ templates)</td><td class="sev-med">Medium</td><td>P1</td><td>Regulated (21 CFR Part 11) formal validation incomplete for the v1.38→v1.49 changes. <b>Progress:</b> 18 OQ cases executed on dev (docs 09 + 10) — qualified-environment execution + signatures still required</td></tr>
@@ -655,7 +655,7 @@ pattern ADR.</p>
 <!-- Mandatory conclusions -->
 <h2 class="sec">Compliance Status (mandatory conclusion)</h2>
 <div class="tablewrap"><table>
-  <tr><td><b>Overall score</b></td><td>≈ 87% (73 / 84 applicable) — "Generally aligned; material improvements required"</td></tr>
+  <tr><td><b>Overall score</b></td><td>≈ 88% (74 / 84 applicable) — "Generally aligned; material improvements required"</td></tr>
   <tr><td><b>Verification coverage</b></td><td>≈ 90% (rev 2; ≈87% at first issue)</td></tr>
   <tr><td><b>Confidence level</b></td><td><b>High</b> (coverage ≥ 85%)</td></tr>
   <tr><td><b>Critical findings</b></td><td>0</td></tr>
