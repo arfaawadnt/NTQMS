@@ -56,6 +56,10 @@ public sealed class ValidationStudyConfiguration : IEntityTypeConfiguration<Vali
         builder.OwnsMany(s => s.Replicates, r =>
         {
             r.ToTable("validation_replicate", "qams");
+            // Shadow tenant column (schema hardening Phase 4): stamped from the
+            // owner by TenantStampInterceptor; the composite FK to the owner makes
+            // a mismatched value impossible to persist. RLS reads it.
+            r.Property<Guid>("TenantId");
             r.WithOwner().HasForeignKey("study_id");
             r.HasKey(x => x.Id);
             r.Property(x => x.Level).HasMaxLength(30);
@@ -106,6 +110,10 @@ public sealed class UncertaintyBudgetConfiguration : IEntityTypeConfiguration<Un
         builder.OwnsMany(b => b.Components, component =>
         {
             component.ToTable("uncertainty_component", "qams");
+            // Shadow tenant column (schema hardening Phase 4): stamped from the
+            // owner by TenantStampInterceptor; the composite FK to the owner makes
+            // a mismatched value impossible to persist. RLS reads it.
+            component.Property<Guid>("TenantId");
             component.WithOwner().HasForeignKey("budget_id");
             component.HasKey(c => c.Id);
             component.Property(c => c.Name).HasMaxLength(300);
@@ -129,6 +137,10 @@ public sealed class PtPlanConfiguration : IEntityTypeConfiguration<PtPlan>
         builder.OwnsMany(p => p.Items, item =>
         {
             item.ToTable("pt_plan_item", "qams");
+            // Shadow tenant column (schema hardening Phase 4): stamped from the
+            // owner by TenantStampInterceptor; the composite FK to the owner makes
+            // a mismatched value impossible to persist. RLS reads it.
+            item.Property<Guid>("TenantId");
             item.WithOwner().HasForeignKey("plan_id");
             item.HasKey(i => i.Id);
             item.Property(i => i.Scheme).HasMaxLength(200);
@@ -160,6 +172,10 @@ public sealed class MethodComparisonStudyConfiguration : IEntityTypeConfiguratio
         builder.OwnsMany(s => s.Pairs, pair =>
         {
             pair.ToTable("measurement_pair", "qams");
+            // Shadow tenant column (schema hardening Phase 4): stamped from the
+            // owner by TenantStampInterceptor; the composite FK to the owner makes
+            // a mismatched value impossible to persist. RLS reads it.
+            pair.Property<Guid>("TenantId");
             pair.WithOwner().HasForeignKey("study_id");
             pair.HasKey(p => p.Id);
             pair.Property(p => p.SampleId).HasMaxLength(100);
@@ -187,6 +203,10 @@ public sealed class LinearityStudyConfiguration : IEntityTypeConfiguration<Linea
         builder.OwnsMany(s => s.Measurements, m =>
         {
             m.ToTable("linearity_measurement", "qams");
+            // Shadow tenant column (schema hardening Phase 4): stamped from the
+            // owner by TenantStampInterceptor; the composite FK to the owner makes
+            // a mismatched value impossible to persist. RLS reads it.
+            m.Property<Guid>("TenantId");
             m.WithOwner().HasForeignKey("study_id");
             m.HasKey(x => x.Id);
         });
@@ -212,6 +232,10 @@ public sealed class DetectionLimitStudyConfiguration : IEntityTypeConfiguration<
         builder.OwnsMany(s => s.Measurements, m =>
         {
             m.ToTable("detection_measurement", "qams");
+            // Shadow tenant column (schema hardening Phase 4): stamped from the
+            // owner by TenantStampInterceptor; the composite FK to the owner makes
+            // a mismatched value impossible to persist. RLS reads it.
+            m.Property<Guid>("TenantId");
             m.WithOwner().HasForeignKey("study_id");
             m.HasKey(x => x.Id);
             m.Property(x => x.Kind).HasConversion<string>().HasMaxLength(10);
@@ -240,6 +264,10 @@ public sealed class ReferenceIntervalStudyConfiguration : IEntityTypeConfigurati
         builder.OwnsMany(s => s.Samples, x =>
         {
             x.ToTable("reference_sample", "qams");
+            // Shadow tenant column (schema hardening Phase 4): stamped from the
+            // owner by TenantStampInterceptor; the composite FK to the owner makes
+            // a mismatched value impossible to persist. RLS reads it.
+            x.Property<Guid>("TenantId");
             x.WithOwner().HasForeignKey("study_id");
             x.HasKey(p => p.Id);
             x.Property(p => p.SubjectRef).HasMaxLength(100);
@@ -284,6 +312,10 @@ public sealed class PrecisionStudyConfiguration : IEntityTypeConfiguration<Preci
         builder.OwnsMany(s => s.Measurements, m =>
         {
             m.ToTable("precision_measurement", "qams");
+            // Shadow tenant column (schema hardening Phase 4): stamped from the
+            // owner by TenantStampInterceptor; the composite FK to the owner makes
+            // a mismatched value impossible to persist. RLS reads it.
+            m.Property<Guid>("TenantId");
             m.WithOwner().HasForeignKey("study_id");
             m.HasKey(x => x.Id);
             m.Property(x => x.RunLabel).HasMaxLength(60);
@@ -308,6 +340,10 @@ public sealed class OutlierScreeningConfiguration : IEntityTypeConfiguration<Out
         b.OwnsMany(s => s.Points, p =>
         {
             p.ToTable("outlier_point", "qams");
+            // Shadow tenant column (schema hardening Phase 4): stamped from the
+            // owner by TenantStampInterceptor; the composite FK to the owner makes
+            // a mismatched value impossible to persist. RLS reads it.
+            p.Property<Guid>("TenantId");
             p.WithOwner().HasForeignKey("screening_id");
             p.HasKey(x => x.Id);
             p.Property(x => x.Label).HasMaxLength(100);
@@ -331,6 +367,10 @@ public sealed class CarryoverStudyConfiguration : IEntityTypeConfiguration<Carry
         b.OwnsMany(s => s.Readings, r =>
         {
             r.ToTable("carryover_reading", "qams");
+            // Shadow tenant column (schema hardening Phase 4): stamped from the
+            // owner by TenantStampInterceptor; the composite FK to the owner makes
+            // a mismatched value impossible to persist. RLS reads it.
+            r.Property<Guid>("TenantId");
             r.WithOwner().HasForeignKey("study_id");
             r.HasKey(x => x.Id);
             r.Property(x => x.Kind).HasConversion<string>().HasMaxLength(10);
@@ -356,6 +396,10 @@ public sealed class LotComparisonStudyConfiguration : IEntityTypeConfiguration<L
         b.OwnsMany(s => s.Pairs, p =>
         {
             p.ToTable("lot_sample_pair", "qams");
+            // Shadow tenant column (schema hardening Phase 4): stamped from the
+            // owner by TenantStampInterceptor; the composite FK to the owner makes
+            // a mismatched value impossible to persist. RLS reads it.
+            p.Property<Guid>("TenantId");
             p.WithOwner().HasForeignKey("study_id");
             p.HasKey(x => x.Id);
             p.Property(x => x.SampleId).HasMaxLength(100);
@@ -379,6 +423,10 @@ public sealed class InterferenceStudyConfiguration : IEntityTypeConfiguration<In
         b.OwnsMany(s => s.Measurements, m =>
         {
             m.ToTable("interference_measurement", "qams");
+            // Shadow tenant column (schema hardening Phase 4): stamped from the
+            // owner by TenantStampInterceptor; the composite FK to the owner makes
+            // a mismatched value impossible to persist. RLS reads it.
+            m.Property<Guid>("TenantId");
             m.WithOwner().HasForeignKey("study_id");
             m.HasKey(x => x.Id);
             m.Property(x => x.Interferent).HasMaxLength(120);
@@ -403,6 +451,10 @@ public sealed class InstrumentComparabilityStudyConfiguration : IEntityTypeConfi
         b.OwnsMany(s => s.Readings, r =>
         {
             r.ToTable("instrument_reading", "qams");
+            // Shadow tenant column (schema hardening Phase 4): stamped from the
+            // owner by TenantStampInterceptor; the composite FK to the owner makes
+            // a mismatched value impossible to persist. RLS reads it.
+            r.Property<Guid>("TenantId");
             r.WithOwner().HasForeignKey("study_id");
             r.HasKey(x => x.Id);
             r.Property(x => x.Instrument).HasMaxLength(100);

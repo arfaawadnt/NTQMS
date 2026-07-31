@@ -27,6 +27,10 @@ public sealed class UserAccountConfiguration : IEntityTypeConfiguration<UserAcco
         builder.OwnsMany(u => u.BranchAccess, access =>
         {
             access.ToTable("user_branch_access", "qams");
+            // Shadow tenant column (schema hardening Phase 4): stamped from the
+            // owner by TenantStampInterceptor; the composite FK to the owner makes
+            // a mismatched value impossible to persist. RLS reads it.
+            access.Property<Guid>("TenantId");
             access.WithOwner().HasForeignKey("user_id");
             access.HasKey("user_id", nameof(UserBranchAccess.BranchId));
         });
@@ -34,6 +38,10 @@ public sealed class UserAccountConfiguration : IEntityTypeConfiguration<UserAcco
         builder.OwnsMany(u => u.DepartmentAccess, access =>
         {
             access.ToTable("user_department_access", "qams");
+            // Shadow tenant column (schema hardening Phase 4): stamped from the
+            // owner by TenantStampInterceptor; the composite FK to the owner makes
+            // a mismatched value impossible to persist. RLS reads it.
+            access.Property<Guid>("TenantId");
             access.WithOwner().HasForeignKey("user_id");
             access.HasKey("user_id", nameof(UserDepartmentAccess.DepartmentId));
         });
@@ -63,6 +71,10 @@ public sealed class NonconformanceConfiguration : IEntityTypeConfiguration<Nonco
         builder.OwnsMany(n => n.CapaActions, action =>
         {
             action.ToTable("capa_action", "qams");
+            // Shadow tenant column (schema hardening Phase 4): stamped from the
+            // owner by TenantStampInterceptor; the composite FK to the owner makes
+            // a mismatched value impossible to persist. RLS reads it.
+            action.Property<Guid>("TenantId");
             action.WithOwner().HasForeignKey("nc_id");
             action.HasKey(a => a.Id);
             action.Property(a => a.Type).HasConversion<string>().HasMaxLength(20);
@@ -73,6 +85,10 @@ public sealed class NonconformanceConfiguration : IEntityTypeConfiguration<Nonco
         builder.OwnsMany(n => n.RcaRecords, rca =>
         {
             rca.ToTable("rca_record", "qams");
+            // Shadow tenant column (schema hardening Phase 4): stamped from the
+            // owner by TenantStampInterceptor; the composite FK to the owner makes
+            // a mismatched value impossible to persist. RLS reads it.
+            rca.Property<Guid>("TenantId");
             rca.WithOwner().HasForeignKey("nc_id");
             rca.HasKey(r => r.Id);
             rca.Property(r => r.Method).HasConversion<string>().HasMaxLength(20);
@@ -145,6 +161,10 @@ public sealed class QualityObjectiveConfiguration : IEntityTypeConfiguration<Qua
         builder.OwnsMany(o => o.Updates, update =>
         {
             update.ToTable("objective_progress", "qams");
+            // Shadow tenant column (schema hardening Phase 4): stamped from the
+            // owner by TenantStampInterceptor; the composite FK to the owner makes
+            // a mismatched value impossible to persist. RLS reads it.
+            update.Property<Guid>("TenantId");
             update.WithOwner().HasForeignKey("objective_id");
             update.HasKey(u => u.Id);
             update.Property(u => u.Comment);

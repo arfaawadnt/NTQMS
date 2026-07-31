@@ -21,6 +21,10 @@ public sealed class RiskItemConfiguration : IEntityTypeConfiguration<RiskItem>
         builder.OwnsMany(r => r.Actions, a =>
         {
             a.ToTable("mitigation_action", "qams");
+            // Shadow tenant column (schema hardening Phase 4): stamped from the
+            // owner by TenantStampInterceptor; the composite FK to the owner makes
+            // a mismatched value impossible to persist. RLS reads it.
+            a.Property<Guid>("TenantId");
             a.WithOwner().HasForeignKey("risk_id");
             a.HasKey(x => x.Id);
             a.Property(x => x.Description);
@@ -58,6 +62,10 @@ public sealed class ManagementReviewConfiguration : IEntityTypeConfiguration<Man
         builder.OwnsMany(r => r.Decisions, d =>
         {
             d.ToTable("review_decision", "qams");
+            // Shadow tenant column (schema hardening Phase 4): stamped from the
+            // owner by TenantStampInterceptor; the composite FK to the owner makes
+            // a mismatched value impossible to persist. RLS reads it.
+            d.Property<Guid>("TenantId");
             d.WithOwner().HasForeignKey("review_id");
             d.HasKey(x => x.Id);
             d.Property(x => x.Description);
@@ -84,6 +92,10 @@ public sealed class SupplierConfiguration : IEntityTypeConfiguration<Supplier>
         builder.OwnsMany(s => s.Certificates, c =>
         {
             c.ToTable("supplier_certificate", "qams");
+            // Shadow tenant column (schema hardening Phase 4): stamped from the
+            // owner by TenantStampInterceptor; the composite FK to the owner makes
+            // a mismatched value impossible to persist. RLS reads it.
+            c.Property<Guid>("TenantId");
             c.WithOwner().HasForeignKey("supplier_id");
             c.HasKey(x => x.Id);
             c.Property(x => x.CertificateType).HasMaxLength(100);

@@ -22,6 +22,10 @@ public sealed class RoleConfiguration : IEntityTypeConfiguration<Role>
         builder.OwnsMany(r => r.Permissions, permission =>
         {
             permission.ToTable("role_permission", "qams");
+            // Shadow tenant column (schema hardening Phase 4): stamped from the
+            // owner by TenantStampInterceptor; the composite FK to the owner makes
+            // a mismatched value impossible to persist. RLS reads it.
+            permission.Property<Guid>("TenantId");
             permission.WithOwner().HasForeignKey("role_id");
             permission.Property(p => p.PermissionKey).HasMaxLength(60);
             permission.HasKey("role_id", nameof(RolePermission.PermissionKey));

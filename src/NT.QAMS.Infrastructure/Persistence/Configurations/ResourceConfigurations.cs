@@ -25,6 +25,10 @@ public sealed class EquipmentItemConfiguration : IEntityTypeConfiguration<Equipm
         builder.OwnsMany(e => e.Calibrations, cal =>
         {
             cal.ToTable("calibration_record", "qams");
+            // Shadow tenant column (schema hardening Phase 4): stamped from the
+            // owner by TenantStampInterceptor; the composite FK to the owner makes
+            // a mismatched value impossible to persist. RLS reads it.
+            cal.Property<Guid>("TenantId");
             cal.WithOwner().HasForeignKey("equipment_id");
             cal.HasKey(c => c.Id);
             cal.Property(c => c.Provider).HasMaxLength(200);
@@ -34,6 +38,10 @@ public sealed class EquipmentItemConfiguration : IEntityTypeConfiguration<Equipm
         builder.OwnsMany(e => e.Maintenance, m =>
         {
             m.ToTable("maintenance_record", "qams");
+            // Shadow tenant column (schema hardening Phase 4): stamped from the
+            // owner by TenantStampInterceptor; the composite FK to the owner makes
+            // a mismatched value impossible to persist. RLS reads it.
+            m.Property<Guid>("TenantId");
             m.WithOwner().HasForeignKey("equipment_id");
             m.HasKey(x => x.Id);
             m.Property(x => x.WorkDescription);
@@ -42,6 +50,10 @@ public sealed class EquipmentItemConfiguration : IEntityTypeConfiguration<Equipm
         builder.OwnsMany(e => e.IntermediateChecks, check =>
         {
             check.ToTable("intermediate_check", "qams");
+            // Shadow tenant column (schema hardening Phase 4): stamped from the
+            // owner by TenantStampInterceptor; the composite FK to the owner makes
+            // a mismatched value impossible to persist. RLS reads it.
+            check.Property<Guid>("TenantId");
             check.WithOwner().HasForeignKey("equipment_id");
             check.HasKey(x => x.Id);
             check.Property(x => x.CheckType).HasMaxLength(200);
@@ -112,6 +124,10 @@ public sealed class CompetencyRecordConfiguration : IEntityTypeConfiguration<Com
         builder.OwnsMany(c => c.Assessments, a =>
         {
             a.ToTable("assessment_result", "qams");
+            // Shadow tenant column (schema hardening Phase 4): stamped from the
+            // owner by TenantStampInterceptor; the composite FK to the owner makes
+            // a mismatched value impossible to persist. RLS reads it.
+            a.Property<Guid>("TenantId");
             a.WithOwner().HasForeignKey("competency_id");
             a.HasKey(x => x.Id);
         });

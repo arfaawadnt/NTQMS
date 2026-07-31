@@ -23,6 +23,10 @@ public sealed class ControlledDocumentConfiguration : IEntityTypeConfiguration<C
         builder.OwnsMany(d => d.Versions, version =>
         {
             version.ToTable("document_version", "qams");
+            // Shadow tenant column (schema hardening Phase 4): stamped from the
+            // owner by TenantStampInterceptor; the composite FK to the owner makes
+            // a mismatched value impossible to persist. RLS reads it.
+            version.Property<Guid>("TenantId");
             version.WithOwner().HasForeignKey("document_id");
             version.HasKey(v => v.Id);
             version.Property(v => v.State).HasConversion<string>().HasMaxLength(20);

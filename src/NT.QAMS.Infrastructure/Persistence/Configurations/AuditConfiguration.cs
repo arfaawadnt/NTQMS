@@ -22,6 +22,10 @@ public sealed class AuditConfiguration : IEntityTypeConfiguration<Audit>
         builder.OwnsMany(a => a.Checklist, item =>
         {
             item.ToTable("audit_checklist_item", "qams");
+            // Shadow tenant column (schema hardening Phase 4): stamped from the
+            // owner by TenantStampInterceptor; the composite FK to the owner makes
+            // a mismatched value impossible to persist. RLS reads it.
+            item.Property<Guid>("TenantId");
             item.WithOwner().HasForeignKey("audit_id");
             item.HasKey(i => i.Id);
             item.Property(i => i.IsoClause).HasMaxLength(30);
@@ -33,6 +37,10 @@ public sealed class AuditConfiguration : IEntityTypeConfiguration<Audit>
         builder.OwnsMany(a => a.Findings, finding =>
         {
             finding.ToTable("audit_finding", "qams");
+            // Shadow tenant column (schema hardening Phase 4): stamped from the
+            // owner by TenantStampInterceptor; the composite FK to the owner makes
+            // a mismatched value impossible to persist. RLS reads it.
+            finding.Property<Guid>("TenantId");
             finding.WithOwner().HasForeignKey("audit_id");
             finding.HasKey(f => f.Id);
             finding.Property(f => f.Grade).HasConversion<string>().HasMaxLength(20);

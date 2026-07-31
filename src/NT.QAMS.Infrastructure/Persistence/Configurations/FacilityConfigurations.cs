@@ -24,6 +24,10 @@ public sealed class MonitoringPointConfiguration : IEntityTypeConfiguration<Moni
         builder.OwnsMany(p => p.Readings, reading =>
         {
             reading.ToTable("environmental_reading", "qams");
+            // Shadow tenant column (schema hardening Phase 4): stamped from the
+            // owner by TenantStampInterceptor; the composite FK to the owner makes
+            // a mismatched value impossible to persist. RLS reads it.
+            reading.Property<Guid>("TenantId");
             reading.WithOwner().HasForeignKey("point_id");
             reading.HasKey(r => r.Id);
             reading.Property(r => r.Remark);

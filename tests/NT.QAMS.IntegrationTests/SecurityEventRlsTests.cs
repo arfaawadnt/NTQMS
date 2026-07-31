@@ -96,8 +96,20 @@ public sealed class SecurityEventRlsTests(RealPostgresFixture fx)
         ctx.Elevate();
         await using var tx = await db.Database.BeginTransactionAsync();
 
+        // Phase 4 gave ref_counter a real FK to saas.tenant, so the counters need
+        // real tenants - inventing ids no longer passes (which is the point).
         var tenantA = Guid.CreateVersion7();
         var tenantB = Guid.CreateVersion7();
+        foreach (var (id, slug) in new[] { (tenantA, "itest-rc-a"), (tenantB, "itest-rc-b") })
+        {
+            await db.Database.ExecuteSqlRawAsync(
+                "INSERT INTO saas.tenant (id, identifier, name, status, password_expiry_days, " +
+                "calibration_reminder_days, sop_expiry_reminder_months, default_language, time_zone, " +
+                "require_mfa_privileged, created_at_utc) " +
+                "VALUES ({0}, {1}, 'ITest Tenant', 'Active', 90, 30, 12, 'en', 'UTC', false, now())",
+                id, $"{slug}-{id.ToString("N")[..8]}");
+        }
+
         await db.Database.ExecuteSqlRawAsync(
             "INSERT INTO qams.ref_counter (tenant_id, ref_type, year, last_value) VALUES ({0}, 'ITEST', 2099, 1), ({1}, 'ITEST', 2099, 7)",
             tenantA, tenantB);
