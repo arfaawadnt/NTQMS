@@ -180,6 +180,7 @@ public sealed class AppDbContext(
                 method.Invoke(this, [modelBuilder]);
             }
         }
+
     }
 
     private void ApplyTenantFilter<TEntity>(ModelBuilder modelBuilder)

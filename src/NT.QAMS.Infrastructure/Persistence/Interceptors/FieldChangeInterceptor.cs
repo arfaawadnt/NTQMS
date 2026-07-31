@@ -122,6 +122,16 @@ public sealed class FieldChangeInterceptor(
     public static bool IsSensitive(string propertyName) =>
         Sensitive.Any(s => propertyName.Contains(s, StringComparison.OrdinalIgnoreCase));
 
+    /// <summary>
+    /// The record's identity as the ledger and its readers understand it.
+    /// <para>
+    /// Since primary keys became tenant-first (schema hardening Phase 5), the raw
+    /// key would render as <c>tenant|id</c> — a different value from every
+    /// historical row and from what <c>GetFieldChangesQuery(entityId)</c> looks
+    /// up. The tenant is already its own column on this ledger, so it is dropped
+    /// from the rendered identity and the contract is unchanged.
+    /// </para>
+    /// </summary>
     private static string RenderKey(EntityEntry entry)
     {
         var key = entry.Metadata.FindPrimaryKey();
@@ -130,7 +140,13 @@ public sealed class FieldChangeInterceptor(
             return "(keyless)";
         }
 
-        return string.Join('|', key.Properties.Select(p => Render(entry.Property(p.Name).CurrentValue)));
+        var identity = key.Properties.Where(p => p.Name != "TenantId").ToList();
+        if (identity.Count == 0)
+        {
+            identity = [.. key.Properties];
+        }
+
+        return string.Join('|', identity.Select(p => Render(entry.Property(p.Name).CurrentValue)));
     }
 
     private static string? Render(object? value) => value switch

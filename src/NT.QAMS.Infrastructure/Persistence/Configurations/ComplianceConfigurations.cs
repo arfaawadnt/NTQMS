@@ -13,7 +13,11 @@ public sealed class AuditTrailEntryConfiguration : IEntityTypeConfiguration<Audi
     public void Configure(EntityTypeBuilder<AuditTrailEntry> builder)
     {
         builder.ToTable("audit_trail", "audit");
-        builder.HasKey(e => e.Id);
+        // Tenant-first key (schema hardening Phase 5): this ledger is the first
+        // partitioning target (HASH on tenant_id), and a partitioned table needs
+        // the partition key in its primary key. The hash-chain columns are
+        // untouched.
+        builder.HasKey(e => new { e.TenantId, e.Id });
         builder.Property(e => e.EventType).HasMaxLength(400);
         builder.Property(e => e.PrevHash).HasMaxLength(64);
         builder.Property(e => e.EntryHash).HasMaxLength(64);
@@ -27,7 +31,7 @@ public sealed class SignatureRecordConfiguration : IEntityTypeConfiguration<Sign
     public void Configure(EntityTypeBuilder<SignatureRecord> builder)
     {
         builder.ToTable("electronic_signature", "audit");
-        builder.HasKey(s => s.Id);
+        builder.HasKey(s => new { s.TenantId, s.Id });
         builder.Property(s => s.SignerDisplay).HasMaxLength(150);
         builder.Property(s => s.Meaning).HasMaxLength(500);
         builder.Property(s => s.SubjectRef).HasMaxLength(120);
@@ -77,7 +81,7 @@ public sealed class AuditTrailReviewConfiguration : IEntityTypeConfiguration<Aud
     public void Configure(EntityTypeBuilder<AuditTrailReview> builder)
     {
         builder.ToTable("audit_trail_review", "qams");
-        builder.HasKey(r => r.Id);
+        builder.HasKey(r => new { r.TenantId, r.Id });
         builder.Property(r => r.ReviewRef).HasMaxLength(30);
         builder.Property(r => r.Status).HasConversion<string>().HasMaxLength(20);
         builder.HasIndex(r => new { r.TenantId, r.ReviewRef }).IsUnique();

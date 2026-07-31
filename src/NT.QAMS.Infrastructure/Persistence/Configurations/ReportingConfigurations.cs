@@ -10,7 +10,7 @@ public sealed class KpiSnapshotConfiguration : IEntityTypeConfiguration<KpiSnaps
     public void Configure(EntityTypeBuilder<KpiSnapshot> builder)
     {
         builder.ToTable("kpi_snapshot", "read");
-        builder.HasKey(s => s.Id);
+        builder.HasKey(s => new { s.TenantId, s.Id });
         builder.HasIndex(s => new { s.TenantId, s.Date }).IsUnique();
     }
 }

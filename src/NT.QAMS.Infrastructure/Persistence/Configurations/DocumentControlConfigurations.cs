@@ -10,7 +10,7 @@ public sealed class ControlledDocumentConfiguration : IEntityTypeConfiguration<C
     public void Configure(EntityTypeBuilder<ControlledDocument> builder)
     {
         builder.ToTable("controlled_document", "qams");
-        builder.HasKey(d => d.Id);
+        builder.HasKey(d => new { d.TenantId, d.Id });
 
         builder.Property(d => d.Code).HasMaxLength(40);
         builder.Property(d => d.Title).HasMaxLength(300);
@@ -27,8 +27,8 @@ public sealed class ControlledDocumentConfiguration : IEntityTypeConfiguration<C
             // owner by TenantStampInterceptor; the composite FK to the owner makes
             // a mismatched value impossible to persist. RLS reads it.
             version.Property<Guid>("TenantId");
-            version.WithOwner().HasForeignKey("document_id");
-            version.HasKey(v => v.Id);
+            version.WithOwner().HasForeignKey("TenantId", "document_id");
+            version.HasKey("TenantId", "Id");
             version.Property(v => v.State).HasConversion<string>().HasMaxLength(20);
             version.Property(v => v.ChangeSummary);
             version.Property(v => v.RejectionReason);
@@ -46,7 +46,7 @@ public sealed class DocumentAcknowledgementConfiguration : IEntityTypeConfigurat
     public void Configure(EntityTypeBuilder<DocumentAcknowledgement> builder)
     {
         builder.ToTable("document_acknowledgement", "qams");
-        builder.HasKey(a => a.Id);
+        builder.HasKey(a => new { a.TenantId, a.Id });
         builder.Property(a => a.DocumentCode).HasMaxLength(60);
         builder.Property(a => a.VersionLabel).HasMaxLength(20);
         // One receipt per (document version, user): re-acknowledging is idempotent.
@@ -65,7 +65,7 @@ public sealed class DocumentControlledCopyConfiguration : IEntityTypeConfigurati
     public void Configure(EntityTypeBuilder<DocumentControlledCopy> builder)
     {
         builder.ToTable("document_controlled_copy", "qams");
-        builder.HasKey(c => c.Id);
+        builder.HasKey(c => new { c.TenantId, c.Id });
         builder.Property(c => c.DocumentCode).HasMaxLength(60);
         builder.Property(c => c.VersionLabel).HasMaxLength(20);
         builder.Property(c => c.Holder).HasMaxLength(200);
@@ -83,7 +83,7 @@ public sealed class FileReferenceConfiguration : IEntityTypeConfiguration<FileRe
     public void Configure(EntityTypeBuilder<FileReference> builder)
     {
         builder.ToTable("file_reference", "qams");
-        builder.HasKey(f => f.Id);
+        builder.HasKey(f => new { f.TenantId, f.Id });
 
         builder.Property(f => f.FileName).HasMaxLength(260);
         builder.Property(f => f.ContentType).HasMaxLength(150);

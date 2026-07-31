@@ -9,7 +9,7 @@ public sealed class RoleConfiguration : IEntityTypeConfiguration<Role>
     public void Configure(EntityTypeBuilder<Role> builder)
     {
         builder.ToTable("role", "qams");
-        builder.HasKey(r => r.Id);
+        builder.HasKey(r => new { r.TenantId, r.Id });
 
         builder.Property(r => r.Name).HasMaxLength(80);
         builder.Property(r => r.NormalizedName).HasMaxLength(80);
@@ -26,9 +26,9 @@ public sealed class RoleConfiguration : IEntityTypeConfiguration<Role>
             // owner by TenantStampInterceptor; the composite FK to the owner makes
             // a mismatched value impossible to persist. RLS reads it.
             permission.Property<Guid>("TenantId");
-            permission.WithOwner().HasForeignKey("role_id");
+            permission.WithOwner().HasForeignKey("TenantId", "role_id");
             permission.Property(p => p.PermissionKey).HasMaxLength(60);
-            permission.HasKey("role_id", nameof(RolePermission.PermissionKey));
+            permission.HasKey("TenantId", "role_id", nameof(RolePermission.PermissionKey));
         });
 
         builder.Ignore(r => r.PermissionKeys);

@@ -10,7 +10,7 @@ public sealed class BranchConfiguration : IEntityTypeConfiguration<Branch>
     public void Configure(EntityTypeBuilder<Branch> builder)
     {
         builder.ToTable("branch", "qams");
-        builder.HasKey(b => b.Id);
+        builder.HasKey(b => new { b.TenantId, b.Id });
         builder.Property(b => b.Code).HasMaxLength(20);
         builder.Property(b => b.Name).HasMaxLength(200);
         builder.Property(b => b.City).HasMaxLength(100);
@@ -24,11 +24,17 @@ public sealed class DepartmentConfiguration : IEntityTypeConfiguration<Departmen
     public void Configure(EntityTypeBuilder<Department> builder)
     {
         builder.ToTable("department", "qams");
-        builder.HasKey(d => d.Id);
+        builder.HasKey(d => new { d.TenantId, d.Id });
         builder.Property(d => d.Code).HasMaxLength(20);
         builder.Property(d => d.Name).HasMaxLength(200);
         builder.HasIndex(d => new { d.TenantId, d.BranchId, d.Code }).IsUnique();
-        builder.HasOne<Branch>().WithMany().HasForeignKey(d => d.BranchId).OnDelete(DeleteBehavior.Restrict);
+        // Tenant-composite (schema hardening Phase 5): the last single-column
+        // cross-aggregate FK. Pointing it at the branch's (TenantId, Id) key
+        // makes a department under another tenant's branch impossible.
+        builder.HasOne<Branch>().WithMany()
+            .HasForeignKey(d => new { d.TenantId, d.BranchId })
+            .HasPrincipalKey(b => new { b.TenantId, b.Id })
+            .OnDelete(DeleteBehavior.Restrict);
         builder.Ignore(d => d.DomainEvents);
     }
 }
@@ -38,7 +44,7 @@ public sealed class TestCatalogItemConfiguration : IEntityTypeConfiguration<Test
     public void Configure(EntityTypeBuilder<TestCatalogItem> builder)
     {
         builder.ToTable("test_catalog_item", "qams");
-        builder.HasKey(t => t.Id);
+        builder.HasKey(t => new { t.TenantId, t.Id });
         builder.Property(t => t.TestCode).HasMaxLength(30);
         builder.Property(t => t.TestName).HasMaxLength(200);
         builder.Property(t => t.Methodology).HasMaxLength(300);
@@ -52,7 +58,7 @@ public sealed class LovEntryConfiguration : IEntityTypeConfiguration<LovEntry>
     public void Configure(EntityTypeBuilder<LovEntry> builder)
     {
         builder.ToTable("lov_entry", "qams");
-        builder.HasKey(l => l.Id);
+        builder.HasKey(l => new { l.TenantId, l.Id });
         builder.Property(l => l.Category).HasMaxLength(50);
         builder.Property(l => l.Code).HasMaxLength(50);
         builder.HasIndex(l => new { l.TenantId, l.Category, l.Code }).IsUnique();
@@ -74,7 +80,7 @@ public sealed class NotificationRuleConfiguration : IEntityTypeConfiguration<Not
     public void Configure(EntityTypeBuilder<NotificationRule> builder)
     {
         builder.ToTable("notification_rule", "qams");
-        builder.HasKey(r => r.Id);
+        builder.HasKey(r => new { r.TenantId, r.Id });
         builder.Property(r => r.EventKey).HasMaxLength(50);
         builder.Property(r => r.RecipientRoles).HasMaxLength(300);
         builder.Property(r => r.SubjectTemplate).HasMaxLength(300);
@@ -88,7 +94,7 @@ public sealed class NotificationDispatchConfiguration : IEntityTypeConfiguration
     public void Configure(EntityTypeBuilder<NotificationDispatch> builder)
     {
         builder.ToTable("notification_dispatch", "qams");
-        builder.HasKey(d => d.Id);
+        builder.HasKey(d => new { d.TenantId, d.Id });
         builder.Property(d => d.EventKey).HasMaxLength(50);
         builder.Property(d => d.RecipientEmail).HasMaxLength(320);
         builder.Property(d => d.Subject).HasMaxLength(400);
@@ -108,7 +114,7 @@ public sealed class InterestedPartyConfiguration : IEntityTypeConfiguration<Inte
     public void Configure(EntityTypeBuilder<InterestedParty> builder)
     {
         builder.ToTable("interested_party", "qams");
-        builder.HasKey(p => p.Id);
+        builder.HasKey(p => new { p.TenantId, p.Id });
         builder.Property(p => p.PartyRef).HasMaxLength(30);
         builder.Property(p => p.Name).HasMaxLength(200);
         builder.Property(p => p.Category).HasMaxLength(100);
@@ -123,7 +129,7 @@ public sealed class ContextIssueConfiguration : IEntityTypeConfiguration<Context
     public void Configure(EntityTypeBuilder<ContextIssue> builder)
     {
         builder.ToTable("context_issue", "qams");
-        builder.HasKey(i => i.Id);
+        builder.HasKey(i => new { i.TenantId, i.Id });
         builder.Property(i => i.IssueRef).HasMaxLength(30);
         builder.Property(i => i.Type).HasConversion<string>().HasMaxLength(10);
         builder.Property(i => i.Category).HasMaxLength(100);

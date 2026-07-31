@@ -10,7 +10,7 @@ public sealed class RiskItemConfiguration : IEntityTypeConfiguration<RiskItem>
     public void Configure(EntityTypeBuilder<RiskItem> builder)
     {
         builder.ToTable("risk_item", "qams");
-        builder.HasKey(r => r.Id);
+        builder.HasKey(r => new { r.TenantId, r.Id });
         builder.Property(r => r.RiskRef).HasMaxLength(30);
         builder.Property(r => r.Title).HasMaxLength(300);
         builder.Property(r => r.Category).HasMaxLength(50);
@@ -25,8 +25,8 @@ public sealed class RiskItemConfiguration : IEntityTypeConfiguration<RiskItem>
             // owner by TenantStampInterceptor; the composite FK to the owner makes
             // a mismatched value impossible to persist. RLS reads it.
             a.Property<Guid>("TenantId");
-            a.WithOwner().HasForeignKey("risk_id");
-            a.HasKey(x => x.Id);
+            a.WithOwner().HasForeignKey("TenantId", "risk_id");
+            a.HasKey("TenantId", "Id");
             a.Property(x => x.Description);
         });
 
@@ -39,7 +39,7 @@ public sealed class ChangeRequestConfiguration : IEntityTypeConfiguration<Change
     public void Configure(EntityTypeBuilder<ChangeRequest> builder)
     {
         builder.ToTable("change_request", "qams");
-        builder.HasKey(c => c.Id);
+        builder.HasKey(c => new { c.TenantId, c.Id });
         builder.Property(c => c.ChangeRef).HasMaxLength(30);
         builder.Property(c => c.Title).HasMaxLength(300);
         builder.Property(c => c.Status).HasConversion<string>().HasMaxLength(20);
@@ -53,7 +53,7 @@ public sealed class ManagementReviewConfiguration : IEntityTypeConfiguration<Man
     public void Configure(EntityTypeBuilder<ManagementReview> builder)
     {
         builder.ToTable("management_review", "qams");
-        builder.HasKey(r => r.Id);
+        builder.HasKey(r => new { r.TenantId, r.Id });
         builder.Property(r => r.ReviewRef).HasMaxLength(30);
         builder.Property(r => r.Title).HasMaxLength(300);
         builder.Property(r => r.Status).HasConversion<string>().HasMaxLength(20);
@@ -66,8 +66,8 @@ public sealed class ManagementReviewConfiguration : IEntityTypeConfiguration<Man
             // owner by TenantStampInterceptor; the composite FK to the owner makes
             // a mismatched value impossible to persist. RLS reads it.
             d.Property<Guid>("TenantId");
-            d.WithOwner().HasForeignKey("review_id");
-            d.HasKey(x => x.Id);
+            d.WithOwner().HasForeignKey("TenantId", "review_id");
+            d.HasKey("TenantId", "Id");
             d.Property(x => x.Description);
         });
 
@@ -80,7 +80,7 @@ public sealed class SupplierConfiguration : IEntityTypeConfiguration<Supplier>
     public void Configure(EntityTypeBuilder<Supplier> builder)
     {
         builder.ToTable("supplier", "qams");
-        builder.HasKey(s => s.Id);
+        builder.HasKey(s => new { s.TenantId, s.Id });
         builder.Property(s => s.SupplierRef).HasMaxLength(30);
         builder.Property(s => s.Name).HasMaxLength(200);
         builder.Property(s => s.SupplierType).HasMaxLength(50);
@@ -96,8 +96,8 @@ public sealed class SupplierConfiguration : IEntityTypeConfiguration<Supplier>
             // owner by TenantStampInterceptor; the composite FK to the owner makes
             // a mismatched value impossible to persist. RLS reads it.
             c.Property<Guid>("TenantId");
-            c.WithOwner().HasForeignKey("supplier_id");
-            c.HasKey(x => x.Id);
+            c.WithOwner().HasForeignKey("TenantId", "supplier_id");
+            c.HasKey("TenantId", "Id");
             c.Property(x => x.CertificateType).HasMaxLength(100);
         });
 
@@ -110,7 +110,7 @@ public sealed class SupplierEvaluationConfiguration : IEntityTypeConfiguration<S
     public void Configure(EntityTypeBuilder<SupplierEvaluation> builder)
     {
         builder.ToTable("supplier_evaluation", "qams");
-        builder.HasKey(e => e.Id);
+        builder.HasKey(e => new { e.TenantId, e.Id });
         // jsonb (schema hardening 1.3): the DB validates and indexes the document;
         // the domain keeps a string and owns serialization.
         builder.Property(e => e.Criteria).HasColumnType("jsonb");
@@ -125,7 +125,7 @@ public sealed class ConflictDeclarationConfiguration : IEntityTypeConfiguration<
     public void Configure(EntityTypeBuilder<ConflictDeclaration> builder)
     {
         builder.ToTable("conflict_declaration", "qams");
-        builder.HasKey(c => c.Id);
+        builder.HasKey(c => new { c.TenantId, c.Id });
         builder.Property(c => c.ConflictRef).HasMaxLength(30);
         builder.Property(c => c.RelatedParty).HasMaxLength(300);
         builder.Property(c => c.Status).HasConversion<string>().HasMaxLength(20);

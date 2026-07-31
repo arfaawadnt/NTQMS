@@ -10,7 +10,7 @@ public sealed class ArchiveEntryConfiguration : IEntityTypeConfiguration<Archive
     public void Configure(EntityTypeBuilder<ArchiveEntry> builder)
     {
         builder.ToTable("archive_entry", "qams");
-        builder.HasKey(a => a.Id);
+        builder.HasKey(a => new { a.TenantId, a.Id });
         builder.Property(a => a.ArchiveRef).HasMaxLength(30);
         builder.Property(a => a.SourceModule).HasMaxLength(50);
         builder.Property(a => a.SourceRef).HasMaxLength(60);
@@ -27,7 +27,7 @@ public sealed class SlaDefinitionConfiguration : IEntityTypeConfiguration<SlaDef
     public void Configure(EntityTypeBuilder<SlaDefinition> builder)
     {
         builder.ToTable("sla_definition", "qams");
-        builder.HasKey(s => s.Id);
+        builder.HasKey(s => new { s.TenantId, s.Id });
         builder.Property(s => s.Module).HasMaxLength(50);
         builder.Property(s => s.Severity).HasMaxLength(30);
         builder.HasIndex(s => new { s.TenantId, s.Module, s.Severity }).IsUnique();
@@ -40,7 +40,7 @@ public sealed class WorkTaskConfiguration : IEntityTypeConfiguration<WorkTask>
     public void Configure(EntityTypeBuilder<WorkTask> builder)
     {
         builder.ToTable("work_task", "qams");
-        builder.HasKey(t => t.Id);
+        builder.HasKey(t => new { t.TenantId, t.Id });
         builder.Property(t => t.Subject).HasMaxLength(300);
         builder.Property(t => t.SubjectRef).HasMaxLength(80);
         builder.Property(t => t.AssigneeRole).HasMaxLength(30);
@@ -57,7 +57,7 @@ public sealed class EscalationTimerConfiguration : IEntityTypeConfiguration<Esca
     public void Configure(EntityTypeBuilder<EscalationTimer> builder)
     {
         builder.ToTable("escalation_timer", "qams");
-        builder.HasKey(t => t.Id);
+        builder.HasKey(t => new { t.TenantId, t.Id });
         builder.Property(t => t.SubjectRef).HasMaxLength(80);
         builder.HasIndex(t => t.SubjectRef);
         // The tick's only read path: the active frontier.

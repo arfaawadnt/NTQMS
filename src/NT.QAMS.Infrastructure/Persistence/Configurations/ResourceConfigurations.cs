@@ -10,7 +10,7 @@ public sealed class EquipmentItemConfiguration : IEntityTypeConfiguration<Equipm
     public void Configure(EntityTypeBuilder<EquipmentItem> builder)
     {
         builder.ToTable("equipment_item", "qams");
-        builder.HasKey(e => e.Id);
+        builder.HasKey(e => new { e.TenantId, e.Id });
 
         builder.Property(e => e.Code).HasMaxLength(30);
         builder.Property(e => e.Name).HasMaxLength(200);
@@ -29,8 +29,8 @@ public sealed class EquipmentItemConfiguration : IEntityTypeConfiguration<Equipm
             // owner by TenantStampInterceptor; the composite FK to the owner makes
             // a mismatched value impossible to persist. RLS reads it.
             cal.Property<Guid>("TenantId");
-            cal.WithOwner().HasForeignKey("equipment_id");
-            cal.HasKey(c => c.Id);
+            cal.WithOwner().HasForeignKey("TenantId", "equipment_id");
+            cal.HasKey("TenantId", "Id");
             cal.Property(c => c.Provider).HasMaxLength(200);
             cal.Property(c => c.Result).HasMaxLength(500);
         });
@@ -42,8 +42,8 @@ public sealed class EquipmentItemConfiguration : IEntityTypeConfiguration<Equipm
             // owner by TenantStampInterceptor; the composite FK to the owner makes
             // a mismatched value impossible to persist. RLS reads it.
             m.Property<Guid>("TenantId");
-            m.WithOwner().HasForeignKey("equipment_id");
-            m.HasKey(x => x.Id);
+            m.WithOwner().HasForeignKey("TenantId", "equipment_id");
+            m.HasKey("TenantId", "Id");
             m.Property(x => x.WorkDescription);
         });
 
@@ -54,8 +54,8 @@ public sealed class EquipmentItemConfiguration : IEntityTypeConfiguration<Equipm
             // owner by TenantStampInterceptor; the composite FK to the owner makes
             // a mismatched value impossible to persist. RLS reads it.
             check.Property<Guid>("TenantId");
-            check.WithOwner().HasForeignKey("equipment_id");
-            check.HasKey(x => x.Id);
+            check.WithOwner().HasForeignKey("TenantId", "equipment_id");
+            check.HasKey("TenantId", "Id");
             check.Property(x => x.CheckType).HasMaxLength(200);
             check.Property(x => x.Remarks);
         });
@@ -69,7 +69,7 @@ public sealed class ReferenceStandardConfiguration : IEntityTypeConfiguration<Re
     public void Configure(EntityTypeBuilder<ReferenceStandard> builder)
     {
         builder.ToTable("reference_standard", "qams");
-        builder.HasKey(s => s.Id);
+        builder.HasKey(s => new { s.TenantId, s.Id });
 
         builder.Property(s => s.StandardRef).HasMaxLength(30);
         builder.Property(s => s.Name).HasMaxLength(300);
@@ -94,7 +94,7 @@ public sealed class TestAuthorizationConfiguration : IEntityTypeConfiguration<Te
     public void Configure(EntityTypeBuilder<TestAuthorization> builder)
     {
         builder.ToTable("test_authorization", "qams");
-        builder.HasKey(a => a.Id);
+        builder.HasKey(a => new { a.TenantId, a.Id });
 
         builder.Property(a => a.Scope).HasConversion<string>().HasMaxLength(20);
         builder.Property(a => a.Status).HasConversion<string>().HasMaxLength(20);
@@ -113,7 +113,7 @@ public sealed class CompetencyRecordConfiguration : IEntityTypeConfiguration<Com
     public void Configure(EntityTypeBuilder<CompetencyRecord> builder)
     {
         builder.ToTable("competency_record", "qams");
-        builder.HasKey(c => c.Id);
+        builder.HasKey(c => new { c.TenantId, c.Id });
 
         builder.Property(c => c.Subject).HasMaxLength(300);
         builder.Property(c => c.Status).HasConversion<string>().HasMaxLength(20);
@@ -128,8 +128,8 @@ public sealed class CompetencyRecordConfiguration : IEntityTypeConfiguration<Com
             // owner by TenantStampInterceptor; the composite FK to the owner makes
             // a mismatched value impossible to persist. RLS reads it.
             a.Property<Guid>("TenantId");
-            a.WithOwner().HasForeignKey("competency_id");
-            a.HasKey(x => x.Id);
+            a.WithOwner().HasForeignKey("TenantId", "competency_id");
+            a.HasKey("TenantId", "Id");
         });
 
         builder.Ignore(c => c.DomainEvents);
@@ -141,7 +141,7 @@ public sealed class TrainingAssignmentConfiguration : IEntityTypeConfiguration<T
     public void Configure(EntityTypeBuilder<TrainingAssignment> builder)
     {
         builder.ToTable("training_assignment", "qams");
-        builder.HasKey(t => t.Id);
+        builder.HasKey(t => new { t.TenantId, t.Id });
 
         builder.Property(t => t.Subject).HasMaxLength(300);
 

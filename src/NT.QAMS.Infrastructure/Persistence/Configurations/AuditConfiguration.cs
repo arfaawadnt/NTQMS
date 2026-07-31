@@ -9,7 +9,7 @@ public sealed class AuditConfiguration : IEntityTypeConfiguration<Audit>
     public void Configure(EntityTypeBuilder<Audit> builder)
     {
         builder.ToTable("audit", "qams");
-        builder.HasKey(a => a.Id);
+        builder.HasKey(a => new { a.TenantId, a.Id });
 
         builder.Property(a => a.AuditRef).HasMaxLength(30);
         builder.Property(a => a.Title).HasMaxLength(300);
@@ -26,8 +26,8 @@ public sealed class AuditConfiguration : IEntityTypeConfiguration<Audit>
             // owner by TenantStampInterceptor; the composite FK to the owner makes
             // a mismatched value impossible to persist. RLS reads it.
             item.Property<Guid>("TenantId");
-            item.WithOwner().HasForeignKey("audit_id");
-            item.HasKey(i => i.Id);
+            item.WithOwner().HasForeignKey("TenantId", "audit_id");
+            item.HasKey("TenantId", "Id");
             item.Property(i => i.IsoClause).HasMaxLength(30);
             item.Property(i => i.Question);
             item.Property(i => i.Verdict).HasConversion<string>().HasMaxLength(20);
@@ -41,8 +41,8 @@ public sealed class AuditConfiguration : IEntityTypeConfiguration<Audit>
             // owner by TenantStampInterceptor; the composite FK to the owner makes
             // a mismatched value impossible to persist. RLS reads it.
             finding.Property<Guid>("TenantId");
-            finding.WithOwner().HasForeignKey("audit_id");
-            finding.HasKey(f => f.Id);
+            finding.WithOwner().HasForeignKey("TenantId", "audit_id");
+            finding.HasKey("TenantId", "Id");
             finding.Property(f => f.Grade).HasConversion<string>().HasMaxLength(20);
             finding.Property(f => f.Description);
         });

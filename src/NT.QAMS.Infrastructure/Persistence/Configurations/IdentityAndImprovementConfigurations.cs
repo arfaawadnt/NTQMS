@@ -32,7 +32,7 @@ public sealed class UserAccountConfiguration : IEntityTypeConfiguration<UserAcco
             // a mismatched value impossible to persist. RLS reads it.
             access.Property<Guid>("TenantId");
             access.WithOwner().HasForeignKey("user_id");
-            access.HasKey("user_id", nameof(UserBranchAccess.BranchId));
+            access.HasKey("TenantId", "user_id", nameof(UserBranchAccess.BranchId));
         });
 
         builder.OwnsMany(u => u.DepartmentAccess, access =>
@@ -43,7 +43,7 @@ public sealed class UserAccountConfiguration : IEntityTypeConfiguration<UserAcco
             // a mismatched value impossible to persist. RLS reads it.
             access.Property<Guid>("TenantId");
             access.WithOwner().HasForeignKey("user_id");
-            access.HasKey("user_id", nameof(UserDepartmentAccess.DepartmentId));
+            access.HasKey("TenantId", "user_id", nameof(UserDepartmentAccess.DepartmentId));
         });
 
         builder.Ignore(u => u.HasUnrestrictedBranchAccess);
@@ -57,7 +57,7 @@ public sealed class NonconformanceConfiguration : IEntityTypeConfiguration<Nonco
     public void Configure(EntityTypeBuilder<Nonconformance> builder)
     {
         builder.ToTable("nonconformance", "qams");
-        builder.HasKey(n => n.Id);
+        builder.HasKey(n => new { n.TenantId, n.Id });
 
         builder.Property(n => n.NcRef).HasMaxLength(30);
         builder.Property(n => n.Title).HasMaxLength(300);
@@ -75,8 +75,8 @@ public sealed class NonconformanceConfiguration : IEntityTypeConfiguration<Nonco
             // owner by TenantStampInterceptor; the composite FK to the owner makes
             // a mismatched value impossible to persist. RLS reads it.
             action.Property<Guid>("TenantId");
-            action.WithOwner().HasForeignKey("nc_id");
-            action.HasKey(a => a.Id);
+            action.WithOwner().HasForeignKey("TenantId", "nc_id");
+            action.HasKey("TenantId", "Id");
             action.Property(a => a.Type).HasConversion<string>().HasMaxLength(20);
             action.Property(a => a.Status).HasConversion<string>().HasMaxLength(20);
             action.Property(a => a.Details);
@@ -89,8 +89,8 @@ public sealed class NonconformanceConfiguration : IEntityTypeConfiguration<Nonco
             // owner by TenantStampInterceptor; the composite FK to the owner makes
             // a mismatched value impossible to persist. RLS reads it.
             rca.Property<Guid>("TenantId");
-            rca.WithOwner().HasForeignKey("nc_id");
-            rca.HasKey(r => r.Id);
+            rca.WithOwner().HasForeignKey("TenantId", "nc_id");
+            rca.HasKey("TenantId", "Id");
             rca.Property(r => r.Method).HasConversion<string>().HasMaxLength(20);
             rca.Property(r => r.Analysis);
         });
@@ -115,7 +115,7 @@ public sealed class ComplaintConfiguration : IEntityTypeConfiguration<Complaint>
     public void Configure(EntityTypeBuilder<Complaint> builder)
     {
         builder.ToTable("complaint", "qams");
-        builder.HasKey(c => c.Id);
+        builder.HasKey(c => new { c.TenantId, c.Id });
 
         builder.Property(c => c.ComplaintRef).HasMaxLength(30);
         builder.Property(c => c.Channel).HasConversion<string>().HasMaxLength(20);
@@ -146,7 +146,7 @@ public sealed class QualityObjectiveConfiguration : IEntityTypeConfiguration<Qua
     public void Configure(EntityTypeBuilder<QualityObjective> builder)
     {
         builder.ToTable("quality_objective", "qams");
-        builder.HasKey(o => o.Id);
+        builder.HasKey(o => new { o.TenantId, o.Id });
         builder.Property(o => o.ObjectiveRef).HasMaxLength(30);
         builder.Property(o => o.Title).HasMaxLength(300);
         builder.Property(o => o.Metric).HasMaxLength(300);
@@ -165,8 +165,8 @@ public sealed class QualityObjectiveConfiguration : IEntityTypeConfiguration<Qua
             // owner by TenantStampInterceptor; the composite FK to the owner makes
             // a mismatched value impossible to persist. RLS reads it.
             update.Property<Guid>("TenantId");
-            update.WithOwner().HasForeignKey("objective_id");
-            update.HasKey(u => u.Id);
+            update.WithOwner().HasForeignKey("TenantId", "objective_id");
+            update.HasKey("TenantId", "Id");
             update.Property(u => u.Comment);
         });
 
@@ -179,7 +179,7 @@ public sealed class UserAccessReviewConfiguration : IEntityTypeConfiguration<Use
     public void Configure(EntityTypeBuilder<UserAccessReview> builder)
     {
         builder.ToTable("user_access_review", "qams");
-        builder.HasKey(r => r.Id);
+        builder.HasKey(r => new { r.TenantId, r.Id });
         builder.Property(r => r.ReviewRef).HasMaxLength(30);
         builder.Property(r => r.Status).HasConversion<string>().HasMaxLength(20);
         builder.HasIndex(r => new { r.TenantId, r.ReviewRef }).IsUnique();
@@ -193,7 +193,7 @@ public sealed class QualityPolicyConfiguration : IEntityTypeConfiguration<Qualit
     public void Configure(EntityTypeBuilder<QualityPolicy> builder)
     {
         builder.ToTable("quality_policy", "qams");
-        builder.HasKey(p => p.Id);
+        builder.HasKey(p => new { p.TenantId, p.Id });
         builder.Property(p => p.PolicyRef).HasMaxLength(30);
         builder.Property(p => p.Status).HasConversion<string>().HasMaxLength(20);
         builder.HasIndex(p => new { p.TenantId, p.PolicyRef }).IsUnique();
@@ -208,7 +208,7 @@ public sealed class FeedbackEntryConfiguration : IEntityTypeConfiguration<Feedba
     public void Configure(EntityTypeBuilder<FeedbackEntry> builder)
     {
         builder.ToTable("feedback_entry", "qams");
-        builder.HasKey(f => f.Id);
+        builder.HasKey(f => new { f.TenantId, f.Id });
         builder.Property(f => f.FeedbackRef).HasMaxLength(30);
         builder.Property(f => f.Source).HasMaxLength(100);
         builder.Property(f => f.Channel).HasMaxLength(100);

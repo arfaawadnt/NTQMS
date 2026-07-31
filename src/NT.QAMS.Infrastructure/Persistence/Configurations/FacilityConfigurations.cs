@@ -9,7 +9,7 @@ public sealed class MonitoringPointConfiguration : IEntityTypeConfiguration<Moni
     public void Configure(EntityTypeBuilder<MonitoringPoint> builder)
     {
         builder.ToTable("monitoring_point", "qams");
-        builder.HasKey(p => p.Id);
+        builder.HasKey(p => new { p.TenantId, p.Id });
 
         builder.Property(p => p.PointRef).HasMaxLength(30);
         builder.Property(p => p.Name).HasMaxLength(200);
@@ -28,8 +28,8 @@ public sealed class MonitoringPointConfiguration : IEntityTypeConfiguration<Moni
             // owner by TenantStampInterceptor; the composite FK to the owner makes
             // a mismatched value impossible to persist. RLS reads it.
             reading.Property<Guid>("TenantId");
-            reading.WithOwner().HasForeignKey("point_id");
-            reading.HasKey(r => r.Id);
+            reading.WithOwner().HasForeignKey("TenantId", "point_id");
+            reading.HasKey("TenantId", "Id");
             reading.Property(r => r.Remark);
             reading.HasIndex("point_id", nameof(EnvironmentalReading.RecordedAtUtc));
         });
