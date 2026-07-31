@@ -31,7 +31,7 @@
 with real PostgreSQL 17 · Container non-root + Trivy scan · Frontend incl. SCA gates). Engineering
 record: `IMPLEMENTATION_LOG.md`; decisions: `docs/adr/ADR-0001…0009`; audits:
 `docs/reference/NT_QMS_EA_Remediation_Closure_Report.md`, `…_Compliance_Audit_v1.50.0.html`,
-`…_Enterprise_Application_Compliance_Audit.html` (EAC-NTQMS-001 rev 3, covers v1.50.0).
+`…_Enterprise_Application_Compliance_Audit.html` (EAC-NTQMS-001 rev 4, covers v1.51.2).
 
 ---
 
@@ -372,7 +372,7 @@ evidence.
 
 ## Part F — Execution checklist for QA (what "done" requires)
 
-- [ ] Environment qualified (baseline IQ + Part B IQ-16..25) on the target/staging host.
+- [ ] Environment qualified (baseline IQ + Part B IQ-16..30) on the target/staging host.
 - [ ] Sign OQ-EXEC-NTQMS-002 (doc 12) witness/QA lines; disposition defect RP-D1's residual
       (pre-fix ledger rows keep an empty tenant id) and observation OBS-1.
 - [ ] Execute and witness the A.10 schema-hardening cases (OQ-DB-01…08) on a **qualified**
