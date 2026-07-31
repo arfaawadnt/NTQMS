@@ -1,3 +1,5 @@
+using NT.QAMS.Domain.Authorization;
+using NT.QAMS.WebApi.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -56,7 +58,7 @@ public sealed class ExportsController(
     }
 
     [HttpGet("audit-trail.xlsx")]
-    [Authorize(Roles = Roles.QmAdminAuditor)]
+    [RequirePermission(PermissionCatalog.Compliance, PermissionAction.Export)]
     public async Task<IActionResult> AuditTrail([FromQuery] int take = 1000, CancellationToken ct = default)
     {
         var entries = await sender.Send(new GetAuditTrailQuery(null, take), ct);
@@ -101,7 +103,7 @@ public sealed class ExportsController(
     }
 
     [HttpGet("signatures.xlsx")]
-    [Authorize(Roles = Roles.QmAdminAuditor)]
+    [RequirePermission(PermissionCatalog.Compliance, PermissionAction.Export)]
     public async Task<IActionResult> SignatureManifest([FromQuery] int take = 1000, CancellationToken ct = default)
     {
         var signatures = await sender.Send(new GetSignatureLogQuery(take), ct);
@@ -121,7 +123,7 @@ public sealed class ExportsController(
     }
 
     [HttpGet("review-pack/{reviewId:guid}.pdf")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.ManagementReviews, PermissionAction.Export)]
     public async Task<IActionResult> ReviewPack(Guid reviewId, CancellationToken ct)
     {
         var review = await sender.Send(new GetReviewByIdQuery(reviewId), ct);

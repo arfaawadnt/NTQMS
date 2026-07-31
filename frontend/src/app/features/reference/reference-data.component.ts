@@ -23,7 +23,7 @@ type RefTab = 'branches' | 'departments' | 'tests' | 'lovs';
     imports: [FormsModule, ReactiveFormsModule, PageHeaderComponent, DrawerComponent, StatusPillComponent],
     template: `
     <qams-page-header [title]="i18n.t('ref.title')" [subtitle]="i18n.t('ref.subtitle')">
-      @if (perms.canApprove()) {
+      @if (perms.can('organization.create')) {
         <button (click)="openForm()">{{ addLabel() }}</button>
       }
     </qams-page-header>
@@ -51,7 +51,7 @@ type RefTab = 'branches' | 'departments' | 'tests' | 'lovs';
                   <td class="code">{{ b.code }}</td><td>{{ b.name }}</td><td>{{ b.city ?? '—' }}</td>
                   <td><qams-status-pill [status]="b.isActive ? 'Active' : 'Obsolete'" /></td>
                   <td>
-                    @if (b.isActive && perms.isTenantAdmin()) {
+                    @if (b.isActive && perms.can('organization.manage')) {
                       <button class="link danger-link" type="button" (click)="deactivateBranch(b.id)">{{ i18n.t('ref.deactivate') }}</button>
                     }
                   </td>
@@ -83,7 +83,7 @@ type RefTab = 'branches' | 'departments' | 'tests' | 'lovs';
                   <td>{{ branchName(d.branchId) }}</td>
                   <td><qams-status-pill [status]="d.isActive ? 'Active' : 'Obsolete'" /></td>
                   <td>
-                    @if (d.isActive && perms.isTenantAdmin()) {
+                    @if (d.isActive && perms.can('organization.manage')) {
                       <button class="link danger-link" type="button" (click)="deactivateDepartment(d.id)">{{ i18n.t('ref.deactivate') }}</button>
                     }
                   </td>

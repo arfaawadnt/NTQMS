@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
+using NT.QAMS.Domain.Authorization;
 using NT.QAMS.Domain.AnalyticalQuality;
 using NT.QAMS.Domain.AuditManagement;
 using NT.QAMS.Domain.Competency;
@@ -27,16 +28,25 @@ namespace NT.QAMS.Infrastructure.Persistence;
 /// The write-side DbContext. Schema layout per the database architecture:
 /// saas (control plane, no RLS), qams (tenant data, RLS), audit (append-only).
 /// Global tenant query filters are applied to every ITenantScoped entity by
-/// convention - a module cannot forget them.
+/// convention - a module cannot forget them. IAllocatable entities additionally
+/// get the per-user working-scope filter (allowed branches/departments) in the
+/// same composed filter, so scope restriction is equally unforgettable.
 /// </summary>
 public sealed class AppDbContext(
     DbContextOptions<AppDbContext> options,
-    ICurrentTenant currentTenant) : DbContext(options), IAppDbContext
+    ICurrentTenant currentTenant,
+    IUserPrivileges? privileges = null) : DbContext(options), IAppDbContext
 {
     private readonly ICurrentTenant _currentTenant = currentTenant;
 
+    // Null-object for callers that construct the context directly (tests,
+    // design-time factory): unrestricted, matching pre-scoping behaviour.
+    private readonly IUserPrivileges _privileges =
+        privileges ?? new Authorization.RequestPrivileges();
+
     public DbSet<Tenant> Tenants => Set<Tenant>();
     public DbSet<UserAccount> Users => Set<UserAccount>();
+    public DbSet<Role> Roles => Set<Role>();
     public DbSet<PasswordHistoryEntry> PasswordHistory => Set<PasswordHistoryEntry>();
     public DbSet<RefreshSession> RefreshSessions => Set<RefreshSession>();
     public DbSet<Nonconformance> Nonconformances => Set<Nonconformance>();
@@ -157,8 +167,14 @@ public sealed class AppDbContext(
 
             if (typeof(ITenantScoped).IsAssignableFrom(entityType.ClrType))
             {
+                // EF allows a single filter per entity, so tenant isolation and
+                // (for allocatable records) the user working scope are one
+                // composed expression, chosen here.
+                var filter = typeof(IAllocatable).IsAssignableFrom(entityType.ClrType)
+                    ? nameof(ApplyTenantAndScopeFilter)
+                    : nameof(ApplyTenantFilter);
                 var method = typeof(AppDbContext)
-                    .GetMethod(nameof(ApplyTenantFilter),
+                    .GetMethod(filter,
                         System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
                     .MakeGenericMethod(entityType.ClrType);
                 method.Invoke(this, [modelBuilder]);
@@ -171,5 +187,25 @@ public sealed class AppDbContext(
     {
         modelBuilder.Entity<TEntity>()
             .HasQueryFilter(e => e.TenantId == _currentTenant.TenantId);
+    }
+
+    /// <summary>
+    /// Tenant isolation plus the per-user working scope: a branch-restricted user
+    /// sees records inside their branches and unattributed (null-branch) records,
+    /// never records of other branches; likewise for departments. Unrestricted
+    /// actors and background jobs see the whole tenant — <c>HasBranchRestriction</c>
+    /// is false for them, which short-circuits the scope terms to true.
+    /// </summary>
+    private void ApplyTenantAndScopeFilter<TEntity>(ModelBuilder modelBuilder)
+        where TEntity : class, ITenantScoped, IAllocatable
+    {
+        modelBuilder.Entity<TEntity>().HasQueryFilter(e =>
+            e.TenantId == _currentTenant.TenantId
+            && (!_privileges.HasBranchRestriction
+                || e.BranchId == null
+                || _privileges.AllowedBranchIds.Contains(e.BranchId.Value))
+            && (!_privileges.HasDepartmentRestriction
+                || e.DepartmentId == null
+                || _privileges.AllowedDepartmentIds.Contains(e.DepartmentId.Value)));
     }
 }

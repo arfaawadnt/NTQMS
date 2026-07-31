@@ -22,7 +22,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
     imports: [FormsModule, DatePipe, PageHeaderComponent],
     template: `
     <qams-page-header [title]="i18n.t('qp.title')" [subtitle]="i18n.t('qp.subtitle')">
-      @if (perms.canApprove()) {
+      @if (perms.can('quality-policy.create')) {
         <button (click)="showDraft.set(!showDraft())">{{ i18n.t('qp.newVersion') }}</button>
       }
     </qams-page-header>
@@ -44,7 +44,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
         <div class="card"><p class="muted">{{ i18n.t('qp.none') }}</p></div>
       }
 
-      @if (perms.canApprove()) {
+      @if (perms.can('quality-policy.approve')) {
         @if (showDraft()) {
           <div class="card">
             <h3>{{ i18n.t('qp.draftHeading') }}</h3>
@@ -121,7 +121,7 @@ export class QualityPolicyComponent implements OnInit {
   async load(): Promise<void> {
     await this.run(async () => {
       this.active.set(await firstValueFrom(this.api.active()));
-      if (this.perms.canApprove()) {
+      if (this.perms.can('quality-policy.view')) {
         this.history.set(await firstValueFrom(this.api.history()));
       }
     });

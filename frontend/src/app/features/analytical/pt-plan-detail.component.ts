@@ -33,7 +33,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
       <div class="meta card">
         <div><span class="muted">{{ i18n.t('nc.status') }}</span><qams-status-pill [status]="p.status" /></div>
         @if (p.approvedAtUtc) { <div><span class="muted">{{ i18n.t('val.signedOff') }}</span> {{ p.approvedAtUtc | date:'medium' }}</div> }
-        @if (p.status === 'Draft' && perms.canApprove()) {
+        @if (p.status === 'Draft' && perms.can('proficiency-testing.approve')) {
           <button (click)="facade.approve(p.id)" [disabled]="p.items.length === 0">{{ i18n.t('ptp.approve') }}</button>
         }
       </div>
@@ -71,7 +71,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
             </tbody>
           </table>
         }
-        @if (p.status === 'Draft' && perms.canAssignTraining()) {
+        @if (p.status === 'Draft' && perms.can('proficiency-testing.edit')) {
           <form [formGroup]="itemForm" (ngSubmit)="addItem(p.id)">
             <div class="grid5">
               <div><label>{{ i18n.t('pt.scheme') }}</label><input formControlName="scheme" /></div>
@@ -114,7 +114,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
           </form>
         </section>
 
-        @if (perms.canApprove()) {
+        @if (perms.can('proficiency-testing.void')) {
           <section class="card">
             <h3>{{ i18n.t('ptp.close') }}</h3>
             <form [formGroup]="closeForm" (ngSubmit)="close(p.id)">

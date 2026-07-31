@@ -1,31 +1,91 @@
-import { Injectable, computed, inject } from '@angular/core';
+import { Injectable, computed, effect, inject, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { catchError, of } from 'rxjs';
+import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
+import { I18nService, Lang } from './i18n.service';
+import { MyPrivileges } from './models';
 
 /**
- * Mirrors the backend's role-based `[Authorize(Roles=…)]` gates so the UI can
- * hide actions the current user cannot perform. Authoritative enforcement stays
- * on the server; this is purely for affordance (never a security boundary).
+ * The signed-in user's effective privileges, fetched from the server after each
+ * sign-in (`/auth/me/privileges`) and re-fetched when the session changes. The
+ * UI asks `can('documents.approve')` to decide what to OFFER; authoritative
+ * enforcement stays on the server — this is affordance, never a security
+ * boundary.
+ *
+ * Until the fetch lands, `can()` answers false: a button appearing a beat late
+ * is a cosmetic cost, a button appearing wrongly is a broken promise.
  */
 @Injectable({ providedIn: 'root' })
 export class PermissionsService {
   private readonly auth = inject(AuthService);
+  private readonly http = inject(HttpClient);
+  private readonly i18n = inject(I18nService);
 
-  /** True for Quality Managers and Tenant Administrators (the approval roles). */
-  readonly canApprove = computed(() => this.isInRole('QualityManager', 'TenantAdmin'));
+  private readonly privileges = signal<MyPrivileges | null>(null);
 
-  /** True for roles that may assign competencies and training (QM, department heads, tenant admins). */
-  readonly canAssignTraining = computed(() => this.isInRole('QualityManager', 'DepartmentHead', 'TenantAdmin'));
+  /** Granted permission keys, as a set for O(1) template checks. */
+  private readonly granted = computed(() => new Set(this.privileges()?.permissions ?? []));
 
-  /** True for roles allowed to read the compliance ledgers (audit trail, signatures). */
-  readonly canViewCompliance = computed(() => this.isInRole('QualityManager', 'TenantAdmin', 'ExternalAuditor'));
+  /** The display name of the user's configured role (for the shell header). */
+  readonly roleName = computed(() => this.privileges()?.roleName ?? null);
 
-  /** True for administrators managing configuration (tenant admins). */
-  readonly isTenantAdmin = computed(() => this.isInRole('TenantAdmin'));
+  /** Allowed branches; empty means unrestricted (used by pickers as a hint). */
+  readonly branchIds = computed(() => this.privileges()?.branchIds ?? []);
 
-  /** True for platform (cross-tenant) administrators. */
-  readonly isPlatformAdmin = computed(() => this.isInRole('PlatformAdmin'));
+  /**
+   * True for platform (cross-tenant) administrators. Comes from the session
+   * tier, not the fetched privileges, so route guards work synchronously at
+   * bootstrap instead of racing the privileges request.
+   */
+  readonly isPlatformAdmin = computed(() => this.auth.role() === 'PlatformAdmin');
 
-  private isInRole(...roles: readonly string[]): boolean {
-    return roles.includes(this.auth.role());
+  constructor() {
+    effect(() => {
+      if (!this.auth.isAuthenticated()) {
+        this.privileges.set(null);
+        return;
+      }
+
+      if (this.isPlatformAdmin()) {
+        return; // The platform surface is tier-gated; no tenant privileges exist.
+      }
+
+      this.http
+        .get<MyPrivileges>(`${environment.apiBaseUrl}/auth/me/privileges`)
+        .pipe(catchError(() => of(null)))
+        .subscribe((p) => {
+          this.privileges.set(p);
+          const lang = p?.preferredLanguage;
+          if (lang === 'en' || lang === 'ar' || lang === 'fr') {
+            this.i18n.setLang(lang as Lang);
+          }
+        });
+    });
+  }
+
+  /** True when the user's role grants this permission key (e.g. "nc.approve"). */
+  can(key: string): boolean {
+    return this.isPlatformAdmin() || this.granted().has(key);
+  }
+
+  /** True when any of the keys is granted — for controls shared by sibling actions. */
+  canAny(...keys: string[]): boolean {
+    return keys.some((k) => this.can(k));
+  }
+
+  /**
+   * Persists the user's own language choice so it follows them to the next
+   * device; the switcher applies it locally regardless.
+   */
+  saveMyLanguage(language: Lang): void {
+    if (!this.auth.isAuthenticated()) {
+      return;
+    }
+
+    this.http
+      .put(`${environment.apiBaseUrl}/auth/me/language`, { language })
+      .pipe(catchError(() => of(void 0)))
+      .subscribe();
   }
 }

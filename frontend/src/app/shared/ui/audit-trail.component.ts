@@ -20,7 +20,7 @@ import { AuditTrailEntry, FieldChange } from '../../core/models';
     template: `
     <section class="card">
       <h3>{{ i18n.t('trail.title') }}</h3>
-      @if (!perms.canViewCompliance()) {
+      @if (!perms.can('compliance.view')) {
         <p class="muted">{{ i18n.t('trail.restricted') }}</p>
       } @else if (loading()) {
         <p class="muted">{{ i18n.t('common.loading') }}</p>
@@ -51,7 +51,7 @@ import { AuditTrailEntry, FieldChange } from '../../core/models';
         </ol>
       }
 
-      @if (perms.canViewCompliance() && changes().length > 0) {
+      @if (perms.can('compliance.view') && changes().length > 0) {
         <h3 class="sub">{{ i18n.t('trail.fieldChanges') }}</h3>
         <table class="fc">
           <thead><tr>
@@ -117,7 +117,7 @@ export class AuditTrailComponent implements OnInit {
   readonly expanded = signal('');
 
   async ngOnInit(): Promise<void> {
-    if (!this.perms.canViewCompliance()) { return; }
+    if (!this.perms.can('compliance.view')) { return; }
     this.loading.set(true);
     try {
       const [entries, changes] = await Promise.all([

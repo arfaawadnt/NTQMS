@@ -69,10 +69,21 @@ public sealed class TenantResolutionMiddleware(RequestDelegate next)
 /// user is re-checked against the database, so a deactivated account — or one
 /// whose role changed — stops working immediately instead of lingering until the
 /// JWT expires. (Idle timeout is handled client-side by the 30-minute watch.)
+/// <para>
+/// This is also where the actor's configurable privileges are resolved onto the
+/// request. It belongs here rather than in a token claim for the same reason the
+/// active-account check does: an administrator who revokes a privilege must have
+/// revoked it on the user's next request, not whenever their token happens to
+/// expire.
+/// </para>
 /// </summary>
 public sealed class ActiveSessionMiddleware(RequestDelegate next)
 {
-    public async Task InvokeAsync(HttpContext context, IAppDbContext db)
+    public async Task InvokeAsync(
+        HttpContext context,
+        IAppDbContext db,
+        IPrivilegeResolver privilegeResolver,
+        IUserPrivilegesSetter privilegeSetter)
     {
         if (context.User.Identity?.IsAuthenticated == true)
         {
@@ -95,6 +106,18 @@ public sealed class ActiveSessionMiddleware(RequestDelegate next)
                 {
                     await Deny(context, "AUTH-007", "Your permissions have changed. Please sign in again.");
                     return;
+                }
+
+                // Platform administrators are not tenant members and hold no
+                // tenant role; their reach is the platform surface, gated by its
+                // own endpoints.
+                if (row.Role == NT.QAMS.Domain.IdentityAccess.UserRole.PlatformAdmin)
+                {
+                    privilegeSetter.SetPlatformAdmin();
+                }
+                else if (await privilegeResolver.ResolveAsync(userId, context.RequestAborted) is { } privileges)
+                {
+                    privilegeSetter.Set(privileges);
                 }
             }
         }

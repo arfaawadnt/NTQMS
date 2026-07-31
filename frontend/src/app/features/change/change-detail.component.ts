@@ -74,7 +74,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
             </form>
           }
 
-          @if (perms.canApprove()) {
+          @if (perms.canAny('changes.approve', 'changes.void')) {
             <div class="decision">
               <button (click)="facade.approve(c.id)" [disabled]="!c.riskItemId">{{ i18n.t('chg.approve') }}</button>
               @if (!c.riskItemId) { <p class="muted small">{{ i18n.t('chg.approveHint') }}</p> }
@@ -97,7 +97,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
             <button type="submit" [disabled]="closeForm.invalid">{{ i18n.t('chg.close') }}</button>
           </form>
         </section>
-      } @else if (c.status === 'Closed' && perms.canApprove()) {
+      } @else if (c.status === 'Closed' && perms.can('changes.approve')) {
         <section class="card">
           <h3>{{ i18n.t('chg.pir') }}</h3>
           <p class="muted small">{{ i18n.t('chg.pirHint') }}</p>

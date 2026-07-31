@@ -2,10 +2,20 @@ namespace NT.QAMS.Contracts.IdentityAccess;
 
 /// <summary>A tenant user as shown in the administration screens.</summary>
 public sealed record UserDto(
-    Guid Id, string Email, string DisplayName, string Role, bool IsActive, bool MfaEnabled);
+    Guid Id,
+    string Email,
+    string DisplayName,
+    string Role,
+    bool IsActive,
+    bool MfaEnabled,
+    Guid? RoleId,
+    string? RoleName,
+    IReadOnlyList<Guid> BranchIds,
+    IReadOnlyList<Guid> DepartmentIds,
+    string? PreferredLanguage);
 
 public sealed record RegisterUserRequest(
-    string Email, string DisplayName, string Role, string InitialPassword);
+    string Email, string DisplayName, string Role, string InitialPassword, Guid? RoleId = null);
 
 public sealed record ChangeUserRoleRequest(string Role);
 

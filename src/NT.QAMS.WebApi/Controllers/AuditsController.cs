@@ -1,3 +1,5 @@
+using NT.QAMS.Domain.Authorization;
+using NT.QAMS.WebApi.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +27,7 @@ public sealed class AuditsController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetAuditByIdQuery(id), ct));
 
     [HttpPost]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.Audits, PermissionAction.Create)]
     public async Task<IActionResult> Schedule(ScheduleAuditRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new ScheduleAuditCommand(
@@ -65,7 +67,7 @@ public sealed class AuditsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/sign-off")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.Audits, PermissionAction.Sign)]
     public async Task<IActionResult> SignOff(Guid id, CancellationToken ct)
     {
         await sender.Send(new SignOffAuditCommand(id), ct);

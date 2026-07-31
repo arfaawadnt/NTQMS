@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using NT.QAMS.Application.Authorization;
 using NT.QAMS.Application.IdentityAccess.Commands;
 using NT.QAMS.Application.Tenancy.Queries;
 using NT.QAMS.Contracts.IdentityAccess;
@@ -135,6 +136,25 @@ public sealed class AuthController(ISender sender) : ControllerBase
     public async Task<IActionResult> SetPin(SetPinRequest request, CancellationToken ct)
     {
         await sender.Send(new SetPinCommand(request.Pin), ct);
+        return NoContent();
+    }
+
+    /// <summary>
+    /// The caller's own effective privileges — permission keys, working scope and
+    /// language. The SPA reads this once after sign-in and drives navigation and
+    /// buttons from it; the server keeps enforcing independently on every request.
+    /// </summary>
+    [HttpGet("me/privileges")]
+    [Authorize]
+    public async Task<IActionResult> MyPrivileges(CancellationToken ct) =>
+        Ok(await sender.Send(new GetMyPrivilegesQuery(), ct));
+
+    /// <summary>The caller's own interface-language choice; wins over role and tenant defaults.</summary>
+    [HttpPut("me/language")]
+    [Authorize]
+    public async Task<IActionResult> SetMyLanguage(SetUserLanguageRequest request, CancellationToken ct)
+    {
+        await sender.Send(new SetMyLanguageCommand(request.Language), ct);
         return NoContent();
     }
 }

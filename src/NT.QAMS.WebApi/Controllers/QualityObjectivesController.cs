@@ -1,3 +1,5 @@
+using NT.QAMS.Domain.Authorization;
+using NT.QAMS.WebApi.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +23,7 @@ public sealed class QualityObjectivesController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetQualityObjectiveByIdQuery(id), ct));
 
     [HttpPost]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.QualityObjectives, PermissionAction.Create)]
     public async Task<IActionResult> Define(DefineQualityObjectiveRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new DefineQualityObjectiveCommand(
@@ -40,7 +42,7 @@ public sealed class QualityObjectivesController(ISender sender) : ControllerBase
         });
 
     [HttpPost("{id:guid}/close")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.QualityObjectives, PermissionAction.Void)]
     public async Task<IActionResult> Close(Guid id, CloseObjectiveRequest request, CancellationToken ct)
     {
         await sender.Send(new CloseObjectiveCommand(id, request.Outcome, request.Note), ct);

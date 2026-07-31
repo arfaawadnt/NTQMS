@@ -37,7 +37,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
         @if (a.status === 'Scheduled') {
           <button (click)="facade.start(a.id)">{{ i18n.t('audit.start') }}</button>
         }
-        @if (a.status === 'InProgress' && perms.canApprove()) {
+        @if (a.status === 'InProgress' && perms.can('audits.sign')) {
           <button (click)="facade.signOff(a.id)" [disabled]="!canSignOff()">{{ i18n.t('audit.signOff') }}</button>
         }
       </div>

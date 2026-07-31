@@ -19,7 +19,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
         <option value="">{{ i18n.t('nc.allStatuses') }}</option>
         @for (s of states; track s) { <option [value]="s">{{ s }}</option> }
       </select>
-      @if (perms.canAssignTraining()) {
+      @if (perms.can('analytical-quality.create')) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('val.new') }}</button>
       }
     </qams-page-header>

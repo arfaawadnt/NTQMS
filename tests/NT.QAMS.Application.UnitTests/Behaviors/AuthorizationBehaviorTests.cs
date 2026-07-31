@@ -30,10 +30,21 @@ public class AuthorizationBehaviorTests
     [AllowUnauthenticated]
     private sealed record OpenCommand : ICommand;
 
-    private static Task<Unit> RunAsync<TCommand>(FakeCurrentUser user)
+    private static Task<Unit> RunAsync<TCommand>(FakeCurrentUser user, IUserPrivileges? privileges = null)
         where TCommand : ICommand, new() =>
-        new AuthorizationBehavior<TCommand, Unit>(user)
+        new AuthorizationBehavior<TCommand, Unit>(
+                user, privileges ?? new NT.QAMS.Infrastructure.Authorization.RequestPrivileges())
             .Handle(new TCommand(), () => Task.FromResult(Unit.Value), CancellationToken.None);
+
+    private static NT.QAMS.Infrastructure.Authorization.RequestPrivileges Granting(params string[] keys)
+    {
+        var privileges = new NT.QAMS.Infrastructure.Authorization.RequestPrivileges();
+        privileges.Set(new ResolvedPrivileges(
+            Guid.CreateVersion7(), "Test Role",
+            keys.ToHashSet(StringComparer.Ordinal),
+            new HashSet<Guid>(), new HashSet<Guid>(), null));
+        return privileges;
+    }
 
     private static FakeCurrentUser Actor(UserRole role) => new() { Role = role };
 
@@ -104,5 +115,33 @@ public class AuthorizationBehaviorTests
         var act = () => RunAsync<OpenCommand>(Anonymous());
 
         await act.Should().NotThrowAsync("login must run before anyone is authenticated");
+    }
+
+    [NT.QAMS.Application.Abstractions.RequirePermissionPolicy(
+        NT.QAMS.Domain.Authorization.PermissionCatalog.RolesPrivileges,
+        NT.QAMS.Domain.Authorization.PermissionAction.Manage)]
+    private sealed record PrivilegedCommand : ICommand;
+
+    [Fact]
+    public async Task A_permission_policy_admits_only_actors_whose_role_grants_the_key()
+    {
+        // Granted: passes.
+        await RunAsync<PrivilegedCommand>(
+            Actor(UserRole.Analyst),
+            Granting(NT.QAMS.Domain.Authorization.PermissionCatalog.ManageRoles));
+
+        // Not granted: denied with the standard business-refusal code.
+        var refusal = await Assert.ThrowsAsync<DomainException>(
+            () => RunAsync<PrivilegedCommand>(Actor(UserRole.TenantAdmin)));
+        refusal.Code.Should().Be("AUTHZ-002");
+    }
+
+    [Fact]
+    public async Task A_platform_administrator_passes_every_permission_policy()
+    {
+        var privileges = new NT.QAMS.Infrastructure.Authorization.RequestPrivileges();
+        privileges.SetPlatformAdmin();
+
+        await RunAsync<PrivilegedCommand>(Actor(UserRole.PlatformAdmin), privileges);
     }
 }

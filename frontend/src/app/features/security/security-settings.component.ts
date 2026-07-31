@@ -25,7 +25,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
       <button (click)="setUpMfa()">{{ i18n.t('sec.setUpMfa') }}</button>
     </section>
 
-    @if (perms.isTenantAdmin()) {
+    @if (perms.can('tenant-settings.manage')) {
       <section class="card">
         <h3>{{ i18n.t('sec.tenantPolicy') }}</h3>
         <p class="muted">{{ i18n.t('sec.tenantPolicyHint') }}</p>
@@ -64,7 +64,7 @@ export class SecuritySettingsComponent implements OnInit {
   readonly error = signal('');
 
   ngOnInit(): void {
-    if (!this.perms.isTenantAdmin()) { return; }
+    if (!this.perms.can('tenant-settings.manage')) { return; }
     this.auth.getTenantMfaPolicy().subscribe({
       next: (p) => { this.required.set(p.requireMfaForPrivilegedRoles); this.loaded.set(true); },
       error: (err: HttpErrorResponse) => this.error.set(err.error?.title ?? 'Could not load the policy.'),

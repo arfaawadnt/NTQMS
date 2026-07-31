@@ -47,7 +47,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 
       <section class="card">
         <h3>{{ i18n.t('val.workflow') }}</h3>
-        @if (a.status === 'Active' && perms.canAssignTraining()) {
+        @if (a.status === 'Active' && perms.can('test-authorizations.edit')) {
           <form [formGroup]="reasonForm" (ngSubmit)="suspend(a.id)">
             <label>{{ i18n.t('authz.suspendReason') }}</label>
             <input formControlName="reason" />
@@ -56,11 +56,11 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
         }
         @if (a.status === 'Suspended') {
           <p class="warn">{{ i18n.t('authz.suspendedNote') }} <b>{{ a.suspensionReason }}</b></p>
-          @if (perms.canApprove()) {
+          @if (perms.can('test-authorizations.approve')) {
             <button (click)="facade.reinstate(a.id)">{{ i18n.t('authz.reinstate') }}</button>
           }
         }
-        @if ((a.status === 'Active' || a.status === 'Suspended') && perms.canApprove()) {
+        @if ((a.status === 'Active' || a.status === 'Suspended') && perms.can('test-authorizations.void')) {
           <form [formGroup]="revokeForm" (ngSubmit)="revoke(a.id)">
             <label>{{ i18n.t('authz.revokeReason') }}</label>
             <input formControlName="reason" />

@@ -142,7 +142,7 @@ import { CsvColumn, CsvImportComponent } from '../../shared/ui/csv-import.compon
             <button (click)="facade.calculate(s.id)" [disabled]="runCount() < 2">{{ i18n.t('prc.calculate') }}</button>
             @if (runCount() < 2) { <span class="muted">{{ i18n.t('prc.minRuns') }}</span> }
           }
-          @if (s.state === 'Calculated' && perms.canApprove()) {
+          @if (s.state === 'Calculated' && perms.can('analytical-quality.sign')) {
             <button (click)="facade.signOff(s.id)">{{ i18n.t('mc.signOff') }}</button>
           }
           @if (s.state === 'SignedOff') { <p class="muted">{{ i18n.t('mc.signedOffNote') }}</p> }

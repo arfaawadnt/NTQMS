@@ -22,7 +22,7 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
         <option value="">{{ i18n.t('nc.allStatuses') }}</option>
         @for (s of statuses; track s) { <option [value]="s">{{ s }}</option> }
       </select>
-      @if (perms.canAssignTraining()) {
+      @if (perms.can('competencies.create')) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('comp.new') }}</button>
       }
     </qams-page-header>

@@ -62,7 +62,8 @@ public sealed record RecommendDocumentCommand(Guid DocumentId) : ICommand;
 [RequireInternalActor]
 public sealed record RejectDocumentVersionCommand(Guid DocumentId, string Reason) : ICommand;
 /// <summary>Publishing is a Part 11 signing ceremony: it requires the approver's e-signature PIN.</summary>
-[RequireRole(NT.QAMS.Domain.IdentityAccess.UserRole.QualityManager, NT.QAMS.Domain.IdentityAccess.UserRole.TenantAdmin)]
+[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.Documents,
+    NT.QAMS.Domain.Authorization.PermissionAction.Sign)]
 public sealed record PublishDocumentCommand(Guid DocumentId, string Password, string Pin) : ICommand;
 [RequireInternalActor]
 public sealed record DraftNewVersionCommand(

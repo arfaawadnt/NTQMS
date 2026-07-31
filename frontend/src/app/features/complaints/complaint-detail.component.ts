@@ -62,12 +62,12 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
         <h3>{{ i18n.t('cmpl.workflow') }}</h3>
         @switch (c.status) {
           @case ('Logged') {
-            @if (perms.canAssignTraining()) {
+            @if (perms.can('complaints.edit')) {
               <button (click)="facade.acknowledge(c.id)">{{ i18n.t('cmpl.acknowledge') }}</button>
             } @else { <p class="muted">{{ i18n.t('cmpl.handlerOnly') }}</p> }
           }
           @case ('Acknowledged') {
-            @if (perms.canApprove()) {
+            @if (perms.can('complaints.approve')) {
               <form [formGroup]="validateForm" (ngSubmit)="validate(c.id, true)">
                 <label>{{ i18n.t('cmpl.verdictReason') }}</label>
                 <textarea formControlName="reason" rows="2"></textarea>
@@ -80,12 +80,12 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
             } @else { <p class="muted">{{ i18n.t('comp.approverOnly') }}</p> }
           }
           @case ('Validated') {
-            @if (perms.canAssignTraining()) {
+            @if (perms.can('complaints.edit')) {
               <button (click)="facade.startInvestigation(c.id)">{{ i18n.t('cmpl.startInvestigation') }}</button>
             } @else { <p class="muted">{{ i18n.t('cmpl.handlerOnly') }}</p> }
           }
           @case ('Investigating') {
-            @if (perms.canAssignTraining()) {
+            @if (perms.can('complaints.edit')) {
               <form [formGroup]="outcomeForm" (ngSubmit)="logOutcome(c.id)">
                 <label>{{ i18n.t('cmpl.outcome') }}</label>
                 <textarea formControlName="outcome" rows="3"></textarea>
@@ -94,7 +94,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
             } @else { <p class="muted">{{ i18n.t('cmpl.handlerOnly') }}</p> }
           }
           @case ('OutcomeLogged') {
-            @if (perms.canAssignTraining()) {
+            @if (perms.can('complaints.edit')) {
               <form [formGroup]="resolveForm" (ngSubmit)="resolve(c.id)">
                 <label>{{ i18n.t('cmpl.resolution') }}</label>
                 <textarea formControlName="resolution" rows="3"></textarea>
@@ -103,7 +103,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
             } @else { <p class="muted">{{ i18n.t('cmpl.handlerOnly') }}</p> }
           }
           @case ('Resolved') {
-            @if (perms.canApprove()) {
+            @if (perms.can('complaints.void')) {
               <button (click)="facade.close(c.id)">{{ i18n.t('cmpl.close') }}</button>
               @if (c.linkedNcId) { <p class="muted small">{{ i18n.t('cmpl.closeGateHint') }}</p> }
             } @else { <p class="muted">{{ i18n.t('comp.approverOnly') }}</p> }

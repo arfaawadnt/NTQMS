@@ -16,7 +16,7 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
     imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent],
     template: `
     <qams-page-header [title]="i18n.t('out.title')" [subtitle]="i18n.t('out.subtitle')">
-      @if (perms.canAssignTraining()) {
+      @if (perms.can('analytical-quality.create')) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('out.new') }}</button>
       }
     </qams-page-header>

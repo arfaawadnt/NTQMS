@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.IdentityAccess;
+using NT.QAMS.Domain.Authorization;
 using NT.QAMS.Domain.IdentityAccess;
 using NT.QAMS.SharedKernel.Primitives;
 
@@ -28,8 +29,9 @@ internal static class TenantRole
 
 // â”€â”€ Register â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-[RequireInternalActor]
-public sealed record RegisterUserCommand(string Email, string DisplayName, string Role, string InitialPassword)
+[RequirePermissionPolicy(PermissionCatalog.Users, PermissionAction.Manage)]
+public sealed record RegisterUserCommand(
+    string Email, string DisplayName, string Role, string InitialPassword, Guid? RoleId = null)
     : ICommand<Guid>;
 
 public sealed class RegisterUserValidator : AbstractValidator<RegisterUserCommand>
@@ -57,7 +59,28 @@ public sealed class RegisterUserHandler(IAppDbContext db, ICurrentTenant tenant,
             throw new DomainException("USER-008", $"A user with email '{email}' already exists in this tenant.");
         }
 
-        var user = UserAccount.Create(tenantId, email, c.DisplayName, hasher.Hash(c.InitialPassword), TenantRole.Parse(c.Role));
+        var tier = TenantRole.Parse(c.Role);
+        var user = UserAccount.Create(tenantId, email, c.DisplayName, hasher.Hash(c.InitialPassword), tier);
+
+        if (c.RoleId is { } roleId)
+        {
+            var role = await db.Roles.SingleOrDefaultAsync(r => r.Id == roleId, ct)
+                ?? throw new DomainException("ROLE-404", "Role not found.");
+            if (!role.IsActive)
+            {
+                throw new DomainException("ROLE-008", "An inactive role cannot be assigned.");
+            }
+
+            user.AssignRole(role.Id);
+        }
+        else
+        {
+            // Callers that still speak the tier-based contract get the seeded
+            // role that reproduces the tier - an account must never be born
+            // without privileges just because the caller predates the module.
+            await Authorization.SeededRoleDefault.AssignAsync(db, user, tier, ct);
+        }
+
         db.Users.Add(user);
         await db.SaveChangesAsync(ct);
         return user.Id;
@@ -66,11 +89,11 @@ public sealed class RegisterUserHandler(IAppDbContext db, ICurrentTenant tenant,
 
 // â”€â”€ Role / status / password â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-[RequireInternalActor]
+[RequirePermissionPolicy(PermissionCatalog.Users, PermissionAction.Manage)]
 public sealed record ChangeUserRoleCommand(Guid UserId, string Role) : ICommand;
-[RequireInternalActor]
+[RequirePermissionPolicy(PermissionCatalog.Users, PermissionAction.Manage)]
 public sealed record SetUserActiveCommand(Guid UserId, bool Active) : ICommand;
-[RequireInternalActor]
+[RequirePermissionPolicy(PermissionCatalog.Users, PermissionAction.Manage)]
 public sealed record ResetUserPasswordCommand(Guid UserId, string NewPassword) : ICommand;
 
 public sealed class ResetUserPasswordValidator : AbstractValidator<ResetUserPasswordCommand>
@@ -95,7 +118,12 @@ public sealed class ChangeUserRoleHandler(IAppDbContext db, ICurrentTenant tenan
 {
     public async Task Handle(ChangeUserRoleCommand c, CancellationToken ct)
     {
-        (await TenantUserLoader.LoadAsync(db, tenant, c.UserId, ct)).ChangeRole(TenantRole.Parse(c.Role));
+        var user = await TenantUserLoader.LoadAsync(db, tenant, c.UserId, ct);
+        var tier = TenantRole.Parse(c.Role);
+        user.ChangeRole(tier);
+        // The tier-based contract changes privileges too: follow to the seeded
+        // role that reproduces the new tier, exactly as registration does.
+        await Authorization.SeededRoleDefault.AssignAsync(db, user, tier, ct);
         await db.SaveChangesAsync(ct);
     }
 }
@@ -134,7 +162,13 @@ public sealed class GetUsersHandler(IAppDbContext db, ICurrentTenant tenant)
         return await db.Users.AsNoTracking()
             .Where(u => u.TenantId == tenantId)
             .OrderBy(u => u.DisplayName)
-            .Select(u => new UserDto(u.Id, u.Email, u.DisplayName, u.Role.ToString(), u.IsActive, u.MfaEnabled))
+            .Select(u => new UserDto(
+                u.Id, u.Email, u.DisplayName, u.Role.ToString(), u.IsActive, u.MfaEnabled,
+                u.RoleId,
+                db.Roles.Where(r => r.Id == u.RoleId).Select(r => r.Name).FirstOrDefault(),
+                u.BranchAccess.Select(b => b.BranchId).ToList(),
+                u.DepartmentAccess.Select(d => d.DepartmentId).ToList(),
+                u.PreferredLanguage))
             .ToListAsync(ct);
     }
 }
@@ -157,5 +191,141 @@ public sealed class GetUserDirectoryHandler(IAppDbContext db, ICurrentTenant ten
             .OrderBy(u => u.DisplayName)
             .Select(u => new UserDirectoryEntryDto(u.Id, u.DisplayName, u.Role.ToString()))
             .ToListAsync(ct);
+    }
+}
+
+// ── Configurable role, working scope, language ─────────────────────────────────
+
+/// <summary>Moves a user onto a different configurable role.</summary>
+[RequirePermissionPolicy(PermissionCatalog.Users, PermissionAction.Manage)]
+public sealed record AssignUserRoleCommand(Guid UserId, Guid RoleId) : ICommand;
+
+public sealed class AssignUserRoleHandler(IAppDbContext db, ICurrentTenant tenant)
+    : ICommandHandler<AssignUserRoleCommand>
+{
+    public async Task Handle(AssignUserRoleCommand c, CancellationToken ct)
+    {
+        var user = await TenantUserLoader.LoadAsync(db, tenant, c.UserId, ct);
+
+        var role = await db.Roles.SingleOrDefaultAsync(r => r.Id == c.RoleId, ct)
+            ?? throw new DomainException("ROLE-404", "Role not found.");
+        if (!role.IsActive)
+        {
+            throw new DomainException("ROLE-008", "An inactive role cannot be assigned.");
+        }
+
+        // Moving this user off a roles.manage-granting role must not leave the
+        // tenant without an administrator of privileges.
+        if (user.RoleId is { } current && current != role.Id && !role.Grants(PermissionCatalog.ManageRoles))
+        {
+            var leavingManage = await db.Roles
+                .AnyAsync(r => r.Id == current
+                    && r.Permissions.Any(p => p.PermissionKey == PermissionCatalog.ManageRoles), ct);
+            if (leavingManage)
+            {
+                await Authorization.ManageRolesLockoutGuard.EnsureSurvivesAsync(db, [], user.Id, ct);
+            }
+        }
+
+        user.AssignRole(role.Id);
+        await db.SaveChangesAsync(ct);
+    }
+}
+
+/// <summary>
+/// Sets the branches and departments a user may work in. Empty lists mean
+/// unrestricted — the explicit widest case, which the domain records as its own
+/// auditable fact.
+/// </summary>
+[RequirePermissionPolicy(PermissionCatalog.Users, PermissionAction.Manage)]
+public sealed record SetUserScopeCommand(
+    Guid UserId, IReadOnlyList<Guid> BranchIds, IReadOnlyList<Guid> DepartmentIds) : ICommand;
+
+public sealed class SetUserScopeValidator : AbstractValidator<SetUserScopeCommand>
+{
+    public SetUserScopeValidator()
+    {
+        RuleFor(x => x.BranchIds).NotNull();
+        RuleFor(x => x.DepartmentIds).NotNull();
+    }
+}
+
+public sealed class SetUserScopeHandler(IAppDbContext db, ICurrentTenant tenant)
+    : ICommandHandler<SetUserScopeCommand>
+{
+    public async Task Handle(SetUserScopeCommand c, CancellationToken ct)
+    {
+        var user = await TenantUserLoader.LoadAsync(db, tenant, c.UserId, ct);
+
+        // The scope must point at the tenant's own org units — a foreign or
+        // deleted id would silently restrict the user to nothing.
+        var branchIds = c.BranchIds.Where(id => id != Guid.Empty).Distinct().ToList();
+        if (branchIds.Count > 0)
+        {
+            var known = await db.Branches.CountAsync(b => branchIds.Contains(b.Id), ct);
+            if (known != branchIds.Count)
+            {
+                throw new DomainException("SCOPE-003", "One or more selected branches do not exist.");
+            }
+        }
+
+        var departmentIds = c.DepartmentIds.Where(id => id != Guid.Empty).Distinct().ToList();
+        if (departmentIds.Count > 0)
+        {
+            var known = await db.Departments.CountAsync(d => departmentIds.Contains(d.Id), ct);
+            if (known != departmentIds.Count)
+            {
+                throw new DomainException("SCOPE-004", "One or more selected departments do not exist.");
+            }
+        }
+
+        user.SetScope(branchIds, departmentIds);
+        await db.SaveChangesAsync(ct);
+    }
+}
+
+/// <summary>Sets a user's interface language (administration side).</summary>
+[RequirePermissionPolicy(PermissionCatalog.Users, PermissionAction.Manage)]
+public sealed record SetUserLanguageCommand(Guid UserId, string? Language) : ICommand;
+
+public sealed class SetUserLanguageValidator : AbstractValidator<SetUserLanguageCommand>
+{
+    public SetUserLanguageValidator() => RuleFor(x => x.Language).MaximumLength(10);
+}
+
+public sealed class SetUserLanguageHandler(IAppDbContext db, ICurrentTenant tenant)
+    : ICommandHandler<SetUserLanguageCommand>
+{
+    public async Task Handle(SetUserLanguageCommand c, CancellationToken ct)
+    {
+        (await TenantUserLoader.LoadAsync(db, tenant, c.UserId, ct)).SetPreferredLanguage(c.Language);
+        await db.SaveChangesAsync(ct);
+    }
+}
+
+/// <summary>
+/// The signed-in user's own language choice — self-service, so it needs no
+/// administrative privilege, and it wins over the role and tenant defaults.
+/// </summary>
+[RequireAuthenticatedActor]
+public sealed record SetMyLanguageCommand(string? Language) : ICommand;
+
+public sealed class SetMyLanguageValidator : AbstractValidator<SetMyLanguageCommand>
+{
+    public SetMyLanguageValidator() => RuleFor(x => x.Language).MaximumLength(10);
+}
+
+public sealed class SetMyLanguageHandler(IAppDbContext db, ICurrentUser currentUser)
+    : ICommandHandler<SetMyLanguageCommand>
+{
+    public async Task Handle(SetMyLanguageCommand c, CancellationToken ct)
+    {
+        var userId = currentUser.UserId
+            ?? throw new DomainException("AUTHZ-001", "An authenticated actor is required for this action.");
+        var user = await db.Users.SingleOrDefaultAsync(u => u.Id == userId, ct)
+            ?? throw new DomainException("USER-404", "User not found.");
+
+        user.SetPreferredLanguage(c.Language);
+        await db.SaveChangesAsync(ct);
     }
 }

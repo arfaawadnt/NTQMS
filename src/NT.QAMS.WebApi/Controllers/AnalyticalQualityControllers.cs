@@ -1,3 +1,5 @@
+using NT.QAMS.Domain.Authorization;
+using NT.QAMS.WebApi.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,14 +18,14 @@ public sealed class QualityControlController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetQcProfilesQuery(), ct));
 
     [HttpPost("profiles")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.AnalyticalQuality, PermissionAction.Manage)]
     public async Task<IActionResult> CreateProfile(CreateQcProfileRequest request, CancellationToken ct) =>
         Ok(new { id = await sender.Send(new CreateQcProfileCommand(
             request.Analyte, request.Instrument, request.ControlLot,
             request.TargetMean, request.TargetSd), ct) });
 
     [HttpPut("profiles/{id:guid}/targets")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.AnalyticalQuality, PermissionAction.Manage)]
     public async Task<IActionResult> UpdateTargets(Guid id, UpdateQcTargetsRequest request, CancellationToken ct)
     {
         await sender.Send(new UpdateQcTargetsCommand(id, request.TargetMean, request.TargetSd, request.Reason), ct);
@@ -60,7 +62,7 @@ public sealed class ValidationStudiesController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetStudyByIdQuery(id), ct));
 
     [HttpPost]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.AnalyticalQuality, PermissionAction.Create)]
     public async Task<IActionResult> Configure(ConfigureStudyRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new ConfigureStudyCommand(
@@ -83,7 +85,7 @@ public sealed class ValidationStudiesController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/sign-off")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.AnalyticalQuality, PermissionAction.Sign)]
     public async Task<IActionResult> SignOff(Guid id, CancellationToken ct)
     {
         await sender.Send(new SignOffStudyCommand(id), ct);

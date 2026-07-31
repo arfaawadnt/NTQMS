@@ -1,3 +1,5 @@
+using NT.QAMS.Domain.Authorization;
+using NT.QAMS.WebApi.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,17 +29,17 @@ public sealed class QualityPolicyController(ISender sender) : ControllerBase
 
     /// <summary>The full version history (all drafts, active, and superseded).</summary>
     [HttpGet]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.QualityPolicy, PermissionAction.View)]
     public async Task<IActionResult> List(CancellationToken ct) =>
         Ok(await sender.Send(new GetQualityPoliciesQuery(), ct));
 
     [HttpPost]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.QualityPolicy, PermissionAction.Create)]
     public async Task<IActionResult> Draft(DraftQualityPolicyRequest request, CancellationToken ct) =>
         Ok(new { id = await sender.Send(new DraftQualityPolicyCommand(request.Statement), ct) });
 
     [HttpPut("{id:guid}")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.QualityPolicy, PermissionAction.Edit)]
     public async Task<IActionResult> Revise(Guid id, ReviseQualityPolicyRequest request, CancellationToken ct)
     {
         await sender.Send(new ReviseQualityPolicyCommand(id, request.Statement), ct);
@@ -45,7 +47,7 @@ public sealed class QualityPolicyController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/approve")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.QualityPolicy, PermissionAction.Approve)]
     public async Task<IActionResult> Approve(Guid id, ApproveQualityPolicyRequest request, CancellationToken ct)
     {
         await sender.Send(new ApproveQualityPolicyCommand(id, request.EffectiveDate), ct);

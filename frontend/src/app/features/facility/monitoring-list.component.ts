@@ -19,7 +19,7 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
     imports: [ReactiveFormsModule, DatePipe, DecimalPipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, LovSelectComponent, ListStatsComponent],
     template: `
     <qams-page-header [title]="i18n.t('env.title')" [subtitle]="i18n.t('env.subtitle')">
-      @if (perms.canAssignTraining()) {
+      @if (perms.can('monitoring-points.create')) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('env.new') }}</button>
       }
     </qams-page-header>

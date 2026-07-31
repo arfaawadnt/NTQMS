@@ -1,3 +1,5 @@
+using NT.QAMS.Domain.Authorization;
+using NT.QAMS.WebApi.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,7 +14,8 @@ namespace NT.QAMS.WebApi.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/tenant-settings")]
-[Authorize(Roles = Roles.TenantAdminOnly)]
+[Authorize]
+[RequirePermission(PermissionCatalog.TenantSettings, PermissionAction.Manage)]
 public sealed class TenantSettingsController(ISender sender) : ControllerBase
 {
     /// <summary>Current privileged-MFA enforcement for this tenant (F-04).</summary>

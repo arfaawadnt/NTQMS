@@ -1,3 +1,5 @@
+using NT.QAMS.Domain.Authorization;
+using NT.QAMS.WebApi.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +23,7 @@ public sealed class ReferenceStandardsController(ISender sender) : ControllerBas
         Ok(await sender.Send(new GetReferenceStandardByIdQuery(id), ct));
 
     [HttpPost]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.ReferenceStandards, PermissionAction.Create)]
     public async Task<IActionResult> Register(RegisterReferenceStandardRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new RegisterReferenceStandardCommand(
@@ -33,7 +35,7 @@ public sealed class ReferenceStandardsController(ISender sender) : ControllerBas
     }
 
     [HttpPost("{id:guid}/quarantine")]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.ReferenceStandards, PermissionAction.Edit)]
     public async Task<IActionResult> Quarantine(Guid id, QuarantineReferenceStandardRequest request, CancellationToken ct)
     {
         await sender.Send(new QuarantineReferenceStandardCommand(id, request.Reason), ct);
@@ -41,7 +43,7 @@ public sealed class ReferenceStandardsController(ISender sender) : ControllerBas
     }
 
     [HttpPost("{id:guid}/reactivate")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.ReferenceStandards, PermissionAction.Approve)]
     public async Task<IActionResult> Reactivate(Guid id, CancellationToken ct)
     {
         await sender.Send(new ReactivateReferenceStandardCommand(id), ct);
@@ -49,7 +51,7 @@ public sealed class ReferenceStandardsController(ISender sender) : ControllerBas
     }
 
     [HttpPost("{id:guid}/retire")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.ReferenceStandards, PermissionAction.Void)]
     public async Task<IActionResult> Retire(Guid id, CancellationToken ct)
     {
         await sender.Send(new RetireReferenceStandardCommand(id), ct);

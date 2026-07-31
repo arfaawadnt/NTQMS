@@ -16,7 +16,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
     imports: [ReactiveFormsModule, DecimalPipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent],
     template: `
     <qams-page-header [title]="i18n.t('qc.title')" [subtitle]="i18n.t('qc.subtitle')">
-      @if (perms.canApprove()) {
+      @if (perms.can('analytical-quality.manage')) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('qc.new') }}</button>
       }
     </qams-page-header>

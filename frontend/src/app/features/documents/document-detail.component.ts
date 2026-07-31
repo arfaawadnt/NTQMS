@@ -67,7 +67,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
             <button (click)="facade.submit(d.id)">{{ i18n.t('doc.submit') }}</button>
           }
           @if (inFlightState() === 'UnderReview') {
-            @if (perms.canApprove()) {
+            @if (perms.can('documents.approve')) {
               <button (click)="facade.recommend(d.id)">{{ i18n.t('doc.recommend') }}</button>
               <form [formGroup]="rejectForm" (ngSubmit)="facade.reject(d.id, rejectForm.getRawValue())">
                 <label>{{ i18n.t('nc.rejectReason') }}</label>
@@ -77,7 +77,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
             } @else { <p class="muted">{{ i18n.t('doc.awaitReview') }}</p> }
           }
           @if (inFlightState() === 'Approved') {
-            @if (perms.canApprove()) {
+            @if (perms.can('documents.sign')) {
               <form [formGroup]="publishForm" (ngSubmit)="facade.publish(d.id, publishForm.getRawValue())">
                 <label>{{ i18n.t('doc.signPassword') }}</label>
                 <input formControlName="password" type="password" autocomplete="current-password" />
@@ -96,7 +96,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
               <input type="file" (change)="onFile($event)" />
               <button type="submit" [disabled]="versionForm.invalid || !file()">{{ i18n.t('doc.addVersion') }}</button>
             </form>
-            @if (perms.canApprove()) {
+            @if (perms.can('documents.void')) {
               <button class="secondary" (click)="facade.retire(d.id)">{{ i18n.t('doc.retire') }}</button>
             }
           }
@@ -115,7 +115,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
               </b>
               <span class="muted"> · {{ i18n.t('doc.reviewCycleEvery') }} {{ d.reviewCycleMonths }} {{ i18n.t('comp.months') }}</span>
             </div>
-            @if (perms.canApprove()) {
+            @if (perms.can('documents.sign')) {
               <button (click)="facade.confirmReview(d.id)">{{ i18n.t('doc.confirmReview') }}</button>
             }
           </div>
@@ -135,7 +135,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
               }
             </div>
           }
-          @if (perms.canApprove()) {
+          @if (perms.can('documents.view')) {
             <h4>{{ i18n.t('doc.ackCoverage') }}</h4>
             @if (acks().length === 0) { <p class="muted">{{ i18n.t('doc.ackNone') }}</p> }
             @else {
@@ -158,7 +158,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
         <section class="card">
           <h3>{{ i18n.t('doc.copies') }}</h3>
           <p class="muted small">{{ i18n.t('doc.copiesHint') }}</p>
-          @if (perms.canApprove() && d.status === 'Published') {
+          @if (perms.can('documents.edit') && d.status === 'Published') {
             <div class="ack-row">
               <input [(ngModel)]="copyHolder" [placeholder]="i18n.t('doc.copyHolder')" />
               <button (click)="issueCopy(d.id)" [disabled]="!copyHolder.trim()">{{ i18n.t('doc.issueCopy') }}</button>
@@ -180,7 +180,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
                     <td><qams-status-pill [status]="cp.status" /></td>
                     <td>{{ cp.issuedAtUtc | date:'mediumDate' }}</td>
                     <td class="actions">
-                      @if (cp.status === 'Issued' && perms.canApprove()) {
+                      @if (cp.status === 'Issued' && perms.can('documents.edit')) {
                         <button class="link" type="button" (click)="closeCopy(cp.id, 'Returned')">{{ i18n.t('doc.copyReturned') }}</button>
                         <button class="link danger-link" type="button" (click)="closeCopy(cp.id, 'Destroyed')">{{ i18n.t('doc.copyDestroyed') }}</button>
                       }
@@ -321,7 +321,7 @@ export class DocumentDetailComponent implements OnInit {
       this.myAck.set(null);
     }
 
-    if (this.perms.canApprove()) {
+    if (this.perms.can('documents.view')) {
       try {
         this.acks.set(await firstValueFrom(this.docsApi.acknowledgements(this.id())));
       } catch {

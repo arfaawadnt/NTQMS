@@ -32,6 +32,21 @@ public sealed class RequireRoleAttribute(params UserRole[] roles) : CommandPolic
 }
 
 /// <summary>
+/// Only actors whose (tenant-configured) role grants this permission may execute
+/// the command — the policy for commands whose audience is decided by the
+/// laboratory's own privilege configuration rather than by code. Declared as
+/// module + action (both compile-time constants from the catalogue), e.g.
+/// <c>[RequirePermissionPolicy(PermissionCatalog.RolesPrivileges, PermissionAction.Manage)]</c>;
+/// the composed key is still validated by the behavior, so a module key that
+/// drifts from the catalogue fails every call loudly instead of denying quietly.
+/// </summary>
+public sealed class RequirePermissionPolicyAttribute(
+    string module, Domain.Authorization.PermissionAction action) : CommandPolicyAttribute
+{
+    public string PermissionKey { get; } = Domain.Authorization.PermissionCatalog.Key(module, action);
+}
+
+/// <summary>
 /// The command runs without an authenticated actor BY DESIGN (login,
 /// expired-password rotation). The handler carries its own credential checks.
 /// </summary>

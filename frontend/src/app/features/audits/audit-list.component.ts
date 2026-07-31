@@ -22,7 +22,7 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
     imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent, UserSelectComponent, LoadMoreComponent],
     template: `
     <qams-page-header [title]="i18n.t('audit.title')">
-      @if (perms.canApprove()) { <button (click)="showForm.set(!showForm())">{{ i18n.t('audit.new') }}</button> }
+      @if (perms.can('audits.create')) { <button (click)="showForm.set(!showForm())">{{ i18n.t('audit.new') }}</button> }
     </qams-page-header>
 
     <qams-list-stats [stats]="stats()" ratioFromFirst />

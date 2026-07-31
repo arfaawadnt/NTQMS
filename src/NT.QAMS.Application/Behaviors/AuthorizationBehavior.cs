@@ -15,13 +15,16 @@ namespace NT.QAMS.Application.Behaviors;
 /// its own credential checks);</item>
 /// <item><see cref="RequireInternalActorAttribute"/> → any authenticated role
 /// except the read-only <see cref="UserRole.ExternalAuditor"/>;</item>
-/// <item><see cref="RequireRoleAttribute"/> → listed roles only.</item>
+/// <item><see cref="RequireRoleAttribute"/> → listed roles only;</item>
+/// <item><see cref="RequirePermissionPolicyAttribute"/> → actors whose
+/// configured role grants the permission (the tenant decides who that is).</item>
 /// </list>
 /// Defense-in-depth under the HTTP <c>[Authorize]</c> gates: this layer holds
 /// even if a controller forgets its attribute. Queries are not gated here —
 /// read authorization stays at the controller (auditors must read).
 /// </summary>
-public sealed class AuthorizationBehavior<TRequest, TResponse>(ICurrentUser currentUser)
+public sealed class AuthorizationBehavior<TRequest, TResponse>(
+    ICurrentUser currentUser, IUserPrivileges privileges)
     : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
@@ -57,11 +60,21 @@ public sealed class AuthorizationBehavior<TRequest, TResponse>(ICurrentUser curr
             throw new DomainException("AUTHZ-001", "An authenticated actor is required for this action.");
         }
 
+        if (Policy is RequirePermissionPolicyAttribute declared
+            && !Domain.Authorization.PermissionCatalog.IsKnown(declared.PermissionKey))
+        {
+            // A key the catalogue does not know is a programming error; failing
+            // loudly on every call beats denying quietly until someone notices.
+            throw new DomainException("AUTHZ-008",
+                $"Command '{typeof(TRequest).Name}' requires unknown permission '{declared.PermissionKey}'.");
+        }
+
         var permitted = Policy switch
         {
             RequireAuthenticatedActorAttribute => true,
             RequireInternalActorAttribute => role != UserRole.ExternalAuditor,
             RequireRoleAttribute required => required.Roles.Contains(role),
+            RequirePermissionPolicyAttribute permission => privileges.Has(permission.PermissionKey),
             _ => false,
         };
 

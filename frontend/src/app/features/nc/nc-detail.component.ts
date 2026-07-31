@@ -71,7 +71,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
               <button (click)="facade.submit(n.id)">{{ i18n.t('nc.submitForTriage') }}</button>
             }
             @case ('Raised') {
-              @if (perms.canApprove()) {
+              @if (perms.canAny('nc.approve', 'nc.void')) {
                 <form [formGroup]="triageForm" (ngSubmit)="facade.triage(n.id, triageForm.getRawValue())">
                   <label>{{ i18n.t('nc.assignee') }}</label>
                   <qams-user-select formControlName="assigneeId" />
@@ -97,13 +97,13 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
               @if (!allActionsComplete()) { <p class="muted">{{ i18n.t('nc.completeAllFirst') }}</p> }
             }
             @case ('PendingVerification') {
-              @if (perms.canApprove()) {
+              @if (perms.can('nc.approve')) {
                 <button (click)="facade.verify(n.id, { passed: true })">{{ i18n.t('nc.verifyPass') }}</button>
                 <button class="secondary" (click)="facade.verify(n.id, { passed: false })">{{ i18n.t('nc.verifyFail') }}</button>
               } @else { <p class="muted">{{ i18n.t('nc.awaitVerify') }}</p> }
             }
             @case ('EffectivenessCheck') {
-              @if (perms.canApprove()) {
+              @if (perms.can('nc.approve')) {
                 <button (click)="facade.confirmEffectiveness(n.id, { effective: true })">{{ i18n.t('nc.effectiveClose') }}</button>
                 <button class="secondary" (click)="facade.confirmEffectiveness(n.id, { effective: false })">{{ i18n.t('nc.notEffective') }}</button>
               } @else { <p class="muted">{{ i18n.t('nc.awaitEffectiveness') }}</p> }

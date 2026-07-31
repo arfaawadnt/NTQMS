@@ -1,3 +1,5 @@
+using NT.QAMS.Domain.Authorization;
+using NT.QAMS.WebApi.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,7 +21,7 @@ public sealed class OrgContextController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetInterestedPartiesQuery(), ct));
 
     [HttpPost("interested-parties")]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.OrgContext, PermissionAction.Create)]
     public async Task<IActionResult> RegisterParty(RegisterInterestedPartyRequest request, CancellationToken ct) =>
         Ok(new
         {
@@ -29,7 +31,7 @@ public sealed class OrgContextController(ISender sender) : ControllerBase
         });
 
     [HttpPut("interested-parties/{id:guid}")]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.OrgContext, PermissionAction.Edit)]
     public async Task<IActionResult> ReviseParty(Guid id, ReviseInterestedPartyRequest request, CancellationToken ct)
     {
         await sender.Send(new ReviseInterestedPartyCommand(
@@ -39,7 +41,7 @@ public sealed class OrgContextController(ISender sender) : ControllerBase
     }
 
     [HttpPost("interested-parties/{id:guid}/archive")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.OrgContext, PermissionAction.Void)]
     public async Task<IActionResult> ArchiveParty(Guid id, CancellationToken ct)
     {
         await sender.Send(new ArchiveInterestedPartyCommand(id), ct);
@@ -53,7 +55,7 @@ public sealed class OrgContextController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetContextIssuesQuery(), ct));
 
     [HttpPost("issues")]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.OrgContext, PermissionAction.Create)]
     public async Task<IActionResult> RegisterIssue(RegisterContextIssueRequest request, CancellationToken ct) =>
         Ok(new
         {
@@ -62,7 +64,7 @@ public sealed class OrgContextController(ISender sender) : ControllerBase
         });
 
     [HttpPut("issues/{id:guid}")]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.OrgContext, PermissionAction.Edit)]
     public async Task<IActionResult> ReviseIssue(Guid id, ReviseContextIssueRequest request, CancellationToken ct)
     {
         await sender.Send(new ReviseContextIssueCommand(
@@ -71,7 +73,7 @@ public sealed class OrgContextController(ISender sender) : ControllerBase
     }
 
     [HttpPost("issues/{id:guid}/link-risk")]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.OrgContext, PermissionAction.Edit)]
     public async Task<IActionResult> LinkRisk(Guid id, LinkContextIssueRiskRequest request, CancellationToken ct)
     {
         await sender.Send(new LinkContextIssueRiskCommand(id, request.RiskId), ct);
@@ -79,7 +81,7 @@ public sealed class OrgContextController(ISender sender) : ControllerBase
     }
 
     [HttpPost("issues/{id:guid}/close")]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.OrgContext, PermissionAction.Void)]
     public async Task<IActionResult> CloseIssue(Guid id, CloseContextIssueRequest request, CancellationToken ct)
     {
         await sender.Send(new CloseContextIssueCommand(id, request.Resolution), ct);

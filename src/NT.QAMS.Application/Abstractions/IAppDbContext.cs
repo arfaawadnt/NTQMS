@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using NT.QAMS.Domain.Authorization;
 using NT.QAMS.Domain.AnalyticalQuality;
 using NT.QAMS.Domain.AuditManagement;
 using NT.QAMS.Domain.Competency;
@@ -29,6 +30,7 @@ public interface IAppDbContext
 {
     DbSet<Tenant> Tenants { get; }
     DbSet<UserAccount> Users { get; }
+    DbSet<Role> Roles { get; }
     DbSet<PasswordHistoryEntry> PasswordHistory { get; }
     DbSet<RefreshSession> RefreshSessions { get; }
     DbSet<Nonconformance> Nonconformances { get; }

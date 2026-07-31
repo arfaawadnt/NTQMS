@@ -1,3 +1,5 @@
+using NT.QAMS.Domain.Authorization;
+using NT.QAMS.WebApi.Authorization;
 using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -13,8 +15,9 @@ namespace NT.QAMS.WebApi.Controllers;
 /// the event pipeline, never by an API call.
 /// </summary>
 [ApiController]
+[Authorize]
 [Route("api/compliance")]
-[Authorize(Roles = Roles.QmAdminAuditor)]
+[RequirePermission(PermissionCatalog.Compliance, PermissionAction.View)]
 public sealed class ComplianceController(ISender sender) : ControllerBase
 {
     [HttpGet("audit-trail")]
@@ -40,13 +43,13 @@ public sealed class ComplianceController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetAuditTrailReviewsQuery(), ct));
 
     [HttpPost("audit-trail-reviews")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.Compliance, PermissionAction.Create)]
     public async Task<IActionResult> OpenAuditTrailReview(
         NT.QAMS.Contracts.Compliance.OpenAuditTrailReviewRequest request, CancellationToken ct) =>
         Ok(new { id = await sender.Send(new OpenAuditTrailReviewCommand(request.PeriodStart, request.PeriodEnd), ct) });
 
     [HttpPost("audit-trail-reviews/{id:guid}/complete")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.Compliance, PermissionAction.Approve)]
     public async Task<IActionResult> CompleteAuditTrailReview(
         Guid id, NT.QAMS.Contracts.Compliance.CompleteAuditTrailReviewRequest request, CancellationToken ct)
     {

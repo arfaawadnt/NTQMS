@@ -21,7 +21,7 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
     imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent, UserSelectComponent, LoadMoreComponent],
     template: `
     <qams-page-header [title]="i18n.t('mrv.title')">
-      @if (perms.canApprove()) {
+      @if (perms.can('reviews.create')) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('mrv.new') }}</button>
       }
     </qams-page-header>

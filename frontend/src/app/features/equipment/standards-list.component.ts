@@ -19,7 +19,7 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
     imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent],
     template: `
     <qams-page-header [title]="i18n.t('std.title')" [subtitle]="i18n.t('std.subtitle')">
-      @if (perms.canAssignTraining()) {
+      @if (perms.can('reference-standards.create')) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('std.new') }}</button>
       }
     </qams-page-header>

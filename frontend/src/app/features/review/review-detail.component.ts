@@ -25,7 +25,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
     template: `
     @if (item(); as r) {
       <qams-page-header [title]="r.reviewRef + ' — ' + r.title" [subtitle]="(r.reviewDate | date:'fullDate') ?? ''">
-        @if (perms.canApprove()) {
+        @if (perms.can('reviews.export')) {
           <button class="secondary" (click)="exports.reviewPackPdf(r.id)">{{ i18n.t('exp.reviewPack') }}</button>
         }
         <a routerLink="/management-reviews" class="ghost-link">← {{ i18n.t('mrv.backToList') }}</a>
@@ -52,7 +52,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
             <span class="muted">{{ i18n.t('mrv.owner') }}: {{ d.ownerId }} · {{ i18n.t('mrv.due') }}: {{ d.dueDate | date:'mediumDate' }}</span>
           </div>
         }
-        @if (open() && perms.canApprove()) {
+        @if (open() && perms.can('reviews.edit')) {
           <form [formGroup]="decisionForm" (ngSubmit)="addDecision(r.id)">
             <label>{{ i18n.t('mrv.decisionDesc') }}</label><input formControlName="description" />
             <label>{{ i18n.t('mrv.owner') }}</label><qams-user-select formControlName="ownerId" />
@@ -64,7 +64,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 
       @if (r.minutes) {
         <section class="card"><h3>{{ i18n.t('mrv.minutes') }}</h3><p class="pre">{{ r.minutes }}</p></section>
-      } @else if (open() && perms.canApprove()) {
+      } @else if (open() && perms.can('reviews.void')) {
         <section class="card">
           <h3>{{ i18n.t('mrv.closeOut') }}</h3>
           <form [formGroup]="closeForm" (ngSubmit)="close(r.id)">
@@ -75,7 +75,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
         </section>
       }
 
-      @if (!open() && !perms.canApprove()) { <p class="muted">{{ i18n.t('mrv.closedNote') }}</p> }
+      @if (!open() && !perms.can('reviews.edit')) { <p class="muted">{{ i18n.t('mrv.closedNote') }}</p> }
     
       <qams-audit-trail [subject]="r.id" />
     } @else {

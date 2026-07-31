@@ -40,13 +40,13 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
           </div>
         }
         <div class="lifecycle">
-          @if (p.status === 'Active' && perms.canAssignTraining()) {
+          @if (p.status === 'Active' && perms.can('monitoring-points.edit')) {
             <button class="secondary" (click)="facade.suspend(p.id)">{{ i18n.t('env.suspendPoint') }}</button>
           }
-          @if (p.status === 'Suspended' && perms.canAssignTraining()) {
+          @if (p.status === 'Suspended' && perms.can('monitoring-points.edit')) {
             <button (click)="facade.resume(p.id)">{{ i18n.t('env.resumePoint') }}</button>
           }
-          @if (p.status !== 'Retired' && perms.canApprove()) {
+          @if (p.status !== 'Retired' && perms.can('monitoring-points.void')) {
             <button class="secondary" (click)="facade.retire(p.id)">{{ i18n.t('std.retire') }}</button>
           }
         </div>
@@ -94,7 +94,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
         }
       </section>
 
-      @if (p.status !== 'Retired' && perms.canAssignTraining()) {
+      @if (p.status !== 'Retired' && perms.can('monitoring-points.edit')) {
         <section class="card">
           <h3>{{ i18n.t('env.rebaseline') }}</h3>
           <form [formGroup]="limitsForm" (ngSubmit)="setLimits(p.id)">

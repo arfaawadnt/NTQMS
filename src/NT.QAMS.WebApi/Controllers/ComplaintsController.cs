@@ -1,3 +1,5 @@
+using NT.QAMS.Domain.Authorization;
+using NT.QAMS.WebApi.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -36,7 +38,7 @@ public sealed class ComplaintsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/acknowledge")]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.Complaints, PermissionAction.Edit)]
     public async Task<IActionResult> Acknowledge(Guid id, CancellationToken ct)
     {
         await sender.Send(new AcknowledgeComplaintCommand(id), ct);
@@ -44,7 +46,7 @@ public sealed class ComplaintsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/validate")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.Complaints, PermissionAction.Approve)]
     public async Task<IActionResult> Validate(Guid id, ValidateComplaintRequest request, CancellationToken ct)
     {
         await sender.Send(new ValidateComplaintCommand(id, request.Justified, request.Reason), ct);
@@ -52,7 +54,7 @@ public sealed class ComplaintsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/start-investigation")]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.Complaints, PermissionAction.Edit)]
     public async Task<IActionResult> StartInvestigation(Guid id, CancellationToken ct)
     {
         await sender.Send(new StartComplaintInvestigationCommand(id), ct);
@@ -60,7 +62,7 @@ public sealed class ComplaintsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/outcome")]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.Complaints, PermissionAction.Edit)]
     public async Task<IActionResult> LogOutcome(Guid id, LogComplaintOutcomeRequest request, CancellationToken ct)
     {
         await sender.Send(new LogComplaintOutcomeCommand(id, request.Outcome), ct);
@@ -68,7 +70,7 @@ public sealed class ComplaintsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/resolve")]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.Complaints, PermissionAction.Edit)]
     public async Task<IActionResult> Resolve(Guid id, ResolveComplaintRequest request, CancellationToken ct)
     {
         await sender.Send(new ResolveComplaintCommand(id, request.Resolution), ct);
@@ -76,7 +78,7 @@ public sealed class ComplaintsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/close")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.Complaints, PermissionAction.Void)]
     public async Task<IActionResult> Close(Guid id, CancellationToken ct)
     {
         await sender.Send(new CloseComplaintCommand(id), ct);

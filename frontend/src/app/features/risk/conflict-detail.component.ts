@@ -45,7 +45,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
       @if (c.mitigation) { <section class="card"><h3>{{ i18n.t('coi.mitigation') }}</h3><p>{{ c.mitigation }}</p></section> }
       @if (c.closureNote) { <section class="card"><h3>{{ i18n.t('obj.note') }}</h3><p>{{ c.closureNote }}</p></section> }
 
-      @if (perms.canApprove()) {
+      @if (perms.canAny('conflicts.approve', 'conflicts.void')) {
         <section class="card">
           <h3>{{ i18n.t('val.workflow') }}</h3>
           @if (c.status === 'Declared') {

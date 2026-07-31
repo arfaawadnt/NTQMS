@@ -23,6 +23,13 @@ public static class DependencyInjection
         services.AddScoped<ICurrentTenantSetter>(sp => sp.GetRequiredService<CurrentTenant>());
         services.AddScoped<ICurrentUser, AnonymousCurrentUser>();
 
+        // Configurable privileges: one scoped holder, read through two interfaces
+        // so handlers can only read and the pipeline can only write.
+        services.AddScoped<Authorization.RequestPrivileges>();
+        services.AddScoped<IUserPrivileges>(sp => sp.GetRequiredService<Authorization.RequestPrivileges>());
+        services.AddScoped<IUserPrivilegesSetter>(sp => sp.GetRequiredService<Authorization.RequestPrivileges>());
+        services.AddScoped<IPrivilegeResolver, Authorization.PrivilegeResolver>();
+
         services.AddScoped<CurrentChangeReason>();
         services.AddScoped<ICurrentChangeReason>(sp => sp.GetRequiredService<CurrentChangeReason>());
         services.AddScoped<ICurrentChangeReasonSetter>(sp => sp.GetRequiredService<CurrentChangeReason>());
@@ -32,6 +39,7 @@ public static class DependencyInjection
         services.AddScoped<TenantStampInterceptor>();
         services.AddScoped<TenantConnectionInterceptor>();
         services.AddScoped<OutboxInterceptor>();
+        services.AddScoped<OrgScopeGuardInterceptor>();
 
         services.AddDbContext<AppDbContext>((sp, options) =>
         {
@@ -51,7 +59,8 @@ public static class DependencyInjection
                     sp.GetRequiredService<AuditStampInterceptor>(),
                     sp.GetRequiredService<TenantStampInterceptor>(),
                     sp.GetRequiredService<FieldChangeInterceptor>(),
-                    sp.GetRequiredService<OutboxInterceptor>());
+                    sp.GetRequiredService<OutboxInterceptor>(),
+                    sp.GetRequiredService<OrgScopeGuardInterceptor>());
         });
 
         services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());

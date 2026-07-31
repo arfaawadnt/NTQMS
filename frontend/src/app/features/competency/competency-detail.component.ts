@@ -51,7 +51,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
               <span class="muted">{{ a.assessedAtUtc | date:'medium' }} · {{ a.assessorId }}</span>
             </div>
           }
-          @if (canScore() && perms.canAssignTraining()) {
+          @if (canScore() && perms.can('competencies.edit')) {
             <form [formGroup]="scoreForm" (ngSubmit)="score(c.id)">
               <label>{{ i18n.t('comp.recordScore') }}</label>
               <input type="number" min="0" max="100" formControlName="score" />
@@ -62,7 +62,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 
         <section class="card">
           <h3>{{ i18n.t('comp.actions') }}</h3>
-          @if (perms.canApprove()) {
+          @if (perms.can('competencies.approve')) {
             @if (c.status === 'Evaluated') {
               <button (click)="facade.authorize(c.id)">{{ i18n.t('comp.authorize') }}</button>
             }

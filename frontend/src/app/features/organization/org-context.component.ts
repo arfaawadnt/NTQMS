@@ -31,7 +31,7 @@ type ContextTab = 'parties' | 'issues';
     imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent, LovSelectComponent, AuditTrailComponent, ListStatsComponent],
     template: `
     <qams-page-header [title]="i18n.t('ctx.title')" [subtitle]="i18n.t('ctx.subtitle')">
-      @if (perms.canAssignTraining()) {
+      @if (perms.can('org-context.create')) {
         <button (click)="openCreate()">{{ tab() === 'parties' ? i18n.t('ctx.newParty') : i18n.t('ctx.newIssue') }}</button>
       }
     </qams-page-header>
@@ -111,7 +111,7 @@ type ContextTab = 'parties' | 'issues';
           @if (editingParty()?.status !== 'Archived') {
             <button type="submit" [disabled]="partyForm.invalid">{{ editingParty() ? i18n.t('ctx.saveRevision') : i18n.t('qc.create') }}</button>
           }
-          @if (editingParty() && editingParty()!.status === 'Active' && perms.canApprove()) {
+          @if (editingParty() && editingParty()!.status === 'Active' && perms.can('org-context.void')) {
             <button type="button" class="secondary" (click)="archiveParty(editingParty()!.id)">{{ i18n.t('ctx.archive') }}</button>
           }
         </div>

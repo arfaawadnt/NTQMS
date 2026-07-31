@@ -1,3 +1,5 @@
+using NT.QAMS.Domain.Authorization;
+using NT.QAMS.WebApi.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +23,7 @@ public sealed class MethodComparisonsController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetMethodComparisonByIdQuery(id), ct));
 
     [HttpPost]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.AnalyticalQuality, PermissionAction.Create)]
     public async Task<IActionResult> Create(CreateMethodComparisonRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new CreateMethodComparisonCommand(
@@ -56,7 +58,7 @@ public sealed class MethodComparisonsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/sign-off")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.AnalyticalQuality, PermissionAction.Sign)]
     public async Task<IActionResult> SignOff(Guid id, CancellationToken ct)
     {
         await sender.Send(new SignOffMethodComparisonCommand(id), ct);

@@ -17,7 +17,7 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
     template: `
     <qams-page-header [title]="i18n.t('train.title')">
       <label class="inline"><input type="checkbox" [checked]="includeCompleted()" (change)="onToggle($event)" /> {{ i18n.t('train.showCompleted') }}</label>
-      @if (perms.canAssignTraining()) {
+      @if (perms.can('training.create')) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('train.new') }}</button>
       }
     </qams-page-header>

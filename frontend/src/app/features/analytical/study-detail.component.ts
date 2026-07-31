@@ -72,7 +72,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
             <button (click)="facade.calculate(s.id)" [disabled]="s.replicates.length < 2">{{ i18n.t('val.calculate') }}</button>
             @if (s.replicates.length < 2) { <span class="muted">{{ i18n.t('val.needReplicates') }}</span> }
           }
-          @if (s.state === 'StatsCalculated' && perms.canApprove()) {
+          @if (s.state === 'StatsCalculated' && perms.can('analytical-quality.sign')) {
             <button (click)="facade.signOff(s.id)">{{ i18n.t('val.signOffAction') }}</button>
           }
           @if (s.state === 'SignedOff') {

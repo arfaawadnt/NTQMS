@@ -1,3 +1,5 @@
+using NT.QAMS.Domain.Authorization;
+using NT.QAMS.WebApi.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +23,7 @@ public sealed class InterferenceStudiesController(ISender sender) : ControllerBa
         Ok(await sender.Send(new GetInterferenceStudyByIdQuery(id), ct));
 
     [HttpPost]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.AnalyticalQuality, PermissionAction.Create)]
     public async Task<IActionResult> Create(CreateInterferenceStudyRequest r, CancellationToken ct)
     {
         var id = await sender.Send(new CreateInterferenceStudyCommand(r.Analyte, r.Unit, r.AllowableBiasPct), ct);
@@ -47,7 +49,7 @@ public sealed class InterferenceStudiesController(ISender sender) : ControllerBa
     }
 
     [HttpPost("{id:guid}/sign-off")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.AnalyticalQuality, PermissionAction.Sign)]
     public async Task<IActionResult> SignOff(Guid id, CancellationToken ct)
     {
         await sender.Send(new SignOffInterferenceCommand(id), ct);

@@ -2,6 +2,7 @@ using System.Net.Sockets;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using NT.QAMS.Application.Abstractions;
+using NT.QAMS.Application.Authorization;
 using NT.QAMS.Application.Organization;
 using NT.QAMS.Domain.IdentityAccess;
 using NT.QAMS.Infrastructure.Persistence;
@@ -48,12 +49,13 @@ public static class StartupSeeding
         }
     }
 
-    /// <summary>Performs both idempotent seeding steps. Throws on failure.</summary>
+    /// <summary>Performs the idempotent seeding steps. Throws on failure.</summary>
     public static async Task RunAsync(
         IServiceProvider services, IConfiguration configuration, CancellationToken cancellationToken)
     {
         await BootstrapPlatformAdminAsync(services, configuration, cancellationToken);
         await BackfillStarterListOfValuesAsync(services, cancellationToken);
+        await BackfillRolesAndAssignmentsAsync(services, cancellationToken);
     }
 
     /// <summary>
@@ -110,6 +112,72 @@ public static class StartupSeeding
         }
 
         return seeded;
+    }
+
+    /// <summary>
+    /// Gives every tenant the starter roles, and puts any account that has no role
+    /// yet onto the seeded role matching the fixed tier it already held.
+    /// <para>
+    /// This is the upgrade path to configurable privileges, and it is idempotent:
+    /// accounts that already carry a role are never re-pointed, so an administrator
+    /// who moved someone to a custom role does not find them moved back on the next
+    /// restart.
+    /// </para>
+    /// </summary>
+    private static async Task<int> BackfillRolesAndAssignmentsAsync(
+        IServiceProvider services, CancellationToken cancellationToken)
+    {
+        using var scope = services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        scope.ServiceProvider.GetRequiredService<ICurrentTenantSetter>().Elevate();
+
+        var tenantIds = await db.Tenants.Select(t => t.Id).ToListAsync(cancellationToken);
+        var changes = 0;
+
+        foreach (var tenantId in tenantIds)
+        {
+            changes += (await SystemRoleCatalog.SeedMissingAsync(db, tenantId, cancellationToken)).Count;
+        }
+
+        if (changes > 0)
+        {
+            // Save first: the assignment step below needs the new roles to have ids
+            // it can resolve by name.
+            await db.SaveChangesAsync(cancellationToken);
+        }
+
+        var roleIdsByTenant = await db.Roles.IgnoreQueryFilters()
+            .Select(r => new { r.TenantId, r.Id, r.Name })
+            .ToListAsync(cancellationToken);
+
+        var lookup = roleIdsByTenant
+            .GroupBy(r => r.TenantId)
+            .ToDictionary(g => g.Key, g => g.ToDictionary(r => r.Name, r => r.Id, StringComparer.Ordinal));
+
+        var unassigned = await db.Users
+            .Where(u => u.RoleId == null && u.TenantId != null)
+            .ToListAsync(cancellationToken);
+
+        var assigned = 0;
+        foreach (var user in unassigned)
+        {
+            if (user.TenantId is not { } tenantId
+                || !lookup.TryGetValue(tenantId, out var roles)
+                || !roles.TryGetValue(SystemRoleCatalog.RoleNameFor(user.Role), out var roleId))
+            {
+                continue;
+            }
+
+            user.AssignRole(roleId);
+            assigned++;
+        }
+
+        if (assigned > 0)
+        {
+            await db.SaveChangesAsync(cancellationToken);
+        }
+
+        return changes + assigned;
     }
 
     /// <summary>

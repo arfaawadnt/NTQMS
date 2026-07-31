@@ -648,3 +648,72 @@ cross-tenant denial functional test suite (merge gate from day one).
 - Engineering ceiling reached (~98%). Remaining to 100% is the EXTERNAL track
   only: penetration test (staging, after the v1.46 auth model), CSV
   re-validation (R-6), and the staging telemetry/soak confirmation (R-5/R-7).
+
+## Role Privilege module (2026-07-31) - configurable roles, privileges, working scope [DONE - awaiting review]
+
+Replaces role-name authorization with tenant-configurable privileges end to end.
+
+- Domain: `PermissionCatalog` (31 modules x 8-action closed set = 170 keys,
+  code-defined so a grant always maps to a real code path; unknown keys rejected
+  ROLE-005) + `Role` aggregate (tenant-scoped, system-role rename/deactivate
+  protection, permission changes evented with grants/revocations + reason ->
+  hash-chained audit trail). `UserAccount` extended: `RoleId`, `PreferredLanguage`,
+  owned `user_branch_access`/`user_department_access` scope (empty = unrestricted,
+  widening evented explicitly).
+- Enforcement (three layers, deny-by-default):
+  1. HTTP: `[RequirePermission(module, action)]` filter replaced ALL 127
+     tenant `[Authorize(Roles=...)]` gates (mapped endpoint-by-endpoint; the
+     platform-admin gate on /api/tenants stays tier-based by design). 403s keep
+     the AUTHZ-403 problem+json contract.
+  2. Command pipeline: `[RequirePermissionPolicy(module, action)]` policy in
+     AuthorizationBehavior (unknown key -> loud AUTHZ-008); document publish +
+     the role/user admin commands converted; RequireInternalActor retained as
+     tier defense-in-depth beneath the permission gates.
+  3. Data: composed EF global filter (tenant AND working scope) on all 12
+     IAllocatable aggregates - a branch-restricted user cannot LOAD another
+     branch's records (edits/approvals die as 404) - plus OrgScopeGuardInterceptor
+     refusing out-of-scope creates in-transaction (SCOPE-001/002).
+- Privileges resolve from the DB on every authenticated request (ActiveSession
+  middleware) - revocation bites on the next request, not at token expiry.
+  Deliberately uncached; the resolver is 2 indexed reads.
+- Seeding: 5 system roles reproduce the fixed tiers (explicit per-module table
+  derived from the old gate matrix; parity pins in tests). Tenant provisioning
+  seeds them + puts the first admin on Tenant Administrator; startup backfill
+  (idempotent) upgrades existing tenants/users. Tier-based register/change-role
+  APIs keep working (default onto the equivalent seeded role).
+- Lockout guard ROLE-006: no edit/deactivation/reassignment may leave the tenant
+  without an active user holding roles.manage.
+- API: /api/roles (catalog, list, detail, create, update, permissions,
+  de/reactivate) + /api/users assigned-role|scope|language + /api/auth
+  me/privileges|me/language. API surface snapshot re-approved (626 -> 652).
+- Migration `RolePrivilegeModule`: role (FORCE RLS + tenant_isolation policy,
+  verified relforcerowsecurity=t), role_permission, user_branch_access,
+  user_department_access (owned-table precedent), user_account.role_id/
+  preferred_language. Applied to dev.
+- SPA: PermissionsService rewritten over permission keys fetched from
+  me/privileges (deny until loaded); ALL 62 consumer components converted from
+  the 5 coarse role signals to module.action checks (110 call sites, mapped per
+  action semantics); Roles & Privileges screen (grouped matrix editor, reason
+  prompt on grant changes, i18n en/ar/fr incl. 31 module names); Users screen
+  gained role assignment, branch/department scope drawer, per-user language;
+  language switcher persists the signed-in user's choice server-side.
+- Tests: 417 backend green (was 412) incl. new RolePrivilegeFlowTests proving
+  over HTTP: seeded roles at provisioning, grant flip 403->allowed on the NEXT
+  request, ROLE-005/ROLE-006 refusals, and the scope filter hiding branch B
+  from a branch-A user on reads AND refusing writes (SCOPE-001) while the
+  admin still sees everything. 76 frontend specs green (PermissionsService
+  spec rewritten). Browser-verified on demo-lab: 5 roles listed with member
+  counts, QM matrix shows exactly 164/170 grants, users table shows backfilled
+  roles, console clean.
+- Honest deltas (8-action granularity vs old per-endpoint nuance), all widen
+  only within a module a role already worked in: DeptHead may archive an
+  interested party (shares org-context.void with close-issue); QM gains branch/
+  dept/test deactivation ONLY IF granted organization.manage (seeded QM does
+  NOT have it). Document acknowledgement coverage listing follows documents.view
+  (was QmDeptAdmin-visible). UserRole enum retained solely as the structural
+  platform/tenant tier + legacy JWT claim - no tenant authorization decision
+  reads it anymore.
+- NOT done yet (needs owner direction): formal OQ execution/RTM rows for the
+  module; e2e Playwright scenario; per-branch RLS at the DB layer (app-layer
+  filter + guard only); removing the now-unused Roles.cs group constants
+  (kept while functional tests reference tier logins).

@@ -1,3 +1,5 @@
+using NT.QAMS.Domain.Authorization;
+using NT.QAMS.WebApi.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +23,7 @@ public sealed class UncertaintyController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetUncertaintyBudgetByIdQuery(id), ct));
 
     [HttpPost]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.AnalyticalQuality, PermissionAction.Create)]
     public async Task<IActionResult> Create(CreateUncertaintyBudgetRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new CreateUncertaintyBudgetCommand(
@@ -31,13 +33,13 @@ public sealed class UncertaintyController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/components")]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.AnalyticalQuality, PermissionAction.Edit)]
     public async Task<IActionResult> AddComponent(Guid id, AddUncertaintyComponentRequest request, CancellationToken ct) =>
         Ok(new { componentId = await sender.Send(new AddUncertaintyComponentCommand(
             id, request.Name, request.Type, request.RelativeStandardUncertainty, request.Source), ct) });
 
     [HttpDelete("{id:guid}/components/{componentId:guid}")]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.AnalyticalQuality, PermissionAction.Edit)]
     public async Task<IActionResult> RemoveComponent(Guid id, Guid componentId, CancellationToken ct)
     {
         await sender.Send(new RemoveUncertaintyComponentCommand(id, componentId), ct);
@@ -45,7 +47,7 @@ public sealed class UncertaintyController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/calculate")]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.AnalyticalQuality, PermissionAction.Edit)]
     public async Task<IActionResult> Calculate(Guid id, CancellationToken ct)
     {
         await sender.Send(new CalculateUncertaintyBudgetCommand(id), ct);
@@ -53,7 +55,7 @@ public sealed class UncertaintyController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/approve")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.AnalyticalQuality, PermissionAction.Approve)]
     public async Task<IActionResult> Approve(Guid id, CancellationToken ct)
     {
         await sender.Send(new ApproveUncertaintyBudgetCommand(id), ct);

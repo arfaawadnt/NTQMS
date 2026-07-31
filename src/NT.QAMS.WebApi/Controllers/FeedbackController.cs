@@ -1,3 +1,5 @@
+using NT.QAMS.Domain.Authorization;
+using NT.QAMS.WebApi.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -31,7 +33,7 @@ public sealed class FeedbackController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/review")]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.Feedback, PermissionAction.Edit)]
     public async Task<IActionResult> Review(Guid id, ReviewFeedbackRequest request, CancellationToken ct)
     {
         await sender.Send(new ReviewFeedbackCommand(id, request.ReviewNotes), ct);
@@ -39,7 +41,7 @@ public sealed class FeedbackController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/close")]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.Feedback, PermissionAction.Void)]
     public async Task<IActionResult> Close(Guid id, CloseFeedbackRequest request, CancellationToken ct)
     {
         await sender.Send(new CloseFeedbackCommand(id, request.ActionSummary), ct);
@@ -47,7 +49,7 @@ public sealed class FeedbackController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/escalate")]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.Feedback, PermissionAction.Edit)]
     public async Task<IActionResult> Escalate(Guid id, EscalateFeedbackRequest request, CancellationToken ct) =>
         Ok(new
         {

@@ -55,7 +55,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
         </section>
       }
 
-      @if (perms.canAssignTraining()) {
+      @if (perms.canAny('feedback.edit', 'feedback.void')) {
         <section class="card">
           <h3>{{ i18n.t('val.workflow') }}</h3>
           @if (f.status === 'Logged') {

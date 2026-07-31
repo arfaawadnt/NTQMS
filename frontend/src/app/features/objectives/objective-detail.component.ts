@@ -76,7 +76,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
         }
       </section>
 
-      @if (o.status === 'Active' && perms.canApprove()) {
+      @if (o.status === 'Active' && perms.can('objectives.void')) {
         <section class="card">
           <h3>{{ i18n.t('obj.close') }}</h3>
           <form [formGroup]="closeForm" (ngSubmit)="close(o.id)">

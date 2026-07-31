@@ -37,7 +37,7 @@ import { LovSelectComponent } from '../../shared/ui/lov-select.component';
         <div><span class="muted">{{ i18n.t('equip.lastCal') }}</span> {{ e.lastCalibrationAt ? (e.lastCalibrationAt | date:'mediumDate') : '—' }}</div>
         <div><span class="muted">{{ i18n.t('equip.nextDue') }}</span> {{ e.nextCalibrationDue ? (e.nextCalibrationDue | date:'mediumDate') : '—' }}</div>
         <div><span class="muted">{{ i18n.t('equip.location') }}</span> {{ e.location ?? '—' }}</div>
-        @if (e.status !== 'Retired' && perms.canApprove()) {
+        @if (e.status !== 'Retired' && perms.can('equipment.void')) {
           <button class="secondary" (click)="facade.retire(e.id)">{{ i18n.t('equip.retire') }}</button>
         }
       </div>

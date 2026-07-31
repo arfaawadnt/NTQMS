@@ -1,3 +1,5 @@
+using NT.QAMS.Domain.Authorization;
+using NT.QAMS.WebApi.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +23,7 @@ public sealed class MonitoringPointsController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetMonitoringPointByIdQuery(id), ct));
 
     [HttpPost]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.MonitoringPoints, PermissionAction.Create)]
     public async Task<IActionResult> Register(RegisterMonitoringPointRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new RegisterMonitoringPointCommand(
@@ -31,7 +33,7 @@ public sealed class MonitoringPointsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/limits")]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.MonitoringPoints, PermissionAction.Edit)]
     public async Task<IActionResult> SetLimits(Guid id, SetMonitoringLimitsRequest request, CancellationToken ct)
     {
         await sender.Send(new SetMonitoringLimitsCommand(id, request.LowLimit, request.HighLimit), ct);
@@ -43,7 +45,7 @@ public sealed class MonitoringPointsController(ISender sender) : ControllerBase
         Ok(new { readingId = await sender.Send(new RecordReadingCommand(id, request.Value, request.Remark), ct) });
 
     [HttpPost("{id:guid}/suspend")]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.MonitoringPoints, PermissionAction.Edit)]
     public async Task<IActionResult> Suspend(Guid id, CancellationToken ct)
     {
         await sender.Send(new SuspendMonitoringPointCommand(id), ct);
@@ -51,7 +53,7 @@ public sealed class MonitoringPointsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/resume")]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.MonitoringPoints, PermissionAction.Edit)]
     public async Task<IActionResult> Resume(Guid id, CancellationToken ct)
     {
         await sender.Send(new ResumeMonitoringPointCommand(id), ct);
@@ -59,7 +61,7 @@ public sealed class MonitoringPointsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/retire")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.MonitoringPoints, PermissionAction.Void)]
     public async Task<IActionResult> Retire(Guid id, CancellationToken ct)
     {
         await sender.Send(new RetireMonitoringPointCommand(id), ct);

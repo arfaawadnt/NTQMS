@@ -1926,6 +1926,82 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                     b.ToTable("audit", "qams");
                 });
 
+            modelBuilder.Entity("NT.QAMS.Domain.Authorization.Role", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_user_id");
+
+                    b.Property<string>("DefaultLanguage")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("default_language");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("description");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<bool>("IsSystem")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_system");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("modified_at_utc");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("modified_by");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("NormalizedName")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("normalized_name");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id")
+                        .HasName("pk_role");
+
+                    b.HasIndex("TenantId", "NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("ix_role_tenant_id_normalized_name");
+
+                    b.ToTable("role", "qams");
+                });
+
             modelBuilder.Entity("NT.QAMS.Domain.Competency.CompetencyRecord", b =>
                 {
                     b.Property<Guid>("Id")
@@ -3403,11 +3479,20 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("pin_hash");
 
+                    b.Property<string>("PreferredLanguage")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("preferred_language");
+
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("character varying(30)")
                         .HasColumnName("role");
+
+                    b.Property<Guid?>("RoleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("role_id");
 
                     b.Property<Guid?>("TenantId")
                         .HasColumnType("uuid")
@@ -3421,6 +3506,9 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_user_account");
+
+                    b.HasIndex("RoleId")
+                        .HasDatabaseName("ix_user_account_role_id");
 
                     b.HasIndex("TenantId", "Email")
                         .IsUnique()
@@ -6472,6 +6560,32 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                     b.Navigation("Findings");
                 });
 
+            modelBuilder.Entity("NT.QAMS.Domain.Authorization.Role", b =>
+                {
+                    b.OwnsMany("NT.QAMS.Domain.Authorization.RolePermission", "Permissions", b1 =>
+                        {
+                            b1.Property<Guid>("role_id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("role_id");
+
+                            b1.Property<string>("PermissionKey")
+                                .HasMaxLength(60)
+                                .HasColumnType("character varying(60)")
+                                .HasColumnName("permission_key");
+
+                            b1.HasKey("role_id", "PermissionKey")
+                                .HasName("pk_role_permission");
+
+                            b1.ToTable("role_permission", "qams");
+
+                            b1.WithOwner()
+                                .HasForeignKey("role_id")
+                                .HasConstraintName("fk_role_permission_role_role_id");
+                        });
+
+                    b.Navigation("Permissions");
+                });
+
             modelBuilder.Entity("NT.QAMS.Domain.Competency.CompetencyRecord", b =>
                 {
                     b.OwnsMany("NT.QAMS.Domain.Competency.AssessmentResult", "Assessments", b1 =>
@@ -6771,6 +6885,53 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                         });
 
                     b.Navigation("Readings");
+                });
+
+            modelBuilder.Entity("NT.QAMS.Domain.IdentityAccess.UserAccount", b =>
+                {
+                    b.OwnsMany("NT.QAMS.Domain.IdentityAccess.UserBranchAccess", "BranchAccess", b1 =>
+                        {
+                            b1.Property<Guid>("user_id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("user_id");
+
+                            b1.Property<Guid>("BranchId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("branch_id");
+
+                            b1.HasKey("user_id", "BranchId")
+                                .HasName("pk_user_branch_access");
+
+                            b1.ToTable("user_branch_access", "qams");
+
+                            b1.WithOwner()
+                                .HasForeignKey("user_id")
+                                .HasConstraintName("fk_user_branch_access_user_account_user_id");
+                        });
+
+                    b.OwnsMany("NT.QAMS.Domain.IdentityAccess.UserDepartmentAccess", "DepartmentAccess", b1 =>
+                        {
+                            b1.Property<Guid>("user_id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("user_id");
+
+                            b1.Property<Guid>("DepartmentId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("department_id");
+
+                            b1.HasKey("user_id", "DepartmentId")
+                                .HasName("pk_user_department_access");
+
+                            b1.ToTable("user_department_access", "qams");
+
+                            b1.WithOwner()
+                                .HasForeignKey("user_id")
+                                .HasConstraintName("fk_user_department_access_user_account_user_id");
+                        });
+
+                    b.Navigation("BranchAccess");
+
+                    b.Navigation("DepartmentAccess");
                 });
 
             modelBuilder.Entity("NT.QAMS.Domain.Improvement.Nonconformance", b =>

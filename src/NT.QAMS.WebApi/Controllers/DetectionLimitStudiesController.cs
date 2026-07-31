@@ -1,3 +1,5 @@
+using NT.QAMS.Domain.Authorization;
+using NT.QAMS.WebApi.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +23,7 @@ public sealed class DetectionLimitStudiesController(ISender sender) : Controller
         Ok(await sender.Send(new GetDetectionLimitStudyByIdQuery(id), ct));
 
     [HttpPost]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.AnalyticalQuality, PermissionAction.Create)]
     public async Task<IActionResult> Create(CreateDetectionLimitStudyRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new CreateDetectionLimitStudyCommand(
@@ -52,7 +54,7 @@ public sealed class DetectionLimitStudiesController(ISender sender) : Controller
     }
 
     [HttpPost("{id:guid}/sign-off")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.AnalyticalQuality, PermissionAction.Sign)]
     public async Task<IActionResult> SignOff(Guid id, CancellationToken ct)
     {
         await sender.Send(new SignOffDetectionLimitCommand(id), ct);

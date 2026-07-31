@@ -1,3 +1,5 @@
+using NT.QAMS.Domain.Authorization;
+using NT.QAMS.WebApi.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +23,7 @@ public sealed class PtPlansController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetPtPlanByIdQuery(id), ct));
 
     [HttpPost]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.ProficiencyTesting, PermissionAction.Create)]
     public async Task<IActionResult> Create(CreatePtPlanRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new CreatePtPlanCommand(request.Year), ct);
@@ -29,7 +31,7 @@ public sealed class PtPlansController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/items")]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.ProficiencyTesting, PermissionAction.Edit)]
     public async Task<IActionResult> AddItem(Guid id, AddPtPlanItemRequest request, CancellationToken ct) =>
         Ok(new
         {
@@ -38,7 +40,7 @@ public sealed class PtPlansController(ISender sender) : ControllerBase
         });
 
     [HttpDelete("{id:guid}/items/{itemId:guid}")]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.ProficiencyTesting, PermissionAction.Edit)]
     public async Task<IActionResult> RemoveItem(Guid id, Guid itemId, CancellationToken ct)
     {
         await sender.Send(new RemovePtPlanItemCommand(id, itemId), ct);
@@ -46,7 +48,7 @@ public sealed class PtPlansController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/approve")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.ProficiencyTesting, PermissionAction.Approve)]
     public async Task<IActionResult> Approve(Guid id, CancellationToken ct)
     {
         await sender.Send(new ApprovePtPlanCommand(id), ct);
@@ -61,7 +63,7 @@ public sealed class PtPlansController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/close")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.ProficiencyTesting, PermissionAction.Void)]
     public async Task<IActionResult> Close(Guid id, ClosePtPlanRequest request, CancellationToken ct)
     {
         await sender.Send(new ClosePtPlanCommand(id, request.ClosureSummary), ct);

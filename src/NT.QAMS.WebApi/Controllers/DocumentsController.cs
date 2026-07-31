@@ -1,3 +1,5 @@
+using NT.QAMS.Domain.Authorization;
+using NT.QAMS.WebApi.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -32,7 +34,7 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
 
     /// <summary>Records the completed periodic review and re-arms the cycle (ISO 17025 §8.3).</summary>
     [HttpPost("{id:guid}/confirm-review")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.Documents, PermissionAction.Sign)]
     public async Task<IActionResult> ConfirmReview(Guid id, CancellationToken ct)
     {
         await sender.Send(new ConfirmDocumentReviewCommand(id), ct);
@@ -56,7 +58,7 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
 
     /// <summary>Read-and-understand coverage for this document (quality-management view).</summary>
     [HttpGet("{id:guid}/acknowledgements")]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.Documents, PermissionAction.View)]
     public async Task<IActionResult> Acknowledgements(Guid id, CancellationToken ct) =>
         Ok(await sender.Send(new GetDocumentAcknowledgementsQuery(id), ct));
 
@@ -66,12 +68,12 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetControlledCopiesQuery(id), ct));
 
     [HttpPost("{id:guid}/controlled-copies")]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.Documents, PermissionAction.Edit)]
     public async Task<IActionResult> IssueControlledCopy(Guid id, IssueControlledCopyRequest request, CancellationToken ct) =>
         Ok(new { id = await sender.Send(new IssueControlledCopyCommand(id, request.Holder), ct) });
 
     [HttpPost("controlled-copies/{copyId:guid}/close")]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.Documents, PermissionAction.Edit)]
     public async Task<IActionResult> CloseControlledCopy(Guid copyId, CloseControlledCopyRequest request, CancellationToken ct)
     {
         await sender.Send(new CloseControlledCopyCommand(copyId, request.Outcome), ct);
@@ -94,7 +96,7 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/recommend")]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.Documents, PermissionAction.Approve)]
     public async Task<IActionResult> Recommend(Guid id, CancellationToken ct)
     {
         await sender.Send(new RecommendDocumentCommand(id), ct);
@@ -102,7 +104,7 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/reject")]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.Documents, PermissionAction.Approve)]
     public async Task<IActionResult> Reject(Guid id, RejectVersionRequest request, CancellationToken ct)
     {
         await sender.Send(new RejectDocumentVersionCommand(id, request.Reason), ct);
@@ -110,7 +112,7 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/publish")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.Documents, PermissionAction.Sign)]
     // SEC-013: password+PIN signing ceremony — throttled per actor so a PIN
     // cannot be brute-forced inside a valid session.
     [Microsoft.AspNetCore.RateLimiting.EnableRateLimiting(Security.RateLimiting.ESignaturePolicy)]
@@ -130,7 +132,7 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/retire")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.Documents, PermissionAction.Void)]
     public async Task<IActionResult> Retire(Guid id, CancellationToken ct)
     {
         await sender.Send(new RetireDocumentCommand(id), ct);

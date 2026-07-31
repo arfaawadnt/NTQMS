@@ -29,7 +29,7 @@ function assigneeRequired(group: AbstractControl): ValidationErrors | null {
     imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent, UserSelectComponent, LoadMoreComponent],
     template: `
     <qams-page-header [title]="i18n.t('task.title')" [subtitle]="i18n.t('task.subtitle')">
-      @if (perms.canAssignTraining()) {
+      @if (perms.can('tasks.create')) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('task.new') }}</button>
       }
     </qams-page-header>
@@ -96,7 +96,7 @@ function assigneeRequired(group: AbstractControl): ValidationErrors | null {
                       [loading]="facade.loading()" (more)="facade.loadMore()" />
     }
 
-    @if (perms.canApprove()) {
+    @if (perms.can('tasks.manage')) {
       <section class="card sla">
         <h3>{{ i18n.t('sla.title') }}</h3>
         <p class="muted small">{{ i18n.t('sla.subtitle') }}</p>
@@ -161,7 +161,7 @@ export class TasksComponent implements OnInit {
 
   ngOnInit(): void {
     void this.facade.loadTasks();
-    if (this.perms.canApprove()) { void this.facade.loadSla(); }
+    if (this.perms.can('tasks.manage')) { void this.facade.loadSla(); }
   }
 
   async create(): Promise<void> {

@@ -1,3 +1,5 @@
+using NT.QAMS.Domain.Authorization;
+using NT.QAMS.WebApi.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,8 +15,9 @@ namespace NT.QAMS.WebApi.Controllers;
 /// evidence that access was recertified.
 /// </summary>
 [ApiController]
+[Authorize]
 [Route("api/access-reviews")]
-[Authorize(Roles = Roles.QmOrAdmin)]
+[RequirePermission(PermissionCatalog.AccessReviews, PermissionAction.View)]
 public sealed class AccessReviewsController(ISender sender) : ControllerBase
 {
     [HttpGet]

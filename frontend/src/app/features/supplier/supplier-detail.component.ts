@@ -40,7 +40,7 @@ interface CriterionForm {
       <div class="meta card">
         <div><span class="muted">{{ i18n.t('nc.status') }}</span><qams-status-pill [status]="s.status" /></div>
         @if (s.approvedBy) { <div><span class="muted">{{ i18n.t('sup.approvedBy') }}</span> {{ s.approvedBy }}</div> }
-        @if (perms.canApprove() && s.status === 'PendingEvaluation') {
+        @if (perms.can('suppliers.approve') && s.status === 'PendingEvaluation') {
           <button (click)="facade.approve(s.id)">{{ i18n.t('sup.approve') }}</button>
         }
       </div>
@@ -70,7 +70,7 @@ interface CriterionForm {
 
         <section class="card">
           <h3>{{ i18n.t('sup.lifecycle') }}</h3>
-          @if (s.status === 'Approved' && perms.canApprove()) {
+          @if (s.status === 'Approved' && perms.can('suppliers.void')) {
             <form [formGroup]="suspendForm" (ngSubmit)="suspend(s.id)">
               <label>{{ i18n.t('sup.suspendReason') }}</label>
               <input formControlName="reason" />
@@ -96,7 +96,7 @@ interface CriterionForm {
           </div>
         }
 
-        @if (perms.canApprove()) {
+        @if (perms.can('suppliers.approve')) {
           <form [formGroup]="evalForm" (ngSubmit)="recordEvaluation(s.id)">
             <div class="period">
               <div><label>{{ i18n.t('sup.periodStart') }}</label><input type="date" formControlName="periodStart" /></div>

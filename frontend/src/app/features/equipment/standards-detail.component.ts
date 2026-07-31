@@ -32,7 +32,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
         <div><span class="muted">{{ i18n.t('nc.status') }}</span><qams-status-pill [status]="s.status" /></div>
         <div><span class="muted">{{ i18n.t('std.receivedOn') }}</span> {{ s.receivedOn | date:'mediumDate' }}</div>
         <div><span class="muted">{{ i18n.t('std.expiresOn') }}</span> {{ s.expiresOn ? (s.expiresOn | date:'mediumDate') : '—' }}</div>
-        @if (s.status !== 'Retired' && perms.canApprove()) {
+        @if (s.status !== 'Retired' && perms.can('reference-standards.void')) {
           <button class="secondary" (click)="facade.retire(s.id)">{{ i18n.t('std.retire') }}</button>
         }
       </div>
@@ -54,10 +54,10 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
         <h3>{{ i18n.t('val.workflow') }}</h3>
         @if (s.status === 'Quarantined') {
           <p class="warn">{{ i18n.t('std.quarantinedNote') }} <b>{{ s.quarantineReason }}</b></p>
-          @if (perms.canApprove()) {
+          @if (perms.can('reference-standards.approve')) {
             <button (click)="facade.reactivate(s.id)">{{ i18n.t('std.reactivate') }}</button>
           }
-        } @else if (s.status === 'Active' && perms.canAssignTraining()) {
+        } @else if (s.status === 'Active' && perms.can('reference-standards.edit')) {
           <form [formGroup]="quarantineForm" (ngSubmit)="quarantine(s.id)">
             <label>{{ i18n.t('std.quarantineReason') }}</label>
             <input formControlName="reason" [placeholder]="i18n.t('std.quarantineReasonHint')" />

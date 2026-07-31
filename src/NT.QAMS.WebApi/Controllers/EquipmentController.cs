@@ -1,3 +1,5 @@
+using NT.QAMS.Domain.Authorization;
+using NT.QAMS.WebApi.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -60,7 +62,7 @@ public sealed class EquipmentController(ISender sender) : ControllerBase
         });
 
     [HttpPost("{id:guid}/retire")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.Equipment, PermissionAction.Void)]
     public async Task<IActionResult> Retire(Guid id, CancellationToken ct)
     {
         await sender.Send(new RetireEquipmentCommand(id), ct);

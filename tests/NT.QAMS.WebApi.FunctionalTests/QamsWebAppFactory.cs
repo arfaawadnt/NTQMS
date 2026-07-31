@@ -75,7 +75,8 @@ public sealed class QamsWebAppFactory : WebApplicationFactory<Program>
                 .AddInterceptors(
                     sp.GetRequiredService<AuditStampInterceptor>(),
                     sp.GetRequiredService<TenantStampInterceptor>(),
-                    sp.GetRequiredService<OutboxInterceptor>()));
+                    sp.GetRequiredService<OutboxInterceptor>(),
+                    sp.GetRequiredService<OrgScopeGuardInterceptor>()));
 
             RemoveWhere(services, d => d.ServiceType == typeof(IReferenceNumberGenerator));
             services.AddScoped<IReferenceNumberGenerator, SequentialRefGenerator>();

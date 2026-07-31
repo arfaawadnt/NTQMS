@@ -59,7 +59,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
         <p>{{ s.qcRecommendation }}</p>
       </div>
 
-      @if (s.state === 'Draft' && perms.canAssignTraining()) {
+      @if (s.state === 'Draft' && perms.can('analytical-quality.edit')) {
         <section class="card">
           <h3>{{ i18n.t('sig.editInputs') }}</h3>
           <form [formGroup]="form" (ngSubmit)="save(s.id)">
@@ -76,7 +76,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
       <section class="card">
         <h3>{{ i18n.t('val.workflow') }}</h3>
         <div class="actions">
-          @if (s.state === 'Draft' && perms.canApprove()) {
+          @if (s.state === 'Draft' && perms.can('analytical-quality.sign')) {
             <button (click)="facade.signOff(s.id)">{{ i18n.t('mc.signOff') }}</button>
           }
           @if (s.state === 'SignedOff') {

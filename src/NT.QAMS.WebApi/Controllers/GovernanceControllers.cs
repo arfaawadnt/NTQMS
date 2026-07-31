@@ -1,3 +1,5 @@
+using NT.QAMS.Domain.Authorization;
+using NT.QAMS.WebApi.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -45,7 +47,7 @@ public sealed class RisksController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/residual")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.Risks, PermissionAction.Approve)]
     public async Task<IActionResult> RecordResidual(Guid id, ResidualAssessmentRequest request, CancellationToken ct)
     {
         await sender.Send(new RecordResidualCommand(id, request.Likelihood, request.Impact), ct);
@@ -53,7 +55,7 @@ public sealed class RisksController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/close")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.Risks, PermissionAction.Void)]
     public async Task<IActionResult> Close(Guid id, CancellationToken ct)
     {
         await sender.Send(new CloseRiskCommand(id), ct);
@@ -93,7 +95,7 @@ public sealed class ChangeRequestsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/approve")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.ChangeControl, PermissionAction.Approve)]
     public async Task<IActionResult> Approve(Guid id, CancellationToken ct)
     {
         await sender.Send(new ApproveChangeCommand(id), ct);
@@ -101,7 +103,7 @@ public sealed class ChangeRequestsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/reject")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.ChangeControl, PermissionAction.Void)]
     public async Task<IActionResult> Reject(Guid id, RejectChangeRequest request, CancellationToken ct)
     {
         await sender.Send(new RejectChangeCommand(id, request.Reason), ct);
@@ -117,7 +119,7 @@ public sealed class ChangeRequestsController(ISender sender) : ControllerBase
 
     /// <summary>Post-implementation review: verify the implemented change was effective (F-11).</summary>
     [HttpPost("{id:guid}/review")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.ChangeControl, PermissionAction.Approve)]
     public async Task<IActionResult> Review(Guid id, ReviewChangeRequest request, CancellationToken ct)
     {
         await sender.Send(new ReviewChangeCommand(id, request.Effective, request.Notes), ct);
@@ -141,7 +143,7 @@ public sealed class ManagementReviewsController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetReviewByIdQuery(id), ct));
 
     [HttpPost]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.ManagementReviews, PermissionAction.Create)]
     public async Task<IActionResult> Schedule(ScheduleReviewRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new ScheduleReviewCommand(
@@ -151,13 +153,13 @@ public sealed class ManagementReviewsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/decisions")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.ManagementReviews, PermissionAction.Edit)]
     public async Task<IActionResult> AddDecision(Guid id, AddDecisionRequest request, CancellationToken ct) =>
         Ok(new { decisionId = await sender.Send(new AddDecisionCommand(
             id, request.Description, request.OwnerId, request.DueDate), ct) });
 
     [HttpPost("{id:guid}/close")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.ManagementReviews, PermissionAction.Void)]
     public async Task<IActionResult> Close(Guid id, CloseReviewRequest request, CancellationToken ct)
     {
         await sender.Send(new CloseReviewCommand(id, request.Minutes), ct);
@@ -195,7 +197,7 @@ public sealed class SuppliersController(ISender sender) : ControllerBase
             id, request.CertificateType, request.ExpiresAt, request.FileId), ct) });
 
     [HttpPost("{id:guid}/approve")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.Suppliers, PermissionAction.Approve)]
     public async Task<IActionResult> Approve(Guid id, CancellationToken ct)
     {
         await sender.Send(new ApproveSupplierCommand(id), ct);
@@ -203,7 +205,7 @@ public sealed class SuppliersController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/suspend")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.Suppliers, PermissionAction.Void)]
     public async Task<IActionResult> Suspend(Guid id, SuspendSupplierRequest request, CancellationToken ct)
     {
         await sender.Send(new SuspendSupplierCommand(id, request.Reason), ct);
@@ -215,7 +217,7 @@ public sealed class SuppliersController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetEvaluationsQuery(id), ct));
 
     [HttpPost("{id:guid}/evaluations")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.Suppliers, PermissionAction.Approve)]
     public async Task<IActionResult> RecordEvaluation(
         Guid id, RecordEvaluationRequest request, CancellationToken ct) =>
         Ok(new { evaluationId = await sender.Send(new RecordEvaluationCommand(

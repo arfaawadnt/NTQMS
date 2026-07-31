@@ -1,3 +1,5 @@
+using NT.QAMS.Domain.Authorization;
+using NT.QAMS.WebApi.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +24,7 @@ public sealed class TestAuthorizationsController(ISender sender) : ControllerBas
         Ok(await sender.Send(new GetTestAuthorizationByIdQuery(id), ct));
 
     [HttpPost]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.TestAuthorizations, PermissionAction.Create)]
     public async Task<IActionResult> Grant(GrantTestAuthorizationRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new GrantTestAuthorizationCommand(
@@ -31,7 +33,7 @@ public sealed class TestAuthorizationsController(ISender sender) : ControllerBas
     }
 
     [HttpPost("{id:guid}/suspend")]
-    [Authorize(Roles = Roles.QmDeptAdmin)]
+    [RequirePermission(PermissionCatalog.TestAuthorizations, PermissionAction.Edit)]
     public async Task<IActionResult> Suspend(Guid id, SuspendTestAuthorizationRequest request, CancellationToken ct)
     {
         await sender.Send(new SuspendTestAuthorizationCommand(id, request.Reason), ct);
@@ -39,7 +41,7 @@ public sealed class TestAuthorizationsController(ISender sender) : ControllerBas
     }
 
     [HttpPost("{id:guid}/reinstate")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.TestAuthorizations, PermissionAction.Approve)]
     public async Task<IActionResult> Reinstate(Guid id, CancellationToken ct)
     {
         await sender.Send(new ReinstateTestAuthorizationCommand(id), ct);
@@ -47,7 +49,7 @@ public sealed class TestAuthorizationsController(ISender sender) : ControllerBas
     }
 
     [HttpPost("{id:guid}/revoke")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.TestAuthorizations, PermissionAction.Void)]
     public async Task<IActionResult> Revoke(Guid id, RevokeTestAuthorizationRequest request, CancellationToken ct)
     {
         await sender.Send(new RevokeTestAuthorizationCommand(id, request.Reason), ct);

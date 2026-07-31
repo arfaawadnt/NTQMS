@@ -76,7 +76,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
           <h3>{{ i18n.t('risk.governance') }}</h3>
           @if (!open()) {
             <p class="muted">{{ i18n.t('risk.closedNote') }}</p>
-          } @else if (perms.canApprove()) {
+          } @else if (perms.canAny('risks.approve', 'risks.void')) {
             <form [formGroup]="residualForm" (ngSubmit)="recordResidual(r.id)">
               <label>{{ i18n.t('risk.residualScore') }}</label>
               <div class="pair">

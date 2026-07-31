@@ -134,7 +134,7 @@ type LedgerTab = 'trail' | 'signatures' | 'security' | 'reviews';
     }
     @if (tab() === 'reviews' && !loading()) {
       <!-- Periodic audit-trail review (Part 11 §11.10(e)): open a period, examine the ledgers, record the conclusion. -->
-      @if (perms.canApprove()) {
+      @if (perms.can('compliance.create')) {
         <div class="card openrow">
           <b>{{ i18n.t('atr.open') }}</b>
           <input type="date" [(ngModel)]="periodStart" [attr.aria-label]="i18n.t('atr.periodStart')" />
@@ -169,7 +169,7 @@ type LedgerTab = 'trail' | 'signatures' | 'security' | 'reviews';
                   <td class="muted">{{ r.conclusion ?? '—' }}</td>
                   <td>{{ r.status }}</td>
                 </tr>
-                @if (r.status === 'Open' && perms.canApprove()) {
+                @if (r.status === 'Open' && perms.can('compliance.approve')) {
                   <tr><td colspan="6">
                     <div class="completerow">
                       <label class="chk"><input type="checkbox" [(ngModel)]="anomalies" /> {{ i18n.t('atr.anomaliesFound') }}</label>

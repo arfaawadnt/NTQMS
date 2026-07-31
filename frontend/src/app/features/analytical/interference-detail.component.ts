@@ -110,7 +110,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
             <button (click)="facade.calculate(s.id)" [disabled]="!canCalculate()">{{ i18n.t('inf.calculate') }}</button>
             @if (!canCalculate()) { <span class="muted">{{ i18n.t('inf.minControl') }}</span> }
           }
-          @if (s.state === 'Calculated' && perms.canApprove()) {
+          @if (s.state === 'Calculated' && perms.can('analytical-quality.sign')) {
             <button (click)="facade.signOff(s.id)">{{ i18n.t('mc.signOff') }}</button>
           }
           @if (s.state === 'SignedOff') { <p class="muted">{{ i18n.t('mc.signedOffNote') }}</p> }

@@ -70,7 +70,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
             </tbody>
           </table>
         }
-        @if (editable() && perms.canAssignTraining()) {
+        @if (editable() && perms.can('analytical-quality.edit')) {
           <form [formGroup]="componentForm" (ngSubmit)="addComponent(b.id)">
             <div class="quad">
               <div><label>{{ i18n.t('mu.component') }}</label><input formControlName="name" [placeholder]="i18n.t('mu.componentHint')" /></div>
@@ -91,11 +91,11 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
       <section class="card">
         <h3>{{ i18n.t('val.workflow') }}</h3>
         <div class="actions">
-          @if (editable() && perms.canAssignTraining()) {
+          @if (editable() && perms.can('analytical-quality.edit')) {
             <button (click)="facade.calculate(b.id)" [disabled]="b.components.length === 0">{{ i18n.t('mu.calculate') }}</button>
             @if (b.components.length === 0) { <span class="muted">{{ i18n.t('mu.noComponents') }}</span> }
           }
-          @if (b.status === 'Calculated' && perms.canApprove()) {
+          @if (b.status === 'Calculated' && perms.can('analytical-quality.approve')) {
             <button (click)="facade.approve(b.id)">{{ i18n.t('mu.approve') }}</button>
           }
           @if (b.status === 'Approved') {

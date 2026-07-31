@@ -48,9 +48,11 @@ public class ProvisionTenantTests
         tenant.CreatedBy.Should().Be("test-user");
         tenant.DomainEvents.Should().BeEmpty("the outbox interceptor drains events on save");
 
-        // The transactional-outbox guarantee: the event row exists with the change.
-        var outbox = await db.Set<OutboxEvent>().SingleAsync();
-        outbox.EventType.Should().Contain(nameof(TenantProvisioned));
+        // The transactional-outbox guarantee: the event rows exist with the
+        // change (provisioning also seeds the five system roles and assigns the
+        // administrator, each of which is its own auditable event).
+        var outbox = await db.Set<OutboxEvent>()
+            .SingleAsync(e => e.EventType.Contains(nameof(TenantProvisioned)));
         outbox.ProcessedAtUtc.Should().BeNull();
         outbox.Payload.Should().Contain("amman-central-lab");
 

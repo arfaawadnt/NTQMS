@@ -17,8 +17,29 @@ public sealed class UserAccountConfiguration : IEntityTypeConfiguration<UserAcco
         builder.Property(u => u.PasswordHash).HasMaxLength(500);
         builder.Property(u => u.Role).HasConversion<string>().HasMaxLength(30);
 
-        builder.HasIndex(u => new { u.TenantId, u.Email }).IsUnique();
+        builder.Property(u => u.PreferredLanguage).HasMaxLength(10);
 
+        builder.HasIndex(u => new { u.TenantId, u.Email }).IsUnique();
+        builder.HasIndex(u => u.RoleId);
+
+        // The working scope. Owned collections, so a user's scope is loaded and
+        // replaced as one unit with the account it belongs to.
+        builder.OwnsMany(u => u.BranchAccess, access =>
+        {
+            access.ToTable("user_branch_access", "qams");
+            access.WithOwner().HasForeignKey("user_id");
+            access.HasKey("user_id", nameof(UserBranchAccess.BranchId));
+        });
+
+        builder.OwnsMany(u => u.DepartmentAccess, access =>
+        {
+            access.ToTable("user_department_access", "qams");
+            access.WithOwner().HasForeignKey("user_id");
+            access.HasKey("user_id", nameof(UserDepartmentAccess.DepartmentId));
+        });
+
+        builder.Ignore(u => u.HasUnrestrictedBranchAccess);
+        builder.Ignore(u => u.HasUnrestrictedDepartmentAccess);
         builder.Ignore(u => u.DomainEvents);
     }
 }

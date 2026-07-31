@@ -80,13 +80,13 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
                 <td class="actions">
                   @if (a.state === 'Archived') {
                     <button class="link" type="button" (click)="facade.retrieve(a.id)">{{ i18n.t('arc.retrieve') }}</button>
-                    @if (perms.canApprove() && a.retentionClass !== 'Permanent' && !a.isOnLegalHold) {
+                    @if (perms.can('records.void') && a.retentionClass !== 'Permanent' && !a.isOnLegalHold) {
                       <button class="link danger-link" type="button" (click)="facade.dispose(a.id)">{{ i18n.t('arc.dispose') }}</button>
                     }
                   } @else if (a.state === 'Retrieved') {
                     <button class="link" type="button" (click)="facade.return(a.id)">{{ i18n.t('arc.return') }}</button>
                   }
-                  @if (perms.canApprove() && a.state !== 'Disposed') {
+                  @if (perms.can('records.void') && a.state !== 'Disposed') {
                     @if (a.isOnLegalHold) {
                       <button class="link" type="button" (click)="facade.releaseLegalHold(a.id)">{{ i18n.t('arc.releaseHold') }}</button>
                     } @else {

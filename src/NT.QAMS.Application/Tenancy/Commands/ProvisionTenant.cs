@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
+using NT.QAMS.Application.Authorization;
 using NT.QAMS.Application.IdentityAccess;
 using NT.QAMS.Application.Organization;
 using NT.QAMS.Domain.IdentityAccess;
@@ -58,6 +59,13 @@ public sealed class ProvisionTenantHandler(IAppDbContext db, IPasswordHasher has
 
         db.Tenants.Add(tenant);
         db.Users.Add(admin);
+
+        // The tenant's starter roles, seeded in the same transaction, and the
+        // first administrator placed on the full-access one so the privilege
+        // module is governable from the first sign-in.
+        var seededRoles = await SystemRoleCatalog.SeedMissingAsync(db, tenant.Id, cancellationToken);
+        var adminRole = seededRoles.Single(r => r.Name == SystemRoleCatalog.TenantAdministrator);
+        admin.AssignRole(adminRole.Id);
 
         // Starter list-of-values so every dropdown is usable on day one â€”
         // seeded in the SAME transaction as the tenant itself.

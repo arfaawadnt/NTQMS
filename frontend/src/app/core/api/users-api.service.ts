@@ -3,8 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
-  ChangeUserRoleRequest, CreatedResource, RegisterUserRequest,
-  ResetUserPasswordRequest, UserAccount, UserDirectoryEntry,
+  AssignUserRoleRequest, ChangeUserRoleRequest, CreatedResource, RegisterUserRequest,
+  ResetUserPasswordRequest, SetUserLanguageRequest, SetUserScopeRequest,
+  UserAccount, UserDirectoryEntry,
 } from '../models';
 
 /** Typed client for tenant user administration (tenant-admin only, server-enforced). */
@@ -23,6 +24,21 @@ export class UsersApiService {
 
   changeRole(id: string, body: ChangeUserRoleRequest): Observable<void> {
     return this.http.post<void>(`${this.base}/${id}/role`, body);
+  }
+
+  /** Moves the user onto a configurable role. */
+  assignRole(id: string, body: AssignUserRoleRequest): Observable<void> {
+    return this.http.put<void>(`${this.base}/${id}/assigned-role`, body);
+  }
+
+  /** Sets the user's allowed branches/departments; empty lists mean unrestricted. */
+  setScope(id: string, body: SetUserScopeRequest): Observable<void> {
+    return this.http.put<void>(`${this.base}/${id}/scope`, body);
+  }
+
+  /** Sets the user's interface language; null inherits role, then tenant. */
+  setLanguage(id: string, body: SetUserLanguageRequest): Observable<void> {
+    return this.http.put<void>(`${this.base}/${id}/language`, body);
   }
 
   deactivate(id: string): Observable<void> { return this.http.post<void>(`${this.base}/${id}/deactivate`, {}); }

@@ -2,7 +2,10 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, firstValueFrom } from 'rxjs';
 import { UsersApiService } from '../../core/api/users-api.service';
-import { ChangeUserRoleRequest, RegisterUserRequest, ResetUserPasswordRequest, UserAccount } from '../../core/models';
+import {
+  AssignUserRoleRequest, ChangeUserRoleRequest, RegisterUserRequest, ResetUserPasswordRequest,
+  SetUserLanguageRequest, SetUserScopeRequest, UserAccount,
+} from '../../core/models';
 
 /** Signal-based facade for tenant user administration. */
 @Injectable({ providedIn: 'root' })
@@ -31,6 +34,9 @@ export class UsersFacade {
   }
 
   async changeRole(id: string, request: ChangeUserRoleRequest): Promise<void> { await this.mutate(() => this.api.changeRole(id, request)); }
+  async assignRole(id: string, request: AssignUserRoleRequest): Promise<void> { await this.mutate(() => this.api.assignRole(id, request)); }
+  async setScope(id: string, request: SetUserScopeRequest): Promise<void> { await this.mutate(() => this.api.setScope(id, request)); }
+  async setLanguage(id: string, request: SetUserLanguageRequest): Promise<void> { await this.mutate(() => this.api.setLanguage(id, request)); }
   async deactivate(id: string): Promise<void> { await this.mutate(() => this.api.deactivate(id)); }
   async reactivate(id: string): Promise<void> { await this.mutate(() => this.api.reactivate(id)); }
   async resetPassword(id: string, request: ResetUserPasswordRequest): Promise<void> { await this.mutate(() => this.api.resetPassword(id, request)); }

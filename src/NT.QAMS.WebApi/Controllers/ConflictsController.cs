@@ -1,3 +1,5 @@
+using NT.QAMS.Domain.Authorization;
+using NT.QAMS.WebApi.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,7 +31,7 @@ public sealed class ConflictsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/assess")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.Conflicts, PermissionAction.Approve)]
     public async Task<IActionResult> Assess(Guid id, AssessConflictRequest request, CancellationToken ct)
     {
         await sender.Send(new AssessConflictCommand(id, request.RiskLevel, request.Mitigation), ct);
@@ -37,7 +39,7 @@ public sealed class ConflictsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/close")]
-    [Authorize(Roles = Roles.QmOrAdmin)]
+    [RequirePermission(PermissionCatalog.Conflicts, PermissionAction.Void)]
     public async Task<IActionResult> Close(Guid id, CloseConflictRequest request, CancellationToken ct)
     {
         await sender.Send(new CloseConflictCommand(id, request.Outcome, request.ClosureNote), ct);

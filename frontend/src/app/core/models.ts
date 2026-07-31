@@ -323,6 +323,65 @@ export interface UserAccount {
   role: string;
   isActive: boolean;
   mfaEnabled: boolean;
+  roleId: string | null;
+  roleName: string | null;
+  branchIds: string[];
+  departmentIds: string[];
+  preferredLanguage: string | null;
+}
+
+// ── Roles & privileges ────────────────────────────────────────────────────────
+
+/** One configurable module of the privilege matrix. */
+export interface PermissionModule {
+  key: string;
+  group: string;
+  nameKey: string;
+  actions: string[];
+}
+
+/** The whole permission catalogue, in render order. */
+export interface PermissionCatalog {
+  modules: PermissionModule[];
+  actions: string[];
+}
+
+/** A role as listed in the privileges screen. */
+export interface RoleSummary {
+  id: string;
+  name: string;
+  description: string | null;
+  isSystem: boolean;
+  isActive: boolean;
+  defaultLanguage: string | null;
+  permissionCount: number;
+  memberCount: number;
+}
+
+/** A role opened for editing: the summary plus its granted keys. */
+export interface RoleDetail {
+  id: string;
+  name: string;
+  description: string | null;
+  isSystem: boolean;
+  isActive: boolean;
+  defaultLanguage: string | null;
+  permissionKeys: string[];
+  memberCount: number;
+}
+
+/**
+ * The signed-in user's effective privileges: what the UI should offer. The
+ * server enforces the same facts independently on every request.
+ */
+export interface MyPrivileges {
+  roleId: string | null;
+  roleName: string | null;
+  isPlatformAdmin: boolean;
+  permissions: string[];
+  branchIds: string[];
+  departmentIds: string[];
+  preferredLanguage: string | null;
 }
 
 /** Lightweight directory entry for user pickers. */
@@ -333,7 +392,26 @@ export interface RegisterUserRequest {
   displayName: string;
   role: TenantRole;
   initialPassword: string;
+  roleId?: string | null;
 }
+
+export interface CreateRoleRequest {
+  name: string;
+  description: string | null;
+  permissionKeys: string[];
+  defaultLanguage: string | null;
+}
+
+export interface UpdateRoleRequest {
+  name: string;
+  description: string | null;
+  defaultLanguage: string | null;
+}
+
+export interface SetRolePermissionsRequest { permissionKeys: string[]; reason: string; }
+export interface AssignUserRoleRequest { roleId: string; }
+export interface SetUserScopeRequest { branchIds: string[]; departmentIds: string[]; }
+export interface SetUserLanguageRequest { language: string | null; }
 
 export interface ChangeUserRoleRequest { role: TenantRole; }
 export interface ResetUserPasswordRequest { newPassword: string; }

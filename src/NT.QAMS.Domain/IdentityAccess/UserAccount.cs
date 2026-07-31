@@ -28,6 +28,9 @@ public sealed class UserAccount : AggregateRoot
     public const int MaxFailedAttempts = 5;
     public const int LockoutMinutes = 30;
 
+    private readonly List<UserBranchAccess> _branchAccess = [];
+    private readonly List<UserDepartmentAccess> _departmentAccess = [];
+
     private UserAccount()
     {
         Email = null!;
@@ -55,6 +58,29 @@ public sealed class UserAccount : AggregateRoot
 
     // E-signature PIN (salted hash; never stored or compared in plaintext).
     public string? PinHash { get; private set; }
+
+    /// <summary>
+    /// The tenant-defined role this user holds, once the tenant has moved to
+    /// configurable privileges. Null while the account still relies on the
+    /// built-in <see cref="Role"/> tier alone (seeded accounts before migration).
+    /// </summary>
+    public Guid? RoleId { get; private set; }
+
+    /// <summary>
+    /// Interface language for this user. Null inherits the role default, then the
+    /// tenant default — a user's own choice always wins over both.
+    /// </summary>
+    public string? PreferredLanguage { get; private set; }
+
+    /// <summary>
+    /// Branches this user may work in. <b>Empty means unrestricted</b> (the whole
+    /// tenant), which is how existing accounts keep working after the upgrade; any
+    /// entry turns it into a closed list enforced in the data layer.
+    /// </summary>
+    public IReadOnlyList<UserBranchAccess> BranchAccess => _branchAccess;
+
+    /// <summary>Departments this user may work in. Empty means unrestricted.</summary>
+    public IReadOnlyList<UserDepartmentAccess> DepartmentAccess => _departmentAccess;
 
     public static UserAccount Create(
         Guid? tenantId, string email, string displayName, string passwordHash, UserRole role)
@@ -135,6 +161,49 @@ public sealed class UserAccount : AggregateRoot
 
     public bool IsLockedOut(DateTimeOffset now) => LockedUntilUtc is { } until && until > now;
 
+    /// <summary>Assigns the tenant-defined role that carries this user's privileges.</summary>
+    public void AssignRole(Guid roleId)
+    {
+        if (roleId == Guid.Empty)
+        {
+            throw new DomainException("USER-010", "A role is required.");
+        }
+
+        RoleId = roleId;
+        Raise(new UserRoleAssigned(Id, roleId));
+    }
+
+    /// <summary>Sets the user's interface language; null falls back to role, then tenant.</summary>
+    public void SetPreferredLanguage(string? language) =>
+        PreferredLanguage = string.IsNullOrWhiteSpace(language) ? null : language.Trim().ToLowerInvariant();
+
+    /// <summary>
+    /// Replaces the user's working scope. An empty list means unrestricted; that is
+    /// a deliberate widening of access, so it is raised as its own auditable fact
+    /// rather than looking like a routine edit.
+    /// </summary>
+    public void SetScope(IEnumerable<Guid> branchIds, IEnumerable<Guid> departmentIds)
+    {
+        var branches = Distinct(branchIds);
+        var departments = Distinct(departmentIds);
+
+        _branchAccess.Clear();
+        _branchAccess.AddRange(branches.Select(id => new UserBranchAccess(id)));
+        _departmentAccess.Clear();
+        _departmentAccess.AddRange(departments.Select(id => new UserDepartmentAccess(id)));
+
+        Raise(new UserScopeChanged(Id, branches, departments, IsUnrestricted: branches.Count == 0 && departments.Count == 0));
+    }
+
+    /// <summary>True when no branch restriction applies — the user sees the whole tenant.</summary>
+    public bool HasUnrestrictedBranchAccess => _branchAccess.Count == 0;
+
+    /// <summary>True when no department restriction applies.</summary>
+    public bool HasUnrestrictedDepartmentAccess => _departmentAccess.Count == 0;
+
+    private static List<Guid> Distinct(IEnumerable<Guid> ids) =>
+        (ids ?? []).Where(id => id != Guid.Empty).Distinct().ToList();
+
     /// <summary>Records a failed authentication factor; locks the account at the threshold.</summary>
     public void RegisterFailedLogin(DateTimeOffset now)
     {
@@ -187,3 +256,37 @@ public sealed class UserAccount : AggregateRoot
 }
 
 public sealed record UserLockedOut(Guid UserId, string Email, DateTimeOffset LockedUntilUtc) : DomainEvent;
+
+/// <summary>A branch the user is permitted to work in. Owned by <see cref="UserAccount"/>.</summary>
+public sealed class UserBranchAccess
+{
+    private UserBranchAccess() { }
+
+    internal UserBranchAccess(Guid branchId) => BranchId = branchId;
+
+    public Guid BranchId { get; private set; }
+}
+
+/// <summary>A department the user is permitted to work in. Owned by <see cref="UserAccount"/>.</summary>
+public sealed class UserDepartmentAccess
+{
+    private UserDepartmentAccess() { }
+
+    internal UserDepartmentAccess(Guid departmentId) => DepartmentId = departmentId;
+
+    public Guid DepartmentId { get; private set; }
+}
+
+/// <summary>The user was assigned a tenant-defined role (an access-control change).</summary>
+public sealed record UserRoleAssigned(Guid UserId, Guid RoleId) : DomainEvent;
+
+/// <summary>
+/// The user's branch/department working scope changed. <paramref name="IsUnrestricted"/>
+/// records the widest case explicitly, because "no restriction" is the state an
+/// auditor most needs to see stated rather than inferred from an empty list.
+/// </summary>
+public sealed record UserScopeChanged(
+    Guid UserId,
+    IReadOnlyList<Guid> BranchIds,
+    IReadOnlyList<Guid> DepartmentIds,
+    bool IsUnrestricted) : DomainEvent;

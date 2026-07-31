@@ -74,7 +74,7 @@ const GROUPS_STATE_KEY = 'qams.sidebar.groups';
           }
           <div class="langswitch" role="group" aria-label="Language">
             @for (l of langs; track l.code) {
-              <button type="button" [class.active]="i18n.lang() === l.code" (click)="i18n.setLang(l.code)">{{ l.label }}</button>
+              <button type="button" [class.active]="i18n.lang() === l.code" (click)="switchLang(l.code)">{{ l.label }}</button>
             }
           </div>
           <div class="who">
@@ -339,10 +339,11 @@ export class ShellComponent {
         items: [
           { path: '/settings/security', label: 'nav.security', icon: 'security' },
           { path: '/reference-data', label: 'nav.reference', icon: 'reference' },
-          { path: '/notification-rules', label: 'nav.notificationRules', icon: 'rules', visible: () => this.perms.canApprove() },
-          { path: '/compliance', label: 'nav.compliance', icon: 'compliance', visible: () => this.perms.canViewCompliance() },
-          { path: '/users', label: 'nav.users', icon: 'users', visible: () => this.perms.isTenantAdmin() },
-          { path: '/access-reviews', label: 'nav.accessReviews', icon: 'accessReview', visible: () => this.perms.canApprove() },
+          { path: '/notification-rules', label: 'nav.notificationRules', icon: 'rules', visible: () => this.perms.can('notifications.manage') },
+          { path: '/compliance', label: 'nav.compliance', icon: 'compliance', visible: () => this.perms.can('compliance.view') },
+          { path: '/users', label: 'nav.users', icon: 'users', visible: () => this.perms.can('users.view') },
+          { path: '/roles', label: 'nav.roles', icon: 'accessReview', visible: () => this.perms.can('roles.view') },
+          { path: '/access-reviews', label: 'nav.accessReviews', icon: 'accessReview', visible: () => this.perms.can('access-reviews.view') },
         ],
       },
     ];
@@ -401,5 +402,11 @@ export class ShellComponent {
   signOut(): void {
     this.auth.logout();
     void this.router.navigate(['/login']);
+  }
+
+  /** Applies the language locally and saves it as the user's own preference. */
+  switchLang(lang: Lang): void {
+    this.i18n.setLang(lang);
+    this.perms.saveMyLanguage(lang);
   }
 }

@@ -27,7 +27,7 @@ import { UserSelectComponent } from '../../shared/ui/user-select.component';
     imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, ListStatsComponent, UserSelectComponent],
     template: `
     <qams-page-header [title]="i18n.t('authz.title')" [subtitle]="i18n.t('authz.subtitle')">
-      @if (perms.canAssignTraining()) {
+      @if (perms.can('test-authorizations.create')) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('authz.new') }}</button>
       }
     </qams-page-header>
