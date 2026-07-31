@@ -2,7 +2,7 @@
 
 | Field | Value |
 | ----- | ----- |
-| Programme | 8 changes, delivered as 5 phased EF Core migrations (`Hardening1` … `Hardening5`) |
+| Programme | 8 changes, delivered as 6 EF Core migrations (`Hardening1` … `Hardening6`) |
 | Database | `ntqams`, PostgreSQL 17, EF Core 9.0.18 + Npgsql |
 | Commits | `28ba880` P1 · `8be2c13` P2 · `ea9eb24` P3 · `9e7c3eb` P4 · `fdc08df` P5 (+ this docs pass) |
 | Plan | `SCHEMA-HARDENING-PLAN.md`, approved with recommendations after the discovery step |
@@ -255,7 +255,7 @@ correctly (verified live at ledger sequences 14/15). The window is closed and ca
 
 ---
 
-## 10. NEW FINDING — field-change ledger rows invisible to their tenant (open, needs a decision)
+## 10. Fixed — field-change ledger rows invisible to their tenant
 
 Measured while dispositioning B10, and **not covered by that decision** — it is a different,
 larger and *ongoing* condition, so it is recorded separately rather than folded into "keep as-is".
@@ -286,11 +286,36 @@ invisible in the audit view of the tenant it affects. The `RolePermissionsChange
 correctly tenant-stamped in `audit_trail` (verified during the OQ), so the change is not
 unrecorded — but its field-level detail is unreachable for that tenant.
 
-**Recommended fix (not applied — your call).** Give the interceptor the same fallback
-`TenantStampInterceptor` already uses: read the shadow property when the CLR type is not
-`ITenantScoped`, then the owner, then the request tenant. One line of the same shape as the
-RP-D1 fix, plus a pin test. Existing rows would stay as-is under the same append-only reasoning
-as §9.
+**Fixed (`Hardening6` commit).** `FieldChangeInterceptor.TenantOf` now resolves in order:
+the `ITenantScoped` value, then the **shadow** `TenantId` an owned child carries, then
+`IOptionallyTenantScoped`, then the request tenant. Pinned by
+`An_owned_childs_change_is_attributed_to_the_owner_tenant_on_an_elevated_write`, which recreates
+the exact condition (owned children written with **no** request tenant) and would have failed
+before.
+
+**Proven live on the elevated path that produced the nulls.** Provisioning a fresh tenant wrote
+**536** `RolePermission` field-change rows — **0 null, 536 stamped** — and that tenant's own
+compliance view now returns them (424 of the first 500 rows it can see). The 19,296 historical
+rows are unchanged, kept as-is under the same append-only reasoning as §9.
+
+### A Phase-4 regression this uncovered — tenant provisioning was broken
+
+The first attempt to prove the fix failed with **HTTP 500**, and the cause was not the
+interceptor: `fk_outbox_event_tenant`, added in Phase 4 §4.5, **broke tenant provisioning
+outright**. Provisioning writes the tenant, its administrator and its outbox events in one
+`SaveChanges`; because that FK was created in raw SQL, EF has no model relationship for it and
+no reason to order the tenant INSERT first — so PostgreSQL rejected the outbox row with 23503.
+
+Nothing caught it: the functional tests provision tenants on InMemory, where the FK does not
+exist, and the Phase-4 live checks exercised NC workflows rather than provisioning. It was only
+found because proving *this* fix required the elevated seeding path.
+
+**Fixed in `Hardening6_DeferrableTenantFks`:** all five `saas.tenant` FKs become
+`DEFERRABLE INITIALLY DEFERRED`. The guarantee is unchanged in strength — a transaction still
+cannot commit a row pointing at a non-existent tenant — but intra-transaction ordering stops
+mattering. Preferred over modelling the relationship in EF, which would drag infrastructure
+tables (outbox, counters, read models) into the domain model. Verified: provisioning returns
+**201** again.
 
 ---
 
@@ -315,11 +340,10 @@ compensating controls verified rather than asserted, and now enforced at build t
 `UserAccountTenantBoundTests`. **B10 is closed** — the 32 historical RP-D1 ledger rows are kept
 as-is (§9).
 
-**One new item needs your decision (§10):** 21,209 `audit.field_change` rows carry a NULL tenant
-and are therefore invisible to every tenant's compliance view — 19,296 of them the field-level
-detail of privilege changes. Unlike B10 this is **ongoing**, not historical, with a one-line
-root cause and fix. It was measured while dispositioning B10 and is deliberately **not** covered
-by that decision.
+**§10 is closed**: the field-change tenant attribution is fixed and proven live, and fixing it
+uncovered a Phase-4 regression that had **broken tenant provisioning** (`fk_outbox_event_tenant`
+vs EF insert ordering) — also fixed, in `Hardening6_DeferrableTenantFks`. The 19,296 historical
+rows stay as-is on the same reasoning as §9.
 
 Nothing in this programme has been executed on a qualified environment — that remains open, as it
 was before it started.

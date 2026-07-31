@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
+using NT.QAMS.Domain.Authorization;
 using NT.QAMS.Domain.ComplianceLedger;
 using NT.QAMS.Domain.Improvement;
 using NT.QAMS.Infrastructure.Persistence;
@@ -146,5 +147,52 @@ public sealed class FieldChangeInterceptorTests
         FieldChangeInterceptor.IsSensitive("MfaSecret").Should().BeTrue();
         FieldChangeInterceptor.IsSensitive("SignaturePin").Should().BeTrue();
         FieldChangeInterceptor.IsSensitive("Title").Should().BeFalse();
+    }
+
+    /// <summary>
+    /// An elevated write - startup seeding, provisioning - has no request tenant
+    /// by definition. Before the fix, the interceptor read only
+    /// <c>ITenantScoped</c>, which an owned child is not: it carries a shadow
+    /// <c>TenantId</c> instead. The result was 19,296 privilege-detail rows
+    /// stamped NULL and therefore invisible to the tenant whose privileges
+    /// changed, because the field-change read filters on tenant. This pins the
+    /// owner's tenant reaching the ledger through the shadow value.
+    /// </summary>
+    [Fact]
+    public async Task An_owned_childs_change_is_attributed_to_the_owner_tenant_on_an_elevated_write()
+    {
+        var elevated = new ElevatedTenant();
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseInMemoryDatabase(nameof(An_owned_childs_change_is_attributed_to_the_owner_tenant_on_an_elevated_write))
+            .AddInterceptors(
+                // Same order as production: the stamp must land before the ledger reads it.
+                new TenantStampInterceptor(elevated),
+                new FieldChangeInterceptor(new FixedClock(), new FixedUser(), elevated, new StubReason(null)))
+            .Options;
+        await using var db = new AppDbContext(options, elevated);
+
+        // Exactly the shape that produced the NULLs: a seeded role with owned
+        // permissions, written with no request tenant resolved.
+        var role = Role.CreateSystem("ITest Seeded Role", null, ["nc.view", "nc.export"]);
+        role.TenantId = Tenant;
+        db.Roles.Add(role);
+        await db.SaveChangesAsync();
+
+        var childRows = await db.FieldChanges
+            .Where(f => f.EntityType == nameof(RolePermission))
+            .ToListAsync();
+
+        childRows.Should().NotBeEmpty("the owned permissions are auditable changes");
+        childRows.Should().OnlyContain(f => f.TenantId == Tenant,
+            "an owned child's change belongs to the owner's tenant, and the field-change "
+            + "read filters on tenant - a NULL here is invisible to the tenant it concerns");
+    }
+
+    /// <summary>An elevated unit of work: bypass on, no request tenant.</summary>
+    private sealed class ElevatedTenant : ICurrentTenant
+    {
+        public Guid? TenantId => null;
+        public bool IsResolved => false;
+        public bool IsElevated => true;
     }
 }

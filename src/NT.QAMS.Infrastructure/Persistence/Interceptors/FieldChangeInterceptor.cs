@@ -103,10 +103,7 @@ public sealed class FieldChangeInterceptor(
     private FieldChangeRecord Record(
         EntityEntry entry, string action, string? property, string? oldValue, string? newValue) => new()
     {
-        // Owned children (and other non-ITenantScoped entities) inherit the
-        // request's tenant, so a child change is attributed to — and visible in —
-        // the owning tenant's audit trail, and satisfies the RLS WITH CHECK.
-        TenantId = (entry.Entity as ITenantScoped)?.TenantId ?? currentTenant.TenantId,
+        TenantId = TenantOf(entry),
         EntityType = entry.Entity.GetType().Name,
         EntityId = RenderKey(entry),
         Action = action,
@@ -121,6 +118,41 @@ public sealed class FieldChangeInterceptor(
 
     public static bool IsSensitive(string propertyName) =>
         Sensitive.Any(s => propertyName.Contains(s, StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>
+    /// The tenant this change belongs to, so it appears in that tenant's own
+    /// compliance view (the read filters on <c>tenant_id</c>).
+    /// <para>
+    /// Order matters. A tenant-scoped aggregate carries the value directly. An
+    /// owned child does not: since the child tables gained tenancy it holds a
+    /// <b>shadow</b> <c>TenantId</c>, which no CLR cast can reach — reading only
+    /// the interface left 19,296 privilege-detail rows stamped NULL and therefore
+    /// invisible to the tenant whose privileges changed. The request tenant is the
+    /// last resort, and is legitimately absent on elevated paths (seeding,
+    /// provisioning), which is exactly where the shadow value has to answer.
+    /// </para>
+    /// </summary>
+    private Guid? TenantOf(EntityEntry entry)
+    {
+        if (entry.Entity is ITenantScoped { TenantId: var scoped } && scoped != Guid.Empty)
+        {
+            return scoped;
+        }
+
+        if (entry.Metadata.FindProperty("TenantId") is { } tenantProperty
+            && tenantProperty.IsShadowProperty()
+            && entry.Property("TenantId").CurrentValue is Guid shadow && shadow != Guid.Empty)
+        {
+            return shadow;
+        }
+
+        if (entry.Entity is IOptionallyTenantScoped { TenantId: { } optional })
+        {
+            return optional;
+        }
+
+        return currentTenant.TenantId;
+    }
 
     /// <summary>
     /// The record's identity as the ledger and its readers understand it.

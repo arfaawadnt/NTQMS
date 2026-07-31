@@ -4,7 +4,7 @@
 | ----- | ----- |
 | Document ID | DB-ASBUILT-NTQMS-001 |
 | Status | **As-built.** Every figure below was read from `pg_catalog` / `information_schema`, not from a design document |
-| Captured | 2026-08-01, database `ntqams` (PostgreSQL 17) at migration `20260731210953_Hardening5_CompositeKeys` (55 applied) |
+| Captured | 2026-08-01, database `ntqams` (PostgreSQL 17) at migration `20260731223800_Hardening6_DeferrableTenantFks` (56 applied) |
 | Companion | `NT_QAMS_Database_Architecture.md` is the **design/target-state** document ("No DDL, no EF classes, no migrations"). This file records what was actually built, and supersedes it wherever the two differ |
 | Re-verify | Every claim here has a query in §7. Re-run them rather than trusting this snapshot |
 
@@ -18,10 +18,10 @@
 | Tables with FORCE row-level security | **90** |
 | `tenant_isolation` policies | **90** |
 | Secondary indexes | 265 |
-| Foreign keys | **36** — 29 tenant-composite, 5 to `saas.tenant`, 2 single-column to `user_account` |
+| Foreign keys | **36** — 29 tenant-composite, 5 to `saas.tenant` (`DEFERRABLE INITIALLY DEFERRED`, so intra-transaction insert order cannot break provisioning), 2 single-column to `user_account` |
 | CHECK constraints | **85** — 67 enum domains, 5 hash formats, 13 pre-existing range/order rules |
 | Tenant-first composite primary keys | **88** |
-| Applied migrations | 55 |
+| Applied migrations | 56 |
 
 Type posture after the hardening program: 172 `text` columns (free text, bounded by command
 validators), 1 `jsonb`, 3 `inet`. Bounded codes, refs, enum strings and hashes keep explicit
@@ -75,7 +75,7 @@ each phase re-verified that they still fire.
 | `qams.user_account` — no RLS | **Permanently accepted** by the System Owner, 2026-08-01. Its tenant is nullable (platform administrators have none), so a `tenant_id`-based policy cannot express its rule — and applying one would break authentication, which necessarily runs before a tenant is resolved. Compensating controls verified across all 27 access sites: every read is either explicitly tenant-filtered, keyed by the authenticated actor's own id from the JWT, or keyed by an id set already derived from a tenant-filtered query. Full record and residual risk: `SCHEMA-HARDENING-REPORT.md` §8 |
 | `qams.outbox_event` — no RLS | **Permanently accepted** by the System Owner, 2026-08-01. Nullable tenant; only three code paths touch it and the processor runs deliberately cross-tenant under `Elevate()`. No tenant-facing read surface. Same record, §8 |
 | 32 historical `audit.audit_trail` rows with a nil tenant | **Dispositioned 2026-08-01: kept as-is.** RP-D1 residue (29 `UserRoleAssigned`, 2 `UserScopeChanged`, 1 `UserLockedOut`), written before v1.51.1. The ledger is append-only and hash-chained — a ledger that can be corrected is not a ledger. Readable under elevation. A further 18 nil-tenant rows are `TenantProvisioned` and are correct, not residue. `SCHEMA-HARDENING-REPORT.md` §9 |
-| 21,209 `audit.field_change` rows with a NULL tenant | **Open — needs a decision.** Invisible to every tenant (the read filters on tenant); 19,296 are the field-level detail of privilege changes. **Ongoing, not historical** — `FieldChangeInterceptor` cannot see the shadow `TenantId` that owned children carry since Phase 4, so elevated writes fall through to a null request tenant. `SCHEMA-HARDENING-REPORT.md` §10 |
+| 21,209 historical `audit.field_change` rows with a NULL tenant | **Fixed forward; rows kept as-is.** `FieldChangeInterceptor` now reads the shadow `TenantId` that owned children carry, so new rows are attributed correctly (proven: a fresh tenant's provisioning wrote 536 `RolePermission` rows, 0 null). The existing rows remain unattributed under the same append-only reasoning as the RP-D1 residue. `SCHEMA-HARDENING-REPORT.md` §10 |
 | 83 `audit.security_event` rows with a NULL tenant | **Correct by design**, not a defect: pre-authentication events (`LOGIN_FAILED`, `LOGOUT`, `REFRESH_INVALID`) have no tenant. The policy's `WITH CHECK` allows them; they are platform-level |
 | `audit.security_event.ip_address` never populated | **Open.** The column is `inet` and correct, but no writer sets it — `ISecurityEventLog.WriteAsync` takes no IP parameter |
 | Independent penetration test | **Open external activity** |

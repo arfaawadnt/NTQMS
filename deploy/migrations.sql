@@ -8237,5 +8237,34 @@ BEGIN
     VALUES ('20260731210953_Hardening5_CompositeKeys', '9.0.18');
     END IF;
 END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260731223800_Hardening6_DeferrableTenantFks') THEN
+    ALTER TABLE qams.outbox_event DROP CONSTRAINT fk_outbox_event_tenant;
+    ALTER TABLE qams.outbox_event ADD CONSTRAINT fk_outbox_event_tenant FOREIGN KEY (tenant_id)
+      REFERENCES saas.tenant (id) ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+    ALTER TABLE qams.ref_counter DROP CONSTRAINT fk_ref_counter_tenant;
+    ALTER TABLE qams.ref_counter ADD CONSTRAINT fk_ref_counter_tenant FOREIGN KEY (tenant_id)
+      REFERENCES saas.tenant (id) ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+    ALTER TABLE read.kpi_snapshot DROP CONSTRAINT fk_kpi_snapshot_tenant;
+    ALTER TABLE read.kpi_snapshot ADD CONSTRAINT fk_kpi_snapshot_tenant FOREIGN KEY (tenant_id)
+      REFERENCES saas.tenant (id) ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+    ALTER TABLE qams.branch DROP CONSTRAINT fk_branch_tenant;
+    ALTER TABLE qams.branch ADD CONSTRAINT fk_branch_tenant FOREIGN KEY (tenant_id)
+      REFERENCES saas.tenant (id) ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+    ALTER TABLE qams.user_account DROP CONSTRAINT fk_user_account_tenant;
+    ALTER TABLE qams.user_account ADD CONSTRAINT fk_user_account_tenant FOREIGN KEY (tenant_id)
+      REFERENCES saas.tenant (id) ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260731223800_Hardening6_DeferrableTenantFks') THEN
+    INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+    VALUES ('20260731223800_Hardening6_DeferrableTenantFks', '9.0.18');
+    END IF;
+END $EF$;
 COMMIT;
 
