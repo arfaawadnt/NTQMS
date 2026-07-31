@@ -1,11 +1,11 @@
-# CSV Re-Validation Delta — v1.38.0 → v1.51.1
+# CSV Re-Validation Delta — v1.38.0 → v1.51.2
 
 | Field | Value |
 | ----- | ----- |
-| Document ID | REVAL-NTQMS-001 (rev 4 — extended to v1.51.1; filename retained for reference stability) |
+| Document ID | REVAL-NTQMS-001 (rev 5 — extended to v1.51.2; filename retained for reference stability) |
 | System | NT.QMS |
 | Baseline validated version | 1.0 (VMP/URS/FRA/QP/RTM/VSR — docs 00–05) |
-| Scope of this delta | Changes across releases **v1.38.0 → v1.51.1** (EA-remediation Phases 0–6 + Road-to-100 backlog/Phases 7–9 + v1.49 supply-chain assurance & Angular 22 upgrade + v1.50 sign-in surface & statistic presentation + **v1.51 Role Privilege module** and v1.51.1 RP-D1 audit-attribution fix) |
+| Scope of this delta | Changes across releases **v1.38.0 → v1.51.1** (EA-remediation Phases 0–6 + Road-to-100 backlog/Phases 7–9 + v1.49 supply-chain assurance & Angular 22 upgrade + v1.50 sign-in surface & statistic presentation + **v1.51 Role Privilege module**, v1.51.1 RP-D1 audit-attribution fix, and the **v1.51.2 database schema-hardening programme** (6 migrations)) |
 | Parent | VMP-NTQMS-001; URS-NTQMS-001; RTM-NTQMS-001; QP-NTQMS-001; VSR-NTQMS-001 |
 | Status | **DRAFT for QA execution.** Engineering-prepared traceability + qualification stubs; **QA owns, executes, witnesses, and signs.** |
 
@@ -164,6 +164,47 @@ own compliance view. Root cause, blast radius (SQL-measured), fix and re-test ar
 doc 12 §3. **Residual for QA disposition:** rows written before the fix retain the empty
 tenant id (the ledger is append-only and is not restated).
 
+
+### A.10 Database schema hardening — isolation, domains, keys (v1.51.2, migrations `Hardening1`…`Hardening6`)
+
+> **Execution status — read before relying on this section.** The engineering verification is
+> unusually strong for a delta of this size (see the evidence column, and
+> `SCHEMA-HARDENING-REPORT.md`), but **no witnessed OQ session has been executed for this
+> programme**. The cases in Part C A.10 are therefore **Template**. The catalog introspection,
+> the 442-test suite and the live application checks attach as *supporting evidence*, not as the
+> qualification itself. Two defects were found by that verification and are recorded below,
+> because a delta that reports only successes is not evidence.
+
+| URS | Requirement | Design element(s) | Verification | Status |
+| --- | ----------- | ----------------- | ------------ | ------ |
+| URS-100 | Every table holding tenant data shall be fenced at the database, not only by the application: row-level security enabled **and forced**, with a `tenant_isolation` policy. A table carrying a non-nullable `tenant_id` without that protection shall be impossible to leave in the schema unnoticed. | `Hardening2_RlsGapClosure` (`audit.security_event`, `qams.ref_counter`); `Hardening4_ChildTenancy` (30 owned child tables) | INSP catalog: 90 FORCE-RLS tables / 90 policies / **0 parity violations**; AUTO `OwnedChildTenancyTests.Every_owned_child_table_carries_tenant_id_and_full_rls` (structural sweep — fails if any future table regresses); OQ-DB-01 | Template |
+| URS-101 | An owned child record shall be readable only by the tenant that owns its parent, and a child whose tenant differs from its parent's shall be **impossible to persist** — not merely detected. | `Hardening4`: `tenant_id NOT NULL` on 30 children (backfilled from the parent), 28 tenant-composite FKs, 24 parent `UNIQUE (id, tenant_id)`; shadow `TenantId` + `TenantStampInterceptor` | AUTO `OwnedChildTenancyTests` (7 per-family isolation cases + drift rejection with an accepted control); INSP measured `rca_record` 2 rows → owning tenant sees 1, foreign 0, nil tenant 0; OQ-DB-02 | Template |
+| URS-102 | A value persisted in a state, status, role or classification column shall be one the application can actually produce; integrity hashes shall be well-formed. | `Hardening3_CheckDomains`: 64 enum domains derived from the C# enums + 2 closed literal sets + 5 hash-format constraints, `NOT VALID` → `VALIDATE` | Pre-flight `scripts/preflight-enum-domains.sql` (67 checks, 0 violations) — the **same generator** produces the scan and the constraints, so they cannot disagree; AUTO `CheckConstraintTests.Phase3_domains_reject_bogus_enum_values_and_malformed_hashes`; INSP 85 CHECKs, 0 left `NOT VALID`; OQ-DB-03 | Template |
+| URS-103 | The schema shall be partition-ready: the tenant discriminator shall lead the primary key of every tenant-owned table, since PostgreSQL requires the partition key in every primary key and unique index and cannot convert an existing table into a partitioned one. | `Hardening5_CompositeKeys`: 88 tenant-first composite PKs; `department → branch` made composite; no `UNIQUE (id)` added (it would be illegal on a partitioned table) | INSP 88 composite PKs, **0** single-id PKs remain on a NOT NULL tenant table; the 4 nullable-tenant tables retain single keys by necessity; OQ-DB-04 | Template |
+| URS-104 | Free-text fields shall not be bounded only by a column width: where the database limit is removed, the limit shall exist in the command validator, so input remains bounded at the API. | `Hardening1_TypesAndNames` (56 columns → `text`/`jsonb`); 17 FluentValidation rules added/extended | INSP 0 remaining `varchar(≥1000)`; the API-bound audit of all 56 columns is in `SCHEMA-HARDENING-PLAN.md` Appendix A2; OQ-DB-05 | Template |
+| URS-105 | Database identifiers shall stay within PostgreSQL's limit, so no index or constraint name is silently truncated. | `Hardening1` §1.4: 3 EF-truncated names renamed and pinned with `HasDatabaseName`; abbreviation map in `CLAUDE.md` §5 | INSP **0** identifiers > 62 characters (re-checked after Phase 5 lengthened generated names); OQ-DB-06 | Template |
+| URS-106 | A change to a record shall be attributed to the tenant that owns it, including changes to owned child records, so it appears in that tenant's own compliance view. | `FieldChangeInterceptor.TenantOf` (v1.51.2): `ITenantScoped` → **shadow** `TenantId` → `IOptionallyTenantScoped` → request tenant | AUTO `FieldChangeInterceptorTests.An_owned_childs_change_is_attributed_to_the_owner_tenant_on_an_elevated_write`; INSP live — provisioning wrote 536 `RolePermission` rows, **0 null**, visible to that tenant; OQ-DB-07 | Template |
+| URS-107 | Referential integrity to the tenant table shall not depend on the order in which the ORM emits inserts within a transaction. | `Hardening6_DeferrableTenantFks`: the 5 `saas.tenant` FKs become `DEFERRABLE INITIALLY DEFERRED` | INSP 5/5 deferrable; live — tenant provisioning returns 201 (was 500); OQ-DB-08 | Template |
+
+**Two defects found by this programme's own verification, both fixed and re-proven:**
+
+| Ref | Defect | Found by | Closure |
+| --- | ------ | -------- | ------- |
+| SH-D1 | Applying RLS to `audit.security_event` **broke sign-in** (HTTP 500): `LoginHandler` writes tenant-stamped `LOGIN_*` events before a tenant is resolved, so the new `WITH CHECK` refused them (42501). | Live browser check — the 419-test suite passed, because functional tests run on InMemory where RLS does not exist | Pre-auth handlers scope the request tenant as soon as the workspace slug resolves; failed logins now also appear in their own tenant's view. Pinned by `SecurityEventRlsTests` (4 cases) |
+| SH-D2 | `fk_outbox_event_tenant` (added in this programme) **broke tenant provisioning** (HTTP 500, 23503): created in raw SQL, so EF had no model relationship and no reason to order the tenant INSERT before the outbox rows referencing it. | Live check while proving the URS-106 fix — provisioning is not exercised by the InMemory functional tests | `Hardening6` defers the five tenant FKs to COMMIT; the guarantee is unchanged in strength while ordering stops mattering. Provisioning verified 201 |
+
+**Accepted deviation (permanent).** `qams.user_account` and `qams.outbox_event` carry a nullable
+tenant and therefore **cannot** hold a `tenant_id`-based policy — applying one would hide every
+platform administrator and break authentication, which runs before a tenant exists. Accepted by
+the System Owner on 2026-08-01 with compensating controls **verified across all 27 access sites**
+(explicit tenant predicate, actor-keyed, or keyed by a tenant-derived id set) and now enforced at
+build time by `UserAccountTenantBoundTests`. Full record: `SCHEMA-HARDENING-REPORT.md` §8.
+
+**Dispositioned records.** 32 historical `audit.audit_trail` rows and 21,209 historical
+`audit.field_change` rows carry no tenant. Both are **kept as-is** (System Owner, 2026-08-01):
+the ledgers are append-only and hash-chained, and a ledger that can be corrected is not a ledger.
+Both remain readable under elevation. Forward behaviour is fixed and proven.
+
 ---
 
 ## Part B — Installation Qualification (IQ) delta
@@ -182,6 +223,11 @@ Append to QP-NTQMS-001 Part 1. Templates for execution in the qualified environm
 | IQ-23 | Observability stack (if deployed) | Collector/Prometheus/Grafana up; targets UP; alert rules loaded | | | `deploy/observability/`; Prometheus `/targets`, `/alerts` |
 | IQ-24 | CI vulnerability-scan gates active | The deployed build's CI run shows ".NET SCA", "npm SCA", and "Trivy image vulnerability scan" steps executed and green; exception register reviewed (currently empty) | | | GitHub Actions run log; `.github/npm-audit-allowlist.txt` |
 | IQ-25 | Frontend framework version | Deployed SPA built from `@angular/* 22.0.8` on the Node 24 / npm 11 toolchain; build artifact matches the tagged release (v1.49.0+) | | | `frontend/package.json` + lock; CI "Setup Node 24" + AOT build log |
+| IQ-26 | Schema-hardening migrations applied | `__EFMigrationsHistory` contains all 56 migrations, ending `Hardening6_DeferrableTenantFks`; `dotnet ef migrations has-pending-model-changes` reports none | | | migration list; EF output |
+| IQ-27 | Tenant fence intact on the installed database | The RLS parity query (`SCHEMA-HARDENING-REPORT.md` §2 / as-built §7) returns **0 rows**; 90 FORCE-RLS tables and 90 `tenant_isolation` policies | | | psql transcript |
+| IQ-28 | Guard triggers survived installation/restore | `pg_trigger` shows **17** enabled guards (4 append-only ledgers + 13 `frozen_immutability`), `tgenabled = 'O'` | | | psql transcript |
+| IQ-29 | Identifier limit respected | No relation or constraint name exceeds 62 characters | | | psql transcript |
+| IQ-30 | Deployment script current | `deploy/migrations.sql` regenerated `--idempotent` covers all 56 migrations; applied as `qams_owner`, followed by `harden-runtime-role.sql`; app connects as `qams_app` | | | script header + migration id list; role grants |
 
 ---
 
@@ -202,8 +248,15 @@ witnessed manual confirmation is recorded per baseline convention.
 | `scripts/security-probe.ps1`, `security-probe-deep.ps1`, `failure-drills.ps1` | Executed adversarial + operational drills (24/24 checks, live poison→dead-letter) | Supplementary OQ evidence |
 | CI SCA/Trivy gates (added, v1.49) | .NET SCA + npm SCA (vs exception register) + Trivy image scan, every push | OQ-SCA |
 | Role Privilege suites (added, v1.51) | `RolePrivilegeFlowTests` (grant flip, lockout guard, scope filter over HTTP), `RoleTests`/`PermissionCatalogTests`, `SystemRoleCatalogTests` (seeded parity pins), `RoleHandlersTests`, `UserScopeTests`, `UserEventTenantStampTests` (RP-D1 pins) | OQ-RP-01..10 |
+| Schema-hardening suites (added, v1.51.2) | `OwnedChildTenancyTests` (child isolation, drift rejection, structural RLS sweep), `SecurityEventRlsTests` (ledger isolation, pre-auth write, login-shape pin), `UserAccountTenantBoundTests` (build-time guard on the accepted deviation), `CheckConstraintTests` Phase-3 case, `FieldChangeInterceptorTests` owned-child attribution pin | OQ-DB-01…08 |
 
 ### OQ manual/witnessed cases (templates)
+
+> **A.10 (schema hardening, v1.51.2) — NOT executed as protocol.** OQ-DB-01…08 below are
+> templates. The behaviour they describe was verified by engineering (catalog introspection,
+> 442 automated tests including 12 written for this programme, and live application checks that
+> found two defects — SH-D1, SH-D2 — both fixed and re-proven), but **no witnessed session has
+> been run**. That evidence attaches as supporting material; it is not the qualification.
 
 > **Execution status (2026-07-29).** A witnessed session executed **18 cases** on the
 > **development** environment against v1.49.0, transcribed in
@@ -257,6 +310,14 @@ witnessed manual confirmation is recorded per baseline convention.
 | OQ-SEC-16 | `GET /api/auth/workspace/{slug}` for (a) an active lab, (b) an unknown slug, (c) a malformed slug, (d) a suspended lab — unauthenticated | (a) 200 with `{"name":…}` and no other property; (b)(c)(d) identical `404 problem+json`, indistinguishable from each other | | |
 | OQ-UI-04 | On a register, compare each tile's caption with the list contents; then open a register whose strip has no total | Every "N / M" matches a real count of loaded rows; the strip without a population shows plain counts and NO meter | | |
 | OQ-UI-05 | Sign in at `/login` with no laboratory pinned | Platform-administration identity is shown (shield mark, admin wording); laboratory credentials wording is absent | | |
+| OQ-DB-01 | On the qualified database run the RLS parity query (as-built §7) and count FORCE-RLS tables and `tenant_isolation` policies | Parity query returns **0 rows**; 90 tables forced; 90 policies. `qams.user_account` and `qams.outbox_event` are the only tenant-carrying exceptions and are the accepted deviation | | |
+| OQ-DB-02 | As tenant A, read an owned child register (e.g. CAPA actions / RCA); then attempt, by direct SQL under tenant A's context, to insert a child row referencing tenant B's parent | A sees only its own children and any unattributed rows; the cross-tenant insert is refused (`23503`); the same insert with the parent's own tenant is accepted | | |
+| OQ-DB-03 | Attempt by direct SQL to set a status column to a value outside its C# enum, a ledger `action` outside its literal set, and a hash column to malformed hex | All three refused (`23514`) naming `ck_<table>_<column>_domain` / `_sha256`; the append-only trigger still fires on the ledger afterwards | | |
+| OQ-DB-04 | Inspect primary keys on the qualified database | Every table with a non-nullable `tenant_id` has a tenant-first composite PK (88); no such table retains a single-column `id` PK; the 4 nullable-tenant tables retain single keys by necessity | | |
+| OQ-DB-05 | Submit a request whose free-text field exceeds the former column bound (e.g. a rejection reason > 1000 chars) | Refused at the API with a validation error naming the field — the bound moved to the validator when the column became `text`, so input is still bounded | | |
+| OQ-DB-06 | Query `pg_class` and `pg_constraint` for identifier lengths | No relation or constraint name exceeds 62 characters | | |
+| OQ-DB-07 | Provision a laboratory, then sign in as its administrator and open the field-change ledger | Privilege-detail rows (`RolePermission`) for that laboratory are present and attributed to it; none carries a null tenant | | |
+| OQ-DB-08 | Provision a laboratory (writes tenant, administrator and outbox events in one transaction) | Succeeds (`201`); no `23503` on `fk_outbox_event_tenant` — the tenant FKs are deferred to COMMIT | | |
 
 ---
 
@@ -294,6 +355,7 @@ upgrade is presentation-layer only (no migration; API surface snapshot unchanged
 | Assurance depth (Ph 9) | Assurance/UX | Role×endpoint matrix, contract coverage, a11y in CI (URS-083..085) |
 | Supply-chain assurance (v1.49) | Security/assurance | CI SCA (.NET + npm w/ exception register) + Trivy image scan; Angular 18.2→22.0.8 — 10 high-severity framework advisories cleared, `npm audit` (prod) = 0, register empty (URS-086..088; IQ-24/25) |
 | Role Privilege module (v1.51/.1) | Security/access control | Configurable roles over a closed 170-key catalogue; per-request privilege resolution (immediate revocation); branch/department hard data filter; ROLE-006 lockout guard; privilege changes in the tenant audit trail incl. RP-D1 fix (URS-095..099; OQ-EXEC-NTQMS-002 executed on dev, unsigned) |
+| Schema hardening (v1.51.2) | Data integrity / isolation | 6 migrations: RLS closed on the last 2 gap tables and extended to 30 owned child tables (90 FORCE-RLS / 0 parity violations); 71 CHECK domains; 88 tenant-first composite PKs (partition-ready); 28 tenant-composite FKs making cross-tenant children impossible; types/naming corrected. 2 defects found by the programme's own live verification and closed (URS-100..107; IQ-26..30) |
 
 **Independent security validation.** An in-house automated adversarial assessment executed 24
 checks with 0 findings (`docs/reference/NT_QMS_Security_Assessment_Report.html`). An
@@ -313,6 +375,11 @@ evidence.
 - [ ] Environment qualified (baseline IQ + Part B IQ-16..25) on the target/staging host.
 - [ ] Sign OQ-EXEC-NTQMS-002 (doc 12) witness/QA lines; disposition defect RP-D1's residual
       (pre-fix ledger rows keep an empty tenant id) and observation OBS-1.
+- [ ] Execute and witness the A.10 schema-hardening cases (OQ-DB-01…08) on a **qualified**
+      environment. The engineering evidence (introspection, 442 tests, live checks) attaches as
+      supporting evidence only — it is not the qualification.
+- [ ] Confirm the two permanent acceptances and two record dispositions recorded in A.10 are
+      reflected in the site's deviation register.
 - [ ] Automated evidence engines attached: a green CI run (incl. the SCA + Trivy gates) +
       local `dotnet test` (370 backend, 0 skipped) + frontend (67 specs, Angular 22) +
       e2e (6, incl. a11y) transcripts.

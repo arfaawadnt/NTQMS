@@ -4,7 +4,7 @@
 | ----- | ----- |
 | Document ID | RTM-NTQMS-001 |
 | System | NT.QMS |
-| Version | 1.1 (2026-07-31 — URS-005/009 traces revised for the v1.51 Role Privilege module; post-baseline requirements cross-referenced) |
+| Version | 1.2 (2026-08-01 — URS-005/009 revised for the v1.51 Role Privilege module; URS-008/011/012 revised for the v1.51.2 schema-hardening programme; post-baseline requirements cross-referenced) |
 | Parent | VMP / URS / FRA / QP |
 
 Each URS traces to a **design element** (aggregate / controller / interceptor / migration)
@@ -28,7 +28,7 @@ Legend — Verification: **AUTO** = automated test; **OQ/PQ** = scripted qualifi
 | URS-005 | **Revised at v1.51 (Role Privilege module):** `Domain/Authorization/PermissionCatalog.cs` + `Role` aggregate; `[RequirePermission(module, action)]` across all tenant controllers (replaced `[Authorize(Roles=…)]`); `[RequirePermissionPolicy]` command policies; seeded system roles reproduce the former tiers (`SystemRoleCatalog`). `UserRole` enum retained only as the platform/tenant structural tier; `Roles.cs` governs the platform surface only. | AUTO `WebApi.FunctionalTests/RolePrivilegeFlowTests` + `RoleEndpointMatrixTests`; OQ-RP-04/07 **executed** (doc 12); OQ-SEC-06/07 superseded | Verified (dev); OQ executed, unsigned |
 | URS-006 | `ActiveSessionMiddleware` (`WebApi/Middleware/RequestIdentity.cs`) | OQ-SEC-08/09 (functional test: deactivate → 401) | Verified (dev) |
 | URS-007 | Frontend `auth.service` idle timeout (30 min) | OQ (UI) — witnessed | Template |
-| URS-008 | `TenantConnectionInterceptor`; migration `ActivateForcedTenantRls`; `ICurrentTenant.IsElevated`; RLS policies | AUTO `IntegrationTests/RlsTenantIsolationTests` (real PG); OQ-ISO-01..04; IQ-05/06/07 | Verified (dev) |
+| URS-008 | `TenantConnectionInterceptor`; migration `ActivateForcedTenantRls`; `ICurrentTenant.IsElevated`; RLS policies. **Extended at v1.51.2:** the fence now covers the 2 remaining gap tables and all 30 owned child tables — 90 FORCE-RLS tables, 0 parity violations — and cross-tenant children are structurally impossible via tenant-composite FKs (`Hardening2`/`Hardening4`). Two tables keep a documented permanent exception (nullable tenant). | AUTO `IntegrationTests/RlsTenantIsolationTests` + `OwnedChildTenancyTests` + `SecurityEventRlsTests` (real PG); `Architecture.Tests/UserAccountTenantBoundTests` (guards the exception); OQ-ISO-01..04, **OQ-DB-01/02**; IQ-05/06/07, **IQ-27** | Verified (dev); A.10 cases Template |
 | URS-009 | `UsersController` `/api/users`; `UserAccount` — **extended at v1.51** with role assignment (`assigned-role`), working scope (`scope`, hard data filter) and language (`language`), gated by `users.manage` | AUTO `Domain.UnitTests/IdentityAccess/UserRoleAndResetTests` + `UserScopeTests`; OQ-RP-06 **executed** (doc 12) | Verified (dev) |
 | URS-010 | `UserAccessReview` (`Domain/IdentityAccess`); `AccessReviewsController` `/api/access-reviews` | AUTO `Domain.UnitTests/IdentityAccess/UserAccessReviewTests`; OQ-SEC-10 | Verified (dev) |
 
@@ -36,8 +36,8 @@ Legend — Verification: **AUTO** = automated test; **OQ/PQ** = scripted qualifi
 
 | URS | Design element(s) | Verification | Status |
 | --- | ----------------- | ------------ | ------ |
-| URS-011 | `FieldChangeRecord` (`ComplianceLedger/LedgerEntries.cs`); `FieldChangeInterceptor` | AUTO `WebApi.FunctionalTests/FieldChangeInterceptorTests`; OQ-AUD-01 | Verified (dev) |
-| URS-012 | `AuditTrailEntry`; `LedgerHash.Compute` (SHA-256 chain) | AUTO `Application.UnitTests/Compliance/ComplianceHardeningTests`; OQ-AUD-02 | Verified (dev) |
+| URS-011 | `FieldChangeRecord` (`ComplianceLedger/LedgerEntries.cs`); `FieldChangeInterceptor`. **Corrected at v1.51.2:** `TenantOf` now reads an owned child's shadow `TenantId`, so a child's change reaches the owning tenant's own view (it previously landed unattributed); `RenderKey` excludes the tenant so `entity_id` remains the record identity after keys became composite. | AUTO `WebApi.FunctionalTests/FieldChangeInterceptorTests` (incl. the owned-child elevated-write pin); OQ-AUD-01, **OQ-DB-07** | Verified (dev); A.10 case Template |
+| URS-012 | `AuditTrailEntry`; `LedgerHash.Compute` (SHA-256 chain). **v1.51.2:** the ledger's primary key became tenant-first for partition-readiness and the five hash columns gained `^[0-9a-f]{64}$` format constraints; the chain columns themselves are unchanged in type and the chain re-verified intact (`ok: true`) after the re-key. | AUTO `Application.UnitTests/Compliance/ComplianceHardeningTests`; INSP live chain verification; OQ-AUD-02, **OQ-DB-03/04** | Verified (dev); A.10 cases Template |
 | URS-013 | `ComplianceController` `GET /api/compliance/chain-verification`; `VerifyChainQuery` | OQ-AUD-02; AUTO compliance tests | Verified (dev) |
 | URS-014 | `deploy/harden-runtime-role.sql` (append-only grants); append-only trigger design | IQ-08; OQ-AUD-03; INSP | Verified (dev) via role grants |
 | URS-015 | `FieldChangeRecord.Reason`; `ChangeReasonMiddleware`; `ICurrentChangeReason(Setter)` | AUTO `FieldChangeInterceptorTests` (reason); OQ-AUD-04/05 | Verified (dev) |
@@ -124,7 +124,9 @@ Legend — Verification: **AUTO** = automated test; **OQ/PQ** = scripted qualifi
 Requirements **URS-056 … URS-099** were introduced after the validated 1.0 baseline and
 are maintained, with full trace rows, in **REVAL-NTQMS-001 Part A** (doc 06, rev 4):
 A.1–A.6 hardening phases, A.7 supply chain, A.8 sign-in/statistics, **A.9 Role Privilege
-module (URS-095…099, qualified by executed record OQ-EXEC-NTQMS-002 / doc 12, unsigned)**.
+module (URS-095…099, qualified by executed record OQ-EXEC-NTQMS-002 / doc 12, unsigned)**, and
+**A.10 database schema hardening (URS-100…107, engineering-verified; OQ cases OQ-DB-01…08 are
+Template — no witnessed session has been run)**.
 This matrix deliberately does not duplicate those rows — doc 06 is their single source of
 truth until the next full RTM consolidation.
 
@@ -132,7 +134,7 @@ truth until the next full RTM consolidation.
 
 ## Coverage Summary
 
-- **URS requirements (baseline):** 55 (URS-001 … URS-055); post-baseline URS-056…099 traced in doc 06 Part A.
+- **URS requirements (baseline):** 55 (URS-001 … URS-055); post-baseline URS-056…107 traced in doc 06 Part A.
 - **Traced to a design element:** 55 / 55 (100%).
 - **Traced to a verification method:** 55 / 55 (100%).
 - **Backed by automated tests (dev evidence):** 47 / 55.

@@ -737,3 +737,25 @@ Replaces role-name authorization with tenant-configurable privileges end to end.
   403s). Startup backfill self-healed on next boot (90 roles / 18 tenants,
   0 unassigned) - by design. Ops note: restart the API after running the
   integration suite on dev; custom dev-only roles/scopes are lost by that test.
+
+## Database schema hardening — CSV doc set updated (2026-08-01) [ENGINEERING-VERIFIED, OQ NOT EXECUTED]
+
+- REVAL-NTQMS-001 (doc 06) -> rev 5, scope extended to v1.51.2. New Part A section A.10
+  registers URS-100..107 for the 6-migration hardening programme, with the two defects the
+  programme's own live verification found (SH-D1 sign-in broken by security_event RLS;
+  SH-D2 tenant provisioning broken by fk_outbox_event_tenant vs EF insert ordering), both
+  fixed and re-proven. Also: IQ-26..30 (migrations applied, tenant fence intact, guard
+  triggers survived, identifier limit, deployment script current), OQ-DB-01..08, the
+  schema-hardening test suites added to the evidence-engine table, a VSR-addendum row, and
+  two Part F checklist items.
+- RTM-NTQMS-001 (doc 04) -> v1.2. Three baseline traces revised where the hardening changed
+  them: URS-008 (tenant fence now 90 FORCE-RLS tables incl. 30 owned children, cross-tenant
+  children structurally impossible, 2 documented permanent exceptions guarded by an
+  architecture test), URS-011 (field-change tenant attribution corrected; entity_id identity
+  preserved after composite keys), URS-012 (audit ledger re-keyed tenant-first, hash columns
+  format-constrained, chain re-verified intact).
+- HONEST STATUS: OQ-DB-01..08 are Template. No witnessed session was run for this programme.
+  The catalog introspection, 442 automated tests (12 written for it) and the live checks are
+  supporting evidence only. Two permanent acceptances (user_account/outbox_event RLS) and two
+  record dispositions (historical unattributed ledger rows) are recorded and need reflecting
+  in the site deviation register.
