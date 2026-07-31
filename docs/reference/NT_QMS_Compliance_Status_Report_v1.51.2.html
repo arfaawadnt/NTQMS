@@ -1,0 +1,274 @@
+<meta charset="utf-8">
+<title>NT.QMS — Consolidated Compliance Status Report v1.51.2</title>
+<style>
+  :root{
+    --ink:#12212e; --muted:#4d6274; --line:#d8e2ea; --bg:#f6f9fb; --card:#fff;
+    --ok:#0f7a4a; --ok-bg:#e6f5ed; --warn:#8a5a00; --warn-bg:#fdf3e0;
+    --crit:#a02020; --crit-bg:#fdecec; --info:#0064a6; --info-bg:#e8f2fb;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --ink:#e8eef3; --muted:#9fb3c4; --line:#2b3d4d; --bg:#101a22; --card:#16242f;
+           --ok:#5fd39b; --ok-bg:#12352a; --warn:#e5b567; --warn-bg:#3a2e15;
+           --crit:#ff8a8a; --crit-bg:#3a1a1a; --info:#7fc0f5; --info-bg:#12293c; }
+  }
+  :root[data-theme="dark"]{ --ink:#e8eef3; --muted:#9fb3c4; --line:#2b3d4d; --bg:#101a22; --card:#16242f;
+    --ok:#5fd39b; --ok-bg:#12352a; --warn:#e5b567; --warn-bg:#3a2e15;
+    --crit:#ff8a8a; --crit-bg:#3a1a1a; --info:#7fc0f5; --info-bg:#12293c; }
+  :root[data-theme="light"]{ --ink:#12212e; --muted:#4d6274; --line:#d8e2ea; --bg:#f6f9fb; --card:#fff;
+    --ok:#0f7a4a; --ok-bg:#e6f5ed; --warn:#8a5a00; --warn-bg:#fdf3e0;
+    --crit:#a02020; --crit-bg:#fdecec; --info:#0064a6; --info-bg:#e8f2fb; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:15px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 20px 72px}
+  header{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px 28px}
+  h1{margin:0 0 6px;font-size:26px;letter-spacing:-.2px}
+  .id{color:var(--muted);font-size:13px}
+  .verdict{margin-top:18px;padding:14px 16px;border-radius:10px;background:var(--warn-bg);
+           border:1px solid var(--line);font-weight:600}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:18px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .stat b{display:block;font-size:21px;line-height:1.2}
+  .stat span{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+  h2{margin:34px 0 10px;font-size:19px;border-bottom:2px solid var(--line);padding-bottom:6px}
+  h3{margin:22px 0 8px;font-size:15.5px}
+  table{width:100%;border-collapse:collapse;margin:10px 0;background:var(--card);
+        border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  th,td{padding:9px 11px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;font-size:13.5px}
+  th{background:var(--info-bg);font-weight:650}
+  tr:last-child td{border-bottom:0}
+  .scroll{overflow-x:auto}
+  code{background:var(--info-bg);padding:1px 5px;border-radius:4px;font-size:12.5px}
+  .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:650;white-space:nowrap}
+  .p-ok{background:var(--ok-bg);color:var(--ok)} .p-warn{background:var(--warn-bg);color:var(--warn)}
+  .p-crit{background:var(--crit-bg);color:var(--crit)} .p-info{background:var(--info-bg);color:var(--info)}
+  .note{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--info);
+        border-radius:8px;padding:13px 15px;margin:14px 0}
+  .note.warn{border-left-color:var(--warn)}
+  .sign{margin-top:12px}
+  .sign td{height:44px}
+  footer{margin-top:40px;color:var(--muted);font-size:12.5px;border-top:1px solid var(--line);padding-top:14px}
+  ul{margin:8px 0 8px 20px;padding:0} li{margin:4px 0}
+</style>
+
+<div class="wrap">
+<header>
+  <h1>NT.QMS — Consolidated Compliance Status Report</h1>
+  <div class="id">CSR-NTQMS-001 <b>rev 3</b> · issued 2026-08-01 · target <code>v1.51.2</code>
+    (commit <code>4be6b27</code>, CI all-green) · supersedes rev 2 (v1.50.0)</div>
+
+  <div class="verdict">
+    Status — <span class="pill p-warn">Approved with conditions</span> · 0 critical · 0 P0 blockers ·
+    0 open defects · <b>3 conditions open, all requiring an external party or a deployed environment</b>
+  </div>
+
+  <div class="grid">
+    <div class="stat"><b>≈ 88%</b><span>architecture compliance (74/84)</span></div>
+    <div class="stat"><b>446</b><span>backend tests, 0 failing</span></div>
+    <div class="stat"><b>90 / 90</b><span>FORCE-RLS tables / policies</span></div>
+    <div class="stat"><b>0</b><span>tenant-isolation parity violations</span></div>
+    <div class="stat"><b>56</b><span>migrations applied</span></div>
+    <div class="stat"><b>3</b><span>open conditions (external)</span></div>
+  </div>
+</header>
+
+<div class="note">
+  <b>What this report is.</b> A single consolidated view over four registers that previously had to be read
+  together: the CSV/Part-11 validation set (<code>docs/validation/</code>), the enterprise application audit
+  (EAC-NTQMS-001 rev 4), the schema-hardening programme (<code>SCHEMA-HARDENING-REPORT.md</code>), and the
+  engineering log. Every figure was read from the live catalogue, a test run, or a named document — none is
+  carried forward from a previous revision without re-checking.
+</div>
+
+<h2>1. Position in one paragraph</h2>
+<p>
+  NT.QMS is <b>feature-complete and defect-free against every check that can be run without a deployed,
+  qualified environment</b>. All 18 original CSV/regulatory findings are closed; the enterprise-architecture
+  remediation train is complete; and the two programmes since the last report — configurable authorization
+  (v1.51.0/.1) and database schema hardening (v1.51.2) — are shipped, verified by catalogue introspection and
+  exercised live. <b>What is not done is external and environmental</b>: an independent penetration test, formal
+  validation execution with signatures on a qualified installation, and a staging bring-up with observability and
+  load. Those three have been the outstanding items since v1.41 and none of this cycle's work advances them.
+</p>
+
+<h2>2. What changed since rev 2 (v1.50.0 → v1.51.2)</h2>
+<div class="scroll"><table>
+  <tr><th>Programme</th><th>Delivered</th><th>Evidence</th></tr>
+  <tr>
+    <td><b>Role Privilege module</b><br>v1.51.0 / .1</td>
+    <td>Role names in code replaced by tenant-defined roles over a closed 170-key permission catalogue; 127
+      endpoint gates converted; privileges resolved <b>per request</b>, so a revocation binds on the user's next
+      call rather than at token expiry; branch/department scope enforced as a hard data filter; a lock-out guard
+      that refuses any change leaving a tenant unable to administer its own privileges.</td>
+    <td>Witnessed OQ, 10 cases / 30 checks (doc 12) — <span class="pill p-warn">unsigned</span>;
+      URS-095…099</td>
+  </tr>
+  <tr>
+    <td><b>Database schema hardening</b><br>v1.51.2, 6 migrations</td>
+    <td>Tenant fence extended to every tenant table incl. 30 owned children (cross-tenant children now
+      structurally impossible); 71 CHECK constraints (14 → 85); 88 tenant-first composite keys, making the
+      schema partition-ready; types, naming and API-side bounds corrected.</td>
+    <td>Catalogue introspection; 12 new tests; OQ-DB-01…08 <span class="pill p-warn">Template</span>;
+      URS-100…107</td>
+  </tr>
+  <tr>
+    <td><b>Verification integrity</b><br>VER-001</td>
+    <td>Regulated flows now execute over the real HTTP pipeline against real PostgreSQL, closing a blind spot in
+      which RLS, foreign keys and CHECK constraints were invisible to the functional suite.</td>
+    <td><code>RegulatedFlowRealDatabaseTests</code>, mutation-tested against all three escaped defects</td>
+  </tr>
+</table></div>
+
+<h2>3. Defects raised and closed this cycle</h2>
+<div class="note warn">
+  <b>Read this section before the scores.</b> Four defects were found in this cycle. <b>Three of them escaped a
+  green test suite</b> and were caught only by driving the running application by hand. That is the single most
+  important quality signal in this report — and it is why the fourth item, VER-001, was raised against the
+  verification strategy itself rather than against any feature.
+</div>
+<div class="scroll"><table>
+  <tr><th>Ref</th><th>Defect</th><th>How it was found</th><th>Status</th></tr>
+  <tr><td><b>RP-D1</b></td>
+    <td>User-account access-control events (role assignment, scope change, lockout) were written to the audit
+      ledger with an empty tenant — present in the hash chain, invisible to the tenant they concerned.</td>
+    <td>OQ-RP-09, witnessed session</td><td><span class="pill p-ok">Closed v1.51.1</span></td></tr>
+  <tr><td><b>SH-D1</b></td>
+    <td>Applying row-level security to <code>audit.security_event</code> <b>broke sign-in</b> (HTTP 500): the
+      login handler writes a tenant-stamped event before a tenant is resolved.</td>
+    <td>Live browser check — 419 tests were green</td><td><span class="pill p-ok">Closed v1.51.2</span></td></tr>
+  <tr><td><b>SH-D2</b></td>
+    <td>A new tenant foreign key <b>broke tenant provisioning</b> (HTTP 500): created in raw SQL, so EF had no
+      reason to order the tenant insert before rows referencing it.</td>
+    <td>Live check while proving another fix</td><td><span class="pill p-ok">Closed v1.51.2</span></td></tr>
+  <tr><td><b>VER-001</b></td>
+    <td>Regulated behaviour was tested on an in-memory provider where RLS, foreign keys and CHECK constraints do
+      not exist — so the three defects above were structurally invisible to the suite.</td>
+    <td>Raised by the audit on the evidence of the three escapes</td>
+    <td><span class="pill p-ok">Closed same-revision</span></td></tr>
+</table></div>
+
+<h2>4. Tenant isolation — the control that changed most</h2>
+<p>
+  Revisions 1–3 of the architecture audit scored multi-tenancy <b>4/4</b> on the strength of "EF query filter +
+  PostgreSQL FORCE RLS". That was true of aggregate roots and <b>not</b> true of the 30 owned child tables
+  (<code>rca_record</code>, <code>capa_action</code>, <code>document_version</code>, <code>role_permission</code>
+  and the rest), which carried no tenant column at all — a direct <code>SELECT</code> returned every tenant's
+  rows. The audit's verification method was the weakness: it accepted "RLS is on" without asking on which tables.
+</p>
+<div class="scroll"><table>
+  <tr><th>Measure</th><th>Before (v1.50.0)</th><th>Now (v1.51.2)</th></tr>
+  <tr><td>Tables with FORCE RLS + <code>tenant_isolation</code></td><td>57</td><td><b>90 / 90</b></td></tr>
+  <tr><td>Tenant tables with no database-level fence</td><td>32 (30 children + 2 gap tables)</td><td><b>0</b></td></tr>
+  <tr><td>Cross-tenant child row</td><td>Possible; not detected</td><td><b>Rejected by the engine</b> (23503)</td></tr>
+  <tr><td>Database CHECK constraints</td><td>14</td><td><b>85</b></td></tr>
+  <tr><td>Tenant-first composite primary keys</td><td>0</td><td><b>88</b> (partition-ready)</td></tr>
+</table></div>
+<p>
+  Because §8 was already scored 4/4, closing this gap <b>earns no points</b> — it makes the existing score
+  deserved. The architecture score moved 88% → 87% → 88% across rev 4: down when VER-001 was raised, back up when
+  it was closed in the same revision.
+</p>
+
+<h2>5. Verification evidence</h2>
+<div class="scroll"><table>
+  <tr><th>Layer</th><th>Count</th><th>Runs against</th></tr>
+  <tr><td>Domain unit</td><td>228</td><td>in-process</td></tr>
+  <tr><td>Application unit</td><td>72</td><td>in-process / in-memory</td></tr>
+  <tr><td>Architecture rules</td><td>33</td><td>compiled assemblies + source</td></tr>
+  <tr><td>Integration</td><td>31 (+1 skipped)</td><td><b>real PostgreSQL</b></td></tr>
+  <tr><td>WebApi functional</td><td>82</td><td>real HTTP host; <b>4 of them on real PostgreSQL</b></td></tr>
+  <tr><td>Frontend unit</td><td>76</td><td>ChromeHeadless</td></tr>
+  <tr><td>End-to-end</td><td>6</td><td>live stack (Playwright)</td></tr>
+  <tr><th>Total</th><th>528 automated checks, 0 failing</th><th>CI green on a clean database</th></tr>
+</table></div>
+<p>
+  Two structural guards are worth naming because they fail the build rather than a review: a sweep that rejects
+  any table carrying a non-nullable <code>tenant_id</code> without full RLS, and a rule that rejects any
+  unbounded query over the user table (the one place where RLS is permanently, deliberately absent).
+</p>
+
+<h2>6. Accepted deviations and record dispositions</h2>
+<div class="scroll"><table>
+  <tr><th>Item</th><th>Decision</th><th>Basis</th></tr>
+  <tr><td><code>qams.user_account</code> and <code>qams.outbox_event</code> have no RLS</td>
+    <td><span class="pill p-info">Permanently accepted</span><br>System Owner, 2026-08-01</td>
+    <td>Both tenant columns are nullable by design; the policy predicate is false for NULL, so applying it would
+      hide every platform administrator and break authentication, which runs before a tenant exists. Compensating
+      controls verified across all 27 access sites and now enforced at build time.</td></tr>
+  <tr><td>32 historical <code>audit.audit_trail</code> rows with no tenant</td>
+    <td><span class="pill p-info">Kept as-is</span><br>System Owner, 2026-08-01</td>
+    <td>RP-D1 residue. The ledger is append-only and hash-chained; a ledger that can be corrected is not a ledger.
+      Readable under elevation. Forward behaviour fixed and proven.</td></tr>
+  <tr><td>21,209 historical <code>audit.field_change</code> rows with no tenant</td>
+    <td><span class="pill p-info">Kept as-is</span></td>
+    <td>Same reasoning. Attribution is fixed forward — a freshly provisioned tenant now writes 536 privilege-detail
+      rows, none unattributed.</td></tr>
+</table></div>
+
+<h2>7. Open conditions — the whole of what remains</h2>
+<div class="note warn">
+  These are <b>3 distinct conditions</b>, each needing an external party or a deployed environment. They appear
+  under different identifiers in different registers; they are not 3 separate bodies of work per register.
+</div>
+<div class="scroll"><table>
+  <tr><th>ID</th><th>Condition</th><th>Why it cannot close here</th><th>Priority</th></tr>
+  <tr><td><b>SEC-001</b></td>
+    <td>Independent penetration test against a staging deployment</td>
+    <td>Requires a third party and a live TLS deployment. In-house adversarial assessment ran 24 checks with 0
+      findings, which is not a substitute.</td>
+    <td><span class="pill p-warn">High / P1</span></td></tr>
+  <tr><td><b>DOC-001</b></td>
+    <td>Formal validation execution and signatures on a qualified installation</td>
+    <td>Requires a qualified environment and QA/System-Owner signatures. Progress: 28 OQ cases executed on the
+      development workstation (docs 09–12) and transcribed; all remain <b>unsigned</b>, and the v1.51.2 cases
+      (OQ-DB-01…08) have not been executed at all.</td>
+    <td><span class="pill p-warn">Medium / P1</span></td></tr>
+  <tr><td><b>OPS-001</b></td>
+    <td>Staging bring-up: observability stack, alerts firing, 24-hour soak, load baseline</td>
+    <td>Requires a deployed host. Authored and configured; never exercised under real telemetry or load.</td>
+    <td><span class="pill p-warn">Medium / P1</span></td></tr>
+</table></div>
+
+<h2>8. Honest limitations of this report</h2>
+<ul>
+  <li><b>All execution evidence is from a development workstation.</b> Nothing in this cycle ran on a qualified or
+    staging installation. CI does run every migration against a clean PostgreSQL, which is stronger than a
+    developer machine but is still not a qualified environment.</li>
+  <li><b>The one witnessed OQ is unsigned.</b> Doc 12 is an execution transcript: the results are real, the
+    attestation is pending. The v1.51.2 cases have no witnessed session at all.</li>
+  <li><b>Independence is limited.</b> The party that wrote the code also wrote and executed the checks. An
+    external assessor will note the absence of segregation of duties.</li>
+  <li><b>The architecture score is self-assessed</b> against a checklist, not certified by a third party.</li>
+</ul>
+
+<h2>9. Recommendation</h2>
+<p>
+  <b>Approved with conditions</b>, unchanged in substance from rev 2 — the conditions are the same three, and they
+  are the same three that have been open since v1.41. What changed is the confidence behind the approval: a
+  material isolation gap that previous revisions scored as passing has been found and closed, and the verification
+  weakness that allowed three defects to escape has itself been closed. Production use should remain gated on
+  SEC-001, DOC-001 and OPS-001.
+</p>
+
+<h2>10. Approval block</h2>
+<p>Signing confirms the reader has read §3 (defects), §7 (open conditions) and §8 (limitations), not only §1.</p>
+<div class="scroll"><table class="sign">
+  <tr><th>Role</th><th>Name</th><th>Signature</th><th>Date</th></tr>
+  <tr><td>Prepared by (Engineering)</td><td>Claude Code (automated)</td>
+      <td><i>n/a — machine-prepared; figures measured, not asserted</i></td><td>2026-08-01</td></tr>
+  <tr><td>Reviewed by (QA)</td><td></td><td></td><td></td></tr>
+  <tr><td>Approved by (System Owner)</td><td></td><td></td><td></td></tr>
+</table></div>
+<p style="color:var(--muted);font-size:13px">
+  Engineering applies no signature on QA's or the System Owner's behalf. Until both lines are signed this document
+  is a <b>status report, not an approval</b>.
+</p>
+
+<footer>
+  Sources: <code>SCHEMA-HARDENING-REPORT.md</code> · <code>docs/reference/NT_QMS_Enterprise_Application_Compliance_Audit.html</code>
+  (EAC-NTQMS-001 rev 4) · <code>docs/reference/NT_QMS_Database_AsBuilt.md</code> ·
+  <code>docs/validation/</code> (REVAL-NTQMS-001 rev 5, RTM v1.2, OQ records 09–12) ·
+  <code>IMPLEMENTATION_LOG.md</code>. Catalogue figures re-measured 2026-08-01 against
+  <code>ntqams</code> at migration <code>Hardening6_DeferrableTenantFks</code>.
+</footer>
+</div>
