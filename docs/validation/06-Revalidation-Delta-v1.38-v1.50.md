@@ -1,11 +1,11 @@
-# CSV Re-Validation Delta — v1.38.0 → v1.50.0
+# CSV Re-Validation Delta — v1.38.0 → v1.51.1
 
 | Field | Value |
 | ----- | ----- |
-| Document ID | REVAL-NTQMS-001 (rev 3 — extended to v1.50.0) |
+| Document ID | REVAL-NTQMS-001 (rev 4 — extended to v1.51.1; filename retained for reference stability) |
 | System | NT.QMS |
 | Baseline validated version | 1.0 (VMP/URS/FRA/QP/RTM/VSR — docs 00–05) |
-| Scope of this delta | Changes across releases **v1.38.0 → v1.50.0** (EA-remediation Phases 0–6 + Road-to-100 backlog/Phases 7–9 + v1.49 supply-chain assurance & Angular 22 upgrade + v1.50 sign-in surface & statistic presentation) |
+| Scope of this delta | Changes across releases **v1.38.0 → v1.51.1** (EA-remediation Phases 0–6 + Road-to-100 backlog/Phases 7–9 + v1.49 supply-chain assurance & Angular 22 upgrade + v1.50 sign-in surface & statistic presentation + **v1.51 Role Privilege module** and v1.51.1 RP-D1 audit-attribution fix) |
 | Parent | VMP-NTQMS-001; URS-NTQMS-001; RTM-NTQMS-001; QP-NTQMS-001; VSR-NTQMS-001 |
 | Status | **DRAFT for QA execution.** Engineering-prepared traceability + qualification stubs; **QA owns, executes, witnesses, and signs.** |
 
@@ -139,6 +139,31 @@ Verification legend as in RTM-NTQMS-001 (**AUTO** automated test, **OQ/PQ** scri
 | URS-093 | The sign-in surface and statistic tiles shall meet WCAG AA contrast; brand tones that fail as text or marks shall be replaced by compliant steps of the same hue rather than used as-is. | `styles.css` `--nt-ink-*` tokens; documented deviations in `login.component.ts` and `list-stats.component.ts` | AUTO axe scan `e2e/a11y.spec.ts` (0 serious/critical); INSP measured ratios (value 11.5:1, label/caption 9.5:1, meter fills ≥3:1) | Template |
 | URS-094 | Platform (administrator) sign-in shall be visually and textually distinct from a laboratory workspace sign-in. | `login.component.ts` platform variant (shield mark, `login.adminPortal`, admin-specific copy) | OQ-UI-05 | Template |
 
+### A.9 Role Privilege module — configurable roles, permission matrix, working scope (v1.51.0 / v1.51.1)
+
+> Unlike A.1–A.8, this section's OQ cases were **executed** (development environment,
+> witnessed session 2026-07-31) and are transcribed with verbatim actuals in
+> [`12-OQ-Execution-Record-RolePrivilege-v1.51.md`](12-OQ-Execution-Record-RolePrivilege-v1.51.md)
+> (OQ-EXEC-NTQMS-002) — **unsigned until the witness/QA signs**; the record found one
+> defect (RP-D1, fixed and re-tested in-session, shipped as v1.51.1) and one
+> environmental observation (OBS-1). URS-005's baseline trace (role-name authorization)
+> is superseded by this section — see RTM-NTQMS-001 rev 1.1.
+
+| URS | Requirement | Design element(s) | Verification | Status |
+| --- | ----------- | ----------------- | ------------ | ------ |
+| URS-095 | Authorization shall be governed by tenant-configurable roles composed over a closed, code-defined permission catalogue (module × action); a grant that maps to no code path shall be impossible to store, and seeded system roles shall reproduce the pre-existing fixed tiers so enabling the module changes nobody's reach. | `Domain/Authorization/PermissionCatalog.cs` (31 modules × 8 actions = 170 keys; ROLE-005), `Role.cs` aggregate (FORCE RLS; ROLE-003/004 system-role protections); `Application/Authorization/SystemRoleCatalog.cs` (seeded parity table); `[RequirePermission]` on 127 endpoint gates; `[RequirePermissionPolicy]` command policies | AUTO `Domain.UnitTests/Authorization/RoleTests`+`PermissionCatalogTests`, `Application.UnitTests/Authorization/SystemRoleCatalogTests` (parity pins), `WebApi.FunctionalTests/RolePrivilegeFlowTests`; **OQ-RP-01/02/03/07 executed** | **Executed (dev), unsigned — doc 12** |
+| URS-096 | Granting and revoking a privilege shall take effect on the affected user's next request, without waiting for session or token expiry. | Per-request DB resolution: `ActiveSessionMiddleware` + `Infrastructure/Authorization/PrivilegeResolution.cs` (deliberately uncached) | AUTO `RolePrivilegeFlowTests`; **OQ-RP-04 executed** (403 → grant → 201 on the same token → revoke → 403) | **Executed (dev), unsigned — doc 12** |
+| URS-097 | A user's allowed branches/departments shall be a hard data boundary: out-of-scope records shall be neither readable nor writable; unattributed (tenant-wide) records remain visible; empty scope means unrestricted. | Composed tenant+scope EF global filter on all 12 `IAllocatable` aggregates (`AppDbContext`); `OrgScopeGuardInterceptor` (SCOPE-001/002); `UserAccount` owned scope tables | AUTO `RolePrivilegeFlowTests` (reads + writes), `Domain.UnitTests/IdentityAccess/UserScopeTests`; **OQ-RP-06 executed** | **Executed (dev), unsigned — doc 12** |
+| URS-098 | No sequence of role edits, deactivations or reassignments shall leave a tenant without an active user able to administer privileges. | `Application/Authorization/RolesSlice.cs` `ManageRolesLockoutGuard` (ROLE-006) | AUTO `Application.UnitTests/Authorization/RoleHandlersTests`; **OQ-RP-05 executed** | **Executed (dev), unsigned — doc 12** |
+| URS-099 | Every change to who-may-do-what — role grants (with the operator's reason), role assignments, working-scope changes — shall be captured in the tenant's own tamper-evident audit trail. | Domain events → outbox → hash-chained `audit.audit_trail`; **v1.51.1 fix RP-D1**: `SharedKernel/MultiTenancy/IOptionallyTenantScoped.cs` on `UserAccount` + outbox tenant fallback | AUTO `Application.UnitTests/Authorization/UserEventTenantStampTests` (RP-D1 pins); **OQ-RP-09 executed: failed → RP-D1 raised/fixed → re-tested Pass** | **Executed (dev), unsigned — doc 12** |
+
+**Defect RP-D1 (raised by OQ-RP-09, closed in v1.51.1).** User-account access-control
+events (`UserRoleAssigned`, `UserScopeChanged`, pre-existing `UserLockedOut`) were
+ledgered with an empty tenant id — present in the hash chain, invisible to the tenant's
+own compliance view. Root cause, blast radius (SQL-measured), fix and re-test are in
+doc 12 §3. **Residual for QA disposition:** rows written before the fix retain the empty
+tenant id (the ledger is append-only and is not restated).
+
 ---
 
 ## Part B — Installation Qualification (IQ) delta
@@ -176,6 +201,7 @@ witnessed manual confirmation is recorded per baseline convention.
 | Frontend (added) | axe a11y scans, load-more pager, change-reason dialog specs | OQ-UI |
 | `scripts/security-probe.ps1`, `security-probe-deep.ps1`, `failure-drills.ps1` | Executed adversarial + operational drills (24/24 checks, live poison→dead-letter) | Supplementary OQ evidence |
 | CI SCA/Trivy gates (added, v1.49) | .NET SCA + npm SCA (vs exception register) + Trivy image scan, every push | OQ-SCA |
+| Role Privilege suites (added, v1.51) | `RolePrivilegeFlowTests` (grant flip, lockout guard, scope filter over HTTP), `RoleTests`/`PermissionCatalogTests`, `SystemRoleCatalogTests` (seeded parity pins), `RoleHandlersTests`, `UserScopeTests`, `UserEventTenantStampTests` (RP-D1 pins) | OQ-RP-01..10 |
 
 ### OQ manual/witnessed cases (templates)
 
@@ -197,6 +223,17 @@ witnessed manual confirmation is recorded per baseline convention.
 > automated suites and was observed during development, but no witnessed run exists. The cells below remain **Template** until QA
 > executes on a **qualified** environment and signs; the dev-session records attach as
 > supporting evidence, not as the qualification itself.
+>
+> **Execution status (2026-07-31, v1.51).** A second witnessed dev-environment session
+> executed the Role Privilege module protocol — **10 cases / 30 checks** on a dedicated
+> tenant, transcribed in
+> [`12-OQ-Execution-Record-RolePrivilege-v1.51.md`](12-OQ-Execution-Record-RolePrivilege-v1.51.md):
+> 29/30 first-pass; the single failure was defect **RP-D1** (user-account access-control
+> events invisible to the tenant audit trail), **fixed as v1.51.1 and re-tested to Pass
+> in-session**; post-fix regression 419 backend tests green. One environmental
+> observation (OBS-1: the migration round-trip test empties the newest migration's
+> tables on a shared dev DB; the startup backfill self-heals on next boot). The record
+> is unsigned until the witness/QA signs.
 
 | Case | Procedure | Expected | Actual | P/F |
 | ---- | --------- | -------- | ------ | --- |
@@ -256,6 +293,7 @@ upgrade is presentation-layer only (no migration; API surface snapshot unchanged
 | Evidence at scale (Ph 8) | Performance/ops | Load baseline + failure drills + observability stack (PQ-PERF/OBS) |
 | Assurance depth (Ph 9) | Assurance/UX | Role×endpoint matrix, contract coverage, a11y in CI (URS-083..085) |
 | Supply-chain assurance (v1.49) | Security/assurance | CI SCA (.NET + npm w/ exception register) + Trivy image scan; Angular 18.2→22.0.8 — 10 high-severity framework advisories cleared, `npm audit` (prod) = 0, register empty (URS-086..088; IQ-24/25) |
+| Role Privilege module (v1.51/.1) | Security/access control | Configurable roles over a closed 170-key catalogue; per-request privilege resolution (immediate revocation); branch/department hard data filter; ROLE-006 lockout guard; privilege changes in the tenant audit trail incl. RP-D1 fix (URS-095..099; OQ-EXEC-NTQMS-002 executed on dev, unsigned) |
 
 **Independent security validation.** An in-house automated adversarial assessment executed 24
 checks with 0 findings (`docs/reference/NT_QMS_Security_Assessment_Report.html`). An
@@ -273,6 +311,8 @@ evidence.
 ## Part F — Execution checklist for QA (what "done" requires)
 
 - [ ] Environment qualified (baseline IQ + Part B IQ-16..25) on the target/staging host.
+- [ ] Sign OQ-EXEC-NTQMS-002 (doc 12) witness/QA lines; disposition defect RP-D1's residual
+      (pre-fix ledger rows keep an empty tenant id) and observation OBS-1.
 - [ ] Automated evidence engines attached: a green CI run (incl. the SCA + Trivy gates) +
       local `dotnet test` (370 backend, 0 skipped) + frontend (67 specs, Angular 22) +
       e2e (6, incl. a11y) transcripts.

@@ -4,7 +4,7 @@
 | ----- | ----- |
 | Document ID | RTM-NTQMS-001 |
 | System | NT.QMS |
-| Version | 1.0 |
+| Version | 1.1 (2026-07-31 — URS-005/009 traces revised for the v1.51 Role Privilege module; post-baseline requirements cross-referenced) |
 | Parent | VMP / URS / FRA / QP |
 
 Each URS traces to a **design element** (aggregate / controller / interceptor / migration)
@@ -25,11 +25,11 @@ Legend — Verification: **AUTO** = automated test; **OQ/PQ** = scripted qualifi
 | URS-002 | `Application/IdentityAccess/PasswordRules.cs`; RegisterUser/ResetUserPassword/ChangePassword | AUTO `Application.UnitTests/IdentityAccess/PasswordRulesTests`; OQ-SEC-04 | Verified (dev) |
 | URS-003 | `UserAccount` (MaxFailedAttempts=5, LockoutMinutes=30, `RegisterFailedLogin`/`IsLockedOut`) | AUTO `Domain.UnitTests/IdentityAccess/UserAccountTests`; OQ-SEC-03 | Verified (dev) |
 | URS-004 | `AuthController` `mfa/enroll`,`mfa/confirm`; `MfaEnrollmentGateMiddleware`; `TenantSettings.RequireMfaForPrivilegedRoles`; `TenantSettingsController` mfa-policy; TOTP infra | OQ-SEC-05; INSP (F-04) | Verified (dev); UI witnessed at OQ |
-| URS-005 | `Authorization/Roles.cs`; `[Authorize(Roles=…)]` across all controllers; `UserRole` enum | AUTO `WebApi.FunctionalTests/AuthActorFunctionalTests`; OQ-SEC-06/07 | Verified (dev) |
+| URS-005 | **Revised at v1.51 (Role Privilege module):** `Domain/Authorization/PermissionCatalog.cs` + `Role` aggregate; `[RequirePermission(module, action)]` across all tenant controllers (replaced `[Authorize(Roles=…)]`); `[RequirePermissionPolicy]` command policies; seeded system roles reproduce the former tiers (`SystemRoleCatalog`). `UserRole` enum retained only as the platform/tenant structural tier; `Roles.cs` governs the platform surface only. | AUTO `WebApi.FunctionalTests/RolePrivilegeFlowTests` + `RoleEndpointMatrixTests`; OQ-RP-04/07 **executed** (doc 12); OQ-SEC-06/07 superseded | Verified (dev); OQ executed, unsigned |
 | URS-006 | `ActiveSessionMiddleware` (`WebApi/Middleware/RequestIdentity.cs`) | OQ-SEC-08/09 (functional test: deactivate → 401) | Verified (dev) |
 | URS-007 | Frontend `auth.service` idle timeout (30 min) | OQ (UI) — witnessed | Template |
 | URS-008 | `TenantConnectionInterceptor`; migration `ActivateForcedTenantRls`; `ICurrentTenant.IsElevated`; RLS policies | AUTO `IntegrationTests/RlsTenantIsolationTests` (real PG); OQ-ISO-01..04; IQ-05/06/07 | Verified (dev) |
-| URS-009 | `UsersController` `/api/users`; `UserAccount` | AUTO `Domain.UnitTests/IdentityAccess/UserRoleAndResetTests`; OQ | Verified (dev) |
+| URS-009 | `UsersController` `/api/users`; `UserAccount` — **extended at v1.51** with role assignment (`assigned-role`), working scope (`scope`, hard data filter) and language (`language`), gated by `users.manage` | AUTO `Domain.UnitTests/IdentityAccess/UserRoleAndResetTests` + `UserScopeTests`; OQ-RP-06 **executed** (doc 12) | Verified (dev) |
 | URS-010 | `UserAccessReview` (`Domain/IdentityAccess`); `AccessReviewsController` `/api/access-reviews` | AUTO `Domain.UnitTests/IdentityAccess/UserAccessReviewTests`; OQ-SEC-10 | Verified (dev) |
 
 ## B. Audit Trail & Data Integrity
@@ -119,9 +119,20 @@ Legend — Verification: **AUTO** = automated test; **OQ/PQ** = scripted qualifi
 
 ---
 
+## Post-baseline requirements (change program v1.38 → v1.51.1)
+
+Requirements **URS-056 … URS-099** were introduced after the validated 1.0 baseline and
+are maintained, with full trace rows, in **REVAL-NTQMS-001 Part A** (doc 06, rev 4):
+A.1–A.6 hardening phases, A.7 supply chain, A.8 sign-in/statistics, **A.9 Role Privilege
+module (URS-095…099, qualified by executed record OQ-EXEC-NTQMS-002 / doc 12, unsigned)**.
+This matrix deliberately does not duplicate those rows — doc 06 is their single source of
+truth until the next full RTM consolidation.
+
+---
+
 ## Coverage Summary
 
-- **URS requirements:** 55 (URS-001 … URS-055).
+- **URS requirements (baseline):** 55 (URS-001 … URS-055); post-baseline URS-056…099 traced in doc 06 Part A.
 - **Traced to a design element:** 55 / 55 (100%).
 - **Traced to a verification method:** 55 / 55 (100%).
 - **Backed by automated tests (dev evidence):** 47 / 55.
