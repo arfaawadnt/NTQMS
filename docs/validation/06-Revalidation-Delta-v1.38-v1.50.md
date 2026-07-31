@@ -167,24 +167,25 @@ tenant id (the ledger is append-only and is not restated).
 
 ### A.10 Database schema hardening — isolation, domains, keys (v1.51.2, migrations `Hardening1`…`Hardening6`)
 
-> **Execution status — read before relying on this section.** The engineering verification is
-> unusually strong for a delta of this size (see the evidence column, and
-> `SCHEMA-HARDENING-REPORT.md`), but **no witnessed OQ session has been executed for this
-> programme**. The cases in Part C A.10 are therefore **Template**. The catalog introspection,
-> the 442-test suite and the live application checks attach as *supporting evidence*, not as the
-> qualification itself. Two defects were found by that verification and are recorded below,
-> because a delta that reports only successes is not evidence.
+> **Execution status (2026-08-01).** The A.10 cases **have now been executed**: a witnessed
+> session ran **OQ-DB-01…08 — 23 checks, 23 passed, 0 failed, 0 deviations** — transcribed with
+> verbatim actuals in
+> [`13-OQ-Execution-Record-SchemaHardening-v1.51.2.md`](13-OQ-Execution-Record-SchemaHardening-v1.51.2.md)
+> (OQ-EXEC-NTQMS-003). The record is **unsigned** pending the witness/QA lines, and it was
+> executed on the **development workstation**, so it does not close DOC-001. Two defects were
+> found by this programme's own verification and are recorded below, because a delta that reports
+> only successes is not evidence.
 
 | URS | Requirement | Design element(s) | Verification | Status |
 | --- | ----------- | ----------------- | ------------ | ------ |
-| URS-100 | Every table holding tenant data shall be fenced at the database, not only by the application: row-level security enabled **and forced**, with a `tenant_isolation` policy. A table carrying a non-nullable `tenant_id` without that protection shall be impossible to leave in the schema unnoticed. | `Hardening2_RlsGapClosure` (`audit.security_event`, `qams.ref_counter`); `Hardening4_ChildTenancy` (30 owned child tables) | INSP catalog: 90 FORCE-RLS tables / 90 policies / **0 parity violations**; AUTO `OwnedChildTenancyTests.Every_owned_child_table_carries_tenant_id_and_full_rls` (structural sweep — fails if any future table regresses); OQ-DB-01 | Template |
-| URS-101 | An owned child record shall be readable only by the tenant that owns its parent, and a child whose tenant differs from its parent's shall be **impossible to persist** — not merely detected. | `Hardening4`: `tenant_id NOT NULL` on 30 children (backfilled from the parent), 28 tenant-composite FKs, 24 parent `UNIQUE (id, tenant_id)`; shadow `TenantId` + `TenantStampInterceptor` | AUTO `OwnedChildTenancyTests` (7 per-family isolation cases + drift rejection with an accepted control); INSP measured `rca_record` 2 rows → owning tenant sees 1, foreign 0, nil tenant 0; OQ-DB-02 | Template |
-| URS-102 | A value persisted in a state, status, role or classification column shall be one the application can actually produce; integrity hashes shall be well-formed. | `Hardening3_CheckDomains`: 64 enum domains derived from the C# enums + 2 closed literal sets + 5 hash-format constraints, `NOT VALID` → `VALIDATE` | Pre-flight `scripts/preflight-enum-domains.sql` (67 checks, 0 violations) — the **same generator** produces the scan and the constraints, so they cannot disagree; AUTO `CheckConstraintTests.Phase3_domains_reject_bogus_enum_values_and_malformed_hashes`; INSP 85 CHECKs, 0 left `NOT VALID`; OQ-DB-03 | Template |
-| URS-103 | The schema shall be partition-ready: the tenant discriminator shall lead the primary key of every tenant-owned table, since PostgreSQL requires the partition key in every primary key and unique index and cannot convert an existing table into a partitioned one. | `Hardening5_CompositeKeys`: 88 tenant-first composite PKs; `department → branch` made composite; no `UNIQUE (id)` added (it would be illegal on a partitioned table) | INSP 88 composite PKs, **0** single-id PKs remain on a NOT NULL tenant table; the 4 nullable-tenant tables retain single keys by necessity; OQ-DB-04 | Template |
-| URS-104 | Free-text fields shall not be bounded only by a column width: where the database limit is removed, the limit shall exist in the command validator, so input remains bounded at the API. | `Hardening1_TypesAndNames` (56 columns → `text`/`jsonb`); 17 FluentValidation rules added/extended | INSP 0 remaining `varchar(≥1000)`; the API-bound audit of all 56 columns is in `SCHEMA-HARDENING-PLAN.md` Appendix A2; OQ-DB-05 | Template |
-| URS-105 | Database identifiers shall stay within PostgreSQL's limit, so no index or constraint name is silently truncated. | `Hardening1` §1.4: 3 EF-truncated names renamed and pinned with `HasDatabaseName`; abbreviation map in `CLAUDE.md` §5 | INSP **0** identifiers > 62 characters (re-checked after Phase 5 lengthened generated names); OQ-DB-06 | Template |
-| URS-106 | A change to a record shall be attributed to the tenant that owns it, including changes to owned child records, so it appears in that tenant's own compliance view. | `FieldChangeInterceptor.TenantOf` (v1.51.2): `ITenantScoped` → **shadow** `TenantId` → `IOptionallyTenantScoped` → request tenant | AUTO `FieldChangeInterceptorTests.An_owned_childs_change_is_attributed_to_the_owner_tenant_on_an_elevated_write`; INSP live — provisioning wrote 536 `RolePermission` rows, **0 null**, visible to that tenant; OQ-DB-07 | Template |
-| URS-107 | Referential integrity to the tenant table shall not depend on the order in which the ORM emits inserts within a transaction. | `Hardening6_DeferrableTenantFks`: the 5 `saas.tenant` FKs become `DEFERRABLE INITIALLY DEFERRED` | INSP 5/5 deferrable; live — tenant provisioning returns 201 (was 500); OQ-DB-08 | Template |
+| URS-100 | Every table holding tenant data shall be fenced at the database, not only by the application: row-level security enabled **and forced**, with a `tenant_isolation` policy. A table carrying a non-nullable `tenant_id` without that protection shall be impossible to leave in the schema unnoticed. | `Hardening2_RlsGapClosure` (`audit.security_event`, `qams.ref_counter`); `Hardening4_ChildTenancy` (30 owned child tables) | INSP catalog: 90 FORCE-RLS tables / 90 policies / **0 parity violations**; AUTO `OwnedChildTenancyTests.Every_owned_child_table_carries_tenant_id_and_full_rls` (structural sweep — fails if any future table regresses); **OQ-DB-01 executed** | Executed (dev), unsigned |
+| URS-101 | An owned child record shall be readable only by the tenant that owns its parent, and a child whose tenant differs from its parent's shall be **impossible to persist** — not merely detected. | `Hardening4`: `tenant_id NOT NULL` on 30 children (backfilled from the parent), 28 tenant-composite FKs, 24 parent `UNIQUE (id, tenant_id)`; shadow `TenantId` + `TenantStampInterceptor` | AUTO `OwnedChildTenancyTests` (7 per-family isolation cases + drift rejection with an accepted control); INSP measured `rca_record` 2 rows → owning tenant sees 1, foreign 0, nil tenant 0; **OQ-DB-02 executed** | Executed (dev), unsigned |
+| URS-102 | A value persisted in a state, status, role or classification column shall be one the application can actually produce; integrity hashes shall be well-formed. | `Hardening3_CheckDomains`: 64 enum domains derived from the C# enums + 2 closed literal sets + 5 hash-format constraints, `NOT VALID` → `VALIDATE` | Pre-flight `scripts/preflight-enum-domains.sql` (67 checks, 0 violations) — the **same generator** produces the scan and the constraints, so they cannot disagree; AUTO `CheckConstraintTests.Phase3_domains_reject_bogus_enum_values_and_malformed_hashes`; INSP 85 CHECKs, 0 left `NOT VALID`; **OQ-DB-03 executed** | Executed (dev), unsigned |
+| URS-103 | The schema shall be partition-ready: the tenant discriminator shall lead the primary key of every tenant-owned table, since PostgreSQL requires the partition key in every primary key and unique index and cannot convert an existing table into a partitioned one. | `Hardening5_CompositeKeys`: 88 tenant-first composite PKs; `department → branch` made composite; no `UNIQUE (id)` added (it would be illegal on a partitioned table) | INSP 88 composite PKs, **0** single-id PKs remain on a NOT NULL tenant table; the 4 nullable-tenant tables retain single keys by necessity; **OQ-DB-04 executed** | Executed (dev), unsigned |
+| URS-104 | Free-text fields shall not be bounded only by a column width: where the database limit is removed, the limit shall exist in the command validator, so input remains bounded at the API. | `Hardening1_TypesAndNames` (56 columns → `text`/`jsonb`); 17 FluentValidation rules added/extended | INSP 0 remaining `varchar(≥1000)`; the API-bound audit of all 56 columns is in `SCHEMA-HARDENING-PLAN.md` Appendix A2; **OQ-DB-05 executed** | Executed (dev), unsigned |
+| URS-105 | Database identifiers shall stay within PostgreSQL's limit, so no index or constraint name is silently truncated. | `Hardening1` §1.4: 3 EF-truncated names renamed and pinned with `HasDatabaseName`; abbreviation map in `CLAUDE.md` §5 | INSP **0** identifiers > 62 characters (re-checked after Phase 5 lengthened generated names); **OQ-DB-06 executed** | Executed (dev), unsigned |
+| URS-106 | A change to a record shall be attributed to the tenant that owns it, including changes to owned child records, so it appears in that tenant's own compliance view. | `FieldChangeInterceptor.TenantOf` (v1.51.2): `ITenantScoped` → **shadow** `TenantId` → `IOptionallyTenantScoped` → request tenant | AUTO `FieldChangeInterceptorTests.An_owned_childs_change_is_attributed_to_the_owner_tenant_on_an_elevated_write`; INSP live — provisioning wrote 536 `RolePermission` rows, **0 null**, visible to that tenant; **OQ-DB-07 executed** | Executed (dev), unsigned |
+| URS-107 | Referential integrity to the tenant table shall not depend on the order in which the ORM emits inserts within a transaction. | `Hardening6_DeferrableTenantFks`: the 5 `saas.tenant` FKs become `DEFERRABLE INITIALLY DEFERRED` | INSP 5/5 deferrable; live — tenant provisioning returns 201 (was 500); **OQ-DB-08 executed** | Executed (dev), unsigned |
 
 **Two defects found by this programme's own verification, both fixed and re-proven:**
 
@@ -252,11 +253,12 @@ witnessed manual confirmation is recorded per baseline convention.
 
 ### OQ manual/witnessed cases (templates)
 
-> **A.10 (schema hardening, v1.51.2) — NOT executed as protocol.** OQ-DB-01…08 below are
-> templates. The behaviour they describe was verified by engineering (catalog introspection,
-> 442 automated tests including 12 written for this programme, and live application checks that
-> found two defects — SH-D1, SH-D2 — both fixed and re-proven), but **no witnessed session has
-> been run**. That evidence attaches as supporting material; it is not the qualification.
+> **A.10 (schema hardening, v1.51.2) — EXECUTED 2026-08-01.** OQ-DB-01…08 were run as a
+> witnessed session: **23 checks, 23 passed, 0 failed, 0 deviations**, transcribed in
+> [`13-OQ-Execution-Record-SchemaHardening-v1.51.2.md`](13-OQ-Execution-Record-SchemaHardening-v1.51.2.md).
+> Three cases carry a deliberate **control step**, so a constraint that refuses everything could
+> not be mistaken for one that discriminates. Executed on the **development workstation** and
+> **unsigned** — it does not close DOC-001.
 
 > **Execution status (2026-07-29).** A witnessed session executed **18 cases** on the
 > **development** environment against v1.49.0, transcribed in
@@ -375,9 +377,9 @@ evidence.
 - [ ] Environment qualified (baseline IQ + Part B IQ-16..30) on the target/staging host.
 - [ ] Sign OQ-EXEC-NTQMS-002 (doc 12) witness/QA lines; disposition defect RP-D1's residual
       (pre-fix ledger rows keep an empty tenant id) and observation OBS-1.
-- [ ] Execute and witness the A.10 schema-hardening cases (OQ-DB-01…08) on a **qualified**
-      environment. The engineering evidence (introspection, 442 tests, live checks) attaches as
-      supporting evidence only — it is not the qualification.
+- [x] ~~Execute the A.10 schema-hardening cases (OQ-DB-01…08)~~ — done 2026-08-01 on the
+      development workstation, 23/23 passed (doc 13). **Still required:** re-execute on a
+      **qualified** environment and sign, for DOC-001.
 - [ ] Confirm the two permanent acceptances and two record dispositions recorded in A.10 are
       reflected in the site's deviation register.
 - [ ] Automated evidence engines attached: a green CI run (incl. the SCA + Trivy gates) +

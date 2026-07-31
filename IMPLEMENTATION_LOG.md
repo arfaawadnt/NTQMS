@@ -759,3 +759,20 @@ Replaces role-name authorization with tenant-configurable privileges end to end.
   supporting evidence only. Two permanent acceptances (user_account/outbox_event RLS) and two
   record dispositions (historical unattributed ledger rows) are recorded and need reflecting
   in the site deviation register.
+
+## OQ-DB-01..08 executed (2026-08-01) [EXECUTED on dev, UNSIGNED]
+
+- Witnessed session ran the 8 schema-hardening OQ cases: 23 checks, 23 passed, 0 failed,
+  0 deviations. Transcribed with verbatim actuals in
+  docs/validation/13-OQ-Execution-Record-SchemaHardening-v1.51.2.md (OQ-EXEC-NTQMS-003).
+- OQ-DB-02 proves isolation at BOTH layers separately, which a single probe would have
+  conflated: the read fence (A cannot see B's parent -> INSERT 0 0) and the structural fence
+  (elevated mismatched-tenant insert -> 23503 from the composite FK). Three cases carry a
+  control step so a constraint refusing everything could not pass as one that discriminates.
+- Observations: the composite FK's real name is fk_capa_action_nonconformance_tenant_id_nc_id
+  (EF regenerated it in Phase 5, superseding the Phase-4 name); the longest database identifier
+  is exactly 62 chars - the convention holds with zero margin.
+- Doc 06 A.10 status moved Template -> Executed (dev), unsigned; Part F checklist item ticked
+  with the qualified-environment re-execution still required. CSR rev 3.1: DOC-001 progress now
+  36 OQ cases across docs 09-13, all unsigned.
+- Does NOT close DOC-001 (dev workstation, unsigned), SEC-001 or OPS-001.

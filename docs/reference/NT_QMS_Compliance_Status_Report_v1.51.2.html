@@ -54,7 +54,7 @@
 <div class="wrap">
 <header>
   <h1>NT.QMS — Consolidated Compliance Status Report</h1>
-  <div class="id">CSR-NTQMS-001 <b>rev 3</b> · issued 2026-08-01 · target <code>v1.51.2</code>
+  <div class="id">CSR-NTQMS-001 <b>rev 3.1</b> · issued 2026-08-01 (OQ-DB executed same day) · target <code>v1.51.2</code>
     (commit <code>4be6b27</code>, CI all-green) · supersedes rev 2 (v1.50.0)</div>
 
   <div class="verdict">
@@ -108,8 +108,8 @@
     <td>Tenant fence extended to every tenant table incl. 30 owned children (cross-tenant children now
       structurally impossible); 71 CHECK constraints (14 → 85); 88 tenant-first composite keys, making the
       schema partition-ready; types, naming and API-side bounds corrected.</td>
-    <td>Catalogue introspection; 12 new tests; OQ-DB-01…08 <span class="pill p-warn">Template</span>;
-      URS-100…107</td>
+    <td>Catalogue introspection; 12 new tests; <b>OQ-DB-01…08 executed</b> 2026-08-01, 23/23 passed
+      (doc 13, <span class="pill p-warn">unsigned</span>); URS-100…107</td>
   </tr>
   <tr>
     <td><b>Verification integrity</b><br>VER-001</td>
@@ -219,9 +219,10 @@
     <td><span class="pill p-warn">High / P1</span></td></tr>
   <tr><td><b>DOC-001</b></td>
     <td>Formal validation execution and signatures on a qualified installation</td>
-    <td>Requires a qualified environment and QA/System-Owner signatures. Progress: 28 OQ cases executed on the
-      development workstation (docs 09–12) and transcribed; all remain <b>unsigned</b>, and the v1.51.2 cases
-      (OQ-DB-01…08) have not been executed at all.</td>
+    <td>Requires a qualified environment and QA/System-Owner signatures. Progress: <b>36 OQ cases</b> executed on
+      the development workstation and transcribed (docs 09–13) — including the v1.51.2 schema-hardening cases
+      OQ-DB-01…08, run 2026-08-01 with 23/23 checks passed. <b>All remain unsigned</b>, and none was executed on a
+      qualified installation, which is what this condition actually requires.</td>
     <td><span class="pill p-warn">Medium / P1</span></td></tr>
   <tr><td><b>OPS-001</b></td>
     <td>Staging bring-up: observability stack, alerts firing, 24-hour soak, load baseline</td>
