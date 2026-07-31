@@ -196,10 +196,25 @@ precisely the class of defect RLS exists to make impossible, and precisely what 
 the 30 owned children. The risk is accepted on the basis that the surface is small (27 sites),
 enumerated above, and gated by privileges.
 
-**Recommended (not implemented — outside this programme's scope):** an architecture test that
-fails the build if a new `db.Users` query has neither a tenant predicate nor an id-equality
-bound. That would convert the discipline back into a structural guarantee at compile time. Say
-the word and I will add it.
+**Guard implemented — `UserAccountTenantBoundTests`** (Architecture.Tests, 9 cases). It converts
+the discipline back into a build-time guarantee: every `db.Users` / `Set<UserAccount>()` query
+across Application, Infrastructure and WebApi must be bounded by a tenant predicate, a specific
+user/actor id, or an id set derived from a tenant-filtered query. Source-level by necessity —
+the bound lives in a LINQ predicate, which is not recoverable from compiled IL the way a type
+reference is, so NetArchTest (used by the sibling rules) cannot express it. Genuinely
+cross-tenant infrastructure opts out with a `tenant-unbounded:` comment stating why, so an
+exemption is a written decision rather than a silent omission — currently used exactly once, by
+the elevated startup role-backfill. The rule carries its own positive and negative cases, and
+was mutation-tested: an injected `db.Users.Where(u => u.IsActive)` fails the build with the
+offending file and line.
+
+**The guard found a real defect on its first run.** `GetRolesHandler` built its member-count map
+with `db.Users.Where(u => u.RoleId != null)` — an unqualified scan reading **every tenant's**
+users into memory. The response was not wrong (role ids are unique, so a tenant only read its
+own counts back out), but the query crossed the boundary and was one refactor away from leaking.
+Now bounded to the tenant's own role ids. Two further sites (`RolesSlice` lines 39 and 273) were
+correctly bounded by tenant-resolved *role* ids — a legitimate fourth shape the first version of
+the matcher did not recognise, now added.
 
 ### Revisit triggers
 

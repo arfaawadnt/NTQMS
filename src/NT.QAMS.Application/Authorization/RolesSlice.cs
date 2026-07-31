@@ -230,8 +230,13 @@ public sealed class GetRolesHandler(IAppDbContext db)
 {
     public async Task<IReadOnlyList<RoleSummaryDto>> Handle(GetRolesQuery q, CancellationToken ct)
     {
+        // Bound the member count to this tenant's roles. user_account has no RLS
+        // (accepted deviation), so an unqualified scan here reads every tenant's
+        // users into memory - harmless in the response only because role ids are
+        // unique, which is one refactor away from not being true.
+        var roleIds = await db.Roles.Select(r => r.Id).ToListAsync(ct);
         var members = await db.Users
-            .Where(u => u.RoleId != null)
+            .Where(u => u.RoleId != null && roleIds.Contains(u.RoleId!.Value))
             .GroupBy(u => u.RoleId!.Value)
             .Select(g => new { RoleId = g.Key, Count = g.Count() })
             .ToDictionaryAsync(x => x.RoleId, x => x.Count, ct);

@@ -154,6 +154,9 @@ public static class StartupSeeding
             .GroupBy(r => r.TenantId)
             .ToDictionary(g => g.Key, g => g.ToDictionary(r => r.Name, r => r.Id, StringComparer.Ordinal));
 
+        // tenant-unbounded: the backfill runs under Elevate() across every tenant
+        // by design - it exists precisely to reach accounts the request pipeline
+        // never sees. Bounded instead by the RoleId == null predicate.
         var unassigned = await db.Users
             .Where(u => u.RoleId == null && u.TenantId != null)
             .ToListAsync(cancellationToken);
