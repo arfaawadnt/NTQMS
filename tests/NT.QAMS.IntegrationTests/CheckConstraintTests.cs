@@ -79,4 +79,42 @@ public sealed class CheckConstraintTests(RealPostgresFixture fx)
 
         await tx.RollbackAsync();
     }
+
+    /// <summary>
+    /// Schema hardening Phase 3: the value-domain net now covers every
+    /// enum-backed column (67 domains) plus the five hash columns. One
+    /// representative per new constraint family, probed by direct SQL.
+    /// </summary>
+    [SkippableFact]
+    public async Task Phase3_domains_reject_bogus_enum_values_and_malformed_hashes()
+    {
+        Skip.IfNot(fx.Available, fx.Unavailable ?? "PostgreSQL unavailable");
+
+        using var db = fx.CreateContext(out var ctx);
+        ctx.Elevate();
+        await using var tx = await db.Database.BeginTransactionAsync();
+
+        // Enum domain on a Phase-3 table (equipment status - EquipmentStatus enum).
+        await db.Database.ExecuteSqlRawAsync("SAVEPOINT p1");
+        var statusAttack = () => db.Database.ExecuteSqlRawAsync(
+            "INSERT INTO qams.equipment_item (id, tenant_id, code, name, serial_number, status, calibration_interval_days, grace_period_days, created_at_utc) " +
+            "VALUES (gen_random_uuid(), gen_random_uuid(), 'CK-P3', 'probe', 'SN-1', 'Exploded', 30, 0, now())");
+        (await Assert.ThrowsAsync<PostgresException>(statusAttack)).SqlState.Should().Be(CheckViolation);
+        await db.Database.ExecuteSqlRawAsync("ROLLBACK TO SAVEPOINT p1");
+
+        // Literal-set domain on the append-only ledger (field_change.action).
+        var actionAttack = () => db.Database.ExecuteSqlRawAsync(
+            "INSERT INTO audit.field_change (id, entity_type, entity_id, action, property, occurred_at_utc, actor) " +
+            "VALUES (gen_random_uuid(), 'Probe', gen_random_uuid(), 'Nuked', 'p', now(), 'itest')");
+        (await Assert.ThrowsAsync<PostgresException>(actionAttack)).SqlState.Should().Be(CheckViolation);
+        await db.Database.ExecuteSqlRawAsync("ROLLBACK TO SAVEPOINT p1");
+
+        // Hash format: 64 chars of the wrong case is not a valid entry hash.
+        var hashAttack = () => db.Database.ExecuteSqlRawAsync(
+            "INSERT INTO qams.file_reference (id, tenant_id, file_name, content_type, size_bytes, sha256, storage_key, created_at_utc) " +
+            "VALUES (gen_random_uuid(), gen_random_uuid(), 'p.pdf', 'application/pdf', 1, upper(repeat('ab', 32)), 'x', now())");
+        (await Assert.ThrowsAsync<PostgresException>(hashAttack)).SqlState.Should().Be(CheckViolation);
+
+        await tx.RollbackAsync();
+    }
 }
