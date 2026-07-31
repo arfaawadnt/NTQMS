@@ -72,6 +72,31 @@ has acceptance criteria + a proving test. Summary:
   lives in the command validator (`MaximumLength`), not the column. Bounded codes, refs, enum
   strings and hashes keep explicit `varchar(n)` under 1000. Never drop a varchar bound without a
   matching validator rule.
+- **Composite primary keys (schema hardening Phase 5):** every table whose `tenant_id` is
+  NOT NULL has a **tenant-first** PK `(tenant_id, id)` - 88 of them - so the schema is
+  partition-ready (PostgreSQL requires the partition key in every PK and unique index, and
+  cannot convert an existing table into a partitioned one). A new tenant-scoped entity declares
+  `builder.HasKey(x => new { x.TenantId, x.Id });`, and an owned child declares
+  `child.HasKey("TenantId", "Id");` plus `child.WithOwner().HasForeignKey("TenantId", "<fk>")`.
+  **Do not add `UNIQUE (id)`** - a unique index that omits the partition key is illegal on a
+  partitioned table. The four nullable-tenant tables (`user_account`, `outbox_event`,
+  `audit.security_event`, `audit.field_change`) keep single-column PKs: a key column cannot be
+  null.
+- **Cross-aggregate FKs are tenant-composite:** `FOREIGN KEY (fk, tenant_id) REFERENCES parent
+  (id, tenant_id)`. This makes a child under another tenant's parent structurally impossible,
+  which a single-column FK never did. (PostgreSQL matches an FK target by column *set*, so the
+  order in the REFERENCES clause need not match the PK's.)
+- **Migrations that touch FORCE-RLS tables must declare a bypass.** FORCE row-level security
+  applies to the migration's own session *and to PostgreSQL's referential-integrity checks*.
+  Without it, a data-backfill `UPDATE ... FROM parent` silently updates **zero rows** and a
+  later `ADD CONSTRAINT ... FOREIGN KEY` fails because the RI check cannot see the parent. Put
+  `SELECT set_config('app.bypass_rls', 'on', true);` (transaction-local) at the top of **both**
+  `Up()` and `Down()` in any migration that backfills from, or adds an FK to, a FORCE-RLS table.
+- **EF's model snapshot does not learn raw-SQL DDL.** If a migration renames or replaces a
+  constraint via `migrationBuilder.Sql(...)`, EF still believes the old name, and the *next*
+  scaffolded migration will emit a drop for a constraint that no longer exists. Reconcile
+  generated names against `pg_constraint` before applying, and remember the `Down()` half must
+  drop what `Up()` *created*, not what it replaced.
 
 ## 6. Dev environment setup (Windows)
 - **.NET 9 SDK** (user-local): invoke as `"$LOCALAPPDATA/Microsoft/dotnet/dotnet.exe"`.

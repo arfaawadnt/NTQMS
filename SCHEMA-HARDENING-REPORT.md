@@ -1,0 +1,164 @@
+# Schema Hardening — Completion Report
+
+| Field | Value |
+| ----- | ----- |
+| Programme | 8 changes, delivered as 5 phased EF Core migrations (`Hardening1` … `Hardening5`) |
+| Database | `ntqams`, PostgreSQL 17, EF Core 9.0.18 + Npgsql |
+| Commits | `28ba880` P1 · `8be2c13` P2 · `ea9eb24` P3 · `9e7c3eb` P4 · `fdc08df` P5 (+ this docs pass) |
+| Plan | `SCHEMA-HARDENING-PLAN.md`, approved with recommendations after the discovery step |
+| Environment | Development workstation. **Not executed on a qualified/staging installation** |
+
+Every figure below was read from `pg_catalog` / `information_schema` after the migrations ran.
+Nothing here is inferred from the migration source.
+
+---
+
+## 1. What changed, per phase
+
+### Phase 1 — `Hardening1_TypesAndNames`
+
+| Change | Result |
+| ------ | ------ |
+| 1.1 `audit.security_event.ip_address` → `inet` | Raw SQL `USING ip_address::inet`. The CLR type stays `string` behind an EF value converter, because the endpoint returns the entity directly — an `IPAddress` property would have changed the wire contract |
+| 1.2 `varchar(≥1000)` → `text` | 55 columns (the 56th is 1.3). All matching `HasMaxLength` removed |
+| 1.3 `criteria_json` → `criteria jsonb` | Renamed end-to-end (aggregate, EF config, DTO, SPA model) |
+| 1.4 Index names | 3 EF-truncated names renamed and pinned with `HasDatabaseName`; abbreviation map added to `CLAUDE.md` |
+| Q6 validators | **17** FluentValidation rules added/extended so the bound moved from the column to the API |
+
+### Phase 2 — `Hardening2_RlsGapClosure`
+
+`audit.security_event` and (discovered) `qams.ref_counter` both gained ENABLE + FORCE RLS and a
+`tenant_isolation` policy. `GetSecurityEventsAsync` — the one ledger read with no tenant filter —
+now filters like its siblings.
+
+### Phase 3 — `Hardening3_CheckDomains`
+
+71 constraints: 64 enum domains + 2 closed literal sets + 5 hash formats, all `NOT VALID` then
+`VALIDATE`. Total user CHECKs 14 → 85.
+
+### Phase 4 — `Hardening4_ChildTenancy`
+
+30 owned child tables gained `tenant_id NOT NULL` (backfilled from the parent), RLS, and 28
+tenant-composite FKs backed by 24 parent `UNIQUE (id, tenant_id)`. 5 FKs to `saas.tenant`
+(`RESTRICT`) on the elevated-writer tables only.
+
+### Phase 5 — `Hardening5_CompositeKeys`
+
+88 tenant-first composite primary keys; `department → branch` converted to composite; ownership
+FKs widened. No `UNIQUE (id)` added.
+
+## 2. What the catalog proves
+
+| Assertion | Measured |
+| --------- | -------- |
+| Tables | 96 (`qams` 89 · `audit` 4 · `saas` 2 · `read` 1) |
+| FORCE-RLS tables / `tenant_isolation` policies | **90 / 90** |
+| RLS parity violations among NOT-NULL-tenant tables | **0** |
+| Tenant-first composite PKs | **88**; single-id PKs left with NOT NULL tenant: **0** |
+| Foreign keys | 36 (29 tenant-composite, 5 to `saas.tenant`, 2 to `user_account`) |
+| CHECK constraints | 85 (67 domain, 5 hash, 13 pre-existing); left `NOT VALID`: **0** |
+| Identifiers > 62 chars | **0** |
+| Guard triggers | **17**, all enabled (4 append-only + 13 `frozen_immutability`) |
+| Audit hash chain | `ok: true`, 82 entries, no break — after re-keying `audit_trail` |
+| Types | 172 `text`, 1 `jsonb`, 3 `inet` |
+
+**The headline result.** Before Phase 4, `SELECT * FROM qams.rca_record` returned every tenant's
+rows. Measured after: 2 rows total, demo-lab sees **1**, foreign rows **0**, nil tenant **0**;
+a child insert carrying a tenant different from its parent's is rejected `23503`, while the same
+insert with the parent's tenant is accepted.
+
+## 3. Defects found — and where they came from
+
+| # | Defect | Found by | Disposition |
+| - | ------ | -------- | ----------- |
+| 1 | **Login broke (HTTP 500) after `security_event` RLS.** `LoginHandler` writes tenant-stamped `LOGIN_*` events before any tenant context exists, so the new `WITH CHECK` refused them (42501) | Phase 2 **live browser check** — the 419-test suite passed, because functional tests run on InMemory where RLS does not exist | Fixed: both pre-auth handlers scope the request tenant as soon as the slug resolves. Side benefit — failed logins are now visible to their own tenant |
+| 2 | **Audit-ledger identity would have been corrupted.** `FieldChangeInterceptor.RenderKey` joins all PK properties, so `entity_id` silently became `"<tenant>\|<id>"` — a different value from every historical row and from what `GetFieldChangesQuery(entityId)` looks up | Phase 5 functional test | Fixed: renders the record identity only; tenant is already its own column. Verified live |
+| 3 | **`refresh_session.token_hash` is uppercase hex.** The brief specified `^[0-9a-f]{64}$` for all five hash columns; all 59 rows would have violated it and `VALIDATE` would have failed | Phase 3 **pre-flight scan** | Constraint matches the writer (`[0-9A-F]`); the other four stay lowercase |
+| 4 | **FORCE RLS blocks a migration's own work.** The Phase-4 backfill ran as a silent no-op (parents invisible to the tenant-less session) and the first composite FK then failed on a nil tenant. The `Down()` hits it differently: PostgreSQL's referential-integrity check is *itself* subject to FORCE RLS | Phase 4 round-trip | Both directions declare a transaction-local bypass. Written up in `CLAUDE.md` as a standing rule |
+| 5 | **EF's model snapshot never learns raw-SQL DDL.** Phase 4 renamed 28 FKs in SQL; Phase 5's scaffold then emitted drops for constraints that no longer existed | Phase 5 apply | 56 names reconciled against `pg_constraint`; `Down()` corrected so its drops target what `Up()` creates |
+
+### Mistakes I made during execution (recorded, not hidden)
+
+- A model-level PK convention that broke same-row owned types — abandoned for explicit `HasKey`.
+- A rewrite regex that hardcoded the builder parameter name `builder`, missing 23 configurations
+  — **and a verification script that reported a false pass**, because it matched
+  `HasIndex(… new { s.TenantId … })`. Both replaced with an indentation-scoped rewrite and a
+  check that looks only at `HasKey` lines.
+- A later regex that rewrote a `HasKey` *inside* an owned-collection lambda; reverted with
+  `git checkout` and redone.
+- The Phase-2 `ref_counter` test invented tenant GUIDs; Phase 4's new tenant FK correctly
+  rejected them. The FK was right, the test was wrong.
+
+## 4. Contradiction in the approved plan (Q5)
+
+`SCHEMA-HARDENING-PLAN.md` §Phase 5 recommended **keeping** `UNIQUE (id)`; §10's decision table
+recommended **dropping** it. You approved "with recommendations", so the conflict was mine to
+resolve and I should have caught it before you approved.
+
+**Resolved: no `UNIQUE (id)`** — for a reason neither entry gave. PostgreSQL forbids a unique
+index that omits the partition key, so keeping it would defeat the whole purpose of Phase 5.
+Reversible in one migration.
+
+## 5. Corrections to the brief's assumptions
+
+| Brief said | Measured |
+| ---------- | -------- |
+| 27 owned child tables (doc: 33) | **30** — the doc predates v1.51's Role Privilege module |
+| ~53 status-ish columns | **47** (67 enum-backed columns in total, all constrained) |
+| ≥ 1 index name already truncated at 63 | **0 stored names exceed 62**; EF had truncated 2 client-side to exactly 62, mid-word |
+| 88 tables in Phase 5 scope | **88 keyed**, from 84 single-id + 3 natural-key children + 2 audit ledgers − 1 already tenant-first |
+| `docs/reference/NT_QMS_Database_Architecture.html` | Does not exist. The `.md` is the design document; `NT_QMS_Database_AsBuilt.md` was created for the as-built state (Q4) |
+| 93 tables / 28 FKs / 14 CHECKs | 96 / 36 / 85 after this programme |
+
+## 6. Verification performed
+
+- **Round-trip** `up → down → up` on every phase, against the real database.
+- **Introspection** after each phase (§2) — asserted from the catalog, never from source.
+- **432 backend tests green** (228 domain, 72 application, 24 architecture, 32 integration
+  incl. 1 skipped, 77 functional) — was 419 before the programme; **13 new tests**:
+  4 RLS (security_event/ref_counter/login-shape), 9 owned-child tenancy (7 per-family isolation
+  cases, drift rejection with control, and a structural sweep that fails if any future table
+  carries a NOT NULL tenant without full RLS), plus a Phase-3 CHECK-family probe.
+- **Live application** after each risky phase: sign-in, NC workflow through triage → RCA → CAPA,
+  compliance ledger, dashboard; 8 API endpoints 200; console clean; hash chain verified.
+- **Least privilege** — `RuntimeRolePrivilegeTests` passes; `DatabaseRoleGuard` unchanged.
+
+**Environment caveat:** dev is owner-role, so `qams_app` holds grants it will not hold in
+production. The audit `SELECT`+`INSERT`-only control lives in `deploy/harden-runtime-role.sql`
+and must be re-verified on a role-split installation.
+
+## 7. Also-done
+
+- `deploy/migrations.sql` regenerated `--idempotent`: **10 → 55 migrations**
+  (`InitialFoundation` … `Hardening5_CompositeKeys`).
+- `CLAUDE.md` §5: index abbreviation map, `varchar`/`text` rule, composite-PK convention,
+  tenant-composite FK rule, and the two migration lessons (FORCE-RLS bypass; EF snapshot vs
+  raw SQL).
+- `docs/reference/NT_QMS_Database_AsBuilt.md` created (Q4) — measured as-built state with
+  re-runnable verification queries.
+- `deploy/BACKUP-RESTORE-DR.md` §5: restore gate now asserts the RLS parity query, the 17 guard
+  triggers, and `(tenant_id, id)` row identity in manifests.
+- Pre-flight scripts kept re-runnable: `scripts/preflight-data-checks.sql` (33 checks),
+  `scripts/preflight-enum-domains.sql` (67 checks).
+
+## 8. Follow-up backlog (reported, not implemented)
+
+| # | Item | Rationale |
+| - | ---- | --------- |
+| B1 | Partition `audit.audit_trail` (HASH `tenant_id`), `field_change`/`security_event` (RANGE monthly), `outbox_event` (RANGE → `DROP PARTITION` purge) | Phase 5 made the schema ready; enabling needs volume data, an ops window, and a key decision for the four nullable-tenant tables |
+| B2 | `citext` or lower-normalisation for `user_account.email` | `Alice@x.com` and `alice@x.com` are two accounts under `UNIQUE (tenant_id, email)`; needs dedup analysis first |
+| B3 | Actor-column naming: `_by_user_id` (uuid) vs `_by_name` (text) | `created_by`/`modified_by` are `text` while five `_by` columns are `uuid` — same suffix, different type |
+| B4 | Split polymorphic `subject_ref` (`MODULE:REF`) | `archive_entry` already models the target shape with `source_module` + `source_ref` |
+| B5 | Orphan detection for `file_reference` by-id edges | `document_version.file_id`, `archive_entry.snapshot_file_id` have no FK |
+| B6 | Populate `security_event.ip_address` | The column is `inet` and correct, but nothing writes it. GDPR note: IPs are personal data — needs a retention rule |
+| B7 | Type `QcRun.Outcome` as `WestgardOutcome` | Closes the string/enum gap the Phase-3 CHECK papers over |
+| B8 | Composite FK `user_account(role_id) → role` | No FK exists today; deferred because `user_account` keeps a single-column PK |
+| B9 | RLS for `user_account` / `outbox_event` | Needs a policy shape that tolerates a null tenant, or a structural split of platform vs tenant accounts |
+| B10 | Disposition pre-RP-D1 ledger rows with an empty tenant | Append-only ledger, not restated — QA decision |
+
+## 9. Status
+
+The eight requested changes are delivered, verified by introspection and by live use, and
+committed. Two items need your decision rather than more engineering: **B10** (the historical
+ledger rows) and whether **B9** is accepted permanently or scheduled. Nothing in this programme
+has been executed on a qualified environment — that remains open, as it was before it started.
