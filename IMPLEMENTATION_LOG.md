@@ -717,3 +717,23 @@ Replaces role-name authorization with tenant-configurable privileges end to end.
   module; e2e Playwright scenario; per-branch RLS at the DB layer (app-layer
   filter + guard only); removing the now-unused Roles.cs group constants
   (kept while functional tests reference tier logins).
+
+## Role Privilege module OQ execution + defect RP-D1 (2026-07-31) [EXECUTED - awaiting witness signature]
+
+- OQ executed live against dev (doc 12, OQ-EXEC-NTQMS-002): 10 cases / 30 checks
+  on a dedicated tenant (oq-roles-103114) incl. a 25-cell seeded-role deny
+  matrix. 29/30 first-pass; URS-095..099 registered with trace.
+- DEFECT RP-D1 (found by OQ-RP-09): UserAccount events (UserRoleAssigned,
+  UserScopeChanged, and pre-existing UserLockedOut) landed in the audit ledger
+  with tenant_id = empty -> invisible to the tenant's own compliance view,
+  because the outbox drain stamped tenant only from ITenantScoped and
+  UserAccount deliberately isn't. Fix: IOptionallyTenantScoped (SharedKernel)
+  on UserAccount + outbox fallback. Pinned by UserEventTenantStampTests (2);
+  OQ-RP-09 re-executed to Pass (events at ledger sequences 14/15 with the
+  correct tenant). Historical rows keep the empty tenant (append-only ledger);
+  QA to disposition. 419 backend tests green post-fix.
+- OBS-1: GovernanceTests' migration round-trip on the shared dev DB drops/
+  recreates the newest migration's tables (roles vanished mid-session; SPA
+  403s). Startup backfill self-healed on next boot (90 roles / 18 tenants,
+  0 unassigned) - by design. Ops note: restart the API after running the
+  integration suite on dev; custom dev-only roles/scopes are lost by that test.

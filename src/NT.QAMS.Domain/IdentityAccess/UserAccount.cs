@@ -1,3 +1,4 @@
+using NT.QAMS.SharedKernel.MultiTenancy;
 using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Domain.IdentityAccess;
@@ -23,7 +24,7 @@ public enum UserRole
 /// Carries the authentication-hardening state: lockout (FR-AUTH-02), TOTP MFA
 /// (FR-AUTH-01), and the salted e-signature PIN hash (21 CFR Part 11).
 /// </summary>
-public sealed class UserAccount : AggregateRoot
+public sealed class UserAccount : AggregateRoot, IOptionallyTenantScoped
 {
     public const int MaxFailedAttempts = 5;
     public const int LockoutMinutes = 30;

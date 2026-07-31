@@ -48,7 +48,12 @@ public sealed class OutboxInterceptor(IClock clock) : SaveChangesInterceptor
                 continue;
             }
 
-            var tenantId = (entry.Entity as ITenantScoped)?.TenantId;
+            // RP-D1: events must be attributed to the owning tenant even when the
+            // aggregate is only optionally tenant-scoped (user accounts) - an
+            // access-control change invisible to its own tenant's audit trail
+            // defeats the purpose of recording it.
+            var tenantId = (entry.Entity as ITenantScoped)?.TenantId
+                ?? (entry.Entity as IOptionallyTenantScoped)?.TenantId;
 
             foreach (var domainEvent in entry.Entity.DomainEvents)
             {
