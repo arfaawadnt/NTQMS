@@ -4,6 +4,12 @@
 Version of the system under test: **v1.51.2** (repo `D:\SAAS\QAMS\21-7\NT.QAMS`, branch `master`).
 Inspection date: 2026-08-01.
 
+> **Amended 2026-08-01 (commit `1aa3803` → this commit).** Five as-built claims were re-measured
+> against the live build and corrected: the `audit.security_event` RLS gap (closed in v1.51.2, and the
+> original text told authors to write a failing test for it), the endpoint-gating mechanism, the role
+> enum's remaining purpose, the requirement-ID ceiling, and the test baseline. Corrections are marked
+> **[corrected 2026-08-01]** in place. Everything else is as originally authored.
+
 ---
 
 ## 1. VERIFIED as-built stack (measured from the repository, not assumed)
@@ -35,7 +41,7 @@ Inspection date: 2026-08-01.
 ## 2. VERIFIED functional facts (cite these; do not re-invent)
 
 ### Identity & access
-- Roles are a fixed enum `UserRole` — `PlatformAdmin=0, TenantAdmin=1, QualityManager=2, DepartmentHead=3, Analyst=4, ExternalAuditor=5` (`src/NT.QAMS.Domain/IdentityAccess/UserAccount.cs:10`).
+- **[corrected 2026-08-01]** The enum `UserRole` — `PlatformAdmin=0, TenantAdmin=1, QualityManager=2, DepartmentHead=3, Analyst=4, ExternalAuditor=5` (`src/NT.QAMS.Domain/IdentityAccess/UserAccount.cs:10`) — still exists, but since v1.51.0 it is the **platform/tenant structural tier, not the authorization mechanism**. Authorization comes from tenant-defined roles over the permission catalogue (see *Authorization / privileges* below). Do not write tests that assume a fixed role grants a fixed capability.
 - `UserAccount.MaxFailedAttempts = 5`, `UserAccount.LockoutMinutes = 30` (same file, lines 29–30).
 - `UserAccount` is `IOptionallyTenantScoped` — deliberately **outside RLS** (accepted deviation B9, guarded by `UserAccountTenantBoundTests`). Platform admins have no tenant.
 - **MFA is per-tenant OPTIONAL, default OFF** — `TenantSettings.RequireMfaForPrivilegedRoles` (column `require_mfa_privileged`, default `false`), platform-admin fallback config `Security:RequireMfaForPrivilegedRoles` (default `false`). TOTP RFC 6238. The brief's claim "all active accounts require MFA" is **NOT the implemented behaviour** → Gap.
@@ -56,7 +62,7 @@ Inspection date: 2026-08-01.
 - `PermissionAction` values seen in use: `View, Create, Edit, Approve, Void, Sign, Export, Manage`.
 - Action bundles: `FullRecordLifecycle` = View/Create/Edit/Approve/Void/Export; `SignedRecordLifecycle` = + Sign; `ReadOnlyModule` = View/Export; `ConfigurationModule` = View/Manage.
 - **The brief's privilege codes (`USER.CREATE`, `DOC.APPROVE`, `NCR.TRIAGE`, `EQUIP.CALIB_SCHED`, …) DO NOT EXIST** in this build. Map each to its real `{module}.{action}` equivalent in the Role & Permission Matrix and record the naming divergence once as a Gap — do not write tests against the fictional codes.
-- Endpoint gating additionally uses `[Authorize(Roles=…)]` via central constants `NT.QAMS.WebApi.Authorization.Roles` (groups `QmOrAdmin`, `QmAdminAuditor`, `QmDeptAdmin`, `TenantAdminOnly`) — 120 call sites. `ExternalAuditor` is **read-only**; any new write command needs a policy attribute or `CommandPolicyTests` fails CI.
+- **[corrected 2026-08-01]** Endpoint gating is `[RequirePermission(module, action)]` — **144 call sites** across the controllers. v1.51.0 converted the former `[Authorize(Roles=…)]` gates; exactly **one** remains, guarding the platform (non-tenant) surface, and `NT.QAMS.WebApi.Authorization.Roles` now governs that surface only. Command-level gating is `[RequirePermissionPolicy]`, with `RequireInternalActor` retained as tier defence-in-depth. Any new write command still needs a policy attribute or `CommandPolicyTests` fails CI.
 - Data-scoped access: `qams.role`, `qams.role_permission`, `qams.user_branch_access`, `qams.user_department_access`, `user_account.role_id` (v1.51.0 Role Privilege module).
 
 ### Tenancy & RLS
@@ -65,7 +71,7 @@ Inspection date: 2026-08-01.
 - `audit.*` schema policies are deliberately **relaxed on WRITE**: `WITH CHECK (tenant_id IS NULL OR tenant_id = GUC OR bypass)` — audit ledgers must accept null-tenant appends (a failed pre-auth login writes a null-tenant `field_change` row). `qams.*` stays strict.
 - Elevation is explicit: `ICurrentTenant.IsElevated` / `ICurrentTenantSetter.Elevate()`, used by exactly the trusted cross-tenant paths (`ProvisionTenant`, `OutboxProcessor`, `ScheduledSweepService`, `KpiSnapshotService`, LOV backfill).
 - **Accepted deviation B9:** `user_account` and `outbox_event` stay outside RLS (nullable tenant).
-- **Known open gap:** `audit.security_event` has the append-only trigger but **no RLS policy** — its store reads are not tenant-filtered. Both RLS migrations iterated `pg_policies` and therefore skipped it. This is a real, unfixed finding — write it up as a Gap AND author the failing-condition test.
+- **[corrected 2026-08-01] CLOSED — do not author a failing-condition test.** `audit.security_event` formerly had the append-only trigger but **no RLS policy** (both earlier RLS migrations iterated `pg_policies` and so skipped it), and its store reads were not tenant-filtered. Both halves were fixed in v1.51.2 by `Hardening2_RlsGapClosure`: measured now `rls=true force=true policy=tenant_isolation`, and `ComplianceLedgerStore.GetSecurityEventsAsync` filters by tenant like its siblings. Author **positive** isolation cases against it (see `SecurityEventRlsTests`, and OQ-DB-01 in `docs/validation/13-OQ-Execution-Record-SchemaHardening-v1.51.2.md`). The **accepted, permanent** RLS exceptions are `user_account` and `outbox_event` only — those are deviation B9, not defects.
 - Schema hardening (v1.51.x): tenant-first composite PKs `(tenant_id, id)` on 88 tables, **no `UNIQUE(id)`**; 36 FKs (29 tenant-composite CASCADE, 5 DEFERRABLE INITIALLY DEFERRED to `saas.tenant`, 2 to `user_account`); 85 CHECK constraints; **`xmin` concurrency token (there is no `row_version` column)**.
 - New `ITenantScoped` tables need RLS added in their **own** migration — EF will not generate it.
 
@@ -107,7 +113,7 @@ Inspection date: 2026-08-01.
 - Change-request route is **`/api/changes`** (not `/api/change-requests`).
 - 41 controllers; 86 `path:` entries in `frontend/src/app/app.routes.ts`.
 - Frontend tests: **15 `.spec.ts` files** (Jasmine/Karma) + **3 Playwright e2e specs** (`auth`, `regulated-workflow`, `a11y` with `@axe-core/playwright`).
-- Backend test projects: Domain.UnitTests (43 files), Application.UnitTests (23), WebApi.FunctionalTests (31), IntegrationTests (15), Architecture.Tests (10), LoadTests (4, **outside the solution** — run with `dotnet run`). Reported green baseline **≈436 backend tests**.
+- Backend test projects: Domain.UnitTests (43 files), Application.UnitTests (23), WebApi.FunctionalTests (31), IntegrationTests (15), Architecture.Tests (10), LoadTests (4, **outside the solution** — run with `dotnet run`). **[corrected 2026-08-01]** Green baseline **446 backend tests** (228 domain / 72 application / 33 architecture / 31 integration +1 skipped / 82 functional), plus 76 frontend unit and 6 Playwright e2e. Per-run history: `docs/validation/verification-log.md`.
 - CI jobs (`.github/workflows/ci.yml`): `build-test`, `frontend`, `container`. Gates include .NET SCA, npm SCA against `.github/npm-audit-allowlist.txt` (currently empty), Trivy image scan, non-root container assertion, module-boundary + API-surface-snapshot merge gates, axe a11y.
 - No PDF **watermark** implementation ("OBSOLETE - UNCONTROLLED") was found anywhere in `src` → Gap.
 
@@ -160,7 +166,7 @@ Examples: `TC-AUTH-API-001`, `TC-TENANT-RLS-014`, `TC-QC-WESTGARD-007`, `TC-COMP
 
 **Gap IDs:** `GAP-<MODULE>-<NNN>`. **Risk IDs:** reuse `docs/validation/02-Functional-Risk-Assessment.md` IDs where they exist; otherwise mint `RSK-<MODULE>-<NNN>` and say so.
 
-**Requirement IDs:** the authoritative set is `URS-001`…`URS-055` in `docs/validation/01-User-Requirements-Specification.md`, extended by `URS-089`…`URS-094` (added at v1.50.0). Trace to those first. Where no URS requirement covers the behaviour, trace to the source file and open a Gap for the missing requirement.
+**Requirement IDs [corrected 2026-08-01]:** the baseline set is `URS-001`…`URS-055` in `docs/validation/01-User-Requirements-Specification.md`. Everything after the 1.0 baseline — `URS-056`…`URS-107` — is defined in `docs/validation/06-Revalidation-Delta-v1.38-v1.50.md` **Part A**, which is their single source of truth (A.9 role privileges `URS-095`…`099`; A.10 schema hardening `URS-100`…`107`). Trace to those first. Where no URS requirement covers the behaviour, trace to the source file and open a Gap for the missing requirement.
 
 ---
 
