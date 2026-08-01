@@ -263,6 +263,8 @@ export class ShellComponent {
         key: 'overview', label: 'nav.groupOverview',
         items: [
           { path: '/dashboard', label: 'nav.dashboard', icon: 'dashboard' },
+          { path: '/quality-analytics', label: 'nav.qualityAnalytics', icon: 'analytics',
+            visible: () => this.perms.can('reports.view') },
           { path: '/tasks', label: 'nav.tasks', icon: 'tasks' },
           { path: '/notifications', label: 'nav.notifications', icon: 'bell' },
           { path: '/manual', label: 'nav.manual', icon: 'manual' },

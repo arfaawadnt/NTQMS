@@ -156,6 +156,163 @@ export interface SlaCompliance {
   computedAtUtc: string;
 }
 
+// ── Quality analytics ────────────────────────────────────────────────────────
+// Mirrors NT.QAMS.Contracts.Reporting. A `null` percentage means "no population
+// to measure", which the UI must render as an em dash — never as 0%.
+
+export interface CategoryCount { label: string; count: number; }
+
+export interface AnalyticsRow {
+  reference: string;
+  title: string;
+  detail: string | null;
+  status: string;
+}
+
+export interface DocumentControlStats {
+  totalActive: number;
+  current: number;
+  percentCurrent: number | null;
+  overdueReviews: number;
+  dueWithin30: number;
+  due31To60: number;
+  due61To90: number;
+  acknowledgementsRecorded: number;
+  upcomingReviews: AnalyticsRow[];
+}
+
+export interface NcCapaStats {
+  openNcs: number;
+  totalNcs: number;
+  overdueCapa: number;
+  totalCapa: number;
+  capaClosedOnTime: number;
+  capaClosedTotal: number;
+  capaOnTimePercent: number | null;
+  /** Not-overdue rate — the figure the composite score uses. */
+  capaOnSchedulePercent: number | null;
+  byStatus: CategoryCount[];
+  bySource: CategoryCount[];
+  byDepartment: CategoryCount[];
+  active: AnalyticsRow[];
+}
+
+export interface ComplaintsStats {
+  open: number;
+  total: number;
+  resolvedWithinSla: number;
+  resolvedTotal: number;
+  percentWithinSla: number | null;
+  averageResolutionDays: number | null;
+  byChannel: CategoryCount[];
+  active: AnalyticsRow[];
+}
+
+export interface AuditStats {
+  completed: number;
+  totalPlanned: number;
+  planCompletionPercent: number | null;
+  majorFindings: number;
+  minorFindings: number;
+  observations: number;
+  recent: AnalyticsRow[];
+}
+
+export interface EquipmentStats {
+  total: number;
+  calibrationCurrent: number;
+  calibrationCompliancePercent: number | null;
+  outOfService: number;
+  availabilityPercent: number | null;
+  overdueCalibration: number;
+  byStatus: CategoryCount[];
+  upcomingCalibrations: AnalyticsRow[];
+}
+
+export interface CompetencyStats {
+  authorized: number;
+  total: number;
+  percentCompetent: number | null;
+  expiringWithin90: number;
+  revoked: number;
+  pendingTraining: number;
+  recent: AnalyticsRow[];
+}
+
+export interface PtStats {
+  satisfactory: number;
+  questionable: number;
+  unsatisfactory: number;
+  pending: number;
+  total: number;
+  satisfactionRatePercent: number | null;
+  recent: AnalyticsRow[];
+}
+
+export interface SupplierStats {
+  approved: number;
+  total: number;
+  approvedPercent: number | null;
+  suspended: number;
+  averageEvaluationScore: number | null;
+  recent: AnalyticsRow[];
+}
+
+export interface RiskMatrixCell { likelihood: number; impact: number; count: number; }
+
+export interface RiskStats {
+  highOrExtreme: number;
+  total: number;
+  highMitigated: number;
+  highMitigatedPercent: number | null;
+  overdueTreatments: number;
+  matrix: RiskMatrixCell[];
+  top: AnalyticsRow[];
+}
+
+export interface QualityHealthComponent {
+  category: string;
+  weight: number;
+  achievedScore: number | null;
+  contributed: boolean;
+  excludedReason: string | null;
+}
+
+export interface QualityHealthScore {
+  score: number | null;
+  components: QualityHealthComponent[];
+  contributingCategories: number;
+  totalCategories: number;
+}
+
+export interface QualityAnalyticsScope {
+  branchId: string | null;
+  departmentId: string | null;
+  filterApplied: boolean;
+  /** Sections a branch/department filter could not narrow (no attribution on the record). */
+  unscopedSections: string[];
+  /** Sections omitted because the caller lacks the module's view permission. */
+  hiddenSections: string[];
+}
+
+export interface QualityAnalytics {
+  health: QualityHealthScore;
+  documentControl: DocumentControlStats | null;
+  ncCapa: NcCapaStats | null;
+  complaints: ComplaintsStats | null;
+  audits: AuditStats | null;
+  equipment: EquipmentStats | null;
+  competency: CompetencyStats | null;
+  proficiencyTesting: PtStats | null;
+  suppliers: SupplierStats | null;
+  risk: RiskStats | null;
+  scope: QualityAnalyticsScope;
+  computedAtUtc: string;
+}
+
+export interface QualityHealthWeight { category: string; weight: number; }
+export interface QualityHealthProfile { weights: QualityHealthWeight[]; }
+
 // ── Complaints ───────────────────────────────────────────────────────────────
 
 export const COMPLAINT_CHANNELS = ['Phone', 'Email', 'Portal', 'InPerson', 'Letter'] as const;

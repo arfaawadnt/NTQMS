@@ -103,6 +103,7 @@ public sealed class AppDbContext(
     public DbSet<WorkTask> WorkTasks => Set<WorkTask>();
     public DbSet<EscalationTimer> EscalationTimers => Set<EscalationTimer>();
     public DbSet<KpiSnapshot> KpiSnapshots => Set<KpiSnapshot>();
+    public DbSet<QualityHealthProfile> QualityHealthProfiles => Set<QualityHealthProfile>();
     public DbSet<FieldChangeRecord> FieldChanges => Set<FieldChangeRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

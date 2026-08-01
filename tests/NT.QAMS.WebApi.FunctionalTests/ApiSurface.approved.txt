@@ -107,6 +107,8 @@ GET /api/reference-standards/{id}
 GET /api/reports/kpi-history
 GET /api/reports/kpis
 GET /api/reports/nc-pareto
+GET /api/reports/quality-analytics
+GET /api/reports/quality-health-profile
 GET /api/reports/sla-compliance
 GET /api/risks
 GET /api/risks/{id}
@@ -215,6 +217,8 @@ GET /api/v{version}/reference-standards/{id}
 GET /api/v{version}/reports/kpi-history
 GET /api/v{version}/reports/kpis
 GET /api/v{version}/reports/nc-pareto
+GET /api/v{version}/reports/quality-analytics
+GET /api/v{version}/reports/quality-health-profile
 GET /api/v{version}/reports/sla-compliance
 GET /api/v{version}/risks
 GET /api/v{version}/risks/{id}
@@ -631,6 +635,7 @@ PUT /api/org-context/interested-parties/{id}
 PUT /api/org-context/issues/{id}
 PUT /api/qc/profiles/{id}/targets
 PUT /api/quality-policy/{id}
+PUT /api/reports/quality-health-profile
 PUT /api/roles/{id}
 PUT /api/roles/{id}/permissions
 PUT /api/sigma-assessments/{id}
@@ -643,6 +648,7 @@ PUT /api/v{version}/org-context/interested-parties/{id}
 PUT /api/v{version}/org-context/issues/{id}
 PUT /api/v{version}/qc/profiles/{id}/targets
 PUT /api/v{version}/quality-policy/{id}
+PUT /api/v{version}/reports/quality-health-profile
 PUT /api/v{version}/roles/{id}
 PUT /api/v{version}/roles/{id}/permissions
 PUT /api/v{version}/sigma-assessments/{id}

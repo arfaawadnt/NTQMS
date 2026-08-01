@@ -139,8 +139,10 @@ A `sealed record`, past-tense, deriving from `DomainEvent` (which supplies
 ```csharp
 public sealed record NcRaised(Guid NcId, string NcRef, string Title, int Severity, int Rpn) : DomainEvent;
 ```
-**Do not put `TenantId` in the payload** — the outbox attributes tenancy itself (via `ITenantScoped`
-or `IOptionallyTenantScoped`).
+**Do not put `TenantId` in the payload of a new event** — the outbox attributes tenancy itself (via
+`ITenantScoped` / `IOptionallyTenantScoped`), so a payload copy is redundant and can drift. 9 of the
+32 existing events still carry it; the v1.51 `Role*` events do not. Follow the newer convention and
+leave the legacy ones alone — renaming an event type breaks replay (below).
 
 Three transactional hops: `OutboxInterceptor` drains events into `outbox_event` in the *same*
 SaveChanges (so an event without its change is impossible), `OutboxProcessor` claims rows with

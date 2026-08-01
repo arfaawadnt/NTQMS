@@ -87,6 +87,7 @@ public interface IAppDbContext
     DbSet<WorkTask> WorkTasks { get; }
     DbSet<EscalationTimer> EscalationTimers { get; }
     DbSet<KpiSnapshot> KpiSnapshots { get; }
+    DbSet<QualityHealthProfile> QualityHealthProfiles { get; }
     DbSet<FieldChangeRecord> FieldChanges { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

@@ -41,6 +41,11 @@ export const routes: Routes = [
             loadComponent: () => import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent),
           },
           {
+            path: 'quality-analytics',
+            loadComponent: () =>
+              import('./features/dashboard/quality-analytics.component').then((m) => m.QualityAnalyticsComponent),
+          },
+          {
             path: 'settings/security',
             loadComponent: () => import('./features/security/security-settings.component').then((m) => m.SecuritySettingsComponent),
           },

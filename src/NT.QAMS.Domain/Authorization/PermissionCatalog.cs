@@ -176,7 +176,11 @@ public static class PermissionCatalog
         // ── Operations ───────────────────────────────────────────────────────
         new(Tasks, GroupOperations, "perm.mod.tasks", [PermissionAction.View, PermissionAction.Create, PermissionAction.Edit, PermissionAction.Manage]),
         new(Notifications, GroupOperations, "perm.mod.notifications", [PermissionAction.View, PermissionAction.Manage]),
-        new(Reports, GroupOperations, "perm.mod.reports", ReadOnlyModule),
+        // Reporting carries Manage in addition to the read-only pair: the composite
+        // Quality Health Score is a governance figure, so tuning its category
+        // weighting is a privileged act distinct from reading the analytics.
+        new(Reports, GroupOperations, "perm.mod.reports",
+            [PermissionAction.View, PermissionAction.Export, PermissionAction.Manage]),
 
         // ── Administration ───────────────────────────────────────────────────
         new(Organization, GroupAdministration, "perm.mod.organization",

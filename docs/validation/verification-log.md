@@ -43,6 +43,7 @@ exactly how two wrong totals reached the commit record (see the note below the t
 
 | Date | Commit | Env | Domain | App | Arch | Integ | Func | Backend | FE unit | E2E | Result |
 | ---- | ------ | --- | -----: | --: | ---: | ----: | ---: | ------: | ------: | --: | ------ |
+| 2026-08-01 | `357ce2e` | dev + real PG | 237 | 72 | 33 | 31 (+1 skip) | 82 | **455** | 81 | — | All green (Quality Analytics) |
 | 2026-08-01 | `063f98f` | dev + real PG | 228 | 72 | 33 | 31 (+1 skip) | 82 | **446** | 76 | 6 | **All green** |
 | 2026-08-01 | `4be6b27` | dev + real PG | 228 | 72 | 33 | 31 (+1 skip) | 82 | **446** | 76 | 6 | All green |
 | 2026-08-01 | `4be6b27` | dev + real PG | 228 | 72 | 33 | 31 (+1 skip) | 82 | **446** | 76 | 6 | All green (VER-001 tests added) |
