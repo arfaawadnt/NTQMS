@@ -10,14 +10,21 @@ standing rules below exactly. They override default behaviour.
 ## 1. What this is
 NT.QMS is a **multi-tenant SaaS Quality Management System** for ISO 17025 / 15189 /
 9001 / 21 CFR Part 11 / GMP laboratories.
-**Stack:** .NET 9 · PostgreSQL 17 (Npgsql, snake_case) · Angular 18 · Clean Architecture + CQRS.
+**Stack:** .NET 9 · PostgreSQL 17 (Npgsql, snake_case) · Angular 22 · Clean Architecture + CQRS.
+
+> **Before building anything, load the reference skills in `.claude/skills/`** — they carry the
+> as-built detail this file only summarises: `ntqms-architecture` (end-to-end feature playbook),
+> `ntqms-database` (schema/migration law), `ntqms-frontend` (Angular conventions),
+> `ntqms-compliance` (what a change obliges you to document and prove).
 **Solution layout:** `src/NT.QAMS.{Domain, Application, Infrastructure, WebApi, Contracts, SharedKernel}` + `tests/NT.QAMS.{Domain.UnitTests, Application.UnitTests, Architecture.Tests, IntegrationTests, WebApi.FunctionalTests}` + `frontend/` (Angular).
 
 ## 2. Standing rules (the "law" — never break these)
 1. **Do NOT redesign the domain, database, or public APIs.** The architecture docs in
    `docs/reference/` are law — extend within them, don't re-architect.
-2. **No magic strings / magic numbers.** Roles live in `WebApi/Authorization/Roles.cs`;
-   error codes are structured (`NC-001`, `SOD-AQ-001`, …); config is typed/centralized.
+2. **No magic strings / magic numbers.** Permissions come from `PermissionCatalog` constants
+   (never a literal key string); error codes are structured (`NC-001`, `SOD-AQ-001`, …); config
+   is typed/centralized. `WebApi/Authorization/Roles.cs` now governs the **platform** surface
+   only — see rule 9.
 3. **No dead code, no TODOs, no mocks, no fake/placeholder screens** in production paths.
 4. **XML doc comments** on public domain/application types; **strict TypeScript, no `any`**.
 5. **Report gaps honestly.** Never claim compiled/tests-pass/migrations-applied unless you
@@ -29,22 +36,43 @@ NT.QMS is a **multi-tenant SaaS Quality Management System** for ISO 17025 / 1518
    global query filter AND PostgreSQL FORCE RLS. See rule in §5.
 8. **Commit discipline:** work on `master`; commit/push only when asked; end commit
    messages with `Co-Authored-By: Claude <noreply@anthropic.com>` (use the current model).
+   **Stage by explicit path, never `git add -A`** — a blanket add once swept an unrelated file
+   into a commit.
+9. **Authorization is the permission catalogue, not the role enum** (v1.51.0). Endpoints use
+   `[RequirePermission(module, action)]`; commands use `[RequirePermissionPolicy]`. The
+   `UserRole` enum still exists but is the platform/tenant *structural tier*, not the
+   authorization mechanism. Do not add new `[Authorize(Roles=…)]` gates to tenant endpoints.
 
-## 3. Current state (as of 2026-07-28)
-- Code at tag **`v1.46.0`** — EA remediation COMPLETE (Phases 0–6) + Road-to-100 backlog #1 (v1.45) + **Phase 7 session-security** (v1.46); production blockers cleared at v1.41; `restore-point-20260727` = v1.37.0. Repo: `github.com/arfaawadnt/NTQMS`. Closure report: `docs/reference/NT_QMS_EA_Remediation_Closure_Report.md`; road-to-100: `docs/reference/NT_QMS_Road_to_100_Plan.md`.
+## 3. Current state (as of 2026-08-01)
+- Code at **`v1.51.2`** — EA remediation COMPLETE (Phases 0–6, closed at v1.44); **Role Privilege
+  module** (v1.51.0, dynamic tenant-defined roles over a 170-key permission catalogue, branch/
+  department as a hard data filter); **schema hardening** (v1.51.2, six `Hardening*` migrations).
+  Production blockers cleared at v1.41. Repo: `github.com/arfaawadnt/NTQMS`.
+  Closure report: `docs/reference/NT_QMS_EA_Remediation_Closure_Report.md`; hardening record:
+  `SCHEMA-HARDENING-REPORT.md`; as-built schema: `docs/reference/NT_QMS_Database_AsBuilt.md`.
+- **Schema posture:** 88 tenant-first composite PKs · 90 FORCE-RLS tables · 85 CHECK constraints ·
+  deferrable tenant-composite FKs. Two accepted permanent deviations (B9, B10) — see the report §8.
+- Tests green at last run: **446 backend** (228 domain / 72 app / 33 arch / 31 +1 skip integration /
+  82 functional) + **76 frontend unit** + **6 Playwright e2e**. Per-run history:
+  `docs/validation/verification-log.md`.
 - **Auth model (ADR-0009, supersedes ADR-0003):** access JWT in SPA memory (15-min default); rotating httpOnly `Secure SameSite=Strict` refresh cookie `qams_rt` (Path=/api/auth) with reuse-detection family revocation; `POST /api/auth/refresh` + `/logout`; silent refresh on 401 and at SPA bootstrap.
 - **All 18 CSV/regulatory-audit findings are CLOSED** (release train v1.25→v1.37): tenant
   RLS, signed-record immutability, MFA, SoD, reason-for-change, session revocation,
   e-sig logging, integration tests, backup/DR, governance modules, exports, password
   policy, config externalization, secrets, frontend+e2e tests, GAMP 5 CSV doc set.
-- Tests green when last run: **~270 backend + 37 frontend unit + 3 Playwright e2e**.
-- Two audits delivered: CSV/Part-11 (all closed) and **Enterprise Architecture** (~76%,
-  0 critical, "approved with conditions").
+- Two audits delivered: CSV/Part-11 (all closed) and **Enterprise Architecture**, now at **88%**,
+  0 critical. Current posture: `docs/reference/NT_QMS_Compliance_Status_Report_v1.51.2.html`.
+- **Still open (do not report as closed):** `SEC-001` independent penetration test · `DOC-001`
+  validation in a qualified environment with signatures · `OPS-001` staging observability/load ·
+  OQ transcripts 12 and 13 awaiting human signature.
 
-## 4. What to do NEXT — the active plan
-Follow **`docs/reference/NT_QMS_Enterprise_Architecture_Remediation_Plan.html`** — a gated
-7-phase train (v1.38 → v1.44), in order. Ship each phase behind the CI gate; each finding
-has acceptance criteria + a proving test. Summary:
+## 4. What to do NEXT
+**The remediation train is COMPLETE** (v1.38→v1.44) and the schema hardening is delivered
+(v1.51.2). New work comes from the **product backlog** — feature and page enhancements. Before
+starting any of it, load the skills in `.claude/skills/` and follow `ntqms-architecture`'s
+end-to-end playbook; it is the current, measured procedure, and it supersedes the phase plan below.
+
+<details><summary>Historical — the completed EA remediation train (v1.38 → v1.44)</summary>
 - **Phase 0 (P0, v1.38): ✅ SHIPPED** — role guard (Production refuses over-privileged DB role), `/health/live`+`/health/ready`, single-replica ADR-0001 + advisory-lock sentinel.
 - **Phase 1 (P1, v1.39): ✅ SHIPPED** — `xmin` concurrency + 409 `CONCURRENCY-409`; outbox dead-letter/backoff/retention + `SKIP LOCKED` claim lease; sweep leader election.
 - **Phase 2 (P1, v1.40): ✅ SHIPPED** — JSON logs + canonical request log; OTel traces HTTP→MediatR→EF→Outbox (traceparent persisted on outbox rows); X-Correlation-Id + ProblemDetails traceId; /metrics + alert set (deploy/OBSERVABILITY.md).
@@ -52,7 +80,8 @@ has acceptance criteria + a proving test. Summary:
 - **Phase 4 (P2, v1.42): ✅ SHIPPED** — problem+json everywhere; pagination envelope (API+SPA); file allow-list/sniffing; deny-by-default command authorization (211 annotated + CI gate); Idempotency-Key replay; api/v1 versioning (ADR-0004).
 - **Phase 5 (P2, v1.43): ✅ SHIPPED** — CHECK constraints on regulated tables; ConfigGuard fail-fast config; Npgsql retry+timeout (execution-strategy-safe locks); non-root container + compose.production.yml.
 - **Phase 6 (P2/P3, v1.44): ✅ SHIPPED** — module-boundary + API-surface snapshot merge gates; migration round-trip + audit-tamper tests; perf smoke; AUTHZ→403 + problem+json on framework 401/403; accessible change-reason dialog; ADR-0005…0008.
-**The remediation train is COMPLETE — all EA-audit findings closed (v1.38→v1.44); production blockers were cleared at v1.41.** Next work comes from the product backlog (e.g. list-pager UI over the API-004 envelope, refresh-token flow per ADR-0003's revisit trigger).
+
+</details>
 
 ## 5. Reusable lessons / conventions (must-follow)
 - **New `ITenantScoped` table ⇒ add RLS in its OWN migration** (EF won't). In `Up()` after
@@ -163,4 +192,5 @@ dotnet restore NT.QAMS.sln && (cd frontend && npm ci)
 dotnet ef database update --project src/NT.QAMS.Infrastructure --startup-project src/NT.QAMS.WebApi
 # (optional) restore the dev dataset from the backup dump: pg_restore … ntqms-db-restorepoint-*.dump
 ```
-Then run the API + frontend (§6) and continue with the Phase-0 plan (§4).
+Then run the API + frontend (§6). For new work, load `.claude/skills/ntqms-architecture` and
+follow its playbook (§4).
