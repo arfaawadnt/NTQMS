@@ -11,6 +11,7 @@ import {
   AuditTrailEntry, AuditTrailReview, ChainVerification, SecurityEvent, SignatureRecord,
 } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 
 type LedgerTab = 'trail' | 'signatures' | 'security' | 'reviews';
 
@@ -23,10 +24,18 @@ type LedgerTab = 'trail' | 'signatures' | 'security' | 'reviews';
 @Component({
     selector: 'qams-compliance',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [FormsModule, DatePipe, PageHeaderComponent],
+    imports: [FormsModule, DatePipe, PageHeaderComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('cmp.title')" [subtitle]="i18n.t('cmp.subtitle')">
-      <button class="secondary" (click)="exports.auditTrailXlsx()">{{ i18n.t('exp.xlsx') }}</button>
+      @if (tab() === 'trail') {
+        <qams-export-menu [title]="i18n.t('trail.title')" [columns]="trailExportColumns" [rows]="trail()" />
+      } @else if (tab() === 'signatures') {
+        <qams-export-menu [title]="i18n.t('cmp.signatures')" [columns]="signatureExportColumns" [rows]="signatures()" />
+      } @else if (tab() === 'security') {
+        <qams-export-menu [title]="i18n.t('cmp.security')" [columns]="securityExportColumns" [rows]="security()" />
+      } @else if (tab() === 'reviews') {
+        <qams-export-menu [title]="i18n.t('atr.tab')" [columns]="reviewExportColumns" [rows]="reviews()" />
+      }
       <button (click)="verify()" [disabled]="verifying()">{{ i18n.t('cmp.verifyChain') }}</button>
     </qams-page-header>
 
@@ -222,6 +231,40 @@ export class ComplianceComponent implements OnInit {
 
   readonly perms = inject(PermissionsService);
   readonly tab = signal<LedgerTab>('trail');
+
+  readonly trailExportColumns: ExportColumn<AuditTrailEntry>[] = [
+    { header: 'Seq', cell: (r) => String(r.sequence) },
+    { header: 'Event ID', cell: (r) => r.eventId },
+    { header: 'Event Type', cell: (r) => r.eventType },
+    { header: 'Occurred At', cell: (r) => r.occurredAtUtc },
+    { header: 'Payload', cell: (r) => r.payload },
+  ];
+
+  readonly signatureExportColumns: ExportColumn<SignatureRecord>[] = [
+    { header: 'Signer', cell: (r) => r.signerDisplay },
+    { header: 'Meaning', cell: (r) => r.meaning },
+    { header: 'Subject Ref', cell: (r) => r.subjectRef },
+    { header: 'Content Hash', cell: (r) => r.contentHash },
+    { header: 'Signed At', cell: (r) => r.signedAtUtc },
+  ];
+
+  readonly securityExportColumns: ExportColumn<SecurityEvent>[] = [
+    { header: 'Occurred At', cell: (r) => r.occurredAtUtc },
+    { header: 'Event Type', cell: (r) => r.eventType },
+    { header: 'Actor', cell: (r) => r.actor ?? '' },
+    { header: 'IP Address', cell: (r) => r.ipAddress ?? '' },
+    { header: 'Detail', cell: (r) => r.detail ?? '' },
+  ];
+
+  readonly reviewExportColumns: ExportColumn<AuditTrailReview>[] = [
+    { header: 'Ref', cell: (r) => r.reviewRef },
+    { header: 'Period Start', cell: (r) => r.periodStart },
+    { header: 'Period End', cell: (r) => r.periodEnd },
+    { header: 'Events Reviewed', cell: (r) => `${r.eventsReviewed ?? 0}` },
+    { header: 'Anomalies Found', cell: (r) => r.anomaliesFound ? 'Yes' : 'No' },
+    { header: 'Status', cell: (r) => r.status },
+  ];
+
   readonly reviews = signal<AuditTrailReview[]>([]);
   /** Open-review form state (template-driven like the trail search). */
   periodStart = '';

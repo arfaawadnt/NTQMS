@@ -142,6 +142,23 @@ export class RiskListComponent implements OnInit {
       && (!q || `${r.riskRef} ${r.title} ${r.category} ${r.status}`.toLowerCase().includes(q)));
   });
 
+  readonly exportColumns: ExportColumn<RiskListItem>[] = [
+    { header: 'Ref', cell: (r) => r.riskRef },
+    { header: 'Title', cell: (r) => r.title },
+    { header: 'Category', cell: (r) => r.category },
+    { header: 'Status', cell: (r) => r.status },
+    { header: 'RPN', cell: (r) => `${r.rpn}` },
+    { header: 'Residual RPN', cell: (r) => r.residualRpn !== null ? `${r.residualRpn}` : '—' },
+  ];
+
+  readonly exportAll = async () => this.facade.list();
+  readonly filtersSummary = computed(() => {
+    const parts: string[] = [];
+    if (this.statusFilter()) { parts.push(`Status: ${this.statusFilter()}`); }
+    if (this.search()) { parts.push(`Search: ${this.search()}`); }
+    return parts.join(' · ');
+  });
+
   /** Live statistics computed from the real register. */
   readonly stats = computed<ListStat[]>(() => {
     const all = this.facade.list();

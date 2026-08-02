@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
@@ -14,6 +14,7 @@ import { UserSelectComponent } from '../../shared/ui/user-select.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { LoadMoreComponent } from '../../shared/ui/load-more.component';
 import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
+import { ListStat } from '../../shared/ui/list-stats.component';
 
 /** Group-level validator: a task must name a user or a role (mirrors TASK-002). */
 function assigneeRequired(group: AbstractControl): ValidationErrors | null {
@@ -30,9 +31,10 @@ function assigneeRequired(group: AbstractControl): ValidationErrors | null {
 @Component({
     selector: 'qams-tasks',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent, UserSelectComponent, LoadMoreComponent],
+    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent, UserSelectComponent, LoadMoreComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('task.title')" [subtitle]="i18n.t('task.subtitle')">
+      <qams-export-menu [title]="i18n.t('task.title')" [stats]="stats()" [columns]="exportColumns" [rows]="facade.tasks()" />
       @if (perms.can('tasks.create')) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('task.new') }}</button>
       }
@@ -147,6 +149,20 @@ export class TasksComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
 
   private readonly rolesApi = inject(RolesApiService);
+
+  readonly exportColumns: ExportColumn<WorkTask>[] = [
+    { header: 'Subject', cell: (r) => r.subject },
+    { header: 'Subject Ref', cell: (r) => r.subjectRef ?? '—' },
+    { header: 'Assignee Role', cell: (r) => r.assigneeRole ?? '—' },
+    { header: 'Due Date', cell: (r) => r.dueDate ? r.dueDate.substring(0, 10) : '—' },
+    { header: 'Status', cell: (r) => r.status },
+    { header: 'Overdue', cell: (r) => r.overdue ? 'Yes' : 'No' },
+  ];
+
+  readonly stats = computed<readonly ListStat[]>(() => [
+    { label: 'Total Tasks', value: this.facade.total(), tone: 'blue' },
+    { label: 'Loaded', value: this.facade.tasks().length, tone: 'slate' },
+  ]);
 
   /**
    * Role options for assignment. The tenant's real, active role names when the

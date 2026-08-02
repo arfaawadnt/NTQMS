@@ -9,6 +9,7 @@ import { Branch, Department, LovEntry, TestCatalogItem } from '../../core/models
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 
 type RefTab = 'branches' | 'departments' | 'tests' | 'lovs';
 
@@ -20,9 +21,18 @@ type RefTab = 'branches' | 'departments' | 'tests' | 'lovs';
 @Component({
     selector: 'qams-reference-data',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [FormsModule, ReactiveFormsModule, PageHeaderComponent, DrawerComponent, StatusPillComponent],
+    imports: [FormsModule, ReactiveFormsModule, PageHeaderComponent, DrawerComponent, StatusPillComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('ref.title')" [subtitle]="i18n.t('ref.subtitle')">
+      @if (tab() === 'branches') {
+        <qams-export-menu [title]="i18n.t('ref.branches')" [columns]="branchExportColumns" [rows]="branches()" />
+      } @else if (tab() === 'departments') {
+        <qams-export-menu [title]="i18n.t('ref.departments')" [columns]="deptExportColumns" [rows]="departments()" />
+      } @else if (tab() === 'tests') {
+        <qams-export-menu [title]="i18n.t('ref.tests')" [columns]="testExportColumns" [rows]="tests()" />
+      } @else if (tab() === 'lovs') {
+        <qams-export-menu [title]="i18n.t('ref.lovs')" [columns]="lovExportColumns" [rows]="lovs()" />
+      }
       @if (perms.can('organization.create')) {
         <button (click)="openForm()">{{ addLabel() }}</button>
       }
@@ -226,6 +236,38 @@ export class ReferenceDataComponent implements OnInit {
   readonly departments = signal<Department[]>([]);
   readonly tests = signal<TestCatalogItem[]>([]);
   readonly lovs = signal<LovEntry[]>([]);
+
+  readonly branchExportColumns: ExportColumn<Branch>[] = [
+    { header: 'Code', cell: (r) => r.code },
+    { header: 'Name', cell: (r) => r.name },
+    { header: 'City', cell: (r) => r.city ?? '' },
+    { header: 'Status', cell: (r) => r.isActive ? 'Active' : 'Obsolete' },
+  ];
+
+  readonly deptExportColumns: ExportColumn<Department>[] = [
+    { header: 'Code', cell: (r) => r.code },
+    { header: 'Name', cell: (r) => r.name },
+    { header: 'Branch ID', cell: (r) => r.branchId },
+    { header: 'Status', cell: (r) => r.isActive ? 'Active' : 'Obsolete' },
+  ];
+
+  readonly testExportColumns: ExportColumn<TestCatalogItem>[] = [
+    { header: 'Code', cell: (r) => r.testCode },
+    { header: 'Test Name', cell: (r) => r.testName },
+    { header: 'Methodology', cell: (r) => r.methodology ?? '' },
+    { header: 'Turnaround Hours', cell: (r) => String(r.turnaroundHours) },
+    { header: 'Status', cell: (r) => r.isActive ? 'Active' : 'Obsolete' },
+  ];
+
+  readonly lovExportColumns: ExportColumn<LovEntry>[] = [
+    { header: 'Category', cell: (r) => r.category },
+    { header: 'Code', cell: (r) => r.code },
+    { header: 'Name (EN)', cell: (r) => r.nameEn },
+    { header: 'Name (AR)', cell: (r) => r.nameAr ?? '' },
+    { header: 'Sort Order', cell: (r) => String(r.sortOrder) },
+    { header: 'Status', cell: (r) => r.isActive ? 'Active' : 'Obsolete' },
+  ];
+
   readonly loading = signal(false);
   readonly error = signal('');
   readonly showForm = signal(false);
@@ -282,7 +324,7 @@ export class ReferenceDataComponent implements OnInit {
 
   branchName(branchId: string): string {
     const b = this.branches().find((x) => x.id === branchId);
-    return b ? `${b.code} — ${b.name}` : branchId;
+    return b ? (b.code + ' — ' + b.name) : branchId;
   }
 
   onBranchFilter(value: string): void {
@@ -388,7 +430,7 @@ export class ReferenceDataComponent implements OnInit {
 
   private describe(err: unknown): string {
     if (err instanceof HttpErrorResponse) {
-      return (err.error as { title?: string } | null)?.title ?? `Request failed (${err.status}).`;
+      return (err.error as { title?: string } | null)?.title ?? ('Request failed (' + err.status + ').');
     }
     return 'Unexpected error.';
   }

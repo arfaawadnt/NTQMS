@@ -14,6 +14,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { LovSelectComponent } from '../../shared/ui/lov-select.component';
 import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 
 type ContextTab = 'parties' | 'issues';
 
@@ -28,9 +29,14 @@ type ContextTab = 'parties' | 'issues';
 @Component({
     selector: 'qams-org-context',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent, LovSelectComponent, AuditTrailComponent, ListStatsComponent],
+    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent, LovSelectComponent, AuditTrailComponent, ListStatsComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('ctx.title')" [subtitle]="i18n.t('ctx.subtitle')">
+      @if (tab() === 'parties') {
+        <qams-export-menu [title]="i18n.t('ctx.parties')" [columns]="partyExportColumns" [rows]="parties()" />
+      } @else {
+        <qams-export-menu [title]="i18n.t('ctx.issues')" [columns]="issueExportColumns" [rows]="issues()" />
+      }
       @if (perms.can('org-context.create')) {
         <button (click)="openCreate()">{{ tab() === 'parties' ? i18n.t('ctx.newParty') : i18n.t('ctx.newIssue') }}</button>
       }
@@ -191,6 +197,23 @@ export class OrgContextComponent implements OnInit {
   readonly issues = signal<ContextIssue[]>([]);
   readonly risks = signal<RiskListItem[]>([]);
   readonly error = signal('');
+
+  readonly partyExportColumns: ExportColumn<InterestedParty>[] = [
+    { header: 'Party Ref', cell: (r) => r.partyRef },
+    { header: 'Name', cell: (r) => r.name },
+    { header: 'Category', cell: (r) => r.category },
+    { header: 'Needs & Expectations', cell: (r) => r.needsAndExpectations },
+    { header: 'Status', cell: (r) => r.status },
+  ];
+
+  readonly issueExportColumns: ExportColumn<ContextIssue>[] = [
+    { header: 'Issue Ref', cell: (r) => r.issueRef },
+    { header: 'Description', cell: (r) => r.description },
+    { header: 'Type', cell: (r) => r.type },
+    { header: 'Category', cell: (r) => r.category },
+    { header: 'Impact', cell: (r) => r.impact },
+    { header: 'Status', cell: (r) => r.status },
+  ];
 
   readonly partyOpen = signal(false);
   readonly issueOpen = signal(false);

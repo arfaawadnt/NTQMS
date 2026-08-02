@@ -10,6 +10,8 @@ import { PermissionCatalog, PermissionModule, RoleDetail, RoleSummary } from '..
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
+import { ListStat } from '../../shared/ui/list-stats.component';
 
 /**
  * Roles & privileges administration: the tenant composes named roles over the
@@ -20,9 +22,10 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 @Component({
     selector: 'qams-roles',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, StatusPillComponent],
+    imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, StatusPillComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('roles.title')" [subtitle]="i18n.t('roles.subtitle')">
+      <qams-export-menu [title]="i18n.t('roles.title')" [stats]="stats()" [columns]="exportColumns" [rows]="roles()" />
       @if (perms.can('roles.manage')) {
         <button (click)="openCreate()">{{ i18n.t('roles.new') }}</button>
       }
@@ -171,6 +174,21 @@ export class RolesComponent implements OnInit {
 
   readonly roles = signal<RoleSummary[]>([]);
   readonly catalog = signal<PermissionCatalog | null>(null);
+
+  readonly exportColumns: ExportColumn<RoleSummary>[] = [
+    { header: 'Role Name', cell: (r) => r.name },
+    { header: 'Type', cell: (r) => r.isSystem ? 'System' : 'Custom' },
+    { header: 'Status', cell: (r) => r.isActive ? 'Active' : 'Suspended' },
+    { header: 'Permissions', cell: (r) => `${r.permissionCount}` },
+    { header: 'Members', cell: (r) => `${r.memberCount}` },
+    { header: 'Description', cell: (r) => r.description ?? '' },
+  ];
+
+  readonly stats = computed<readonly ListStat[]>(() => [
+    { label: 'Total Roles', value: this.roles().length, tone: 'blue' },
+    { label: 'System Roles', value: this.roles().filter(r => r.isSystem).length, tone: 'teal' },
+    { label: 'Custom Roles', value: this.roles().filter(r => !r.isSystem).length, tone: 'slate' },
+  ]);
   readonly loading = signal(false);
   readonly saving = signal(false);
   readonly error = signal('');

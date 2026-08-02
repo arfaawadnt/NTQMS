@@ -181,6 +181,15 @@ export class UsersComponent implements OnInit {
   readonly branches = signal<Branch[]>([]);
   readonly departments = signal<Department[]>([]);
 
+  readonly exportColumns: ExportColumn<UserAccount>[] = [
+    { header: 'Email', cell: (u) => u.email },
+    { header: 'Full Name', cell: (u) => u.displayName },
+    { header: 'Structural Tier', cell: (u) => u.role },
+    { header: 'Status', cell: (u) => u.isActive ? 'Active' : 'Suspended' },
+    { header: 'MFA', cell: (u) => u.mfaEnabled ? 'Enabled' : 'Disabled' },
+    { header: 'PIN', cell: (r) => r.pinConfigured ? 'Configured' : 'Pending' },
+  ];
+
   readonly assignableRoles = computed(() => this.roles().filter((r) => r.isActive));
 
   /** The user whose working scope is being edited, plus the draft selections. */

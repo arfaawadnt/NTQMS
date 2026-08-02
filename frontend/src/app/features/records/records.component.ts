@@ -11,6 +11,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { LoadMoreComponent } from '../../shared/ui/load-more.component';
 import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
+import { ListStat } from '../../shared/ui/list-stats.component';
 
 /**
  * Records & Retention register: archived record snapshots with per-row
@@ -21,13 +22,14 @@ import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.c
 @Component({
     selector: 'qams-records',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent, LoadMoreComponent],
+    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent, LoadMoreComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('arc.title')" [subtitle]="i18n.t('arc.subtitle')">
       <select [value]="stateFilter()" (change)="onFilter($event)" aria-label="State filter">
         <option value="">{{ i18n.t('nc.allStatuses') }}</option>
         @for (s of states; track s) { <option [value]="s">{{ s }}</option> }
       </select>
+      <qams-export-menu [title]="i18n.t('arc.title')" [stats]="stats()" [columns]="exportColumns" [rows]="facade.list()" />
       <button (click)="showForm.set(!showForm())">{{ i18n.t('arc.new') }}</button>
     </qams-page-header>
 
@@ -127,6 +129,20 @@ export class RecordsComponent implements OnInit {
   readonly stateFilter = signal('');
   readonly snapshot = signal<File | null>(null);
 
+  readonly exportColumns: ExportColumn<ArchiveListItem>[] = [
+    { header: 'Archive Ref', cell: (r) => r.archiveRef },
+    { header: 'Source Module', cell: (r) => r.sourceModule },
+    { header: 'Source Ref', cell: (r) => r.sourceRef },
+    { header: 'Retention Class', cell: (r) => r.retentionClass },
+    { header: 'State', cell: (r) => r.state },
+    { header: 'Legal Hold', cell: (r) => r.isOnLegalHold ? 'Yes' : 'No' },
+  ];
+
+  readonly stats = computed<readonly ListStat[]>(() => [
+    { label: 'Total Records', value: this.facade.total(), tone: 'blue' },
+    { label: 'Loaded', value: this.facade.list().length, tone: 'slate' },
+  ]);
+
   readonly form = this.fb.nonNullable.group({
     sourceModule: ['Nonconformance', [Validators.required]],
     sourceRef: ['', [Validators.required, Validators.maxLength(100)]],
@@ -162,3 +178,4 @@ export class RecordsComponent implements OnInit {
     this.form.reset({ sourceModule: 'Nonconformance', retentionClass: 'FiveYears' });
   }
 }
+
