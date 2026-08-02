@@ -1,8 +1,8 @@
-# NT.QAMS — Deployment Guide (v1.51.1 build)
+# NT.QAMS — Deployment Guide (v1.51.2 build)
 
 ## What this package contains — read first
 
-This deploys the **NT.QAMS full-stack application, version v1.51.1**:
+This deploys the **NT.QAMS full-stack application, version v1.51.2**:
 
 - **JWT authentication** (deny-by-default: every endpoint requires a valid token
   except `/api/auth/login` and `/health`), role-gated APIs, platform-admin bootstrap
