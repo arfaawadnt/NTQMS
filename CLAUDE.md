@@ -43,18 +43,28 @@ NT.QMS is a **multi-tenant SaaS Quality Management System** for ISO 17025 / 1518
    `UserRole` enum still exists but is the platform/tenant *structural tier*, not the
    authorization mechanism. Do not add new `[Authorize(Roles=…)]` gates to tenant endpoints.
 
-## 3. Current state (as of 2026-08-01)
-- Code at **`v1.51.2`** — EA remediation COMPLETE (Phases 0–6, closed at v1.44); **Role Privilege
+## 3. Current state (as of 2026-08-02)
+- Code at **`v1.52.0`** — EA remediation COMPLETE (Phases 0–6, closed at v1.44); **Role Privilege
   module** (v1.51.0, dynamic tenant-defined roles over a 170-key permission catalogue, branch/
-  department as a hard data filter); **schema hardening** (v1.51.2, six `Hardening*` migrations).
-  Production blockers cleared at v1.41. Repo: `github.com/arfaawadnt/NTQMS`.
+  department as a hard data filter); **schema hardening** (v1.51.2, six `Hardening*` migrations);
+  **Quality Analytics** (v1.52.0 — one computation serving a Quality Statistics dashboard and an
+  ISO 17025 §8.9.2 Management Review pack; nine sub-systems, tenant-configurable weighted Quality
+  Health Score gated by `reports.manage`; server-side privilege/branch scoping; URS-108…114) plus
+  a **usability / self-service set** (v1.52.0 — My-Tasks role resolution, grid-overlap fix,
+  route↔help parity, management-review agenda/link/participants + dispatch, self-service and
+  admin-issued e-signature PINs, self-service password change, tabbed equipment workspace with
+  maintenance certificates; URS-115…122). Production blockers cleared at v1.41.
+  Repo: `github.com/arfaawadnt/NTQMS`.
   Closure report: `docs/reference/NT_QMS_EA_Remediation_Closure_Report.md`; hardening record:
   `SCHEMA-HARDENING-REPORT.md`; as-built schema: `docs/reference/NT_QMS_Database_AsBuilt.md`.
-- **Schema posture:** 88 tenant-first composite PKs · 90 FORCE-RLS tables · 85 CHECK constraints ·
-  deferrable tenant-composite FKs. Two accepted permanent deviations (B9, B10) — see the report §8.
-- Tests green at last run: **446 backend** (228 domain / 72 app / 33 arch / 31 +1 skip integration /
-  82 functional) + **76 frontend unit** + **6 Playwright e2e**. Per-run history:
-  `docs/validation/verification-log.md`.
+- **Schema posture (v1.52.0):** 91 tenant-first composite PKs · 93 FORCE-RLS tables · 87 CHECK
+  constraints · 59 migrations · deferrable tenant-composite FKs. (v1.52.0 added the three
+  tenant-scoped tables `quality_health_profile`, `quality_health_weight`, `review_participant` —
+  each composite-PK + FORCE-RLS — and two CHECK domains on `quality_health_weight`.) Two accepted
+  permanent deviations (B9, B10) — see the report §8.
+- Tests green at last run (2026-08-01, v1.52.0): **460 backend** (242 domain / 72 app / 33 arch /
+  31 +1 skip integration / 82 functional) + **87 frontend unit** + **6 Playwright e2e**. Per-run
+  history: `docs/validation/verification-log.md`.
 - **Auth model (ADR-0009, supersedes ADR-0003):** access JWT in SPA memory (15-min default); rotating httpOnly `Secure SameSite=Strict` refresh cookie `qams_rt` (Path=/api/auth) with reuse-detection family revocation; `POST /api/auth/refresh` + `/logout`; silent refresh on 401 and at SPA bootstrap.
 - **All 18 CSV/regulatory-audit findings are CLOSED** (release train v1.25→v1.37): tenant
   RLS, signed-record immutability, MFA, SoD, reason-for-change, session revocation,
