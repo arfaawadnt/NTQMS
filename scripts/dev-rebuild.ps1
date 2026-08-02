@@ -29,6 +29,13 @@ param(
 
 $repo   = Split-Path -Parent $PSScriptRoot
 $dotnet = Join-Path $env:LOCALAPPDATA 'Microsoft\dotnet\dotnet.exe'
+if (-not (Test-Path $dotnet)) {
+    $dotnet = Join-Path $env:LOCALAPPDATA 'Packages\Claude_pzs8sxrjxfjjc\LocalCache\Local\Microsoft\dotnet\dotnet.exe'
+}
+if (-not (Test-Path $dotnet)) {
+    $found = Get-ChildItem -Path "$env:LOCALAPPDATA\Packages" -Filter "dotnet.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName
+    if ($found) { $dotnet = $found }
+}
 $failed = $false
 
 Write-Host "1/4  stopping the API so its DLLs are unlocked" -ForegroundColor Cyan

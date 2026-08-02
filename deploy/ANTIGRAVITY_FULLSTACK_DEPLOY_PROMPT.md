@@ -1,11 +1,11 @@
-# Antigravity Full-Stack Deployment Prompt — NT.QAMS v1.0
+# Antigravity Full-Stack Deployment Prompt — NT.QAMS v1.51.1
 
 Deploys the **backend API** (Windows service on loopback) and the **Angular SPA**
 (served by IIS, which also reverse-proxies `/api` to the backend so they are
 same-origin). Copy both packages to the target server first:
 
-- `C:\install\NT.QAMS-webapi-v1.0-win-x64.zip`  (backend)
-- `C:\install\NT.QAMS-frontend-v1-dist.zip`      (SPA + web.config)
+- `C:\install\NT.QAMS-webapi-v1.51.1-win-x64.zip`   (backend)
+- `C:\install\NT.QAMS-frontend-v1.51.1-dist.zip`      (SPA + web.config)
 
 Then paste everything inside the fence into Antigravity **on the target server**.
 

@@ -29,6 +29,13 @@ param(
 $ErrorActionPreference = 'Stop'
 $repo    = Split-Path -Parent $PSScriptRoot
 $dotnet  = Join-Path $env:LOCALAPPDATA 'Microsoft\dotnet\dotnet.exe'
+if (-not (Test-Path $dotnet)) {
+    $dotnet = Join-Path $env:LOCALAPPDATA 'Packages\Claude_pzs8sxrjxfjjc\LocalCache\Local\Microsoft\dotnet\dotnet.exe'
+}
+if (-not (Test-Path $dotnet)) {
+    $found = Get-ChildItem -Path "$env:LOCALAPPDATA\Packages" -Filter "dotnet.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName
+    if ($found) { $dotnet = $found }
+}
 $npm     = 'C:\Program Files\nodejs\npm.cmd'
 $logDir  = Join-Path $env:TEMP 'ntqms-dev'
 if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir -Force | Out-Null }
@@ -78,11 +85,26 @@ if (Test-Port 5080) {
     $env:ASPNETCORE_ENVIRONMENT     = 'Development'
     $env:ASPNETCORE_URLS            = 'http://localhost:5080'
     $env:Database__MigrateOnStartup = 'true'
+    if (-not $env:ConnectionStrings__Postgres) {
+        $env:ConnectionStrings__Postgres = 'Host=localhost;Database=ntqams;Username=qams_app;Password=dev-only-local'
+    }
+    if (-not $env:Jwt__Secret) {
+        $env:Jwt__Secret = 'DevOnlySecretKeyAtLeast48CharactersLongForNTQAMSSystem1234567890!'
+    }
+    if (-not $env:PlatformAdmin__Email) {
+        $env:PlatformAdmin__Email = 'platform-admin@localhost'
+    }
+    if (-not $env:PlatformAdmin__Password) {
+        $env:PlatformAdmin__Password = 'Dev-Only-Platform-Pass-1!'
+    }
 
-    Start-Process -FilePath $dotnet `
-        -ArgumentList @('run','--project', (Join-Path $repo 'src\NT.QAMS.WebApi'), '--no-launch-profile','--no-build') `
-        -WorkingDirectory $repo -WindowStyle Hidden `
-        -RedirectStandardOutput $apiLog -RedirectStandardError (Join-Path $logDir 'api.err.log') | Out-Null
+    $psi = New-Object System.Diagnostics.ProcessStartInfo
+    $psi.FileName = $dotnet
+    $psi.Arguments = "exec `"$apiDll`""
+    $psi.WorkingDirectory = $repo
+    $psi.UseShellExecute = $true
+    $psi.WindowStyle = [System.Diagnostics.ProcessWindowStyle]::Hidden
+    [System.Diagnostics.Process]::Start($psi) | Out-Null
 
     if (Wait-Http 'http://localhost:5080/health/ready' $TimeoutSeconds $apiLog) {
         Write-Host " ready (health/ready 200)" -ForegroundColor Green
