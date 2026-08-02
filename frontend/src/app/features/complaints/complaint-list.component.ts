@@ -5,20 +5,23 @@ import { Router, RouterOutlet } from '@angular/router';
 import { ComplaintsFacade } from './complaints.facade';
 import { I18nService } from '../../core/i18n.service';
 import { OrgDataService } from '../../core/org-data.service';
-import { COMPLAINT_CHANNELS, ComplaintChannel } from '../../core/models';
+import { COMPLAINT_CHANNELS, ComplaintChannel, ComplaintListItem } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { AllocationPickerComponent } from '../../shared/ui/allocation-picker.component';
 import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 
 /** Complaints registry: status-filterable list + a log form (any authenticated user). */
 @Component({
     selector: 'qams-complaint-list',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent],
+    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('cmpl.title')" [subtitle]="i18n.t('cmpl.subtitle')">
+      <qams-export-menu [title]="i18n.t('cmpl.title')" [stats]="stats()" [columns]="exportColumns"
+                        [rows]="filtered()" [filtersSummary]="filtersSummary()" />
       <button (click)="showForm.set(!showForm())">{{ i18n.t('cmpl.new') }}</button>
     </qams-page-header>
 
@@ -132,6 +135,26 @@ export class ComplaintListComponent implements OnInit {
     return this.facade.list().filter((c) =>
       (!branch || c.branchId === branch)
       && (!q || `${c.complaintRef} ${c.subject} ${c.channel} ${c.status} ${c.complainantName}`.toLowerCase().includes(q)));
+  });
+
+  /** Export columns — the printed grid mirrors the on-screen table. */
+  readonly exportColumns: ExportColumn<ComplaintListItem>[] = [
+    { header: this.i18n.t('cmpl.ref'), cell: (c) => c.complaintRef },
+    { header: this.i18n.t('cmpl.subject'), cell: (c) => c.subject },
+    { header: this.i18n.t('cmpl.channel'), cell: (c) => c.channel },
+    { header: this.i18n.t('cmpl.complainant'), cell: (c) => c.confidential ? `${c.complainantName} (${this.i18n.t('cmpl.confidential')})` : c.complainantName },
+    { header: this.i18n.t('cmpl.loggedAt'), cell: (c) => c.loggedAtUtc },
+    { header: this.i18n.t('nc.status'), cell: (c) => c.status },
+    { header: this.i18n.t('alloc.branch'), cell: (c) => this.org.branchName(c.branchId) || '—' },
+  ];
+
+  /** The filter line printed on the document, mirroring the filter bar. */
+  readonly filtersSummary = computed(() => {
+    const parts: string[] = [];
+    if (this.statusFilter()) { parts.push(this.statusFilter()); }
+    if (this.branchFilter()) { parts.push(this.org.branchName(this.branchFilter())); }
+    if (this.search().trim()) { parts.push(`"${this.search().trim()}"`); }
+    return parts.length ? parts.join(' · ') : this.i18n.t('exp.allRecords');
   });
 
   /** Live statistics computed from the real registry. */

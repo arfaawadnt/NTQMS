@@ -1,23 +1,29 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { Router, RouterOutlet } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { CompetencyFacade } from './competency.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
+import { CompetencyApiService } from '../../core/api/competency-api.service';
+import { CompetencyListItem } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { UserSelectComponent } from '../../shared/ui/user-select.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 import { LoadMoreComponent } from '../../shared/ui/load-more.component';
 
 /** Competency matrix: status-filterable list + an assign form (role-gated). */
 @Component({
     selector: 'qams-competency-list',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, UserSelectComponent, LoadMoreComponent],
+    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, UserSelectComponent, LoadMoreComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('comp.title')">
+      <qams-export-menu [title]="i18n.t('comp.title')" [columns]="exportColumns"
+                        [rows]="facade.list()" [fetchAll]="exportAll" [filtersSummary]="filtersSummary()" />
       <select [value]="statusFilter()" (change)="onFilter($event)" aria-label="Status filter">
         <option value="">{{ i18n.t('nc.allStatuses') }}</option>
         @for (s of statuses; track s) { <option [value]="s">{{ s }}</option> }
@@ -88,6 +94,7 @@ export class CompetencyListComponent implements OnInit {
   readonly facade = inject(CompetencyFacade);
   readonly i18n = inject(I18nService);
   readonly perms = inject(PermissionsService);
+  private readonly api = inject(CompetencyApiService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
 
@@ -96,6 +103,35 @@ export class CompetencyListComponent implements OnInit {
   /** Whether the record-workspace drawer (child route) is active. */
   readonly detailOpen = signal(false);
   readonly statusFilter = signal('');
+
+  /** Export columns — the printed grid mirrors the on-screen table. */
+  readonly exportColumns: ExportColumn<CompetencyListItem>[] = [
+    { header: this.i18n.t('comp.subject'), cell: (c) => c.subject },
+    { header: this.i18n.t('comp.trainee'), cell: (c) => c.traineeId },
+    { header: this.i18n.t('nc.status'), cell: (c) => c.status },
+    { header: this.i18n.t('comp.expires'), cell: (c) => c.expiresAt ?? '—' },
+  ];
+
+  /** The filter line printed on the document, mirroring the status filter. */
+  readonly filtersSummary = computed(() => {
+    const parts: string[] = [];
+    if (this.statusFilter()) { parts.push(this.statusFilter()); }
+    return parts.length ? parts.join(' · ') : this.i18n.t('exp.allRecords');
+  });
+
+  /**
+   * Pulls every page of the current server-side filter so the document holds
+   * the whole filtered register (the screen applies no further narrowing).
+   */
+  readonly exportAll = async (): Promise<readonly CompetencyListItem[]> => {
+    const all: CompetencyListItem[] = [];
+    for (let page = 1; page <= 25; page++) {
+      const batch = await firstValueFrom(this.api.listCompetencies(undefined, this.statusFilter() || undefined, page, 200));
+      all.push(...batch.items);
+      if (!batch.hasMore) { break; }
+    }
+    return all;
+  };
 
   readonly form = this.fb.nonNullable.group({
     subject: ['', [Validators.required, Validators.maxLength(200)]],

@@ -1,16 +1,19 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterOutlet } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { NcFacade } from './nc.facade';
 import { I18nService } from '../../core/i18n.service';
 import { OrgDataService } from '../../core/org-data.service';
+import { NcApiService } from '../../core/api/nc-api.service';
 import { ExportsApiService } from '../../core/api/exports-api.service';
-import { NC_SOURCE_TYPES, NcSourceType, QUALITY_EVENT_TYPES, QualityEventType } from '../../core/models';
+import { NC_SOURCE_TYPES, NcListItem, NcSourceType, QUALITY_EVENT_TYPES, QualityEventType } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { AllocationPickerComponent } from '../../shared/ui/allocation-picker.component';
 import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 import { LoadMoreComponent } from '../../shared/ui/load-more.component';
 
 /**
@@ -21,10 +24,11 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
 @Component({
     selector: 'qams-nc-list',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent, LoadMoreComponent],
+    imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent, LoadMoreComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('nc.title')">
-      <button class="secondary" (click)="exports.ncRegisterXlsx()">{{ i18n.t('exp.xlsx') }}</button>
+      <qams-export-menu [title]="i18n.t('nc.title')" [stats]="stats()" [columns]="exportColumns"
+                        [rows]="filtered()" [fetchAll]="exportAll" [filtersSummary]="filtersSummary()" />
       <button (click)="showForm.set(!showForm())">{{ i18n.t('nc.new') }}</button>
     </qams-page-header>
 
@@ -138,6 +142,7 @@ export class NcListComponent implements OnInit {
   readonly i18n = inject(I18nService);
   readonly org = inject(OrgDataService);
   readonly exports = inject(ExportsApiService);
+  private readonly api = inject(NcApiService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
 
@@ -159,6 +164,46 @@ export class NcListComponent implements OnInit {
       (!branch || nc.branchId === branch)
       && (!q || `${nc.ncRef} ${nc.title} ${nc.sourceType} ${nc.status}`.toLowerCase().includes(q)));
   });
+
+  /** Export columns — the printed grid mirrors the on-screen table. */
+  readonly exportColumns: ExportColumn<NcListItem>[] = [
+    { header: this.i18n.t('nc.ref'), cell: (n) => n.ncRef },
+    { header: this.i18n.t('nc.subject'), cell: (n) => n.title },
+    { header: this.i18n.t('nc.status'), cell: (n) => n.status },
+    { header: this.i18n.t('nc.severity'), cell: (n) => `${n.severity}` },
+    { header: this.i18n.t('nc.rpn'), cell: (n) => `${n.rpn}` },
+    { header: this.i18n.t('nc.source'), cell: (n) => n.sourceType },
+    { header: this.i18n.t('nc.eventType'), cell: (n) => this.i18n.t('nc.event.' + n.eventType) },
+    { header: this.i18n.t('alloc.branch'), cell: (n) => this.org.branchName(n.branchId) || '—' },
+  ];
+
+  /** The filter line printed on the document, mirroring the filter bar. */
+  readonly filtersSummary = computed(() => {
+    const parts: string[] = [];
+    if (this.statusFilter()) { parts.push(this.statusFilter()); }
+    if (this.branchFilter()) { parts.push(this.org.branchName(this.branchFilter())); }
+    if (this.search().trim()) { parts.push(`"${this.search().trim()}"`); }
+    return parts.length ? parts.join(' · ') : this.i18n.t('exp.allRecords');
+  });
+
+  /**
+   * Pulls every page of the current server-side filter so the document holds
+   * the whole filtered register, then applies the same client-side narrowing
+   * the screen applies.
+   */
+  readonly exportAll = async (): Promise<readonly NcListItem[]> => {
+    const all: NcListItem[] = [];
+    for (let page = 1; page <= 25; page++) {
+      const batch = await firstValueFrom(this.api.list(this.statusFilter() || undefined, undefined, page, 200));
+      all.push(...batch.items);
+      if (!batch.hasMore) { break; }
+    }
+    const q = this.search().trim().toLowerCase();
+    const branch = this.branchFilter();
+    return all.filter((nc) =>
+      (!branch || nc.branchId === branch)
+      && (!q || `${nc.ncRef} ${nc.title} ${nc.sourceType} ${nc.status}`.toLowerCase().includes(q)));
+  };
 
   /** Live statistics computed from the real register. */
   readonly stats = computed<ListStat[]>(() => {

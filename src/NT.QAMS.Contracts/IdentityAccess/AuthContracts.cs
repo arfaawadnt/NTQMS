@@ -14,4 +14,11 @@ public sealed record AuthResponse(
 public sealed record MfaEnrollmentResponse(string Secret, string OtpAuthUri);
 
 public sealed record ConfirmMfaRequest(string Code);
-public sealed record SetPinRequest(string Pin);
+/// <summary>
+/// Sets or changes the e-signature PIN. The account password is re-verified so a
+/// live session alone cannot silently replace a Part 11 signing component.
+/// </summary>
+public sealed record SetPinRequest(string CurrentPassword, string Pin);
+
+/// <summary>Self-service password change for the signed-in user (identity from the session).</summary>
+public sealed record ChangeMyPasswordRequest(string CurrentPassword, string NewPassword);

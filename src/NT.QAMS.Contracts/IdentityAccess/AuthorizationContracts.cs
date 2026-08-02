@@ -75,4 +75,10 @@ public sealed record MyPrivilegesDto(
     IReadOnlyList<string> Permissions,
     IReadOnlyList<Guid> BranchIds,
     IReadOnlyList<Guid> DepartmentIds,
-    string? PreferredLanguage);
+    string? PreferredLanguage,
+    /// <summary>
+    /// Whether an e-signature PIN is on file — the fact only, never the value.
+    /// Lets the UI steer a user to set one before their first signing attempt
+    /// instead of letting the attempt fail.
+    /// </summary>
+    bool PinConfigured = false);

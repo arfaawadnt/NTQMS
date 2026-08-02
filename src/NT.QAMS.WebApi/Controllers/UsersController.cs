@@ -28,7 +28,8 @@ public sealed class UsersController(ISender sender) : ControllerBase
     [RequirePermission(PermissionCatalog.Users, PermissionAction.Manage)]
     public async Task<IActionResult> Register(RegisterUserRequest request, CancellationToken ct) =>
         Ok(new { id = await sender.Send(new RegisterUserCommand(
-            request.Email, request.DisplayName, request.Role, request.InitialPassword, request.RoleId), ct) });
+            request.Email, request.DisplayName, request.Role, request.InitialPassword, request.RoleId,
+            request.InitialPin), ct) });
 
     [HttpPost("{id:guid}/role")]
     [RequirePermission(PermissionCatalog.Users, PermissionAction.Manage)]
@@ -86,6 +87,15 @@ public sealed class UsersController(ISender sender) : ControllerBase
     public async Task<IActionResult> ResetPassword(Guid id, ResetUserPasswordRequest request, CancellationToken ct)
     {
         await sender.Send(new ResetUserPasswordCommand(id, request.NewPassword), ct);
+        return NoContent();
+    }
+
+    /// <summary>Admin set/reset of a user's e-signature PIN (ledgered as PIN_ADMIN_SET).</summary>
+    [HttpPost("{id:guid}/signature-pin")]
+    [RequirePermission(PermissionCatalog.Users, PermissionAction.Manage)]
+    public async Task<IActionResult> SetPin(Guid id, SetUserPinRequest request, CancellationToken ct)
+    {
+        await sender.Send(new SetUserPinCommand(id, request.Pin), ct);
         return NoContent();
     }
 }

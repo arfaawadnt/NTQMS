@@ -1,20 +1,24 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterOutlet } from '@angular/router';
 import { ValidationFacade } from './validation.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
+import { ValidationStudyListItem } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 
 /** Method-validation study register: state-filterable list + configure form. */
 @Component({
     selector: 'qams-study-list',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent],
+    imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('val.title')">
+      <qams-export-menu [title]="i18n.t('val.title')" [columns]="exportColumns"
+                        [rows]="facade.list()" [filtersSummary]="filtersSummary()" />
       <select [value]="stateFilter()" (change)="onFilter($event)" aria-label="State filter">
         <option value="">{{ i18n.t('nc.allStatuses') }}</option>
         @for (s of states; track s) { <option [value]="s">{{ s }}</option> }
@@ -92,6 +96,19 @@ export class StudyListComponent implements OnInit {
   /** Whether the record-workspace drawer (child route) is active. */
   readonly detailOpen = signal(false);
   readonly stateFilter = signal('');
+
+  /** Export columns — the printed grid mirrors the on-screen table. */
+  readonly exportColumns: ExportColumn<ValidationStudyListItem>[] = [
+    { header: this.i18n.t('val.ref'), cell: (s) => s.studyRef },
+    { header: this.i18n.t('qc.analyte'), cell: (s) => s.analyte },
+    { header: this.i18n.t('val.protocol'), cell: (s) => s.protocol },
+    { header: this.i18n.t('nc.status'), cell: (s) => s.state },
+    { header: this.i18n.t('val.verdict'), cell: (s) => s.passed === true ? 'Satisfactory' : s.passed === false ? 'Failed' : '—' },
+  ];
+
+  /** The filter line printed on the document, mirroring the state filter. */
+  readonly filtersSummary = computed(() =>
+    this.stateFilter() || this.i18n.t('exp.allRecords'));
 
   readonly form = this.fb.nonNullable.group({
     analyte: ['', [Validators.required, Validators.maxLength(200)]],

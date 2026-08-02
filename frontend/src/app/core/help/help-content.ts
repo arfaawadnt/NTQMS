@@ -111,6 +111,28 @@ export const HELP_TOPICS: HelpTopic[] = [
     ],
   },
   {
+    route: '/quality-analytics', titleKey: 'nav.qualityAnalytics', groupKey: 'nav.groupOverview', icon: 'analytics',
+    summary: L(
+      'Quality analytics: the nine quality sub-systems measured from live records, a configurable composite health score, and the same figures framed as ISO/IEC 17025 \u00a78.9.2 management-review inputs.',
+      '\u062a\u062d\u0644\u064a\u0644\u0627\u062a \u0627\u0644\u062c\u0648\u062f\u0629: \u0623\u0646\u0638\u0645\u0629 \u0627\u0644\u062c\u0648\u062f\u0629 \u0627\u0644\u062a\u0633\u0639\u0629 \u0645\u0642\u0627\u0633\u0629 \u0645\u0646 \u0627\u0644\u0633\u062c\u0644\u0627\u062a \u0627\u0644\u062d\u064a\u0629\u060c \u0648\u0645\u0624\u0634\u0631 \u0635\u062d\u0629 \u0645\u0631\u0643\u0628 \u0642\u0627\u0628\u0644 \u0644\u0644\u0636\u0628\u0637\u060c \u0648\u0627\u0644\u0623\u0631\u0642\u0627\u0645 \u0646\u0641\u0633\u0647\u0627 \u0645\u0639\u0631\u0648\u0636\u0629 \u0643\u0645\u062f\u062e\u0644\u0627\u062a \u0645\u0631\u0627\u062c\u0639\u0629 \u0627\u0644\u0625\u062f\u0627\u0631\u0629 \u0648\u0641\u0642 ISO/IEC 17025 \u00a78.9.2.',
+      'Analytique qualit\u00e9 : les neuf sous-syst\u00e8mes mesur\u00e9s depuis les enregistrements en direct, un indice de sant\u00e9 composite configurable, et les m\u00eames chiffres pr\u00e9sent\u00e9s comme entr\u00e9es de revue de direction ISO/IEC 17025 \u00a78.9.2.'),
+    steps: [],
+    usage: [
+      L('Filter by branch or department; sections whose records carry no attribution say so instead of pretending to narrow.',
+        '\u0635\u0641\u0650 \u062d\u0633\u0628 \u0627\u0644\u0641\u0631\u0639 \u0623\u0648 \u0627\u0644\u0642\u0633\u0645\u061b \u0627\u0644\u0623\u0642\u0633\u0627\u0645 \u0627\u0644\u062a\u064a \u0644\u0627 \u062a\u062d\u0645\u0644 \u0633\u062c\u0644\u0627\u062a\u0647\u0627 \u0625\u0633\u0646\u0627\u062f\u0627\u064b \u062a\u0635\u0631\u0651\u062d \u0628\u0630\u0644\u0643 \u0628\u062f\u0644 \u0627\u062f\u0639\u0627\u0621 \u0627\u0644\u062a\u0636\u064a\u064a\u0642.',
+        'Filtrez par site ou service ; les sections sans rattachement le signalent au lieu de simuler un filtrage.'),
+      L('Switch between the Statistics and Management Review tabs \u2014 both render the same computation, so the figures cannot disagree.',
+        '\u0628\u062f\u0651\u0644 \u0628\u064a\u0646 \u062a\u0628\u0648\u064a\u0628\u064a \u0627\u0644\u0625\u062d\u0635\u0627\u0621\u0627\u062a \u0648\u0645\u0631\u0627\u062c\u0639\u0629 \u0627\u0644\u0625\u062f\u0627\u0631\u0629 \u2014 \u0643\u0644\u0627\u0647\u0645\u0627 \u064a\u0639\u0631\u0636 \u0627\u0644\u062d\u0633\u0627\u0628 \u0646\u0641\u0633\u0647 \u0641\u0644\u0627 \u064a\u0645\u0643\u0646 \u0623\u0646 \u062a\u062a\u0639\u0627\u0631\u0636 \u0627\u0644\u0623\u0631\u0642\u0627\u0645.',
+        'Basculez entre Statistiques et Revue de direction \u2014 les deux affichent le m\u00eame calcul, les chiffres ne peuvent diverger.'),
+      L('With reports.manage you can tune the health-score weighting; every change requires a reason and is recorded in the audit trail.',
+        '\u0645\u0639 \u0635\u0644\u0627\u062d\u064a\u0629 reports.manage \u064a\u0645\u0643\u0646\u0643 \u0636\u0628\u0637 \u0623\u0648\u0632\u0627\u0646 \u0627\u0644\u0645\u0624\u0634\u0631\u061b \u0643\u0644 \u062a\u063a\u064a\u064a\u0631 \u064a\u062a\u0637\u0644\u0628 \u0633\u0628\u0628\u0627\u064b \u0648\u064a\u0633\u062c\u0644 \u0641\u064a \u0633\u062c\u0644 \u0627\u0644\u062a\u062f\u0642\u064a\u0642.',
+        'Avec reports.manage vous pouvez ajuster la pond\u00e9ration ; chaque modification exige un motif et est trac\u00e9e.'),
+      L('A dash means \u201cno population to measure\u201d \u2014 it is deliberately not shown as 0%.',
+        '\u0627\u0644\u0634\u0631\u0637\u0629 \u062a\u0639\u0646\u064a \u0644\u0627 \u0645\u062c\u062a\u0645\u0639 \u0644\u0644\u0642\u064a\u0627\u0633 \u2014 \u0648\u0644\u0627 \u062a\u064f\u0639\u0631\u0636 \u0639\u0645\u062f\u0627\u064b \u0643\u0640 0\u066a.',
+        'Un tiret signifie \u00ab aucune population \u00e0 mesurer \u00bb \u2014 volontairement distinct de 0 %.'),
+    ],
+  },
+  {
     route: '/tasks', titleKey: 'nav.tasks', groupKey: 'nav.groupOverview', icon: 'tasks',
     summary: L(
       'Your personal work queue: every action assigned to you across the system — CAPAs, reviews, verifications and approvals — with due dates and escalation.',
@@ -306,6 +328,29 @@ export const HELP_TOPICS: HelpTopic[] = [
   },
 
   // ── Documents & records ───────────────────────────────────────────────────
+  {
+    route: '/quality-policy', titleKey: 'nav.qualityPolicy', groupKey: 'nav.groupDocs', icon: 'qualityPolicy',
+    summary: L(
+      'The controlled quality-policy statement (ISO 9001 \u00a75.2 / ISO 17025 \u00a78.2): versioned, approved by someone other than its author, with exactly one policy in force at a time and the full history retained.',
+      '\u0628\u064a\u0627\u0646 \u0633\u064a\u0627\u0633\u0629 \u0627\u0644\u062c\u0648\u062f\u0629 \u0627\u0644\u0645\u0636\u0628\u0648\u0637 (ISO 9001 \u00a75.2 / ISO 17025 \u00a78.2): \u0645\u064f\u0631\u0642\u0651\u0645 \u0627\u0644\u0625\u0635\u062f\u0627\u0631\u0627\u062a\u060c \u064a\u0639\u062a\u0645\u062f\u0647 \u0634\u062e\u0635 \u063a\u064a\u0631 \u0645\u0624\u0644\u0641\u0647\u060c \u0645\u0639 \u0633\u064a\u0627\u0633\u0629 \u0648\u0627\u062d\u062f\u0629 \u0646\u0627\u0641\u0630\u0629 \u0641\u064a \u0643\u0644 \u0648\u0642\u062a \u0648\u0627\u062d\u062a\u0641\u0627\u0638 \u0643\u0627\u0645\u0644 \u0628\u0627\u0644\u062a\u0627\u0631\u064a\u062e.',
+      'La d\u00e9claration de politique qualit\u00e9 ma\u00eetris\u00e9e (ISO 9001 \u00a75.2 / ISO 17025 \u00a78.2) : versionn\u00e9e, approuv\u00e9e par une personne autre que son auteur, une seule politique en vigueur \u00e0 la fois et tout l\u2019historique conserv\u00e9.'),
+    steps: [
+      S(L('Draft', '\u0645\u0633\u0648\u062f\u0629', 'Brouillon'), L('Author the next version of the statement; a draft can still be edited.', '\u062d\u0631\u0651\u0631 \u0627\u0644\u0625\u0635\u062f\u0627\u0631 \u0627\u0644\u062a\u0627\u0644\u064a \u0644\u0644\u0628\u064a\u0627\u0646\u061b \u0627\u0644\u0645\u0633\u0648\u062f\u0629 \u0642\u0627\u0628\u0644\u0629 \u0644\u0644\u062a\u0639\u062f\u064a\u0644.', 'R\u00e9digez la prochaine version ; un brouillon reste modifiable.')),
+      S(L('Active', '\u0646\u0627\u0641\u0630\u0629', 'Active'), L('Approved by a second person (segregation of duties) and in force from its effective date.', '\u064a\u0639\u062a\u0645\u062f\u0647\u0627 \u0634\u062e\u0635 \u062b\u0627\u0646 (\u0641\u0635\u0644 \u0627\u0644\u0645\u0647\u0627\u0645) \u0648\u062a\u0633\u0631\u064a \u0645\u0646 \u062a\u0627\u0631\u064a\u062e \u0646\u0641\u0627\u0630\u0647\u0627.', 'Approuv\u00e9e par une seconde personne (s\u00e9paration des t\u00e2ches), en vigueur \u00e0 sa date d\u2019effet.')),
+      S(L('Superseded', '\u0645\u0633\u062a\u0628\u062f\u0644\u0629', 'Remplac\u00e9e'), L('Retired automatically when the next version is approved; history stays readable.', '\u062a\u064f\u0633\u062d\u0628 \u062a\u0644\u0642\u0627\u0626\u064a\u0627\u064b \u0639\u0646\u062f \u0627\u0639\u062a\u0645\u0627\u062f \u0627\u0644\u0625\u0635\u062f\u0627\u0631 \u0627\u0644\u062a\u0627\u0644\u064a\u061b \u0648\u064a\u0628\u0642\u0649 \u0627\u0644\u062a\u0627\u0631\u064a\u062e \u0645\u0642\u0631\u0648\u0621\u0627\u064b.', 'Retir\u00e9e automatiquement \u00e0 l\u2019approbation de la version suivante ; l\u2019historique reste lisible.')),
+    ],
+    usage: [
+      L('Draft a new version, then have a different user approve it \u2014 the author cannot approve their own policy (SOD-QP-001).',
+        '\u0623\u0646\u0634\u0626 \u0645\u0633\u0648\u062f\u0629 \u062c\u062f\u064a\u062f\u0629 \u062b\u0645 \u062f\u0639 \u0645\u0633\u062a\u062e\u062f\u0645\u0627\u064b \u0622\u062e\u0631 \u064a\u0639\u062a\u0645\u062f\u0647\u0627 \u2014 \u0644\u0627 \u064a\u062c\u0648\u0632 \u0644\u0644\u0645\u0624\u0644\u0641 \u0627\u0639\u062a\u0645\u0627\u062f \u0633\u064a\u0627\u0633\u062a\u0647 (SOD-QP-001).',
+        'R\u00e9digez une nouvelle version puis faites-la approuver par un autre utilisateur \u2014 l\u2019auteur ne peut approuver sa propre politique (SOD-QP-001).'),
+      L('An approved policy is immutable \u2014 a change is always a new version, never an edit in place.',
+        '\u0627\u0644\u0633\u064a\u0627\u0633\u0629 \u0627\u0644\u0645\u0639\u062a\u0645\u062f\u0629 \u063a\u064a\u0631 \u0642\u0627\u0628\u0644\u0629 \u0644\u0644\u062a\u0639\u062f\u064a\u0644 \u2014 \u0627\u0644\u062a\u063a\u064a\u064a\u0631 \u0625\u0635\u062f\u0627\u0631 \u062c\u062f\u064a\u062f \u062f\u0627\u0626\u0645\u0627\u064b \u0648\u0644\u064a\u0633 \u062a\u0639\u062f\u064a\u0644\u0627\u064b \u0641\u064a \u0645\u0643\u0627\u0646\u0647.',
+        'Une politique approuv\u00e9e est immuable \u2014 tout changement est une nouvelle version, jamais une modification sur place.'),
+      L('Approval is an electronic signature: password and e-signature PIN, recorded with its meaning in the audit trail.',
+        '\u0627\u0644\u0627\u0639\u062a\u0645\u0627\u062f \u062a\u0648\u0642\u064a\u0639 \u0625\u0644\u0643\u062a\u0631\u0648\u0646\u064a: \u0643\u0644\u0645\u0629 \u0627\u0644\u0645\u0631\u0648\u0631 \u0648\u0631\u0642\u0645 PIN\u060c \u0648\u064a\u0633\u062c\u0644 \u0628\u0645\u0639\u0646\u0627\u0647 \u0641\u064a \u0633\u062c\u0644 \u0627\u0644\u062a\u062f\u0642\u064a\u0642.',
+        'L\u2019approbation est une signature \u00e9lectronique : mot de passe et code PIN, enregistr\u00e9e avec sa signification dans la piste d\u2019audit.'),
+    ],
+  },
   {
     route: '/documents', titleKey: 'nav.documents', groupKey: 'nav.groupDocs', icon: 'documents',
     summary: L(
@@ -889,6 +934,76 @@ export const HELP_TOPICS: HelpTopic[] = [
         'Désactivez plutôt que supprimer pour préserver la piste d’audit ; seuls les administrateurs gèrent les utilisateurs.'),
     ],
   },
+  {
+    route: '/roles', titleKey: 'nav.roles', groupKey: 'nav.groupAdmin', icon: 'accessReview',
+    summary: L(
+      'Roles & privileges: tenant-defined roles over the permission catalogue. Each role grants module-action permissions and can be restricted to branches and departments as a hard data filter.',
+      '\u0627\u0644\u0623\u062f\u0648\u0627\u0631 \u0648\u0627\u0644\u0635\u0644\u0627\u062d\u064a\u0627\u062a: \u0623\u062f\u0648\u0627\u0631 \u064a\u0639\u0631\u0641\u0647\u0627 \u0627\u0644\u0645\u0633\u062a\u0623\u062c\u0631 \u0641\u0648\u0642 \u0641\u0647\u0631\u0633 \u0627\u0644\u0635\u0644\u0627\u062d\u064a\u0627\u062a. \u0643\u0644 \u062f\u0648\u0631 \u064a\u0645\u0646\u062d \u0635\u0644\u0627\u062d\u064a\u0627\u062a \u0648\u062d\u062f\u0629-\u0625\u062c\u0631\u0627\u0621 \u0648\u064a\u0645\u0643\u0646 \u062a\u0642\u064a\u064a\u062f\u0647 \u0628\u0627\u0644\u0641\u0631\u0648\u0639 \u0648\u0627\u0644\u0623\u0642\u0633\u0627\u0645 \u0643\u0645\u0631\u0634\u062d \u0628\u064a\u0627\u0646\u0627\u062a \u0635\u0627\u0631\u0645.',
+      'R\u00f4les et privil\u00e8ges : des r\u00f4les d\u00e9finis par le laboratoire sur le catalogue de permissions. Chaque r\u00f4le accorde des permissions module-action et peut \u00eatre restreint par site et service comme filtre de donn\u00e9es strict.'),
+    steps: [],
+    usage: [
+      L('Create a role, tick the module-action cells it should grant, and assign users to it from the Users page.',
+        '\u0623\u0646\u0634\u0626 \u062f\u0648\u0631\u0627\u064b\u060c \u062d\u062f\u062f \u062e\u0644\u0627\u064a\u0627 \u0627\u0644\u0648\u062d\u062f\u0629-\u0627\u0644\u0625\u062c\u0631\u0627\u0621 \u0627\u0644\u062a\u064a \u064a\u0645\u0646\u062d\u0647\u0627\u060c \u062b\u0645 \u0623\u0633\u0646\u062f \u0627\u0644\u0645\u0633\u062a\u062e\u062f\u0645\u064a\u0646 \u0625\u0644\u064a\u0647 \u0645\u0646 \u0635\u0641\u062d\u0629 \u0627\u0644\u0645\u0633\u062a\u062e\u062f\u0645\u064a\u0646.',
+        'Cr\u00e9ez un r\u00f4le, cochez les cellules module-action \u00e0 accorder, puis affectez les utilisateurs depuis la page Utilisateurs.'),
+      L('A revoked permission takes effect on the next request \u2014 privileges are resolved from the database per call, not cached in the session token.',
+        '\u0627\u0644\u0635\u0644\u0627\u062d\u064a\u0629 \u0627\u0644\u0645\u0644\u063a\u0627\u0629 \u062a\u0633\u0631\u064a \u0645\u0646 \u0627\u0644\u0637\u0644\u0628 \u0627\u0644\u062a\u0627\u0644\u064a \u2014 \u062a\u064f\u062d\u0644 \u0627\u0644\u0635\u0644\u0627\u062d\u064a\u0627\u062a \u0645\u0646 \u0642\u0627\u0639\u062f\u0629 \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u0639\u0646\u062f \u0643\u0644 \u0646\u062f\u0627\u0621 \u0648\u0644\u0627 \u062a\u064f\u062e\u0632\u0646 \u0641\u064a \u0631\u0645\u0632 \u0627\u0644\u062c\u0644\u0633\u0629.',
+        'Une permission r\u00e9voqu\u00e9e prend effet \u00e0 la requ\u00eate suivante \u2014 les privil\u00e8ges sont r\u00e9solus en base \u00e0 chaque appel, jamais mis en cache dans le jeton.'),
+      L('Branch/department restrictions are a data filter, not just menu visibility: restricted users cannot read or write records outside their scope.',
+        '\u0642\u064a\u0648\u062f \u0627\u0644\u0641\u0631\u0639/\u0627\u0644\u0642\u0633\u0645 \u0645\u0631\u0634\u062d \u0628\u064a\u0627\u0646\u0627\u062a \u0648\u0644\u064a\u0633\u062a \u0645\u062c\u0631\u062f \u0625\u0638\u0647\u0627\u0631 \u0642\u0648\u0627\u0626\u0645: \u0644\u0627 \u064a\u0642\u0631\u0623 \u0627\u0644\u0645\u0633\u062a\u062e\u062f\u0645 \u0627\u0644\u0645\u0642\u064a\u062f \u0633\u062c\u0644\u0627\u062a \u062e\u0627\u0631\u062c \u0646\u0637\u0627\u0642\u0647 \u0648\u0644\u0627 \u064a\u0643\u062a\u0628\u0647\u0627.',
+        'Les restrictions site/service sont un filtre de donn\u00e9es, pas une simple visibilit\u00e9 de menu : un utilisateur restreint ne lit ni n\u2019\u00e9crit hors de son p\u00e9rim\u00e8tre.'),
+    ],
+  },
+  {
+    route: '/access-reviews', titleKey: 'nav.accessReviews', groupKey: 'nav.groupAdmin', icon: 'accessReview',
+    summary: L(
+      'Periodic user-access reviews (ISO 27001 heritage, Part 11 \u00a711.10(g)): open a review, attest each account is still appropriate, and close it as a signed record.',
+      '\u0645\u0631\u0627\u062c\u0639\u0627\u062a \u062f\u0648\u0631\u064a\u0629 \u0644\u0648\u0635\u0648\u0644 \u0627\u0644\u0645\u0633\u062a\u062e\u062f\u0645\u064a\u0646: \u0627\u0641\u062a\u062d \u0645\u0631\u0627\u062c\u0639\u0629\u060c \u0648\u0623\u0643\u062f \u0645\u0644\u0627\u0621\u0645\u0629 \u0643\u0644 \u062d\u0633\u0627\u0628\u060c \u062b\u0645 \u0623\u063a\u0644\u0642\u0647\u0627 \u0643\u0633\u062c\u0644 \u0645\u0648\u0642\u0651\u0639.',
+      'Revues p\u00e9riodiques des acc\u00e8s utilisateurs : ouvrez une revue, attestez que chaque compte reste appropri\u00e9, puis cl\u00f4turez-la comme enregistrement sign\u00e9.'),
+    steps: [
+      S(L('Open', '\u0645\u0641\u062a\u0648\u062d\u0629', 'Ouverte'), L('Start a review of every active account and its role.', '\u0627\u0628\u062f\u0623 \u0645\u0631\u0627\u062c\u0639\u0629 \u0643\u0644 \u062d\u0633\u0627\u0628 \u0646\u0634\u0637 \u0648\u062f\u0648\u0631\u0647.', 'Lancez une revue de chaque compte actif et de son r\u00f4le.')),
+      S(L('Closed', '\u0645\u063a\u0644\u0642\u0629', 'Cl\u00f4tur\u00e9e'), L('Attested and closed; the outcome is retained as evidence.', '\u0645\u0624\u0643\u062f\u0629 \u0648\u0645\u063a\u0644\u0642\u0629\u061b \u0648\u062a\u062d\u0641\u0638 \u0627\u0644\u0646\u062a\u064a\u062c\u0629 \u0643\u062f\u0644\u064a\u0644.', 'Attest\u00e9e et cl\u00f4tur\u00e9e ; le r\u00e9sultat est conserv\u00e9 comme preuve.')),
+    ],
+    usage: [
+      L('Run a review on a fixed calendar (e.g. quarterly); the register shows when the last one closed.',
+        '\u0646\u0641\u0630 \u0627\u0644\u0645\u0631\u0627\u062c\u0639\u0629 \u0648\u0641\u0642 \u062c\u062f\u0648\u0644 \u062b\u0627\u0628\u062a (\u0631\u0628\u0639 \u0633\u0646\u0648\u064a \u0645\u062b\u0644\u0627\u064b)\u061b \u0648\u064a\u0638\u0647\u0631 \u0627\u0644\u0633\u062c\u0644 \u0645\u062a\u0649 \u0623\u064f\u063a\u0644\u0642\u062a \u0627\u0644\u0623\u062e\u064a\u0631\u0629.',
+        'Ex\u00e9cutez la revue selon un calendrier fixe (p. ex. trimestriel) ; le registre montre la derni\u00e8re cl\u00f4ture.'),
+      L('Revoke or adjust anything inappropriate from the Users and Roles pages before closing the review.',
+        '\u0623\u0644\u063a\u0650 \u0623\u0648 \u0639\u062f\u0651\u0644 \u0623\u064a \u0648\u0635\u0648\u0644 \u063a\u064a\u0631 \u0645\u0644\u0627\u0626\u0645 \u0645\u0646 \u0635\u0641\u062d\u062a\u064a \u0627\u0644\u0645\u0633\u062a\u062e\u062f\u0645\u064a\u0646 \u0648\u0627\u0644\u0623\u062f\u0648\u0627\u0631 \u0642\u0628\u0644 \u0625\u063a\u0644\u0627\u0642 \u0627\u0644\u0645\u0631\u0627\u062c\u0639\u0629.',
+        'R\u00e9voquez ou ajustez tout acc\u00e8s inappropri\u00e9 depuis Utilisateurs et R\u00f4les avant de cl\u00f4turer.'),
+    ],
+  },
+  {
+    route: '/settings/security', titleKey: 'nav.security', groupKey: 'nav.groupAdmin', icon: 'security',
+    summary: L(
+      'Your security settings: multi-factor authentication enrolment, and \u2014 for tenant administrators \u2014 the tenant-wide MFA enforcement policy.',
+      '\u0625\u0639\u062f\u0627\u062f\u0627\u062a \u0623\u0645\u0627\u0646\u0643: \u062a\u0641\u0639\u064a\u0644 \u0627\u0644\u0645\u0635\u0627\u062f\u0642\u0629 \u0645\u062a\u0639\u062f\u062f\u0629 \u0627\u0644\u0639\u0648\u0627\u0645\u0644\u060c \u0648\u0644\u0645\u062f\u064a\u0631\u064a \u0627\u0644\u0645\u0633\u062a\u0623\u062c\u0631 \u0633\u064a\u0627\u0633\u0629 \u0641\u0631\u0636 MFA \u0639\u0644\u0649 \u0645\u0633\u062a\u0648\u0649 \u0627\u0644\u0645\u0633\u062a\u0623\u062c\u0631.',
+      'Vos param\u00e8tres de s\u00e9curit\u00e9 : enr\u00f4lement MFA et, pour les administrateurs, la politique d\u2019exigence MFA du laboratoire.'),
+    steps: [],
+    usage: [
+      L('Enrol MFA from here; privileged users of an enforcing tenant must enrol before they get a full session.',
+        '\u0641\u0639\u0651\u0644 MFA \u0645\u0646 \u0647\u0646\u0627\u061b \u0648\u064a\u062c\u0628 \u0639\u0644\u0649 \u0627\u0644\u0645\u0633\u062a\u062e\u062f\u0645\u064a\u0646 \u0630\u0648\u064a \u0627\u0644\u0627\u0645\u062a\u064a\u0627\u0632\u0627\u062a \u0641\u064a \u0645\u0633\u062a\u0623\u062c\u0631 \u0645\u0641\u0639\u0651\u0644 \u0644\u0644\u0625\u0644\u0632\u0627\u0645 \u0627\u0644\u062a\u0641\u0639\u064a\u0644 \u0642\u0628\u0644 \u0627\u0644\u062d\u0635\u0648\u0644 \u0639\u0644\u0649 \u062c\u0644\u0633\u0629 \u0643\u0627\u0645\u0644\u0629.',
+        'Enr\u00f4lez le MFA ici ; les utilisateurs privil\u00e9gi\u00e9s d\u2019un laboratoire l\u2019exigeant doivent s\u2019enr\u00f4ler avant d\u2019obtenir une session compl\u00e8te.'),
+      L('Your password and e-signature PIN are changed from the account menu in the header (your name, top right).',
+        '\u062a\u064f\u063a\u064a\u0651\u0631 \u0643\u0644\u0645\u0629 \u0627\u0644\u0645\u0631\u0648\u0631 \u0648\u0631\u0642\u0645 PIN \u0644\u0644\u062a\u0648\u0642\u064a\u0639 \u0627\u0644\u0625\u0644\u0643\u062a\u0631\u0648\u0646\u064a \u0645\u0646 \u0642\u0627\u0626\u0645\u0629 \u0627\u0644\u062d\u0633\u0627\u0628 \u0641\u064a \u0627\u0644\u062a\u0631\u0648\u064a\u0633\u0629 (\u0627\u0633\u0645\u0643 \u0623\u0639\u0644\u0649 \u0627\u0644\u0635\u0641\u062d\u0629).',
+        'Le mot de passe et le code PIN de signature se changent depuis le menu du compte dans l\u2019en-t\u00eate (votre nom, en haut).'),
+    ],
+  },
+  {
+    route: '/platform/tenants', titleKey: 'nav.tenants', groupKey: 'nav.groupPlatform', icon: 'tenants',
+    summary: L(
+      'Platform administration: provision laboratory tenants, activate or suspend them, and monitor provisioning state. Visible to platform administrators only.',
+      '\u0625\u062f\u0627\u0631\u0629 \u0627\u0644\u0645\u0646\u0635\u0629: \u062a\u062c\u0647\u064a\u0632 \u0645\u0633\u062a\u0623\u062c\u0631\u064a \u0627\u0644\u0645\u062e\u062a\u0628\u0631\u0627\u062a\u060c \u0648\u062a\u0641\u0639\u064a\u0644\u0647\u0645 \u0623\u0648 \u0625\u064a\u0642\u0627\u0641\u0647\u0645\u060c \u0648\u0645\u0631\u0627\u0642\u0628\u0629 \u062d\u0627\u0644\u0629 \u0627\u0644\u062a\u062c\u0647\u064a\u0632. \u0645\u0631\u0626\u064a\u0629 \u0644\u0645\u062f\u064a\u0631\u064a \u0627\u0644\u0645\u0646\u0635\u0629 \u0641\u0642\u0637.',
+      'Administration de la plateforme : provisionnez les laboratoires, activez ou suspendez-les, surveillez l\u2019\u00e9tat du provisionnement. Visible des administrateurs plateforme uniquement.'),
+    steps: [],
+    usage: [
+      L('Provision a tenant with its slug and first administrator; seeding creates the default roles and lists.',
+        '\u062c\u0647\u0651\u0632 \u0645\u0633\u062a\u0623\u062c\u0631\u0627\u064b \u0628\u0627\u0644\u0645\u0639\u0631\u0641 \u0648\u0627\u0644\u0645\u062f\u064a\u0631 \u0627\u0644\u0623\u0648\u0644\u061b \u0648\u064a\u0646\u0634\u0626 \u0627\u0644\u062a\u0623\u0633\u064a\u0633 \u0627\u0644\u0623\u062f\u0648\u0627\u0631 \u0648\u0627\u0644\u0642\u0648\u0627\u0626\u0645 \u0627\u0644\u0627\u0641\u062a\u0631\u0627\u0636\u064a\u0629.',
+        'Provisionnez un laboratoire avec son identifiant et son premier administrateur ; l\u2019amor\u00e7age cr\u00e9e les r\u00f4les et listes par d\u00e9faut.'),
+      L('Suspending a tenant blocks its sign-ins immediately; its data is retained untouched.',
+        '\u0625\u064a\u0642\u0627\u0641 \u0627\u0644\u0645\u0633\u062a\u0623\u062c\u0631 \u064a\u0645\u0646\u0639 \u062a\u0633\u062c\u064a\u0644 \u0627\u0644\u062f\u062e\u0648\u0644 \u0641\u0648\u0631\u0627\u064b\u061b \u0648\u062a\u0628\u0642\u0649 \u0628\u064a\u0627\u0646\u0627\u062a\u0647 \u062f\u0648\u0646 \u0645\u0633\u0627\u0633.',
+        'La suspension bloque imm\u00e9diatement les connexions ; les donn\u00e9es restent intactes.'),
+    ],
+  },
 ];
 
 /** Map from top-level route segment → topic, for quick lookup by URL. */
@@ -897,14 +1012,15 @@ const TOPIC_BY_SEGMENT = new Map(
 );
 
 /**
- * Resolve the help topic for a router URL, matching on the first path segment
- * (so '/nonconformances/abc' → the nonconformances topic). Returns undefined
- * for pages without registered help.
+ * Resolve the help topic for a router URL. The full cleaned path is tried first
+ * so multi-segment pages ('/settings/security', '/platform/tenants') can carry
+ * their own topics; it then falls back to the first segment, which is what lets
+ * a detail child ('/nonconformances/abc') inherit its list page's topic.
+ * Returns undefined for pages without registered help.
  */
 export function helpTopicForUrl(url: string): HelpTopic | undefined {
   const clean = url.split('?')[0].split('#')[0].replace(/^\//, '');
-  const segment = clean.split('/')[0];
-  return TOPIC_BY_SEGMENT.get(segment);
+  return TOPIC_BY_SEGMENT.get(clean) ?? TOPIC_BY_SEGMENT.get(clean.split('/')[0]);
 }
 
 /** Distinct group keys in sidebar order, for the User Manual’s section list. */

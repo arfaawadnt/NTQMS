@@ -25,16 +25,20 @@ public sealed class CalibrationRecord : Entity
 
 public sealed class MaintenanceRecord : Entity
 {
-    internal MaintenanceRecord(DateOnly performedAt, string workDescription)
+    internal MaintenanceRecord(DateOnly performedAt, string workDescription, Guid? certificateFileId)
     {
         PerformedAt = performedAt;
         WorkDescription = workDescription;
+        CertificateFileId = certificateFileId;
     }
 
     private MaintenanceRecord() { WorkDescription = null!; }
 
     public DateOnly PerformedAt { get; private set; }
     public string WorkDescription { get; private set; }
+
+    /// <summary>Optional service/maintenance certificate, mirroring the calibration record.</summary>
+    public Guid? CertificateFileId { get; private set; }
 }
 
 /// <summary>
@@ -190,7 +194,7 @@ public sealed class EquipmentItem : AggregateRoot, ITenantScoped, IAllocatable
         Raise(new EquipmentLockedOut(Id, Code, Name, TenantId));
     }
 
-    public void LogMaintenance(DateOnly performedAt, string workDescription)
+    public void LogMaintenance(DateOnly performedAt, string workDescription, Guid? certificateFileId = null)
     {
         if (Status == EquipmentStatus.Retired)
         {
@@ -202,7 +206,7 @@ public sealed class EquipmentItem : AggregateRoot, ITenantScoped, IAllocatable
             throw new DomainException("EQP-013", "Maintenance description is required.");
         }
 
-        _maintenance.Add(new MaintenanceRecord(performedAt, workDescription.Trim()));
+        _maintenance.Add(new MaintenanceRecord(performedAt, workDescription.Trim(), certificateFileId));
     }
 
     /// <summary>

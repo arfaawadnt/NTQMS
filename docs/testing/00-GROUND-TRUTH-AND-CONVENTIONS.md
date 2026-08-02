@@ -188,3 +188,47 @@ Write to `docs/testing/`. One file per part, numbered so the package reads in or
 `NN-<slug>.md` — e.g. `10-module-auth.md`, `24-traceability-matrix.md`.
 
 Start every file with a heading, the module code, the ID range you consumed, and a one-line statement of what is complete vs deferred.
+
+**Split convention [added 2026-08-01].** A module package is split so that no single authoring pass has to emit more output than it can complete:
+
+- `NN-module-<slug>.md` — **front matter only**: implementation inventory, divergences, state-transition matrices, decision tables, UAT scenarios, exploratory charters, gap register. **No detailed cases.**
+- `NN-module-<slug>-cases-<A|B|C…>.md` — **detailed cases only**, one batch per file, each batch owning a disjoint slice of scope and a reserved ID block.
+
+The front-matter file's ID-range table is a *reservation*; the case files are what actually consume the ids. A reservation with no matching case file is a coverage hole, not a delivered case.
+
+---
+
+## 8. Canonical detailed-case block [added 2026-08-01]
+
+All 28 mandatory fields are present, paired onto rows so a batch of ~25 cases fits one authoring pass. **Use this exact shape** — the HTML renderer keys off it.
+
+```markdown
+#### TC-AUTH-API-014 — Login rejected on the 6th consecutive failure  [IV]
+
+| Field | Value |
+|---|---|
+| **Module / Requirement / Risk** | AUTH · URS-003 · RSK-AUTH-002 |
+| **Level / Type / Technique** | API · Functional (negative) · BVA — at the lockout threshold |
+| **Priority / Severity / Automation** | Critical · Critical · Yes (functional) |
+| **Role / Permission / Tenant** | Analyst · n/a — anonymous endpoint · `demo-lab` |
+| **Environment** | API `:5080` Development + live PostgreSQL `ntqams` |
+| **Preconditions** | `user_account.failed_attempts = 5`, `locked_until_utc` set, per `UserAccount.cs:29-30` |
+| **Test Data** | `admin@demo-lab.local` / `WrongPass-9!` |
+| **Steps** | 1. `POST /api/auth/login` with the above. 2. Read status + body. 3. `SELECT failed_attempts, locked_until_utc FROM qams.user_account WHERE email=…`. |
+| **Expected UI** | Sign-in form shows the locked message; inputs remain enabled. |
+| **Expected API** | `401` `application/problem+json`, code `AUTH-00x` — assert the exact code from the handler. |
+| **Expected DB** | `failed_attempts` unchanged at 5; `locked_until_utc` unchanged (no lock extension on an already-locked account). |
+| **Expected Audit** | One `audit.security_event` row, type `LOGIN_FAILED`, `tenant_id` null-tolerant per the relaxed audit WITH CHECK. |
+| **Expected Notification** | n/a — no notification is defined for a failed login. |
+| **Cleanup** | `UPDATE qams.user_account SET failed_attempts=0, locked_until_utc=NULL WHERE email=…` |
+| **Evidence** | HTTP response capture · SQL result · security-event row |
+| **Result / Defect** | Not Run · — |
+| **Notes** | Verify the code string against the handler before execution; do not assume. |
+```
+
+Rules for the block:
+- The `####` line carries **id — title — evidence label**. Nothing else.
+- `Result / Defect` is always `Not Run · —`.
+- Any field genuinely inapplicable reads `n/a — <one-clause reason>`.
+- Cite `file:line` inside the row that makes the claim, not in a footnote.
+- Steps are numbered inside the single `Steps` cell, separated by `. ` — keep them exact and executable.

@@ -59,7 +59,8 @@ public sealed record LogCalibrationCommand(
     : ICommand;
 
 [RequireInternalActor]
-public sealed record LogMaintenanceCommand(Guid EquipmentId, DateOnly PerformedAt, string WorkDescription)
+public sealed record LogMaintenanceCommand(
+    Guid EquipmentId, DateOnly PerformedAt, string WorkDescription, Guid? CertificateFileId = null)
     : ICommand;
 
 // The former varchar bound, kept at the API layer now the column is text (schema hardening 1.2/Q6).
@@ -104,8 +105,15 @@ public sealed class LogMaintenanceHandler(IAppDbContext db) : ICommandHandler<Lo
 {
     public async Task Handle(LogMaintenanceCommand c, CancellationToken ct)
     {
+        // Same guard as calibration: a certificate id must reference a stored
+        // file, or the log would carry a download link that leads nowhere.
+        if (c.CertificateFileId is { } fileId && !await db.Files.AnyAsync(f => f.Id == fileId, ct))
+        {
+            throw new DomainException("FILE-404", "Certificate file not found.");
+        }
+
         (await EquipmentLoader.LoadAsync(db, c.EquipmentId, ct))
-            .LogMaintenance(c.PerformedAt, c.WorkDescription);
+            .LogMaintenance(c.PerformedAt, c.WorkDescription, c.CertificateFileId);
         await db.SaveChangesAsync(ct);
     }
 }
@@ -210,7 +218,7 @@ public sealed class GetEquipmentByIdHandler(IAppDbContext db)
                 .Select(x => new CalibrationRecordDto(x.Id, x.PerformedAt, x.Provider, x.Result, x.CertificateFileId))
                 .ToList(),
             e.Maintenance.OrderByDescending(x => x.PerformedAt)
-                .Select(x => new MaintenanceRecordDto(x.Id, x.PerformedAt, x.WorkDescription))
+                .Select(x => new MaintenanceRecordDto(x.Id, x.PerformedAt, x.WorkDescription, x.CertificateFileId))
                 .ToList(),
             e.IntermediateChecks.OrderByDescending(x => x.PerformedOn)
                 .Select(x => new IntermediateCheckDto(

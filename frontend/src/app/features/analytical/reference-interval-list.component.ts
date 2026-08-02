@@ -5,18 +5,22 @@ import { Router, RouterOutlet } from '@angular/router';
 import { ReferenceIntervalFacade } from './reference-interval.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
+import { ReferenceIntervalListItem } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 
 /** Reference-interval verification register (CLSI EP28): transference of claimed intervals. */
 @Component({
     selector: 'qams-reference-interval-list',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DecimalPipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent],
+    imports: [ReactiveFormsModule, DecimalPipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('ri.title')" [subtitle]="i18n.t('ri.subtitle')">
+      <qams-export-menu [title]="i18n.t('ri.title')" [stats]="stats()" [columns]="exportColumns"
+                        [rows]="filtered()" [filtersSummary]="filtersSummary()" />
       @if (perms.can('analytical-quality.create')) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('ri.new') }}</button>
       }
@@ -118,6 +122,25 @@ export class ReferenceIntervalListComponent implements OnInit {
     const q = this.search().trim().toLowerCase();
     return this.facade.list().filter((s) =>
       !q || `${s.studyRef} ${s.analyte} ${s.population} ${s.state} ${s.verdict ?? ''}`.toLowerCase().includes(q));
+  });
+
+  /** Export columns — the printed grid mirrors the on-screen table. */
+  readonly exportColumns: ExportColumn<ReferenceIntervalListItem>[] = [
+    { header: this.i18n.t('mu.ref'), cell: (s) => s.studyRef },
+    { header: this.i18n.t('qc.analyte'), cell: (s) => s.analyte },
+    { header: this.i18n.t('ri.population'), cell: (s) => s.population },
+    { header: this.i18n.t('ri.interval'), cell: (s) => `${s.claimedLower} – ${s.claimedUpper}` },
+    { header: this.i18n.t('ri.outside'), cell: (s) => s.outsideCount !== null ? `${s.outsideCount} / ${s.allowedOutside ?? 0}` : '—' },
+    { header: this.i18n.t('val.verdict'), cell: (s) => s.verdict ?? '—' },
+    { header: this.i18n.t('nc.status'), cell: (s) => s.state },
+  ];
+
+  /** The filter line printed on the document, mirroring the filter bar. */
+  readonly filtersSummary = computed(() => {
+    const parts: string[] = [];
+    if (this.stateFilter()) { parts.push(this.stateFilter()); }
+    if (this.search().trim()) { parts.push(`"${this.search().trim()}"`); }
+    return parts.length ? parts.join(' · ') : this.i18n.t('exp.allRecords');
   });
 
   readonly stats = computed<ListStat[]>(() => {

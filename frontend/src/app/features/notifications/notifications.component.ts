@@ -6,6 +6,7 @@ import { I18nService } from '../../core/i18n.service';
 import { NotificationFeedItem } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { LoadMoreComponent } from '../../shared/ui/load-more.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 
 /** The signed-in user's in-app notification feed with mark-as-read and a load-more pager (R-3). */
 @Component({

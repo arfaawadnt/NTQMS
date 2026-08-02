@@ -2,25 +2,31 @@ import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } 
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { Router, RouterOutlet } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { ReviewFacade } from './review.facade';
 import { I18nService } from '../../core/i18n.service';
 import { OrgDataService } from '../../core/org-data.service';
 import { PermissionsService } from '../../core/permissions.service';
+import { ReviewApiService } from '../../core/api/review-api.service';
+import { ReviewListItem } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { UserSelectComponent } from '../../shared/ui/user-select.component';
 import { AllocationPickerComponent } from '../../shared/ui/allocation-picker.component';
 import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 import { LoadMoreComponent } from '../../shared/ui/load-more.component';
 
 /** Management review list: live statistics, filterable list + a schedule form (QM-gated). */
 @Component({
     selector: 'qams-review-list',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent, UserSelectComponent, LoadMoreComponent],
+    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent, UserSelectComponent, LoadMoreComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('mrv.title')">
+      <qams-export-menu [title]="i18n.t('mrv.title')" [stats]="stats()" [columns]="exportColumns"
+                        [rows]="filtered()" [fetchAll]="exportAll" [filtersSummary]="filtersSummary()" />
       @if (perms.can('reviews.create')) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('mrv.new') }}</button>
       }
@@ -44,7 +50,11 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
         </div>
         <label>{{ i18n.t('mrv.participants') }}</label>
         <qams-user-select formControlName="participantIds" [multiple]="true" />
-        <div class="hint">{{ i18n.t('mrv.participantsPick') }}</div>
+        <div class="hint">{{ i18n.t('mrv.participantsMail') }}</div>
+        <label>{{ i18n.t('mrv.agenda') }}</label>
+        <textarea formControlName="agenda" rows="4" [placeholder]="i18n.t('mrv.agendaHint')"></textarea>
+        <label>{{ i18n.t('mrv.meetingLink') }}</label>
+        <input formControlName="meetingLink" type="url" [placeholder]="i18n.t('mrv.meetingLinkHint')" />
         <qams-allocation-picker [branchCtrl]="form.controls.branchId" [departmentCtrl]="form.controls.departmentId" />
         <div class="row">
           <button type="submit" [disabled]="form.invalid || facade.loading()">{{ i18n.t('mrv.schedule') }}</button>
@@ -104,6 +114,7 @@ export class ReviewListComponent implements OnInit {
   readonly i18n = inject(I18nService);
   readonly perms = inject(PermissionsService);
   readonly org = inject(OrgDataService);
+  private readonly api = inject(ReviewApiService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
 
@@ -122,6 +133,42 @@ export class ReviewListComponent implements OnInit {
       && (!q || `${r.reviewRef} ${r.title} ${r.status}`.toLowerCase().includes(q)));
   });
 
+  /** Export columns — the printed grid mirrors the on-screen table. */
+  readonly exportColumns: ExportColumn<ReviewListItem>[] = [
+    { header: this.i18n.t('mrv.ref'), cell: (r) => r.reviewRef },
+    { header: this.i18n.t('mrv.reviewTitle'), cell: (r) => r.title },
+    { header: this.i18n.t('mrv.reviewDate'), cell: (r) => r.reviewDate },
+    { header: this.i18n.t('nc.status'), cell: (r) => r.status },
+    { header: this.i18n.t('mrv.decisions'), cell: (r) => `${r.decisionCount}` },
+    { header: this.i18n.t('alloc.branch'), cell: (r) => this.org.branchName(r.branchId) || '—' },
+  ];
+
+  /** The filter line printed on the document, mirroring the filter bar. */
+  readonly filtersSummary = computed(() => {
+    const parts: string[] = [];
+    if (this.branchFilter()) { parts.push(this.org.branchName(this.branchFilter())); }
+    if (this.search().trim()) { parts.push(`"${this.search().trim()}"`); }
+    return parts.length ? parts.join(' · ') : this.i18n.t('exp.allRecords');
+  });
+
+  /**
+   * Pulls every page of the register so the document holds the whole dataset,
+   * then applies the same client-side narrowing the screen applies.
+   */
+  readonly exportAll = async (): Promise<readonly ReviewListItem[]> => {
+    const all: ReviewListItem[] = [];
+    for (let page = 1; page <= 25; page++) {
+      const batch = await firstValueFrom(this.api.list(page, 200));
+      all.push(...batch.items);
+      if (!batch.hasMore) { break; }
+    }
+    const q = this.search().trim().toLowerCase();
+    const branch = this.branchFilter();
+    return all.filter((r) =>
+      (!branch || r.branchId === branch)
+      && (!q || `${r.reviewRef} ${r.title} ${r.status}`.toLowerCase().includes(q)));
+  };
+
   /** Live statistics computed from the real register. */
   readonly stats = computed<ListStat[]>(() => {
     const all = this.facade.list();
@@ -136,6 +183,8 @@ export class ReviewListComponent implements OnInit {
     title: ['', [Validators.required, Validators.maxLength(200)]],
     reviewDate: ['', [Validators.required]],
     participantIds: [[] as string[], [Validators.required]],
+    agenda: ['', [Validators.maxLength(10000)]],
+    meetingLink: ['', [Validators.maxLength(500), Validators.pattern(/^https?:\/\/.+/)]],
     branchId: [''],
     departmentId: [''],
   });
@@ -151,9 +200,11 @@ export class ReviewListComponent implements OnInit {
     const id = await this.facade.schedule({
       title: raw.title,
       reviewDate: raw.reviewDate,
-      // The domain stores participants as the human-readable minutes string —
-      // resolve the picked users to their display names.
-      participants: raw.participantIds.map((uid) => this.org.userName(uid)).filter(Boolean).join(', '),
+      // User ids, not display names: the server resolves the minutes string and
+      // mails the invitation (agenda + link) to each picked participant.
+      participantUserIds: raw.participantIds,
+      agenda: raw.agenda.trim() || null,
+      meetingLink: raw.meetingLink.trim() || null,
       branchId: raw.branchId || null,
       departmentId: raw.departmentId || null,
     });

@@ -6,21 +6,24 @@ import { ObjectivesFacade } from './objectives.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
 import { OrgDataService } from '../../core/org-data.service';
-import { OBJECTIVE_DIRECTIONS } from '../../core/models';
+import { OBJECTIVE_DIRECTIONS, QualityObjectiveListItem } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { AllocationPickerComponent } from '../../shared/ui/allocation-picker.component';
 import { UserSelectComponent } from '../../shared/ui/user-select.component';
 import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 
 /** Quality objectives register: measurable targets with live on-target verdicts (§6.2 / §8.2). */
 @Component({
     selector: 'qams-objective-list',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, UserSelectComponent, ListStatsComponent],
+    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, UserSelectComponent, ListStatsComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('obj.title')" [subtitle]="i18n.t('obj.subtitle')">
+      <qams-export-menu [title]="i18n.t('obj.title')" [stats]="stats()" [columns]="exportColumns"
+                        [rows]="filtered()" [filtersSummary]="filtersSummary()" />
       @if (perms.can('objectives.create')) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('obj.new') }}</button>
       }
@@ -138,6 +141,26 @@ export class ObjectiveListComponent implements OnInit {
     const q = this.search().trim().toLowerCase();
     return this.facade.list().filter((o) =>
       !q || `${o.objectiveRef} ${o.title} ${o.metric} ${o.status}`.toLowerCase().includes(q));
+  });
+
+  /** Export columns — the printed grid mirrors the on-screen table. */
+  readonly exportColumns: ExportColumn<QualityObjectiveListItem>[] = [
+    { header: this.i18n.t('mu.ref'), cell: (o) => o.objectiveRef },
+    { header: this.i18n.t('obj.objTitle'), cell: (o) => o.title },
+    { header: this.i18n.t('obj.metric'), cell: (o) => o.metric },
+    { header: this.i18n.t('obj.target'), cell: (o) => `${this.i18n.t('obj.dir' + o.direction)} ${o.targetValue} ${o.unit}`.trim() },
+    { header: this.i18n.t('obj.current'), cell: (o) => o.currentValue !== null ? `${o.currentValue} ${o.unit}`.trim() : '—' },
+    { header: this.i18n.t('mrv.owner'), cell: (o) => this.org.userName(o.ownerId) || '—' },
+    { header: this.i18n.t('atr.period'), cell: (o) => `${o.periodStart} – ${o.periodEnd}` },
+    { header: this.i18n.t('nc.status'), cell: (o) => o.status },
+  ];
+
+  /** The filter line printed on the document, mirroring the filter bar. */
+  readonly filtersSummary = computed(() => {
+    const parts: string[] = [];
+    if (this.statusFilter()) { parts.push(this.statusFilter()); }
+    if (this.search().trim()) { parts.push(`"${this.search().trim()}"`); }
+    return parts.length ? parts.join(' · ') : this.i18n.t('exp.allRecords');
   });
 
   readonly stats = computed<ListStat[]>(() => {

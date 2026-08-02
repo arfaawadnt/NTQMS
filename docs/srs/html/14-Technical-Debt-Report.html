@@ -1,0 +1,884 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Technical Debt Report — NT.QMS As-Built SRS</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧱</text></svg>">
+<style>
+:root{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);
+ --mono:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace;
+ --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,ui-serif,serif;
+ --sans:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}}
+:root[data-theme="dark"]{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}
+:root[data-theme="light"]{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+ font-size:15.5px;line-height:1.62;-webkit-text-size-adjust:100%}
+.wrap{display:grid;grid-template-columns:288px minmax(0,1fr);gap:0;max-width:1560px;margin:0 auto}
+/* ---- sidebar ---- */
+aside{position:sticky;top:0;height:100vh;overflow-y:auto;padding:22px 16px 60px;
+ border-right:1px solid var(--line);background:var(--panel)}
+aside .brand{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:-.01em;
+ margin:0 0 2px}
+aside .sub{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;
+ margin:0 0 16px}
+aside nav a{display:block;padding:5px 9px;border-radius:7px;color:var(--ink);text-decoration:none;
+ font-size:13.2px;border-left:2px solid transparent}
+aside nav a:hover{background:var(--panel-2)}
+aside nav a.cur{background:var(--accent-soft);border-left-color:var(--accent);font-weight:600}
+aside nav a .n{color:var(--muted);font-variant-numeric:tabular-nums;margin-right:7px;font-size:11.5px}
+aside .sec{margin:16px 0 5px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+ color:var(--muted);font-weight:700}
+#toc{margin-top:6px;border-top:1px solid var(--line);padding-top:10px}
+#toc a{display:block;padding:2.5px 9px;font-size:12.4px;color:var(--muted);text-decoration:none;
+ border-left:2px solid transparent;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#toc a:hover{color:var(--ink)}
+#toc a.h3{padding-left:22px;font-size:11.8px}
+/* ---- main ---- */
+main{padding:34px 46px 120px;min-width:0;overflow-wrap:anywhere}
+.doc-head{border-bottom:2px solid var(--accent);padding-bottom:14px;margin-bottom:26px}
+.kicker{color:var(--accent);font-size:11.5px;font-weight:700;letter-spacing:.11em;
+ text-transform:uppercase;margin:0 0 4px}
+h1{font-family:var(--serif);font-size:31px;line-height:1.2;margin:0;letter-spacing:-.015em}
+h2{font-family:var(--serif);font-size:24px;margin:38px 0 12px;padding-bottom:6px;
+ border-bottom:1px solid var(--line);letter-spacing:-.01em;scroll-margin-top:14px}
+h3{font-size:18px;margin:26px 0 9px;letter-spacing:-.005em;scroll-margin-top:14px}
+h4{font-size:15px;margin:20px 0 7px;color:var(--accent)}
+h5,h6{font-size:13.5px;margin:16px 0 6px;color:var(--muted);text-transform:uppercase;
+ letter-spacing:.05em}
+p{margin:10px 0}
+a{color:var(--accent)}
+hr{border:0;border-top:1px solid var(--line);margin:30px 0}
+ul,ol{margin:9px 0;padding-left:24px}
+li{margin:3px 0}
+blockquote{margin:16px 0;padding:12px 18px;background:var(--accent-soft);
+ border-left:3px solid var(--accent);border-radius:0 8px 8px 0}
+blockquote p:first-child{margin-top:0}blockquote p:last-child{margin-bottom:0}
+code{font-family:var(--mono);font-size:.875em;background:var(--panel-2);
+ padding:1.5px 5px;border-radius:4px;border:1px solid var(--line)}
+pre{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;
+ padding:14px 16px;overflow-x:auto;margin:14px 0}
+pre code{background:none;border:0;padding:0;font-size:12.6px;line-height:1.5}
+/* ---- tables ---- */
+.tw{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:10px;
+ background:var(--panel);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;font-size:13.4px}
+th,td{padding:8px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:var(--panel-2);font-weight:700;font-size:12.2px;letter-spacing:.02em;
+ position:sticky;top:0;z-index:1}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--accent-soft)}
+td code,th code{font-size:.9em;white-space:nowrap}
+/* ---- diagrams ---- */
+figure.d{margin:18px 0;padding:18px;background:var(--panel);border:1px solid var(--line);
+ border-radius:12px;box-shadow:var(--shadow);overflow-x:auto;text-align:center}
+figure.d svg{max-width:100%;height:auto;display:inline-block}
+/* ---- misc ---- */
+.tools{position:fixed;top:12px;right:16px;display:flex;gap:6px;z-index:50}
+.tools button{font:inherit;font-size:12px;padding:5px 11px;border-radius:8px;cursor:pointer;
+ border:1px solid var(--line);background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+.tools button:hover{background:var(--panel-2)}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:52px;padding-top:18px;
+ border-top:1px solid var(--line)}
+.pager a{display:block;max-width:46%;padding:10px 14px;border:1px solid var(--line);
+ border-radius:10px;background:var(--panel);text-decoration:none;font-size:13px}
+.pager a span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;
+ letter-spacing:.08em}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:14px;margin:20px 0}
+.card{padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--panel);
+ box-shadow:var(--shadow);text-decoration:none;color:var(--ink);display:block}
+.card:hover{border-color:var(--accent)}
+.card .num{color:var(--accent);font-weight:700;font-size:11.5px;letter-spacing:.1em}
+.card .t{font-family:var(--serif);font-size:17px;margin:3px 0 5px}
+.card .d{color:var(--muted);font-size:12.7px;line-height:1.5}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin:20px 0}
+.stat{padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.stat b{display:block;font-size:23px;font-family:var(--serif);line-height:1.1}
+.stat span{color:var(--muted);font-size:11.4px}
+@media print{
+ aside,.tools,.pager{display:none!important}
+ .wrap{display:block;max-width:none}
+ main{padding:0}
+ .tw,figure.d{break-inside:avoid;box-shadow:none}
+ h2{break-after:avoid}
+ a{color:inherit;text-decoration:none}
+}
+@media (max-width:1080px){
+ .wrap{grid-template-columns:1fr}
+ aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+ main{padding:22px 18px 80px}
+ #toc{display:none}
+}
+</style>
+</head><body>
+<div class="tools"><button id="th">◐ Theme</button><button id="pr">⎙ Print</button></div>
+<div class="wrap">
+<aside><p class="brand">NT.QMS</p><p class="sub">As-Built SRS · v1.51.x</p><a class="card" style="padding:9px 12px;margin-bottom:10px;font-size:13px" href="index.html">◂ Document set</a><div class="sec">Documents</div><nav><a class="" href="00-SRS-Index-and-Conventions.html"><span class="n">00</span>Index, Conventions &amp; Glossary</a><a class="" href="01-Software-Requirements-Specification.html"><span class="n">01</span>Software Requirements Specification</a><a class="" href="02-1-Functional-Specification-Quality-and-Improvement.html"><span class="n">02-1</span>Functional Spec 1 — Quality &amp; Improvement</a><a class="" href="02-2-Functional-Specification-Resources-People-Governance.html"><span class="n">02-2</span>Functional Spec 2 — Resources, People &amp; Governance</a><a class="" href="02-3-Functional-Specification-Analytical-Quality.html"><span class="n">02-3</span>Functional Spec 3 — Analytical Quality</a><a class="" href="02-4-Functional-Specification-Operations-and-Platform.html"><span class="n">02-4</span>Functional Spec 4 — Operations &amp; Platform</a><a class="" href="03-Business-Rules.html"><span class="n">03</span>Business Rules &amp; Error Catalogue</a><a class="" href="04-Configuration-Reference.html"><span class="n">04</span>Configuration Reference</a><a class="" href="05-Screen-Specification.html"><span class="n">05</span>Screen Specification</a><a class="" href="06-Workflow-Specification.html"><span class="n">06</span>Workflow Specification</a><a class="" href="07-File-System-Specification.html"><span class="n">07</span>File System Specification</a><a class="" href="08-API-Specification.html"><span class="n">08</span>API Specification</a><a class="" href="09-Security-Specification.html"><span class="n">09</span>Security Specification</a><a class="" href="10-Deployment-Specification.html"><span class="n">10</span>Deployment Specification</a><a class="" href="11-Architecture-Constraints.html"><span class="n">11</span>Architecture Constraints</a><a class="" href="12-Requirements-Traceability-Matrix.html"><span class="n">12</span>Requirements Traceability Matrix</a><a class="" href="13-Implementation-vs-SRS-Gap-Analysis.html"><span class="n">13</span>Implementation vs SRS — Gap Analysis</a><a class="cur" href="14-Technical-Debt-Report.html"><span class="n">14</span>Technical Debt Report</a><a class="" href="15-Recommendations.html"><span class="n">15</span>Recommendations</a></nav><div class='sec'>On this page</div><div id='toc'><a class="h2" href="#what-is-genuinely-good-and-therefore-should-not-be-improved">What is genuinely good (and therefore should not be &quot;improved&quot;)</a><a class="h2" href="#td-01-auditsecurity-event-has-no-row-level-security-policy">TD-01 🔴 · audit.security_event has no row-level-security policy</a><a class="h2" href="#td-02-no-automated-gate-for-rls-parity-on-new-tenant-tables">TD-02 🔴 · No automated gate for RLS parity on new tenant tables</a><a class="h2" href="#td-03-no-independent-penetration-test">TD-03 🔴 · No independent penetration test</a><a class="h2" href="#td-04-no-executed-restore-drill">TD-04 🔴 · No executed restore drill</a><a class="h2" href="#td-05-deploymigrationssql-is-stale-and-the-runbook-says-to-use-it">TD-05 🔴 · deploy/migrations.sql is stale and the runbook says to use it</a><a class="h2" href="#correctness-behavioural">Correctness / behavioural</a><a class="h2" href="#robustness-resource">Robustness / resource</a><a class="h2" href="#operational">Operational</a><a class="h2" href="#naming-and-code-hygiene">Naming and code-hygiene</a><a class="h2" href="#duplication">Duplication</a><a class="h2" href="#large-files">Large files</a><a class="h2" href="#miscellaneous">Miscellaneous</a><a class="h2" href="#what-the-shape-says">What the shape says</a></div></aside>
+<main>
+<div class="doc-head"><p class="kicker">Document 14 · NT.QMS Production SRS</p><h1>Technical Debt Report</h1></div>
+<blockquote>
+<p><a href="00-SRS-Index-and-Conventions.html">Conventions</a> · Prioritised remediation:
+<a href="15-Recommendations.html">Document 15</a> · Defects found in the gap analysis:
+<a href="13-Implementation-vs-SRS-Gap-Analysis.html">Document 13 §13.7</a></p>
+</blockquote>
+<hr>
+<h1>14.1 Overall assessment</h1>
+<p>This is a <strong>well-disciplined codebase carrying a specific, identifiable set of debts</strong>. That is worth
+stating plainly, because the list below is long and a reader could mistake length for severity.</p>
+<h2 id="what-is-genuinely-good-and-therefore-should-not-be-improved">What is genuinely good (and therefore should not be "improved")</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Evidence</th>
+<th>Measurement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Zero TODO / HACK / FIXME markers</strong> in the entire source tree</td>
+<td>measured: <code>0</code> across all <code>.cs</code> and <code>.ts</code></td>
+</tr>
+<tr>
+<td><strong>Zero unauthorised commands</strong> — every one of 215 carries a policy, machine-enforced</td>
+<td><code>CommandPolicyTests</code></td>
+</tr>
+<tr>
+<td><strong>Layering is a build gate, not a convention</strong> — including the rare <em>"no domain module may reference another domain module"</em> rule</td>
+<td><code>LayerRulesTests</code> (6 rules)</td>
+</tr>
+<tr>
+<td><strong>The API surface cannot drift</strong></td>
+<td>658-line snapshot gate</td>
+</tr>
+<tr>
+<td><strong>Business rules live in aggregates</strong>, not in handlers or validators</td>
+<td>consistent across 86 domain classes</td>
+</tr>
+<tr>
+<td><strong>Error codes are structured and exhaustive</strong> — 416 codes, all machine-extractable</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>Hard-won lessons are written down at the point of pain</strong> — the RLS/audit 500-vs-401 lesson, the EF 62-character index truncation, the migration RLS-bypass trap, the <code>ng build</code> ≠ <code>ng serve</code> trap</td>
+<td>code comments and <code>CLAUDE.md</code></td>
+</tr>
+<tr>
+<td><strong>Deliberate reversals are recorded</strong> — the CSV export set was built and reverted, and that is documented so nobody rebuilds it</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>Refusals to fabricate evidence</strong> — a vendor pen-test attestation was declined rather than forged</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<p>Debt is rated by <strong>cost of leaving it</strong> × <strong>cost of fixing it</strong>.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Severity</th>
+<th style="text-align: right;">Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🔴 High</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr>
+<td>🟠 Medium</td>
+<td style="text-align: right;">21</td>
+</tr>
+<tr>
+<td>🟡 Low</td>
+<td style="text-align: right;">16</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td style="text-align: right;"><strong>42</strong></td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>14.2 High-severity debt</h1>
+<h2 id="td-01-auditsecurity-event-has-no-row-level-security-policy">TD-01 🔴 · <code>audit.security_event</code> has no row-level-security policy</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What</strong></td>
+<td>Both RLS migrations iterate <code>pg_policies</code> to find tables to harden. <code>audit.security_event</code> had <strong>no</strong> policy, so it was <strong>skipped by both</strong>. Its store reads are not tenant-filtered.</td>
+</tr>
+<tr>
+<td><strong>Why it happened</strong></td>
+<td>A migration that hardens "every table that already has a policy" cannot bootstrap a table that has none. A reasonable-looking loop with a blind spot.</td>
+</tr>
+<tr>
+<td><strong>Cost of leaving</strong></td>
+<td>A tenant-scoped read path over that table returns other tenants' security events — login failures, export events, display names. The append-only trigger <em>is</em> present, so integrity holds; <strong>only isolation is missing</strong>.</td>
+</tr>
+<tr>
+<td><strong>Cost of fixing</strong></td>
+<td><strong>One migration.</strong> The policy shape is already standardised across 90 other tables.</td>
+</tr>
+<tr>
+<td><strong>Detection</strong></td>
+<td><code>SELECT relrowsecurity, relforcerowsecurity FROM pg_class WHERE relname='security_event'</code></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="td-02-no-automated-gate-for-rls-parity-on-new-tenant-tables">TD-02 🔴 · No automated gate for RLS parity on new tenant tables</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What</strong></td>
+<td><code>AC-19</code>/<code>AC-20</code> require every <code>ITenantScoped</code> table to carry a FORCE-RLS policy added in its own migration. <strong>Nothing checks this.</strong> It is a review discipline documented in three places.</td>
+</tr>
+<tr>
+<td><strong>Why it matters</strong></td>
+<td>TD-01 is the proof that the discipline can fail. The single most important invariant in a multi-tenant regulated system is the one with no gate.</td>
+</tr>
+<tr>
+<td><strong>Cost of fixing</strong></td>
+<td><strong>Low.</strong> An integration test that enumerates <code>ITenantScoped</code> implementations, maps them to table names, and asserts <code>relrowsecurity AND relforcerowsecurity</code> for each. The integration project already runs against real PostgreSQL.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="td-03-no-independent-penetration-test">TD-03 🔴 · No independent penetration test</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What</strong></td>
+<td>24 self-authored probes pass (0 findings), but they were written by the same party that wrote the system, and run against a development instance.</td>
+</tr>
+<tr>
+<td><strong>Cost of leaving</strong></td>
+<td>The largest single assurance gap. No external party has attempted to break this system.</td>
+</tr>
+<tr>
+<td><strong>Cost of fixing</strong></td>
+<td>External — needs a staging host and an independent tester. SOW and readiness checklist already exist.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="td-04-no-executed-restore-drill">TD-04 🔴 · No executed restore drill</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What</strong></td>
+<td>RPO ≤ 5 min / RTO ≤ 4 h are <strong>documented targets</strong>. <code>backup.sh</code> and <code>restore.sh</code> exist. <strong>Neither has been executed end-to-end.</strong></td>
+</tr>
+<tr>
+<td><strong>Cost of leaving</strong></td>
+<td>An untested backup is a hypothesis. Worse: <code>backup.sh</code> <em>warns and continues</em> when the file-store path is wrong, producing a DB-only backup that looks successful — every controlled document, calibration certificate and archive snapshot would be unrecoverable.</td>
+</tr>
+<tr>
+<td><strong>Cost of fixing</strong></td>
+<td><strong>Low</strong> — one scheduled drill, plus turning the file-store warning into a failure unless <code>--db-only</code> is passed explicitly.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="td-05-deploymigrationssql-is-stale-and-the-runbook-says-to-use-it">TD-05 🔴 · <code>deploy/migrations.sql</code> is stale and the runbook says to use it</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What</strong></td>
+<td>The script covers <strong>migrations 1–10 of 56</strong>. <code>DEPLOY.md</code> instructs re-running it on each upgrade.</td>
+</tr>
+<tr>
+<td><strong>Cost of leaving</strong></td>
+<td>Following the documented procedure produces a <strong>broken schema</strong>. This is a live footgun in an operational runbook.</td>
+</tr>
+<tr>
+<td><strong>Cost of fixing</strong></td>
+<td><strong>Trivial</strong> — regenerate with <code>dotnet ef migrations script --idempotent</code>, and add a CI step that regenerates and diffs it so it can never go stale again.</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>14.3 Medium-severity debt</h1>
+<h2 id="correctness-behavioural">Correctness / behavioural</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Debt</th>
+<th>Detail</th>
+<th>Fix cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>TD-06</strong> 🟠</td>
+<td><strong>Complaint closure interlock is unsatisfiable for a rejected NC</strong></td>
+<td><code>CMP-020</code> requires the linked NC to be <code>Closed</code>. A <em>rejected</em> NC is terminal but never <code>Closed</code> ⇒ the complaint can never be closed.</td>
+<td>Low — accept <code>Rejected</code> as a terminal state in the interlock</td>
+</tr>
+<tr>
+<td><strong>TD-07</strong> 🟠</td>
+<td><strong>Suspended suppliers cannot be reinstated</strong></td>
+<td><code>Suspended</code> is terminal. A supplier auto-suspended for an expired certificate cannot be restored after renewal — the only remedy is a new supplier record, which orphans the evaluation history.</td>
+<td>Low — add a guarded <code>Reinstate</code></td>
+</tr>
+<tr>
+<td><strong>TD-08</strong> 🟠</td>
+<td><strong>Test-authorisation scope is never enforced</strong></td>
+<td><code>Perform</code> / <code>ReviewAndRelease</code> / <code>Train</code> is recorded and never checked anywhere downstream.</td>
+<td>Medium — needs a call site that cares</td>
+</tr>
+<tr>
+<td><strong>TD-09</strong> 🟠</td>
+<td><strong>No excursion de-bounce</strong></td>
+<td>Every out-of-limit environmental reading raises an NC <strong>and</strong> a notification per recipient. A sensor oscillating at a limit produces a flood.</td>
+<td>Low–Medium — N-consecutive or duration window</td>
+</tr>
+<tr>
+<td><strong>TD-10</strong> 🟠</td>
+<td><strong>E-mail is never retried</strong></td>
+<td>A transient SMTP failure marks the dispatch <code>Failed</code> and is logged as a warning. The outbox pattern that protects event delivery is <strong>not</strong> applied to the e-mail leg.</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td><strong>TD-11</strong> 🟠</td>
+<td><strong>Silent degradation to log-only e-mail</strong></td>
+<td><code>Smtp:Host</code> unset ⇒ <code>LoggingEmailSender</code> binds and dispatches are marked <em>sent</em>. No operator warning. A production deployment can believe it is notifying people when it is not.</td>
+<td>Trivial — log a startup warning outside Development</td>
+</tr>
+<tr>
+<td><strong>TD-12</strong> 🟠</td>
+<td><strong>Management-review decisions never become tasks</strong></td>
+<td>Owner and due date are recorded; nothing chases them.</td>
+<td>Low</td>
+</tr>
+<tr>
+<td><strong>TD-13</strong> 🟠</td>
+<td><strong><code>SlaDefinition</code> and <code>EscalationTimer</code> are unwired</strong></td>
+<td>SLA targets are stored per module/severity; timers take an absolute deadline. Nothing derives one from the other, so the SLA table may be decorative.</td>
+<td>Medium — first confirm the intent</td>
+</tr>
+<tr>
+<td><strong>TD-14</strong> 🟠</td>
+<td><strong><code>Jwt:ExpiryMinutes</code> = 120 contradicts ADR-0009's 15</strong></td>
+<td>Configuration and the binding decision record disagree by 8×.</td>
+<td>Trivial to change; needs a decision on which is right</td>
+</tr>
+<tr>
+<td><strong>TD-15</strong> 🟠</td>
+<td><strong>Tenant lifecycle has no endpoint</strong></td>
+<td><code>Suspend</code> / <code>Reactivate</code> / <code>Terminate</code> exist on the aggregate. Suspending a tenant today means editing the database.</td>
+<td>Low</td>
+</tr>
+<tr>
+<td><strong>TD-16</strong> 🟠</td>
+<td><strong>SoD is a no-op when <code>CreatedByUserId</code> is null</strong></td>
+<td>Legacy rows and system-raised records bypass every SoD check silently. Accepted residual F-05b — but it is a real bypass and there is no report of <em>which</em> records are affected.</td>
+<td>Low — a query that lists them; Medium to backfill</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="robustness-resource">Robustness / resource</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Debt</th>
+<th>Detail</th>
+<th>Fix cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>TD-17</strong> 🟠</td>
+<td><strong>No maximum upload size</strong></td>
+<td>Only the host body limit applies. An authenticated user can exhaust the disk.</td>
+<td>Trivial</td>
+</tr>
+<tr>
+<td><strong>TD-18</strong> 🟠</td>
+<td><strong><code>take</code> and <code>days</code> are unbounded</strong></td>
+<td><code>pageSize</code> is correctly clamped to 200. <code>take</code> (compliance reads 200, exports 1000) and <code>days</code> (KPI history 90) are <strong>defaults, not maxima</strong>.</td>
+<td>Trivial — reuse the clamp pattern</td>
+</tr>
+<tr>
+<td><strong>TD-19</strong> 🟠</td>
+<td><strong>15+ list endpoints are unpaged</strong></td>
+<td>Complaints, feedback, conflicts, monitoring points, reference standards, test authorisations, objectives, quality policy, org-context, SLA definitions, roles, users, access reviews, PT, PT plans and every analytical study list return the full filtered set.</td>
+<td>Low each; the shared pager already exists</td>
+</tr>
+<tr>
+<td><strong>TD-20</strong> 🟠</td>
+<td><strong>Ledgers have no partitioning or archival</strong></td>
+<td><code>audit.field_change</code> and <code>audit.security_event</code> grow without bound — already 19,296 null-tenant rows in the dev dataset alone. Chain verification is an <strong>O(n) full scan</strong> with no checkpoint.</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td><strong>TD-21</strong> 🟠</td>
+<td><strong>No purge for expired <code>refresh_session</code> rows</strong></td>
+<td>Rows accumulate past their 14-day lifetime with no cleanup job.</td>
+<td>Trivial</td>
+</tr>
+<tr>
+<td><strong>TD-22</strong> 🟠</td>
+<td><strong>File blobs are never deleted</strong></td>
+<td>No retention, no orphan collection, no reference counting. Disposed archive records keep their snapshot forever. <strong>And two records can share one deduplicated blob with no counter</strong> — so if a delete path is ever added, it will corrupt the other record.</td>
+<td>Low now, Medium later</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="operational">Operational</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Debt</th>
+<th>Detail</th>
+<th>Fix cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>TD-23</strong> 🟠</td>
+<td><strong>The alert set has never fired</strong></td>
+<td>Seven well-specified alerts; the observability stack was authored and never brought up. Alerts that have never fired are alerts that might not work.</td>
+<td>Needs a Docker host</td>
+</tr>
+<tr>
+<td><strong>TD-24</strong> 🟠</td>
+<td><strong>Build output committed to version control</strong></td>
+<td><code>deploy/publish-win-x64/</code> (a full framework publish) plus two ZIPs. They bloat the repository, go stale silently, and can be deployed by mistake instead of a current build.</td>
+<td>Trivial — delete and <code>.gitignore</code></td>
+</tr>
+<tr>
+<td><strong>TD-25</strong> 🟠</td>
+<td><strong>Repository documentation contradicts the code in at least six places</strong></td>
+<td>Angular 18 vs 22 · <code>[Authorize(Roles)]</code> vs <code>[RequirePermission]</code> · ~270 tests vs 436 · 93 tables/49 migrations vs 97/56 · v1.46 vs v1.51 · the stale migration script. <code>docs/reference/</code> is described as "law".</td>
+<td>Low — but it recurs unless something checks it</td>
+</tr>
+<tr>
+<td><strong>TD-26</strong> 🟠</td>
+<td><strong><code>ref</code> schema granted but never created</strong></td>
+<td><code>harden-runtime-role.sql</code> grants on a schema that does not exist, and the design docs describe it.</td>
+<td>Trivial — remove the grant or create the schema</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>14.4 Low-severity debt</h1>
+<h2 id="naming-and-code-hygiene">Naming and code-hygiene</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Debt</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>TD-27</strong> 🟡</td>
+<td><strong><code>AUTHZ-*</code> prefix collision</strong> — test authorisations (<code>AUTHZ-001…015</code>, <code>404</code>) share a prefix with the command-authorisation pipeline (<code>AUTHZ-000</code>, <code>002</code>, <code>008</code>). <strong><code>AUTHZ-002</code> carries two entirely unrelated messages</strong> depending on origin.</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>TD-28</strong> 🟡</td>
+<td><strong><code>SIG-*</code> prefix collision</strong> — sigma assessment (<code>SIG-001/002/003</code>) vs e-signature failure (<code>SIG-001</code> PIN, <code>SIG-002</code> password, <code>SIG-003</code> locked). Three codes, two meanings each. A support engineer cannot resolve a <code>SIG-002</code> without context.</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>TD-29</strong> 🟡</td>
+<td><strong><code>Roles.cs</code> is 8/9 dead code.</strong> Only <code>Roles.PlatformAdmin</code> is used (once). The four group constants (<code>QmOrAdmin</code>, <code>QmDeptAdmin</code>, <code>QmAdminAuditor</code>, <code>TenantAdminOnly</code>) survive <strong>only as label strings inside <code>RoleEndpointMatrixTests</code></strong> — a future developer will reasonably believe they still gate endpoints.</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>TD-30</strong> 🟡</td>
+<td><strong>Route/aggregate naming mismatch</strong> — <code>ChangeRequest</code> is served at <code>/api/changes</code>, pinned by the surface gate.</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>TD-31</strong> 🟡</td>
+<td><strong>117 duplicated <code>*-404</code> throw sites</strong> with near-identical messages. Mechanical, harmless, and a candidate for one guard helper.</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>TD-32</strong> 🟡</td>
+<td><strong><code>GovernanceControllers.cs</code> holds 3 controllers; <code>PlatformControllers.cs</code> holds 5</strong> including <code>NotificationsController</code> — notifications are not a "platform" concern.</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="duplication">Duplication</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Debt</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>TD-33</strong> 🟡</td>
+<td><strong>Twelve analytical study slices are ~85 % structurally identical</strong> — 2,223 lines across 15 files, each repeating configure / add-point / remove-point / calculate / sign-off with different nouns. Generic-ising them would trade one duplication for one abstraction, and the current shape is very readable. <strong>Documented as a conscious trade-off, not recommended for change.</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>TD-34</strong> 🟡</td>
+<td><strong>Twelve near-identical study controllers</strong> — same trade-off.</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>TD-35</strong> 🟡</td>
+<td><strong>Twelve near-identical list/detail SPA screen pairs</strong> — same trade-off.</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="large-files">Large files</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>File</th>
+<th style="text-align: right;">Lines</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>TD-36</strong> 🟡</td>
+<td><code>frontend/src/app/core/models.ts</code></td>
+<td style="text-align: right;"><strong>2,205</strong></td>
+<td>one file for every DTO type in the SPA — a growing merge-conflict surface</td>
+</tr>
+<tr>
+<td><strong>TD-37</strong> 🟡</td>
+<td><code>frontend/src/app/core/i18n.service.ts</code></td>
+<td style="text-align: right;"><strong>1,641</strong></td>
+<td>three languages × every key in one file</td>
+</tr>
+<tr>
+<td><strong>TD-38</strong> 🟡</td>
+<td><code>Application/Reporting/QualityAnalyticsQuery.cs</code></td>
+<td style="text-align: right;"><strong>552</strong></td>
+<td>one handler computing nine sections; new, cohesive, watch it</td>
+</tr>
+<tr>
+<td><strong>TD-39</strong> 🟡</td>
+<td><code>frontend/.../help/help-content.ts</code></td>
+<td style="text-align: right;">917</td>
+<td>static content, low risk</td>
+</tr>
+<tr>
+<td><strong>TD-40</strong> 🟡</td>
+<td><code>frontend/.../quality-analytics.component.ts</code></td>
+<td style="text-align: right;">657</td>
+<td>new</td>
+</tr>
+<tr>
+<td><strong>TD-41</strong> 🟡</td>
+<td><code>Persistence/Configurations/AnalyticalQualityConfigurations.cs</code></td>
+<td style="text-align: right;">467</td>
+<td>twelve study configurations in one file — consistent with the slice pattern</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong>Backend file sizes are healthy.</strong> The largest hand-written backend file is 552 lines and the median
+is well under 200. There are no god classes and no long methods of note: the largest domain
+aggregate is <code>LinearityStudy</code> at 303 lines, most of which is the documented AMR-refitting algorithm.</p>
+</blockquote>
+<h2 id="miscellaneous">Miscellaneous</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Debt</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>TD-42</strong> 🟡</td>
+<td><strong>39 of 44 nav items have no permission predicate</strong> — the sidebar advertises modules the user cannot use. Data calls still 403, so nothing leaks; it is purely a usability wart. Only the five Admin-group items are gated.</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>14.5 Hard-coded values that should be configuration</h1>
+<p>Full inventory in <a href="04-Configuration-Reference.html">Document 04 §4.4</a> (CON-01…CON-61). The ones a
+laboratory is most likely to hit:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Priority</th>
+<th>Constant</th>
+<th>Value</th>
+<th>Why it will bite</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1</strong></td>
+<td>Competency pass mark</td>
+<td><strong>80</strong></td>
+<td>Different laboratories use different thresholds. This one is nearly certain to be requested.</td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td>SPA idle timeout</td>
+<td><strong>30 min</strong></td>
+<td>21 CFR Part 11 §11.10(d) automatic logoff — a site policy of 15 minutes cannot be met.</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>Account lockout</td>
+<td>5 attempts / 30 min</td>
+<td>Site security policies vary.</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>Escalation ladder</td>
+<td>+24/+48/+72 h, recipient <code>"QualityManager"</code></td>
+<td>The role is a <strong>string literal</strong>, not even a <code>Roles.*</code> reference.</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td>Westgard limits</td>
+<td>per-deployment, not per-tenant or per-profile</td>
+<td>A multi-tenant host cannot give two laboratories different QC rules.</td>
+</tr>
+<tr>
+<td><strong>6</strong></td>
+<td>Password length/classes</td>
+<td>12 / upper+lower+digit+symbol</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>7</strong></td>
+<td>Retention classes</td>
+<td>5 y / 10 y / Permanent</td>
+<td>A 7-year jurisdiction cannot be represented.</td>
+</tr>
+<tr>
+<td><strong>8</strong></td>
+<td>Detection-limit <code>Z</code></td>
+<td>1.645 (one-sided 95 %)</td>
+<td>A site wanting 99 % cannot change it.</td>
+</tr>
+<tr>
+<td><strong>9</strong></td>
+<td>PT z-thresholds</td>
+<td>2 / 3</td>
+<td>ISO 13528 convention, but not universal.</td>
+</tr>
+<tr>
+<td><strong>10</strong></td>
+<td>Sweep and snapshot intervals</td>
+<td>1 h / 6 h</td>
+<td>Fine for most sites; not tunable.</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>14.6 Coupling and hidden dependencies</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Coupling</th>
+<th>Assessment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>C-1</strong></td>
+<td><strong>PostgreSQL is structural, not incidental</strong> — RLS, <code>FORCE</code>, advisory locks, <code>xmin</code>, <code>SKIP LOCKED</code>, <code>set_config</code> GUCs, triggers. <strong>The system is not portable to another RDBMS</strong>, and that is a deliberate trade for isolation and integrity.</td>
+<td>Accepted (ADR-0008)</td>
+</tr>
+<tr>
+<td><strong>C-2</strong></td>
+<td><strong><code>IAppDbContext</code> exposes <code>DbSet</code></strong> — handlers are coupled to EF Core query semantics.</td>
+<td>Accepted (ADR-0008)</td>
+</tr>
+<tr>
+<td><strong>C-3</strong></td>
+<td><strong>MediatR pinned to 12.4.*</strong> — v13 changes the licence <em>and</em> the <code>next()</code> signature. An upgrade is a pipeline rewrite.</td>
+<td>Accepted, documented</td>
+</tr>
+<tr>
+<td><strong>C-4</strong></td>
+<td><strong>EF interceptor order is load-bearing and enforced only by a comment.</strong> Reordering <code>TenantConnectionInterceptor</code> away from first silently breaks tenant isolation for the other interceptors' own reads.</td>
+<td>🟠 <strong>Worth a test</strong></td>
+</tr>
+<tr>
+<td><strong>C-5</strong></td>
+<td><strong>Middleware order is load-bearing</strong> — five ordering constraints, all documented, none tested.</td>
+<td>🟡</td>
+</tr>
+<tr>
+<td><strong>C-6</strong></td>
+<td><strong>Free-text instrument references</strong> — <code>Instrument</code> fields across QC and the studies are strings, not FKs to <code>EquipmentItem</code>. This is why equipment lock-out cannot block use (G-03).</td>
+<td>🟠</td>
+</tr>
+<tr>
+<td><strong>C-7</strong></td>
+<td><strong>PT plan ↔ enrolment link is a reference string</strong> (<code>LastEnrollmentRef</code>), not a relation.</td>
+<td>🟡</td>
+</tr>
+<tr>
+<td><strong>C-8</strong></td>
+<td><strong>Cross-context work is correctly decoupled</strong> via events + policies (AC-06).</td>
+<td>✅ <strong>exemplary</strong></td>
+</tr>
+<tr>
+<td><strong>C-9</strong></td>
+<td><strong>28 <code>IgnoreQueryFilters()</code> uses across 8 files</strong> — all in legitimately cross-tenant paths (sweep, snapshot, seeding, system-role catalogue, LOV backfill, notification policies, document-review policy, SLA slice), each preceded by an explicit <code>Elevate()</code>. Greppable and reviewable, but <strong>the correctness of each is a review judgement, not a test</strong>.</td>
+<td>🟡</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>14.7 Test-coverage gaps</h1>
+<p>The suite is strong (436 backend tests, 0 skipped). What it does <strong>not</strong> cover:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Gap</th>
+<th>Risk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>RLS parity for new tables</strong></td>
+<td>🔴 TD-02 — the highest-value missing test</td>
+</tr>
+<tr>
+<td><strong>EF interceptor ordering</strong></td>
+<td>🟠 C-4</td>
+</tr>
+<tr>
+<td><strong>Middleware ordering</strong></td>
+<td>🟡 C-5</td>
+</tr>
+<tr>
+<td><strong>Write-path load</strong></td>
+<td>the harness supports <code>--with-writes</code>; never run</td>
+</tr>
+<tr>
+<td><strong>Soak / endurance</strong></td>
+<td>none</td>
+</tr>
+<tr>
+<td><strong>E-mail delivery</strong></td>
+<td>SMTP never configured in any tested environment</td>
+</tr>
+<tr>
+<td><strong>Container runtime</strong></td>
+<td>image built and scanned in CI; <strong>never run</strong></td>
+</tr>
+<tr>
+<td><strong>Backup / restore</strong></td>
+<td>🔴 TD-04</td>
+</tr>
+<tr>
+<td><strong>Alert firing</strong></td>
+<td>🟠 TD-23</td>
+</tr>
+<tr>
+<td><strong>Browser matrix</strong></td>
+<td>none declared, none tested</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>14.8 Debt by theme</h1>
+<figure class="d"><svg width="701" height="450" preserveAspectRatio="xMidYMid meet" id="mmd-9b51a5d52c69" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 701.34375 450" style="max-width:701px;height:auto" role="graphics-document document" aria-roledescription="pie"><style>#mmd-9b51a5d52c69{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;fill:#000000;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#mmd-9b51a5d52c69 .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#mmd-9b51a5d52c69 .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#mmd-9b51a5d52c69 .error-icon{fill:#552222;}#mmd-9b51a5d52c69 .error-text{fill:#552222;stroke:#552222;}#mmd-9b51a5d52c69 .edge-thickness-normal{stroke-width:1px;}#mmd-9b51a5d52c69 .edge-thickness-thick{stroke-width:3.5px;}#mmd-9b51a5d52c69 .edge-pattern-solid{stroke-dasharray:0;}#mmd-9b51a5d52c69 .edge-thickness-invisible{stroke-width:0;fill:none;}#mmd-9b51a5d52c69 .edge-pattern-dashed{stroke-dasharray:3;}#mmd-9b51a5d52c69 .edge-pattern-dotted{stroke-dasharray:2;}#mmd-9b51a5d52c69 .marker{fill:#666;stroke:#666;}#mmd-9b51a5d52c69 .marker.cross{stroke:#666;}#mmd-9b51a5d52c69 svg{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;}#mmd-9b51a5d52c69 p{margin:0;}#mmd-9b51a5d52c69 .pieCircle{stroke:black;stroke-width:2px;opacity:0.7;}#mmd-9b51a5d52c69 .pieCircle.highlighted{scale:1.05;opacity:1;}#mmd-9b51a5d52c69 .pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}#mmd-9b51a5d52c69 .pieOuterCircle{stroke:black;stroke-width:2px;fill:none;}#mmd-9b51a5d52c69 .pieTitleText{text-anchor:middle;font-size:25px;fill:#333;font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}#mmd-9b51a5d52c69 .slice{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;fill:#000000;font-size:17px;}#mmd-9b51a5d52c69 .legend text{fill:#333;font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:17px;}#mmd-9b51a5d52c69 .node .neo-node{stroke:#999;}#mmd-9b51a5d52c69 [data-look="neo"].node rect,#mmd-9b51a5d52c69 [data-look="neo"].cluster rect,#mmd-9b51a5d52c69 [data-look="neo"].node polygon{stroke:url(#mmd-9b51a5d52c69-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-9b51a5d52c69 [data-look="neo"].swimlane.cluster rect{filter:none;}#mmd-9b51a5d52c69 [data-look="neo"].node path{stroke:url(#mmd-9b51a5d52c69-gradient);stroke-width:1px;}#mmd-9b51a5d52c69 [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-9b51a5d52c69 [data-look="neo"].node .neo-line path{stroke:#999;filter:none;}#mmd-9b51a5d52c69 [data-look="neo"].node circle{stroke:url(#mmd-9b51a5d52c69-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-9b51a5d52c69 [data-look="neo"].node circle .state-start{fill:#000000;}#mmd-9b51a5d52c69 [data-look="neo"].icon-shape .icon{fill:url(#mmd-9b51a5d52c69-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-9b51a5d52c69 [data-look="neo"].icon-shape .icon-neo path{stroke:url(#mmd-9b51a5d52c69-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-9b51a5d52c69 :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><g/><g transform="translate(225,225)"><g><circle cx="0" cy="0" r="186" class="pieOuterCircle"/><path d="M0,-185A185,185,0,0,1,184.483,-13.825L0,0Z" fill="#F4F4F4" class="pieCircle"/><path d="M184.483,-13.825A185,185,0,0,1,125.832,135.615L0,0Z" fill="#555" class="pieCircle"/><path d="M125.832,135.615A185,185,0,0,1,-80.268,166.679L0,0Z" fill="#BBB" class="pieCircle"/><path d="M-80.268,166.679A185,185,0,0,1,-180.362,41.166L0,0Z" fill="#777" class="pieCircle"/><path d="M-180.362,41.166A185,185,0,0,1,-144.639,-115.346L0,0Z" fill="#999" class="pieCircle"/><path d="M-144.639,-115.346A185,185,0,0,1,-80.268,-166.679L0,0Z" fill="#DDD" class="pieCircle"/><path d="M-80.268,-166.679A185,185,0,0,1,0,-185L0,0Z" fill="#FFF" class="pieCircle"/><text transform="translate(94.37396736571507,-101.71094721638839)" class="slice" style="text-anchor: middle;">24%</text><text transform="translate(129.15873262438333,50.691067130837325)" class="slice" style="text-anchor: middle;">14%</text><text transform="translate(20.679614431944174,137.2002771387366)" class="slice" style="text-anchor: middle;">19%</text><text transform="translate(-108.47911819243913,86.50921000789928)" class="slice" style="text-anchor: middle;">14%</text><text transform="translate(-135.27124781522804,-30.874779586438606)" class="slice" style="text-anchor: middle;">14%</text><text transform="translate(-86.5092100078993,-108.47911819243912)" class="slice" style="text-anchor: middle;">7%</text><text transform="translate(-30.87477958643865,-135.27124781522804)" class="slice" style="text-anchor: middle;">7%</text></g><text x="0" y="-200" class="pieTitleText">Technical debt by theme (42 items)</text><g class="legend" transform="translate(216,-77)"><rect width="18" height="18" style="fill: rgb(244, 244, 244); stroke: rgb(244, 244, 244);"/><text x="22" y="14">Missing configurability</text></g><g class="legend" transform="translate(216,-55)"><rect width="18" height="18" style="fill: rgb(85, 85, 85); stroke: rgb(85, 85, 85);"/><text x="22" y="14">Missing automated gates</text></g><g class="legend" transform="translate(216,-33)"><rect width="18" height="18" style="fill: rgb(187, 187, 187); stroke: rgb(187, 187, 187);"/><text x="22" y="14">Correctness defects</text></g><g class="legend" transform="translate(216,-11)"><rect width="18" height="18" style="fill: rgb(119, 119, 119); stroke: rgb(119, 119, 119);"/><text x="22" y="14">Resource / retention</text></g><g class="legend" transform="translate(216,11)"><rect width="18" height="18" style="fill: rgb(153, 153, 153); stroke: rgb(153, 153, 153);"/><text x="22" y="14">Naming &amp; hygiene</text></g><g class="legend" transform="translate(216,33)"><rect width="18" height="18" style="fill: rgb(221, 221, 221); stroke: rgb(221, 221, 221);"/><text x="22" y="14">Documentation drift</text></g><g class="legend" transform="translate(216,55)"><rect width="18" height="18" style="fill: rgb(255, 255, 255); stroke: rgb(255, 255, 255);"/><text x="22" y="14">Accepted duplication</text></g></g></svg></figure>
+
+<h2 id="what-the-shape-says">What the shape says</h2>
+<ul>
+<li><strong>The largest single theme is missing configurability</strong>, not broken code. That is the signature of a
+  system built quickly to one laboratory's assumptions and now needing to serve several.</li>
+<li><strong>The second is missing gates.</strong> The team clearly believes in machine-enforced rules — nine
+  constraint families are gated — but the six ungated ones are all <em>database-schema</em> disciplines, and
+  TD-01 is exactly the failure that predicts.</li>
+<li><strong>Correctness defects are few and shallow.</strong> Most are one-line state-machine adjustments
+  (TD-06, TD-07) or a missing bound (TD-17, TD-18).</li>
+<li><strong>There are no architectural defects.</strong> Nothing in this list requires re-architecting anything.</li>
+</ul>
+<div class="pager"><a href="13-Implementation-vs-SRS-Gap-Analysis.html"><span>Previous</span>Implementation vs SRS — Gap Analysis</a><a href="15-Recommendations.html" style="text-align:right"><span>Next</span>Recommendations</a></div>
+</main></div>
+<script>
+(function(){
+ var r=document.documentElement, K='ntqms-srs-theme', s=localStorage.getItem(K);
+ if(s) r.setAttribute('data-theme',s);
+ var b=document.getElementById('th');
+ if(b) b.onclick=function(){
+   var cur=r.getAttribute('data-theme');
+   if(!cur) cur=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+   var nx=cur==='dark'?'light':'dark';
+   r.setAttribute('data-theme',nx); localStorage.setItem(K,nx);
+ };
+ var p=document.getElementById('pr'); if(p) p.onclick=function(){window.print();};
+ // scroll-spy on the in-page TOC
+ var links=[].slice.call(document.querySelectorAll('#toc a'));
+ if(!links.length) return;
+ var tgt=links.map(function(a){return document.getElementById(a.getAttribute('href').slice(1));});
+ function spy(){
+   var y=window.scrollY+90, i=0;
+   for(var k=0;k<tgt.length;k++){ if(tgt[k]&&tgt[k].offsetTop<=y) i=k; }
+   links.forEach(function(a,n){a.style.color=n===i?'var(--accent)':'';
+     a.style.borderLeftColor=n===i?'var(--accent)':'transparent';});
+ }
+ addEventListener('scroll',spy,{passive:true}); spy();
+})();
+</script>
+</body></html>

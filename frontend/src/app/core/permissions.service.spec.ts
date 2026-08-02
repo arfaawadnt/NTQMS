@@ -34,6 +34,7 @@ describe('PermissionsService', () => {
       permissions: [],
       branchIds: [],
       departmentIds: [],
+      pinConfigured: false,
       preferredLanguage: null,
       ...overrides,
     };

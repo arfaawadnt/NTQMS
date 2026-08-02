@@ -1,0 +1,5044 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Business Rules &amp; Error Catalogue — NT.QMS As-Built SRS</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>">
+<style>
+:root{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);
+ --mono:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace;
+ --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,ui-serif,serif;
+ --sans:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}}
+:root[data-theme="dark"]{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}
+:root[data-theme="light"]{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+ font-size:15.5px;line-height:1.62;-webkit-text-size-adjust:100%}
+.wrap{display:grid;grid-template-columns:288px minmax(0,1fr);gap:0;max-width:1560px;margin:0 auto}
+/* ---- sidebar ---- */
+aside{position:sticky;top:0;height:100vh;overflow-y:auto;padding:22px 16px 60px;
+ border-right:1px solid var(--line);background:var(--panel)}
+aside .brand{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:-.01em;
+ margin:0 0 2px}
+aside .sub{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;
+ margin:0 0 16px}
+aside nav a{display:block;padding:5px 9px;border-radius:7px;color:var(--ink);text-decoration:none;
+ font-size:13.2px;border-left:2px solid transparent}
+aside nav a:hover{background:var(--panel-2)}
+aside nav a.cur{background:var(--accent-soft);border-left-color:var(--accent);font-weight:600}
+aside nav a .n{color:var(--muted);font-variant-numeric:tabular-nums;margin-right:7px;font-size:11.5px}
+aside .sec{margin:16px 0 5px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+ color:var(--muted);font-weight:700}
+#toc{margin-top:6px;border-top:1px solid var(--line);padding-top:10px}
+#toc a{display:block;padding:2.5px 9px;font-size:12.4px;color:var(--muted);text-decoration:none;
+ border-left:2px solid transparent;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#toc a:hover{color:var(--ink)}
+#toc a.h3{padding-left:22px;font-size:11.8px}
+/* ---- main ---- */
+main{padding:34px 46px 120px;min-width:0;overflow-wrap:anywhere}
+.doc-head{border-bottom:2px solid var(--accent);padding-bottom:14px;margin-bottom:26px}
+.kicker{color:var(--accent);font-size:11.5px;font-weight:700;letter-spacing:.11em;
+ text-transform:uppercase;margin:0 0 4px}
+h1{font-family:var(--serif);font-size:31px;line-height:1.2;margin:0;letter-spacing:-.015em}
+h2{font-family:var(--serif);font-size:24px;margin:38px 0 12px;padding-bottom:6px;
+ border-bottom:1px solid var(--line);letter-spacing:-.01em;scroll-margin-top:14px}
+h3{font-size:18px;margin:26px 0 9px;letter-spacing:-.005em;scroll-margin-top:14px}
+h4{font-size:15px;margin:20px 0 7px;color:var(--accent)}
+h5,h6{font-size:13.5px;margin:16px 0 6px;color:var(--muted);text-transform:uppercase;
+ letter-spacing:.05em}
+p{margin:10px 0}
+a{color:var(--accent)}
+hr{border:0;border-top:1px solid var(--line);margin:30px 0}
+ul,ol{margin:9px 0;padding-left:24px}
+li{margin:3px 0}
+blockquote{margin:16px 0;padding:12px 18px;background:var(--accent-soft);
+ border-left:3px solid var(--accent);border-radius:0 8px 8px 0}
+blockquote p:first-child{margin-top:0}blockquote p:last-child{margin-bottom:0}
+code{font-family:var(--mono);font-size:.875em;background:var(--panel-2);
+ padding:1.5px 5px;border-radius:4px;border:1px solid var(--line)}
+pre{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;
+ padding:14px 16px;overflow-x:auto;margin:14px 0}
+pre code{background:none;border:0;padding:0;font-size:12.6px;line-height:1.5}
+/* ---- tables ---- */
+.tw{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:10px;
+ background:var(--panel);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;font-size:13.4px}
+th,td{padding:8px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:var(--panel-2);font-weight:700;font-size:12.2px;letter-spacing:.02em;
+ position:sticky;top:0;z-index:1}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--accent-soft)}
+td code,th code{font-size:.9em;white-space:nowrap}
+/* ---- diagrams ---- */
+figure.d{margin:18px 0;padding:18px;background:var(--panel);border:1px solid var(--line);
+ border-radius:12px;box-shadow:var(--shadow);overflow-x:auto;text-align:center}
+figure.d svg{max-width:100%;height:auto;display:inline-block}
+/* ---- misc ---- */
+.tools{position:fixed;top:12px;right:16px;display:flex;gap:6px;z-index:50}
+.tools button{font:inherit;font-size:12px;padding:5px 11px;border-radius:8px;cursor:pointer;
+ border:1px solid var(--line);background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+.tools button:hover{background:var(--panel-2)}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:52px;padding-top:18px;
+ border-top:1px solid var(--line)}
+.pager a{display:block;max-width:46%;padding:10px 14px;border:1px solid var(--line);
+ border-radius:10px;background:var(--panel);text-decoration:none;font-size:13px}
+.pager a span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;
+ letter-spacing:.08em}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:14px;margin:20px 0}
+.card{padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--panel);
+ box-shadow:var(--shadow);text-decoration:none;color:var(--ink);display:block}
+.card:hover{border-color:var(--accent)}
+.card .num{color:var(--accent);font-weight:700;font-size:11.5px;letter-spacing:.1em}
+.card .t{font-family:var(--serif);font-size:17px;margin:3px 0 5px}
+.card .d{color:var(--muted);font-size:12.7px;line-height:1.5}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin:20px 0}
+.stat{padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.stat b{display:block;font-size:23px;font-family:var(--serif);line-height:1.1}
+.stat span{color:var(--muted);font-size:11.4px}
+@media print{
+ aside,.tools,.pager{display:none!important}
+ .wrap{display:block;max-width:none}
+ main{padding:0}
+ .tw,figure.d{break-inside:avoid;box-shadow:none}
+ h2{break-after:avoid}
+ a{color:inherit;text-decoration:none}
+}
+@media (max-width:1080px){
+ .wrap{grid-template-columns:1fr}
+ aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+ main{padding:22px 18px 80px}
+ #toc{display:none}
+}
+</style>
+</head><body>
+<div class="tools"><button id="th">◐ Theme</button><button id="pr">⎙ Print</button></div>
+<div class="wrap">
+<aside><p class="brand">NT.QMS</p><p class="sub">As-Built SRS · v1.51.x</p><a class="card" style="padding:9px 12px;margin-bottom:10px;font-size:13px" href="index.html">◂ Document set</a><div class="sec">Documents</div><nav><a class="" href="00-SRS-Index-and-Conventions.html"><span class="n">00</span>Index, Conventions &amp; Glossary</a><a class="" href="01-Software-Requirements-Specification.html"><span class="n">01</span>Software Requirements Specification</a><a class="" href="02-1-Functional-Specification-Quality-and-Improvement.html"><span class="n">02-1</span>Functional Spec 1 — Quality &amp; Improvement</a><a class="" href="02-2-Functional-Specification-Resources-People-Governance.html"><span class="n">02-2</span>Functional Spec 2 — Resources, People &amp; Governance</a><a class="" href="02-3-Functional-Specification-Analytical-Quality.html"><span class="n">02-3</span>Functional Spec 3 — Analytical Quality</a><a class="" href="02-4-Functional-Specification-Operations-and-Platform.html"><span class="n">02-4</span>Functional Spec 4 — Operations &amp; Platform</a><a class="cur" href="03-Business-Rules.html"><span class="n">03</span>Business Rules &amp; Error Catalogue</a><a class="" href="04-Configuration-Reference.html"><span class="n">04</span>Configuration Reference</a><a class="" href="05-Screen-Specification.html"><span class="n">05</span>Screen Specification</a><a class="" href="06-Workflow-Specification.html"><span class="n">06</span>Workflow Specification</a><a class="" href="07-File-System-Specification.html"><span class="n">07</span>File System Specification</a><a class="" href="08-API-Specification.html"><span class="n">08</span>API Specification</a><a class="" href="09-Security-Specification.html"><span class="n">09</span>Security Specification</a><a class="" href="10-Deployment-Specification.html"><span class="n">10</span>Deployment Specification</a><a class="" href="11-Architecture-Constraints.html"><span class="n">11</span>Architecture Constraints</a><a class="" href="12-Requirements-Traceability-Matrix.html"><span class="n">12</span>Requirements Traceability Matrix</a><a class="" href="13-Implementation-vs-SRS-Gap-Analysis.html"><span class="n">13</span>Implementation vs SRS — Gap Analysis</a><a class="" href="14-Technical-Debt-Report.html"><span class="n">14</span>Technical Debt Report</a><a class="" href="15-Recommendations.html"><span class="n">15</span>Recommendations</a></nav><div class='sec'>On this page</div><div id='toc'><a class="h3" href="#the-nine-explicit-sod-pairs">The nine explicit SoD pairs</a><a class="h3" href="#the-known-sod-hole">The known SoD hole</a><a class="h2" href="#dt-01-westgard-qc-verdict">DT-01 · Westgard QC verdict</a><a class="h2" href="#dt-02-equipment-status-transition-time-driven">DT-02 · Equipment status transition (time-driven)</a><a class="h2" href="#dt-03-competency-assessment-outcome">DT-03 · Competency assessment outcome</a><a class="h2" href="#dt-04-pt-performance-grading">DT-04 · PT performance grading</a><a class="h2" href="#dt-05-archive-disposal-eligibility">DT-05 · Archive disposal eligibility</a><a class="h2" href="#dt-06-escalation-ladder">DT-06 · Escalation ladder</a><a class="h2" href="#dt-07-sigma-grade-and-qc-recommendation">DT-07 · Sigma grade and QC recommendation</a><a class="h2" href="#dt-08-upload-acceptance">DT-08 · Upload acceptance</a><a class="h2" href="#dt-09-language-resolution">DT-09 · Language resolution</a><a class="h2" href="#dt-10-mfa-requirement">DT-10 · MFA requirement</a><a class="h3" href="#column-sizing-convention-schema-hardening-12">Column-sizing convention (schema hardening 1.2)</a><a class="h3" href="#known-prefix-collisions-fix-candidates">Known prefix collisions (fix candidates)</a><a class="h3" href="#catalogue">Catalogue</a></div></aside>
+<main>
+<div class="doc-head"><p class="kicker">Document 03 · NT.QMS Production SRS</p><h1>Business Rules &amp; Error Catalogue</h1></div>
+<blockquote>
+<p><a href="00-SRS-Index-and-Conventions.html">Conventions</a> · Module rules in context:
+<a href="02-1-Functional-Specification-Quality-and-Improvement.html">02-1</a> ·
+<a href="02-2-Functional-Specification-Resources-People-Governance.html">02-2</a> ·
+<a href="02-3-Functional-Specification-Analytical-Quality.html">02-3</a> ·
+<a href="02-4-Functional-Specification-Operations-and-Platform.html">02-4</a></p>
+</blockquote>
+<p>This document is the <strong>cross-cutting</strong> rule reference: rules that span modules, the decision tables
+that encode them, and the complete catalogue of all <strong>416 refusal codes</strong>. Module-local rules are
+specified in Document 02 and are not repeated here — they are cross-referenced.</p>
+<hr>
+<h1>3.1 Where business rules live (and why it matters)</h1>
+<p>NT.QMS enforces rules at <strong>five distinct layers</strong>. A rebuild that collapses them into one loses the
+guarantees.</p>
+<figure class="d"><svg width="276" height="681" preserveAspectRatio="xMidYMid meet" id="mmd-0bfa6ca868d5" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="flowchart" style="max-width:276px;height:auto" viewBox="0 0 276 681" role="graphics-document document" aria-roledescription="flowchart-v2"><style>#mmd-0bfa6ca868d5{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;fill:#000000;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#mmd-0bfa6ca868d5 .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#mmd-0bfa6ca868d5 .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#mmd-0bfa6ca868d5 .error-icon{fill:#552222;}#mmd-0bfa6ca868d5 .error-text{fill:#552222;stroke:#552222;}#mmd-0bfa6ca868d5 .edge-thickness-normal{stroke-width:1px;}#mmd-0bfa6ca868d5 .edge-thickness-thick{stroke-width:3.5px;}#mmd-0bfa6ca868d5 .edge-pattern-solid{stroke-dasharray:0;}#mmd-0bfa6ca868d5 .edge-thickness-invisible{stroke-width:0;fill:none;}#mmd-0bfa6ca868d5 .edge-pattern-dashed{stroke-dasharray:3;}#mmd-0bfa6ca868d5 .edge-pattern-dotted{stroke-dasharray:2;}#mmd-0bfa6ca868d5 .marker{fill:#666;stroke:#666;}#mmd-0bfa6ca868d5 .marker.cross{stroke:#666;}#mmd-0bfa6ca868d5 svg{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;}#mmd-0bfa6ca868d5 p{margin:0;}#mmd-0bfa6ca868d5 .label{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#000000;}#mmd-0bfa6ca868d5 .cluster-label text{fill:#333;}#mmd-0bfa6ca868d5 .cluster-label span{color:#333;}#mmd-0bfa6ca868d5 .cluster-label span p{background-color:transparent;}#mmd-0bfa6ca868d5 .label text,#mmd-0bfa6ca868d5 span{fill:#000000;color:#000000;}#mmd-0bfa6ca868d5 .node rect,#mmd-0bfa6ca868d5 .node circle,#mmd-0bfa6ca868d5 .node ellipse,#mmd-0bfa6ca868d5 .node polygon,#mmd-0bfa6ca868d5 .node path{fill:#eee;stroke:#999;stroke-width:1px;}#mmd-0bfa6ca868d5 .rough-node .label text,#mmd-0bfa6ca868d5 .node .label text,#mmd-0bfa6ca868d5 .image-shape .label,#mmd-0bfa6ca868d5 .icon-shape .label{text-anchor:middle;}#mmd-0bfa6ca868d5 .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#mmd-0bfa6ca868d5 .rough-node .label,#mmd-0bfa6ca868d5 .node .label,#mmd-0bfa6ca868d5 .image-shape .label,#mmd-0bfa6ca868d5 .icon-shape .label{text-align:center;}#mmd-0bfa6ca868d5 .node.clickable{cursor:pointer;}#mmd-0bfa6ca868d5 .root .anchor path{fill:#666!important;stroke-width:0;stroke:#666;}#mmd-0bfa6ca868d5 .arrowheadPath{fill:#333333;}#mmd-0bfa6ca868d5 .edgePath .path{stroke:#666;stroke-width:1px;}#mmd-0bfa6ca868d5 .flowchart-link{stroke:#666;fill:none;}#mmd-0bfa6ca868d5 .edgeLabel{background-color:white;text-align:center;}#mmd-0bfa6ca868d5 .edgeLabel p{background-color:white;}#mmd-0bfa6ca868d5 .edgeLabel rect{opacity:0.5;background-color:white;fill:white;}#mmd-0bfa6ca868d5 .labelBkg{background-color:rgba(255, 255, 255, 0.5);}#mmd-0bfa6ca868d5 .cluster rect{fill:hsl(0, 0%, 98.9215686275%);stroke:#707070;stroke-width:1px;}#mmd-0bfa6ca868d5 .cluster text{fill:#333;}#mmd-0bfa6ca868d5 .cluster span{color:#333;}#mmd-0bfa6ca868d5 div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:12px;background:hsl(-160, 0%, 93.3333333333%);border:1px solid #707070;border-radius:2px;pointer-events:none;z-index:100;}#mmd-0bfa6ca868d5 .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#000000;}#mmd-0bfa6ca868d5 rect.text{fill:none;stroke-width:0;}#mmd-0bfa6ca868d5 .icon-shape,#mmd-0bfa6ca868d5 .image-shape{background-color:white;text-align:center;}#mmd-0bfa6ca868d5 .icon-shape p,#mmd-0bfa6ca868d5 .image-shape p{background-color:white;padding:2px;}#mmd-0bfa6ca868d5 .icon-shape .label rect,#mmd-0bfa6ca868d5 .image-shape .label rect{opacity:0.5;background-color:white;fill:white;}#mmd-0bfa6ca868d5 .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#mmd-0bfa6ca868d5 .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#mmd-0bfa6ca868d5 .node .neo-node{stroke:#999;}#mmd-0bfa6ca868d5 [data-look="neo"].node rect,#mmd-0bfa6ca868d5 [data-look="neo"].cluster rect,#mmd-0bfa6ca868d5 [data-look="neo"].node polygon{stroke:url(#mmd-0bfa6ca868d5-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-0bfa6ca868d5 [data-look="neo"].swimlane.cluster rect{filter:none;}#mmd-0bfa6ca868d5 [data-look="neo"].node path{stroke:url(#mmd-0bfa6ca868d5-gradient);stroke-width:1px;}#mmd-0bfa6ca868d5 [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-0bfa6ca868d5 [data-look="neo"].node .neo-line path{stroke:#999;filter:none;}#mmd-0bfa6ca868d5 [data-look="neo"].node circle{stroke:url(#mmd-0bfa6ca868d5-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-0bfa6ca868d5 [data-look="neo"].node circle .state-start{fill:#000000;}#mmd-0bfa6ca868d5 [data-look="neo"].icon-shape .icon{fill:url(#mmd-0bfa6ca868d5-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-0bfa6ca868d5 [data-look="neo"].icon-shape .icon-neo path{stroke:url(#mmd-0bfa6ca868d5-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-0bfa6ca868d5 :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><g><marker id="my-svg_flowchart-v2-pointEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="4.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 5 L 10 10 L 10 0 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointEnd-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="11.5" refY="7" markerUnits="userSpaceOnUse" markerWidth="10.5" markerHeight="14" orient="auto"><path d="M 0 0 L 11.5 7 L 0 14 z" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="1" refY="7" markerUnits="userSpaceOnUse" markerWidth="11.5" markerHeight="14" orient="auto"><polygon points="0,7 11.5,14 11.5,0" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="11" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-1" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refY="5" refX="12.25" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-2" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="12" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossStart" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="-1" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="17.7" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5;"/></marker><marker id="my-svg_flowchart-v2-crossStart-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="-3.5" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5; stroke-dasharray: 1, 0;"/></marker><g class="root"><g class="clusters"/><g class="edgePaths"><path d="M138,80L138,84.167C138,88.333,138,96.667,138,104.333C138,112,138,119,138,122.5L138,126" id="my-svg-L_A_B_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_A_B_0" data-points="W3sieCI6MTM4LCJ5Ijo4MH0seyJ4IjoxMzgsInkiOjEwNX0seyJ4IjoxMzgsInkiOjEzMH1d" data-look="classic" marker-end="url(#mmd-0bfa6ca868d5_flowchart-v2-pointEnd)"/><path d="M138,202L138,206.167C138,210.333,138,218.667,138,226.333C138,234,138,241,138,244.5L138,248" id="my-svg-L_B_C_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_B_C_0" data-points="W3sieCI6MTM4LCJ5IjoyMDJ9LHsieCI6MTM4LCJ5IjoyMjd9LHsieCI6MTM4LCJ5IjoyNTJ9XQ==" data-look="classic" marker-end="url(#mmd-0bfa6ca868d5_flowchart-v2-pointEnd)"/><path d="M138,366L138,370.167C138,374.333,138,382.667,138,390.333C138,398,138,405,138,408.5L138,412" id="my-svg-L_C_D_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_C_D_0" data-points="W3sieCI6MTM4LCJ5IjozNjZ9LHsieCI6MTM4LCJ5IjozOTF9LHsieCI6MTM4LCJ5Ijo0MTZ9XQ==" data-look="classic" marker-end="url(#mmd-0bfa6ca868d5_flowchart-v2-pointEnd)"/><path d="M138,509L138,513.167C138,517.333,138,525.667,138,533.333C138,541,138,548,138,551.5L138,555" id="my-svg-L_D_E_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_D_E_0" data-points="W3sieCI6MTM4LCJ5Ijo1MDl9LHsieCI6MTM4LCJ5Ijo1MzR9LHsieCI6MTM4LCJ5Ijo1NTl9XQ==" data-look="classic" marker-end="url(#mmd-0bfa6ca868d5_flowchart-v2-pointEnd)"/></g><g class="edgeLabels"><g class="edgeLabel"><g class="label" data-id="L_A_B_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_B_C_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_C_D_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_D_E_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g></g><g class="nodes"><g class="node default" id="my-svg-flowchart-A-0" data-look="classic" transform="translate(138, 44)"><rect class="basic label-container" style="" x="-120.3203125" y="-36" width="240.640625" height="72"/><g class="label" style="" transform="translate(-90.3203125, -21)"><rect/><foreignObject width="180.640625" height="42"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>Layer 1 — SPA<br />usability only, never a control</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-B-1" data-look="classic" transform="translate(138, 166)"><rect class="basic label-container" style="" x="-122.1796875" y="-36" width="244.359375" height="72"/><g class="label" style="" transform="translate(-92.1796875, -21)"><rect/><foreignObject width="184.359375" height="42"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>Layer 2 — FluentValidation<br />shape, length, range, required</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-C-3" data-look="classic" transform="translate(138, 309)"><rect class="basic label-container" style="" x="-130" y="-57" width="260" height="114"/><g class="label" style="" transform="translate(-100, -42)"><rect/><foreignObject width="200" height="84"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>Layer 3 — Authorization behaviour<br />deny-by-default policy + permission key</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-D-5" data-look="classic" transform="translate(138, 462.5)"><rect class="basic label-container" style="fill:#0000 !important;stroke-width:3px !important" x="-130" y="-46.5" width="260" height="93"/><g class="label" style="" transform="translate(-100, -31.5)"><rect/><foreignObject width="200" height="63"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>Layer 4 — Domain aggregate<br />state machine, SoD, invariants, calculations</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-E-7" data-look="classic" transform="translate(138, 616)"><rect class="basic label-container" style="" x="-130" y="-57" width="260" height="114"/><g class="label" style="" transform="translate(-100, -42)"><rect/><foreignObject width="200" height="84"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>Layer 5 — PostgreSQL<br />FORCE RLS · signed-record trigger · append-only trigger · CHECK · FK</p></span></div></foreignObject></g></g></g></g></g><defs><filter id="my-svg-drop-shadow" height="130%" width="130%"><feDropShadow dx="4" dy="4" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs><defs><filter id="my-svg-drop-shadow-small" height="150%" width="150%"><feDropShadow dx="2" dy="2" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs><linearGradient id="my-svg-gradient" gradientUnits="objectBoundingBox" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="hsl(0, 0%, 83.3333333333%)" stop-opacity="1"/><stop offset="100%" stop-color="hsl(0, 0%, 88.9215686275%)" stop-opacity="1"/></linearGradient></svg></figure>
+
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>What belongs here</th>
+<th>What must <strong>never</strong> be only here</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 · SPA</td>
+<td>disabling a button, hiding a nav item</td>
+<td>any rule with a compliance consequence</td>
+</tr>
+<tr>
+<td>2 · Validators</td>
+<td>required, length, numeric range, regex</td>
+<td>state transitions, SoD, cross-record rules</td>
+</tr>
+<tr>
+<td>3 · Pipeline</td>
+<td>who may execute a command</td>
+<td>what the command may do to a record</td>
+</tr>
+<tr>
+<td>4 · Domain</td>
+<td><strong>all business invariants</strong></td>
+<td>—</td>
+</tr>
+<tr>
+<td>5 · Database</td>
+<td>isolation, immutability, referential integrity</td>
+<td>rules a user should get a readable message for</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Standing rule (<code>CLAUDE.md</code> §2.6):</strong> <em>the domain protects itself</em> — invariants live inside the
+aggregate, not in validators or handlers. A validator that duplicates a domain rule is acceptable (it
+produces a nicer message); a rule that exists <strong>only</strong> in a validator is a defect.</p>
+<hr>
+<h1>3.2 Universal rules (apply system-wide)</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Rule</th>
+<th>Enforced by</th>
+<th>Refusal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>BR-U-01</strong></td>
+<td>Every request that mutates data must carry an authenticated actor.</td>
+<td><code>ICurrentUser</code> guard in handlers</td>
+<td><code>AUTH-003</code> (thrown at <strong>51</strong> sites)</td>
+</tr>
+<tr>
+<td><strong>BR-U-02</strong></td>
+<td>Every tenant-scoped operation must have a resolved tenant.</td>
+<td><code>CurrentTenant</code>, <code>TenantStampInterceptor</code></td>
+<td><code>TENANT-000</code> (thrown at <strong>41</strong> sites)</td>
+</tr>
+<tr>
+<td><strong>BR-U-03</strong></td>
+<td>A command with <strong>no</strong> authorisation policy attribute is denied at runtime and fails the build gate.</td>
+<td><code>AuthorizationBehavior</code> + <code>CommandPolicyTests</code></td>
+<td><code>AUTHZ-000</code></td>
+</tr>
+<tr>
+<td><strong>BR-U-04</strong></td>
+<td>A command declaring a permission key not in <code>PermissionCatalog</code> is denied.</td>
+<td><code>AuthorizationBehavior</code></td>
+<td><code>AUTHZ-008</code></td>
+</tr>
+<tr>
+<td><strong>BR-U-05</strong></td>
+<td><strong>Every <code>DELETE</code> requires the <code>X-Change-Reason</code> header</strong>, and the reason is stamped onto the ledger row in the same transaction.</td>
+<td><code>ChangeReasonMiddleware</code> + <code>FieldChangeInterceptor</code></td>
+<td><code>CHANGE-REASON-REQUIRED</code> (400)</td>
+</tr>
+<tr>
+<td><strong>BR-U-06</strong></td>
+<td>Concurrent modification of the same row is detected and refused rather than silently overwritten.</td>
+<td><code>xmin</code> optimistic concurrency (ADR-0005)</td>
+<td><code>CONCURRENCY-409</code> (409)</td>
+</tr>
+<tr>
+<td><strong>BR-U-07</strong></td>
+<td>A repeated command carrying the same <code>Idempotency-Key</code> returns the stored result instead of re-executing.</td>
+<td><code>IdempotencyBehavior</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>BR-U-08</strong></td>
+<td>Timestamps come from the injected <code>IClock</code>; <code>DateTime.Now</code> is forbidden.</td>
+<td>standing rule + review</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>BR-U-09</strong></td>
+<td>Actor identity comes from the validated JWT <code>sub</code> claim; a client-supplied actor field is never trusted.</td>
+<td><code>AuditStampInterceptor</code>, <code>HttpCurrentUser</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>BR-U-10</strong></td>
+<td>Every mutation writes per-field before/after rows to the append-only ledger in the same transaction.</td>
+<td><code>FieldChangeInterceptor</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>BR-U-11</strong></td>
+<td>Enum values persist as <strong>strings</strong>, not ordinals, so a reordered enum cannot silently re-interpret stored data.</td>
+<td>EF <code>HasConversion&lt;string&gt;()</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>BR-U-12</strong></td>
+<td>Primary keys are UUIDv7, generated by the application (<code>ValueGeneratedNever</code>).</td>
+<td>EF configuration</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>BR-U-13</strong></td>
+<td>Every error response is RFC 7807 <code>application/problem+json</code> carrying <code>traceId</code> and <code>correlationId</code> — including framework 401/403.</td>
+<td><code>DomainExceptionHandler</code>, <code>ProblemAuthorizationResultHandler</code>, <code>CustomizeProblemDetails</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>BR-U-14</strong></td>
+<td>An authenticated request whose account is inactive, or whose token role no longer matches the database, is refused.</td>
+<td><code>ActiveSessionMiddleware</code></td>
+<td><code>AUTH-006</code> / <code>AUTH-007</code></td>
+</tr>
+<tr>
+<td><strong>BR-U-15</strong></td>
+<td>Records implementing <code>IAllocatable</code> are filtered to the caller's branch/department scope when a scope is set.</td>
+<td><code>OrgScopeGuardInterceptor</code></td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>3.3 Exception-kind → HTTP status mapping</h1>
+<p><code>DomainExceptionHandler</code> maps the domain's exception vocabulary onto HTTP.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Domain exception</th>
+<th>HTTP</th>
+<th>Semantics</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DomainException</code></td>
+<td><strong>422 Unprocessable Content</strong></td>
+<td>the request is well-formed but violates a business rule</td>
+</tr>
+<tr>
+<td><code>InvalidStateTransitionException</code></td>
+<td><strong>409 Conflict</strong></td>
+<td>the operation is not legal from the record's current state</td>
+</tr>
+<tr>
+<td><code>NotFoundException</code> / <code>*-404</code> codes</td>
+<td><strong>404 Not Found</strong></td>
+<td>the record does not exist (or is not visible to this tenant)</td>
+</tr>
+<tr>
+<td><code>ConflictException</code></td>
+<td><strong>409 Conflict</strong></td>
+<td>uniqueness or concurrency conflict</td>
+</tr>
+<tr>
+<td><code>ForbiddenException</code> / <code>AUTHZ-*</code></td>
+<td><strong>403 Forbidden</strong></td>
+<td>the actor may not perform this action</td>
+</tr>
+<tr>
+<td>FluentValidation failure</td>
+<td><strong>400 Bad Request</strong></td>
+<td>shape/length/range violation, with per-field detail</td>
+</tr>
+<tr>
+<td>unhandled</td>
+<td><strong>500</strong></td>
+<td>never carries domain detail</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong><code>[Assumption]</code></strong> — the exact status for each exception type is inferred from <code>DomainExceptionHandler</code>
+and the observed behaviour recorded in the OQ execution records; a rebuild should treat this table as
+the contract and verify it with the endpoint-contract tests.</p>
+<p>Of the 416 codes, <strong><code>InvalidStateTransitionException</code></strong> is used for state-machine refusals
+(→ 409) and <code>DomainException</code> for everything else (→ 422). The distinction is meaningful: a 409 means
+<em>"try again from a different state"</em>, a 422 means <em>"this data can never be accepted"</em>.</p>
+<hr>
+<h1>3.4 Segregation of duties — the complete matrix</h1>
+<p><strong>Rule shape.</strong> SoD is implemented as one shared aggregate method:</p>
+<pre><code class="language-csharp">AggregateRoot.EnsureSignerIsNotPreparer(Guid signerId, string code)
+</code></pre>
+<p>It compares the acting signer against the aggregate's stamped <code>CreatedByUserId</code> and throws with the
+module's code. <code>CreatedByUserId</code> is populated by <code>AuditStampInterceptor</code> from <code>ICurrentUser</code>.</p>
+<h3 id="the-nine-explicit-sod-pairs">The nine explicit SoD pairs</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Rule</th>
+<th>Prepared by</th>
+<th>May not be done by the preparer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SOD-CAPA-001</code></td>
+<td>the raiser cannot <strong>close</strong> their own nonconformance</td>
+<td>raiser</td>
+<td><code>ConfirmEffectiveness</code></td>
+</tr>
+<tr>
+<td><code>SOD-CAPA-002</code></td>
+<td>the raiser cannot <strong>verify</strong> their own nonconformance</td>
+<td>raiser</td>
+<td><code>Verify</code></td>
+</tr>
+<tr>
+<td><code>SOD-DOC-001</code></td>
+<td>the author cannot <strong>review</strong> their own document</td>
+<td>version author</td>
+<td><code>Recommend</code></td>
+</tr>
+<tr>
+<td><code>SOD-DOC-002</code></td>
+<td>the author cannot <strong>approve/publish</strong> their own document</td>
+<td>version author</td>
+<td><code>Publish</code></td>
+</tr>
+<tr>
+<td><code>SOD-QP-001</code></td>
+<td>the author cannot <strong>approve</strong> their own quality policy</td>
+<td>drafter</td>
+<td><code>Approve</code></td>
+</tr>
+<tr>
+<td><code>SOD-COMP-001</code></td>
+<td>a trainee cannot <strong>assess</strong> or <strong>authorise</strong> their own competency</td>
+<td>trainee</td>
+<td><code>ScoreAssessment</code>, <code>Authorize</code></td>
+</tr>
+<tr>
+<td><code>SOD-AUTHZ-001</code></td>
+<td>users cannot <strong>grant</strong> their own test authorisations</td>
+<td>grantee</td>
+<td><code>Grant</code></td>
+</tr>
+<tr>
+<td><code>SOD-SUP-001</code></td>
+<td>the registrant cannot <strong>approve</strong> their own supplier</td>
+<td>registrant</td>
+<td><code>Approve</code></td>
+</tr>
+<tr>
+<td><code>SOD-COI-001</code></td>
+<td>declarants cannot <strong>assess</strong> their own conflict</td>
+<td>declarant</td>
+<td><code>Assess</code></td>
+</tr>
+<tr>
+<td><code>SOD-AQ-001</code></td>
+<td>the preparer cannot <strong>sign off</strong> the analytical record</td>
+<td>study preparer</td>
+<td>all 14 analytical sign-offs/approvals</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>SOD-AQ-001</code> covers the twelve study types plus the uncertainty-budget approval and the change-request
+approval — <strong>14 sign-off gates from one rule</strong>.</p>
+<h3 id="the-known-sod-hole">The known SoD hole</h3>
+<blockquote>
+<p><strong><code>EnsureSignerIsNotPreparer</code> is a no-op when <code>CreatedByUserId</code> is null.</strong></p>
+<p>That is true for (a) records created before the <code>created_by_user_id</code> column was added, and (b)
+records created by a system policy with no human actor (auto-raised NCs, sweep-driven transitions).
+On such records <strong>SoD is not enforced</strong>. This is a deliberate, documented residual (F-05b) accepted
+at validation time, not an oversight — but it <em>is</em> a real gap, and it is listed as
+<a href="14-Technical-Debt-Report.html">TD</a>.</p>
+</blockquote>
+<hr>
+<h1>3.5 Immutability rules — what can never change again</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Record state</th>
+<th>Domain refusal</th>
+<th><strong>Database enforcement</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Analytical study <code>SignedOff</code> (12 types)</td>
+<td><code>{PREFIX}-01x</code> "A signed-off study is immutable."</td>
+<td>✅ <code>qams.reject_frozen_mutation()</code> BEFORE UPDATE/DELETE</td>
+</tr>
+<tr>
+<td><code>UncertaintyBudget</code> <code>Approved</code></td>
+<td><code>MU-011</code> "create a successor budget to revise"</td>
+<td>✅ same trigger</td>
+</tr>
+<tr>
+<td><code>Audit</code> <code>SignedOff</code></td>
+<td><code>AUD-020</code></td>
+<td>❌ domain only</td>
+</tr>
+<tr>
+<td><code>ManagementReview</code> <code>Closed</code></td>
+<td><code>MRV-004</code> "closed minutes are immutable"</td>
+<td>❌ domain only</td>
+</tr>
+<tr>
+<td><code>QualityObjective</code> closed</td>
+<td><code>OBJ-013</code></td>
+<td>❌ domain only</td>
+</tr>
+<tr>
+<td><code>QualityPolicy</code> <code>Active</code>/<code>Superseded</code></td>
+<td><code>QP-012</code></td>
+<td>❌ domain only</td>
+</tr>
+<tr>
+<td><code>AuditTrailReview</code> <code>Completed</code></td>
+<td><code>ATR-010</code></td>
+<td>❌ domain only</td>
+</tr>
+<tr>
+<td><code>UserAccessReview</code> <code>Completed</code></td>
+<td><code>UAR-010</code></td>
+<td>❌ domain only</td>
+</tr>
+<tr>
+<td><code>RiskItem</code> <code>Closed</code></td>
+<td><code>RSK-007</code></td>
+<td>❌ domain only</td>
+</tr>
+<tr>
+<td><code>ContextIssue</code> <code>Closed</code></td>
+<td><code>CTX-010</code></td>
+<td>❌ domain only</td>
+</tr>
+<tr>
+<td><code>InterestedParty</code> <code>Archived</code></td>
+<td><code>IP-010</code></td>
+<td>❌ domain only</td>
+</tr>
+<tr>
+<td><code>DocumentControlledCopy</code> closed</td>
+<td><code>CCP-010</code></td>
+<td>❌ domain only</td>
+</tr>
+<tr>
+<td><code>PtEnrollment</code> result recorded</td>
+<td><code>PT-010</code></td>
+<td>❌ domain only</td>
+</tr>
+<tr>
+<td><code>PtPlan</code> <code>Approved</code> (lines frozen)</td>
+<td><code>PTP-015</code></td>
+<td>❌ domain only</td>
+</tr>
+<tr>
+<td><code>audit.field_change</code>, <code>audit.security_event</code></td>
+<td>—</td>
+<td>✅ append-only trigger</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong>Asymmetry worth knowing:</strong> only the analytical studies and uncertainty budgets are protected at the
+<strong>database</strong> level. Every other "immutable" state is enforced by the application only — a direct SQL
+<code>UPDATE</code> would succeed. Whether that matters depends on whether anyone can reach the database
+directly, which is exactly what <code>DatabaseRoleGuard</code> and <code>harden-runtime-role.sql</code> are for.</p>
+</blockquote>
+<hr>
+<h1>3.6 Calculation rules (index)</h1>
+<p>All calculation specifications are normative and live in
+<a href="02-3-Functional-Specification-Analytical-Quality.html">Document 02 Part 3</a>. Index:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Calculation</th>
+<th>Where</th>
+<th>Key constants</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Risk priority number</td>
+<td><code>Rpn = Severity × Likelihood</code> (NC), <code>Likelihood × Impact</code> (Risk)</td>
+<td>scales 1–5</td>
+</tr>
+<tr>
+<td>Westgard multi-rule verdict</td>
+<td>§M-25</td>
+<td>WarningSd 2, RejectSd 3, RangeSd 4, RunLength 10 (configurable)</td>
+</tr>
+<tr>
+<td>PT z-score &amp; grading</td>
+<td>§M-27</td>
+<td>Questionable &gt; 2, Unsatisfactory ≥ 3</td>
+</tr>
+<tr>
+<td>Method-validation total error</td>
+<td>§26.1</td>
+<td><code>\|bias%\| + 1.65 × CV%</code> vs TEa</td>
+</tr>
+<tr>
+<td>Precision ANOVA</td>
+<td>§26.2</td>
+<td>≥2 runs × ≥2 replicates; n₀ formula; betweenVar floored at 0</td>
+</tr>
+<tr>
+<td>Method comparison</td>
+<td>§26.3</td>
+<td>Deming λ=1; Passing–Bablok; Bland–Altman ±1.96 SD</td>
+</tr>
+<tr>
+<td>Linearity + verified AMR</td>
+<td>§26.4</td>
+<td>≥4 levels; sub-ranges <strong>refitted</strong>, widest passing window wins</td>
+</tr>
+<tr>
+<td>Detection limit LoB/LoD/LoQ</td>
+<td>§26.5</td>
+<td>Z = 1.645; ≥10 blanks; ≥10 low-level; ≥2 reps/level</td>
+</tr>
+<tr>
+<td>Reference-interval verification</td>
+<td>§26.6</td>
+<td>≥20 samples; allowed outside = floor(n × 0.10)</td>
+</tr>
+<tr>
+<td>Carryover %</td>
+<td>§26.7</td>
+<td>(firstLow − steadyLow)/(meanHigh − steadyLow) × 100</td>
+</tr>
+<tr>
+<td>Interference bias %</td>
+<td>§26.8</td>
+<td>≥3 control replicates</td>
+</tr>
+<tr>
+<td>Lot comparison bias %</td>
+<td>§26.9</td>
+<td>≥3 pairs</td>
+</tr>
+<tr>
+<td>Instrument comparability</td>
+<td>§26.10</td>
+<td>every instrument must share ≥1 sample with the reference</td>
+</tr>
+<tr>
+<td>Outlier screening</td>
+<td>§26.11</td>
+<td>Tukey ±1.5 × IQR + z + MAD; ≥4 points</td>
+</tr>
+<tr>
+<td>Sigma metric</td>
+<td>§26.12</td>
+<td><code>(TEa% − \|bias%\|) / CV%</code>; grade bands 3/4/5/6</td>
+</tr>
+<tr>
+<td>Measurement uncertainty</td>
+<td>§26.13</td>
+<td><code>u_c = √Σu_i²</code>; <code>U = k · u_c</code>; k ∈ [1,4]</td>
+</tr>
+<tr>
+<td>Supplier evaluation</td>
+<td>02-2 M-14</td>
+<td><code>Σ(weight × score) / Σ(weight)</code>; ≤50 criteria</td>
+</tr>
+<tr>
+<td>Competency pass mark</td>
+<td>02-2 M-15</td>
+<td><strong>80</strong> (hard-coded)</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>3.7 Decision tables</h1>
+<h2 id="dt-01-westgard-qc-verdict">DT-01 · Westgard QC verdict</h2>
+<p>Evaluated in order; the first matching <strong>rejection</strong> rule wins; <code>1-2s</code> applies only when no rejection
+rule fired.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Condition</th>
+<th>Outcome</th>
+<th>Rules emitted</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>\|z\| &gt; RejectSd</code></td>
+<td><strong>OutOfControl</strong></td>
+<td><code>1-3s</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>\|z\| &gt; WarningSd</code> <strong>and</strong> <code>\|priorZ\| &gt; WarningSd</code> <strong>and</strong> <code>sign(z) == sign(priorZ)</code></td>
+<td><strong>OutOfControl</strong></td>
+<td><code>2-2s</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>\|z − priorZ\| &gt; RangeSd</code> <strong>and</strong> opposite signs</td>
+<td><strong>OutOfControl</strong></td>
+<td><code>R-4s</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>last <code>RunLength</code> values (incl. this) all on the same side of the mean</td>
+<td><strong>OutOfControl</strong></td>
+<td><code>10-x</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>none of 1–4 <strong>and</strong> <code>\|z\| &gt; WarningSd</code></td>
+<td><strong>Warning</strong></td>
+<td><code>1-2s</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td>otherwise</td>
+<td><strong>InControl</strong></td>
+<td><em>(none)</em></td>
+</tr>
+</tbody>
+</table></div>
+<p>Rules 1–4 are cumulative: a single run may emit several labels.</p>
+<h2 id="dt-02-equipment-status-transition-time-driven">DT-02 · Equipment status transition (time-driven)</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Current status</th>
+<th><code>today</code> vs <code>NextCalibrationDue</code></th>
+<th>Sweep action</th>
+<th>New status</th>
+<th>Event</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Active</code></td>
+<td><code>today ≥ due</code></td>
+<td><code>MarkCalibrationDue</code></td>
+<td><code>NeedsCalibration</code></td>
+<td><code>CalibrationDue</code></td>
+</tr>
+<tr>
+<td><code>NeedsCalibration</code></td>
+<td><code>today ≥ due + grace</code></td>
+<td><code>LockOutIfGraceExhausted</code></td>
+<td><code>OutOfService</code></td>
+<td><code>EquipmentLockedOut</code></td>
+</tr>
+<tr>
+<td><code>NeedsCalibration</code></td>
+<td><code>today &lt; due + grace</code></td>
+<td>—</td>
+<td>unchanged</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>OutOfService</code></td>
+<td><em>(any)</em></td>
+<td><code>LogCalibration</code> (manual)</td>
+<td><code>Active</code></td>
+<td><code>EquipmentReturnedToService</code></td>
+</tr>
+<tr>
+<td><code>Retired</code></td>
+<td><em>(any)</em></td>
+<td>none — all operations refused</td>
+<td><code>Retired</code></td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="dt-03-competency-assessment-outcome">DT-03 · Competency assessment outcome</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Score</th>
+<th>Current status</th>
+<th>New status</th>
+<th>Can authorise?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt; 80</code></td>
+<td><code>PendingTraining</code></td>
+<td><code>PendingTraining</code></td>
+<td>no (<code>COMP-012</code>)</td>
+</tr>
+<tr>
+<td><code>≥ 80</code></td>
+<td><code>PendingTraining</code></td>
+<td><code>Evaluated</code></td>
+<td>yes, by a <strong>different</strong> person</td>
+</tr>
+<tr>
+<td>any</td>
+<td><code>Authorized</code></td>
+<td>refused <code>COMP-010</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>any</td>
+<td><code>Revoked</code></td>
+<td>refused <code>COMP-010</code></td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="dt-04-pt-performance-grading">DT-04 · PT performance grading</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th><code>\|z\|</code></th>
+<th>Performance</th>
+<th>Event</th>
+<th>Downstream</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt; 2</code></td>
+<td><code>Satisfactory</code></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>= 2</code></td>
+<td><code>Satisfactory</code></td>
+<td>—</td>
+<td><em>(boundary: strict <code>&gt;</code> for Questionable)</em></td>
+</tr>
+<tr>
+<td><code>&gt; 2</code> and <code>&lt; 3</code></td>
+<td><code>Questionable</code></td>
+<td>—</td>
+<td><strong>nothing happens</strong></td>
+</tr>
+<tr>
+<td><code>≥ 3</code></td>
+<td><code>Unsatisfactory</code></td>
+<td><code>PtUnsatisfactory</code></td>
+<td>NC auto-raised, KPI increments</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="dt-05-archive-disposal-eligibility">DT-05 · Archive disposal eligibility</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Retention class</th>
+<th>Past expiry?</th>
+<th>Legal hold?</th>
+<th>Disposal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Permanent</code></td>
+<td>n/a</td>
+<td>any</td>
+<td><strong>refused</strong> <code>ARC-013</code></td>
+</tr>
+<tr>
+<td><code>FiveYears</code> / <code>TenYears</code></td>
+<td>no</td>
+<td>any</td>
+<td><strong>refused</strong> <code>ARC-014</code> (states the expiry date)</td>
+</tr>
+<tr>
+<td><code>FiveYears</code> / <code>TenYears</code></td>
+<td>yes</td>
+<td><strong>yes</strong></td>
+<td><strong>refused</strong> <code>ARC-015</code></td>
+</tr>
+<tr>
+<td><code>FiveYears</code> / <code>TenYears</code></td>
+<td>yes</td>
+<td>no</td>
+<td><strong>permitted</strong> → <code>Disposed</code>, <code>RecordDisposed</code></td>
+</tr>
+<tr>
+<td>any</td>
+<td>any</td>
+<td>any, state <code>Disposed</code></td>
+<td><strong>refused</strong> <code>ARC-012</code></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="dt-06-escalation-ladder">DT-06 · Escalation ladder</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th style="text-align: right;">Level after advance</th>
+<th>Fires at</th>
+<th>Recipient</th>
+<th>Next step</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1</td>
+<td><code>Deadline + 24 h</code></td>
+<td>owner (<code>OwnerUserId</code>)</td>
+<td><code>Deadline + 48 h</code></td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td><code>Deadline + 48 h</code></td>
+<td>role <code>QualityManager</code></td>
+<td><code>Deadline + 72 h</code></td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td><code>Deadline + 72 h</code></td>
+<td>role <code>QualityManager</code></td>
+<td><strong>null — ladder ends</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="dt-07-sigma-grade-and-qc-recommendation">DT-07 · Sigma grade and QC recommendation</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Sigma</th>
+<th>Grade</th>
+<th>Recommended QC (advisory text only)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>≥ 6</code></td>
+<td>WorldClass</td>
+<td>1:3s, N=2, R=1</td>
+</tr>
+<tr>
+<td><code>≥ 5</code></td>
+<td>Excellent</td>
+<td>1:3s / 2:2s / R:4s, N=2, R=1</td>
+</tr>
+<tr>
+<td><code>≥ 4</code></td>
+<td>Good</td>
+<td>1:3s / 2:2s / R:4s / 4:1s, N=4, R=1</td>
+</tr>
+<tr>
+<td><code>≥ 3</code></td>
+<td>Marginal</td>
+<td>1:3s / 2:2s / R:4s / 4:1s / 8:x, N=6</td>
+</tr>
+<tr>
+<td><code>&lt; 3</code></td>
+<td>Unacceptable</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="dt-08-upload-acceptance">DT-08 · Upload acceptance</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Extension on allow-list?</th>
+<th>Signature matches?</th>
+<th>NUL byte in first 512 (text types)?</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>no</td>
+<td>—</td>
+<td>—</td>
+<td><strong>refused</strong> — lists the allowed extensions</td>
+</tr>
+<tr>
+<td>yes (binary)</td>
+<td>no</td>
+<td>—</td>
+<td><strong>refused</strong> — "content does not match the {ext} file signature"</td>
+</tr>
+<tr>
+<td>yes (binary)</td>
+<td>yes</td>
+<td>—</td>
+<td><strong>accepted</strong>, stored with the <strong>canonical</strong> content type</td>
+</tr>
+<tr>
+<td>yes (text)</td>
+<td>n/a</td>
+<td>yes</td>
+<td><strong>refused</strong> — "content is binary, not the {ext} text format it claims"</td>
+</tr>
+<tr>
+<td>yes (text)</td>
+<td>n/a</td>
+<td>no</td>
+<td><strong>accepted</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="dt-09-language-resolution">DT-09 · Language resolution</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>User preference set?</th>
+<th>Assigned role default set?</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>yes</td>
+<td>any</td>
+<td><strong>user preference</strong></td>
+</tr>
+<tr>
+<td>no</td>
+<td>yes</td>
+<td><strong>role default</strong></td>
+</tr>
+<tr>
+<td>no</td>
+<td>no</td>
+<td><strong>tenant default</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="dt-10-mfa-requirement">DT-10 · MFA requirement</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Actor</th>
+<th>Tenant <code>RequireMfaForPrivilegedRoles</code></th>
+<th>Global <code>Security:RequireMfaForPrivilegedRoles</code></th>
+<th>Privileged role?</th>
+<th>MFA enrolled?</th>
+<th>Outcome</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>tenant user</td>
+<td>false</td>
+<td>any</td>
+<td>any</td>
+<td>any</td>
+<td>normal session</td>
+</tr>
+<tr>
+<td>tenant user</td>
+<td>true</td>
+<td>any</td>
+<td>no</td>
+<td>any</td>
+<td>normal session</td>
+</tr>
+<tr>
+<td>tenant user</td>
+<td>true</td>
+<td>any</td>
+<td>yes</td>
+<td>yes</td>
+<td>normal session (TOTP required at login)</td>
+</tr>
+<tr>
+<td>tenant user</td>
+<td>true</td>
+<td>any</td>
+<td>yes</td>
+<td><strong>no</strong></td>
+<td><strong>enrolment-scoped session</strong> — only <code>/mfa/enroll</code> and <code>/mfa/confirm</code> reachable; everything else 403 <code>MFA-ENROLL-REQUIRED</code></td>
+</tr>
+<tr>
+<td>platform admin</td>
+<td>n/a</td>
+<td>false</td>
+<td>—</td>
+<td>any</td>
+<td>normal session</td>
+</tr>
+<tr>
+<td>platform admin</td>
+<td>n/a</td>
+<td>true</td>
+<td>—</td>
+<td>no</td>
+<td>enrolment-scoped session</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>3.8 Reason-for-change rules</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Rule</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>BR-RC-01</strong></td>
+<td>The reason travels in the <code>X-Change-Reason</code> HTTP header.</td>
+</tr>
+<tr>
+<td><strong>BR-RC-02</strong></td>
+<td>A <code>DELETE</code> <strong>without</strong> the header is refused with 400 <code>CHANGE-REASON-REQUIRED</code> <strong>before it reaches a handler</strong>.</td>
+</tr>
+<tr>
+<td><strong>BR-RC-03</strong></td>
+<td>A blank or whitespace-only reason counts as absent.</td>
+</tr>
+<tr>
+<td><strong>BR-RC-04</strong></td>
+<td>An accepted reason is placed on the request-scoped <code>ICurrentChangeReason</code> and stamped by <code>FieldChangeInterceptor</code> onto every ledger row written in that transaction (<code>audit.field_change.reason</code>, <code>varchar(1000)</code>).</td>
+</tr>
+<tr>
+<td><strong>BR-RC-05</strong></td>
+<td>Non-<code>DELETE</code> requests pass through, but the header is <strong>still honoured if present</strong> — so a controlled non-delete change can carry a reason too.</td>
+</tr>
+<tr>
+<td><strong>BR-RC-06</strong></td>
+<td><strong>Exception:</strong> the archive <em>place-hold</em> operation sends its Part-11 reason <strong>in the POST body</strong>, because it is a POST. Only the <em>release</em> (a DELETE) uses the header. This asymmetry is real and easy to get wrong.</td>
+</tr>
+<tr>
+<td><strong>BR-RC-07</strong></td>
+<td>The SPA's <code>changeReasonInterceptor</code> prompts for a reason on any DELETE via an accessible dialog; cancelling or leaving it blank aborts the request client-side (<code>EMPTY</code>).</td>
+</tr>
+</tbody>
+</table></div>
+<p>Beyond deletes, three commands take a reason as a <strong>first-class field</strong> because the change itself is
+regulated: <code>UpdateQcTargetsCommand.Reason</code> (<code>QC-012</code>), <code>SetRolePermissionsCommand.Reason</code>, and
+<code>PlaceLegalHoldCommand.Reason</code> (<code>ARC-030</code>).</p>
+<hr>
+<h1>3.9 Auto-raise policies — the six event→NC bridges</h1>
+<p>Six domain policies convert an operational event into a nonconformance. These are the system's
+<strong>automatic quality detection</strong>, and they are the reason most NCs exist.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Policy</th>
+<th>Trigger event</th>
+<th>NC <code>sourceType</code></th>
+<th>Module</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>FindingToNcPolicy</code></td>
+<td><code>FindingRaised</code> with grade <code>MinorNc</code> or <code>MajorNc</code> (never <code>Ofi</code>)</td>
+<td><code>Audit</code></td>
+<td>02-1 M-06</td>
+</tr>
+<tr>
+<td><code>ComplaintToNcPolicy</code></td>
+<td><code>ComplaintValidated</code> (justified only)</td>
+<td><code>Complaint</code></td>
+<td>02-1 M-02</td>
+</tr>
+<tr>
+<td><code>PtToNcPolicy</code></td>
+<td><code>PtUnsatisfactory</code> (<code>\|z\| ≥ 3</code>)</td>
+<td><code>ProficiencyTest</code></td>
+<td>02-3 M-27</td>
+</tr>
+<tr>
+<td><code>IntermediateCheckToNcPolicy</code></td>
+<td><code>IntermediateCheckFailed</code></td>
+<td><code>Internal</code></td>
+<td>02-2 M-11</td>
+</tr>
+<tr>
+<td><code>ExcursionToNcPolicy</code></td>
+<td><code>EnvironmentalExcursionDetected</code></td>
+<td><code>Internal</code></td>
+<td>02-2 M-13</td>
+</tr>
+<tr>
+<td><code>CompetencyLapseAuthorizationPolicy</code></td>
+<td><code>CompetencyExpired</code> / <code>CompetencyRevoked</code></td>
+<td><code>Internal</code></td>
+<td>02-2 M-15</td>
+</tr>
+</tbody>
+</table></div>
+<p>Two further policies exist that do <strong>not</strong> raise NCs:
+<code>DocumentReviewDuePolicy</code> (raises the <code>DOC_REVIEW_DUE</code> notification) and <code>EscalationTriggeredPolicy</code>
+(raises <code>SLA_ESCALATED</code>).</p>
+<p>All eight run <strong>asynchronously through the outbox</strong>, so an event that fails to produce its consequence
+is retried with backoff and eventually dead-lettered — it is never silently lost.</p>
+<hr>
+<h1>3.10 Validation-rule conventions</h1>
+<p>Extracted from all <strong>88</strong> validators. These conventions are consistent enough to be requirements in
+their own right.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Field kind</th>
+<th>Standard bound</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Short code</td>
+<td>≤ 20–60</td>
+<td>branch code 20, LOV code 50, document code 40, archive source ref 60, lot id 60</td>
+</tr>
+<tr>
+<td>Name / title</td>
+<td>≤ 150–300</td>
+<td>display name 150, title 300, supplier name 200, standard name 300</td>
+</tr>
+<tr>
+<td>Analyte</td>
+<td>≤ 200 (100 in QC and method validation)</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Unit</td>
+<td>≤ 30–50</td>
+<td>monitoring unit 30, objective unit 30, study unit 50</td>
+</tr>
+<tr>
+<td>Method / source</td>
+<td>≤ 300–500</td>
+<td>method 300, traceable-to 500, component source 500</td>
+</tr>
+<tr>
+<td>Reason / note</td>
+<td>≤ 500–2000</td>
+<td>QC target reason 500, role permission reason 500, rejection reason 1000, review notes 2000</td>
+</tr>
+<tr>
+<td>Description / details</td>
+<td>≤ 2000–4000</td>
+<td>conflict 2000, NC description 4000, impact analysis 4000</td>
+</tr>
+<tr>
+<td>Analysis / conclusion</td>
+<td>≤ 4000–8000</td>
+<td>conclusions 4000, RCA analysis 8000, quality-policy statement 8000</td>
+</tr>
+<tr>
+<td>Minutes</td>
+<td>≤ 20000</td>
+<td>management-review minutes</td>
+</tr>
+<tr>
+<td>E-mail</td>
+<td>≤ 320 + <code>EmailAddress()</code></td>
+<td>RFC-practical maximum</td>
+</tr>
+<tr>
+<td>Score / rating</td>
+<td><code>InclusiveBetween(1,5)</code></td>
+<td>severity, likelihood, impact, satisfaction</td>
+</tr>
+<tr>
+<td>Percentage criterion</td>
+<td><code>&gt; 0</code> and <code>≤ 50</code> (interference: <code>≤ 100</code>)</td>
+<td>all study acceptance criteria</td>
+</tr>
+<tr>
+<td>Coverage factor</td>
+<td><code>InclusiveBetween(1,4)</code></td>
+<td>uncertainty budget</td>
+</tr>
+<tr>
+<td>Validity months</td>
+<td><code>InclusiveBetween(1,60)</code></td>
+<td>competency</td>
+</tr>
+<tr>
+<td>Calibration interval</td>
+<td><code>InclusiveBetween(1,3650)</code> days</td>
+<td>equipment</td>
+</tr>
+<tr>
+<td>Grace period</td>
+<td><code>InclusiveBetween(0,365)</code> days</td>
+<td>equipment</td>
+</tr>
+<tr>
+<td>Planned cycles</td>
+<td><code>InclusiveBetween(1,52)</code></td>
+<td>PT plan line</td>
+</tr>
+<tr>
+<td>Password</td>
+<td><code>StrongPassword()</code></td>
+<td>see §3.11</td>
+</tr>
+<tr>
+<td>PIN</td>
+<td><code>^[0-9]{4}$</code></td>
+<td>e-signature</td>
+</tr>
+<tr>
+<td>Document code</td>
+<td><code>^[A-Za-z0-9][A-Za-z0-9-]*$</code></td>
+<td>"letters, digits and hyphens (e.g. SOP-CAL-045)"</td>
+</tr>
+<tr>
+<td>Tenant slug</td>
+<td>2–N lower-case letters/digits/single hyphens, starts and ends alphanumeric</td>
+<td><code>TENANT-002</code></td>
+</tr>
+<tr>
+<td>Language</td>
+<td>≤ 10</td>
+<td>BCP-47-ish, <strong>not validated against a list</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="column-sizing-convention-schema-hardening-12">Column-sizing convention (schema hardening 1.2)</h3>
+<blockquote>
+<p>Free-text columns sized <strong>≥ 1000 are <code>text</code></strong> in PostgreSQL — the bound lives in the command
+validator (<code>MaximumLength</code>), <strong>not</strong> the column. Bounded codes, references, enum strings and hashes
+keep an explicit <code>varchar(n)</code> under 1000. <strong>Never drop a <code>varchar</code> bound without a matching validator
+rule</strong> — doing so removes the only length control.</p>
+</blockquote>
+<hr>
+<h1>3.11 Password and credential rules</h1>
+<p><code>PasswordRules.StrongPassword()</code> — one shared rule set applied to <strong><code>RegisterUser</code>,
+<code>ResetUserPassword</code>, <code>ChangePassword</code> and <code>ProvisionTenant</code></strong> (this replaced an earlier 10-vs-12
+character drift between call sites).</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Rule</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>BR-PWD-01</strong></td>
+<td>Minimum length</td>
+<td><strong>12</strong> characters</td>
+</tr>
+<tr>
+<td><strong>BR-PWD-02</strong></td>
+<td>Maximum length</td>
+<td><strong>200</strong> characters</td>
+</tr>
+<tr>
+<td><strong>BR-PWD-03</strong></td>
+<td>Must contain upper case, lower case, a digit <strong>and</strong> a symbol</td>
+<td>all four</td>
+</tr>
+<tr>
+<td><strong>BR-PWD-04</strong></td>
+<td>Must not appear on the offline common/breached-password blocklist</td>
+<td>shipped in-repo, no network call</td>
+</tr>
+<tr>
+<td><strong>BR-PWD-05</strong></td>
+<td>Must differ from the last <code>HistoryDepth + 1</code> passwords</td>
+<td>default <strong>6</strong> (<code>AUTH-102</code>)</td>
+</tr>
+<tr>
+<td><strong>BR-PWD-06</strong></td>
+<td>Maximum age</td>
+<td><strong>90</strong> days (<code>PasswordPolicy:MaxAgeDays</code>)</td>
+</tr>
+<tr>
+<td><strong>BR-PWD-07</strong></td>
+<td>Lockout</td>
+<td><strong>5</strong> failed attempts → <strong>30</strong> minutes</td>
+</tr>
+<tr>
+<td><strong>BR-PWD-08</strong></td>
+<td>Failed <strong>e-signature</strong> attempts increment the <em>same</em> counter and can lock the account</td>
+<td><code>SIG-003</code></td>
+</tr>
+<tr>
+<td><strong>BR-PWD-09</strong></td>
+<td>E-signature requires <strong>two components</strong>: account password <strong>and</strong> 4-digit PIN</td>
+<td><code>SIG-001</code>, <code>SIG-002</code></td>
+</tr>
+<tr>
+<td><strong>BR-PWD-10</strong></td>
+<td>An expired password can still be changed — <code>change-password</code> is deliberately anonymous</td>
+<td><code>AuthController</code></td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>3.12 Multi-tenancy rules</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Rule</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>BR-MT-01</strong></td>
+<td>The tenant is resolved <strong>only</strong> from the validated JWT <code>tenant_id</code> claim. Headers and query strings are explicitly banned as tenant sources.</td>
+</tr>
+<tr>
+<td><strong>BR-MT-02</strong></td>
+<td><code>TenantConnectionInterceptor</code> sets <code>app.current_tenant</code> (and <code>app.bypass_rls</code>) via <code>set_config</code> on <strong>every connection open</strong>, <strong>fail-closed to nil</strong> — an unresolved tenant yields no rows rather than all rows.</td>
+</tr>
+<tr>
+<td><strong>BR-MT-03</strong></td>
+<td>Every <code>ITenantScoped</code> table carries <strong>both</strong> an EF global query filter <strong>and</strong> a PostgreSQL <code>ENABLE + FORCE ROW LEVEL SECURITY</code> policy. 90 of 97 tables.</td>
+</tr>
+<tr>
+<td><strong>BR-MT-04</strong></td>
+<td>The RLS policy shape is <code>USING/WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant',true),'')::uuid OR current_setting('app.bypass_rls',true)='on')</code>.</td>
+</tr>
+<tr>
+<td><strong>BR-MT-05</strong></td>
+<td><strong>A new <code>ITenantScoped</code> table must add its RLS policy in its own migration</strong> — EF will not. Verify with <code>SELECT relrowsecurity, relforcerowsecurity FROM pg_class WHERE relname='&lt;t&gt;'</code> → expect <code>t\|t</code>.</td>
+</tr>
+<tr>
+<td><strong>BR-MT-06</strong></td>
+<td><code>audit.*</code> policies relax <code>WITH CHECK</code> to <code>(tenant_id IS NULL OR tenant_id = GUC OR bypass)</code> so pre-authentication events can append. <code>qams.*</code> stays strict.</td>
+</tr>
+<tr>
+<td><strong>BR-MT-07</strong></td>
+<td>Cross-tenant access is only via <strong>explicit elevation</strong> (<code>ICurrentTenantSetter.Elevate()</code>), used by exactly five trusted paths: tenant provisioning, the outbox processor, the compliance sweep, the KPI snapshot service, and the start-up LOV backfill.</td>
+</tr>
+<tr>
+<td><strong>BR-MT-08</strong></td>
+<td>Owned child rows carry a <strong>shadow <code>tenant_id</code></strong> and their own RLS policy, so a child cannot be read or written outside its parent's tenant.</td>
+</tr>
+<tr>
+<td><strong>BR-MT-09</strong></td>
+<td>Cross-aggregate foreign keys are <strong>tenant-composite</strong> — <code>FOREIGN KEY (fk, tenant_id) REFERENCES parent (id, tenant_id)</code> — making a child under another tenant's parent structurally impossible.</td>
+</tr>
+<tr>
+<td><strong>BR-MT-10</strong></td>
+<td>Four tables are deliberately outside RLS with nullable tenant: <code>user_account</code>, <code>outbox_event</code>, <code>audit.security_event</code>, <code>audit.field_change</code>. This is accepted deviation <strong>B9</strong>, guarded by <code>UserAccountTenantBoundTests</code>. <strong><code>audit.security_event</code> additionally lacks any RLS policy</strong> — see <a href="09-Security-Specification.html">Document 09</a>.</td>
+</tr>
+<tr>
+<td><strong>BR-MT-11</strong></td>
+<td>Tenant-scoped tables use a <strong>tenant-first composite PK</strong> <code>(tenant_id, id)</code> and must <strong>not</strong> declare <code>UNIQUE(id)</code>.</td>
+</tr>
+<tr>
+<td><strong>BR-MT-12</strong></td>
+<td>A migration that backfills from, or adds an FK to, a FORCE-RLS table must declare <code>SELECT set_config('app.bypass_rls','on',true);</code> at the top of <strong>both</strong> <code>Up()</code> and <code>Down()</code> — otherwise the backfill silently updates <strong>zero rows</strong> and the FK's referential-integrity check cannot see the parent.</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>3.13 Retry, timeout, backoff and interval rules</h1>
+<p>Every timing constant in the system, in one place. None of these are configurable unless noted.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Subject</th>
+<th>Value</th>
+<th>Configurable?</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Database connection retry</td>
+<td><strong>5</strong> attempts, max delay <strong>10 s</strong></td>
+<td>no</td>
+<td><code>EnableRetryOnFailure</code></td>
+</tr>
+<tr>
+<td>Database command timeout</td>
+<td><strong>30 s</strong></td>
+<td>no</td>
+<td><code>CommandTimeout(30)</code></td>
+</tr>
+<tr>
+<td>Outbox poll interval</td>
+<td><strong>2 s</strong></td>
+<td>no</td>
+<td><code>OutboxProcessor.PollInterval</code></td>
+</tr>
+<tr>
+<td>Outbox batch size</td>
+<td><strong>50</strong></td>
+<td>no</td>
+<td><code>BatchSize</code></td>
+</tr>
+<tr>
+<td>Outbox max attempts</td>
+<td><strong>5</strong>, then dead-letter with an ERROR log</td>
+<td>no</td>
+<td><code>MaxAttempts</code></td>
+</tr>
+<tr>
+<td>Outbox backoff</td>
+<td>exponential from a <strong>5 s</strong> base</td>
+<td>no</td>
+<td><code>BackoffBase</code>, <code>ComputeBackoff</code></td>
+</tr>
+<tr>
+<td>Outbox claim lease</td>
+<td><strong>2 min</strong> (<code>SKIP LOCKED</code>)</td>
+<td>no</td>
+<td><code>ClaimLease</code></td>
+</tr>
+<tr>
+<td>Outbox purge interval</td>
+<td><strong>1 h</strong></td>
+<td>no</td>
+<td><code>PurgeInterval</code></td>
+</tr>
+<tr>
+<td>Outbox retention</td>
+<td><strong>30 days</strong></td>
+<td><strong>yes</strong> — <code>Outbox:RetentionDays</code></td>
+<td>validated positive</td>
+</tr>
+<tr>
+<td>Outbox queue-stats interval</td>
+<td><strong>30 s</strong></td>
+<td>no</td>
+<td><code>QueueStatsInterval</code></td>
+</tr>
+<tr>
+<td>Compliance sweep interval</td>
+<td><strong>1 h</strong></td>
+<td>no</td>
+<td><code>ScheduledSweepService.Interval</code></td>
+</tr>
+<tr>
+<td>Compliance sweep start delay</td>
+<td><strong>15 s</strong></td>
+<td>no</td>
+<td>"so migrations/bootstrap finish first"</td>
+</tr>
+<tr>
+<td>KPI snapshot interval</td>
+<td><strong>6 h</strong></td>
+<td>no</td>
+<td><code>KpiSnapshotService.Interval</code></td>
+</tr>
+<tr>
+<td>KPI snapshot start delay</td>
+<td><strong>20 s</strong></td>
+<td>no</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Single-replica sentinel retry</td>
+<td><strong>60 s</strong></td>
+<td>no</td>
+<td><code>RetryInterval</code></td>
+</tr>
+<tr>
+<td>Deferred startup seeding retry</td>
+<td><strong>15 s</strong></td>
+<td>no</td>
+<td><code>DeferredStartupSeeder.RetryInterval</code></td>
+</tr>
+<tr>
+<td>Account lockout</td>
+<td><strong>5</strong> attempts → <strong>30 min</strong></td>
+<td>no</td>
+<td><code>UserAccount</code></td>
+</tr>
+<tr>
+<td>Access-token lifetime</td>
+<td><strong>120 min</strong> shipped (<strong>15 min</strong> per ADR-0009)</td>
+<td><strong>yes</strong> — <code>Jwt:ExpiryMinutes</code></td>
+<td>drift, see GAP</td>
+</tr>
+<tr>
+<td>Refresh-session lifetime</td>
+<td><strong>14 days</strong></td>
+<td><strong>yes</strong> — <code>Auth:RefreshTokenDays</code></td>
+<td>validated positive</td>
+</tr>
+<tr>
+<td>JWT clock skew</td>
+<td><strong>1 min</strong></td>
+<td>no</td>
+<td><code>TokenValidationParameters</code></td>
+</tr>
+<tr>
+<td>SPA idle timeout</td>
+<td><strong>30 min</strong></td>
+<td>no</td>
+<td><code>auth.service</code></td>
+</tr>
+<tr>
+<td>Rate limit window</td>
+<td><strong>1 min</strong> fixed window, <code>QueueLimit = 0</code></td>
+<td>no</td>
+<td><code>RateLimiting.Window</code></td>
+</tr>
+<tr>
+<td>Rate limit — global</td>
+<td><strong>300</strong>/min per client address</td>
+<td><strong>yes</strong></td>
+<td><code>RateLimit:GlobalPermitPerMinute</code></td>
+</tr>
+<tr>
+<td>Rate limit — auth</td>
+<td><strong>10</strong>/min per client address</td>
+<td><strong>yes</strong></td>
+<td><code>RateLimit:AuthPermitPerMinute</code></td>
+</tr>
+<tr>
+<td>Rate limit — refresh</td>
+<td><strong>60</strong>/min per client address</td>
+<td><strong>yes</strong></td>
+<td><code>RateLimit:RefreshPermitPerMinute</code></td>
+</tr>
+<tr>
+<td>Rate limit — e-signature</td>
+<td><strong>10</strong>/min <strong>per actor</strong></td>
+<td><strong>yes</strong></td>
+<td><code>RateLimit:ESignaturePermitPerMinute</code></td>
+</tr>
+<tr>
+<td><code>Retry-After</code> on 429</td>
+<td><strong>60</strong> seconds</td>
+<td>no</td>
+<td>derived from the window</td>
+</tr>
+<tr>
+<td>Escalation ladder</td>
+<td>+24 h, +48 h, +72 h, then stop</td>
+<td>no</td>
+<td><code>EscalationTimer</code></td>
+</tr>
+<tr>
+<td>HSTS max-age</td>
+<td><strong>63,072,000 s</strong> (2 years) + <code>includeSubDomains</code></td>
+<td>no</td>
+<td><code>SecurityHeadersMiddleware</code></td>
+</tr>
+<tr>
+<td>File sniff window</td>
+<td><strong>512</strong> bytes</td>
+<td>no</td>
+<td><code>FileContentPolicy.HeaderLength</code></td>
+</tr>
+<tr>
+<td>Default list page size</td>
+<td><strong>50</strong></td>
+<td>per-request</td>
+<td>controller defaults</td>
+</tr>
+<tr>
+<td>Default compliance <code>take</code></td>
+<td><strong>200</strong></td>
+<td>per-request</td>
+<td>controller defaults</td>
+</tr>
+<tr>
+<td>Default export <code>take</code></td>
+<td><strong>1000</strong></td>
+<td>per-request</td>
+<td>controller defaults</td>
+</tr>
+<tr>
+<td>Default QC run window</td>
+<td><strong>60</strong> runs</td>
+<td>per-request</td>
+<td>controller default</td>
+</tr>
+<tr>
+<td>Default KPI history</td>
+<td><strong>90</strong> days</td>
+<td>per-request</td>
+<td>controller default</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong>There is no cooldown, no stabilisation window, no de-bounce and no anti-spam behaviour anywhere in
+the notification path.</strong> Every qualifying event produces a dispatch immediately. The only throttling
+in the system is HTTP rate limiting on inbound requests.</p>
+</blockquote>
+<hr>
+<h1>3.14 Uniqueness rules</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Scope</th>
+<th>Unique on</th>
+<th>Refusal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Platform</td>
+<td>tenant slug</td>
+<td><code>TENANT-005</code></td>
+</tr>
+<tr>
+<td>Tenant</td>
+<td>user e-mail</td>
+<td><code>USER-008</code></td>
+</tr>
+<tr>
+<td>Tenant</td>
+<td>role name (normalised)</td>
+<td><code>ROLE-007</code></td>
+</tr>
+<tr>
+<td>Tenant</td>
+<td>branch code</td>
+<td><code>ORG-010</code></td>
+</tr>
+<tr>
+<td>Branch</td>
+<td>department code</td>
+<td><code>ORG-012</code></td>
+</tr>
+<tr>
+<td>Tenant</td>
+<td>test code</td>
+<td><code>ORG-013</code></td>
+</tr>
+<tr>
+<td>Tenant</td>
+<td>document code</td>
+<td><code>DOC-003</code></td>
+</tr>
+<tr>
+<td>Tenant</td>
+<td>equipment serial number</td>
+<td><code>EQP-004</code></td>
+</tr>
+<tr>
+<td>Tenant</td>
+<td>archive <code>(sourceModule, sourceRef)</code></td>
+<td><code>ARC-020</code></td>
+</tr>
+<tr>
+<td>Tenant</td>
+<td>PT plan year</td>
+<td><code>PTP-020</code></td>
+</tr>
+<tr>
+<td>Tenant</td>
+<td>document acknowledgement <code>(document, version, user)</code></td>
+<td>idempotent — returns success</td>
+</tr>
+<tr>
+<td>Tenant</td>
+<td>active test authorisation <code>(user, test, scope)</code></td>
+<td><code>AUTHZ-005</code></td>
+</tr>
+<tr>
+<td>Tenant</td>
+<td>one <code>Active</code> quality policy</td>
+<td>enforced by auto-supersede, not a constraint</td>
+</tr>
+<tr>
+<td>File storage</td>
+<td>content SHA-256 per tenant</td>
+<td>deduplicated silently</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>3.15 Complete error-code catalogue (416 codes, 60 families)</h1>
+<p>Machine-extracted from source. Codes are grouped by family prefix; within a family, numerically.
+<code>Kind</code> is the exception type, which determines the HTTP status per §3.3.</p>
+<p><strong>How to read a code:</strong> <code>{FAMILY}-{nnn}</code> where <code>nnn &lt; 010</code> is usually a <em>validation/invariant</em> refusal,
+<code>010–0nn</code> a <em>state-transition</em> refusal, <code>020+</code> a <em>cross-record</em> rule, and <code>404</code> not-found. This
+convention holds for most families but is <strong>not</strong> universally enforced.</p>
+<h3 id="known-prefix-collisions-fix-candidates">Known prefix collisions (fix candidates)</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Prefix</th>
+<th>Collision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AUTHZ-*</code></td>
+<td><strong>test authorisations</strong> (<code>001…015</code>, <code>404</code>) vs the <strong>command-authorisation pipeline</strong> (<code>000</code>, <code>002</code>, <code>008</code>). <code>AUTHZ-002</code> carries two unrelated messages.</td>
+</tr>
+<tr>
+<td><code>SIG-*</code></td>
+<td><strong>sigma assessment</strong> (<code>001</code>, <code>002</code>, <code>003</code>, <code>010</code>, <code>011</code>, <code>404</code>) vs <strong>e-signature failures</strong> (<code>001</code> PIN, <code>002</code> password, <code>003</code> locked, <code>404</code> signer). Three codes, two meanings each.</td>
+</tr>
+<tr>
+<td><code>AUTH-001</code></td>
+<td>reused for two distinct "invalid credentials" sites.</td>
+</tr>
+<tr>
+<td><code>RS-*</code></td>
+<td>reference standards — no collision, but note <code>RS-020</code> is raised from the <strong>equipment</strong> module.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="catalogue">Catalogue</h3>
+<!-- generated: 411 distinct codes -->
+
+<p><strong>ACK</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ACK-001</code></td>
+<td>Domain</td>
+<td>A document is required to record an acknowledgement.</td>
+<td><code>src/NT.QAMS.Domain/DocumentControl/DocumentAcknowledgement.cs:33</code></td>
+</tr>
+<tr>
+<td><code>ACK-002</code></td>
+<td>Domain</td>
+<td>An acknowledging user is required.</td>
+<td><code>src/NT.QAMS.Domain/DocumentControl/DocumentAcknowledgement.cs:38</code></td>
+</tr>
+<tr>
+<td><code>ACK-003</code></td>
+<td>Domain</td>
+<td>A published version is required to acknowledge.</td>
+<td><code>src/NT.QAMS.Domain/DocumentControl/DocumentAcknowledgement.cs:43</code></td>
+</tr>
+<tr>
+<td><code>ACK-010</code></td>
+<td>Domain</td>
+<td>Only a published document can be acknowledged.</td>
+<td><code>src/NT.QAMS.Application/DocumentControl/DocumentAcknowledgementSlice.cs:29</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ARC</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ARC-001</code></td>
+<td>Domain</td>
+<td>Source module and reference are required.</td>
+<td><code>src/NT.QAMS.Domain/Records/ArchiveEntry.cs:54</code></td>
+</tr>
+<tr>
+<td><code>ARC-002</code></td>
+<td>Domain</td>
+<td>An immutable content snapshot is required to archive a record.</td>
+<td><code>src/NT.QAMS.Domain/Records/ArchiveEntry.cs:59</code></td>
+</tr>
+<tr>
+<td><code>ARC-010</code></td>
+<td>InvalidStateTransition</td>
+<td>A disposed record cannot be retrieved.</td>
+<td><code>src/NT.QAMS.Domain/Records/ArchiveEntry.cs:113</code></td>
+</tr>
+<tr>
+<td><code>ARC-011</code></td>
+<td>InvalidStateTransition</td>
+<td>Only a retrieved record can be returned.</td>
+<td><code>src/NT.QAMS.Domain/Records/ArchiveEntry.cs:123</code></td>
+</tr>
+<tr>
+<td><code>ARC-012</code></td>
+<td>InvalidStateTransition</td>
+<td>Record is already disposed.</td>
+<td><code>src/NT.QAMS.Domain/Records/ArchiveEntry.cs:133</code></td>
+</tr>
+<tr>
+<td><code>ARC-013</code></td>
+<td>Domain</td>
+<td>Permanent-retention records cannot be disposed.</td>
+<td><code>src/NT.QAMS.Domain/Records/ArchiveEntry.cs:144</code></td>
+</tr>
+<tr>
+<td><code>ARC-014</code></td>
+<td>Domain</td>
+<td>Retention period runs until {RetentionExpiry:yyyy-MM-dd}; disposal is not yet permitted.</td>
+<td><code>src/NT.QAMS.Domain/Records/ArchiveEntry.cs:149</code></td>
+</tr>
+<tr>
+<td><code>ARC-015</code></td>
+<td>Domain</td>
+<td>The record is under legal hold and cannot be disposed until the hold is released.</td>
+<td><code>src/NT.QAMS.Domain/Records/ArchiveEntry.cs:138</code></td>
+</tr>
+<tr>
+<td><code>ARC-020</code></td>
+<td>Domain</td>
+<td>{c.SourceModule} {c.SourceRef} is already archived.</td>
+<td><code>src/NT.QAMS.Application/Records/RecordsSlice.cs:41</code></td>
+</tr>
+<tr>
+<td><code>ARC-030</code></td>
+<td>Domain</td>
+<td>A reason is required to place a legal hold.</td>
+<td><code>src/NT.QAMS.Domain/Records/ArchiveEntry.cs:81</code></td>
+</tr>
+<tr>
+<td><code>ARC-031</code></td>
+<td>InvalidStateTransition</td>
+<td>A disposed record cannot be placed on legal hold.</td>
+<td><code>src/NT.QAMS.Domain/Records/ArchiveEntry.cs:86</code></td>
+</tr>
+<tr>
+<td><code>ARC-032</code></td>
+<td>InvalidStateTransition</td>
+<td>The record is not on legal hold.</td>
+<td><code>src/NT.QAMS.Domain/Records/ArchiveEntry.cs:100</code></td>
+</tr>
+<tr>
+<td><code>ARC-404</code></td>
+<td>Domain</td>
+<td>Archive entry not found.</td>
+<td><code>src/NT.QAMS.Application/Records/RecordsSlice.cs:81</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ATR</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ATR-001</code></td>
+<td>Domain</td>
+<td>The review period end must not precede its start.</td>
+<td><code>src/NT.QAMS.Domain/ComplianceLedger/AuditTrailReview.cs:37</code></td>
+</tr>
+<tr>
+<td><code>ATR-010</code></td>
+<td>InvalidStateTransition</td>
+<td>The review is already completed and immutable.</td>
+<td><code>src/NT.QAMS.Domain/ComplianceLedger/AuditTrailReview.cs:55</code></td>
+</tr>
+<tr>
+<td><code>ATR-011</code></td>
+<td>Domain</td>
+<td>A written conclusion is required — 'reviewed' without findings is not evidence.</td>
+<td><code>src/NT.QAMS.Domain/ComplianceLedger/AuditTrailReview.cs:60</code></td>
+</tr>
+<tr>
+<td><code>ATR-404</code></td>
+<td>Domain</td>
+<td>Audit-trail review not found.</td>
+<td><code>src/NT.QAMS.Application/ComplianceLedger/AuditTrailReviewSlice.cs:57</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>AUD</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AUD-001</code></td>
+<td>Domain</td>
+<td>Audit title is required.</td>
+<td><code>src/NT.QAMS.Domain/AuditManagement/Audit.cs:84</code></td>
+</tr>
+<tr>
+<td><code>AUD-002</code></td>
+<td>Domain</td>
+<td>Checklist question is required.</td>
+<td><code>src/NT.QAMS.Domain/AuditManagement/Audit.cs:105</code></td>
+</tr>
+<tr>
+<td><code>AUD-010</code></td>
+<td>InvalidStateTransition</td>
+<td>Cannot start an audit in state {Status}.</td>
+<td><code>src/NT.QAMS.Domain/AuditManagement/Audit.cs:117</code></td>
+</tr>
+<tr>
+<td><code>AUD-011</code></td>
+<td>Domain</td>
+<td>An audit needs at least one checklist item before it starts.</td>
+<td><code>src/NT.QAMS.Domain/AuditManagement/Audit.cs:122</code></td>
+</tr>
+<tr>
+<td><code>AUD-012</code></td>
+<td>Domain</td>
+<td>A verdict is required (Conform, Ofi or NonConform).</td>
+<td><code>src/NT.QAMS.Domain/AuditManagement/Audit.cs:133</code></td>
+</tr>
+<tr>
+<td><code>AUD-013</code></td>
+<td>Domain</td>
+<td>Checklist item not found on this audit.</td>
+<td><code>src/NT.QAMS.Domain/AuditManagement/Audit.cs:137</code></td>
+</tr>
+<tr>
+<td><code>AUD-014</code></td>
+<td>Domain</td>
+<td>Finding description is required.</td>
+<td><code>src/NT.QAMS.Domain/AuditManagement/Audit.cs:148</code></td>
+</tr>
+<tr>
+<td><code>AUD-015</code></td>
+<td>Domain</td>
+<td>Finding not found on this audit.</td>
+<td><code>src/NT.QAMS.Domain/AuditManagement/Audit.cs:162</code></td>
+</tr>
+<tr>
+<td><code>AUD-016</code></td>
+<td>Domain</td>
+<td>OFI findings do not carry nonconformances.</td>
+<td><code>src/NT.QAMS.Domain/AuditManagement/Audit.cs:166</code></td>
+</tr>
+<tr>
+<td><code>AUD-017</code></td>
+<td>Domain</td>
+<td>All checklist items must be answered before sign-off.</td>
+<td><code>src/NT.QAMS.Domain/AuditManagement/Audit.cs:178</code></td>
+</tr>
+<tr>
+<td><code>AUD-018</code></td>
+<td>Domain</td>
+<td>{unacknowledged} NC-graded finding(s) await their nonconformance before sign-off.</td>
+<td><code>src/NT.QAMS.Domain/AuditManagement/Audit.cs:184</code></td>
+</tr>
+<tr>
+<td><code>AUD-019</code></td>
+<td>InvalidStateTransition</td>
+<td>Cannot {action}: audit is {Status}.</td>
+<td><code>src/NT.QAMS.Domain/AuditManagement/Audit.cs:199</code></td>
+</tr>
+<tr>
+<td><code>AUD-020</code></td>
+<td>InvalidStateTransition</td>
+<td>A signed-off audit is immutable.</td>
+<td><code>src/NT.QAMS.Domain/AuditManagement/Audit.cs:207</code></td>
+</tr>
+<tr>
+<td><code>AUD-404</code></td>
+<td>Domain</td>
+<td>Audit not found.</td>
+<td><code>src/NT.QAMS.Application/AuditManagement/Commands/AuditCommands.cs:88</code> (+1)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>AUTH</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AUTH-000</code></td>
+<td>Domain</td>
+<td>A refresh session requires an id and a user. <br>— A refresh session requires the token hash. <br>— A refresh session requires a positive lifetime. <br>— A revoked session cannot rotate.</td>
+<td><code>src/NT.QAMS.Domain/IdentityAccess/RefreshSession.cs:53</code> (+3)</td>
+</tr>
+<tr>
+<td><code>AUTH-001</code></td>
+<td>Domain</td>
+<td>Invalid credentials.</td>
+<td><code>src/NT.QAMS.Application/IdentityAccess/Commands/Login.cs:192</code> (+1)</td>
+</tr>
+<tr>
+<td><code>AUTH-003</code></td>
+<td>Domain</td>
+<td>An authenticated user is required.</td>
+<td><code>src/NT.QAMS.Application/AnalyticalQuality/CarryoverSlice.cs:77</code> (+50)</td>
+</tr>
+<tr>
+<td><code>AUTH-006</code></td>
+<td>Domain</td>
+<td>Your session is no longer valid. Please sign in again.</td>
+<td><code>src/NT.QAMS.Application/IdentityAccess/Commands/RefreshSessions.cs:124</code></td>
+</tr>
+<tr>
+<td><code>AUTH-008</code></td>
+<td>Domain</td>
+<td>The session has been revoked. Please sign in again.</td>
+<td><code>src/NT.QAMS.Application/IdentityAccess/Commands/RefreshSessions.cs:111</code></td>
+</tr>
+<tr>
+<td><code>AUTH-009</code></td>
+<td>Domain</td>
+<td>The session has expired. Please sign in again.</td>
+<td><code>src/NT.QAMS.Application/IdentityAccess/Commands/RefreshSessions.cs:90</code> (+2)</td>
+</tr>
+<tr>
+<td><code>AUTH-102</code></td>
+<td>Domain</td>
+<td>The new password must differ from the last {passwordPolicy.HistoryDepth + 1} passwords.</td>
+<td><code>src/NT.QAMS.Application/IdentityAccess/Commands/Login.cs:215</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>AUTHZ</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AUTHZ-000</code></td>
+<td>Domain</td>
+<td>Command '{typeof(TRequest).Name}' declares no authorization policy — denied.</td>
+<td><code>src/NT.QAMS.Application/Behaviors/AuthorizationBehavior.cs:52</code></td>
+</tr>
+<tr>
+<td><code>AUTHZ-001</code></td>
+<td>Domain</td>
+<td>An authenticated actor is required for this action. <br>— The authorization expiry must fall after the grant date.</td>
+<td><code>src/NT.QAMS.Application/Behaviors/AuthorizationBehavior.cs:60</code> (+2)</td>
+</tr>
+<tr>
+<td><code>AUTHZ-002</code></td>
+<td>Domain</td>
+<td>Role '{role}' is not permitted to execute this action. <br>— Test {test.TestCode} is inactive â€” authorizations can only target active catalog tests.</td>
+<td><code>src/NT.QAMS.Application/Behaviors/AuthorizationBehavior.cs:83</code> (+1)</td>
+</tr>
+<tr>
+<td><code>AUTHZ-003</code></td>
+<td>Domain</td>
+<td>The evidencing competency belongs to a different person.</td>
+<td><code>src/NT.QAMS.Application/Competency/AuthorizationSlice.cs:50</code></td>
+</tr>
+<tr>
+<td><code>AUTHZ-004</code></td>
+<td>Domain</td>
+<td>Only a current, Authorized competency can evidence a test authorization.</td>
+<td><code>src/NT.QAMS.Application/Competency/AuthorizationSlice.cs:55</code></td>
+</tr>
+<tr>
+<td><code>AUTHZ-005</code></td>
+<td>Domain</td>
+<td>An equivalent authorization (same person, test and scope) is already in force.</td>
+<td><code>src/NT.QAMS.Application/Competency/AuthorizationSlice.cs:63</code></td>
+</tr>
+<tr>
+<td><code>AUTHZ-008</code></td>
+<td>Domain</td>
+<td>Command '{typeof(TRequest).Name}' requires unknown permission '{declared.PermissionKey}'.</td>
+<td><code>src/NT.QAMS.Application/Behaviors/AuthorizationBehavior.cs:68</code></td>
+</tr>
+<tr>
+<td><code>AUTHZ-010</code></td>
+<td>InvalidStateTransition</td>
+<td>Only an active authorization can be suspended (current: {Status}).</td>
+<td><code>src/NT.QAMS.Domain/Competency/TestAuthorization.cs:68</code></td>
+</tr>
+<tr>
+<td><code>AUTHZ-011</code></td>
+<td>Domain</td>
+<td>A suspension reason is required.</td>
+<td><code>src/NT.QAMS.Domain/Competency/TestAuthorization.cs:73</code></td>
+</tr>
+<tr>
+<td><code>AUTHZ-012</code></td>
+<td>InvalidStateTransition</td>
+<td>Only a suspended authorization can be reinstated (current: {Status}).</td>
+<td><code>src/NT.QAMS.Domain/Competency/TestAuthorization.cs:93</code></td>
+</tr>
+<tr>
+<td><code>AUTHZ-013</code></td>
+<td>Domain</td>
+<td>The authorization has lapsed — grant a new one against a current competency.</td>
+<td><code>src/NT.QAMS.Domain/Competency/TestAuthorization.cs:98</code></td>
+</tr>
+<tr>
+<td><code>AUTHZ-014</code></td>
+<td>InvalidStateTransition</td>
+<td>A {Status} authorization cannot be revoked.</td>
+<td><code>src/NT.QAMS.Domain/Competency/TestAuthorization.cs:109</code></td>
+</tr>
+<tr>
+<td><code>AUTHZ-015</code></td>
+<td>Domain</td>
+<td>A revocation reason is required.</td>
+<td><code>src/NT.QAMS.Domain/Competency/TestAuthorization.cs:114</code></td>
+</tr>
+<tr>
+<td><code>AUTHZ-404</code></td>
+<td>Domain</td>
+<td>Test authorization not found.</td>
+<td><code>src/NT.QAMS.Application/Competency/AuthorizationSlice.cs:128</code> (+1)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>CAPA</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CAPA-001</code></td>
+<td>Domain</td>
+<td>CAPA action not found on this nonconformance.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/Nonconformance.cs:216</code></td>
+</tr>
+<tr>
+<td><code>CAPA-002</code></td>
+<td>InvalidStateTransition</td>
+<td>Action is already completed.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/Nonconformance.cs:53</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>CAR</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CAR-001</code></td>
+<td>Domain</td>
+<td>An analyte is required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/CarryoverStudy.cs:76</code></td>
+</tr>
+<tr>
+<td><code>CAR-002</code></td>
+<td>Domain</td>
+<td>The allowable carryover must be a positive percentage (at most 50%).</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/CarryoverStudy.cs:81</code></td>
+</tr>
+<tr>
+<td><code>CAR-010</code></td>
+<td>Domain</td>
+<td>At least one high-concentration reading is required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/CarryoverStudy.cs:120</code></td>
+</tr>
+<tr>
+<td><code>CAR-011</code></td>
+<td>Domain</td>
+<td>At least {MinimumLow} low readings are required (first low + steady state).</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/CarryoverStudy.cs:125</code></td>
+</tr>
+<tr>
+<td><code>CAR-012</code></td>
+<td>Domain</td>
+<td>The high and low steady-state means are equal — carryover cannot be computed.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/CarryoverStudy.cs:134</code></td>
+</tr>
+<tr>
+<td><code>CAR-013</code></td>
+<td>InvalidStateTransition</td>
+<td>Only a calculated study can be signed off (current: {State}).</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/CarryoverStudy.cs:151</code></td>
+</tr>
+<tr>
+<td><code>CAR-014</code></td>
+<td>InvalidStateTransition</td>
+<td>A signed-off study is immutable.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/CarryoverStudy.cs:175</code></td>
+</tr>
+<tr>
+<td><code>CAR-404</code></td>
+<td>Domain</td>
+<td>Carryover study not found. <br>— Reading not found.</td>
+<td><code>src/NT.QAMS.Application/AnalyticalQuality/CarryoverSlice.cs:85</code> (+2)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>CCP</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CCP-001</code></td>
+<td>Domain</td>
+<td>A copy holder (person, role, or location) is required.</td>
+<td><code>src/NT.QAMS.Domain/DocumentControl/DocumentControlledCopy.cs:46</code></td>
+</tr>
+<tr>
+<td><code>CCP-002</code></td>
+<td>Domain</td>
+<td>The copy number must be positive.</td>
+<td><code>src/NT.QAMS.Domain/DocumentControl/DocumentControlledCopy.cs:51</code></td>
+</tr>
+<tr>
+<td><code>CCP-003</code></td>
+<td>Domain</td>
+<td>The outcome must be Returned or Destroyed. <br>— A controlled copy can only be closed as Returned or Destroyed.</td>
+<td><code>src/NT.QAMS.Application/DocumentControl/ControlledCopySlice.cs:54</code> (+1)</td>
+</tr>
+<tr>
+<td><code>CCP-010</code></td>
+<td>InvalidStateTransition</td>
+<td>Only an issued copy can be returned or destroyed (current: {Status}).</td>
+<td><code>src/NT.QAMS.Domain/DocumentControl/DocumentControlledCopy.cs:77</code></td>
+</tr>
+<tr>
+<td><code>CCP-020</code></td>
+<td>Domain</td>
+<td>Only a published document can have a controlled copy issued.</td>
+<td><code>src/NT.QAMS.Application/DocumentControl/ControlledCopySlice.cs:30</code></td>
+</tr>
+<tr>
+<td><code>CCP-404</code></td>
+<td>Domain</td>
+<td>Controlled copy not found.</td>
+<td><code>src/NT.QAMS.Application/DocumentControl/ControlledCopySlice.cs:58</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>CHG</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CHG-001</code></td>
+<td>Domain</td>
+<td>Change title is required.</td>
+<td><code>src/NT.QAMS.Domain/RiskGovernance/ChangeAndReview.cs:48</code></td>
+</tr>
+<tr>
+<td><code>CHG-002</code></td>
+<td>Domain</td>
+<td>An impact analysis is required to propose a change.</td>
+<td><code>src/NT.QAMS.Domain/RiskGovernance/ChangeAndReview.cs:53</code></td>
+</tr>
+<tr>
+<td><code>CHG-012</code></td>
+<td>Domain</td>
+<td>A change cannot be approved without a linked risk assessment.</td>
+<td><code>src/NT.QAMS.Domain/RiskGovernance/ChangeAndReview.cs:77</code></td>
+</tr>
+<tr>
+<td><code>CHG-014</code></td>
+<td>Domain</td>
+<td>A rejection reason is required.</td>
+<td><code>src/NT.QAMS.Domain/RiskGovernance/ChangeAndReview.cs:91</code></td>
+</tr>
+<tr>
+<td><code>CHG-021</code></td>
+<td>Domain</td>
+<td>Post-implementation review notes are required.</td>
+<td><code>src/NT.QAMS.Domain/RiskGovernance/ChangeAndReview.cs:116</code></td>
+</tr>
+<tr>
+<td><code>CHG-404</code></td>
+<td>Domain</td>
+<td>Change request not found.</td>
+<td><code>src/NT.QAMS.Application/RiskGovernance/RiskGovernanceSlice.cs:222</code> (+1)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>CMP</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CMP-001</code></td>
+<td>Domain</td>
+<td>The complainant name is required.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/Complaint.cs:61</code></td>
+</tr>
+<tr>
+<td><code>CMP-002</code></td>
+<td>Domain</td>
+<td>A complaint subject and description are required.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/Complaint.cs:66</code></td>
+</tr>
+<tr>
+<td><code>CMP-003</code></td>
+<td>Domain</td>
+<td>A validation verdict reason is required.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/Complaint.cs:104</code></td>
+</tr>
+<tr>
+<td><code>CMP-004</code></td>
+<td>Domain</td>
+<td>An investigation outcome is required.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/Complaint.cs:130</code></td>
+</tr>
+<tr>
+<td><code>CMP-005</code></td>
+<td>Domain</td>
+<td>A resolution is required.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/Complaint.cs:142</code></td>
+</tr>
+<tr>
+<td><code>CMP-020</code></td>
+<td>Domain</td>
+<td>The linked nonconformance must be closed before the complaint.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/Complaint.cs:160</code></td>
+</tr>
+<tr>
+<td><code>CMP-404</code></td>
+<td>Domain</td>
+<td>Complaint not found.</td>
+<td><code>src/NT.QAMS.Application/Improvement/Commands/ComplaintCommands.cs:156</code> (+1)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>COI</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>COI-001</code></td>
+<td>Domain</td>
+<td>The conflict description and the related party are required.</td>
+<td><code>src/NT.QAMS.Domain/RiskGovernance/ConflictDeclaration.cs:49</code></td>
+</tr>
+<tr>
+<td><code>COI-010</code></td>
+<td>InvalidStateTransition</td>
+<td>Only a declared conflict can be assessed (current: {Status}).</td>
+<td><code>src/NT.QAMS.Domain/RiskGovernance/ConflictDeclaration.cs:67</code></td>
+</tr>
+<tr>
+<td><code>COI-011</code></td>
+<td>Domain</td>
+<td>A mitigation (or the justification that none is needed) is required.</td>
+<td><code>src/NT.QAMS.Domain/RiskGovernance/ConflictDeclaration.cs:77</code></td>
+</tr>
+<tr>
+<td><code>COI-012</code></td>
+<td>InvalidStateTransition</td>
+<td>Only an assessed conflict can be closed (current: {Status}).</td>
+<td><code>src/NT.QAMS.Domain/RiskGovernance/ConflictDeclaration.cs:95</code></td>
+</tr>
+<tr>
+<td><code>COI-013</code></td>
+<td>Domain</td>
+<td>A closure note is required.</td>
+<td><code>src/NT.QAMS.Domain/RiskGovernance/ConflictDeclaration.cs:100</code></td>
+</tr>
+<tr>
+<td><code>COI-404</code></td>
+<td>Domain</td>
+<td>Conflict declaration not found.</td>
+<td><code>src/NT.QAMS.Application/RiskGovernance/ConflictSlice.cs:88</code> (+1)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>COMP</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>COMP-001</code></td>
+<td>Domain</td>
+<td>A competency subject is required (e.g. an SOP or method).</td>
+<td><code>src/NT.QAMS.Domain/Competency/CompetencyRecord.cs:59</code></td>
+</tr>
+<tr>
+<td><code>COMP-002</code></td>
+<td>Domain</td>
+<td>Validity must be at least one month.</td>
+<td><code>src/NT.QAMS.Domain/Competency/CompetencyRecord.cs:64</code></td>
+</tr>
+<tr>
+<td><code>COMP-010</code></td>
+<td>InvalidStateTransition</td>
+<td>Cannot score an assessment in state {Status}.</td>
+<td><code>src/NT.QAMS.Domain/Competency/CompetencyRecord.cs:81</code></td>
+</tr>
+<tr>
+<td><code>COMP-011</code></td>
+<td>Domain</td>
+<td>Score must be between 0 and 100.</td>
+<td><code>src/NT.QAMS.Domain/Competency/CompetencyRecord.cs:86</code></td>
+</tr>
+<tr>
+<td><code>COMP-012</code></td>
+<td>InvalidStateTransition</td>
+<td>Only an Evaluated competency (score &gt;= {PassMark}) can be authorized.</td>
+<td><code>src/NT.QAMS.Domain/Competency/CompetencyRecord.cs:102</code></td>
+</tr>
+<tr>
+<td><code>COMP-013</code></td>
+<td>InvalidStateTransition</td>
+<td>Only an Authorized competency can be revoked.</td>
+<td><code>src/NT.QAMS.Domain/Competency/CompetencyRecord.cs:134</code></td>
+</tr>
+<tr>
+<td><code>COMP-014</code></td>
+<td>Domain</td>
+<td>A revocation reason is required.</td>
+<td><code>src/NT.QAMS.Domain/Competency/CompetencyRecord.cs:139</code></td>
+</tr>
+<tr>
+<td><code>COMP-404</code></td>
+<td>Domain</td>
+<td>Competency record not found.</td>
+<td><code>src/NT.QAMS.Application/Competency/AuthorizationSlice.cs:47</code> (+2)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>CTX</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CTX-001</code></td>
+<td>Domain</td>
+<td>The issue category and description are required. <br>— The issue category, description, and impact are required.</td>
+<td><code>src/NT.QAMS.Domain/Organization/OrganizationContext.cs:134</code> (+1)</td>
+</tr>
+<tr>
+<td><code>CTX-002</code></td>
+<td>Domain</td>
+<td>The assessed impact on the QMS is required.</td>
+<td><code>src/NT.QAMS.Domain/Organization/OrganizationContext.cs:139</code></td>
+</tr>
+<tr>
+<td><code>CTX-003</code></td>
+<td>Domain</td>
+<td>A resolution is required to close a context issue.</td>
+<td><code>src/NT.QAMS.Domain/Organization/OrganizationContext.cs:180</code></td>
+</tr>
+<tr>
+<td><code>CTX-010</code></td>
+<td>InvalidStateTransition</td>
+<td>The issue is closed and frozen.</td>
+<td><code>src/NT.QAMS.Domain/Organization/OrganizationContext.cs:191</code></td>
+</tr>
+<tr>
+<td><code>CTX-404</code></td>
+<td>Domain</td>
+<td>Context issue not found.</td>
+<td><code>src/NT.QAMS.Application/Organization/OrgContextSlice.cs:168</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>DL</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DL-001</code></td>
+<td>Domain</td>
+<td>An analyte and the method under study are required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/DetectionLimitStudy.cs:89</code></td>
+</tr>
+<tr>
+<td><code>DL-002</code></td>
+<td>Domain</td>
+<td>The LoQ CV goal must be a positive percentage (at most 50%).</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/DetectionLimitStudy.cs:94</code></td>
+</tr>
+<tr>
+<td><code>DL-003</code></td>
+<td>Domain</td>
+<td>A low-level replicate needs its sample's positive assigned concentration.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/DetectionLimitStudy.cs:113</code></td>
+</tr>
+<tr>
+<td><code>DL-004</code></td>
+<td>Domain</td>
+<td>Blanks carry no assigned concentration.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/DetectionLimitStudy.cs:118</code></td>
+</tr>
+<tr>
+<td><code>DL-010</code></td>
+<td>Domain</td>
+<td>At least {MinimumBlankReplicates} blank replicates are required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/DetectionLimitStudy.cs:145</code></td>
+</tr>
+<tr>
+<td><code>DL-011</code></td>
+<td>Domain</td>
+<td>At least {MinimumLowLevelReplicates} low-level replicates are required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/DetectionLimitStudy.cs:150</code></td>
+</tr>
+<tr>
+<td><code>DL-012</code></td>
+<td>Domain</td>
+<td>Low-level samples need at least two replicates each to pool a within-sample SD.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/DetectionLimitStudy.cs:178</code></td>
+</tr>
+<tr>
+<td><code>DL-013</code></td>
+<td>InvalidStateTransition</td>
+<td>Only a calculated study can be signed off (current: {State}).</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/DetectionLimitStudy.cs:213</code></td>
+</tr>
+<tr>
+<td><code>DL-014</code></td>
+<td>InvalidStateTransition</td>
+<td>A signed-off study is immutable.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/DetectionLimitStudy.cs:267</code></td>
+</tr>
+<tr>
+<td><code>DL-404</code></td>
+<td>Domain</td>
+<td>Detection-limit study not found. <br>— Measurement not found.</td>
+<td><code>src/NT.QAMS.Application/AnalyticalQuality/DetectionLimitSlice.cs:94</code> (+2)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>DOC</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DOC-001</code></td>
+<td>Domain</td>
+<td>Document code is required (e.g. SOP-CAL-045).</td>
+<td><code>src/NT.QAMS.Domain/DocumentControl/ControlledDocument.cs:90</code></td>
+</tr>
+<tr>
+<td><code>DOC-002</code></td>
+<td>Domain</td>
+<td>Document title is required.</td>
+<td><code>src/NT.QAMS.Domain/DocumentControl/ControlledDocument.cs:95</code></td>
+</tr>
+<tr>
+<td><code>DOC-003</code></td>
+<td>Domain</td>
+<td>Document code '{code}' is already in use.</td>
+<td><code>src/NT.QAMS.Application/DocumentControl/Commands/DocumentCommands.cs:39</code></td>
+</tr>
+<tr>
+<td><code>DOC-012</code></td>
+<td>InvalidStateTransition</td>
+<td>No version is awaiting review or approval. <br>— Cannot reject a version in state {version.State}.</td>
+<td><code>src/NT.QAMS.Domain/DocumentControl/ControlledDocument.cs:134</code> (+1)</td>
+</tr>
+<tr>
+<td><code>DOC-013</code></td>
+<td>Domain</td>
+<td>A rejection reason is required.</td>
+<td><code>src/NT.QAMS.Domain/DocumentControl/ControlledDocument.cs:143</code></td>
+</tr>
+<tr>
+<td><code>DOC-015</code></td>
+<td>InvalidStateTransition</td>
+<td>A retired document cannot receive new versions.</td>
+<td><code>src/NT.QAMS.Domain/DocumentControl/ControlledDocument.cs:211</code></td>
+</tr>
+<tr>
+<td><code>DOC-016</code></td>
+<td>Domain</td>
+<td>A version is already in progress; publish or reject it first.</td>
+<td><code>src/NT.QAMS.Domain/DocumentControl/ControlledDocument.cs:216</code></td>
+</tr>
+<tr>
+<td><code>DOC-017</code></td>
+<td>InvalidStateTransition</td>
+<td>Only a published document can be revised.</td>
+<td><code>src/NT.QAMS.Domain/DocumentControl/ControlledDocument.cs:220</code></td>
+</tr>
+<tr>
+<td><code>DOC-018</code></td>
+<td>InvalidStateTransition</td>
+<td>Document is already obsolete.</td>
+<td><code>src/NT.QAMS.Domain/DocumentControl/ControlledDocument.cs:233</code></td>
+</tr>
+<tr>
+<td><code>DOC-020</code></td>
+<td>InvalidStateTransition</td>
+<td>Only a published document undergoes periodic review.</td>
+<td><code>src/NT.QAMS.Domain/DocumentControl/ControlledDocument.cs:199</code></td>
+</tr>
+<tr>
+<td><code>DOC-404</code></td>
+<td>Domain</td>
+<td>Document not found.</td>
+<td><code>src/NT.QAMS.Application/DocumentControl/ControlledCopySlice.cs:27</code> (+4)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ENV</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ENV-001</code></td>
+<td>Domain</td>
+<td>A monitoring point name is required.</td>
+<td><code>src/NT.QAMS.Domain/Facility/MonitoringPoint.cs:76</code></td>
+</tr>
+<tr>
+<td><code>ENV-002</code></td>
+<td>Domain</td>
+<td>The monitored parameter and its unit are required.</td>
+<td><code>src/NT.QAMS.Domain/Facility/MonitoringPoint.cs:81</code></td>
+</tr>
+<tr>
+<td><code>ENV-003</code></td>
+<td>Domain</td>
+<td>At least one acceptance limit (low or high) is required.</td>
+<td><code>src/NT.QAMS.Domain/Facility/MonitoringPoint.cs:107</code></td>
+</tr>
+<tr>
+<td><code>ENV-004</code></td>
+<td>Domain</td>
+<td>The low limit must fall below the high limit.</td>
+<td><code>src/NT.QAMS.Domain/Facility/MonitoringPoint.cs:112</code></td>
+</tr>
+<tr>
+<td><code>ENV-010</code></td>
+<td>InvalidStateTransition</td>
+<td>A retired monitoring point cannot be re-baselined.</td>
+<td><code>src/NT.QAMS.Domain/Facility/MonitoringPoint.cs:102</code></td>
+</tr>
+<tr>
+<td><code>ENV-011</code></td>
+<td>InvalidStateTransition</td>
+<td>Readings can only be recorded on an active point (current: {Status}).</td>
+<td><code>src/NT.QAMS.Domain/Facility/MonitoringPoint.cs:127</code></td>
+</tr>
+<tr>
+<td><code>ENV-012</code></td>
+<td>InvalidStateTransition</td>
+<td>Only an active point can be suspended (current: {Status}).</td>
+<td><code>src/NT.QAMS.Domain/Facility/MonitoringPoint.cs:150</code></td>
+</tr>
+<tr>
+<td><code>ENV-013</code></td>
+<td>InvalidStateTransition</td>
+<td>Only a suspended point can be resumed (current: {Status}).</td>
+<td><code>src/NT.QAMS.Domain/Facility/MonitoringPoint.cs:160</code></td>
+</tr>
+<tr>
+<td><code>ENV-014</code></td>
+<td>InvalidStateTransition</td>
+<td>The monitoring point is already retired.</td>
+<td><code>src/NT.QAMS.Domain/Facility/MonitoringPoint.cs:170</code></td>
+</tr>
+<tr>
+<td><code>ENV-404</code></td>
+<td>Domain</td>
+<td>Monitoring point not found.</td>
+<td><code>src/NT.QAMS.Application/Facility/MonitoringSlice.cs:116</code> (+1)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>EQP</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>EQP-001</code></td>
+<td>Domain</td>
+<td>Equipment name is required.</td>
+<td><code>src/NT.QAMS.Domain/Equipment/EquipmentItem.cs:113</code></td>
+</tr>
+<tr>
+<td><code>EQP-002</code></td>
+<td>Domain</td>
+<td>Serial number is required.</td>
+<td><code>src/NT.QAMS.Domain/Equipment/EquipmentItem.cs:118</code></td>
+</tr>
+<tr>
+<td><code>EQP-003</code></td>
+<td>Domain</td>
+<td>Calibration interval must be positive; grace period non-negative.</td>
+<td><code>src/NT.QAMS.Domain/Equipment/EquipmentItem.cs:123</code></td>
+</tr>
+<tr>
+<td><code>EQP-004</code></td>
+<td>Domain</td>
+<td>Serial number '{serial}' is already registered.</td>
+<td><code>src/NT.QAMS.Application/Equipment/EquipmentSlice.cs:41</code></td>
+</tr>
+<tr>
+<td><code>EQP-010</code></td>
+<td>InvalidStateTransition</td>
+<td>Retired equipment cannot be calibrated.</td>
+<td><code>src/NT.QAMS.Domain/Equipment/EquipmentItem.cs:142</code></td>
+</tr>
+<tr>
+<td><code>EQP-011</code></td>
+<td>Domain</td>
+<td>A calibration result is required.</td>
+<td><code>src/NT.QAMS.Domain/Equipment/EquipmentItem.cs:147</code></td>
+</tr>
+<tr>
+<td><code>EQP-012</code></td>
+<td>InvalidStateTransition</td>
+<td>Retired equipment cannot receive maintenance.</td>
+<td><code>src/NT.QAMS.Domain/Equipment/EquipmentItem.cs:197</code></td>
+</tr>
+<tr>
+<td><code>EQP-013</code></td>
+<td>Domain</td>
+<td>Maintenance description is required.</td>
+<td><code>src/NT.QAMS.Domain/Equipment/EquipmentItem.cs:202</code></td>
+</tr>
+<tr>
+<td><code>EQP-014</code></td>
+<td>InvalidStateTransition</td>
+<td>Equipment is already retired.</td>
+<td><code>src/NT.QAMS.Domain/Equipment/EquipmentItem.cs:245</code></td>
+</tr>
+<tr>
+<td><code>EQP-020</code></td>
+<td>InvalidStateTransition</td>
+<td>Retired equipment cannot receive intermediate checks.</td>
+<td><code>src/NT.QAMS.Domain/Equipment/EquipmentItem.cs:219</code></td>
+</tr>
+<tr>
+<td><code>EQP-021</code></td>
+<td>Domain</td>
+<td>A check type is required.</td>
+<td><code>src/NT.QAMS.Domain/Equipment/EquipmentItem.cs:224</code></td>
+</tr>
+<tr>
+<td><code>EQP-404</code></td>
+<td>Domain</td>
+<td>Equipment not found.</td>
+<td><code>src/NT.QAMS.Application/Equipment/EquipmentSlice.cs:85</code> (+1)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>FBK</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>FBK-001</code></td>
+<td>Domain</td>
+<td>A subject and details are required.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/FeedbackEntry.cs:55</code></td>
+</tr>
+<tr>
+<td><code>FBK-002</code></td>
+<td>Domain</td>
+<td>The feedback source and channel are required.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/FeedbackEntry.cs:60</code></td>
+</tr>
+<tr>
+<td><code>FBK-003</code></td>
+<td>Domain</td>
+<td>The satisfaction score is on a 1–5 scale.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/FeedbackEntry.cs:65</code></td>
+</tr>
+<tr>
+<td><code>FBK-010</code></td>
+<td>InvalidStateTransition</td>
+<td>Only logged feedback can be reviewed (current: {Status}).</td>
+<td><code>src/NT.QAMS.Domain/Improvement/FeedbackEntry.cs:87</code></td>
+</tr>
+<tr>
+<td><code>FBK-011</code></td>
+<td>Domain</td>
+<td>Review notes are required.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/FeedbackEntry.cs:92</code></td>
+</tr>
+<tr>
+<td><code>FBK-012</code></td>
+<td>InvalidStateTransition</td>
+<td>Only reviewed feedback can be closed (current: {Status}).</td>
+<td><code>src/NT.QAMS.Domain/Improvement/FeedbackEntry.cs:103</code></td>
+</tr>
+<tr>
+<td><code>FBK-013</code></td>
+<td>Domain</td>
+<td>A summary of the action taken (or the reason none was needed) is required.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/FeedbackEntry.cs:108</code></td>
+</tr>
+<tr>
+<td><code>FBK-014</code></td>
+<td>Domain</td>
+<td>Only dissatisfaction can be escalated to a complaint.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/FeedbackEntry.cs:120</code></td>
+</tr>
+<tr>
+<td><code>FBK-015</code></td>
+<td>InvalidStateTransition</td>
+<td>{Status} feedback cannot be escalated.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/FeedbackEntry.cs:125</code></td>
+</tr>
+<tr>
+<td><code>FBK-404</code></td>
+<td>Domain</td>
+<td>Feedback entry not found.</td>
+<td><code>src/NT.QAMS.Application/Improvement/FeedbackSlice.cs:126</code> (+1)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>FILE</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>FILE-001</code></td>
+<td>Domain</td>
+<td>File name is required.</td>
+<td><code>src/NT.QAMS.Domain/Files/FileReference.cs:34</code></td>
+</tr>
+<tr>
+<td><code>FILE-002</code></td>
+<td>Domain</td>
+<td>File is empty.</td>
+<td><code>src/NT.QAMS.Domain/Files/FileReference.cs:39</code></td>
+</tr>
+<tr>
+<td><code>FILE-404</code></td>
+<td>Domain</td>
+<td>Uploaded file not found. <br>— Certificate file not found. <br>— Snapshot file not found.</td>
+<td><code>src/NT.QAMS.Application/DocumentControl/Commands/DocumentCommands.cs:45</code> (+4)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ICP</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ICP-001</code></td>
+<td>Domain</td>
+<td>An analyte is required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/InstrumentComparabilityStudy.cs:73</code></td>
+</tr>
+<tr>
+<td><code>ICP-002</code></td>
+<td>Domain</td>
+<td>A reference instrument is required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/InstrumentComparabilityStudy.cs:78</code></td>
+</tr>
+<tr>
+<td><code>ICP-003</code></td>
+<td>Domain</td>
+<td>The allowable bias must be a positive percentage (at most 50%).</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/InstrumentComparabilityStudy.cs:83</code></td>
+</tr>
+<tr>
+<td><code>ICP-004</code></td>
+<td>Domain</td>
+<td>Both the instrument and the sample identifier are required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/InstrumentComparabilityStudy.cs:102</code></td>
+</tr>
+<tr>
+<td><code>ICP-010</code></td>
+<td>Domain</td>
+<td>The reference instrument has no readings to compare against.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/InstrumentComparabilityStudy.cs:129</code></td>
+</tr>
+<tr>
+<td><code>ICP-011</code></td>
+<td>Domain</td>
+<td>At least one non-reference instrument is required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/InstrumentComparabilityStudy.cs:140</code></td>
+</tr>
+<tr>
+<td><code>ICP-012</code></td>
+<td>Domain</td>
+<td>Every instrument must share at least one sample with the reference.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/InstrumentComparabilityStudy.cs:146</code></td>
+</tr>
+<tr>
+<td><code>ICP-013</code></td>
+<td>InvalidStateTransition</td>
+<td>Only a calculated study can be signed off (current: {State}).</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/InstrumentComparabilityStudy.cs:198</code></td>
+</tr>
+<tr>
+<td><code>ICP-014</code></td>
+<td>InvalidStateTransition</td>
+<td>A signed-off study is immutable.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/InstrumentComparabilityStudy.cs:221</code></td>
+</tr>
+<tr>
+<td><code>ICP-404</code></td>
+<td>Domain</td>
+<td>Instrument-comparability study not found. <br>— Reading not found.</td>
+<td><code>src/NT.QAMS.Application/AnalyticalQuality/InstrumentComparabilitySlice.cs:87</code> (+2)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>INT</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>INT-001</code></td>
+<td>Domain</td>
+<td>An analyte is required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/InterferenceStudy.cs:77</code></td>
+</tr>
+<tr>
+<td><code>INT-002</code></td>
+<td>Domain</td>
+<td>The allowable bias must be a positive percentage.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/InterferenceStudy.cs:82</code></td>
+</tr>
+<tr>
+<td><code>INT-003</code></td>
+<td>Domain</td>
+<td>A test reading needs the interferent name.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/InterferenceStudy.cs:109</code></td>
+</tr>
+<tr>
+<td><code>INT-010</code></td>
+<td>Domain</td>
+<td>At least {MinimumControlReplicates} control replicates are required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/InterferenceStudy.cs:135</code></td>
+</tr>
+<tr>
+<td><code>INT-011</code></td>
+<td>Domain</td>
+<td>At least one interferent test set is required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/InterferenceStudy.cs:140</code></td>
+</tr>
+<tr>
+<td><code>INT-012</code></td>
+<td>Domain</td>
+<td>The control mean is zero — a percentage bias cannot be computed.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/InterferenceStudy.cs:146</code></td>
+</tr>
+<tr>
+<td><code>INT-013</code></td>
+<td>InvalidStateTransition</td>
+<td>Only a calculated study can be signed off (current: {State}).</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/InterferenceStudy.cs:172</code></td>
+</tr>
+<tr>
+<td><code>INT-014</code></td>
+<td>InvalidStateTransition</td>
+<td>A signed-off study is immutable.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/InterferenceStudy.cs:214</code></td>
+</tr>
+<tr>
+<td><code>INT-404</code></td>
+<td>Domain</td>
+<td>Interference study not found. <br>— Measurement not found.</td>
+<td><code>src/NT.QAMS.Application/AnalyticalQuality/InterferenceSlice.cs:88</code> (+2)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>IP</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>IP-001</code></td>
+<td>Domain</td>
+<td>The party name and category are required. <br>— The party name, category, and needs are required.</td>
+<td><code>src/NT.QAMS.Domain/Organization/OrganizationContext.cs:42</code> (+1)</td>
+</tr>
+<tr>
+<td><code>IP-002</code></td>
+<td>Domain</td>
+<td>The needs and expectations are the point of the register — they are required.</td>
+<td><code>src/NT.QAMS.Domain/Organization/OrganizationContext.cs:47</code></td>
+</tr>
+<tr>
+<td><code>IP-010</code></td>
+<td>InvalidStateTransition</td>
+<td>An archived entry is frozen — register a new one instead.</td>
+<td><code>src/NT.QAMS.Domain/Organization/OrganizationContext.cs:69</code></td>
+</tr>
+<tr>
+<td><code>IP-011</code></td>
+<td>InvalidStateTransition</td>
+<td>The entry is already archived.</td>
+<td><code>src/NT.QAMS.Domain/Organization/OrganizationContext.cs:89</code></td>
+</tr>
+<tr>
+<td><code>IP-404</code></td>
+<td>Domain</td>
+<td>Interested party not found.</td>
+<td><code>src/NT.QAMS.Application/Organization/OrgContextSlice.cs:69</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>LIN</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LIN-001</code></td>
+<td>Domain</td>
+<td>An analyte and the method under study are required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/LinearityStudy.cs:82</code></td>
+</tr>
+<tr>
+<td><code>LIN-002</code></td>
+<td>Domain</td>
+<td>The allowable deviation must be a positive percentage (at most 50%).</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/LinearityStudy.cs:87</code></td>
+</tr>
+<tr>
+<td><code>LIN-003</code></td>
+<td>Domain</td>
+<td>Assigned level concentrations must be positive.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/LinearityStudy.cs:106</code></td>
+</tr>
+<tr>
+<td><code>LIN-010</code></td>
+<td>Domain</td>
+<td>At least {MinimumLevels} distinct levels are required (EP06 recommends 5–9).</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/LinearityStudy.cs:134</code></td>
+</tr>
+<tr>
+<td><code>LIN-011</code></td>
+<td>Domain</td>
+<td>All levels share one assigned value — a dilution series needs a spread.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/LinearityStudy.cs:153</code></td>
+</tr>
+<tr>
+<td><code>LIN-012</code></td>
+<td>InvalidStateTransition</td>
+<td>Only a calculated study can be signed off (current: {State}).</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/LinearityStudy.cs:190</code></td>
+</tr>
+<tr>
+<td><code>LIN-013</code></td>
+<td>InvalidStateTransition</td>
+<td>A signed-off study is immutable.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/LinearityStudy.cs:297</code></td>
+</tr>
+<tr>
+<td><code>LIN-404</code></td>
+<td>Domain</td>
+<td>Linearity study not found. <br>— Measurement not found.</td>
+<td><code>src/NT.QAMS.Application/AnalyticalQuality/LinearitySlice.cs:93</code> (+2)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>LOT</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LOT-001</code></td>
+<td>Domain</td>
+<td>An analyte is required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/LotComparisonStudy.cs:74</code></td>
+</tr>
+<tr>
+<td><code>LOT-002</code></td>
+<td>Domain</td>
+<td>Both the current and new lot identifiers are required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/LotComparisonStudy.cs:79</code></td>
+</tr>
+<tr>
+<td><code>LOT-003</code></td>
+<td>Domain</td>
+<td>The allowable bias must be a positive percentage (at most 50%).</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/LotComparisonStudy.cs:84</code></td>
+</tr>
+<tr>
+<td><code>LOT-004</code></td>
+<td>Domain</td>
+<td>Measured values must be positive.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/LotComparisonStudy.cs:104</code></td>
+</tr>
+<tr>
+<td><code>LOT-010</code></td>
+<td>Domain</td>
+<td>At least {MinimumPairs} paired samples are required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/LotComparisonStudy.cs:128</code></td>
+</tr>
+<tr>
+<td><code>LOT-011</code></td>
+<td>Domain</td>
+<td>The current-lot mean is zero — a percentage bias cannot be computed.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/LotComparisonStudy.cs:135</code></td>
+</tr>
+<tr>
+<td><code>LOT-012</code></td>
+<td>InvalidStateTransition</td>
+<td>Only a calculated study can be signed off (current: {State}).</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/LotComparisonStudy.cs:151</code></td>
+</tr>
+<tr>
+<td><code>LOT-013</code></td>
+<td>InvalidStateTransition</td>
+<td>A signed-off study is immutable.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/LotComparisonStudy.cs:176</code></td>
+</tr>
+<tr>
+<td><code>LOT-404</code></td>
+<td>Domain</td>
+<td>Lot comparison not found. <br>— Sample pair not found.</td>
+<td><code>src/NT.QAMS.Application/AnalyticalQuality/LotComparisonSlice.cs:88</code> (+2)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>MC</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MC-001</code></td>
+<td>Domain</td>
+<td>An analyte is required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/MethodComparisonStudy.cs:81</code></td>
+</tr>
+<tr>
+<td><code>MC-002</code></td>
+<td>Domain</td>
+<td>Both the reference method (X) and the test method (Y) are required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/MethodComparisonStudy.cs:86</code></td>
+</tr>
+<tr>
+<td><code>MC-003</code></td>
+<td>Domain</td>
+<td>Measured values must be positive.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/MethodComparisonStudy.cs:105</code></td>
+</tr>
+<tr>
+<td><code>MC-010</code></td>
+<td>Domain</td>
+<td>At least two measurement pairs are required to fit a regression.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/MethodComparisonStudy.cs:134</code></td>
+</tr>
+<tr>
+<td><code>MC-011</code></td>
+<td>Domain</td>
+<td>The reference or test values show no spread — a regression cannot be fitted. <br>— No comparable pairs (all reference values are identical).</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/MethodComparisonStudy.cs:153</code> (+1)</td>
+</tr>
+<tr>
+<td><code>MC-012</code></td>
+<td>InvalidStateTransition</td>
+<td>Only a calculated study can be signed off (current: {State}).</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/MethodComparisonStudy.cs:193</code></td>
+</tr>
+<tr>
+<td><code>MC-013</code></td>
+<td>InvalidStateTransition</td>
+<td>A signed-off study is immutable.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/MethodComparisonStudy.cs:281</code></td>
+</tr>
+<tr>
+<td><code>MC-404</code></td>
+<td>Domain</td>
+<td>Method-comparison study not found. <br>— Measurement pair not found.</td>
+<td><code>src/NT.QAMS.Application/AnalyticalQuality/MethodComparisonSlice.cs:93</code> (+3)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>MFA</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MFA-001</code></td>
+<td>Domain</td>
+<td>A TOTP secret is required to enroll.</td>
+<td><code>src/NT.QAMS.Domain/IdentityAccess/UserAccount.cs:231</code></td>
+</tr>
+<tr>
+<td><code>MFA-002</code></td>
+<td>Domain</td>
+<td>MFA has not been enrolled.</td>
+<td><code>src/NT.QAMS.Domain/IdentityAccess/UserAccount.cs:242</code></td>
+</tr>
+<tr>
+<td><code>MFA-003</code></td>
+<td>Domain</td>
+<td>The verification code is invalid.</td>
+<td><code>src/NT.QAMS.Application/IdentityAccess/Commands/MfaAndPin.cs:49</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>MRV</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MRV-001</code></td>
+<td>Domain</td>
+<td>Review title is required.</td>
+<td><code>src/NT.QAMS.Domain/RiskGovernance/ChangeAndReview.cs:187</code></td>
+</tr>
+<tr>
+<td><code>MRV-002</code></td>
+<td>Domain</td>
+<td>Decision description is required.</td>
+<td><code>src/NT.QAMS.Domain/RiskGovernance/ChangeAndReview.cs:205</code></td>
+</tr>
+<tr>
+<td><code>MRV-003</code></td>
+<td>Domain</td>
+<td>Minutes are required to close a management review.</td>
+<td><code>src/NT.QAMS.Domain/RiskGovernance/ChangeAndReview.cs:218</code></td>
+</tr>
+<tr>
+<td><code>MRV-004</code></td>
+<td>InvalidStateTransition</td>
+<td>Cannot {action} a review in state {Status} — closed minutes are immutable.</td>
+<td><code>src/NT.QAMS.Domain/RiskGovernance/ChangeAndReview.cs:231</code></td>
+</tr>
+<tr>
+<td><code>MRV-404</code></td>
+<td>Domain</td>
+<td>Management review not found.</td>
+<td><code>src/NT.QAMS.Application/RiskGovernance/RiskGovernanceSlice.cs:375</code> (+2)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>MU</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MU-001</code></td>
+<td>Domain</td>
+<td>Analyte and method are required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/UncertaintyBudget.cs:87</code></td>
+</tr>
+<tr>
+<td><code>MU-002</code></td>
+<td>Domain</td>
+<td>The coverage factor k must be between 1 and 4 (k=2 ≈ 95 %).</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/UncertaintyBudget.cs:92</code></td>
+</tr>
+<tr>
+<td><code>MU-003</code></td>
+<td>Domain</td>
+<td>The target expanded uncertainty must be positive when set.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/UncertaintyBudget.cs:97</code></td>
+</tr>
+<tr>
+<td><code>MU-004</code></td>
+<td>Domain</td>
+<td>A component name is required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/UncertaintyBudget.cs:118</code></td>
+</tr>
+<tr>
+<td><code>MU-005</code></td>
+<td>Domain</td>
+<td>A standard uncertainty cannot be negative.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/UncertaintyBudget.cs:123</code></td>
+</tr>
+<tr>
+<td><code>MU-006</code></td>
+<td>Domain</td>
+<td>Component not found.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/UncertaintyBudget.cs:139</code></td>
+</tr>
+<tr>
+<td><code>MU-007</code></td>
+<td>Domain</td>
+<td>At least one uncertainty component is required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/UncertaintyBudget.cs:153</code></td>
+</tr>
+<tr>
+<td><code>MU-010</code></td>
+<td>InvalidStateTransition</td>
+<td>Only a calculated budget can be approved (current: {Status}).</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/UncertaintyBudget.cs:169</code></td>
+</tr>
+<tr>
+<td><code>MU-011</code></td>
+<td>InvalidStateTransition</td>
+<td>An approved budget is immutable — create a successor budget to revise.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/UncertaintyBudget.cs:182</code></td>
+</tr>
+<tr>
+<td><code>MU-404</code></td>
+<td>Domain</td>
+<td>Uncertainty budget not found.</td>
+<td><code>src/NT.QAMS.Application/AnalyticalQuality/UncertaintySlice.cs:108</code> (+1)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>MV</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MV-001</code></td>
+<td>Domain</td>
+<td>Analyte and CLSI protocol are required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/ValidationStudy.cs:60</code></td>
+</tr>
+<tr>
+<td><code>MV-002</code></td>
+<td>Domain</td>
+<td>Total allowable error (TEa) must be positive.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/ValidationStudy.cs:65</code></td>
+</tr>
+<tr>
+<td><code>MV-010</code></td>
+<td>InvalidStateTransition</td>
+<td>A signed-off study is immutable.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/ValidationStudy.cs:82</code></td>
+</tr>
+<tr>
+<td><code>MV-011</code></td>
+<td>Domain</td>
+<td>A replicate level (e.g. Low/Mid/High) is required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/ValidationStudy.cs:95</code></td>
+</tr>
+<tr>
+<td><code>MV-012</code></td>
+<td>InvalidStateTransition</td>
+<td>Cannot calculate statistics in state {State}.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/ValidationStudy.cs:110</code></td>
+</tr>
+<tr>
+<td><code>MV-013</code></td>
+<td>Domain</td>
+<td>At least two replicates are required to compute statistics.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/ValidationStudy.cs:115</code></td>
+</tr>
+<tr>
+<td><code>MV-014</code></td>
+<td>Domain</td>
+<td>Cannot compute CV against a zero mean.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/ValidationStudy.cs:122</code></td>
+</tr>
+<tr>
+<td><code>MV-015</code></td>
+<td>InvalidStateTransition</td>
+<td>Statistics must be calculated before sign-off.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/ValidationStudy.cs:148</code></td>
+</tr>
+<tr>
+<td><code>MV-404</code></td>
+<td>Domain</td>
+<td>Validation study not found.</td>
+<td><code>src/NT.QAMS.Application/AnalyticalQuality/ValidationAndPtSlice.cs:55</code> (+1)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>NC</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NC-001</code></td>
+<td>Domain</td>
+<td>Title is required.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/Nonconformance.cs:125</code></td>
+</tr>
+<tr>
+<td><code>NC-002</code></td>
+<td>Domain</td>
+<td>Severity and likelihood must each be 1-5 and explicitly assessed.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/Nonconformance.cs:130</code></td>
+</tr>
+<tr>
+<td><code>NC-013</code></td>
+<td>Domain</td>
+<td>A rejection reason is required.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/Nonconformance.cs:170</code></td>
+</tr>
+<tr>
+<td><code>NC-014</code></td>
+<td>InvalidStateTransition</td>
+<td>Cannot record RCA in state {Status}.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/Nonconformance.cs:182</code></td>
+</tr>
+<tr>
+<td><code>NC-015</code></td>
+<td>Domain</td>
+<td>RCA analysis text is required.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/Nonconformance.cs:187</code></td>
+</tr>
+<tr>
+<td><code>NC-016</code></td>
+<td>InvalidStateTransition</td>
+<td>Cannot plan CAPA actions in state {Status}.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/Nonconformance.cs:198</code></td>
+</tr>
+<tr>
+<td><code>NC-017</code></td>
+<td>Domain</td>
+<td>Action details are required.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/Nonconformance.cs:203</code></td>
+</tr>
+<tr>
+<td><code>NC-019</code></td>
+<td>Domain</td>
+<td>At least one CAPA action is required before verification.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/Nonconformance.cs:226</code></td>
+</tr>
+<tr>
+<td><code>NC-020</code></td>
+<td>Domain</td>
+<td>All CAPA actions must be completed before verification.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/Nonconformance.cs:231</code></td>
+</tr>
+<tr>
+<td><code>NC-404</code></td>
+<td>Domain</td>
+<td>Nonconformance not found.</td>
+<td><code>src/NT.QAMS.Application/Improvement/Commands/NcWorkflowCommands.cs:106</code> (+1)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>NTF</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NTF-001</code></td>
+<td>Domain</td>
+<td>An event key is required (e.g. NC_RAISED).</td>
+<td><code>src/NT.QAMS.Domain/Notifications/NotificationAggregates.cs:38</code></td>
+</tr>
+<tr>
+<td><code>NTF-002</code></td>
+<td>Domain</td>
+<td>At least one recipient role is required.</td>
+<td><code>src/NT.QAMS.Domain/Notifications/NotificationAggregates.cs:43</code></td>
+</tr>
+<tr>
+<td><code>NTF-003</code></td>
+<td>Domain</td>
+<td>A subject template is required.</td>
+<td><code>src/NT.QAMS.Domain/Notifications/NotificationAggregates.cs:48</code></td>
+</tr>
+<tr>
+<td><code>NTF-004</code></td>
+<td>Domain</td>
+<td>Recipient roles and subject template are required.</td>
+<td><code>src/NT.QAMS.Domain/Notifications/NotificationAggregates.cs:66</code></td>
+</tr>
+<tr>
+<td><code>NTF-404</code></td>
+<td>Domain</td>
+<td>Notification not found.</td>
+<td><code>src/NT.QAMS.Application/Notifications/NotificationSlice.cs:105</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>OBJ</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>OBJ-001</code></td>
+<td>Domain</td>
+<td>A title and a measurable metric are required.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/QualityObjective.cs:75</code></td>
+</tr>
+<tr>
+<td><code>OBJ-002</code></td>
+<td>Domain</td>
+<td>The objective period end must fall after its start.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/QualityObjective.cs:80</code></td>
+</tr>
+<tr>
+<td><code>OBJ-010</code></td>
+<td>InvalidStateTransition</td>
+<td>Progress can only be recorded on an active objective (current: {Status}).</td>
+<td><code>src/NT.QAMS.Domain/Improvement/QualityObjective.cs:112</code></td>
+</tr>
+<tr>
+<td><code>OBJ-011</code></td>
+<td>Domain</td>
+<td>The latest measurement does not meet the target — an objective cannot be declared achieved against the evidence.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/QualityObjective.cs:127</code></td>
+</tr>
+<tr>
+<td><code>OBJ-012</code></td>
+<td>Domain</td>
+<td>A closure note is required.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/QualityObjective.cs:148</code></td>
+</tr>
+<tr>
+<td><code>OBJ-013</code></td>
+<td>InvalidStateTransition</td>
+<td>The objective is already {Status} and immutable.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/QualityObjective.cs:159</code></td>
+</tr>
+<tr>
+<td><code>OBJ-014</code></td>
+<td>Domain</td>
+<td>The outcome must be Achieved, Missed or Cancelled.</td>
+<td><code>src/NT.QAMS.Application/Improvement/QualityObjectiveSlice.cs:99</code></td>
+</tr>
+<tr>
+<td><code>OBJ-404</code></td>
+<td>Domain</td>
+<td>Quality objective not found.</td>
+<td><code>src/NT.QAMS.Application/Improvement/QualityObjectiveSlice.cs:108</code> (+1)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ORG</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ORG-001</code></td>
+<td>Domain</td>
+<td>Branch code and name are required.</td>
+<td><code>src/NT.QAMS.Domain/Organization/OrganizationAggregates.cs:25</code></td>
+</tr>
+<tr>
+<td><code>ORG-002</code></td>
+<td>Domain</td>
+<td>Branch name is required.</td>
+<td><code>src/NT.QAMS.Domain/Organization/OrganizationAggregates.cs:41</code></td>
+</tr>
+<tr>
+<td><code>ORG-003</code></td>
+<td>Domain</td>
+<td>A department must belong to a branch.</td>
+<td><code>src/NT.QAMS.Domain/Organization/OrganizationAggregates.cs:65</code></td>
+</tr>
+<tr>
+<td><code>ORG-004</code></td>
+<td>Domain</td>
+<td>Department code and name are required.</td>
+<td><code>src/NT.QAMS.Domain/Organization/OrganizationAggregates.cs:70</code></td>
+</tr>
+<tr>
+<td><code>ORG-005</code></td>
+<td>Domain</td>
+<td>Department name is required.</td>
+<td><code>src/NT.QAMS.Domain/Organization/OrganizationAggregates.cs:86</code></td>
+</tr>
+<tr>
+<td><code>ORG-006</code></td>
+<td>Domain</td>
+<td>Test code and name are required.</td>
+<td><code>src/NT.QAMS.Domain/Organization/OrganizationAggregates.cs:111</code></td>
+</tr>
+<tr>
+<td><code>ORG-007</code></td>
+<td>Domain</td>
+<td>Turnaround time must be at least one hour.</td>
+<td><code>src/NT.QAMS.Domain/Organization/OrganizationAggregates.cs:116</code></td>
+</tr>
+<tr>
+<td><code>ORG-008</code></td>
+<td>Domain</td>
+<td>LOV category and code are required.</td>
+<td><code>src/NT.QAMS.Domain/Organization/OrganizationAggregates.cs:148</code></td>
+</tr>
+<tr>
+<td><code>ORG-010</code></td>
+<td>Domain</td>
+<td>Branch code '{code}' already exists.</td>
+<td><code>src/NT.QAMS.Application/Organization/OrganizationSlice.cs:32</code></td>
+</tr>
+<tr>
+<td><code>ORG-011</code></td>
+<td>Domain</td>
+<td>Branch not found or inactive.</td>
+<td><code>src/NT.QAMS.Application/Organization/OrganizationSlice.cs:51</code></td>
+</tr>
+<tr>
+<td><code>ORG-012</code></td>
+<td>Domain</td>
+<td>Department code '{code}' already exists in this branch.</td>
+<td><code>src/NT.QAMS.Application/Organization/OrganizationSlice.cs:57</code></td>
+</tr>
+<tr>
+<td><code>ORG-013</code></td>
+<td>Domain</td>
+<td>Test code '{code}' already exists.</td>
+<td><code>src/NT.QAMS.Application/Organization/OrganizationSlice.cs:134</code></td>
+</tr>
+<tr>
+<td><code>ORG-404</code></td>
+<td>Domain</td>
+<td>Catalog test not found. <br>— Branch not found. <br>— Department not found.</td>
+<td><code>src/NT.QAMS.Application/Competency/AuthorizationSlice.cs:38</code> (+2)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>OUT</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>OUT-001</code></td>
+<td>Domain</td>
+<td>A data-set description is required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/OutlierScreening.cs:76</code></td>
+</tr>
+<tr>
+<td><code>OUT-010</code></td>
+<td>Domain</td>
+<td>At least {MinimumPoints} data points are required to screen for outliers.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/OutlierScreening.cs:111</code></td>
+</tr>
+<tr>
+<td><code>OUT-011</code></td>
+<td>InvalidStateTransition</td>
+<td>Only a calculated screening can be signed off (current: {State}).</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/OutlierScreening.cs:173</code></td>
+</tr>
+<tr>
+<td><code>OUT-012</code></td>
+<td>InvalidStateTransition</td>
+<td>A signed-off screening is immutable.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/OutlierScreening.cs:231</code></td>
+</tr>
+<tr>
+<td><code>OUT-404</code></td>
+<td>Domain</td>
+<td>Outlier screening not found. <br>— Data point not found.</td>
+<td><code>src/NT.QAMS.Application/AnalyticalQuality/OutlierScreeningSlice.cs:84</code> (+2)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>PIN</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PIN-001</code></td>
+<td>Domain</td>
+<td>A PIN hash is required.</td>
+<td><code>src/NT.QAMS.Domain/IdentityAccess/UserAccount.cs:252</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>PR</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PR-001</code></td>
+<td>Domain</td>
+<td>An analyte is required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/PrecisionStudy.cs:84</code></td>
+</tr>
+<tr>
+<td><code>PR-002</code></td>
+<td>Domain</td>
+<td>Claimed CVs, when given, must be positive percentages.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/PrecisionStudy.cs:89</code></td>
+</tr>
+<tr>
+<td><code>PR-003</code></td>
+<td>Domain</td>
+<td>A run label is required — replicates are grouped by run.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/PrecisionStudy.cs:109</code></td>
+</tr>
+<tr>
+<td><code>PR-010</code></td>
+<td>Domain</td>
+<td>At least {MinimumRuns} runs are required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/PrecisionStudy.cs:142</code></td>
+</tr>
+<tr>
+<td><code>PR-011</code></td>
+<td>Domain</td>
+<td>Every run needs at least {MinimumReplicatesPerRun} replicates.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/PrecisionStudy.cs:147</code></td>
+</tr>
+<tr>
+<td><code>PR-012</code></td>
+<td>InvalidStateTransition</td>
+<td>Only a calculated study can be signed off (current: {State}).</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/PrecisionStudy.cs:203</code></td>
+</tr>
+<tr>
+<td><code>PR-013</code></td>
+<td>InvalidStateTransition</td>
+<td>A signed-off study is immutable.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/PrecisionStudy.cs:234</code></td>
+</tr>
+<tr>
+<td><code>PR-404</code></td>
+<td>Domain</td>
+<td>Precision study not found. <br>— Measurement not found.</td>
+<td><code>src/NT.QAMS.Application/AnalyticalQuality/PrecisionSlice.cs:93</code> (+3)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>PT</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PT-001</code></td>
+<td>Domain</td>
+<td>PT scheme and analyte are required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/PtEnrollment.cs:41</code></td>
+</tr>
+<tr>
+<td><code>PT-010</code></td>
+<td>InvalidStateTransition</td>
+<td>A PT result has already been recorded.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/PtEnrollment.cs:62</code></td>
+</tr>
+<tr>
+<td><code>PT-011</code></td>
+<td>Domain</td>
+<td>The scheme standard deviation must be positive.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/PtEnrollment.cs:67</code></td>
+</tr>
+<tr>
+<td><code>PT-404</code></td>
+<td>Domain</td>
+<td>PT enrollment not found.</td>
+<td><code>src/NT.QAMS.Application/AnalyticalQuality/PtPlanSlice.cs:104</code> (+1)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>PTP</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PTP-001</code></td>
+<td>Domain</td>
+<td>A plausible plan year is required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/PtPlan.cs:70</code></td>
+</tr>
+<tr>
+<td><code>PTP-002</code></td>
+<td>Domain</td>
+<td>Scheme and analyte are required for a plan line.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/PtPlan.cs:81</code></td>
+</tr>
+<tr>
+<td><code>PTP-003</code></td>
+<td>Domain</td>
+<td>At least one cycle must be planned per line.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/PtPlan.cs:86</code></td>
+</tr>
+<tr>
+<td><code>PTP-010</code></td>
+<td>InvalidStateTransition</td>
+<td>Only a draft plan can be approved (current: {Status}).</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/PtPlan.cs:111</code></td>
+</tr>
+<tr>
+<td><code>PTP-011</code></td>
+<td>Domain</td>
+<td>An empty plan cannot be approved — add at least one scheme/analyte line.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/PtPlan.cs:116</code></td>
+</tr>
+<tr>
+<td><code>PTP-012</code></td>
+<td>InvalidStateTransition</td>
+<td>Fulfilment is recorded against an approved plan (current: {Status}).</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/PtPlan.cs:129</code></td>
+</tr>
+<tr>
+<td><code>PTP-013</code></td>
+<td>InvalidStateTransition</td>
+<td>Only an approved plan can be closed (current: {Status}).</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/PtPlan.cs:141</code></td>
+</tr>
+<tr>
+<td><code>PTP-014</code></td>
+<td>Domain</td>
+<td>A closure summary (coverage and gaps) is required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/PtPlan.cs:146</code></td>
+</tr>
+<tr>
+<td><code>PTP-015</code></td>
+<td>InvalidStateTransition</td>
+<td>The approved plan is frozen — fulfilment is recorded instead of editing lines.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/PtPlan.cs:157</code></td>
+</tr>
+<tr>
+<td><code>PTP-020</code></td>
+<td>Domain</td>
+<td>A PT plan for {c.Year} already exists â€” one plan per year.</td>
+<td><code>src/NT.QAMS.Application/AnalyticalQuality/PtPlanSlice.cs:57</code></td>
+</tr>
+<tr>
+<td><code>PTP-021</code></td>
+<td>Domain</td>
+<td>Enrollment {enrollment.PtRef} has no result yet â€” a pending cycle is not fulfilment.</td>
+<td><code>src/NT.QAMS.Application/AnalyticalQuality/PtPlanSlice.cs:107</code></td>
+</tr>
+<tr>
+<td><code>PTP-404</code></td>
+<td>Domain</td>
+<td>PT plan not found. <br>— Plan line not found.</td>
+<td><code>src/NT.QAMS.Application/AnalyticalQuality/PtPlanSlice.cs:124</code> (+3)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>QC</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>QC-001</code></td>
+<td>Domain</td>
+<td>Analyte and instrument are required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/QcProfile.cs:40</code></td>
+</tr>
+<tr>
+<td><code>QC-002</code></td>
+<td>Domain</td>
+<td>Target SD must be positive.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/QcProfile.cs:45</code> (+1)</td>
+</tr>
+<tr>
+<td><code>QC-010</code></td>
+<td>InvalidStateTransition</td>
+<td>Troubleshooting notes apply only to out-of-control runs.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/QcProfile.cs:144</code></td>
+</tr>
+<tr>
+<td><code>QC-011</code></td>
+<td>Domain</td>
+<td>A troubleshooting note is required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/QcProfile.cs:150</code></td>
+</tr>
+<tr>
+<td><code>QC-012</code></td>
+<td>Domain</td>
+<td>A reason is required to change QC targets.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/QcProfile.cs:74</code></td>
+</tr>
+<tr>
+<td><code>QC-013</code></td>
+<td>Domain</td>
+<td>Target changes are forward-only; the effective date cannot precede the current one.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/QcProfile.cs:79</code></td>
+</tr>
+<tr>
+<td><code>QC-404</code></td>
+<td>Domain</td>
+<td>QC profile not found. <br>— QC run not found.</td>
+<td><code>src/NT.QAMS.Application/AnalyticalQuality/QcSlice.cs:53</code> (+2)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>QP</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>QP-001</code></td>
+<td>Domain</td>
+<td>A policy statement is required.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/QualityPolicy.cs:38</code> (+1)</td>
+</tr>
+<tr>
+<td><code>QP-002</code></td>
+<td>Domain</td>
+<td>The policy version must be a positive number.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/QualityPolicy.cs:43</code></td>
+</tr>
+<tr>
+<td><code>QP-010</code></td>
+<td>InvalidStateTransition</td>
+<td>Only a draft policy can be approved (current: {Status}).</td>
+<td><code>src/NT.QAMS.Domain/Improvement/QualityPolicy.cs:82</code></td>
+</tr>
+<tr>
+<td><code>QP-011</code></td>
+<td>InvalidStateTransition</td>
+<td>Only an active policy can be superseded.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/QualityPolicy.cs:98</code></td>
+</tr>
+<tr>
+<td><code>QP-012</code></td>
+<td>InvalidStateTransition</td>
+<td>Only a draft policy can be edited.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/QualityPolicy.cs:60</code></td>
+</tr>
+<tr>
+<td><code>QP-404</code></td>
+<td>Domain</td>
+<td>Quality policy not found.</td>
+<td><code>src/NT.QAMS.Application/Improvement/QualityPolicySlice.cs:89</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>RI</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>RI-001</code></td>
+<td>Domain</td>
+<td>An analyte and the reference population are required.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/ReferenceIntervalStudy.cs:84</code></td>
+</tr>
+<tr>
+<td><code>RI-002</code></td>
+<td>Domain</td>
+<td>The source of the claimed interval is required for traceability.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/ReferenceIntervalStudy.cs:89</code></td>
+</tr>
+<tr>
+<td><code>RI-003</code></td>
+<td>Domain</td>
+<td>The claimed upper limit must exceed the lower limit.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/ReferenceIntervalStudy.cs:94</code></td>
+</tr>
+<tr>
+<td><code>RI-010</code></td>
+<td>Domain</td>
+<td>At least {RecommendedSampleCount} reference samples are required to verify a claimed interval (EP28-A3c).</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/ReferenceIntervalStudy.cs:133</code></td>
+</tr>
+<tr>
+<td><code>RI-011</code></td>
+<td>InvalidStateTransition</td>
+<td>Only a calculated study can be signed off (current: {State}).</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/ReferenceIntervalStudy.cs:156</code></td>
+</tr>
+<tr>
+<td><code>RI-012</code></td>
+<td>InvalidStateTransition</td>
+<td>A signed-off study is immutable.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/ReferenceIntervalStudy.cs:180</code></td>
+</tr>
+<tr>
+<td><code>RI-404</code></td>
+<td>Domain</td>
+<td>Reference-interval study not found. <br>— Reference sample not found.</td>
+<td><code>src/NT.QAMS.Application/AnalyticalQuality/ReferenceIntervalSlice.cs:94</code> (+2)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ROLE</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ROLE-001</code></td>
+<td>Domain</td>
+<td>A role name is required.</td>
+<td><code>src/NT.QAMS.Domain/Authorization/Role.cs:88</code> (+1)</td>
+</tr>
+<tr>
+<td><code>ROLE-002</code></td>
+<td>Domain</td>
+<td>A role name may not exceed 80 characters.</td>
+<td><code>src/NT.QAMS.Domain/Authorization/Role.cs:93</code></td>
+</tr>
+<tr>
+<td><code>ROLE-003</code></td>
+<td>Domain</td>
+<td>A system role cannot be renamed.</td>
+<td><code>src/NT.QAMS.Domain/Authorization/Role.cs:116</code></td>
+</tr>
+<tr>
+<td><code>ROLE-004</code></td>
+<td>Domain</td>
+<td>A system role cannot be deactivated.</td>
+<td><code>src/NT.QAMS.Domain/Authorization/Role.cs:160</code></td>
+</tr>
+<tr>
+<td><code>ROLE-005</code></td>
+<td>Domain</td>
+<td>Unknown permission key(s): {string.Join(</td>
+<td><code>src/NT.QAMS.Domain/Authorization/Role.cs:199</code></td>
+</tr>
+<tr>
+<td><code>ROLE-006</code></td>
+<td>Domain</td>
+<td>This change would leave no active user able to manage roles and privileges.</td>
+<td><code>src/NT.QAMS.Application/Authorization/RolesSlice.cs:48</code></td>
+</tr>
+<tr>
+<td><code>ROLE-007</code></td>
+<td>Domain</td>
+<td>A role named '{c.Name.Trim()}' already exists.</td>
+<td><code>src/NT.QAMS.Application/Authorization/RolesSlice.cs:89</code> (+1)</td>
+</tr>
+<tr>
+<td><code>ROLE-008</code></td>
+<td>Domain</td>
+<td>An inactive role cannot be assigned.</td>
+<td><code>src/NT.QAMS.Application/IdentityAccess/Commands/UserManagement.cs:71</code> (+1)</td>
+</tr>
+<tr>
+<td><code>ROLE-009</code></td>
+<td>Domain</td>
+<td>The seeded role '{name}' is not available in this workspace; assign a role explicitly.</td>
+<td><code>src/NT.QAMS.Application/Authorization/SeededRoleDefault.cs:25</code></td>
+</tr>
+<tr>
+<td><code>ROLE-404</code></td>
+<td>Domain</td>
+<td>Role not found.</td>
+<td><code>src/NT.QAMS.Application/Authorization/RolesSlice.cs:60</code> (+3)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>RS</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>RS-001</code></td>
+<td>Domain</td>
+<td>A standard name is required.</td>
+<td><code>src/NT.QAMS.Domain/Equipment/ReferenceStandard.cs:55</code></td>
+</tr>
+<tr>
+<td><code>RS-002</code></td>
+<td>Domain</td>
+<td>The traceability chain (traceable to) is required — an untraceable standard cannot anchor calibrations.</td>
+<td><code>src/NT.QAMS.Domain/Equipment/ReferenceStandard.cs:60</code></td>
+</tr>
+<tr>
+<td><code>RS-003</code></td>
+<td>Domain</td>
+<td>The expiry date must fall after the received date.</td>
+<td><code>src/NT.QAMS.Domain/Equipment/ReferenceStandard.cs:65</code></td>
+</tr>
+<tr>
+<td><code>RS-010</code></td>
+<td>InvalidStateTransition</td>
+<td>Only an active standard can be quarantined (current: {Status}).</td>
+<td><code>src/NT.QAMS.Domain/Equipment/ReferenceStandard.cs:89</code></td>
+</tr>
+<tr>
+<td><code>RS-011</code></td>
+<td>Domain</td>
+<td>A quarantine reason is required.</td>
+<td><code>src/NT.QAMS.Domain/Equipment/ReferenceStandard.cs:94</code></td>
+</tr>
+<tr>
+<td><code>RS-012</code></td>
+<td>InvalidStateTransition</td>
+<td>Only a quarantined standard can be reactivated (current: {Status}).</td>
+<td><code>src/NT.QAMS.Domain/Equipment/ReferenceStandard.cs:106</code></td>
+</tr>
+<tr>
+<td><code>RS-013</code></td>
+<td>Domain</td>
+<td>An expired certificate cannot be reactivated — register a replacement standard.</td>
+<td><code>src/NT.QAMS.Domain/Equipment/ReferenceStandard.cs:111</code></td>
+</tr>
+<tr>
+<td><code>RS-014</code></td>
+<td>InvalidStateTransition</td>
+<td>The standard is already retired.</td>
+<td><code>src/NT.QAMS.Domain/Equipment/ReferenceStandard.cs:134</code></td>
+</tr>
+<tr>
+<td><code>RS-020</code></td>
+<td>Domain</td>
+<td>Standard {standard.StandardRef} is {standard.Status} â€” checks must use an active, in-date standard.</td>
+<td><code>src/NT.QAMS.Application/Equipment/EquipmentSlice.cs:151</code></td>
+</tr>
+<tr>
+<td><code>RS-404</code></td>
+<td>Domain</td>
+<td>Reference standard not found.</td>
+<td><code>src/NT.QAMS.Application/Equipment/EquipmentSlice.cs:148</code> (+2)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>RSK</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>RSK-001</code></td>
+<td>Domain</td>
+<td>Risk title is required.</td>
+<td><code>src/NT.QAMS.Domain/RiskGovernance/RiskItem.cs:64</code></td>
+</tr>
+<tr>
+<td><code>RSK-002</code></td>
+<td>Domain</td>
+<td>Likelihood and impact must each be explicitly assessed 1-5.</td>
+<td><code>src/NT.QAMS.Domain/RiskGovernance/RiskItem.cs:147</code></td>
+</tr>
+<tr>
+<td><code>RSK-003</code></td>
+<td>Domain</td>
+<td>Mitigation description is required.</td>
+<td><code>src/NT.QAMS.Domain/RiskGovernance/RiskItem.cs:86</code></td>
+</tr>
+<tr>
+<td><code>RSK-004</code></td>
+<td>Domain</td>
+<td>Mitigation action not found.</td>
+<td><code>src/NT.QAMS.Domain/RiskGovernance/RiskItem.cs:99</code></td>
+</tr>
+<tr>
+<td><code>RSK-005</code></td>
+<td>Domain</td>
+<td>A residual assessment is required before closing a risk.</td>
+<td><code>src/NT.QAMS.Domain/RiskGovernance/RiskItem.cs:123</code></td>
+</tr>
+<tr>
+<td><code>RSK-006</code></td>
+<td>Domain</td>
+<td>All mitigation actions must be completed before closure.</td>
+<td><code>src/NT.QAMS.Domain/RiskGovernance/RiskItem.cs:128</code></td>
+</tr>
+<tr>
+<td><code>RSK-007</code></td>
+<td>InvalidStateTransition</td>
+<td>A closed risk is immutable.</td>
+<td><code>src/NT.QAMS.Domain/RiskGovernance/RiskItem.cs:139</code></td>
+</tr>
+<tr>
+<td><code>RSK-404</code></td>
+<td>Domain</td>
+<td>Risk not found.</td>
+<td><code>src/NT.QAMS.Application/Organization/OrgContextSlice.cs:151</code> (+3)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>SCOPE</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SCOPE-001</code></td>
+<td>Domain</td>
+<td>You are not permitted to work in the selected branch.</td>
+<td><code>src/NT.QAMS.Infrastructure/Persistence/Interceptors/OrgScopeGuardInterceptor.cs:55</code></td>
+</tr>
+<tr>
+<td><code>SCOPE-002</code></td>
+<td>Domain</td>
+<td>You are not permitted to work in the selected department.</td>
+<td><code>src/NT.QAMS.Infrastructure/Persistence/Interceptors/OrgScopeGuardInterceptor.cs:62</code></td>
+</tr>
+<tr>
+<td><code>SCOPE-003</code></td>
+<td>Domain</td>
+<td>One or more selected branches do not exist.</td>
+<td><code>src/NT.QAMS.Application/IdentityAccess/Commands/UserManagement.cs:268</code></td>
+</tr>
+<tr>
+<td><code>SCOPE-004</code></td>
+<td>Domain</td>
+<td>One or more selected departments do not exist.</td>
+<td><code>src/NT.QAMS.Application/IdentityAccess/Commands/UserManagement.cs:278</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>SIG</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SIG-001</code></td>
+<td>Domain</td>
+<td>An analyte is required. <br>— Electronic-signature PIN is not set or is incorrect.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/SigmaAssessment.cs:53</code> (+1)</td>
+</tr>
+<tr>
+<td><code>SIG-002</code></td>
+<td>Domain</td>
+<td>The allowable total error must be a positive percentage. <br>— Account password is incorrect.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/SigmaAssessment.cs:77</code> (+1)</td>
+</tr>
+<tr>
+<td><code>SIG-003</code></td>
+<td>Domain</td>
+<td>The CV must be a positive percentage — sigma is undefined at zero imprecision. <br>— Account is temporarily locked after repeated failed signings.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/SigmaAssessment.cs:82</code> (+1)</td>
+</tr>
+<tr>
+<td><code>SIG-010</code></td>
+<td>InvalidStateTransition</td>
+<td>A signed-off assessment is immutable.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/SigmaAssessment.cs:72</code></td>
+</tr>
+<tr>
+<td><code>SIG-011</code></td>
+<td>InvalidStateTransition</td>
+<td>The assessment is already signed off.</td>
+<td><code>src/NT.QAMS.Domain/AnalyticalQuality/SigmaAssessment.cs:101</code></td>
+</tr>
+<tr>
+<td><code>SIG-404</code></td>
+<td>Domain</td>
+<td>Sigma assessment not found. <br>— Signer not found.</td>
+<td><code>src/NT.QAMS.Application/AnalyticalQuality/SigmaAssessmentSlice.cs:73</code> (+2)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>SLA</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SLA-001</code></td>
+<td>Domain</td>
+<td>Module and severity are required.</td>
+<td><code>src/NT.QAMS.Domain/Sla/SlaAndTasks.cs:20</code></td>
+</tr>
+<tr>
+<td><code>SLA-002</code></td>
+<td>Domain</td>
+<td>Target hours must be positive.</td>
+<td><code>src/NT.QAMS.Domain/Sla/SlaAndTasks.cs:25</code> (+1)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>SOD-AUTHZ</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SOD-AUTHZ-001</code></td>
+<td>Domain</td>
+<td>Segregation of duties: users cannot grant their own test authorizations.</td>
+<td><code>src/NT.QAMS.Domain/Competency/TestAuthorization.cs:43</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>SOD-CAPA</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SOD-CAPA-001</code></td>
+<td>Domain</td>
+<td>Segregation of duties: the raiser cannot close their own nonconformance.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/Nonconformance.cs:268</code></td>
+</tr>
+<tr>
+<td><code>SOD-CAPA-002</code></td>
+<td>Domain</td>
+<td>Segregation of duties: the raiser cannot verify their own nonconformance.</td>
+<td><code>src/NT.QAMS.Domain/Improvement/Nonconformance.cs:245</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>SOD-COI</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SOD-COI-001</code></td>
+<td>Domain</td>
+<td>Segregation of duties: declarants cannot assess their own conflict.</td>
+<td><code>src/NT.QAMS.Domain/RiskGovernance/ConflictDeclaration.cs:72</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>SOD-COMP</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SOD-COMP-001</code></td>
+<td>Domain</td>
+<td>Segregation of duties: a trainee cannot assess their own competency. <br>— Segregation of duties: a trainee cannot authorize their own competency.</td>
+<td><code>src/NT.QAMS.Domain/Competency/CompetencyRecord.cs:91</code> (+1)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>SOD-DOC</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SOD-DOC-001</code></td>
+<td>Domain</td>
+<td>Segregation of duties: the author cannot review their own document.</td>
+<td><code>src/NT.QAMS.Domain/DocumentControl/ControlledDocument.cs:122</code></td>
+</tr>
+<tr>
+<td><code>SOD-DOC-002</code></td>
+<td>Domain</td>
+<td>Segregation of duties: the author cannot approve their own document.</td>
+<td><code>src/NT.QAMS.Domain/DocumentControl/ControlledDocument.cs:156</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>SOD-SUP</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SOD-SUP-001</code></td>
+<td>Domain</td>
+<td>Segregation of duties: the registrant cannot approve their own supplier.</td>
+<td><code>src/NT.QAMS.Domain/SupplierQuality/Supplier.cs:91</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>SUP</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SUP-001</code></td>
+<td>Domain</td>
+<td>Supplier name is required.</td>
+<td><code>src/NT.QAMS.Domain/SupplierQuality/Supplier.cs:57</code></td>
+</tr>
+<tr>
+<td><code>SUP-002</code></td>
+<td>Domain</td>
+<td>Certificate type is required.</td>
+<td><code>src/NT.QAMS.Domain/SupplierQuality/Supplier.cs:74</code></td>
+</tr>
+<tr>
+<td><code>SUP-010</code></td>
+<td>InvalidStateTransition</td>
+<td>Supplier is already approved.</td>
+<td><code>src/NT.QAMS.Domain/SupplierQuality/Supplier.cs:86</code></td>
+</tr>
+<tr>
+<td><code>SUP-011</code></td>
+<td>InvalidStateTransition</td>
+<td>Only an approved supplier can be suspended (current: {Status}).</td>
+<td><code>src/NT.QAMS.Domain/SupplierQuality/Supplier.cs:104</code></td>
+</tr>
+<tr>
+<td><code>SUP-012</code></td>
+<td>Domain</td>
+<td>A suspension reason is required.</td>
+<td><code>src/NT.QAMS.Domain/SupplierQuality/Supplier.cs:109</code></td>
+</tr>
+<tr>
+<td><code>SUP-020</code></td>
+<td>Domain</td>
+<td>Evaluation period end precedes its start.</td>
+<td><code>src/NT.QAMS.Domain/SupplierQuality/Supplier.cs:164</code></td>
+</tr>
+<tr>
+<td><code>SUP-021</code></td>
+<td>Domain</td>
+<td>At least one evaluation criterion is required.</td>
+<td><code>src/NT.QAMS.Domain/SupplierQuality/Supplier.cs:169</code></td>
+</tr>
+<tr>
+<td><code>SUP-022</code></td>
+<td>Domain</td>
+<td>Criterion weights must sum to a positive value.</td>
+<td><code>src/NT.QAMS.Domain/SupplierQuality/Supplier.cs:175</code></td>
+</tr>
+<tr>
+<td><code>SUP-023</code></td>
+<td>Domain</td>
+<td>Scores must be 0-100 and weights non-negative.</td>
+<td><code>src/NT.QAMS.Domain/SupplierQuality/Supplier.cs:180</code></td>
+</tr>
+<tr>
+<td><code>SUP-404</code></td>
+<td>Domain</td>
+<td>Supplier not found.</td>
+<td><code>src/NT.QAMS.Application/SupplierQuality/SupplierSlice.cs:68</code> (+1)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>TASK</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TASK-001</code></td>
+<td>Domain</td>
+<td>A task subject is required.</td>
+<td><code>src/NT.QAMS.Domain/Sla/SlaAndTasks.cs:72</code></td>
+</tr>
+<tr>
+<td><code>TASK-002</code></td>
+<td>Domain</td>
+<td>A task must be assigned to a user or a role.</td>
+<td><code>src/NT.QAMS.Domain/Sla/SlaAndTasks.cs:77</code></td>
+</tr>
+<tr>
+<td><code>TASK-003</code></td>
+<td>InvalidStateTransition</td>
+<td>Task is already completed.</td>
+<td><code>src/NT.QAMS.Domain/Sla/SlaAndTasks.cs:95</code></td>
+</tr>
+<tr>
+<td><code>TASK-404</code></td>
+<td>Domain</td>
+<td>Task not found.</td>
+<td><code>src/NT.QAMS.Application/Sla/SlaSlice.cs:88</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>TENANT</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TENANT-000</code></td>
+<td>Domain</td>
+<td>A tenant context is required. <br>— No tenant in context. <br>— Cannot persist tenant-scoped '{entry.Metadata.ClrType.Name}' without a resolved tenant. <br>— Cannot persist owned '{entry.Metadata.ClrType.Name}' without a resolved tenant.</td>
+<td><code>src/NT.QAMS.Application/AnalyticalQuality/CarryoverSlice.cs:29</code> (+40)</td>
+</tr>
+<tr>
+<td><code>TENANT-001</code></td>
+<td>Domain</td>
+<td>Tenant identifier is required.</td>
+<td><code>src/NT.QAMS.Domain/Tenancy/TenantSlug.cs:25</code></td>
+</tr>
+<tr>
+<td><code>TENANT-002</code></td>
+<td>Domain</td>
+<td>Tenant identifier must be 2-{MaxLength} chars of lowercase letters, digits and single hyphens, starting and ending with a letter or digit.</td>
+<td><code>src/NT.QAMS.Domain/Tenancy/TenantSlug.cs:32</code></td>
+</tr>
+<tr>
+<td><code>TENANT-003</code></td>
+<td>Domain</td>
+<td>Tenant name is required.</td>
+<td><code>src/NT.QAMS.Domain/Tenancy/Tenant.cs:45</code></td>
+</tr>
+<tr>
+<td><code>TENANT-004</code></td>
+<td>Domain</td>
+<td>Tenant name must not exceed {MaxNameLength} characters.</td>
+<td><code>src/NT.QAMS.Domain/Tenancy/Tenant.cs:50</code></td>
+</tr>
+<tr>
+<td><code>TENANT-005</code></td>
+<td>Domain</td>
+<td>Tenant identifier '{slug}' is already in use.</td>
+<td><code>src/NT.QAMS.Application/Tenancy/Commands/ProvisionTenant.cs:48</code></td>
+</tr>
+<tr>
+<td><code>TENANT-010</code></td>
+<td>InvalidStateTransition</td>
+<td>Only an Active tenant can be suspended (current: {Status}).</td>
+<td><code>src/NT.QAMS.Domain/Tenancy/Tenant.cs:62</code></td>
+</tr>
+<tr>
+<td><code>TENANT-011</code></td>
+<td>Domain</td>
+<td>A suspension reason is required.</td>
+<td><code>src/NT.QAMS.Domain/Tenancy/Tenant.cs:68</code></td>
+</tr>
+<tr>
+<td><code>TENANT-012</code></td>
+<td>InvalidStateTransition</td>
+<td>Only a Suspended tenant can be reactivated (current: {Status}).</td>
+<td><code>src/NT.QAMS.Domain/Tenancy/Tenant.cs:80</code></td>
+</tr>
+<tr>
+<td><code>TENANT-013</code></td>
+<td>InvalidStateTransition</td>
+<td>Tenant is already terminated.</td>
+<td><code>src/NT.QAMS.Domain/Tenancy/Tenant.cs:93</code></td>
+</tr>
+<tr>
+<td><code>TENANT-404</code></td>
+<td>Domain</td>
+<td>Tenant not found.</td>
+<td><code>src/NT.QAMS.Application/Tenancy/Commands/TenantMfaPolicy.cs:21</code> (+1)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>TRN</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TRN-001</code></td>
+<td>Domain</td>
+<td>A training subject is required.</td>
+<td><code>src/NT.QAMS.Domain/Competency/CompetencyRecord.cs:168</code></td>
+</tr>
+<tr>
+<td><code>TRN-002</code></td>
+<td>InvalidStateTransition</td>
+<td>Training is already completed.</td>
+<td><code>src/NT.QAMS.Domain/Competency/CompetencyRecord.cs:184</code></td>
+</tr>
+<tr>
+<td><code>TRN-404</code></td>
+<td>Domain</td>
+<td>Training assignment not found.</td>
+<td><code>src/NT.QAMS.Application/Competency/CompetencySlice.cs:127</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>UAR</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>UAR-010</code></td>
+<td>InvalidStateTransition</td>
+<td>The access review is already completed and immutable.</td>
+<td><code>src/NT.QAMS.Domain/IdentityAccess/UserAccessReview.cs:43</code></td>
+</tr>
+<tr>
+<td><code>UAR-011</code></td>
+<td>Domain</td>
+<td>A written conclusion is required — 'reviewed' without a statement is not evidence.</td>
+<td><code>src/NT.QAMS.Domain/IdentityAccess/UserAccessReview.cs:48</code></td>
+</tr>
+<tr>
+<td><code>UAR-404</code></td>
+<td>Domain</td>
+<td>Access review not found.</td>
+<td><code>src/NT.QAMS.Application/IdentityAccess/Commands/AccessReviewSlice.cs:52</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>USER</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Kind</th>
+<th>Message(s)</th>
+<th>First location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USER-001</code></td>
+<td>Domain</td>
+<td>A valid email address is required.</td>
+<td><code>src/NT.QAMS.Domain/IdentityAccess/UserAccount.cs:91</code></td>
+</tr>
+<tr>
+<td><code>USER-002</code></td>
+<td>Domain</td>
+<td>Display name is required.</td>
+<td><code>src/NT.QAMS.Domain/IdentityAccess/UserAccount.cs:96</code></td>
+</tr>
+<tr>
+<td><code>USER-003</code></td>
+<td>Domain</td>
+<td>Platform administrators cannot belong to a tenant.</td>
+<td><code>src/NT.QAMS.Domain/IdentityAccess/UserAccount.cs:101</code></td>
+</tr>
+<tr>
+<td><code>USER-004</code></td>
+<td>Domain</td>
+<td>Tenant users must belong to a tenant.</td>
+<td><code>src/NT.QAMS.Domain/IdentityAccess/UserAccount.cs:106</code></td>
+</tr>
+<tr>
+<td><code>USER-005</code></td>
+<td>Domain</td>
+<td>Platform administrator is not a tenant role. <br>— A tenant user cannot be made a platform administrator.</td>
+<td><code>src/NT.QAMS.Application/IdentityAccess/Commands/UserManagement.cs:23</code> (+1)</td>
+</tr>
+<tr>
+<td><code>USER-006</code></td>
+<td>Domain</td>
+<td>A password hash is required.</td>
+<td><code>src/NT.QAMS.Domain/IdentityAccess/UserAccount.cs:140</code> (+1)</td>
+</tr>
+<tr>
+<td><code>USER-007</code></td>
+<td>Domain</td>
+<td>Unknown role '{role}'.</td>
+<td><code>src/NT.QAMS.Application/IdentityAccess/Commands/UserManagement.cs:18</code></td>
+</tr>
+<tr>
+<td><code>USER-008</code></td>
+<td>Domain</td>
+<td>A user with email '{email}' already exists in this tenant.</td>
+<td><code>src/NT.QAMS.Application/IdentityAccess/Commands/UserManagement.cs:59</code></td>
+</tr>
+<tr>
+<td><code>USER-010</code></td>
+<td>Domain</td>
+<td>A role is required.</td>
+<td><code>src/NT.QAMS.Domain/IdentityAccess/UserAccount.cs:170</code></td>
+</tr>
+<tr>
+<td><code>USER-404</code></td>
+<td>Domain</td>
+<td>User not found.</td>
+<td><code>src/NT.QAMS.Application/IdentityAccess/Commands/MfaAndPin.cs:23</code> (+4)</td>
+</tr>
+</tbody>
+</table></div>
+<div class="pager"><a href="02-4-Functional-Specification-Operations-and-Platform.html"><span>Previous</span>Functional Spec 4 — Operations &amp; Platform</a><a href="04-Configuration-Reference.html" style="text-align:right"><span>Next</span>Configuration Reference</a></div>
+</main></div>
+<script>
+(function(){
+ var r=document.documentElement, K='ntqms-srs-theme', s=localStorage.getItem(K);
+ if(s) r.setAttribute('data-theme',s);
+ var b=document.getElementById('th');
+ if(b) b.onclick=function(){
+   var cur=r.getAttribute('data-theme');
+   if(!cur) cur=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+   var nx=cur==='dark'?'light':'dark';
+   r.setAttribute('data-theme',nx); localStorage.setItem(K,nx);
+ };
+ var p=document.getElementById('pr'); if(p) p.onclick=function(){window.print();};
+ // scroll-spy on the in-page TOC
+ var links=[].slice.call(document.querySelectorAll('#toc a'));
+ if(!links.length) return;
+ var tgt=links.map(function(a){return document.getElementById(a.getAttribute('href').slice(1));});
+ function spy(){
+   var y=window.scrollY+90, i=0;
+   for(var k=0;k<tgt.length;k++){ if(tgt[k]&&tgt[k].offsetTop<=y) i=k; }
+   links.forEach(function(a,n){a.style.color=n===i?'var(--accent)':'';
+     a.style.borderLeftColor=n===i?'var(--accent)':'transparent';});
+ }
+ addEventListener('scroll',spy,{passive:true}); spy();
+})();
+</script>
+</body></html>

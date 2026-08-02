@@ -5,18 +5,22 @@ import { Router, RouterOutlet } from '@angular/router';
 import { PrecisionFacade } from './precision.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
+import { PrecisionListItem } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 
 /** Imprecision-study register (CLSI EP05): within-run / between-run / within-lab precision. */
 @Component({
     selector: 'qams-precision-list',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DecimalPipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent],
+    imports: [ReactiveFormsModule, DecimalPipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('prc.title')" [subtitle]="i18n.t('prc.subtitle')">
+      <qams-export-menu [title]="i18n.t('prc.title')" [stats]="stats()" [columns]="exportColumns"
+                        [rows]="filtered()" [filtersSummary]="filtersSummary()" />
       @if (perms.can('analytical-quality.create')) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('prc.new') }}</button>
       }
@@ -116,6 +120,25 @@ export class PrecisionListComponent implements OnInit {
     const q = this.search().trim().toLowerCase();
     return this.facade.list().filter((s) =>
       !q || `${s.studyRef} ${s.analyte} ${s.level} ${s.state}`.toLowerCase().includes(q));
+  });
+
+  /** Export columns — the printed grid mirrors the on-screen table. */
+  readonly exportColumns: ExportColumn<PrecisionListItem>[] = [
+    { header: this.i18n.t('mu.ref'), cell: (s) => s.studyRef },
+    { header: this.i18n.t('qc.analyte'), cell: (s) => s.analyte },
+    { header: this.i18n.t('mu.level'), cell: (s) => s.level },
+    { header: this.i18n.t('prc.repeatabilityCv'), cell: (s) => s.repeatabilityCvPct !== null ? `${s.repeatabilityCvPct.toFixed(2)}%` : '—' },
+    { header: this.i18n.t('prc.withinLabCv'), cell: (s) => s.withinLabCvPct !== null ? `${s.withinLabCvPct.toFixed(2)}%` : '—' },
+    { header: this.i18n.t('val.verdict'), cell: (s) => s.meetsWithinLabClaim === true ? 'Pass' : s.meetsWithinLabClaim === false ? 'Failed' : '—' },
+    { header: this.i18n.t('nc.status'), cell: (s) => s.state },
+  ];
+
+  /** The filter line printed on the document, mirroring the filter bar. */
+  readonly filtersSummary = computed(() => {
+    const parts: string[] = [];
+    if (this.stateFilter()) { parts.push(this.stateFilter()); }
+    if (this.search().trim()) { parts.push(`"${this.search().trim()}"`); }
+    return parts.length ? parts.join(' · ') : this.i18n.t('exp.allRecords');
   });
 
   readonly stats = computed<ListStat[]>(() => {

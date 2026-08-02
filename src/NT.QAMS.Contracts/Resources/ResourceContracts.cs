@@ -9,12 +9,12 @@ public sealed record RegisterEquipmentRequest(
 public sealed record LogCalibrationRequest(
     DateOnly PerformedAt, string Provider, string Result, Guid? CertificateFileId);
 
-public sealed record LogMaintenanceRequest(DateOnly PerformedAt, string WorkDescription);
+public sealed record LogMaintenanceRequest(DateOnly PerformedAt, string WorkDescription, Guid? CertificateFileId = null);
 
 public sealed record CalibrationRecordDto(
     Guid Id, DateOnly PerformedAt, string Provider, string Result, Guid? CertificateFileId);
 
-public sealed record MaintenanceRecordDto(Guid Id, DateOnly PerformedAt, string WorkDescription);
+public sealed record MaintenanceRecordDto(Guid Id, DateOnly PerformedAt, string WorkDescription, Guid? CertificateFileId = null);
 
 public sealed record EquipmentListItemDto(
     Guid Id, string Code, string Name, string SerialNumber, string? Location,

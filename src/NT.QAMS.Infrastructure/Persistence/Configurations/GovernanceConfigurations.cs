@@ -59,6 +59,10 @@ public sealed class ManagementReviewConfiguration : IEntityTypeConfiguration<Man
         builder.Property(r => r.Status).HasConversion<string>().HasMaxLength(20);
         builder.HasIndex(r => new { r.TenantId, r.ReviewRef }).IsUnique();
 
+        // Free text; the 500 bound on the link and 10000 on the agenda live in
+        // the command validator per schema hardening 1.2.
+        builder.Property(r => r.MeetingLink).HasMaxLength(500);
+
         builder.OwnsMany(r => r.Decisions, d =>
         {
             d.ToTable("review_decision", "qams");
@@ -69,6 +73,18 @@ public sealed class ManagementReviewConfiguration : IEntityTypeConfiguration<Man
             d.WithOwner().HasForeignKey("TenantId", "review_id");
             d.HasKey("TenantId", "Id");
             d.Property(x => x.Description);
+        });
+
+        builder.OwnsMany(r => r.ParticipantUsers, p =>
+        {
+            p.ToTable("review_participant", "qams");
+            p.Property<Guid>("TenantId");
+            p.WithOwner().HasForeignKey("TenantId", "review_id");
+            p.HasKey("TenantId", "Id");
+            // One row per user per review — a duplicate invite is a data error.
+            p.HasIndex("TenantId", "review_id", "UserId")
+                .IsUnique()
+                .HasDatabaseName("ux_review_participant_user");
         });
 
         builder.Ignore(r => r.DomainEvents);

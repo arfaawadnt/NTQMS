@@ -4,21 +4,24 @@ import { DatePipe } from '@angular/common';
 import { Router, RouterOutlet } from '@angular/router';
 import { FeedbackFacade } from './feedback.facade';
 import { I18nService } from '../../core/i18n.service';
-import { FEEDBACK_TYPES } from '../../core/models';
+import { FEEDBACK_TYPES, FeedbackListItem } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { AllocationPickerComponent } from '../../shared/ui/allocation-picker.component';
 import { LovSelectComponent } from '../../shared/ui/lov-select.component';
 import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 
 /** General feedback register: compliments, suggestions, dissatisfaction + satisfaction trend (§8.6.2). */
 @Component({
     selector: 'qams-feedback-list',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, LovSelectComponent, ListStatsComponent],
+    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, LovSelectComponent, ListStatsComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('fbk.title')" [subtitle]="i18n.t('fbk.subtitle')">
+      <qams-export-menu [title]="i18n.t('fbk.title')" [stats]="stats()" [columns]="exportColumns"
+                        [rows]="filtered()" [filtersSummary]="filtersSummary()" />
       <button (click)="showForm.set(!showForm())">{{ i18n.t('fbk.new') }}</button>
     </qams-page-header>
 
@@ -133,6 +136,26 @@ export class FeedbackListComponent implements OnInit {
     const q = this.search().trim().toLowerCase();
     return this.facade.list().filter((f) =>
       !q || `${f.feedbackRef} ${f.subject} ${f.source} ${f.channel} ${f.type} ${f.status}`.toLowerCase().includes(q));
+  });
+
+  /** Export columns — the printed grid mirrors the on-screen table. */
+  readonly exportColumns: ExportColumn<FeedbackListItem>[] = [
+    { header: this.i18n.t('mu.ref'), cell: (f) => f.feedbackRef },
+    { header: this.i18n.t('fbk.type'), cell: (f) => this.i18n.t('fbk.type' + f.type) },
+    { header: this.i18n.t('cmpl.subject'), cell: (f) => f.subject },
+    { header: this.i18n.t('fbk.source'), cell: (f) => `${f.source} · ${f.channel}` },
+    { header: this.i18n.t('fbk.score'), cell: (f) => f.satisfactionScore !== null ? `${f.satisfactionScore}/5` : '—' },
+    { header: this.i18n.t('fbk.receivedOn'), cell: (f) => f.receivedOn },
+    { header: this.i18n.t('nc.status'), cell: (f) => f.status },
+  ];
+
+  /** The filter line printed on the document, mirroring the filter bar. */
+  readonly filtersSummary = computed(() => {
+    const parts: string[] = [];
+    if (this.typeFilter()) { parts.push(this.i18n.t('fbk.type' + this.typeFilter())); }
+    if (this.statusFilter()) { parts.push(this.statusFilter()); }
+    if (this.search().trim()) { parts.push(`"${this.search().trim()}"`); }
+    return parts.length ? parts.join(' · ') : this.i18n.t('exp.allRecords');
   });
 
   readonly stats = computed<ListStat[]>(() => {

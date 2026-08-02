@@ -1,16 +1,19 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterOutlet } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { RiskFacade } from './risk.facade';
 import { I18nService } from '../../core/i18n.service';
 import { OrgDataService } from '../../core/org-data.service';
-import { HIGH_RESIDUAL_RPN_THRESHOLD } from '../../core/models';
+import { RiskApiService } from '../../core/api/risk-api.service';
+import { HIGH_RESIDUAL_RPN_THRESHOLD, RiskListItem } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { AllocationPickerComponent } from '../../shared/ui/allocation-picker.component';
 import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
 import { LovSelectComponent } from '../../shared/ui/lov-select.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 import { LoadMoreComponent } from '../../shared/ui/load-more.component';
 
 /**
@@ -21,9 +24,11 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
 @Component({
     selector: 'qams-risk-list',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent, LovSelectComponent, LoadMoreComponent],
+    imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent, LovSelectComponent, LoadMoreComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('risk.title')">
+      <qams-export-menu [title]="i18n.t('risk.title')" [stats]="stats()" [columns]="exportColumns"
+                        [rows]="filtered()" [fetchAll]="exportAll" [filtersSummary]="filtersSummary()" />
       <button (click)="showForm.set(!showForm())">{{ i18n.t('risk.new') }}</button>
     </qams-page-header>
 

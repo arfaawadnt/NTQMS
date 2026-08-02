@@ -203,17 +203,35 @@ public sealed class ChangePasswordHandler(
             throw new DomainException("AUTH-001", "Invalid credentials.");
         }
 
-        // Reuse ban: the new password may not match the current hash or any retired one in scope.
+        await PasswordRotation.RotateAsync(db, hasher, passwordPolicy, clock, user, command.NewPassword, ct);
+
+        await security.WriteAsync("PASSWORD_CHANGED", tenantId, email, null, ct);
+        await db.SaveChangesAsync(ct);
+    }
+}
+
+/// <summary>
+/// The one rotation procedure both password-change paths share — reuse ban
+/// against the current hash and the retired history, retire-then-set, prune —
+/// so the anonymous (expired-password) flow and the signed-in self-service flow
+/// can never drift apart in what they enforce.
+/// </summary>
+internal static class PasswordRotation
+{
+    internal static async Task RotateAsync(
+        IAppDbContext db, IPasswordHasher hasher, PasswordPolicyOptions policy, IClock clock,
+        UserAccount user, string newPassword, CancellationToken ct)
+    {
         var history = await db.PasswordHistory
             .Where(h => h.UserId == user.Id)
             .OrderByDescending(h => h.SetAtUtc)
-            .Take(Math.Max(passwordPolicy.HistoryDepth, 0))
+            .Take(Math.Max(policy.HistoryDepth, 0))
             .ToListAsync(ct);
-        if (hasher.Verify(user.PasswordHash, command.NewPassword)
-            || history.Any(h => hasher.Verify(h.PasswordHash, command.NewPassword)))
+        if (hasher.Verify(user.PasswordHash, newPassword)
+            || history.Any(h => hasher.Verify(h.PasswordHash, newPassword)))
         {
             throw new DomainException(
-                "AUTH-102", $"The new password must differ from the last {passwordPolicy.HistoryDepth + 1} passwords.");
+                "AUTH-102", $"The new password must differ from the last {policy.HistoryDepth + 1} passwords.");
         }
 
         db.PasswordHistory.Add(new PasswordHistoryEntry
@@ -222,17 +240,62 @@ public sealed class ChangePasswordHandler(
             PasswordHash = user.PasswordHash,
             SetAtUtc = clock.UtcNow,
         });
-        user.ChangePassword(hasher.Hash(command.NewPassword), clock.UtcNow);
+        user.ChangePassword(hasher.Hash(newPassword), clock.UtcNow);
 
         // Prune history beyond the configured depth.
         var stale = await db.PasswordHistory
             .Where(h => h.UserId == user.Id)
             .OrderByDescending(h => h.SetAtUtc)
-            .Skip(Math.Max(passwordPolicy.HistoryDepth, 0))
+            .Skip(Math.Max(policy.HistoryDepth, 0))
             .ToListAsync(ct);
         db.PasswordHistory.RemoveRange(stale);
+    }
+}
 
-        await security.WriteAsync("PASSWORD_CHANGED", tenantId, email, null, ct);
+// ── Self-service password change (signed-in) ─────────────────────────────────
+
+/// <summary>
+/// Password change from the account menu. Unlike <see cref="ChangePasswordCommand"/>
+/// — which is anonymous and email-keyed so an expired password can be rotated
+/// before login — this resolves the account from the session, so the SPA never
+/// handles the caller's email and the anonymous surface stays untouched.
+/// The current password is still verified: a session is not a password.
+/// </summary>
+[RequireAuthenticatedActor]
+public sealed record ChangeMyPasswordCommand(string CurrentPassword, string NewPassword) : ICommand;
+
+public sealed class ChangeMyPasswordValidator : AbstractValidator<ChangeMyPasswordCommand>
+{
+    public ChangeMyPasswordValidator()
+    {
+        RuleFor(x => x.CurrentPassword).NotEmpty();
+        RuleFor(x => x.NewPassword).StrongPassword();
+    }
+}
+
+public sealed class ChangeMyPasswordHandler(
+    IAppDbContext db, ICurrentUser currentUser, IPasswordHasher hasher, ISecurityEventLog security,
+    IClock clock, PasswordPolicyOptions passwordPolicy)
+    : ICommandHandler<ChangeMyPasswordCommand>
+{
+    public async Task Handle(ChangeMyPasswordCommand command, CancellationToken ct)
+    {
+        var userId = currentUser.UserId
+            ?? throw new DomainException("AUTH-003", "An authenticated user is required.");
+        var user = await db.Users.SingleOrDefaultAsync(u => u.Id == userId, ct)
+            ?? throw new DomainException("USER-404", "User not found.");
+
+        if (!user.IsActive || user.IsLockedOut(clock.UtcNow)
+            || !hasher.Verify(user.PasswordHash, command.CurrentPassword))
+        {
+            await security.WriteAsync(
+                "PASSWORD_CHANGE_DENIED", user.TenantId, user.DisplayName, "bad-password", ct);
+            throw new DomainException("AUTH-001", "Invalid credentials.");
+        }
+
+        await PasswordRotation.RotateAsync(db, hasher, passwordPolicy, clock, user, command.NewPassword, ct);
+
+        await security.WriteAsync("PASSWORD_CHANGED", user.TenantId, user.Email, "self-service", ct);
         await db.SaveChangesAsync(ct);
     }
 }

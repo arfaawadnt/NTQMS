@@ -1,0 +1,3678 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>API Specification — NT.QMS As-Built SRS</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔌</text></svg>">
+<style>
+:root{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);
+ --mono:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace;
+ --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,ui-serif,serif;
+ --sans:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}}
+:root[data-theme="dark"]{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}
+:root[data-theme="light"]{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+ font-size:15.5px;line-height:1.62;-webkit-text-size-adjust:100%}
+.wrap{display:grid;grid-template-columns:288px minmax(0,1fr);gap:0;max-width:1560px;margin:0 auto}
+/* ---- sidebar ---- */
+aside{position:sticky;top:0;height:100vh;overflow-y:auto;padding:22px 16px 60px;
+ border-right:1px solid var(--line);background:var(--panel)}
+aside .brand{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:-.01em;
+ margin:0 0 2px}
+aside .sub{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;
+ margin:0 0 16px}
+aside nav a{display:block;padding:5px 9px;border-radius:7px;color:var(--ink);text-decoration:none;
+ font-size:13.2px;border-left:2px solid transparent}
+aside nav a:hover{background:var(--panel-2)}
+aside nav a.cur{background:var(--accent-soft);border-left-color:var(--accent);font-weight:600}
+aside nav a .n{color:var(--muted);font-variant-numeric:tabular-nums;margin-right:7px;font-size:11.5px}
+aside .sec{margin:16px 0 5px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+ color:var(--muted);font-weight:700}
+#toc{margin-top:6px;border-top:1px solid var(--line);padding-top:10px}
+#toc a{display:block;padding:2.5px 9px;font-size:12.4px;color:var(--muted);text-decoration:none;
+ border-left:2px solid transparent;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#toc a:hover{color:var(--ink)}
+#toc a.h3{padding-left:22px;font-size:11.8px}
+/* ---- main ---- */
+main{padding:34px 46px 120px;min-width:0;overflow-wrap:anywhere}
+.doc-head{border-bottom:2px solid var(--accent);padding-bottom:14px;margin-bottom:26px}
+.kicker{color:var(--accent);font-size:11.5px;font-weight:700;letter-spacing:.11em;
+ text-transform:uppercase;margin:0 0 4px}
+h1{font-family:var(--serif);font-size:31px;line-height:1.2;margin:0;letter-spacing:-.015em}
+h2{font-family:var(--serif);font-size:24px;margin:38px 0 12px;padding-bottom:6px;
+ border-bottom:1px solid var(--line);letter-spacing:-.01em;scroll-margin-top:14px}
+h3{font-size:18px;margin:26px 0 9px;letter-spacing:-.005em;scroll-margin-top:14px}
+h4{font-size:15px;margin:20px 0 7px;color:var(--accent)}
+h5,h6{font-size:13.5px;margin:16px 0 6px;color:var(--muted);text-transform:uppercase;
+ letter-spacing:.05em}
+p{margin:10px 0}
+a{color:var(--accent)}
+hr{border:0;border-top:1px solid var(--line);margin:30px 0}
+ul,ol{margin:9px 0;padding-left:24px}
+li{margin:3px 0}
+blockquote{margin:16px 0;padding:12px 18px;background:var(--accent-soft);
+ border-left:3px solid var(--accent);border-radius:0 8px 8px 0}
+blockquote p:first-child{margin-top:0}blockquote p:last-child{margin-bottom:0}
+code{font-family:var(--mono);font-size:.875em;background:var(--panel-2);
+ padding:1.5px 5px;border-radius:4px;border:1px solid var(--line)}
+pre{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;
+ padding:14px 16px;overflow-x:auto;margin:14px 0}
+pre code{background:none;border:0;padding:0;font-size:12.6px;line-height:1.5}
+/* ---- tables ---- */
+.tw{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:10px;
+ background:var(--panel);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;font-size:13.4px}
+th,td{padding:8px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:var(--panel-2);font-weight:700;font-size:12.2px;letter-spacing:.02em;
+ position:sticky;top:0;z-index:1}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--accent-soft)}
+td code,th code{font-size:.9em;white-space:nowrap}
+/* ---- diagrams ---- */
+figure.d{margin:18px 0;padding:18px;background:var(--panel);border:1px solid var(--line);
+ border-radius:12px;box-shadow:var(--shadow);overflow-x:auto;text-align:center}
+figure.d svg{max-width:100%;height:auto;display:inline-block}
+/* ---- misc ---- */
+.tools{position:fixed;top:12px;right:16px;display:flex;gap:6px;z-index:50}
+.tools button{font:inherit;font-size:12px;padding:5px 11px;border-radius:8px;cursor:pointer;
+ border:1px solid var(--line);background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+.tools button:hover{background:var(--panel-2)}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:52px;padding-top:18px;
+ border-top:1px solid var(--line)}
+.pager a{display:block;max-width:46%;padding:10px 14px;border:1px solid var(--line);
+ border-radius:10px;background:var(--panel);text-decoration:none;font-size:13px}
+.pager a span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;
+ letter-spacing:.08em}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:14px;margin:20px 0}
+.card{padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--panel);
+ box-shadow:var(--shadow);text-decoration:none;color:var(--ink);display:block}
+.card:hover{border-color:var(--accent)}
+.card .num{color:var(--accent);font-weight:700;font-size:11.5px;letter-spacing:.1em}
+.card .t{font-family:var(--serif);font-size:17px;margin:3px 0 5px}
+.card .d{color:var(--muted);font-size:12.7px;line-height:1.5}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin:20px 0}
+.stat{padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.stat b{display:block;font-size:23px;font-family:var(--serif);line-height:1.1}
+.stat span{color:var(--muted);font-size:11.4px}
+@media print{
+ aside,.tools,.pager{display:none!important}
+ .wrap{display:block;max-width:none}
+ main{padding:0}
+ .tw,figure.d{break-inside:avoid;box-shadow:none}
+ h2{break-after:avoid}
+ a{color:inherit;text-decoration:none}
+}
+@media (max-width:1080px){
+ .wrap{grid-template-columns:1fr}
+ aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+ main{padding:22px 18px 80px}
+ #toc{display:none}
+}
+</style>
+</head><body>
+<div class="tools"><button id="th">◐ Theme</button><button id="pr">⎙ Print</button></div>
+<div class="wrap">
+<aside><p class="brand">NT.QMS</p><p class="sub">As-Built SRS · v1.51.x</p><a class="card" style="padding:9px 12px;margin-bottom:10px;font-size:13px" href="index.html">◂ Document set</a><div class="sec">Documents</div><nav><a class="" href="00-SRS-Index-and-Conventions.html"><span class="n">00</span>Index, Conventions &amp; Glossary</a><a class="" href="01-Software-Requirements-Specification.html"><span class="n">01</span>Software Requirements Specification</a><a class="" href="02-1-Functional-Specification-Quality-and-Improvement.html"><span class="n">02-1</span>Functional Spec 1 — Quality &amp; Improvement</a><a class="" href="02-2-Functional-Specification-Resources-People-Governance.html"><span class="n">02-2</span>Functional Spec 2 — Resources, People &amp; Governance</a><a class="" href="02-3-Functional-Specification-Analytical-Quality.html"><span class="n">02-3</span>Functional Spec 3 — Analytical Quality</a><a class="" href="02-4-Functional-Specification-Operations-and-Platform.html"><span class="n">02-4</span>Functional Spec 4 — Operations &amp; Platform</a><a class="" href="03-Business-Rules.html"><span class="n">03</span>Business Rules &amp; Error Catalogue</a><a class="" href="04-Configuration-Reference.html"><span class="n">04</span>Configuration Reference</a><a class="" href="05-Screen-Specification.html"><span class="n">05</span>Screen Specification</a><a class="" href="06-Workflow-Specification.html"><span class="n">06</span>Workflow Specification</a><a class="" href="07-File-System-Specification.html"><span class="n">07</span>File System Specification</a><a class="cur" href="08-API-Specification.html"><span class="n">08</span>API Specification</a><a class="" href="09-Security-Specification.html"><span class="n">09</span>Security Specification</a><a class="" href="10-Deployment-Specification.html"><span class="n">10</span>Deployment Specification</a><a class="" href="11-Architecture-Constraints.html"><span class="n">11</span>Architecture Constraints</a><a class="" href="12-Requirements-Traceability-Matrix.html"><span class="n">12</span>Requirements Traceability Matrix</a><a class="" href="13-Implementation-vs-SRS-Gap-Analysis.html"><span class="n">13</span>Implementation vs SRS — Gap Analysis</a><a class="" href="14-Technical-Debt-Report.html"><span class="n">14</span>Technical Debt Report</a><a class="" href="15-Recommendations.html"><span class="n">15</span>Recommendations</a></nav><div class='sec'>On this page</div><div id='toc'><a class="h2" href="#media-types">Media types</a><a class="h2" href="#headers">Headers</a><a class="h2" href="#two-gates-two-layers">Two gates, two layers</a><a class="h2" href="#gate-1-http-requirepermissionmodule-action">Gate 1 — HTTP: [RequirePermission(module, action)]</a><a class="h2" href="#gate-2-command-commandpolicyattribute">Gate 2 — Command: CommandPolicyAttribute</a><a class="h2" href="#what-remains-of-the-role-model">What remains of the role model</a><a class="h2" href="#status-codes-in-use">Status codes in use</a></div></aside>
+<main>
+<div class="doc-head"><p class="kicker">Document 08 · NT.QMS Production SRS</p><h1>API Specification</h1></div>
+<blockquote>
+<p><a href="00-SRS-Index-and-Conventions.html">Conventions</a> · Authorisation model:
+<a href="09-Security-Specification.html">Document 09 §9.4</a> · Business meaning of each endpoint:
+<a href="02-1-Functional-Specification-Quality-and-Improvement.html">Document 02</a></p>
+</blockquote>
+<p><strong>329 route actions</strong> across <strong>54 controllers</strong>, each exposed at <strong>two paths</strong> (unversioned and
+versioned) → <strong>658 routable paths</strong>, pinned by the <code>ApiSurface.approved.txt</code> merge gate.</p>
+<hr>
+<h1>8.1 API conventions</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Convention</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>API-001</strong></td>
+<td><strong>Dual routing.</strong> Every literal <code>api/…</code> route is <em>also</em> published at <code>api/v{version:apiVersion}/…</code> by a single application-model convention (<code>VersionedRouteConvention</code>) — not by editing controllers. Controllers carry <strong>no</strong> version attributes, so they are implicitly <strong>v1.0</strong>; unversioned legacy paths keep working through <code>AssumeDefaultVersionWhenUnspecified</code>. Responses carry the reported API versions. Evolution policy: <code>docs/adr/ADR-0004</code>.</td>
+</tr>
+<tr>
+<td><strong>API-002</strong></td>
+<td><strong>Rate limiting</strong> — fixed 1-minute window, <code>QueueLimit = 0</code>. Global 300/min per client address; <code>/api/auth/*</code> 10/min; <code>/api/auth/refresh</code> 60/min; e-signature ceremonies 10/min <strong>per actor</strong>. Rejection is <strong>429</strong> with <code>Retry-After: 60</code>. Health probes and <code>/metrics</code> are exempt.</td>
+</tr>
+<tr>
+<td><strong>API-003</strong></td>
+<td><strong>One error contract.</strong> Every failure path emits RFC 7807 <code>application/problem+json</code> through a <strong>single writer</strong> (<code>ProblemResponse</code>) — including framework 401/403, which are routed through <code>ProblemAuthorizationResultHandler</code>. Anonymous-object error shapes are banned.</td>
+</tr>
+<tr>
+<td><strong>API-004</strong></td>
+<td><strong>Pagination envelope.</strong> Paged lists return <code>{ items, total, page, pageSize }</code>. <code>PageRequest.Normalized</code> <strong>clamps</strong> out-of-range input (<code>page ≥ 1</code>, <code>pageSize</code> clamped to <strong>1…200</strong>) rather than erroring — a hostile <code>pageSize</code> can never become an unbounded query. Default page size <strong>50</strong>.</td>
+</tr>
+<tr>
+<td><strong>API-005</strong></td>
+<td><strong>Upload allow-list + content sniffing</strong> — see <a href="02-4-Functional-Specification-Operations-and-Platform.html">Document 02 M-35</a>.</td>
+</tr>
+<tr>
+<td><strong>API-006</strong></td>
+<td><strong>Deny-by-default authorisation</strong> at both the HTTP gate (<code>[RequirePermission]</code>) and the command gate (<code>CommandPolicyAttribute</code>).</td>
+</tr>
+<tr>
+<td><strong>API-007</strong></td>
+<td><strong>Same-origin only.</strong> No CORS policy is registered (ADR-0007). A cross-origin client cannot call this API.</td>
+</tr>
+<tr>
+<td><strong>API-008</strong></td>
+<td><strong>Idempotency.</strong> A repeated command carrying the same <code>Idempotency-Key</code> header returns the stored result instead of re-executing.</td>
+</tr>
+<tr>
+<td><strong>API-009</strong></td>
+<td><strong>Reason for change.</strong> Every <code>DELETE</code> requires <code>X-Change-Reason</code>, refused with 400 <code>CHANGE-REASON-REQUIRED</code> before any handler runs.</td>
+</tr>
+<tr>
+<td><strong>API-010</strong></td>
+<td><strong>Correlation.</strong> <code>X-Correlation-Id</code> is echoed if supplied, generated otherwise; every problem body carries <code>traceId</code> and <code>correlationId</code>.</td>
+</tr>
+<tr>
+<td><strong>API-011</strong></td>
+<td><strong>Concurrency.</strong> <code>xmin</code>-based optimistic concurrency; a stale write returns 409 <code>CONCURRENCY-409</code> (ADR-0005).</td>
+</tr>
+<tr>
+<td><strong>API-012</strong></td>
+<td><strong>Surface snapshot gate.</strong> Any route addition, removal or rename must update <code>tests/NT.QAMS.WebApi.FunctionalTests/ApiSurface.approved.txt</code> <strong>in the same commit</strong>, or CI fails.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="media-types">Media types</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Direction</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Request (normal)</td>
+<td><code>application/json</code></td>
+</tr>
+<tr>
+<td>Request (upload)</td>
+<td><code>multipart/form-data</code></td>
+</tr>
+<tr>
+<td>Response (success)</td>
+<td><code>application/json</code>, or <code>…spreadsheetml.sheet</code> / <code>application/pdf</code> for exports</td>
+</tr>
+<tr>
+<td>Response (error)</td>
+<td><strong><code>application/problem+json</code></strong> — always</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="headers">Headers</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Header</th>
+<th>Direction</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Authorization: Bearer &lt;jwt&gt;</code></td>
+<td>in</td>
+<td>access token (SPA memory only)</td>
+</tr>
+<tr>
+<td><code>Cookie: qams_rt=…</code></td>
+<td>in</td>
+<td>refresh cookie — <strong>only</strong> on <code>/api/auth/*</code> (Path-scoped), httpOnly, Secure, SameSite=Strict</td>
+</tr>
+<tr>
+<td><code>X-Change-Reason</code></td>
+<td>in</td>
+<td><strong>required on every DELETE</strong>; honoured on other verbs if present</td>
+</tr>
+<tr>
+<td><code>Idempotency-Key</code></td>
+<td>in</td>
+<td>optional replay protection on commands</td>
+</tr>
+<tr>
+<td><code>X-Correlation-Id</code></td>
+<td>in/out</td>
+<td>echoed or generated</td>
+</tr>
+<tr>
+<td><code>X-Forwarded-For</code> / <code>-Proto</code></td>
+<td>in</td>
+<td>from the reverse proxy; restores the real client address and scheme</td>
+</tr>
+<tr>
+<td><code>Retry-After</code></td>
+<td>out</td>
+<td>on 429, always <code>60</code></td>
+</tr>
+<tr>
+<td><code>Content-Security-Policy</code></td>
+<td>out</td>
+<td><code>default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'</code></td>
+</tr>
+<tr>
+<td><code>X-Content-Type-Options</code></td>
+<td>out</td>
+<td><code>nosniff</code></td>
+</tr>
+<tr>
+<td><code>X-Frame-Options</code></td>
+<td>out</td>
+<td><code>DENY</code></td>
+</tr>
+<tr>
+<td><code>Referrer-Policy</code></td>
+<td>out</td>
+<td><code>no-referrer</code></td>
+</tr>
+<tr>
+<td><code>Strict-Transport-Security</code></td>
+<td>out</td>
+<td><code>max-age=63072000; includeSubDomains</code> — <strong>non-Development only</strong></td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>8.2 The authorisation model (as built at v1.51)</h1>
+<blockquote>
+<p><strong>This changed materially and the repository documentation has not all caught up.</strong> The role-list
+gate has been replaced by a permission gate. A rebuild must implement the <em>current</em> model.</p>
+</blockquote>
+<h2 id="two-gates-two-layers">Two gates, two layers</h2>
+<figure class="d"><svg width="607" height="803" preserveAspectRatio="xMidYMid meet" id="mmd-f10fbaed9997" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="flowchart" style="max-width:607px;height:auto" viewBox="0 0 607.3203125 803" role="graphics-document document" aria-roledescription="flowchart-v2"><style>#mmd-f10fbaed9997{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;fill:#000000;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#mmd-f10fbaed9997 .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#mmd-f10fbaed9997 .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#mmd-f10fbaed9997 .error-icon{fill:#552222;}#mmd-f10fbaed9997 .error-text{fill:#552222;stroke:#552222;}#mmd-f10fbaed9997 .edge-thickness-normal{stroke-width:1px;}#mmd-f10fbaed9997 .edge-thickness-thick{stroke-width:3.5px;}#mmd-f10fbaed9997 .edge-pattern-solid{stroke-dasharray:0;}#mmd-f10fbaed9997 .edge-thickness-invisible{stroke-width:0;fill:none;}#mmd-f10fbaed9997 .edge-pattern-dashed{stroke-dasharray:3;}#mmd-f10fbaed9997 .edge-pattern-dotted{stroke-dasharray:2;}#mmd-f10fbaed9997 .marker{fill:#666;stroke:#666;}#mmd-f10fbaed9997 .marker.cross{stroke:#666;}#mmd-f10fbaed9997 svg{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;}#mmd-f10fbaed9997 p{margin:0;}#mmd-f10fbaed9997 .label{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#000000;}#mmd-f10fbaed9997 .cluster-label text{fill:#333;}#mmd-f10fbaed9997 .cluster-label span{color:#333;}#mmd-f10fbaed9997 .cluster-label span p{background-color:transparent;}#mmd-f10fbaed9997 .label text,#mmd-f10fbaed9997 span{fill:#000000;color:#000000;}#mmd-f10fbaed9997 .node rect,#mmd-f10fbaed9997 .node circle,#mmd-f10fbaed9997 .node ellipse,#mmd-f10fbaed9997 .node polygon,#mmd-f10fbaed9997 .node path{fill:#eee;stroke:#999;stroke-width:1px;}#mmd-f10fbaed9997 .rough-node .label text,#mmd-f10fbaed9997 .node .label text,#mmd-f10fbaed9997 .image-shape .label,#mmd-f10fbaed9997 .icon-shape .label{text-anchor:middle;}#mmd-f10fbaed9997 .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#mmd-f10fbaed9997 .rough-node .label,#mmd-f10fbaed9997 .node .label,#mmd-f10fbaed9997 .image-shape .label,#mmd-f10fbaed9997 .icon-shape .label{text-align:center;}#mmd-f10fbaed9997 .node.clickable{cursor:pointer;}#mmd-f10fbaed9997 .root .anchor path{fill:#666!important;stroke-width:0;stroke:#666;}#mmd-f10fbaed9997 .arrowheadPath{fill:#333333;}#mmd-f10fbaed9997 .edgePath .path{stroke:#666;stroke-width:1px;}#mmd-f10fbaed9997 .flowchart-link{stroke:#666;fill:none;}#mmd-f10fbaed9997 .edgeLabel{background-color:white;text-align:center;}#mmd-f10fbaed9997 .edgeLabel p{background-color:white;}#mmd-f10fbaed9997 .edgeLabel rect{opacity:0.5;background-color:white;fill:white;}#mmd-f10fbaed9997 .labelBkg{background-color:rgba(255, 255, 255, 0.5);}#mmd-f10fbaed9997 .cluster rect{fill:hsl(0, 0%, 98.9215686275%);stroke:#707070;stroke-width:1px;}#mmd-f10fbaed9997 .cluster text{fill:#333;}#mmd-f10fbaed9997 .cluster span{color:#333;}#mmd-f10fbaed9997 div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:12px;background:hsl(-160, 0%, 93.3333333333%);border:1px solid #707070;border-radius:2px;pointer-events:none;z-index:100;}#mmd-f10fbaed9997 .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#000000;}#mmd-f10fbaed9997 rect.text{fill:none;stroke-width:0;}#mmd-f10fbaed9997 .icon-shape,#mmd-f10fbaed9997 .image-shape{background-color:white;text-align:center;}#mmd-f10fbaed9997 .icon-shape p,#mmd-f10fbaed9997 .image-shape p{background-color:white;padding:2px;}#mmd-f10fbaed9997 .icon-shape .label rect,#mmd-f10fbaed9997 .image-shape .label rect{opacity:0.5;background-color:white;fill:white;}#mmd-f10fbaed9997 .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#mmd-f10fbaed9997 .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#mmd-f10fbaed9997 .node .neo-node{stroke:#999;}#mmd-f10fbaed9997 [data-look="neo"].node rect,#mmd-f10fbaed9997 [data-look="neo"].cluster rect,#mmd-f10fbaed9997 [data-look="neo"].node polygon{stroke:url(#mmd-f10fbaed9997-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-f10fbaed9997 [data-look="neo"].swimlane.cluster rect{filter:none;}#mmd-f10fbaed9997 [data-look="neo"].node path{stroke:url(#mmd-f10fbaed9997-gradient);stroke-width:1px;}#mmd-f10fbaed9997 [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-f10fbaed9997 [data-look="neo"].node .neo-line path{stroke:#999;filter:none;}#mmd-f10fbaed9997 [data-look="neo"].node circle{stroke:url(#mmd-f10fbaed9997-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-f10fbaed9997 [data-look="neo"].node circle .state-start{fill:#000000;}#mmd-f10fbaed9997 [data-look="neo"].icon-shape .icon{fill:url(#mmd-f10fbaed9997-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-f10fbaed9997 [data-look="neo"].icon-shape .icon-neo path{stroke:url(#mmd-f10fbaed9997-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-f10fbaed9997 :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><g><marker id="my-svg_flowchart-v2-pointEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="4.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 5 L 10 10 L 10 0 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointEnd-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="11.5" refY="7" markerUnits="userSpaceOnUse" markerWidth="10.5" markerHeight="14" orient="auto"><path d="M 0 0 L 11.5 7 L 0 14 z" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="1" refY="7" markerUnits="userSpaceOnUse" markerWidth="11.5" markerHeight="14" orient="auto"><polygon points="0,7 11.5,14 11.5,0" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="11" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-1" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refY="5" refX="12.25" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-2" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="12" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossStart" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="-1" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="17.7" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5;"/></marker><marker id="my-svg_flowchart-v2-crossStart-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="-3.5" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5; stroke-dasharray: 1, 0;"/></marker><g class="root"><g class="clusters"/><g class="edgePaths"><path d="M208.508,59L208.508,63.167C208.508,67.333,208.508,75.667,208.508,83.333C208.508,91,208.508,98,208.508,101.5L208.508,105" id="my-svg-L_R_A_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_R_A_0" data-points="W3sieCI6MjA4LjUwNzgxMjUsInkiOjU5fSx7IngiOjIwOC41MDc4MTI1LCJ5Ijo4NH0seyJ4IjoyMDguNTA3ODEyNSwieSI6MTA5fV0=" data-look="classic" marker-end="url(#mmd-f10fbaed9997_flowchart-v2-pointEnd)"/><path d="M136.583,202L127.431,207.917C118.279,213.833,99.975,225.667,90.824,242.083C81.672,258.5,81.672,279.5,81.672,290L81.672,300.5" id="my-svg-L_A_X1_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_A_X1_0" data-points="W3sieCI6MTM2LjU4MjU1NTI1OTE0NjM1LCJ5IjoyMDJ9LHsieCI6ODEuNjcxODc1LCJ5IjoyMzcuNX0seyJ4Ijo4MS42NzE4NzUsInkiOjMwNC41fV0=" data-look="classic" marker-end="url(#mmd-f10fbaed9997_flowchart-v2-pointEnd)"/><path d="M280.433,202L289.585,207.917C298.737,213.833,317.04,225.667,326.192,236.833C335.344,248,335.344,258.5,335.344,263.75L335.344,269" id="my-svg-L_A_P_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_A_P_0" data-points="W3sieCI6MjgwLjQzMzA2OTc0MDg1MzYsInkiOjIwMn0seyJ4IjozMzUuMzQzNzUsInkiOjIzNy41fSx7IngiOjMzNS4zNDM3NSwieSI6MjczfV0=" data-look="classic" marker-end="url(#mmd-f10fbaed9997_flowchart-v2-pointEnd)"/><path d="M261.07,387L253.361,392.917C245.651,398.833,230.232,410.667,222.522,421.833C214.813,433,214.813,443.5,214.813,448.75L214.813,454" id="my-svg-L_P_X2_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_P_X2_0" data-points="W3sieCI6MjYxLjA3MDQzOTE4OTE4OTIsInkiOjM4N30seyJ4IjoyMTQuODEyNSwieSI6NDIyLjV9LHsieCI6MjE0LjgxMjUsInkiOjQ1OH1d" data-look="classic" marker-end="url(#mmd-f10fbaed9997_flowchart-v2-pointEnd)"/><path d="M409.617,387L417.327,392.917C425.036,398.833,440.456,410.667,448.165,421.833C455.875,433,455.875,443.5,455.875,448.75L455.875,454" id="my-svg-L_P_C_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_P_C_0" data-points="W3sieCI6NDA5LjYxNzA2MDgxMDgxMDgsInkiOjM4N30seyJ4Ijo0NTUuODc1LCJ5Ijo0MjIuNX0seyJ4Ijo0NTUuODc1LCJ5Ijo0NTh9XQ==" data-look="classic" marker-end="url(#mmd-f10fbaed9997_flowchart-v2-pointEnd)"/><path d="M455.875,509L455.875,513.167C455.875,517.333,455.875,525.667,455.875,533.333C455.875,541,455.875,548,455.875,551.5L455.875,555" id="my-svg-L_C_Q_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_C_Q_0" data-points="W3sieCI6NDU1Ljg3NSwieSI6NTA5fSx7IngiOjQ1NS44NzUsInkiOjUzNH0seyJ4Ijo0NTUuODc1LCJ5Ijo1NTl9XQ==" data-look="classic" marker-end="url(#mmd-f10fbaed9997_flowchart-v2-pointEnd)"/><path d="M411.115,652L403.735,659.667C396.355,667.333,381.596,682.667,374.216,697.333C366.836,712,366.836,726,366.836,733L366.836,740" id="my-svg-L_Q_X3_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_Q_X3_0" data-points="W3sieCI6NDExLjExNDgyMjYzNTEzNTEsInkiOjY1Mn0seyJ4IjozNjYuODM1OTM3NSwieSI6Njk4fSx7IngiOjM2Ni44MzU5Mzc1LCJ5Ijo3NDR9XQ==" data-look="classic" marker-end="url(#mmd-f10fbaed9997_flowchart-v2-pointEnd)"/><path d="M500.635,652L508.015,659.667C515.395,667.333,530.154,682.667,537.534,697.333C544.914,712,544.914,726,544.914,733L544.914,740" id="my-svg-L_Q_H_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_Q_H_0" data-points="W3sieCI6NTAwLjYzNTE3NzM2NDg2NDksInkiOjY1Mn0seyJ4Ijo1NDQuOTE0MDYyNSwieSI6Njk4fSx7IngiOjU0NC45MTQwNjI1LCJ5Ijo3NDR9XQ==" data-look="classic" marker-end="url(#mmd-f10fbaed9997_flowchart-v2-pointEnd)"/></g><g class="edgeLabels"><g class="edgeLabel"><g class="label" data-id="L_R_A_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel" transform="translate(81.671875, 237.5)"><g class="label" data-id="L_A_X1_0" transform="translate(-55.078125, -10.5)"><foreignObject width="110.15625" height="21"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"><p>401 if anonymous</p></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_A_P_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel" transform="translate(214.8125, 422.5)"><g class="label" data-id="L_P_X2_0" transform="translate(-49.1796875, -10.5)"><foreignObject width="98.359375" height="21"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"><p>403 AUTHZ-403</p></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_P_C_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_C_Q_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel" transform="translate(366.8359375, 698)"><g class="label" data-id="L_Q_X3_0" transform="translate(-100, -21)"><foreignObject width="200" height="42"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="edgeLabel"><p>AUTHZ-000 / AUTHZ-002 / AUTHZ-008</p></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_Q_H_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g></g><g class="nodes"><g class="node default" id="my-svg-flowchart-R-0" data-look="classic" transform="translate(208.5078125, 33.5)"><rect class="basic label-container" style="" x="-71.4609375" y="-25.5" width="142.921875" height="51"/><g class="label" style="" transform="translate(-41.4609375, -10.5)"><rect/><foreignObject width="82.921875" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>HTTP request</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-A-1" data-look="classic" transform="translate(208.5078125, 155.5)"><rect class="basic label-container" style="" x="-130" y="-46.5" width="260" height="93"/><g class="label" style="" transform="translate(-100, -31.5)"><rect/><foreignObject width="200" height="63"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>[Authorize]<br />authentication ONLY — 57 occurrences, all bare</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-X1-3" data-look="classic" transform="translate(81.671875, 330)"><rect class="basic label-container" style="" x="-73.671875" y="-25.5" width="147.34375" height="51"/><g class="label" style="" transform="translate(-43.671875, -10.5)"><rect/><foreignObject width="87.34375" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>problem+json</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-P-5" data-look="classic" transform="translate(335.34375, 330)"><rect class="basic label-container" style="" x="-130" y="-57" width="260" height="114"/><g class="label" style="" transform="translate(-100, -42)"><rect/><foreignObject width="200" height="84"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>[RequirePermission(module, action)]<br />144 occurrences: 3 class-level, 141 method-level</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-X2-7" data-look="classic" transform="translate(214.8125, 483.5)"><rect class="basic label-container" style="" x="-73.671875" y="-25.5" width="147.34375" height="51"/><g class="label" style="" transform="translate(-43.671875, -10.5)"><rect/><foreignObject width="87.34375" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>problem+json</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-C-9" data-look="classic" transform="translate(455.875, 483.5)"><rect class="basic label-container" style="" x="-117.390625" y="-25.5" width="234.78125" height="51"/><g class="label" style="" transform="translate(-87.390625, -10.5)"><rect/><foreignObject width="174.78125" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>Controller action → MediatR</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-Q-11" data-look="classic" transform="translate(455.875, 605.5)"><rect class="basic label-container" style="" x="-130" y="-46.5" width="260" height="93"/><g class="label" style="" transform="translate(-100, -31.5)"><rect/><foreignObject width="200" height="63"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>CommandPolicyAttribute on the command record<br />deny-by-default</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-X3-13" data-look="classic" transform="translate(366.8359375, 769.5)"><rect class="basic label-container" style="" x="-73.671875" y="-25.5" width="147.34375" height="51"/><g class="label" style="" transform="translate(-43.671875, -10.5)"><rect/><foreignObject width="87.34375" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>problem+json</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-H-15" data-look="classic" transform="translate(544.9140625, 769.5)"><rect class="basic label-container" style="" x="-54.40625" y="-25.5" width="108.8125" height="51"/><g class="label" style="" transform="translate(-24.40625, -10.5)"><rect/><foreignObject width="48.8125" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>Handler</p></span></div></foreignObject></g></g></g></g></g><defs><filter id="my-svg-drop-shadow" height="130%" width="130%"><feDropShadow dx="4" dy="4" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs><defs><filter id="my-svg-drop-shadow-small" height="150%" width="150%"><feDropShadow dx="2" dy="2" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs><linearGradient id="my-svg-gradient" gradientUnits="objectBoundingBox" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="hsl(0, 0%, 83.3333333333%)" stop-opacity="1"/><stop offset="100%" stop-color="hsl(0, 0%, 88.9215686275%)" stop-opacity="1"/></linearGradient></svg></figure>
+
+<h2 id="gate-1-http-requirepermissionmodule-action">Gate 1 — HTTP: <code>[RequirePermission(module, action)]</code></h2>
+<p>Replaced <code>[Authorize(Roles = …)]</code> entirely. The rationale, quoted from the attribute's own
+documentation:</p>
+<blockquote>
+<p><em>"Roles are tenant data now, so the endpoint can no longer name the roles that reach it — it names
+the capability it represents, and whichever roles the laboratory has granted that capability are the
+roles that get through."</em></p>
+</blockquote>
+<ul>
+<li>Checks <code>IUserPrivileges.Has(permissionKey)</code> — resolved per request by <code>ActiveSessionMiddleware</code>.</li>
+<li>An <strong>unauthenticated</strong> caller passes straight through this filter: authentication is <code>[Authorize]</code>'s
+  job and runs first, so an anonymous caller sees <strong>401</strong>, not 403.</li>
+<li>A caller who is authenticated but unprivileged gets <strong>403</strong> with code <code>AUTHZ-403</code> — the same code and
+  the same problem+json shape the framework handler emits, so the SPA has one path to handle.</li>
+</ul>
+<p><strong>Measured usage:</strong> 144 <code>[RequirePermission]</code> attributes — <strong>3 at class level</strong> (<code>AccessReviewsController</code>
+and two others gate the whole controller) and <strong>141 at method level</strong>.</p>
+<h2 id="gate-2-command-commandpolicyattribute">Gate 2 — Command: <code>CommandPolicyAttribute</code></h2>
+<p>Every one of the <strong>215 commands</strong> carries exactly one policy attribute. An unannotated command is
+denied at runtime (<code>AUTHZ-000</code>) <strong>and</strong> fails the <code>CommandPolicyTests</code> CI gate.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Policy</th>
+<th style="text-align: right;">Count</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>[RequireInternalActor]</code></td>
+<td style="text-align: right;"><strong>193</strong></td>
+<td>any authenticated internal actor — <strong>every role except <code>ExternalAuditor</code></strong>. The default for write commands: <em>auditors read the quality ledger, they never mutate it.</em></td>
+</tr>
+<tr>
+<td><code>[RequirePermissionPolicy(module, action)]</code></td>
+<td style="text-align: right;"><strong>12</strong></td>
+<td>only actors whose tenant-configured role grants this permission key. The composed key is validated against the catalogue, so a drifted module key <strong>fails every call loudly</strong> instead of denying quietly (<code>AUTHZ-008</code>).</td>
+</tr>
+<tr>
+<td><code>[RequireAuthenticatedActor]</code></td>
+<td style="text-align: right;"><strong>4</strong></td>
+<td>any authenticated actor <strong>including</strong> the external auditor — reserved for self-service account security (MFA enrolment, e-signature PIN).</td>
+</tr>
+<tr>
+<td><code>[AllowUnauthenticated]</code></td>
+<td style="text-align: right;"><strong>4</strong></td>
+<td>runs without an authenticated actor <strong>by design</strong> (login, refresh, logout, expired-password rotation). The handler carries its own credential checks.</td>
+</tr>
+<tr>
+<td><code>[RequireRole(...)]</code></td>
+<td style="text-align: right;"><strong>1</strong></td>
+<td>only the listed <code>UserRole</code> values.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="what-remains-of-the-role-model">What remains of the role model</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>[Authorize]</code> (bare, authentication only)</td>
+<td><strong>57</strong> occurrences — the live mechanism</td>
+</tr>
+<tr>
+<td><code>[Authorize(Roles = …)]</code></td>
+<td><strong>exactly one</strong>: <code>Roles.PlatformAdmin</code> on <code>TenantsController</code></td>
+</tr>
+<tr>
+<td><code>Roles.PlatformAdmin</code></td>
+<td>live (that one use)</td>
+</tr>
+<tr>
+<td><code>Roles.TenantAdmin/QualityManager/DepartmentHead/Analyst/ExternalAuditor</code></td>
+<td><strong>unused</strong></td>
+</tr>
+<tr>
+<td><code>Roles.QmOrAdmin</code>, <code>QmDeptAdmin</code>, <code>QmAdminAuditor</code>, <code>TenantAdminOnly</code></td>
+<td><strong>dead code</strong> — referenced only as <em>label strings</em> inside <code>RoleEndpointMatrixTests</code>, never as attribute arguments</td>
+</tr>
+<tr>
+<td><code>UserRole</code> enum</td>
+<td>still live: carried in the JWT <code>role</code> claim, re-checked every request by <code>ActiveSessionMiddleware</code>, and used by <code>[RequireInternalActor]</code> (to exclude <code>ExternalAuditor</code>) and <code>[RequireRole]</code></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong>Consequence for a rebuild:</strong> <em>"which roles can call endpoint X"</em> is <strong>no longer answerable from the
+code</strong>. It is answerable only from the tenant's own role→permission configuration. The endpoint
+declares a capability; the laboratory decides who holds it. The one exception is the platform
+control plane, which is still hard-gated on <code>PlatformAdmin</code>.</p>
+</blockquote>
+<hr>
+<h1>8.3 Error contract</h1>
+<pre><code class="language-json">{
+  &quot;type&quot;:    &quot;about:blank&quot;,
+  &quot;title&quot;:   &quot;Segregation of duties: the raiser cannot verify their own nonconformance.&quot;,
+  &quot;status&quot;:  422,
+  &quot;code&quot;:    &quot;SOD-CAPA-002&quot;,
+  &quot;traceId&quot;: &quot;0af7651916cd43dd8448eb211c80319c&quot;,
+  &quot;correlationId&quot;: &quot;6b2f0e1c-...&quot;
+}
+</code></pre>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Always present</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>status</code></td>
+<td>✅</td>
+<td>per §3.3 of <a href="03-Business-Rules.html">Document 03</a></td>
+</tr>
+<tr>
+<td><code>title</code></td>
+<td>✅</td>
+<td>the domain message</td>
+</tr>
+<tr>
+<td><code>code</code></td>
+<td>✅ on domain/middleware errors</td>
+<td>the structured refusal code (411 of them)</td>
+</tr>
+<tr>
+<td><code>traceId</code></td>
+<td>✅</td>
+<td><code>Activity.Current.TraceId</code>, else <code>HttpContext.TraceIdentifier</code></td>
+</tr>
+<tr>
+<td><code>correlationId</code></td>
+<td>when set</td>
+<td><code>X-Correlation-Id</code> (echoed or generated)</td>
+</tr>
+<tr>
+<td><code>errors</code></td>
+<td>on validation failures</td>
+<td>per-field FluentValidation messages</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="status-codes-in-use">Status codes in use</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Status</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>successful read, or a command returning a value</td>
+</tr>
+<tr>
+<td>201</td>
+<td>resource created (<code>POST /api/tenants</code>, <code>POST /api/files</code>)</td>
+</tr>
+<tr>
+<td>204</td>
+<td>successful command with no body</td>
+</tr>
+<tr>
+<td>400</td>
+<td>validation failure · <code>CHANGE-REASON-REQUIRED</code> · upload refusal</td>
+</tr>
+<tr>
+<td>401</td>
+<td>no/invalid token · <code>AUTH-006</code> inactive account · <code>AUTH-007</code> role changed · <code>AUTH-008/009</code> session revoked/expired</td>
+</tr>
+<tr>
+<td>403</td>
+<td><code>AUTHZ-403</code> insufficient privilege · <code>MFA-ENROLL-REQUIRED</code> · command-policy denial</td>
+</tr>
+<tr>
+<td>404</td>
+<td><code>*-404</code> not found (<strong>also returned for cross-tenant ids — RLS makes them invisible, not forbidden</strong>)</td>
+</tr>
+<tr>
+<td>409</td>
+<td><code>InvalidStateTransitionException</code> · <code>CONCURRENCY-409</code></td>
+</tr>
+<tr>
+<td>422</td>
+<td><code>DomainException</code> — business-rule violation</td>
+</tr>
+<tr>
+<td>429</td>
+<td>rate limit exceeded (<code>Retry-After: 60</code>)</td>
+</tr>
+<tr>
+<td>500</td>
+<td>unhandled — never carries domain detail</td>
+</tr>
+<tr>
+<td>503</td>
+<td><code>/health/ready</code> when PostgreSQL is unreachable</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong>Security property:</strong> a cross-tenant identifier returns <strong>404, not 403</strong> — because row-level
+security makes the row invisible, the handler genuinely cannot find it. Tenant membership is
+therefore not probeable through status codes.</p>
+</blockquote>
+<hr>
+<h1>8.4 Non-controller endpoints</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Route</th>
+<th>Auth</th>
+<th>Rate-limited</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /health/live</code></td>
+<td>anonymous</td>
+<td><strong>exempt</strong></td>
+<td>liveness — <strong>no checks at all</strong>; a database outage must recycle traffic, not the process</td>
+</tr>
+<tr>
+<td><code>GET /health/ready</code></td>
+<td>anonymous</td>
+<td><strong>exempt</strong></td>
+<td>readiness — 503 while PostgreSQL is unreachable; the container <code>HEALTHCHECK</code> target</td>
+</tr>
+<tr>
+<td><code>GET /health</code></td>
+<td>anonymous</td>
+<td><strong>exempt</strong></td>
+<td>legacy liveness alias for existing probes/scripts</td>
+</tr>
+<tr>
+<td><code>GET /metrics</code></td>
+<td>anonymous</td>
+<td><strong>exempt</strong></td>
+<td>Prometheus scrape — measurements only, no tenant data</td>
+</tr>
+<tr>
+<td><code>GET /openapi/...</code></td>
+<td>anonymous</td>
+<td>—</td>
+<td><strong>Development only</strong></td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>8.5 Anonymous endpoints (the unauthenticated attack surface)</h1>
+<p>Exactly <strong>five</strong> controller routes are anonymous, all on <code>AuthController</code>, all behind the strict
+10/min auth limiter (refresh gets its own 60/min policy):</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Route</th>
+<th>Why anonymous</th>
+<th>Risk note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /api/auth/workspace/{slug}</code></td>
+<td>read before any credential exists</td>
+<td>returns <strong>the laboratory name only</strong>; unknown, malformed and non-active slugs all answer <strong>404 identically</strong> so tenant state cannot be probed</td>
+</tr>
+<tr>
+<td><code>POST /api/auth/login</code></td>
+<td>obviously</td>
+<td><code>AUTH-001</code> "Invalid credentials." is deliberately non-specific</td>
+</tr>
+<tr>
+<td><code>POST /api/auth/refresh</code></td>
+<td><strong>the cookie is the credential</strong>; the access token is expected to be expired</td>
+<td>reuse of a rotated token revokes the whole family</td>
+</tr>
+<tr>
+<td><code>POST /api/auth/logout</code></td>
+<td>must work with an expired access token</td>
+<td>idempotent; no cookie still returns 204</td>
+</tr>
+<tr>
+<td><code>POST /api/auth/change-password</code></td>
+<td><strong>so an EXPIRED password can still be changed</strong></td>
+<td>the handler verifies full credentials. <strong>This is an unauthenticated credential-verification oracle</strong> — see <a href="09-Security-Specification.html">Document 09</a></td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>8.6 Pagination</h1>
+<p><strong>13 endpoints</strong> are paged; the rest return the full filtered set.</p>
+<pre><code>GET /api/nonconformances?status=Raised&amp;search=pump&amp;page=2&amp;pageSize=50
+→ 200 { &quot;items&quot;: [ … ], &quot;total&quot;: 137, &quot;page&quot;: 2, &quot;pageSize&quot;: 50 }
+</code></pre>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Default page size</td>
+<td><strong>50</strong></td>
+</tr>
+<tr>
+<td>Maximum page size</td>
+<td><strong>200</strong> — clamped, never rejected</td>
+</tr>
+<tr>
+<td>Minimum page</td>
+<td><strong>1</strong> — clamped</td>
+</tr>
+<tr>
+<td>Total</td>
+<td>a <code>COUNT</code> over the same filtered query</td>
+</tr>
+<tr>
+<td>Ordering</td>
+<td>applied by the query before paging (<code>ToPagedAsync</code> is a terminal operator on an <strong>ordered</strong> projection)</td>
+</tr>
+<tr>
+<td>Legacy shape</td>
+<td>the pre-envelope bare-array response is still served on some routes; <code>ContractCoverageTests</code> pins <strong>both</strong> shapes for all 13 lists</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Paged:</strong> nonconformances · documents · audits · risks · changes · management-reviews · suppliers ·
+equipment · competencies · training-assignments · archives · tasks/mine · notifications/mine
+(+ notifications/monitor).</p>
+<p><strong>Not paged (returns everything):</strong> complaints, feedback, conflicts, monitoring-points,
+reference-standards, test-authorizations, quality-objectives, quality-policy, org-context (both),
+sla-definitions, roles, users, users/directory, access-reviews, lovs, branches, departments,
+test-catalog, proficiency-tests, pt-plans, uncertainty-budgets, and every analytical study list.</p>
+<blockquote>
+<p><code>take</code>-style bounds (compliance reads 200, exports 1000, QC runs 60, KPI history 90 days) are
+<strong>defaults, not maxima</strong> — they are not clamped. See <a href="14-Technical-Debt-Report.html">Document 14</a>.</p>
+</blockquote>
+<hr>
+<h1>8.7 Idempotency</h1>
+<pre><code>POST /api/nonconformances
+Idempotency-Key: 4f1e2c9a-...
+</code></pre>
+<p>Handled by <code>IdempotencyBehavior</code> in the MediatR pipeline, backed by <code>EfIdempotencyStore</code>.
+The header is read by <code>HeaderIdempotencyKeyAccessor</code> (registered in the WebApi); background scopes get
+<code>NullIdempotencyKeyAccessor</code> because they have no HTTP context.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Behaviour</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Absent key</td>
+<td>no replay protection — normal execution</td>
+</tr>
+<tr>
+<td>First call with a key</td>
+<td>executes, stores the result</td>
+</tr>
+<tr>
+<td>Repeat with the same key</td>
+<td><strong>returns the stored result; the effect happens once</strong></td>
+</tr>
+<tr>
+<td>Scope</td>
+<td>per key; <strong><code>[Assumption]</code></strong> the store is not purged on any schedule</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>8.8 Versioning and evolution (ADR-0004)</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Current version</td>
+<td><strong>v1.0</strong> (implicit)</td>
+</tr>
+<tr>
+<td>Reader</td>
+<td><code>UrlSegmentApiVersionReader</code></td>
+</tr>
+<tr>
+<td>Default assumed</td>
+<td>yes — unversioned paths resolve to v1.0</td>
+</tr>
+<tr>
+<td>Reported</td>
+<td><code>ReportApiVersions = true</code></td>
+</tr>
+<tr>
+<td>Adding a route</td>
+<td>must appear in <code>ApiSurface.approved.txt</code> in the same commit</td>
+</tr>
+<tr>
+<td>Breaking a contract</td>
+<td>requires a new version segment; the v1 path must keep working</td>
+</tr>
+<tr>
+<td>Non-breaking additions</td>
+<td>new optional fields, new endpoints — no version bump</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>8.9 Export endpoints</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Route</th>
+<th>Media type</th>
+<th>Permission</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /api/exports/nonconformances.xlsx</code></td>
+<td>XLSX</td>
+<td><em>(NC read)</em></td>
+<td>NC register</td>
+</tr>
+<tr>
+<td><code>GET /api/exports/audit-trail.xlsx?take=1000</code></td>
+<td>XLSX</td>
+<td><code>compliance.export</code></td>
+<td>audit trail + field changes + <strong>live Integrity Attestation sheet</strong> + reason column</td>
+</tr>
+<tr>
+<td><code>GET /api/exports/signatures.xlsx?take=1000</code></td>
+<td>XLSX</td>
+<td><code>compliance.export</code></td>
+<td>e-signature manifest</td>
+</tr>
+<tr>
+<td><code>GET /api/exports/review-pack/{reviewId}.pdf</code></td>
+<td>PDF</td>
+<td><code>reviews.export</code></td>
+<td>review + dashboard KPIs + NC Pareto</td>
+</tr>
+</tbody>
+</table></div>
+<p>Every export writes a <code>RECORD_EXPORTED</code> security event. <strong>XLSX is the only tabular format</strong> — a
+parallel CSV endpoint set was built and deliberately reverted; do not reintroduce one.</p>
+<hr>
+<h1>8.10 Contract testing</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Gate</th>
+<th>What it proves</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ApiSurface.approved.txt</code> (658 lines)</td>
+<td>no route appears, disappears or is renamed without an explicit, reviewed change</td>
+</tr>
+<tr>
+<td><code>RoleEndpointMatrixTests</code></td>
+<td><strong>6 roles × role-gated endpoints</strong>: no role ever receives 401 or 5xx from a gate; <strong>every denial is 403 problem+json</strong></td>
+</tr>
+<tr>
+<td><code>ContractCoverageTests</code></td>
+<td><strong>13 lists × (legacy + v1 envelope)</strong>; by-id 404 problem contract</td>
+</tr>
+<tr>
+<td><code>CommandPolicyTests</code></td>
+<td>every command carries a policy attribute</td>
+</tr>
+<tr>
+<td>Module-boundary gate</td>
+<td>no cross-module reference outside the allowed graph</td>
+</tr>
+<tr>
+<td>Migration round-trip</td>
+<td>every migration's <code>Up</code>/<code>Down</code> reverses cleanly</td>
+</tr>
+<tr>
+<td>Audit-tamper tests</td>
+<td>the append-only ledger rejects mutation</td>
+</tr>
+<tr>
+<td>axe (always-on)</td>
+<td>SPA accessibility</td>
+</tr>
+<tr>
+<td>.NET SCA / npm SCA / Trivy</td>
+<td>dependency and image vulnerabilities, failing on High/Critical</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>8.11 Known API limitations</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Limitation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LIM-API-01</strong></td>
+<td><strong>No OpenAPI document outside Development.</strong> <code>MapOpenApi()</code> is Development-only, so there is no published machine-readable contract for consumers.</td>
+</tr>
+<tr>
+<td><strong>LIM-API-02</strong></td>
+<td><strong>No CORS</strong> — cross-origin clients are impossible by design (ADR-0007).</td>
+</tr>
+<tr>
+<td><strong>LIM-API-03</strong></td>
+<td><code>take</code> parameters have <strong>no enforced maximum</strong> (only <code>pageSize</code> is clamped).</td>
+</tr>
+<tr>
+<td><strong>LIM-API-04</strong></td>
+<td><strong>15+ list endpoints are unpaged</strong> and will degrade as tenant data grows.</td>
+</tr>
+<tr>
+<td><strong>LIM-API-05</strong></td>
+<td><strong>No <code>PATCH</code> anywhere</strong> — partial update is not supported; edits are whole-command operations.</td>
+</tr>
+<tr>
+<td><strong>LIM-API-06</strong></td>
+<td><strong>Only one <code>DELETE</code> verb family exists</strong> (analytical data points and the archive legal-hold release). Every other "removal" is a state transition, which is correct for a regulated system but means <code>X-Change-Reason</code> protects a narrower surface than "every destructive action".</td>
+</tr>
+<tr>
+<td><strong>LIM-API-07</strong></td>
+<td><strong>No bulk endpoints</strong> — every operation is single-record (except the two CSV imports).</td>
+</tr>
+<tr>
+<td><strong>LIM-API-08</strong></td>
+<td><strong>No webhook or subscription surface</strong> — integrations must poll.</td>
+</tr>
+<tr>
+<td><strong>LIM-API-09</strong></td>
+<td>Tenant lifecycle (suspend/reactivate/terminate) exists in the domain with <strong>no endpoint</strong>.</td>
+</tr>
+<tr>
+<td><strong>LIM-API-10</strong></td>
+<td><code>QcProfile.Deactivate()</code> exists with <strong>no endpoint</strong>.</td>
+</tr>
+<tr>
+<td><strong>LIM-API-11</strong></td>
+<td>No API-key or service-account authentication — every caller must be a user with a JWT.</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>8.12 API acceptance criteria</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Given</th>
+<th>When</th>
+<th>Then</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AT-API-01</strong></td>
+<td>any endpoint</td>
+<td>called at <code>/api/x</code> and <code>/api/v1/x</code></td>
+<td>both resolve identically</td>
+</tr>
+<tr>
+<td><strong>AT-API-02</strong></td>
+<td>a paged list</td>
+<td><code>pageSize=100000</code></td>
+<td>the response uses <code>pageSize = 200</code> (clamped), not an unbounded query</td>
+</tr>
+<tr>
+<td><strong>AT-API-03</strong></td>
+<td>a paged list</td>
+<td><code>page=0</code></td>
+<td>the response uses <code>page = 1</code></td>
+</tr>
+<tr>
+<td><strong>AT-API-04</strong></td>
+<td>any error, including framework 401/403</td>
+<td>it occurs</td>
+<td>the body is <code>application/problem+json</code> with <code>traceId</code></td>
+</tr>
+<tr>
+<td><strong>AT-API-05</strong></td>
+<td>a DELETE</td>
+<td>sent without <code>X-Change-Reason</code></td>
+<td><strong>400 <code>CHANGE-REASON-REQUIRED</code></strong> before the handler runs</td>
+</tr>
+<tr>
+<td><strong>AT-API-06</strong></td>
+<td>11 requests to <code>/api/auth/login</code> in one minute from one address</td>
+<td>the 11th is sent</td>
+<td><strong>429</strong> with <code>Retry-After: 60</code></td>
+</tr>
+<tr>
+<td><strong>AT-API-07</strong></td>
+<td>301 requests to any endpoint in one minute from one address</td>
+<td>the 301st is sent</td>
+<td><strong>429</strong></td>
+</tr>
+<tr>
+<td><strong>AT-API-08</strong></td>
+<td><code>/health/live</code></td>
+<td>PostgreSQL is stopped</td>
+<td>still <strong>200</strong></td>
+</tr>
+<tr>
+<td><strong>AT-API-09</strong></td>
+<td><code>/health/ready</code></td>
+<td>PostgreSQL is stopped</td>
+<td><strong>503</strong>; returns to 200 when the database returns</td>
+</tr>
+<tr>
+<td><strong>AT-API-10</strong></td>
+<td>a tenant-B identifier</td>
+<td>requested by a tenant-A user</td>
+<td><strong>404</strong>, never 403</td>
+</tr>
+<tr>
+<td><strong>AT-API-11</strong></td>
+<td>an <code>ExternalAuditor</code> token</td>
+<td>any write command</td>
+<td><strong>403</strong> — and the <code>CommandPolicyTests</code> gate independently prevents such a path from being introduced</td>
+</tr>
+<tr>
+<td><strong>AT-API-12</strong></td>
+<td>the same command twice</td>
+<td>with an identical <code>Idempotency-Key</code></td>
+<td>one effect, two identical responses</td>
+</tr>
+<tr>
+<td><strong>AT-API-13</strong></td>
+<td>a stale entity</td>
+<td>written concurrently</td>
+<td><strong>409 <code>CONCURRENCY-409</code></strong></td>
+</tr>
+<tr>
+<td><strong>AT-API-14</strong></td>
+<td>a route added/renamed</td>
+<td>CI runs</td>
+<td>the build <strong>fails</strong> unless <code>ApiSurface.approved.txt</code> was updated in the same commit</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>8.13 Complete route catalogue</h1>
+<p>All <strong>329</strong> route actions, each also available at <code>/api/v{version}/…</code>. <em>(The catalogue table below was generated at the 326-route baseline; the three Quality-Analytics routes added during analysis are listed in §8.14.)</em>
+<strong>Roles</strong> shows the HTTP-level role gate — which after the v1.51 authorisation change is
+<code>authenticated</code> for everything except the platform control plane. <strong>Permission</strong> shows the
+<code>[RequirePermission]</code> key where one is declared (absence means the action is gated only by the command
+policy — see §8.2).</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th style="text-align: right;">#</th>
+<th>Method</th>
+<th>Route</th>
+<th>Roles</th>
+<th>Permission</th>
+<th>Command / Query</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1</td>
+<td><code>GET</code></td>
+<td><code>/api/access-reviews</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetAccessReviewsQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td><code>POST</code></td>
+<td><code>/api/access-reviews</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>OpenAccessReviewCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td><code>POST</code></td>
+<td><code>/api/access-reviews/{id:guid}/complete</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>CompleteAccessReviewCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td><code>GET</code></td>
+<td><code>/api/archives</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetArchivesQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td><code>POST</code></td>
+<td><code>/api/archives</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>ArchiveRecordCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">6</td>
+<td><code>POST</code></td>
+<td><code>/api/archives/{id:guid}/dispose</code></td>
+<td>authenticated</td>
+<td>Records.Void</td>
+<td>DisposeRecordCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">7</td>
+<td><code>DELETE</code></td>
+<td><code>/api/archives/{id:guid}/legal-hold</code></td>
+<td>authenticated</td>
+<td>Records.Void</td>
+<td>ReleaseLegalHoldCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">8</td>
+<td><code>POST</code></td>
+<td><code>/api/archives/{id:guid}/legal-hold</code></td>
+<td>authenticated</td>
+<td>Records.Void</td>
+<td>PlaceLegalHoldCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">9</td>
+<td><code>POST</code></td>
+<td><code>/api/archives/{id:guid}/retrieve</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>RetrieveRecordCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">10</td>
+<td><code>POST</code></td>
+<td><code>/api/archives/{id:guid}/return</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>ReturnRecordCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">11</td>
+<td><code>GET</code></td>
+<td><code>/api/audits</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetAuditsQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">12</td>
+<td><code>POST</code></td>
+<td><code>/api/audits</code></td>
+<td>authenticated</td>
+<td>Audits.Create</td>
+<td>ScheduleAuditCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">13</td>
+<td><code>GET</code></td>
+<td><code>/api/audits/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetAuditByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">14</td>
+<td><code>POST</code></td>
+<td><code>/api/audits/{id:guid}/checklist/{itemId:guid}/answer</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>AnswerChecklistItemCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">15</td>
+<td><code>POST</code></td>
+<td><code>/api/audits/{id:guid}/findings</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>RaiseFindingCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">16</td>
+<td><code>POST</code></td>
+<td><code>/api/audits/{id:guid}/sign-off</code></td>
+<td>authenticated</td>
+<td>Audits.Sign</td>
+<td>SignOffAuditCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">17</td>
+<td><code>POST</code></td>
+<td><code>/api/audits/{id:guid}/start</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>StartAuditCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">18</td>
+<td><code>POST</code></td>
+<td><code>/api/auth/change-password</code></td>
+<td><strong>anonymous</strong></td>
+<td>—</td>
+<td>ChangePasswordCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">19</td>
+<td><code>POST</code></td>
+<td><code>/api/auth/login</code></td>
+<td><strong>anonymous</strong></td>
+<td>—</td>
+<td>LoginCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">20</td>
+<td><code>POST</code></td>
+<td><code>/api/auth/logout</code></td>
+<td><strong>anonymous</strong></td>
+<td>—</td>
+<td>LogoutCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">21</td>
+<td><code>PUT</code></td>
+<td><code>/api/auth/me/language</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>SetMyLanguageCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">22</td>
+<td><code>GET</code></td>
+<td><code>/api/auth/me/privileges</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetMyPrivilegesQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">23</td>
+<td><code>POST</code></td>
+<td><code>/api/auth/mfa/confirm</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>ConfirmMfaCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">24</td>
+<td><code>POST</code></td>
+<td><code>/api/auth/mfa/enroll</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>EnrollMfaCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">25</td>
+<td><code>POST</code></td>
+<td><code>/api/auth/refresh</code></td>
+<td><strong>anonymous</strong></td>
+<td>—</td>
+<td>RefreshTokenCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">26</td>
+<td><code>POST</code></td>
+<td><code>/api/auth/signature-pin</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>SetPinCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">27</td>
+<td><code>GET</code></td>
+<td><code>/api/auth/workspace/{slug}</code></td>
+<td><strong>anonymous</strong></td>
+<td>—</td>
+<td>GetWorkspaceQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">28</td>
+<td><code>GET</code></td>
+<td><code>/api/branches</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetOrgTreeQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">29</td>
+<td><code>POST</code></td>
+<td><code>/api/branches</code></td>
+<td>authenticated</td>
+<td>Organization.Create</td>
+<td>CreateBranchCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">30</td>
+<td><code>POST</code></td>
+<td><code>/api/branches/{id:guid}/deactivate</code></td>
+<td>authenticated</td>
+<td>Organization.Manage</td>
+<td>DeactivateOrgUnitCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">31</td>
+<td><code>GET</code></td>
+<td><code>/api/carryover-studies</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetCarryoverStudiesQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">32</td>
+<td><code>POST</code></td>
+<td><code>/api/carryover-studies</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Create</td>
+<td>CreateCarryoverStudyCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">33</td>
+<td><code>GET</code></td>
+<td><code>/api/carryover-studies/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetCarryoverStudyByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">34</td>
+<td><code>POST</code></td>
+<td><code>/api/carryover-studies/{id:guid}/calculate</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>CalculateCarryoverCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">35</td>
+<td><code>POST</code></td>
+<td><code>/api/carryover-studies/{id:guid}/readings</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>AddCarryoverReadingCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">36</td>
+<td><code>DELETE</code></td>
+<td><code>/api/carryover-studies/{id:guid}/readings/{readingId:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>RemoveCarryoverReadingCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">37</td>
+<td><code>POST</code></td>
+<td><code>/api/carryover-studies/{id:guid}/sign-off</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Sign</td>
+<td>SignOffCarryoverCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">38</td>
+<td><code>GET</code></td>
+<td><code>/api/changes</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetChangesQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">39</td>
+<td><code>POST</code></td>
+<td><code>/api/changes</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>ProposeChangeCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">40</td>
+<td><code>GET</code></td>
+<td><code>/api/changes/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetChangeByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">41</td>
+<td><code>POST</code></td>
+<td><code>/api/changes/{id:guid}/approve</code></td>
+<td>authenticated</td>
+<td>ChangeControl.Approve</td>
+<td>ApproveChangeCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">42</td>
+<td><code>POST</code></td>
+<td><code>/api/changes/{id:guid}/close</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>CloseChangeCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">43</td>
+<td><code>POST</code></td>
+<td><code>/api/changes/{id:guid}/reject</code></td>
+<td>authenticated</td>
+<td>ChangeControl.Void</td>
+<td>RejectChangeCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">44</td>
+<td><code>POST</code></td>
+<td><code>/api/changes/{id:guid}/review</code></td>
+<td>authenticated</td>
+<td>ChangeControl.Approve</td>
+<td>ReviewChangeCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">45</td>
+<td><code>POST</code></td>
+<td><code>/api/changes/{id:guid}/risk</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>LinkRiskCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">46</td>
+<td><code>GET</code></td>
+<td><code>/api/competencies</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetCompetenciesQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">47</td>
+<td><code>POST</code></td>
+<td><code>/api/competencies</code></td>
+<td>authenticated</td>
+<td>Competencies.Create</td>
+<td>AssignCompetencyCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">48</td>
+<td><code>GET</code></td>
+<td><code>/api/competencies/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetCompetencyByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">49</td>
+<td><code>POST</code></td>
+<td><code>/api/competencies/{id:guid}/assessments</code></td>
+<td>authenticated</td>
+<td>Competencies.Edit</td>
+<td>ScoreAssessmentCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">50</td>
+<td><code>POST</code></td>
+<td><code>/api/competencies/{id:guid}/authorize</code></td>
+<td>authenticated</td>
+<td>Competencies.Approve</td>
+<td>AuthorizeCompetencyCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">51</td>
+<td><code>POST</code></td>
+<td><code>/api/competencies/{id:guid}/revoke</code></td>
+<td>authenticated</td>
+<td>Competencies.Void</td>
+<td>RevokeCompetencyCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">52</td>
+<td><code>GET</code></td>
+<td><code>/api/complaints</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetComplaintsQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">53</td>
+<td><code>POST</code></td>
+<td><code>/api/complaints</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>LogComplaintCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">54</td>
+<td><code>GET</code></td>
+<td><code>/api/complaints/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetComplaintByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">55</td>
+<td><code>POST</code></td>
+<td><code>/api/complaints/{id:guid}/acknowledge</code></td>
+<td>authenticated</td>
+<td>Complaints.Edit</td>
+<td>AcknowledgeComplaintCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">56</td>
+<td><code>POST</code></td>
+<td><code>/api/complaints/{id:guid}/close</code></td>
+<td>authenticated</td>
+<td>Complaints.Void</td>
+<td>CloseComplaintCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">57</td>
+<td><code>POST</code></td>
+<td><code>/api/complaints/{id:guid}/outcome</code></td>
+<td>authenticated</td>
+<td>Complaints.Edit</td>
+<td>LogComplaintOutcomeCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">58</td>
+<td><code>POST</code></td>
+<td><code>/api/complaints/{id:guid}/resolve</code></td>
+<td>authenticated</td>
+<td>Complaints.Edit</td>
+<td>ResolveComplaintCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">59</td>
+<td><code>POST</code></td>
+<td><code>/api/complaints/{id:guid}/start-investigation</code></td>
+<td>authenticated</td>
+<td>Complaints.Edit</td>
+<td>StartComplaintInvestigationCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">60</td>
+<td><code>POST</code></td>
+<td><code>/api/complaints/{id:guid}/validate</code></td>
+<td>authenticated</td>
+<td>Complaints.Approve</td>
+<td>ValidateComplaintCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">61</td>
+<td><code>GET</code></td>
+<td><code>/api/compliance/audit-trail</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetAuditTrailQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">62</td>
+<td><code>GET</code></td>
+<td><code>/api/compliance/audit-trail-reviews</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetAuditTrailReviewsQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">63</td>
+<td><code>POST</code></td>
+<td><code>/api/compliance/audit-trail-reviews</code></td>
+<td>authenticated</td>
+<td>Compliance.Create</td>
+<td>OpenAuditTrailReviewCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">64</td>
+<td><code>POST</code></td>
+<td><code>/api/compliance/audit-trail-reviews/{id:guid}/complete</code></td>
+<td>authenticated</td>
+<td>Compliance.Approve</td>
+<td>CompleteAuditTrailReviewCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">65</td>
+<td><code>GET</code></td>
+<td><code>/api/compliance/chain-verification</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>VerifyChainQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">66</td>
+<td><code>GET</code></td>
+<td><code>/api/compliance/field-changes</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetFieldChangesQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">67</td>
+<td><code>GET</code></td>
+<td><code>/api/compliance/security-events</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetSecurityEventsQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">68</td>
+<td><code>GET</code></td>
+<td><code>/api/compliance/signatures</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetSignatureLogQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">69</td>
+<td><code>GET</code></td>
+<td><code>/api/conflicts</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetConflictsQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">70</td>
+<td><code>POST</code></td>
+<td><code>/api/conflicts</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>DeclareConflictCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">71</td>
+<td><code>GET</code></td>
+<td><code>/api/conflicts/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetConflictByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">72</td>
+<td><code>POST</code></td>
+<td><code>/api/conflicts/{id:guid}/assess</code></td>
+<td>authenticated</td>
+<td>Conflicts.Approve</td>
+<td>AssessConflictCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">73</td>
+<td><code>POST</code></td>
+<td><code>/api/conflicts/{id:guid}/close</code></td>
+<td>authenticated</td>
+<td>Conflicts.Void</td>
+<td>CloseConflictCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">74</td>
+<td><code>GET</code></td>
+<td><code>/api/departments</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetDepartmentsQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">75</td>
+<td><code>POST</code></td>
+<td><code>/api/departments</code></td>
+<td>authenticated</td>
+<td>Organization.Create</td>
+<td>CreateDepartmentCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">76</td>
+<td><code>POST</code></td>
+<td><code>/api/departments/{id:guid}/deactivate</code></td>
+<td>authenticated</td>
+<td>Organization.Manage</td>
+<td>DeactivateOrgUnitCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">77</td>
+<td><code>GET</code></td>
+<td><code>/api/detection-limit-studies</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetDetectionLimitStudiesQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">78</td>
+<td><code>POST</code></td>
+<td><code>/api/detection-limit-studies</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Create</td>
+<td>CreateDetectionLimitStudyCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">79</td>
+<td><code>GET</code></td>
+<td><code>/api/detection-limit-studies/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetDetectionLimitStudyByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">80</td>
+<td><code>POST</code></td>
+<td><code>/api/detection-limit-studies/{id:guid}/calculate</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>CalculateDetectionLimitCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">81</td>
+<td><code>POST</code></td>
+<td><code>/api/detection-limit-studies/{id:guid}/measurements</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>AddDetectionMeasurementCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">82</td>
+<td><code>DELETE</code></td>
+<td><code>/api/detection-limit-studies/{id:guid}/measurements/{measurementId:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>RemoveDetectionMeasurementCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">83</td>
+<td><code>POST</code></td>
+<td><code>/api/detection-limit-studies/{id:guid}/sign-off</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Sign</td>
+<td>SignOffDetectionLimitCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">84</td>
+<td><code>GET</code></td>
+<td><code>/api/documents</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetDocumentsQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">85</td>
+<td><code>POST</code></td>
+<td><code>/api/documents</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>CreateDocumentCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">86</td>
+<td><code>POST</code></td>
+<td><code>/api/documents/controlled-copies/{copyId:guid}/close</code></td>
+<td>authenticated</td>
+<td>Documents.Edit</td>
+<td>CloseControlledCopyCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">87</td>
+<td><code>GET</code></td>
+<td><code>/api/documents/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetDocumentByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">88</td>
+<td><code>POST</code></td>
+<td><code>/api/documents/{id:guid}/acknowledge</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>AcknowledgeDocumentCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">89</td>
+<td><code>GET</code></td>
+<td><code>/api/documents/{id:guid}/acknowledgements</code></td>
+<td>authenticated</td>
+<td>Documents.View</td>
+<td>GetDocumentAcknowledgementsQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">90</td>
+<td><code>POST</code></td>
+<td><code>/api/documents/{id:guid}/confirm-review</code></td>
+<td>authenticated</td>
+<td>Documents.Sign</td>
+<td>ConfirmDocumentReviewCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">91</td>
+<td><code>GET</code></td>
+<td><code>/api/documents/{id:guid}/controlled-copies</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetControlledCopiesQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">92</td>
+<td><code>POST</code></td>
+<td><code>/api/documents/{id:guid}/controlled-copies</code></td>
+<td>authenticated</td>
+<td>Documents.Edit</td>
+<td>IssueControlledCopyCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">93</td>
+<td><code>GET</code></td>
+<td><code>/api/documents/{id:guid}/my-acknowledgement</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetMyDocumentAcknowledgementQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">94</td>
+<td><code>POST</code></td>
+<td><code>/api/documents/{id:guid}/publish</code></td>
+<td>authenticated</td>
+<td>Documents.Sign</td>
+<td>PublishDocumentCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">95</td>
+<td><code>POST</code></td>
+<td><code>/api/documents/{id:guid}/recommend</code></td>
+<td>authenticated</td>
+<td>Documents.Approve</td>
+<td>RecommendDocumentCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">96</td>
+<td><code>POST</code></td>
+<td><code>/api/documents/{id:guid}/reject</code></td>
+<td>authenticated</td>
+<td>Documents.Approve</td>
+<td>RejectDocumentVersionCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">97</td>
+<td><code>POST</code></td>
+<td><code>/api/documents/{id:guid}/retire</code></td>
+<td>authenticated</td>
+<td>Documents.Void</td>
+<td>RetireDocumentCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">98</td>
+<td><code>GET</code></td>
+<td><code>/api/documents/{id:guid}/signatures</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td style="text-align: right;">99</td>
+<td><code>POST</code></td>
+<td><code>/api/documents/{id:guid}/submit</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>SubmitDocumentForReviewCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">100</td>
+<td><code>POST</code></td>
+<td><code>/api/documents/{id:guid}/versions</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>DraftNewVersionCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">101</td>
+<td><code>GET</code></td>
+<td><code>/api/equipment</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetEquipmentQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">102</td>
+<td><code>POST</code></td>
+<td><code>/api/equipment</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>RegisterEquipmentCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">103</td>
+<td><code>GET</code></td>
+<td><code>/api/equipment/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetEquipmentByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">104</td>
+<td><code>POST</code></td>
+<td><code>/api/equipment/{id:guid}/calibrations</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>LogCalibrationCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">105</td>
+<td><code>POST</code></td>
+<td><code>/api/equipment/{id:guid}/checks</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>RecordIntermediateCheckCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">106</td>
+<td><code>POST</code></td>
+<td><code>/api/equipment/{id:guid}/maintenance</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>LogMaintenanceCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">107</td>
+<td><code>POST</code></td>
+<td><code>/api/equipment/{id:guid}/retire</code></td>
+<td>authenticated</td>
+<td>Equipment.Void</td>
+<td>RetireEquipmentCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">108</td>
+<td><code>GET</code></td>
+<td><code>/api/exports/audit-trail.xlsx</code></td>
+<td>authenticated</td>
+<td>Compliance.Export</td>
+<td>GetAuditTrailQuery, GetFieldChangesQuery, VerifyChainQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">109</td>
+<td><code>GET</code></td>
+<td><code>/api/exports/nonconformances.xlsx</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetNcsQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">110</td>
+<td><code>GET</code></td>
+<td><code>/api/exports/review-pack/{reviewId:guid}.pdf</code></td>
+<td>authenticated</td>
+<td>ManagementReviews.Export</td>
+<td>GetDashboardKpisQuery, GetNcParetoQuery, GetReviewByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">111</td>
+<td><code>GET</code></td>
+<td><code>/api/exports/signatures.xlsx</code></td>
+<td>authenticated</td>
+<td>Compliance.Export</td>
+<td>GetSignatureLogQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">112</td>
+<td><code>GET</code></td>
+<td><code>/api/feedback</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetFeedbackQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">113</td>
+<td><code>POST</code></td>
+<td><code>/api/feedback</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>LogFeedbackCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">114</td>
+<td><code>GET</code></td>
+<td><code>/api/feedback/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetFeedbackByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">115</td>
+<td><code>POST</code></td>
+<td><code>/api/feedback/{id:guid}/close</code></td>
+<td>authenticated</td>
+<td>Feedback.Void</td>
+<td>CloseFeedbackCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">116</td>
+<td><code>POST</code></td>
+<td><code>/api/feedback/{id:guid}/escalate</code></td>
+<td>authenticated</td>
+<td>Feedback.Edit</td>
+<td>EscalateFeedbackCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">117</td>
+<td><code>POST</code></td>
+<td><code>/api/feedback/{id:guid}/review</code></td>
+<td>authenticated</td>
+<td>Feedback.Edit</td>
+<td>ReviewFeedbackCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">118</td>
+<td><code>POST</code></td>
+<td><code>/api/files</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td style="text-align: right;">119</td>
+<td><code>GET</code></td>
+<td><code>/api/files/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td style="text-align: right;">120</td>
+<td><code>GET</code></td>
+<td><code>/api/instrument-comparabilities</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetInstrumentComparabilitiesQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">121</td>
+<td><code>POST</code></td>
+<td><code>/api/instrument-comparabilities</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Create</td>
+<td>CreateInstrumentComparabilityCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">122</td>
+<td><code>GET</code></td>
+<td><code>/api/instrument-comparabilities/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetInstrumentComparabilityByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">123</td>
+<td><code>POST</code></td>
+<td><code>/api/instrument-comparabilities/{id:guid}/calculate</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>CalculateInstrumentComparabilityCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">124</td>
+<td><code>POST</code></td>
+<td><code>/api/instrument-comparabilities/{id:guid}/readings</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>AddInstrumentReadingCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">125</td>
+<td><code>DELETE</code></td>
+<td><code>/api/instrument-comparabilities/{id:guid}/readings/{readingId:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>RemoveInstrumentReadingCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">126</td>
+<td><code>POST</code></td>
+<td><code>/api/instrument-comparabilities/{id:guid}/sign-off</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Sign</td>
+<td>SignOffInstrumentComparabilityCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">127</td>
+<td><code>GET</code></td>
+<td><code>/api/interference-studies</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetInterferenceStudiesQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">128</td>
+<td><code>POST</code></td>
+<td><code>/api/interference-studies</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Create</td>
+<td>CreateInterferenceStudyCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">129</td>
+<td><code>GET</code></td>
+<td><code>/api/interference-studies/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetInterferenceStudyByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">130</td>
+<td><code>POST</code></td>
+<td><code>/api/interference-studies/{id:guid}/calculate</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>CalculateInterferenceCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">131</td>
+<td><code>POST</code></td>
+<td><code>/api/interference-studies/{id:guid}/measurements</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>AddInterferenceMeasurementCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">132</td>
+<td><code>DELETE</code></td>
+<td><code>/api/interference-studies/{id:guid}/measurements/{measurementId:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>RemoveInterferenceMeasurementCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">133</td>
+<td><code>POST</code></td>
+<td><code>/api/interference-studies/{id:guid}/sign-off</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Sign</td>
+<td>SignOffInterferenceCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">134</td>
+<td><code>GET</code></td>
+<td><code>/api/linearity-studies</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetLinearityStudiesQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">135</td>
+<td><code>POST</code></td>
+<td><code>/api/linearity-studies</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Create</td>
+<td>CreateLinearityStudyCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">136</td>
+<td><code>GET</code></td>
+<td><code>/api/linearity-studies/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetLinearityStudyByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">137</td>
+<td><code>POST</code></td>
+<td><code>/api/linearity-studies/{id:guid}/calculate</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>CalculateLinearityCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">138</td>
+<td><code>POST</code></td>
+<td><code>/api/linearity-studies/{id:guid}/measurements</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>AddLinearityMeasurementCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">139</td>
+<td><code>DELETE</code></td>
+<td><code>/api/linearity-studies/{id:guid}/measurements/{measurementId:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>RemoveLinearityMeasurementCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">140</td>
+<td><code>POST</code></td>
+<td><code>/api/linearity-studies/{id:guid}/sign-off</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Sign</td>
+<td>SignOffLinearityCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">141</td>
+<td><code>GET</code></td>
+<td><code>/api/lot-comparisons</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetLotComparisonsQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">142</td>
+<td><code>POST</code></td>
+<td><code>/api/lot-comparisons</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Create</td>
+<td>CreateLotComparisonCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">143</td>
+<td><code>GET</code></td>
+<td><code>/api/lot-comparisons/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetLotComparisonByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">144</td>
+<td><code>POST</code></td>
+<td><code>/api/lot-comparisons/{id:guid}/calculate</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>CalculateLotComparisonCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">145</td>
+<td><code>POST</code></td>
+<td><code>/api/lot-comparisons/{id:guid}/pairs</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>AddLotPairCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">146</td>
+<td><code>DELETE</code></td>
+<td><code>/api/lot-comparisons/{id:guid}/pairs/{pairId:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>RemoveLotPairCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">147</td>
+<td><code>POST</code></td>
+<td><code>/api/lot-comparisons/{id:guid}/sign-off</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Sign</td>
+<td>SignOffLotComparisonCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">148</td>
+<td><code>GET</code></td>
+<td><code>/api/lovs</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetLovsQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">149</td>
+<td><code>POST</code></td>
+<td><code>/api/lovs</code></td>
+<td>authenticated</td>
+<td>Organization.Edit</td>
+<td>UpsertLovCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">150</td>
+<td><code>GET</code></td>
+<td><code>/api/management-reviews</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetReviewsQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">151</td>
+<td><code>POST</code></td>
+<td><code>/api/management-reviews</code></td>
+<td>authenticated</td>
+<td>ManagementReviews.Create</td>
+<td>ScheduleReviewCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">152</td>
+<td><code>GET</code></td>
+<td><code>/api/management-reviews/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetReviewByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">153</td>
+<td><code>POST</code></td>
+<td><code>/api/management-reviews/{id:guid}/close</code></td>
+<td>authenticated</td>
+<td>ManagementReviews.Void</td>
+<td>CloseReviewCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">154</td>
+<td><code>POST</code></td>
+<td><code>/api/management-reviews/{id:guid}/decisions</code></td>
+<td>authenticated</td>
+<td>ManagementReviews.Edit</td>
+<td>AddDecisionCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">155</td>
+<td><code>GET</code></td>
+<td><code>/api/method-comparisons</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetMethodComparisonsQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">156</td>
+<td><code>POST</code></td>
+<td><code>/api/method-comparisons</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Create</td>
+<td>CreateMethodComparisonCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">157</td>
+<td><code>GET</code></td>
+<td><code>/api/method-comparisons/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetMethodComparisonByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">158</td>
+<td><code>POST</code></td>
+<td><code>/api/method-comparisons/{id:guid}/calculate</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>CalculateMethodComparisonCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">159</td>
+<td><code>POST</code></td>
+<td><code>/api/method-comparisons/{id:guid}/pairs</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>AddMeasurementPairCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">160</td>
+<td><code>POST</code></td>
+<td><code>/api/method-comparisons/{id:guid}/pairs/import</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>ImportMeasurementPairsCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">161</td>
+<td><code>DELETE</code></td>
+<td><code>/api/method-comparisons/{id:guid}/pairs/{pairId:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>RemoveMeasurementPairCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">162</td>
+<td><code>POST</code></td>
+<td><code>/api/method-comparisons/{id:guid}/sign-off</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Sign</td>
+<td>SignOffMethodComparisonCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">163</td>
+<td><code>GET</code></td>
+<td><code>/api/monitoring-points</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetMonitoringPointsQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">164</td>
+<td><code>POST</code></td>
+<td><code>/api/monitoring-points</code></td>
+<td>authenticated</td>
+<td>MonitoringPoints.Create</td>
+<td>RegisterMonitoringPointCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">165</td>
+<td><code>GET</code></td>
+<td><code>/api/monitoring-points/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetMonitoringPointByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">166</td>
+<td><code>POST</code></td>
+<td><code>/api/monitoring-points/{id:guid}/limits</code></td>
+<td>authenticated</td>
+<td>MonitoringPoints.Edit</td>
+<td>SetMonitoringLimitsCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">167</td>
+<td><code>POST</code></td>
+<td><code>/api/monitoring-points/{id:guid}/readings</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>RecordReadingCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">168</td>
+<td><code>POST</code></td>
+<td><code>/api/monitoring-points/{id:guid}/resume</code></td>
+<td>authenticated</td>
+<td>MonitoringPoints.Edit</td>
+<td>ResumeMonitoringPointCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">169</td>
+<td><code>POST</code></td>
+<td><code>/api/monitoring-points/{id:guid}/retire</code></td>
+<td>authenticated</td>
+<td>MonitoringPoints.Void</td>
+<td>RetireMonitoringPointCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">170</td>
+<td><code>POST</code></td>
+<td><code>/api/monitoring-points/{id:guid}/suspend</code></td>
+<td>authenticated</td>
+<td>MonitoringPoints.Edit</td>
+<td>SuspendMonitoringPointCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">171</td>
+<td><code>GET</code></td>
+<td><code>/api/nonconformances</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetNcsQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">172</td>
+<td><code>POST</code></td>
+<td><code>/api/nonconformances</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>RaiseNcCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">173</td>
+<td><code>GET</code></td>
+<td><code>/api/nonconformances/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetNcByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">174</td>
+<td><code>POST</code></td>
+<td><code>/api/nonconformances/{id:guid}/actions</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>PlanCapaActionCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">175</td>
+<td><code>POST</code></td>
+<td><code>/api/nonconformances/{id:guid}/actions/{actionId:guid}/complete</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>CompleteCapaActionCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">176</td>
+<td><code>POST</code></td>
+<td><code>/api/nonconformances/{id:guid}/confirm-effectiveness</code></td>
+<td>authenticated</td>
+<td>Nonconformances.Approve</td>
+<td>ConfirmNcEffectivenessCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">177</td>
+<td><code>POST</code></td>
+<td><code>/api/nonconformances/{id:guid}/rca</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>RecordRcaCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">178</td>
+<td><code>POST</code></td>
+<td><code>/api/nonconformances/{id:guid}/reject</code></td>
+<td>authenticated</td>
+<td>Nonconformances.Void</td>
+<td>RejectNcCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">179</td>
+<td><code>POST</code></td>
+<td><code>/api/nonconformances/{id:guid}/submit</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>SubmitNcCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">180</td>
+<td><code>POST</code></td>
+<td><code>/api/nonconformances/{id:guid}/submit-verification</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>SubmitNcForVerificationCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">181</td>
+<td><code>POST</code></td>
+<td><code>/api/nonconformances/{id:guid}/triage</code></td>
+<td>authenticated</td>
+<td>Nonconformances.Approve</td>
+<td>TriageNcCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">182</td>
+<td><code>POST</code></td>
+<td><code>/api/nonconformances/{id:guid}/verify</code></td>
+<td>authenticated</td>
+<td>Nonconformances.Approve</td>
+<td>VerifyNcCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">183</td>
+<td><code>GET</code></td>
+<td><code>/api/notifications/mine</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetMyNotificationsQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">184</td>
+<td><code>GET</code></td>
+<td><code>/api/notifications/monitor</code></td>
+<td>authenticated</td>
+<td>Notifications.Manage</td>
+<td>GetDispatchMonitorQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">185</td>
+<td><code>GET</code></td>
+<td><code>/api/notifications/rules</code></td>
+<td>authenticated</td>
+<td>Notifications.Manage</td>
+<td>GetNotificationRulesQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">186</td>
+<td><code>POST</code></td>
+<td><code>/api/notifications/rules</code></td>
+<td>authenticated</td>
+<td>Notifications.Manage</td>
+<td>UpsertNotificationRuleCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">187</td>
+<td><code>POST</code></td>
+<td><code>/api/notifications/{id:guid}/read</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>MarkNotificationReadCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">188</td>
+<td><code>GET</code></td>
+<td><code>/api/org-context/interested-parties</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetInterestedPartiesQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">189</td>
+<td><code>POST</code></td>
+<td><code>/api/org-context/interested-parties</code></td>
+<td>authenticated</td>
+<td>OrgContext.Create</td>
+<td>RegisterInterestedPartyCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">190</td>
+<td><code>PUT</code></td>
+<td><code>/api/org-context/interested-parties/{id:guid}</code></td>
+<td>authenticated</td>
+<td>OrgContext.Edit</td>
+<td>ReviseInterestedPartyCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">191</td>
+<td><code>POST</code></td>
+<td><code>/api/org-context/interested-parties/{id:guid}/archive</code></td>
+<td>authenticated</td>
+<td>OrgContext.Void</td>
+<td>ArchiveInterestedPartyCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">192</td>
+<td><code>GET</code></td>
+<td><code>/api/org-context/issues</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetContextIssuesQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">193</td>
+<td><code>POST</code></td>
+<td><code>/api/org-context/issues</code></td>
+<td>authenticated</td>
+<td>OrgContext.Create</td>
+<td>RegisterContextIssueCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">194</td>
+<td><code>PUT</code></td>
+<td><code>/api/org-context/issues/{id:guid}</code></td>
+<td>authenticated</td>
+<td>OrgContext.Edit</td>
+<td>ReviseContextIssueCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">195</td>
+<td><code>POST</code></td>
+<td><code>/api/org-context/issues/{id:guid}/close</code></td>
+<td>authenticated</td>
+<td>OrgContext.Void</td>
+<td>CloseContextIssueCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">196</td>
+<td><code>POST</code></td>
+<td><code>/api/org-context/issues/{id:guid}/link-risk</code></td>
+<td>authenticated</td>
+<td>OrgContext.Edit</td>
+<td>LinkContextIssueRiskCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">197</td>
+<td><code>GET</code></td>
+<td><code>/api/outlier-screenings</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetOutlierScreeningsQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">198</td>
+<td><code>POST</code></td>
+<td><code>/api/outlier-screenings</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Create</td>
+<td>CreateOutlierScreeningCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">199</td>
+<td><code>GET</code></td>
+<td><code>/api/outlier-screenings/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetOutlierScreeningByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">200</td>
+<td><code>POST</code></td>
+<td><code>/api/outlier-screenings/{id:guid}/calculate</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>CalculateOutlierScreeningCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">201</td>
+<td><code>POST</code></td>
+<td><code>/api/outlier-screenings/{id:guid}/points</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>AddOutlierPointCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">202</td>
+<td><code>DELETE</code></td>
+<td><code>/api/outlier-screenings/{id:guid}/points/{pointId:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>RemoveOutlierPointCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">203</td>
+<td><code>POST</code></td>
+<td><code>/api/outlier-screenings/{id:guid}/sign-off</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Sign</td>
+<td>SignOffOutlierScreeningCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">204</td>
+<td><code>GET</code></td>
+<td><code>/api/precision-studies</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetPrecisionStudiesQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">205</td>
+<td><code>POST</code></td>
+<td><code>/api/precision-studies</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Create</td>
+<td>CreatePrecisionStudyCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">206</td>
+<td><code>GET</code></td>
+<td><code>/api/precision-studies/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetPrecisionStudyByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">207</td>
+<td><code>POST</code></td>
+<td><code>/api/precision-studies/{id:guid}/calculate</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>CalculatePrecisionCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">208</td>
+<td><code>POST</code></td>
+<td><code>/api/precision-studies/{id:guid}/measurements</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>AddPrecisionMeasurementCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">209</td>
+<td><code>POST</code></td>
+<td><code>/api/precision-studies/{id:guid}/measurements/import</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>ImportPrecisionMeasurementsCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">210</td>
+<td><code>DELETE</code></td>
+<td><code>/api/precision-studies/{id:guid}/measurements/{measurementId:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>RemovePrecisionMeasurementCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">211</td>
+<td><code>POST</code></td>
+<td><code>/api/precision-studies/{id:guid}/sign-off</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Sign</td>
+<td>SignOffPrecisionCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">212</td>
+<td><code>GET</code></td>
+<td><code>/api/proficiency-tests</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetPtEnrollmentsQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">213</td>
+<td><code>POST</code></td>
+<td><code>/api/proficiency-tests</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>EnrollPtCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">214</td>
+<td><code>POST</code></td>
+<td><code>/api/proficiency-tests/{id:guid}/result</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>RecordPtResultCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">215</td>
+<td><code>GET</code></td>
+<td><code>/api/pt-plans</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetPtPlansQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">216</td>
+<td><code>POST</code></td>
+<td><code>/api/pt-plans</code></td>
+<td>authenticated</td>
+<td>ProficiencyTesting.Create</td>
+<td>CreatePtPlanCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">217</td>
+<td><code>GET</code></td>
+<td><code>/api/pt-plans/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetPtPlanByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">218</td>
+<td><code>POST</code></td>
+<td><code>/api/pt-plans/{id:guid}/approve</code></td>
+<td>authenticated</td>
+<td>ProficiencyTesting.Approve</td>
+<td>ApprovePtPlanCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">219</td>
+<td><code>POST</code></td>
+<td><code>/api/pt-plans/{id:guid}/close</code></td>
+<td>authenticated</td>
+<td>ProficiencyTesting.Void</td>
+<td>ClosePtPlanCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">220</td>
+<td><code>POST</code></td>
+<td><code>/api/pt-plans/{id:guid}/fulfilments</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>RecordPtPlanFulfilmentCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">221</td>
+<td><code>POST</code></td>
+<td><code>/api/pt-plans/{id:guid}/items</code></td>
+<td>authenticated</td>
+<td>ProficiencyTesting.Edit</td>
+<td>AddPtPlanItemCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">222</td>
+<td><code>DELETE</code></td>
+<td><code>/api/pt-plans/{id:guid}/items/{itemId:guid}</code></td>
+<td>authenticated</td>
+<td>ProficiencyTesting.Edit</td>
+<td>RemovePtPlanItemCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">223</td>
+<td><code>GET</code></td>
+<td><code>/api/qc/profiles</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetQcProfilesQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">224</td>
+<td><code>POST</code></td>
+<td><code>/api/qc/profiles</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Manage</td>
+<td>CreateQcProfileCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">225</td>
+<td><code>GET</code></td>
+<td><code>/api/qc/profiles/{id:guid}/runs</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetQcRunsQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">226</td>
+<td><code>POST</code></td>
+<td><code>/api/qc/profiles/{id:guid}/runs</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>RecordQcRunCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">227</td>
+<td><code>PUT</code></td>
+<td><code>/api/qc/profiles/{id:guid}/targets</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Manage</td>
+<td>UpdateQcTargetsCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">228</td>
+<td><code>POST</code></td>
+<td><code>/api/qc/runs/{runId:guid}/troubleshoot</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>LogQcTroubleshootingCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">229</td>
+<td><code>GET</code></td>
+<td><code>/api/quality-objectives</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetQualityObjectivesQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">230</td>
+<td><code>POST</code></td>
+<td><code>/api/quality-objectives</code></td>
+<td>authenticated</td>
+<td>QualityObjectives.Create</td>
+<td>DefineQualityObjectiveCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">231</td>
+<td><code>GET</code></td>
+<td><code>/api/quality-objectives/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetQualityObjectiveByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">232</td>
+<td><code>POST</code></td>
+<td><code>/api/quality-objectives/{id:guid}/close</code></td>
+<td>authenticated</td>
+<td>QualityObjectives.Void</td>
+<td>CloseObjectiveCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">233</td>
+<td><code>POST</code></td>
+<td><code>/api/quality-objectives/{id:guid}/progress</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>RecordObjectiveProgressCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">234</td>
+<td><code>GET</code></td>
+<td><code>/api/quality-policy</code></td>
+<td>authenticated</td>
+<td>QualityPolicy.View</td>
+<td>GetQualityPoliciesQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">235</td>
+<td><code>POST</code></td>
+<td><code>/api/quality-policy</code></td>
+<td>authenticated</td>
+<td>QualityPolicy.Create</td>
+<td>DraftQualityPolicyCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">236</td>
+<td><code>GET</code></td>
+<td><code>/api/quality-policy/active</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetActiveQualityPolicyQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">237</td>
+<td><code>PUT</code></td>
+<td><code>/api/quality-policy/{id:guid}</code></td>
+<td>authenticated</td>
+<td>QualityPolicy.Edit</td>
+<td>ReviseQualityPolicyCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">238</td>
+<td><code>POST</code></td>
+<td><code>/api/quality-policy/{id:guid}/approve</code></td>
+<td>authenticated</td>
+<td>QualityPolicy.Approve</td>
+<td>ApproveQualityPolicyCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">239</td>
+<td><code>GET</code></td>
+<td><code>/api/reference-interval-studies</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetReferenceIntervalStudiesQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">240</td>
+<td><code>POST</code></td>
+<td><code>/api/reference-interval-studies</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Create</td>
+<td>CreateReferenceIntervalStudyCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">241</td>
+<td><code>GET</code></td>
+<td><code>/api/reference-interval-studies/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetReferenceIntervalStudyByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">242</td>
+<td><code>POST</code></td>
+<td><code>/api/reference-interval-studies/{id:guid}/calculate</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>CalculateReferenceIntervalCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">243</td>
+<td><code>POST</code></td>
+<td><code>/api/reference-interval-studies/{id:guid}/samples</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>AddReferenceSampleCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">244</td>
+<td><code>DELETE</code></td>
+<td><code>/api/reference-interval-studies/{id:guid}/samples/{sampleId:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>RemoveReferenceSampleCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">245</td>
+<td><code>POST</code></td>
+<td><code>/api/reference-interval-studies/{id:guid}/sign-off</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Sign</td>
+<td>SignOffReferenceIntervalCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">246</td>
+<td><code>GET</code></td>
+<td><code>/api/reference-standards</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetReferenceStandardsQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">247</td>
+<td><code>POST</code></td>
+<td><code>/api/reference-standards</code></td>
+<td>authenticated</td>
+<td>ReferenceStandards.Create</td>
+<td>RegisterReferenceStandardCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">248</td>
+<td><code>GET</code></td>
+<td><code>/api/reference-standards/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetReferenceStandardByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">249</td>
+<td><code>POST</code></td>
+<td><code>/api/reference-standards/{id:guid}/quarantine</code></td>
+<td>authenticated</td>
+<td>ReferenceStandards.Edit</td>
+<td>QuarantineReferenceStandardCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">250</td>
+<td><code>POST</code></td>
+<td><code>/api/reference-standards/{id:guid}/reactivate</code></td>
+<td>authenticated</td>
+<td>ReferenceStandards.Approve</td>
+<td>ReactivateReferenceStandardCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">251</td>
+<td><code>POST</code></td>
+<td><code>/api/reference-standards/{id:guid}/retire</code></td>
+<td>authenticated</td>
+<td>ReferenceStandards.Void</td>
+<td>RetireReferenceStandardCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">252</td>
+<td><code>GET</code></td>
+<td><code>/api/reports/kpi-history</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetKpiHistoryQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">253</td>
+<td><code>GET</code></td>
+<td><code>/api/reports/kpis</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetDashboardKpisQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">254</td>
+<td><code>GET</code></td>
+<td><code>/api/reports/nc-pareto</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetNcParetoQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">255</td>
+<td><code>GET</code></td>
+<td><code>/api/reports/sla-compliance</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetSlaComplianceQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">256</td>
+<td><code>GET</code></td>
+<td><code>/api/risks</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetRisksQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">257</td>
+<td><code>POST</code></td>
+<td><code>/api/risks</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>AssessRiskCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">258</td>
+<td><code>GET</code></td>
+<td><code>/api/risks/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetRiskByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">259</td>
+<td><code>POST</code></td>
+<td><code>/api/risks/{id:guid}/actions</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>AddMitigationCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">260</td>
+<td><code>POST</code></td>
+<td><code>/api/risks/{id:guid}/actions/{actionId:guid}/complete</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>CompleteMitigationCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">261</td>
+<td><code>POST</code></td>
+<td><code>/api/risks/{id:guid}/close</code></td>
+<td>authenticated</td>
+<td>Risks.Void</td>
+<td>CloseRiskCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">262</td>
+<td><code>POST</code></td>
+<td><code>/api/risks/{id:guid}/residual</code></td>
+<td>authenticated</td>
+<td>Risks.Approve</td>
+<td>RecordResidualCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">263</td>
+<td><code>GET</code></td>
+<td><code>/api/roles</code></td>
+<td>authenticated</td>
+<td>RolesPrivileges.View</td>
+<td>GetRolesQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">264</td>
+<td><code>POST</code></td>
+<td><code>/api/roles</code></td>
+<td>authenticated</td>
+<td>RolesPrivileges.Manage</td>
+<td>CreateRoleCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">265</td>
+<td><code>GET</code></td>
+<td><code>/api/roles/catalog</code></td>
+<td>authenticated</td>
+<td>RolesPrivileges.View</td>
+<td>GetPermissionCatalogQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">266</td>
+<td><code>GET</code></td>
+<td><code>/api/roles/{id:guid}</code></td>
+<td>authenticated</td>
+<td>RolesPrivileges.View</td>
+<td>GetRoleQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">267</td>
+<td><code>PUT</code></td>
+<td><code>/api/roles/{id:guid}</code></td>
+<td>authenticated</td>
+<td>RolesPrivileges.Manage</td>
+<td>UpdateRoleCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">268</td>
+<td><code>POST</code></td>
+<td><code>/api/roles/{id:guid}/deactivate</code></td>
+<td>authenticated</td>
+<td>RolesPrivileges.Manage</td>
+<td>SetRoleActiveCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">269</td>
+<td><code>PUT</code></td>
+<td><code>/api/roles/{id:guid}/permissions</code></td>
+<td>authenticated</td>
+<td>RolesPrivileges.Manage</td>
+<td>SetRolePermissionsCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">270</td>
+<td><code>POST</code></td>
+<td><code>/api/roles/{id:guid}/reactivate</code></td>
+<td>authenticated</td>
+<td>RolesPrivileges.Manage</td>
+<td>SetRoleActiveCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">271</td>
+<td><code>GET</code></td>
+<td><code>/api/sigma-assessments</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetSigmaAssessmentsQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">272</td>
+<td><code>POST</code></td>
+<td><code>/api/sigma-assessments</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Create</td>
+<td>CreateSigmaAssessmentCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">273</td>
+<td><code>GET</code></td>
+<td><code>/api/sigma-assessments/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetSigmaAssessmentByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">274</td>
+<td><code>PUT</code></td>
+<td><code>/api/sigma-assessments/{id:guid}</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Edit</td>
+<td>UpdateSigmaInputsCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">275</td>
+<td><code>POST</code></td>
+<td><code>/api/sigma-assessments/{id:guid}/sign-off</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Sign</td>
+<td>SignOffSigmaAssessmentCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">276</td>
+<td><code>GET</code></td>
+<td><code>/api/sla-definitions</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetSlaDefinitionsQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">277</td>
+<td><code>POST</code></td>
+<td><code>/api/sla-definitions</code></td>
+<td>authenticated</td>
+<td>Tasks.Manage</td>
+<td>UpsertSlaCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">278</td>
+<td><code>GET</code></td>
+<td><code>/api/suppliers</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetSuppliersQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">279</td>
+<td><code>POST</code></td>
+<td><code>/api/suppliers</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>RegisterSupplierCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">280</td>
+<td><code>GET</code></td>
+<td><code>/api/suppliers/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetSupplierByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">281</td>
+<td><code>POST</code></td>
+<td><code>/api/suppliers/{id:guid}/approve</code></td>
+<td>authenticated</td>
+<td>Suppliers.Approve</td>
+<td>ApproveSupplierCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">282</td>
+<td><code>POST</code></td>
+<td><code>/api/suppliers/{id:guid}/certificates</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>AddCertificateCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">283</td>
+<td><code>GET</code></td>
+<td><code>/api/suppliers/{id:guid}/evaluations</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetEvaluationsQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">284</td>
+<td><code>POST</code></td>
+<td><code>/api/suppliers/{id:guid}/evaluations</code></td>
+<td>authenticated</td>
+<td>Suppliers.Approve</td>
+<td>RecordEvaluationCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">285</td>
+<td><code>POST</code></td>
+<td><code>/api/suppliers/{id:guid}/suspend</code></td>
+<td>authenticated</td>
+<td>Suppliers.Void</td>
+<td>SuspendSupplierCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">286</td>
+<td><code>POST</code></td>
+<td><code>/api/tasks</code></td>
+<td>authenticated</td>
+<td>Tasks.Create</td>
+<td>CreateTaskCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">287</td>
+<td><code>GET</code></td>
+<td><code>/api/tasks/mine</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetMyTasksQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">288</td>
+<td><code>POST</code></td>
+<td><code>/api/tasks/{id:guid}/complete</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>CompleteTaskCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">289</td>
+<td><code>GET</code></td>
+<td><code>/api/tenant-settings/mfa-policy</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetTenantMfaPolicyQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">290</td>
+<td><code>PUT</code></td>
+<td><code>/api/tenant-settings/mfa-policy</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>SetTenantMfaPolicyCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">291</td>
+<td><code>GET</code></td>
+<td><code>/api/tenants</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetTenantsQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">292</td>
+<td><code>POST</code></td>
+<td><code>/api/tenants</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>ProvisionTenantCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">293</td>
+<td><code>GET</code></td>
+<td><code>/api/test-authorizations</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetTestAuthorizationsQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">294</td>
+<td><code>POST</code></td>
+<td><code>/api/test-authorizations</code></td>
+<td>authenticated</td>
+<td>TestAuthorizations.Create</td>
+<td>GrantTestAuthorizationCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">295</td>
+<td><code>GET</code></td>
+<td><code>/api/test-authorizations/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetTestAuthorizationByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">296</td>
+<td><code>POST</code></td>
+<td><code>/api/test-authorizations/{id:guid}/reinstate</code></td>
+<td>authenticated</td>
+<td>TestAuthorizations.Approve</td>
+<td>ReinstateTestAuthorizationCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">297</td>
+<td><code>POST</code></td>
+<td><code>/api/test-authorizations/{id:guid}/revoke</code></td>
+<td>authenticated</td>
+<td>TestAuthorizations.Void</td>
+<td>RevokeTestAuthorizationCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">298</td>
+<td><code>POST</code></td>
+<td><code>/api/test-authorizations/{id:guid}/suspend</code></td>
+<td>authenticated</td>
+<td>TestAuthorizations.Edit</td>
+<td>SuspendTestAuthorizationCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">299</td>
+<td><code>GET</code></td>
+<td><code>/api/test-catalog</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetTestCatalogQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">300</td>
+<td><code>POST</code></td>
+<td><code>/api/test-catalog</code></td>
+<td>authenticated</td>
+<td>Organization.Create</td>
+<td>CreateTestCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">301</td>
+<td><code>GET</code></td>
+<td><code>/api/training-assignments</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetTrainingQueueQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">302</td>
+<td><code>POST</code></td>
+<td><code>/api/training-assignments</code></td>
+<td>authenticated</td>
+<td>Training.Create</td>
+<td>AssignTrainingCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">303</td>
+<td><code>POST</code></td>
+<td><code>/api/training-assignments/{id:guid}/complete</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>CompleteTrainingCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">304</td>
+<td><code>GET</code></td>
+<td><code>/api/uncertainty-budgets</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetUncertaintyBudgetsQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">305</td>
+<td><code>POST</code></td>
+<td><code>/api/uncertainty-budgets</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Create</td>
+<td>CreateUncertaintyBudgetCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">306</td>
+<td><code>GET</code></td>
+<td><code>/api/uncertainty-budgets/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetUncertaintyBudgetByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">307</td>
+<td><code>POST</code></td>
+<td><code>/api/uncertainty-budgets/{id:guid}/approve</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Approve</td>
+<td>ApproveUncertaintyBudgetCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">308</td>
+<td><code>POST</code></td>
+<td><code>/api/uncertainty-budgets/{id:guid}/calculate</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Edit</td>
+<td>CalculateUncertaintyBudgetCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">309</td>
+<td><code>POST</code></td>
+<td><code>/api/uncertainty-budgets/{id:guid}/components</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Edit</td>
+<td>AddUncertaintyComponentCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">310</td>
+<td><code>DELETE</code></td>
+<td><code>/api/uncertainty-budgets/{id:guid}/components/{componentId:guid}</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Edit</td>
+<td>RemoveUncertaintyComponentCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">311</td>
+<td><code>GET</code></td>
+<td><code>/api/users</code></td>
+<td>authenticated</td>
+<td>Users.View</td>
+<td>GetUsersQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">312</td>
+<td><code>POST</code></td>
+<td><code>/api/users</code></td>
+<td>authenticated</td>
+<td>Users.Manage</td>
+<td>RegisterUserCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">313</td>
+<td><code>GET</code></td>
+<td><code>/api/users/directory</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetUserDirectoryQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">314</td>
+<td><code>PUT</code></td>
+<td><code>/api/users/{id:guid}/assigned-role</code></td>
+<td>authenticated</td>
+<td>Users.Manage</td>
+<td>AssignUserRoleCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">315</td>
+<td><code>POST</code></td>
+<td><code>/api/users/{id:guid}/deactivate</code></td>
+<td>authenticated</td>
+<td>Users.Manage</td>
+<td>SetUserActiveCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">316</td>
+<td><code>PUT</code></td>
+<td><code>/api/users/{id:guid}/language</code></td>
+<td>authenticated</td>
+<td>Users.Manage</td>
+<td>SetUserLanguageCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">317</td>
+<td><code>POST</code></td>
+<td><code>/api/users/{id:guid}/reactivate</code></td>
+<td>authenticated</td>
+<td>Users.Manage</td>
+<td>SetUserActiveCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">318</td>
+<td><code>POST</code></td>
+<td><code>/api/users/{id:guid}/reset-password</code></td>
+<td>authenticated</td>
+<td>Users.Manage</td>
+<td>ResetUserPasswordCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">319</td>
+<td><code>POST</code></td>
+<td><code>/api/users/{id:guid}/role</code></td>
+<td>authenticated</td>
+<td>Users.Manage</td>
+<td>ChangeUserRoleCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">320</td>
+<td><code>PUT</code></td>
+<td><code>/api/users/{id:guid}/scope</code></td>
+<td>authenticated</td>
+<td>Users.Manage</td>
+<td>SetUserScopeCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">321</td>
+<td><code>GET</code></td>
+<td><code>/api/validation-studies</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetStudiesQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">322</td>
+<td><code>POST</code></td>
+<td><code>/api/validation-studies</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Create</td>
+<td>ConfigureStudyCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">323</td>
+<td><code>GET</code></td>
+<td><code>/api/validation-studies/{id:guid}</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>GetStudyByIdQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">324</td>
+<td><code>POST</code></td>
+<td><code>/api/validation-studies/{id:guid}/calculate</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>CalculateStudyCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">325</td>
+<td><code>POST</code></td>
+<td><code>/api/validation-studies/{id:guid}/replicates</code></td>
+<td>authenticated</td>
+<td>—</td>
+<td>EnterReplicateCommand</td>
+</tr>
+<tr>
+<td style="text-align: right;">326</td>
+<td><code>POST</code></td>
+<td><code>/api/validation-studies/{id:guid}/sign-off</code></td>
+<td>authenticated</td>
+<td>AnalyticalQuality.Sign</td>
+<td>SignOffStudyCommand</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>8.14 Routes added during analysis (uncommitted at baseline)</h1>
+<p>Three route actions (six routable paths) were added to the working tree while this specification was
+being written and are <strong>not</strong> in the §8.13 catalogue table. They are specified in
+<a href="02-4-Functional-Specification-Operations-and-Platform.html">Document 02 M-38</a>.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th style="text-align: right;">#</th>
+<th>Method</th>
+<th>Route</th>
+<th>Roles</th>
+<th>Permission</th>
+<th>Command / Query</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">327</td>
+<td><code>GET</code></td>
+<td><code>/api/reports/quality-analytics</code></td>
+<td>authenticated</td>
+<td>Reports.View</td>
+<td>GetQualityAnalyticsQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">328</td>
+<td><code>GET</code></td>
+<td><code>/api/reports/quality-health-profile</code></td>
+<td>authenticated</td>
+<td>Reports.View</td>
+<td>GetQualityHealthProfileQuery</td>
+</tr>
+<tr>
+<td style="text-align: right;">329</td>
+<td><code>PUT</code></td>
+<td><code>/api/reports/quality-health-profile</code></td>
+<td>authenticated</td>
+<td>Reports.View</td>
+<td>SetQualityHealthWeightsCommand</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>ApiSurface.approved.txt</code> was updated in the same change (652 → 658 lines), so the merge gate is
+satisfied.</p>
+<div class="pager"><a href="07-File-System-Specification.html"><span>Previous</span>File System Specification</a><a href="09-Security-Specification.html" style="text-align:right"><span>Next</span>Security Specification</a></div>
+</main></div>
+<script>
+(function(){
+ var r=document.documentElement, K='ntqms-srs-theme', s=localStorage.getItem(K);
+ if(s) r.setAttribute('data-theme',s);
+ var b=document.getElementById('th');
+ if(b) b.onclick=function(){
+   var cur=r.getAttribute('data-theme');
+   if(!cur) cur=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+   var nx=cur==='dark'?'light':'dark';
+   r.setAttribute('data-theme',nx); localStorage.setItem(K,nx);
+ };
+ var p=document.getElementById('pr'); if(p) p.onclick=function(){window.print();};
+ // scroll-spy on the in-page TOC
+ var links=[].slice.call(document.querySelectorAll('#toc a'));
+ if(!links.length) return;
+ var tgt=links.map(function(a){return document.getElementById(a.getAttribute('href').slice(1));});
+ function spy(){
+   var y=window.scrollY+90, i=0;
+   for(var k=0;k<tgt.length;k++){ if(tgt[k]&&tgt[k].offsetTop<=y) i=k; }
+   links.forEach(function(a,n){a.style.color=n===i?'var(--accent)':'';
+     a.style.borderLeftColor=n===i?'var(--accent)':'transparent';});
+ }
+ addEventListener('scroll',spy,{passive:true}); spy();
+})();
+</script>
+</body></html>

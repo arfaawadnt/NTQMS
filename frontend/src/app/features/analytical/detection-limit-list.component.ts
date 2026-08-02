@@ -5,18 +5,22 @@ import { Router, RouterOutlet } from '@angular/router';
 import { DetectionLimitFacade } from './detection-limit.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
+import { DetectionLimitListItem } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 
 /** Detection-capability register (CLSI EP17): LoB / LoD / LoQ studies. */
 @Component({
     selector: 'qams-detection-limit-list',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DecimalPipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent],
+    imports: [ReactiveFormsModule, DecimalPipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('dl.title')" [subtitle]="i18n.t('dl.subtitle')">
+      <qams-export-menu [title]="i18n.t('dl.title')" [stats]="stats()" [columns]="exportColumns"
+                        [rows]="filtered()" [filtersSummary]="filtersSummary()" />
       @if (perms.can('analytical-quality.create')) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('dl.new') }}</button>
       }
@@ -115,6 +119,25 @@ export class DetectionLimitListComponent implements OnInit {
     const q = this.search().trim().toLowerCase();
     return this.facade.list().filter((s) =>
       !q || `${s.studyRef} ${s.analyte} ${s.method} ${s.state}`.toLowerCase().includes(q));
+  });
+
+  /** Export columns — the printed grid mirrors the on-screen table. */
+  readonly exportColumns: ExportColumn<DetectionLimitListItem>[] = [
+    { header: this.i18n.t('mu.ref'), cell: (s) => s.studyRef },
+    { header: this.i18n.t('qc.analyte'), cell: (s) => s.analyte },
+    { header: this.i18n.t('mu.method'), cell: (s) => s.method },
+    { header: 'LoB', cell: (s) => s.lob === null ? '—' : `${+s.lob.toFixed(4)}` },
+    { header: 'LoD', cell: (s) => s.lod === null ? '—' : `${+s.lod.toFixed(4)}` },
+    { header: 'LoQ', cell: (s) => s.loq !== null ? `${+s.loq.toFixed(4)}` : s.lod !== null ? this.i18n.t('dl.notEstablished') : '—' },
+    { header: this.i18n.t('nc.status'), cell: (s) => s.state },
+  ];
+
+  /** The filter line printed on the document, mirroring the filter bar. */
+  readonly filtersSummary = computed(() => {
+    const parts: string[] = [];
+    if (this.stateFilter()) { parts.push(this.stateFilter()); }
+    if (this.search().trim()) { parts.push(`"${this.search().trim()}"`); }
+    return parts.length ? parts.join(' · ') : this.i18n.t('exp.allRecords');
   });
 
   readonly stats = computed<ListStat[]>(() => {

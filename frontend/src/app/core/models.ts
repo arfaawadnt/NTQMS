@@ -162,6 +162,19 @@ export interface SlaCompliance {
 
 export interface CategoryCount { label: string; count: number; }
 
+// ── Page export (PDF / Excel copies of a register view) ─────────────────────
+
+export interface PageExportStat { label: string; value: string; tone: string | null; }
+
+/** The caller's own view of a register: title, filters in force, tiles, grid. */
+export interface PageExportRequest {
+  title: string;
+  filtersSummary: string | null;
+  stats: PageExportStat[];
+  columns: string[];
+  rows: string[][];
+}
+
 export interface AnalyticsRow {
   reference: string;
   title: string;
@@ -485,6 +498,8 @@ export interface UserAccount {
   branchIds: string[];
   departmentIds: string[];
   preferredLanguage: string | null;
+  /** Whether an e-signature PIN is on file — the fact only, never the value. */
+  pinConfigured: boolean;
 }
 
 // ── Roles & privileges ────────────────────────────────────────────────────────
@@ -539,6 +554,8 @@ export interface MyPrivileges {
   branchIds: string[];
   departmentIds: string[];
   preferredLanguage: string | null;
+  /** Whether an e-signature PIN is on file — the fact only, never the value. */
+  pinConfigured: boolean;
 }
 
 /** Lightweight directory entry for user pickers. */
@@ -550,7 +567,11 @@ export interface RegisterUserRequest {
   role: TenantRole;
   initialPassword: string;
   roleId?: string | null;
+  /** Optional admin-issued signing PIN (4 digits); the user can rotate it later. */
+  initialPin?: string | null;
 }
+
+export interface SetUserPinRequest { pin: string; }
 
 export interface CreateRoleRequest {
   name: string;
@@ -668,7 +689,7 @@ export interface CalibrationRecord {
   certificateFileId: string | null;
 }
 
-export interface MaintenanceRecord { id: string; performedAt: string; workDescription: string; }
+export interface MaintenanceRecord { id: string; performedAt: string; workDescription: string; certificateFileId: string | null; }
 
 export interface EquipmentListItem {
   id: string;
@@ -1642,7 +1663,7 @@ export interface RegisterEquipmentRequest {
   departmentId: string | null;
 }
 export interface LogCalibrationRequest { performedAt: string; provider: string; result: string; certificateFileId: string | null; }
-export interface LogMaintenanceRequest { performedAt: string; workDescription: string; }
+export interface LogMaintenanceRequest { performedAt: string; workDescription: string; certificateFileId: string | null; }
 
 // ── Competency & Training ────────────────────────────────────────────────────
 
@@ -1799,9 +1820,20 @@ export interface ReviewDetail {
   minutes: string | null;
   closedBy: string | null;
   decisions: ReviewDecision[];
+  agenda: string | null;
+  meetingLink: string | null;
 }
 
-export interface ScheduleReviewRequest { title: string; reviewDate: string; participants: string; branchId: string | null; departmentId: string | null; }
+/** Participants are user ids; names are resolved server-side. Empty meetingLink → one is generated. */
+export interface ScheduleReviewRequest {
+  title: string;
+  reviewDate: string;
+  participantUserIds: string[];
+  agenda: string | null;
+  meetingLink: string | null;
+  branchId: string | null;
+  departmentId: string | null;
+}
 export interface AddDecisionRequest { description: string; ownerId: string; dueDate: string; }
 export interface CloseReviewRequest { minutes: string; }
 

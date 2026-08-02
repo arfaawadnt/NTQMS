@@ -1,0 +1,1175 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Index, Conventions &amp; Glossary — NT.QMS As-Built SRS</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗂️</text></svg>">
+<style>
+:root{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);
+ --mono:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace;
+ --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,ui-serif,serif;
+ --sans:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}}
+:root[data-theme="dark"]{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}
+:root[data-theme="light"]{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+ font-size:15.5px;line-height:1.62;-webkit-text-size-adjust:100%}
+.wrap{display:grid;grid-template-columns:288px minmax(0,1fr);gap:0;max-width:1560px;margin:0 auto}
+/* ---- sidebar ---- */
+aside{position:sticky;top:0;height:100vh;overflow-y:auto;padding:22px 16px 60px;
+ border-right:1px solid var(--line);background:var(--panel)}
+aside .brand{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:-.01em;
+ margin:0 0 2px}
+aside .sub{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;
+ margin:0 0 16px}
+aside nav a{display:block;padding:5px 9px;border-radius:7px;color:var(--ink);text-decoration:none;
+ font-size:13.2px;border-left:2px solid transparent}
+aside nav a:hover{background:var(--panel-2)}
+aside nav a.cur{background:var(--accent-soft);border-left-color:var(--accent);font-weight:600}
+aside nav a .n{color:var(--muted);font-variant-numeric:tabular-nums;margin-right:7px;font-size:11.5px}
+aside .sec{margin:16px 0 5px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+ color:var(--muted);font-weight:700}
+#toc{margin-top:6px;border-top:1px solid var(--line);padding-top:10px}
+#toc a{display:block;padding:2.5px 9px;font-size:12.4px;color:var(--muted);text-decoration:none;
+ border-left:2px solid transparent;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#toc a:hover{color:var(--ink)}
+#toc a.h3{padding-left:22px;font-size:11.8px}
+/* ---- main ---- */
+main{padding:34px 46px 120px;min-width:0;overflow-wrap:anywhere}
+.doc-head{border-bottom:2px solid var(--accent);padding-bottom:14px;margin-bottom:26px}
+.kicker{color:var(--accent);font-size:11.5px;font-weight:700;letter-spacing:.11em;
+ text-transform:uppercase;margin:0 0 4px}
+h1{font-family:var(--serif);font-size:31px;line-height:1.2;margin:0;letter-spacing:-.015em}
+h2{font-family:var(--serif);font-size:24px;margin:38px 0 12px;padding-bottom:6px;
+ border-bottom:1px solid var(--line);letter-spacing:-.01em;scroll-margin-top:14px}
+h3{font-size:18px;margin:26px 0 9px;letter-spacing:-.005em;scroll-margin-top:14px}
+h4{font-size:15px;margin:20px 0 7px;color:var(--accent)}
+h5,h6{font-size:13.5px;margin:16px 0 6px;color:var(--muted);text-transform:uppercase;
+ letter-spacing:.05em}
+p{margin:10px 0}
+a{color:var(--accent)}
+hr{border:0;border-top:1px solid var(--line);margin:30px 0}
+ul,ol{margin:9px 0;padding-left:24px}
+li{margin:3px 0}
+blockquote{margin:16px 0;padding:12px 18px;background:var(--accent-soft);
+ border-left:3px solid var(--accent);border-radius:0 8px 8px 0}
+blockquote p:first-child{margin-top:0}blockquote p:last-child{margin-bottom:0}
+code{font-family:var(--mono);font-size:.875em;background:var(--panel-2);
+ padding:1.5px 5px;border-radius:4px;border:1px solid var(--line)}
+pre{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;
+ padding:14px 16px;overflow-x:auto;margin:14px 0}
+pre code{background:none;border:0;padding:0;font-size:12.6px;line-height:1.5}
+/* ---- tables ---- */
+.tw{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:10px;
+ background:var(--panel);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;font-size:13.4px}
+th,td{padding:8px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:var(--panel-2);font-weight:700;font-size:12.2px;letter-spacing:.02em;
+ position:sticky;top:0;z-index:1}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--accent-soft)}
+td code,th code{font-size:.9em;white-space:nowrap}
+/* ---- diagrams ---- */
+figure.d{margin:18px 0;padding:18px;background:var(--panel);border:1px solid var(--line);
+ border-radius:12px;box-shadow:var(--shadow);overflow-x:auto;text-align:center}
+figure.d svg{max-width:100%;height:auto;display:inline-block}
+/* ---- misc ---- */
+.tools{position:fixed;top:12px;right:16px;display:flex;gap:6px;z-index:50}
+.tools button{font:inherit;font-size:12px;padding:5px 11px;border-radius:8px;cursor:pointer;
+ border:1px solid var(--line);background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+.tools button:hover{background:var(--panel-2)}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:52px;padding-top:18px;
+ border-top:1px solid var(--line)}
+.pager a{display:block;max-width:46%;padding:10px 14px;border:1px solid var(--line);
+ border-radius:10px;background:var(--panel);text-decoration:none;font-size:13px}
+.pager a span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;
+ letter-spacing:.08em}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:14px;margin:20px 0}
+.card{padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--panel);
+ box-shadow:var(--shadow);text-decoration:none;color:var(--ink);display:block}
+.card:hover{border-color:var(--accent)}
+.card .num{color:var(--accent);font-weight:700;font-size:11.5px;letter-spacing:.1em}
+.card .t{font-family:var(--serif);font-size:17px;margin:3px 0 5px}
+.card .d{color:var(--muted);font-size:12.7px;line-height:1.5}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin:20px 0}
+.stat{padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.stat b{display:block;font-size:23px;font-family:var(--serif);line-height:1.1}
+.stat span{color:var(--muted);font-size:11.4px}
+@media print{
+ aside,.tools,.pager{display:none!important}
+ .wrap{display:block;max-width:none}
+ main{padding:0}
+ .tw,figure.d{break-inside:avoid;box-shadow:none}
+ h2{break-after:avoid}
+ a{color:inherit;text-decoration:none}
+}
+@media (max-width:1080px){
+ .wrap{grid-template-columns:1fr}
+ aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+ main{padding:22px 18px 80px}
+ #toc{display:none}
+}
+</style>
+</head><body>
+<div class="tools"><button id="th">◐ Theme</button><button id="pr">⎙ Print</button></div>
+<div class="wrap">
+<aside><p class="brand">NT.QMS</p><p class="sub">As-Built SRS · v1.51.x</p><a class="card" style="padding:9px 12px;margin-bottom:10px;font-size:13px" href="index.html">◂ Document set</a><div class="sec">Documents</div><nav><a class="cur" href="00-SRS-Index-and-Conventions.html"><span class="n">00</span>Index, Conventions &amp; Glossary</a><a class="" href="01-Software-Requirements-Specification.html"><span class="n">01</span>Software Requirements Specification</a><a class="" href="02-1-Functional-Specification-Quality-and-Improvement.html"><span class="n">02-1</span>Functional Spec 1 — Quality &amp; Improvement</a><a class="" href="02-2-Functional-Specification-Resources-People-Governance.html"><span class="n">02-2</span>Functional Spec 2 — Resources, People &amp; Governance</a><a class="" href="02-3-Functional-Specification-Analytical-Quality.html"><span class="n">02-3</span>Functional Spec 3 — Analytical Quality</a><a class="" href="02-4-Functional-Specification-Operations-and-Platform.html"><span class="n">02-4</span>Functional Spec 4 — Operations &amp; Platform</a><a class="" href="03-Business-Rules.html"><span class="n">03</span>Business Rules &amp; Error Catalogue</a><a class="" href="04-Configuration-Reference.html"><span class="n">04</span>Configuration Reference</a><a class="" href="05-Screen-Specification.html"><span class="n">05</span>Screen Specification</a><a class="" href="06-Workflow-Specification.html"><span class="n">06</span>Workflow Specification</a><a class="" href="07-File-System-Specification.html"><span class="n">07</span>File System Specification</a><a class="" href="08-API-Specification.html"><span class="n">08</span>API Specification</a><a class="" href="09-Security-Specification.html"><span class="n">09</span>Security Specification</a><a class="" href="10-Deployment-Specification.html"><span class="n">10</span>Deployment Specification</a><a class="" href="11-Architecture-Constraints.html"><span class="n">11</span>Architecture Constraints</a><a class="" href="12-Requirements-Traceability-Matrix.html"><span class="n">12</span>Requirements Traceability Matrix</a><a class="" href="13-Implementation-vs-SRS-Gap-Analysis.html"><span class="n">13</span>Implementation vs SRS — Gap Analysis</a><a class="" href="14-Technical-Debt-Report.html"><span class="n">14</span>Technical Debt Report</a><a class="" href="15-Recommendations.html"><span class="n">15</span>Recommendations</a></nav><div class='sec'>On this page</div><div id='toc'><a class="h2" href="#01-purpose-of-this-specification-set">0.1 Purpose of this specification set</a><a class="h3" href="#what-this-set-does">What this set does</a><a class="h3" href="#what-this-set-deliberately-does-not-do">What this set deliberately does NOT do</a><a class="h2" href="#02-document-map">0.2 Document map</a><a class="h2" href="#03-identifier-schemes">0.3 Identifier schemes</a><a class="h3" href="#module-codes-ltmodgt">Module codes (&amp;lt;MOD&amp;gt;)</a><a class="h2" href="#04-evidence-and-confidence-conventions">0.4 Evidence and confidence conventions</a><a class="h3" href="#how-this-specification-was-produced">How this specification was produced</a><a class="h2" href="#05-measured-system-inventory">0.5 Measured system inventory</a><a class="h3" href="#baseline-note-the-tree-moved-during-analysis">⚠ Baseline note — the tree moved during analysis</a><a class="h2" href="#06-glossary">0.6 Glossary</a><a class="h2" href="#07-regulatory-reference-map">0.7 Regulatory reference map</a><a class="h2" href="#08-reading-order-for-a-rebuild-team">0.8 Reading order for a rebuild team</a></div></aside>
+<main>
+<div class="doc-head"><p class="kicker">Document 00 · NT.QMS Production SRS</p><h1>Index, Conventions &amp; Glossary</h1></div>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Product</strong></td>
+<td>NT.QMS — multi-tenant SaaS Quality Management System for ISO/IEC 17025, ISO 15189, ISO 9001, 21 CFR Part 11 and EU GMP Annex 11 laboratories</td>
+</tr>
+<tr>
+<td><strong>Specification baseline</strong></td>
+<td>Source tree <code>D:\SAAS\QAMS\21-7\NT.QAMS</code>, release line <strong>v1.51.x</strong></td>
+</tr>
+<tr>
+<td><strong>Specification type</strong></td>
+<td><strong>As-built</strong> — reverse-specified from the current implementation</td>
+</tr>
+<tr>
+<td><strong>Date of analysis</strong></td>
+<td>2026-08-01</td>
+</tr>
+<tr>
+<td><strong>Supersedes</strong></td>
+<td><code>NT_QMS_SRS.html</code> ("NT.QMS Quality Management System (v1.0)") — see <a href="13-Implementation-vs-SRS-Gap-Analysis.html">Document 13</a></td>
+</tr>
+<tr>
+<td><strong>Status</strong></td>
+<td>Draft for review — every requirement is traceable to code; unverifiable statements are explicitly flagged</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h2 id="01-purpose-of-this-specification-set">0.1 Purpose of this specification set</h2>
+<p>The previous SRS (<code>NT_QMS_SRS.html</code>) was written as a <strong>design-intent</strong> document before and during
+early construction. The system as built diverges from it materially — in stack, in permission model,
+in error contract, and in scope (the built system contains roughly six times the functional surface
+the old SRS describes, and omits several things the old SRS promises).</p>
+<p>This document set replaces it with an <strong>as-built specification</strong>: a complete, verifiable description
+of the software <strong>that exists today</strong>, at a level of detail sufficient for a new development team to
+rebuild the system from these documents alone, without reading the original source code.</p>
+<h3 id="what-this-set-does">What this set does</h3>
+<ul>
+<li>Documents every module, service, screen, workflow, business rule, validation, error path,
+  configuration key, background process, and external dependency <strong>that is present in the code</strong>.</li>
+<li>Extracts business logic that currently exists <strong>only</strong> inside code (retry counts, lockout windows,
+  stabilisation intervals, backoff curves, grouping rules, filename/reference generation, throttling,
+  segregation-of-duty pairings, calculation formulae) and states it as explicit requirements.</li>
+<li>Marks every statement that could not be verified from source as <strong><code>[Assumption]</code></strong> or
+  <strong><code>[Needs Business Confirmation]</code></strong>.</li>
+</ul>
+<h3 id="what-this-set-deliberately-does-not-do">What this set deliberately does NOT do</h3>
+<ul>
+<li>It does <strong>not</strong> redesign the application.</li>
+<li>It does <strong>not</strong> invent features, screens, endpoints or rules.</li>
+<li>It does <strong>not</strong> present intent, roadmap items or audit-report aspirations as implemented behaviour.</li>
+</ul>
+<blockquote>
+<p><strong>Rule applied throughout:</strong> if it is not in the code, it is not a requirement here. If it is in the
+code but its business rationale is unknown, it is recorded as behaviour with a
+<strong><code>[Needs Business Confirmation]</code></strong> flag.</p>
+</blockquote>
+<hr>
+<h2 id="02-document-map">0.2 Document map</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Document</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>00</strong></td>
+<td><em>(this document)</em> <a href="00-SRS-Index-and-Conventions.html">Index &amp; Conventions</a></td>
+<td>Document map, ID schemes, glossary, method, evidence rules</td>
+</tr>
+<tr>
+<td><strong>01</strong></td>
+<td><a href="01-Software-Requirements-Specification.html">Software Requirements Specification</a></td>
+<td>Scope, context, actors, product perspective, assumptions, dependencies, full NFR set, regulatory mapping</td>
+</tr>
+<tr>
+<td><strong>02</strong></td>
+<td>Functional Specification — 4 parts: <a href="02-1-Functional-Specification-Quality-and-Improvement.html">1 Quality &amp; Improvement</a> · <a href="02-2-Functional-Specification-Resources-People-Governance.html">2 Resources, People &amp; Governance</a> · <a href="02-3-Functional-Specification-Analytical-Quality.html">3 Analytical Quality</a> · <a href="02-4-Functional-Specification-Operations-and-Platform.html">4 Operations &amp; Platform</a></td>
+<td>All 35 modules, each with the same 17-section template (purpose → acceptance criteria)</td>
+</tr>
+<tr>
+<td><strong>03</strong></td>
+<td><a href="03-Business-Rules.html">Business Rules Document</a></td>
+<td>Complete BR catalogue, full 411-code error catalogue, decision tables, calculation specifications</td>
+</tr>
+<tr>
+<td><strong>04</strong></td>
+<td><a href="04-Configuration-Reference.html">Configuration Reference</a></td>
+<td>Every configuration key and hard-coded constant: type, default, required, validation, impact</td>
+</tr>
+<tr>
+<td><strong>05</strong></td>
+<td><a href="05-Screen-Specification.html">Screen Specification</a></td>
+<td>All 100 SPA components: purpose, controls, fields, states, disabled/loading/empty/error, dead controls</td>
+</tr>
+<tr>
+<td><strong>06</strong></td>
+<td><a href="06-Workflow-Specification.html">Workflow Specification</a></td>
+<td>Every state machine, sequence diagram, activity diagram, background-process timing</td>
+</tr>
+<tr>
+<td><strong>07</strong></td>
+<td><a href="07-File-System-Specification.html">File System Specification</a></td>
+<td>Every folder, generated file, temp file, retention, cleanup, archive strategy</td>
+</tr>
+<tr>
+<td><strong>08</strong></td>
+<td><a href="08-API-Specification.html">API Specification</a></td>
+<td>All 326 routes × 2 versioned forms: verbs, auth, contracts, errors, envelopes, headers</td>
+</tr>
+<tr>
+<td><strong>09</strong></td>
+<td><a href="09-Security-Specification.html">Security Specification</a></td>
+<td>AuthN/AuthZ, tenancy isolation, credentials, e-signature, threats, weaknesses</td>
+</tr>
+<tr>
+<td><strong>10</strong></td>
+<td><a href="10-Deployment-Specification.html">Deployment Specification</a></td>
+<td>Environments, artefacts, migrations, health, observability, backup/DR, CI gates</td>
+</tr>
+<tr>
+<td><strong>11</strong></td>
+<td><a href="11-Architecture-Constraints.html">Architecture Constraints</a></td>
+<td>Layering law, enforced boundaries, technology constraints, forbidden patterns</td>
+</tr>
+<tr>
+<td><strong>12</strong></td>
+<td><a href="12-Requirements-Traceability-Matrix.html">Requirements Traceability Matrix</a></td>
+<td>Requirement → priority → source → implemented? → code / UI / config location</td>
+</tr>
+<tr>
+<td><strong>13</strong></td>
+<td><a href="13-Implementation-vs-SRS-Gap-Analysis.html">Implementation vs SRS Gap Analysis</a></td>
+<td>Every difference classified: Missing from SRS / Missing from Code / Extra Behaviour / Outdated / Deprecated</td>
+</tr>
+<tr>
+<td><strong>14</strong></td>
+<td><a href="14-Technical-Debt-Report.html">Technical Debt Report</a></td>
+<td>Hard-coded values, coupling, duplication, large classes, magic values, hidden dependencies</td>
+</tr>
+<tr>
+<td><strong>15</strong></td>
+<td><a href="15-Recommendations.html">Recommendations</a></td>
+<td>Prioritised remediation and improvement backlog</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h2 id="03-identifier-schemes">0.3 Identifier schemes</h2>
+<p>All identifiers are stable and cross-referenced between documents.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Prefix</th>
+<th>Meaning</th>
+<th>Example</th>
+<th>Defined in</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>FR-&lt;MOD&gt;-nn</code></td>
+<td>Functional requirement</td>
+<td><code>FR-NC-07</code></td>
+<td>02</td>
+</tr>
+<tr>
+<td><code>NFR-&lt;CAT&gt;-nn</code></td>
+<td>Non-functional requirement</td>
+<td><code>NFR-PERF-03</code></td>
+<td>01</td>
+</tr>
+<tr>
+<td><code>BR-&lt;MOD&gt;-nn</code></td>
+<td>Business rule</td>
+<td><code>BR-DOC-04</code></td>
+<td>03</td>
+</tr>
+<tr>
+<td><code>VR-&lt;MOD&gt;-nn</code></td>
+<td>Validation rule</td>
+<td><code>VR-NC-02</code></td>
+<td>03</td>
+</tr>
+<tr>
+<td><code>ERR-&lt;code&gt;</code></td>
+<td>Error / refusal code (uses the real in-code code)</td>
+<td><code>ERR-SOD-CAPA-001</code></td>
+<td>03</td>
+</tr>
+<tr>
+<td><code>CFG-nn</code></td>
+<td>Configuration key</td>
+<td><code>CFG-14</code></td>
+<td>04</td>
+</tr>
+<tr>
+<td><code>CON-nn</code></td>
+<td>Hard-coded constant (not configurable)</td>
+<td><code>CON-09</code></td>
+<td>04</td>
+</tr>
+<tr>
+<td><code>SCR-nn</code></td>
+<td>Screen</td>
+<td><code>SCR-12</code></td>
+<td>05</td>
+</tr>
+<tr>
+<td><code>WF-nn</code></td>
+<td>Workflow / state machine</td>
+<td><code>WF-03</code></td>
+<td>06</td>
+</tr>
+<tr>
+<td><code>FS-nn</code></td>
+<td>File-system element</td>
+<td><code>FS-05</code></td>
+<td>07</td>
+</tr>
+<tr>
+<td><code>API-nn</code></td>
+<td>API surface requirement</td>
+<td><code>API-11</code></td>
+<td>08</td>
+</tr>
+<tr>
+<td><code>SEC-nn</code></td>
+<td>Security requirement</td>
+<td><code>SEC-08</code></td>
+<td>09</td>
+</tr>
+<tr>
+<td><code>DEP-nn</code></td>
+<td>Deployment requirement</td>
+<td><code>DEP-06</code></td>
+<td>10</td>
+</tr>
+<tr>
+<td><code>AC-nn</code></td>
+<td>Architecture constraint</td>
+<td><code>AC-04</code></td>
+<td>11</td>
+</tr>
+<tr>
+<td><code>UC-nn</code></td>
+<td>Use case</td>
+<td><code>UC-05</code></td>
+<td>02</td>
+</tr>
+<tr>
+<td><code>AT-&lt;REQ&gt;</code></td>
+<td>Acceptance criteria for a requirement</td>
+<td><code>AT-FR-NC-07</code></td>
+<td>02 / 12</td>
+</tr>
+<tr>
+<td><code>GAP-nn</code></td>
+<td>Gap-analysis finding</td>
+<td><code>GAP-17</code></td>
+<td>13</td>
+</tr>
+<tr>
+<td><code>TD-nn</code></td>
+<td>Technical-debt item</td>
+<td><code>TD-22</code></td>
+<td>14</td>
+</tr>
+<tr>
+<td><code>REC-nn</code></td>
+<td>Recommendation</td>
+<td><code>REC-09</code></td>
+<td>15</td>
+</tr>
+<tr>
+<td><code>LIM-nn</code></td>
+<td>Known limitation</td>
+<td><code>LIM-11</code></td>
+<td>02 / 14</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="module-codes-ltmodgt">Module codes (<code>&lt;MOD&gt;</code>)</h3>
+<p>Module codes follow the system's own <code>PermissionCatalog</code> module keys wherever one exists, so that a
+requirement ID, a permission key and a navigation group all name the same thing.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Module</th>
+<th>Permission key</th>
+<th>Nav group</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NC</code></td>
+<td>Nonconformance &amp; CAPA</td>
+<td><code>nc</code></td>
+<td>quality</td>
+</tr>
+<tr>
+<td><code>CMP</code></td>
+<td>Complaints</td>
+<td><code>complaints</code></td>
+<td>quality</td>
+</tr>
+<tr>
+<td><code>FBK</code></td>
+<td>Customer feedback</td>
+<td><code>feedback</code></td>
+<td>quality</td>
+</tr>
+<tr>
+<td><code>AUD</code></td>
+<td>Internal / external audits</td>
+<td><code>audits</code></td>
+<td>quality</td>
+</tr>
+<tr>
+<td><code>OBJ</code></td>
+<td>Quality objectives</td>
+<td><code>objectives</code></td>
+<td>quality</td>
+</tr>
+<tr>
+<td><code>CHG</code></td>
+<td>Change control</td>
+<td><code>changes</code></td>
+<td>quality</td>
+</tr>
+<tr>
+<td><code>MRV</code></td>
+<td>Management review</td>
+<td><code>reviews</code></td>
+<td>quality</td>
+</tr>
+<tr>
+<td><code>DOC</code></td>
+<td>Document control</td>
+<td><code>documents</code></td>
+<td>documents</td>
+</tr>
+<tr>
+<td><code>QP</code></td>
+<td>Quality policy</td>
+<td><code>quality-policy</code></td>
+<td>documents</td>
+</tr>
+<tr>
+<td><code>ARC</code></td>
+<td>Records &amp; archive</td>
+<td><code>records</code></td>
+<td>documents</td>
+</tr>
+<tr>
+<td><code>RSK</code></td>
+<td>Risk register</td>
+<td><code>risks</code></td>
+<td>risk</td>
+</tr>
+<tr>
+<td><code>CLD</code></td>
+<td>Compliance ledger (audit trail, signatures)</td>
+<td><code>compliance</code></td>
+<td>risk</td>
+</tr>
+<tr>
+<td><code>COI</code></td>
+<td>Conflict of interest / impartiality</td>
+<td><code>conflicts</code></td>
+<td>risk</td>
+</tr>
+<tr>
+<td><code>CTX</code></td>
+<td>Organisational context</td>
+<td><code>org-context</code></td>
+<td>risk</td>
+</tr>
+<tr>
+<td><code>UAR</code></td>
+<td>User access review</td>
+<td><code>access-reviews</code></td>
+<td>risk</td>
+</tr>
+<tr>
+<td><code>EQP</code></td>
+<td>Equipment</td>
+<td><code>equipment</code></td>
+<td>resources</td>
+</tr>
+<tr>
+<td><code>RS</code></td>
+<td>Reference standards</td>
+<td><code>reference-standards</code></td>
+<td>resources</td>
+</tr>
+<tr>
+<td><code>ENV</code></td>
+<td>Environmental monitoring</td>
+<td><code>monitoring-points</code></td>
+<td>resources</td>
+</tr>
+<tr>
+<td><code>SUP</code></td>
+<td>Supplier quality</td>
+<td><code>suppliers</code></td>
+<td>resources</td>
+</tr>
+<tr>
+<td><code>COMP</code></td>
+<td>Competency</td>
+<td><code>competencies</code></td>
+<td>people</td>
+</tr>
+<tr>
+<td><code>TRN</code></td>
+<td>Training assignments</td>
+<td><code>training</code></td>
+<td>people</td>
+</tr>
+<tr>
+<td><code>AUTHZ</code></td>
+<td>Test authorisations</td>
+<td><code>test-authorizations</code></td>
+<td>people</td>
+</tr>
+<tr>
+<td><code>USER</code></td>
+<td>User administration</td>
+<td><code>users</code></td>
+<td>people</td>
+</tr>
+<tr>
+<td><code>AQ</code></td>
+<td>Analytical quality (QC + 12 study types + uncertainty)</td>
+<td><code>analytical-quality</code></td>
+<td>analytical</td>
+</tr>
+<tr>
+<td><code>PT</code></td>
+<td>Proficiency testing &amp; PT plans</td>
+<td><code>proficiency-testing</code></td>
+<td>analytical</td>
+</tr>
+<tr>
+<td><code>TASK</code></td>
+<td>Tasks &amp; SLA</td>
+<td><code>tasks</code></td>
+<td>operations</td>
+</tr>
+<tr>
+<td><code>NTF</code></td>
+<td>Notifications</td>
+<td><code>notifications</code></td>
+<td>operations</td>
+</tr>
+<tr>
+<td><code>RPT</code></td>
+<td>Reporting &amp; KPIs</td>
+<td><code>reports</code></td>
+<td>operations</td>
+</tr>
+<tr>
+<td><code>ORG</code></td>
+<td>Organisation (branches, departments, test catalogue, LOVs)</td>
+<td><code>organization</code></td>
+<td>administration</td>
+</tr>
+<tr>
+<td><code>TEN</code></td>
+<td>Tenant settings</td>
+<td><code>tenant-settings</code></td>
+<td>administration</td>
+</tr>
+<tr>
+<td><code>ROLE</code></td>
+<td>Roles &amp; privileges</td>
+<td><code>roles</code></td>
+<td>administration</td>
+</tr>
+<tr>
+<td><code>AUTH</code></td>
+<td>Authentication &amp; session</td>
+<td><em>(no module key — cross-cutting)</em></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>PLT</code></td>
+<td>Platform control plane (tenant provisioning)</td>
+<td><em>(platform-admin only)</em></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>FILE</code></td>
+<td>File storage &amp; evidence</td>
+<td><em>(cross-cutting)</em></td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h2 id="04-evidence-and-confidence-conventions">0.4 Evidence and confidence conventions</h2>
+<p>Every requirement statement carries an evidence marker.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Marker</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>(none)</em></td>
+<td><strong>Verified in source.</strong> The behaviour is directly readable in the cited file.</td>
+</tr>
+<tr>
+<td><strong><code>[Assumption]</code></strong></td>
+<td>Inferred from code structure or naming, but not directly provable; the inference is stated.</td>
+</tr>
+<tr>
+<td><strong><code>[Needs Business Confirmation]</code></strong></td>
+<td>The behaviour is verified, but the <em>business intent</em> behind a specific value or rule is not documented anywhere and should be confirmed by the process owner.</td>
+</tr>
+<tr>
+<td><strong><code>[Not Executed]</code></strong></td>
+<td>The capability exists in code but has never been observed running in this environment (e.g. anything requiring Docker, SMTP, or a staging host).</td>
+</tr>
+<tr>
+<td><strong><code>[Dead / Unused]</code></strong></td>
+<td>Code or UI exists but is unreachable or has no effect.</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Code citations</strong> use repository-relative paths: <code>src/NT.QAMS.Domain/Improvement/Nonconformance.cs:212</code>.</p>
+<h3 id="how-this-specification-was-produced">How this specification was produced</h3>
+<ol>
+<li><strong>Static extraction</strong> — scripted parsing of the whole source tree produced machine-generated
+   inventories: 54 controllers → 329 route actions with their authorisation attributes and dispatched
+   command/query; 215 commands + 105 queries with their policies; 88 FluentValidation validators with
+   every rule chain; 86 domain classes with every property, method and thrown error code; 68 enums;
+   80 domain events; 416 distinct error codes with their messages; 100 SPA components with their
+   controls, bound fields, state signals and branch conditions.</li>
+<li><strong>Targeted reading</strong> — the composition root, middleware pipeline, background services,
+   interceptors, security policy, rate limiter, file policy and configuration guard were read in full.</li>
+<li><strong>Cross-checking</strong> — extracted counts were reconciled against the repository's own
+   <code>ApiSurface.approved.txt</code> merge gate (658 lines = 329 routes × 2 route forms) and against the
+   as-built architecture documents in <code>docs/reference/</code>.</li>
+<li><strong>Gap comparison</strong> — the previous SRS was compared statement-by-statement against the extraction.</li>
+</ol>
+<p><strong>Counts are stated as measured, not as remembered.</strong> Where a repository document disagrees with the
+code, the code wins and the discrepancy is recorded in Document 13.</p>
+<hr>
+<h2 id="05-measured-system-inventory">0.5 Measured system inventory</h2>
+<p>These figures are the factual baseline for the whole specification set.</p>
+<blockquote>
+<h3 id="baseline-note-the-tree-moved-during-analysis">⚠ Baseline note — the tree moved during analysis</h3>
+<p>Extraction was first run against a tree with <strong>326 endpoints / 214 commands / 103 queries /
+411 error codes / 85 domain classes / 100 SPA components</strong>. Part-way through, an <strong>uncommitted
+Quality Analytics + Quality Health Score module</strong> appeared in the working tree, moving the figures
+to those in the table below.</p>
+<p>The table states the <strong>current</strong> measurements. Two machine-generated appendices —
+<a href="08-API-Specification.html">the route catalogue (Doc 08 §8.13)</a> and
+<a href="05-Screen-Specification.html">the component inventory (Doc 05 §5.8)</a> — were generated at the earlier
+baseline; the delta is specified in
+<a href="08-API-Specification.html">Doc 08 §8.14</a> and <a href="02-4-Functional-Specification-Operations-and-Platform.html">Doc 02 M-38</a>.
+The <a href="03-Business-Rules.html">error catalogue (Doc 03)</a> was regenerated after the change and is current.</p>
+<p>Nothing else in the tree changed. <code>git status</code> at the time of writing showed 15 modified and
+5 untracked files, all belonging to that one module (plus this specification set itself).</p>
+</blockquote>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th style="text-align: right;">Count</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Solution projects (source)</td>
+<td style="text-align: right;">6</td>
+<td><code>src/NT.QAMS.{Domain,Application,Infrastructure,WebApi,Contracts,SharedKernel}</code></td>
+</tr>
+<tr>
+<td>Solution projects (test)</td>
+<td style="text-align: right;">6</td>
+<td><code>tests/NT.QAMS.{Domain.UnitTests,Application.UnitTests,Architecture.Tests,IntegrationTests,WebApi.FunctionalTests,LoadTests}</code></td>
+</tr>
+<tr>
+<td>Hand-written backend C#</td>
+<td style="text-align: right;">≈29,700 lines / 376 files</td>
+<td>excludes 113 EF migration files</td>
+</tr>
+<tr>
+<td>EF Core migrations</td>
+<td style="text-align: right;">113 files / 56 migrations</td>
+<td><code>src/NT.QAMS.Infrastructure/Persistence/Migrations</code></td>
+</tr>
+<tr>
+<td>Frontend TypeScript</td>
+<td style="text-align: right;">≈29,100 lines / 215 files</td>
+<td><code>frontend/src</code></td>
+</tr>
+<tr>
+<td>HTTP controllers</td>
+<td style="text-align: right;">54 classes in 42 files</td>
+<td><code>src/NT.QAMS.WebApi/Controllers</code></td>
+</tr>
+<tr>
+<td>HTTP route actions</td>
+<td style="text-align: right;">329</td>
+<td>each also exposed under <code>/api/v{version}/…</code> → 652 routable paths</td>
+</tr>
+<tr>
+<td>Commands (<code>ICommand</code>)</td>
+<td style="text-align: right;">215</td>
+<td>all carry an authorisation policy attribute</td>
+</tr>
+<tr>
+<td>Queries (<code>IQuery</code>)</td>
+<td style="text-align: right;">105</td>
+<td></td>
+</tr>
+<tr>
+<td>FluentValidation validators</td>
+<td style="text-align: right;">88</td>
+<td></td>
+</tr>
+<tr>
+<td>Domain classes</td>
+<td style="text-align: right;">86</td>
+<td>aggregates, entities and value objects</td>
+</tr>
+<tr>
+<td>Domain enums</td>
+<td style="text-align: right;">69</td>
+<td></td>
+</tr>
+<tr>
+<td>Domain events</td>
+<td style="text-align: right;">81</td>
+<td></td>
+</tr>
+<tr>
+<td>Distinct error / refusal codes</td>
+<td style="text-align: right;">416</td>
+<td></td>
+</tr>
+<tr>
+<td>Permission modules × actions</td>
+<td style="text-align: right;">31 × up to 8 = <strong>171 keys</strong></td>
+<td><code>PermissionCatalog.AllKeys</code></td>
+</tr>
+<tr>
+<td>Built-in roles</td>
+<td style="text-align: right;">6</td>
+<td><code>PlatformAdmin, TenantAdmin, QualityManager, DepartmentHead, Analyst, ExternalAuditor</code></td>
+</tr>
+<tr>
+<td>SPA components</td>
+<td style="text-align: right;">105</td>
+<td></td>
+</tr>
+<tr>
+<td>SPA route entries</td>
+<td style="text-align: right;">87</td>
+<td>56 feature routes + 31 <code>:id</code> detail children; 84 lazy-loaded</td>
+</tr>
+<tr>
+<td>Database tables</td>
+<td style="text-align: right;">97</td>
+<td>5 schemas: <code>qams</code> (≈85), <code>audit</code> (4), <code>saas</code> (2), <code>read</code> (1), <code>public</code> (1)</td>
+</tr>
+<tr>
+<td>Tables under FORCE row-level security</td>
+<td style="text-align: right;">90</td>
+<td></td>
+</tr>
+<tr>
+<td>Background hosted services</td>
+<td style="text-align: right;">5</td>
+<td>outbox, sweep, KPI snapshot, replica sentinel, deferred seeder</td>
+</tr>
+<tr>
+<td>MediatR pipeline behaviours</td>
+<td style="text-align: right;">5</td>
+<td>Tracing → Logging → Authorization → Idempotency → Validation</td>
+</tr>
+<tr>
+<td>HTTP middleware components</td>
+<td style="text-align: right;">7 (custom)</td>
+<td>+ framework auth/rate-limit/exception</td>
+</tr>
+<tr>
+<td>Architecture Decision Records</td>
+<td style="text-align: right;">9</td>
+<td><code>docs/adr/ADR-0001 … ADR-0009</code></td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h2 id="06-glossary">0.6 Glossary</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Definition as used in this system</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tenant</strong></td>
+<td>One laboratory organisation. The unit of data isolation. Identified by a URL-safe <code>slug</code> and a <code>Guid</code>.</td>
+</tr>
+<tr>
+<td><strong>Platform / control plane</strong></td>
+<td>The cross-tenant administrative surface (tenant provisioning, tenant listing). Only <code>PlatformAdmin</code> reaches it; a platform admin is <strong>not</strong> a member of any tenant.</td>
+</tr>
+<tr>
+<td><strong>Workspace</strong></td>
+<td>User-facing name for a tenant, resolved from a slug by <code>GET /api/auth/workspace/{slug}</code>.</td>
+</tr>
+<tr>
+<td><strong>Aggregate / aggregate root</strong></td>
+<td>A DDD consistency boundary. All invariants live <em>inside</em> the aggregate; handlers never enforce business rules.</td>
+</tr>
+<tr>
+<td><strong>Slice</strong></td>
+<td>A vertical feature file holding a module's commands, validators, handlers and queries together (e.g. <code>QualityPolicySlice.cs</code>).</td>
+</tr>
+<tr>
+<td><strong>Command / Query</strong></td>
+<td>CQRS request types. Commands mutate and are authorisation-gated deny-by-default; queries read.</td>
+</tr>
+<tr>
+<td><strong>Command policy</strong></td>
+<td>An attribute on a command record declaring who may execute it. A command with no policy fails the <code>CommandPolicyTests</code> CI gate (<code>AUTHZ-000</code> deny-by-default).</td>
+</tr>
+<tr>
+<td><strong>RLS / FORCE RLS</strong></td>
+<td>PostgreSQL row-level security, applied with <code>FORCE</code> so it binds even the table owner. Second, independent layer of tenant isolation beneath the EF global query filter.</td>
+</tr>
+<tr>
+<td><strong>GUC</strong></td>
+<td>PostgreSQL session variable. <code>app.current_tenant</code> and <code>app.bypass_rls</code> drive the RLS policies.</td>
+</tr>
+<tr>
+<td><strong>Elevation</strong></td>
+<td>The controlled, explicit path (<code>ICurrentTenantSetter.Elevate()</code>) by which trusted cross-tenant processes bypass RLS.</td>
+</tr>
+<tr>
+<td><strong>Field-change ledger</strong></td>
+<td><code>audit.field_change</code> — append-only per-column before/after record of every tracked mutation, with actor, timestamp and reason.</td>
+</tr>
+<tr>
+<td><strong>Security event log</strong></td>
+<td><code>audit.security_event</code> — append-only record of authentication, signature, export and authorisation events.</td>
+</tr>
+<tr>
+<td><strong>Hash chain</strong></td>
+<td>Tamper-evident linkage over ledger rows; verified by <code>GET /api/compliance/chain-verification</code>.</td>
+</tr>
+<tr>
+<td><strong>E-signature</strong></td>
+<td>21 CFR Part 11 signing ceremony: password <strong>and</strong> 4-digit PIN, throttled per actor, failures logged as <code>ESIGN_FAILED</code>.</td>
+</tr>
+<tr>
+<td><strong>Reason for change</strong></td>
+<td>Mandatory <code>X-Change-Reason</code> header on every <code>DELETE</code>; stamped onto the ledger row in the same transaction.</td>
+</tr>
+<tr>
+<td><strong>SoD</strong></td>
+<td>Segregation of duties. Enforced as <code>EnsureSignerIsNotPreparer(actor, code)</code> inside aggregates.</td>
+</tr>
+<tr>
+<td><strong>Outbox</strong></td>
+<td>Transactional outbox table; a hosted processor publishes domain events at-least-once with backoff and dead-lettering.</td>
+</tr>
+<tr>
+<td><strong>Sweep</strong></td>
+<td>Hourly time-based reconciliation job that ages records (calibration due, competency expiry, escalation, etc.).</td>
+</tr>
+<tr>
+<td><strong>LOV</strong></td>
+<td>List of values — tenant-scoped, localisable reference data (<code>LovEntry</code>).</td>
+</tr>
+<tr>
+<td><strong>Allocatable</strong></td>
+<td>An aggregate that carries optional <code>BranchId</code>/<code>DepartmentId</code> so a user's organisational scope can filter it (<code>IAllocatable</code>).</td>
+</tr>
+<tr>
+<td><strong>Study</strong></td>
+<td>Any of the 12 analytical-quality investigations (precision, linearity, method comparison, …). All share the <code>DataEntry → Calculated → SignedOff</code> shape.</td>
+</tr>
+<tr>
+<td><strong>Signed record</strong></td>
+<td>A record in a terminal signed state. A database trigger physically rejects <code>UPDATE</code>/<code>DELETE</code> on it.</td>
+</tr>
+<tr>
+<td><strong>Problem+json</strong></td>
+<td>RFC 7807 error contract used by every error path, including framework 401/403.</td>
+</tr>
+<tr>
+<td><strong>Envelope</strong></td>
+<td>Paged list response shape (<code>items</code>, <code>total</code>, <code>page</code>, <code>pageSize</code>) introduced by API-004; legacy bare-array responses are also still served.</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h2 id="07-regulatory-reference-map">0.7 Regulatory reference map</h2>
+<p>The system's compliance obligations, and where this specification addresses each.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Standard / clause</th>
+<th>Obligation</th>
+<th>Where specified</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>21 CFR Part 11 §11.10(a)</strong></td>
+<td>Validation of systems</td>
+<td>Doc 10 §10.9, <code>docs/validation/</code></td>
+</tr>
+<tr>
+<td><strong>§11.10(b)</strong></td>
+<td>Accurate, complete record copies</td>
+<td>Doc 02 <code>CLD</code>, Doc 08 exports</td>
+</tr>
+<tr>
+<td><strong>§11.10(c)</strong></td>
+<td>Record protection / retrievability</td>
+<td>Doc 07, Doc 02 <code>ARC</code></td>
+</tr>
+<tr>
+<td><strong>§11.10(d)</strong></td>
+<td>Limited system access</td>
+<td>Doc 09 §9.2–9.4</td>
+</tr>
+<tr>
+<td><strong>§11.10(e)</strong></td>
+<td>Audit trail, secure, computer-generated, time-stamped, retains originals, includes <strong>reason for change</strong></td>
+<td>Doc 02 <code>CLD</code>, Doc 03 BR-CLD-*, Doc 09 §9.7</td>
+</tr>
+<tr>
+<td><strong>§11.10(g)</strong></td>
+<td>Authority checks / segregation of duties</td>
+<td>Doc 03 §3.4 (SoD table)</td>
+</tr>
+<tr>
+<td><strong>§11.10(k)</strong></td>
+<td>Controlled documentation / revision control</td>
+<td>Doc 02 <code>DOC</code></td>
+</tr>
+<tr>
+<td><strong>§11.200</strong></td>
+<td>Electronic signature components &amp; controls</td>
+<td>Doc 09 §9.6</td>
+</tr>
+<tr>
+<td><strong>§11.300</strong></td>
+<td>Identification-code/password controls</td>
+<td>Doc 09 §9.3</td>
+</tr>
+<tr>
+<td><strong>EU GMP Annex 11 §4</strong></td>
+<td>Qualification / change control</td>
+<td>Doc 02 <code>CHG</code></td>
+</tr>
+<tr>
+<td><strong>Annex 11 §9</strong></td>
+<td>Audit trails</td>
+<td>Doc 02 <code>CLD</code></td>
+</tr>
+<tr>
+<td><strong>Annex 11 §12</strong></td>
+<td>Security &amp; access</td>
+<td>Doc 09</td>
+</tr>
+<tr>
+<td><strong>ISO/IEC 17025 §6.2</strong></td>
+<td>Personnel competence, authorisation</td>
+<td>Doc 02 <code>COMP</code>, <code>AUTHZ</code></td>
+</tr>
+<tr>
+<td><strong>§6.4</strong></td>
+<td>Equipment, calibration, intermediate checks</td>
+<td>Doc 02 <code>EQP</code>, <code>RS</code></td>
+</tr>
+<tr>
+<td><strong>§6.6</strong></td>
+<td>Externally provided products &amp; services</td>
+<td>Doc 02 <code>SUP</code></td>
+</tr>
+<tr>
+<td><strong>§7.7</strong></td>
+<td>Validity of results — QC, PT/ILC</td>
+<td>Doc 02 <code>AQ</code>, <code>PT</code></td>
+</tr>
+<tr>
+<td><strong>§7.9</strong></td>
+<td>Complaints</td>
+<td>Doc 02 <code>CMP</code></td>
+</tr>
+<tr>
+<td><strong>§7.10</strong></td>
+<td>Nonconforming work</td>
+<td>Doc 02 <code>NC</code></td>
+</tr>
+<tr>
+<td><strong>§7.11</strong></td>
+<td>Control of data &amp; information management</td>
+<td>Doc 09, Doc 11</td>
+</tr>
+<tr>
+<td><strong>§8.2</strong></td>
+<td>Management-system documentation / quality policy</td>
+<td>Doc 02 <code>QP</code></td>
+</tr>
+<tr>
+<td><strong>§8.3</strong></td>
+<td>Control of documents; controlled copies</td>
+<td>Doc 02 <code>DOC</code></td>
+</tr>
+<tr>
+<td><strong>§8.4</strong></td>
+<td>Control of records; retention</td>
+<td>Doc 02 <code>ARC</code>, Doc 07</td>
+</tr>
+<tr>
+<td><strong>§8.5</strong></td>
+<td>Risk &amp; opportunity</td>
+<td>Doc 02 <code>RSK</code></td>
+</tr>
+<tr>
+<td><strong>§8.6</strong></td>
+<td>Improvement; customer feedback</td>
+<td>Doc 02 <code>FBK</code>, <code>OBJ</code></td>
+</tr>
+<tr>
+<td><strong>§8.7</strong></td>
+<td>Corrective action</td>
+<td>Doc 02 <code>NC</code></td>
+</tr>
+<tr>
+<td><strong>§8.8</strong></td>
+<td>Internal audit</td>
+<td>Doc 02 <code>AUD</code></td>
+</tr>
+<tr>
+<td><strong>§8.9</strong></td>
+<td>Management review</td>
+<td>Doc 02 <code>MRV</code></td>
+</tr>
+<tr>
+<td><strong>§4.1</strong></td>
+<td>Impartiality</td>
+<td>Doc 02 <code>COI</code></td>
+</tr>
+<tr>
+<td><strong>ISO 9001 §4.1/4.2</strong></td>
+<td>Context of the organisation; interested parties</td>
+<td>Doc 02 <code>CTX</code></td>
+</tr>
+<tr>
+<td><strong>ISO 9001 §5.2</strong></td>
+<td>Quality policy</td>
+<td>Doc 02 <code>QP</code></td>
+</tr>
+<tr>
+<td><strong>ISO 9001 §6.2</strong></td>
+<td>Quality objectives</td>
+<td>Doc 02 <code>OBJ</code></td>
+</tr>
+<tr>
+<td><strong>ISO 15189</strong></td>
+<td>Medical-laboratory analytical quality (reference intervals, sigma, comparability)</td>
+<td>Doc 02 <code>AQ</code></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong><code>[Needs Business Confirmation]</code></strong> — the system implements controls that <em>support</em> these clauses.
+Whether the laboratory's own procedures satisfy each clause is an accreditation judgement outside
+the software's scope. No claim of certification is made here.</p>
+</blockquote>
+<hr>
+<h2 id="08-reading-order-for-a-rebuild-team">0.8 Reading order for a rebuild team</h2>
+<ol>
+<li><strong>Doc 01</strong> — understand scope, actors and constraints.</li>
+<li><strong>Doc 11</strong> — understand the architectural law before designing anything.</li>
+<li><strong>Doc 06 + Doc 03</strong> — the state machines and rules <em>are</em> the product.</li>
+<li><strong>Doc 02</strong> — module by module, build order can follow the dependency notes.</li>
+<li><strong>Doc 08 + Doc 05</strong> — surface contracts (API first, then screens).</li>
+<li><strong>Doc 04 + Doc 07 + Doc 10</strong> — make it run.</li>
+<li><strong>Doc 09</strong> — security is not a phase; read it before, during and after.</li>
+<li><strong>Doc 12–15</strong> — verify what you built and inherit the known debt list knowingly.</li>
+</ol>
+<div class="pager"><span></span><a href="01-Software-Requirements-Specification.html" style="text-align:right"><span>Next</span>Software Requirements Specification</a></div>
+</main></div>
+<script>
+(function(){
+ var r=document.documentElement, K='ntqms-srs-theme', s=localStorage.getItem(K);
+ if(s) r.setAttribute('data-theme',s);
+ var b=document.getElementById('th');
+ if(b) b.onclick=function(){
+   var cur=r.getAttribute('data-theme');
+   if(!cur) cur=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+   var nx=cur==='dark'?'light':'dark';
+   r.setAttribute('data-theme',nx); localStorage.setItem(K,nx);
+ };
+ var p=document.getElementById('pr'); if(p) p.onclick=function(){window.print();};
+ // scroll-spy on the in-page TOC
+ var links=[].slice.call(document.querySelectorAll('#toc a'));
+ if(!links.length) return;
+ var tgt=links.map(function(a){return document.getElementById(a.getAttribute('href').slice(1));});
+ function spy(){
+   var y=window.scrollY+90, i=0;
+   for(var k=0;k<tgt.length;k++){ if(tgt[k]&&tgt[k].offsetTop<=y) i=k; }
+   links.forEach(function(a,n){a.style.color=n===i?'var(--accent)':'';
+     a.style.borderLeftColor=n===i?'var(--accent)':'transparent';});
+ }
+ addEventListener('scroll',spy,{passive:true}); spy();
+})();
+</script>
+</body></html>

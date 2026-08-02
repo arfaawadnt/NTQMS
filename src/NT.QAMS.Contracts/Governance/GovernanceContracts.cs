@@ -38,7 +38,15 @@ public sealed record ChangeDetailDto(
 
 // ── Management review ────────────────────────────────────────────────────────
 
-public sealed record ScheduleReviewRequest(string Title, DateOnly ReviewDate, string Participants, Guid? BranchId = null, Guid? DepartmentId = null);
+/// <summary>
+/// Participants are user ids: the display names for the minutes are resolved
+/// server-side, and the invitation is mailed to each participant. Leave
+/// <paramref name="MeetingLink"/> empty to have one generated.
+/// </summary>
+public sealed record ScheduleReviewRequest(string Title, DateOnly ReviewDate,
+    IReadOnlyList<Guid> ParticipantUserIds,
+    string? Agenda = null, string? MeetingLink = null,
+    Guid? BranchId = null, Guid? DepartmentId = null);
 public sealed record AddDecisionRequest(string Description, Guid OwnerId, DateOnly DueDate);
 public sealed record CloseReviewRequest(string Minutes);
 
@@ -49,7 +57,8 @@ public sealed record ReviewListItemDto(
 
 public sealed record ReviewDetailDto(
     Guid Id, string ReviewRef, string Title, DateOnly ReviewDate, string Participants,
-    string Status, string? Minutes, Guid? ClosedBy, IReadOnlyList<ReviewDecisionDto> Decisions);
+    string Status, string? Minutes, Guid? ClosedBy, IReadOnlyList<ReviewDecisionDto> Decisions,
+    string? Agenda = null, string? MeetingLink = null);
 
 // ── Supplier quality ─────────────────────────────────────────────────────────
 

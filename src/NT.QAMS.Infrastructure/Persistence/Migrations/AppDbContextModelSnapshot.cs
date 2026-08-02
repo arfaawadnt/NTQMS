@@ -5141,6 +5141,10 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<string>("Agenda")
+                        .HasColumnType("text")
+                        .HasColumnName("agenda");
+
                     b.Property<Guid?>("BranchId")
                         .HasColumnType("uuid")
                         .HasColumnName("branch_id");
@@ -5164,6 +5168,11 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("DepartmentId")
                         .HasColumnType("uuid")
                         .HasColumnName("department_id");
+
+                    b.Property<string>("MeetingLink")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("meeting_link");
 
                     b.Property<string>("Minutes")
                         .HasColumnType("text")
@@ -6882,6 +6891,10 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                                 .HasColumnType("uuid")
                                 .HasColumnName("id");
 
+                            b1.Property<Guid?>("CertificateFileId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("certificate_file_id");
+
                             b1.Property<DateOnly>("PerformedAt")
                                 .HasColumnType("date")
                                 .HasColumnName("performed_at");
@@ -7323,7 +7336,41 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                                 .HasConstraintName("fk_review_decision_management_review_tenant_id_review_id");
                         });
 
+                    b.OwnsMany("NT.QAMS.Domain.RiskGovernance.ReviewParticipant", "ParticipantUsers", b1 =>
+                        {
+                            b1.Property<Guid>("TenantId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("tenant_id");
+
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<Guid>("UserId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("user_id");
+
+                            b1.Property<Guid>("review_id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("review_id");
+
+                            b1.HasKey("TenantId", "Id")
+                                .HasName("pk_review_participant");
+
+                            b1.HasIndex("TenantId", "review_id", "UserId")
+                                .IsUnique()
+                                .HasDatabaseName("ux_review_participant_user");
+
+                            b1.ToTable("review_participant", "qams");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TenantId", "review_id")
+                                .HasConstraintName("fk_review_participant_management_review_tenant_id_review_id");
+                        });
+
                     b.Navigation("Decisions");
+
+                    b.Navigation("ParticipantUsers");
                 });
 
             modelBuilder.Entity("NT.QAMS.Domain.RiskGovernance.RiskItem", b =>

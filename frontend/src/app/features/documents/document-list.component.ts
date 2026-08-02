@@ -2,21 +2,27 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@ang
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { Router, RouterOutlet } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { DocumentsFacade } from './documents.facade';
 import { I18nService } from '../../core/i18n.service';
+import { DocumentsApiService } from '../../core/api/documents-api.service';
+import { DocumentListItem } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { LovSelectComponent } from '../../shared/ui/lov-select.component';
 import { LoadMoreComponent } from '../../shared/ui/load-more.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 
 /** Controlled-document register: list + a create form that uploads the initial file. */
 @Component({
     selector: 'qams-document-list',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, LovSelectComponent, LoadMoreComponent],
+    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, LovSelectComponent, LoadMoreComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('doc.title')">
+      <qams-export-menu [title]="i18n.t('doc.title')" [columns]="exportColumns" [rows]="facade.list()"
+                        [fetchAll]="exportAll" [filtersSummary]="i18n.t('exp.allRecords')" />
       <button (click)="showForm.set(!showForm())">{{ i18n.t('doc.new') }}</button>
     </qams-page-header>
 
@@ -99,6 +105,7 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
 export class DocumentListComponent implements OnInit {
   readonly facade = inject(DocumentsFacade);
   readonly i18n = inject(I18nService);
+  private readonly api = inject(DocumentsApiService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
 
@@ -106,6 +113,30 @@ export class DocumentListComponent implements OnInit {
   /** Whether the record-workspace drawer (child route) is active. */
   readonly detailOpen = signal(false);
   readonly file = signal<File | null>(null);
+
+  /** Export columns — the printed grid mirrors the on-screen table. */
+  readonly exportColumns: ExportColumn<DocumentListItem>[] = [
+    { header: this.i18n.t('doc.code'), cell: (d) => d.code },
+    { header: this.i18n.t('doc.docTitle'), cell: (d) => d.title },
+    { header: this.i18n.t('doc.category'), cell: (d) => d.category },
+    { header: this.i18n.t('doc.published'), cell: (d) => d.publishedVersion ?? '—' },
+    { header: this.i18n.t('nc.status'), cell: (d) => d.status },
+    { header: this.i18n.t('doc.created'), cell: (d) => d.createdAtUtc },
+  ];
+
+  /**
+   * Pulls every page of the register so the document holds the whole dataset,
+   * not just the rows loaded so far (this page applies no filters).
+   */
+  readonly exportAll = async (): Promise<readonly DocumentListItem[]> => {
+    const all: DocumentListItem[] = [];
+    for (let page = 1; page <= 25; page++) {
+      const batch = await firstValueFrom(this.api.list(undefined, undefined, page, 200));
+      all.push(...batch.items);
+      if (!batch.hasMore) { break; }
+    }
+    return all;
+  };
 
   readonly form = this.fb.nonNullable.group({
     code: ['', [Validators.required, Validators.maxLength(40)]],

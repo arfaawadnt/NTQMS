@@ -91,12 +91,17 @@ public sealed class CompleteTaskHandler(IAppDbContext db, IClock clock) : IComma
     }
 }
 
-/// <summary>"My Tasks": pending tasks assigned to me directly or to my role.</summary>
-public sealed record GetMyTasksQuery(
-    string MyRole, int Page = 1, int PageSize = PageRequest.DefaultPageSize)
+/// <summary>
+/// "My Tasks": every task assigned to me directly or to a role I hold — pending
+/// first (by due date), then completed work most recent first. Completed tasks
+/// stay on the queue deliberately: hiding them made the page go blank the moment
+/// a user finished their last task, which read as the page being broken, and it
+/// erased the visible record of work done.
+/// </summary>
+public sealed record GetMyTasksQuery(int Page = 1, int PageSize = PageRequest.DefaultPageSize)
     : IQuery<Contracts.Common.PagedResponse<WorkTaskDto>>;
 
-public sealed class GetMyTasksHandler(IAppDbContext db, ICurrentUser user, IClock clock)
+public sealed class GetMyTasksHandler(IAppDbContext db, ICurrentUser user, IUserPrivileges privileges, IClock clock)
     : IQueryHandler<GetMyTasksQuery, Contracts.Common.PagedResponse<WorkTaskDto>>
 {
     public async Task<Contracts.Common.PagedResponse<WorkTaskDto>> Handle(GetMyTasksQuery q, CancellationToken ct)
@@ -104,14 +109,33 @@ public sealed class GetMyTasksHandler(IAppDbContext db, ICurrentUser user, ICloc
         var userId = user.UserId ?? throw new DomainException("AUTH-003", "An authenticated user is required.");
         var today = DateOnly.FromDateTime(clock.UtcNow.UtcDateTime);
 
+        // A role-routed task must match BOTH role vocabularies, resolved from the
+        // database rather than the token: existing rows hold the legacy tier name
+        // ("TenantAdmin") while v1.51 roles are tenant-defined ("Tenant
+        // Administrator"), and the JWT's tier claim goes stale the moment an
+        // administrator reassigns a role mid-session. The tier comes from the
+        // user row (id-bound), the tenant-defined name from the per-request
+        // privilege resolution.
+        var tier = await db.Users.AsNoTracking()
+            .Where(u => u.Id == userId)
+            .Select(u => u.Role.ToString())
+            .SingleAsync(ct);
+        var dynamicRole = privileges.RoleName ?? string.Empty;
+
         // API-004: pagination envelope — no silent cap; the client sees the total.
         return await db.WorkTasks.AsNoTracking()
-            .Where(t => t.Status == WorkTaskStatus.Pending
-                        && (t.AssigneeUserId == userId || t.AssigneeRole == q.MyRole))
-            .OrderBy(t => t.DueDate)
+            .Where(t => t.AssigneeUserId == userId
+                        || t.AssigneeRole == tier
+                        || (dynamicRole != "" && t.AssigneeRole == dynamicRole))
+            // Explicit ordinal — the column is an enum-as-string, so a bare
+            // OrderBy(Status) would sort alphabetically and put Completed first.
+            .OrderBy(t => t.Status == WorkTaskStatus.Pending ? 0 : 1)
+            .ThenBy(t => t.Status == WorkTaskStatus.Pending ? t.DueDate : today)
+            .ThenByDescending(t => t.CompletedAtUtc)
             .Select(t => new WorkTaskDto(
                 t.Id, t.Subject, t.SubjectRef, t.AssigneeUserId, t.AssigneeRole,
-                t.DueDate, t.Status.ToString(), t.DueDate < today))
+                t.DueDate, t.Status.ToString(),
+                t.Status == WorkTaskStatus.Pending && t.DueDate < today))
             .ToPagedAsync(PageRequest.Normalized(q.Page, q.PageSize), ct);
     }
 }

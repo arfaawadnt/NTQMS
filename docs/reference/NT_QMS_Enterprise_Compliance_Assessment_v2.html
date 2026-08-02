@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NT.QMS — Enterprise Application Compliance Assessment</title>
+<style>
+  :root{--ink:#12171f;--muted:#5b6673;--line:#dde3ea;--bg:#fff;--soft:#f6f8fa;
+        --crit:#b3001b;--high:#c2410c;--med:#a16207;--low:#0e7490;--ok:#15803d;--info:#475569}
+  *{box-sizing:border-box}
+  body{margin:0;font:15px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+  .wrap{max-width:1180px;margin:0 auto;padding:40px 24px 96px}
+  h1{font-size:27px;line-height:1.25;margin:0 0 6px}
+  h2{font-size:20px;margin:44px 0 12px;padding-bottom:7px;border-bottom:2px solid var(--ink)}
+  h3{font-size:16px;margin:26px 0 8px}
+  h4{font-size:14px;margin:18px 0 6px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  p,li{margin:0 0 9px}
+  code{font:12.5px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;background:var(--soft);padding:1px 5px;border-radius:3px}
+  table{width:100%;border-collapse:collapse;margin:12px 0 18px;font-size:13.5px}
+  th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+  th{background:var(--soft);font-weight:650}
+  .meta{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:16px 18px;margin:18px 0 26px}
+  .meta table{margin:0;font-size:13.5px}
+  .meta td,.meta th{border:none;padding:3px 10px 3px 0}
+  .tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;padding:2px 7px;border-radius:3px;color:#fff;white-space:nowrap}
+  .t-crit{background:var(--crit)}.t-high{background:var(--high)}.t-med{background:var(--med)}
+  .t-low{background:var(--low)}.t-ok{background:var(--ok)}.t-info{background:var(--info)}
+  .finding{border:1px solid var(--line);border-left:4px solid var(--muted);border-radius:6px;padding:14px 16px;margin:16px 0}
+  .finding.crit{border-left-color:var(--crit)}.finding.high{border-left-color:var(--high)}
+  .finding.med{border-left-color:var(--med)}.finding.low{border-left-color:var(--low)}
+  .finding h3{margin:0 0 10px;font-size:15.5px}
+  .finding dl{display:grid;grid-template-columns:190px 1fr;gap:3px 14px;margin:0;font-size:13.5px}
+  .finding dt{color:var(--muted);font-weight:600}
+  .finding dd{margin:0}
+  .callout{border:1px solid var(--line);border-left:4px solid var(--ok);background:#f2fbf4;border-radius:6px;padding:14px 16px;margin:18px 0}
+  .callout.warn{border-left-color:var(--med);background:#fffbeb}
+  .scroll{overflow-x:auto}
+  ul{padding-left:20px}
+  .small{font-size:13px;color:var(--muted)}
+  hr{border:0;border-top:1px solid var(--line);margin:34px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>NT.QMS — Enterprise Application Compliance Assessment</h1>
+<p class="small">MODE: Enterprise Application Compliance Assessment · multi-tenancy assessed as a mandatory control category</p>
+
+<div class="meta">
+<table>
+<tr><th>Report ID</th><td>EAC-NTQMS-002</td><th>Supersedes</th><td>EAC-NMT-NTQMS-001 (non-multi-tenant brief — scope was incorrect)</td></tr>
+<tr><th>Assessed artefact</th><td><code>D:\SAAS\QAMS\21-7\NT.QAMS</code></td><th>Code state</th><td><code>v1.51.1-13-g10e784e</code> (master)</td></tr>
+<tr><th>Date</th><td>2026-08-01</td><th>Database</th><td>PostgreSQL 17.10, <code>ntqams</code>, 56 migrations applied</td></tr>
+<tr><th>Overall compliance</th><td><strong>76 %</strong> (64 / 84)</td><th>Verification coverage</th><td><strong>≈ 83 %</strong> → Medium confidence</td></tr>
+<tr><th>Critical findings</th><td><strong>0</strong></td><th>High findings</th><td>3</td></tr>
+<tr><th>Tenant isolation</th><td colspan="3"><span class="tag t-ok">VERIFIED</span> — no cross-tenant exposure found; every probe denied</td></tr>
+<tr><th>Production decision</th><td colspan="3"><span class="tag t-med">APPROVED WITH CONDITIONS</span></td></tr>
+</table>
+</div>
+
+<h2>1 · Objective and reviewed scope</h2>
+<p>Determine how closely NT.QMS complies with the Enterprise Application Architecture instructions, validating implementation behaviour from concrete evidence rather than from folder names, interfaces, comments, documentation or intended design.</p>
+<p><strong>NOT VERIFIED: <code>Enterprise_Application_Development_Standard.txt</code> was not supplied.</strong> It is neither attached to this request nor present on disk (searched <code>D:\SAAS</code> to depth 3). Compliance against that specific document therefore cannot be assessed. This assessment is made against the 22-category mandatory checklist contained in the audit instructions themselves, which is complete and self-contained. Where the checklist names a specific technology, deviations are reported rather than silently accepted (see §17 on Serilog).</p>
+<p>Scope: solution and project structure; domain model; application use cases; API surface; authentication and authorization; multi-tenancy; EF Core and the PostgreSQL schema; transactions and messaging; background processing; real-time features; the Angular client; validation and error contracts; audit trail and electronic signatures; security architecture (STRIDE); logging and observability; configuration and secrets; health, resilience and operations; container and deployment manifests; the automated test suite; documentation and traceability.</p>
+<p><strong>The system was executed, not merely read.</strong> The solution was compiled, the full backend and frontend suites were run, the live API was probed for authentication, authorization, cross-tenant access, mass assignment, rate limiting, idempotency and error contracts, and the live database was interrogated through <code>pg_catalog</code> and attacked directly against its immutability controls.</p>
+
+<h2>2 · Artefacts reviewed</h2>
+<ul>
+<li><strong>Source:</strong> 555 C# files across <code>src/NT.QAMS.{SharedKernel, Domain, Application, Contracts, Infrastructure, WebApi}</code>; 214 TypeScript files across <code>frontend/src</code> and <code>frontend/e2e</code>.</li>
+<li><strong>Persistence:</strong> 57 migration files; <code>AppDbContext</code>; 6 interceptors (<code>TenantStamp</code>, <code>TenantConnection</code>, <code>OrgScopeGuard</code>, <code>AuditStamp</code>, <code>FieldChange</code>, <code>Outbox</code>); entity configurations; the live schema read from <code>pg_catalog</code> / <code>information_schema</code>.</li>
+<li><strong>API:</strong> 42 controllers; <code>Program.cs</code>; middleware (<code>Observability</code>, <code>SecurityHeaders</code>, <code>TenantResolution</code>, <code>ActiveSession</code>, <code>MfaEnrollmentGate</code>, <code>ChangeReason</code>); <code>DomainExceptionHandler</code>; <code>ProblemAuthorizationResultHandler</code>; versioning convention.</li>
+<li><strong>Security:</strong> JWT configuration; <code>AuthorizationBehavior</code>; <code>RequirePermissionAttribute</code>; <code>PermissionCatalog</code>; <code>Roles.cs</code>; <code>DatabaseRoleGuard</code>; <code>RateLimitSettings</code>; <code>FileContentPolicy</code>; <code>deploy/harden-runtime-role.sql</code>.</li>
+<li><strong>Tests:</strong> 6 projects — Domain.UnitTests, Application.UnitTests, Architecture.Tests, IntegrationTests, WebApi.FunctionalTests, LoadTests; Angular unit specs; 3 Playwright specs.</li>
+<li><strong>Documentation:</strong> 4 architecture references; <code>NT_QMS_Database_AsBuilt.md</code>; 9 ADRs; CSV/validation set (<code>docs/validation/</code>: VMP, URS, FRA, IQ/OQ/PQ, RTM, VSR); backup/DR runbook; observability runbook; deploy guide; security assessment; pen-test SOW; load-test report; EA remediation closure report; <code>IMPLEMENTATION_LOG.md</code>; <code>CLAUDE.md</code>.</li>
+<li><strong>Pipeline / packaging:</strong> <code>.github/workflows/ci.yml</code>; <code>Dockerfile</code>; <code>docker-compose.yml</code>; <code>deploy/compose.production.yml</code>; <code>deploy/web.config</code>; IIS assets.</li>
+</ul>
+
+<h4>Executions performed</h4>
+<table>
+<tr><th>Action</th><th>Command</th><th>Result</th></tr>
+<tr><td>Solution build</td><td><code>dotnet build NT.QAMS.sln -c Debug</code></td><td><strong>Succeeded — 0 warnings, 0 errors</strong></td></tr>
+<tr><td>Backend tests (real PostgreSQL)</td><td><code>dotnet test NT.QAMS.sln --no-build</code> with <code>QMS_ITEST_POSTGRES</code></td><td><strong>446 passed · 0 failed · 1 skipped</strong> — Domain 228, Application 72, Architecture 33, Integration 31 (+1 skip), Functional 82</td></tr>
+<tr><td>Frontend unit tests</td><td><code>npm run test:ci</code> (ChromeHeadless)</td><td><strong>76 / 76 passed</strong></td></tr>
+<tr><td>Live API probes</td><td>10 probes — see §15 and §16</td><td>All recorded with observed status codes and bodies</td></tr>
+<tr><td>Live database interrogation and attack</td><td>RLS state and policy expressions, role privileges, constraints, indexes, FK actions, triggers, hash-chain continuity, direct <code>UPDATE</code>/<code>DELETE</code> against audit ledgers</td><td>All recorded in §14 and §15</td></tr>
+</table>
+
+<h2>3 · Artefacts not provided</h2>
+<ul>
+<li><strong><code>Enterprise_Application_Development_Standard.txt</code></strong> — referenced by the audit instructions, not supplied. NOT VERIFIED against that document.</li>
+<li><strong>Production or validation (staging) environment.</strong> All runtime evidence is from the Development environment on the developer workstation. Production-only behaviour — HSTS emission, the <code>DatabaseRoleGuard</code> hard failure, JSON console logging, proxy-terminated TLS — was read from code, not observed.</li>
+<li><strong>Reverse proxy / IIS configuration as deployed</strong> — so production reachability of <code>/metrics</code> and <code>/health/*</code>, and Host-header validation, are NOT VERIFIED.</li>
+<li><strong>Backup / restore drill evidence and DR test records.</strong> The runbook defines RPO ≤ 5 min and RTO ≤ 4 h with quarterly drills; no drill artefacts exist in the repository.</li>
+<li><strong>Playwright end-to-end execution</strong> — the 3 specs were read, not run (requires API and SPA up together under the harness).</li>
+<li><strong>Credentials for a branch- or department-restricted user</strong>, which prevented runtime proof of the intra-tenant resource-scope boundary (ACCESS-001).</li>
+<li><strong>Query-plan analysis</strong> for critical operations; <strong>load/capacity evidence</strong> at production volume; <strong>malware/content scanning</strong> service; <strong>key-management and rotation</strong> procedures; <strong>monitoring dashboards and alert delivery</strong>; <strong>penetration-test report</strong> (a SOW exists).</li>
+</ul>
+
+<h2>4 · Assumptions</h2>
+<p>ASSUMPTION: The working tree at <code>v1.51.1-13-g10e784e</code> is the release candidate; the single dirty file (<code>tests/NT.QAMS.WebApi.FunctionalTests/*.csproj</code>) is immaterial to these findings.<br>
+ASSUMPTION: <code>deploy/compose.production.yml</code> is the reference production topology — one API replica, loopback-only publish, TLS terminating at a reverse proxy per ADR-0002.<br>
+ASSUMPTION: <code>docs/reference/NT_QMS_Database_AsBuilt.md</code> supersedes <code>NT_QAMS_Database_Architecture.md</code> wherever the two differ, as that document itself states. Design-only elements of the latter were therefore not scored as implementation defects, but unimplemented controls with regulatory weight are reported (DB-002).<br>
+ASSUMPTION: The Development dataset (20 tenants, largely test fixtures) exercises control <em>behaviour</em> faithfully; it does not represent production data volumes.<br>
+ASSUMPTION: Tenants are independent customer laboratories rather than internal departments — supported by the platform-admin provisioning flow, per-tenant slug sign-in and per-tenant settings.<br>
+ASSUMPTION: The absence of any caching library means no cache tier exists to leak tenant data; verified by searching for <code>IMemoryCache</code>, <code>IDistributedCache</code>, Redis and response-caching across all projects (no matches).</p>
+
+<h2>5 · Open questions</h2>
+<p>OPEN QUESTION: Where is <code>Enterprise_Application_Development_Standard.txt</code>? Several items can only be closed against the organisation's own wording, not a generic checklist.<br>
+OPEN QUESTION: Is the branch/department boundary a <em>security</em> boundary (confidentiality) or a <em>usability</em> boundary (relevance filtering)? The implementation reads as security; the answer sets the severity of ACCESS-001 and ACCESS-003.<br>
+OPEN QUESTION: Is <code>/metrics</code> blocked at the reverse proxy in production? The answer moves SEC-001 between LOW and HIGH.<br>
+OPEN QUESTION: Is the 120-minute access-token lifetime in <code>appsettings.json</code> intentional, given the code default is 15 and ADR-0009 specifies 15?<br>
+OPEN QUESTION: Is local-filesystem evidence storage accepted for production, or is the documented object storage with object-lock (WORM) still the target? No ADR records the deviation.<br>
+OPEN QUESTION: Was Serilog deliberately replaced by <code>Microsoft.Extensions.Logging</code> with JSON console output? The checklist names Serilog explicitly; the implementation is functionally equivalent but is not Serilog.<br>
+OPEN QUESTION: Who owns remediation? No owner is named in any supplied artefact, so the risk register records <em>Unassigned</em> throughout.</p>
+
+<h2>6 · Executive summary</h2>
+<p>NT.QMS is a mature .NET 9 / PostgreSQL 17 / Angular 22 quality-management platform on Clean Architecture with CQRS, serving 20 independent laboratory tenants from one shared application and database. Assessed against the correct control set — with multi-tenancy as a mandatory category rather than an exclusion — it presents as a well-engineered regulated system with a small, specific set of gaps.</p>
+<p><strong>Tenant isolation is verified and no cross-tenant exposure exists.</strong> This is the finding that matters most, and it was established by attack rather than by inspection. A tenant administrator holding a valid token requested another tenant's document by id and received <code>404</code>; the same for a file reference. A create request carrying an injected <code>tenantId</code> for a foreign tenant and a chosen <code>id</code> was accepted, and the row landed in the caller's own tenant with a server-generated id — both injected fields ignored. The runtime database role holds neither <code>SUPERUSER</code> nor <code>BYPASSRLS</code>, so the 90 <code>FORCE ROW LEVEL SECURITY</code> policies are enforced by PostgreSQL independently of application code, and 29 tenant-composite foreign keys make a child row under another tenant's parent structurally impossible. Tenant identity is read from the validated JWT's <code>tenant_id</code> claim only — never headers or query strings — and the session GUCs that RLS reads are re-applied on <em>every</em> connection open, so a pooled physical connection cannot carry a previous request's tenant. Per the instruction that any verified cross-tenant exposure is CRITICAL and P0: there is none, and there are <strong>zero critical findings</strong>.</p>
+<p>Regulated-record controls are equally real. Direct <code>UPDATE</code> and <code>DELETE</code> against <code>audit.audit_trail</code> and <code>audit.electronic_signature</code> were both refused by database triggers. The audit ledger is hash-chained: 387 entries, per-tenant sequences, and <strong>zero chain breaks</strong> under a window-function continuity check. Administrative cross-tenant access is audited — 58 <code>TenantProvisioned</code> entries sit in that ledger, alongside role, permission and user-scope changes. Architectural and authorization rules are enforced mechanically rather than by review: 33 architecture tests hold the dependency direction and module boundaries, and an unannotated command is denied at runtime and fails the build.</p>
+<p>What needs work is narrower than the score suggests, and clusters in three places. First, the <strong>second, intra-tenant boundary</strong>: branch/department scoping is enforced by a single EF query filter with no database backstop, does not cover file attachments, and is dissolved wholesale by eight <code>IgnoreQueryFilters()</code> call sites in the Application layer. Second, <strong>three regulated-evidence gaps</strong>: the electronic signature binds the signed record's version only inside a free-text sentence, the immutable ledger stores .NET assembly-qualified type names as its event taxonomy, and retention/archival is documented but unenforced with file bytes on mutable local disk. Third, <strong>test and contract tails</strong>: no unit tests exist for any FluentValidation validator, cross-tenant denial has no automated export or file case, a <code>429</code> returns an empty body, and deserialization errors disclose internal type names.</p>
+<p>None of these is a cross-tenant or authentication defect. The conditions on approval are proportionate: prove or fix the file-scope gap, correct a token-lifetime configuration drift that contradicts its own ADR, and structure the signature bindings before the next validation cycle.</p>
+
+<h2>7 · Overall compliance score</h2>
+<p><strong>64 / 84 = 76 %</strong> — “Generally aligned; material improvements required”.</p>
+<p>Method, stated so it is reproducible: each of the 22 mandatory checklist categories is scored 0–4 against its evidence. Category 12 (SignalR and real-time features) is NOT APPLICABLE and is excluded from both numerator and denominator, giving 21 scored categories and a maximum of 84. Scoring is deliberately unforgiving: a category with any material named gap scores 3 rather than 4, however strong the remainder — which is why 20 of 21 categories sit at 3 and only Solution Architecture reaches 4. The score should be read as “consistently strong with a named gap almost everywhere”, not as “average”.</p>
+<p class="small">This supersedes report EAC-NMT-NTQMS-001, which scored 74 % under a brief that declared the application non-multi-tenant. That brief cost two category-points to a classification mismatch and a resource-access category that this checklist distributes differently; the underlying evidence is unchanged, and several previously unverified items have since been verified (accessibility, typed forms, cancellation propagation, audit of administrative cross-tenant access, absence of a cache tier).</p>
+
+<h2>8 · Verification coverage</h2>
+<p><strong>≈ 83 %</strong> → <span class="tag t-med">MEDIUM CONFIDENCE</span> (High requires ≥ 85 %).</p>
+<p>Coverage is high because the solution compiled, 522 automated tests executed, the live API was probed, and the live schema was measured and attacked. It falls short of High for eight areas that could not be exercised: the named standard document, production/staging behaviour, the deployed proxy configuration, backup–restore drills, end-to-end execution, query plans, malware scanning and key rotation, and the intra-tenant resource-scope boundary at runtime. A 76 % score at 83 % coverage is directionally reliable, but not final for the items listed in §25.</p>
+
+<h2>9 · Executive scorecard</h2>
+<h4>Table A · Executive scorecard</h4>
+<div class="scroll">
+<table>
+<tr><th>#</th><th>Category</th><th>Score</th><th>Max</th><th>Compliance %</th><th>Verif. cov. %</th><th>Critical</th><th>High</th><th>Status</th></tr>
+<tr><td>1</td><td>Business and functional alignment</td><td>3</td><td>4</td><td>75</td><td>80</td><td>0</td><td>0</td><td>Mostly compliant</td></tr>
+<tr><td>2</td><td>Solution architecture</td><td><strong>4</strong></td><td>4</td><td>100</td><td>95</td><td>0</td><td>0</td><td><strong>Compliant</strong></td></tr>
+<tr><td>3</td><td>SOLID and code structure</td><td>3</td><td>4</td><td>75</td><td>85</td><td>0</td><td>0</td><td>Mostly compliant</td></tr>
+<tr><td>4</td><td>Domain-driven design</td><td>3</td><td>4</td><td>75</td><td>90</td><td>0</td><td>0</td><td>Mostly compliant</td></tr>
+<tr><td>5</td><td>CQRS and MediatR</td><td>3</td><td>4</td><td>75</td><td>95</td><td>0</td><td>0</td><td>Mostly compliant</td></tr>
+<tr><td>6</td><td>API design</td><td>3</td><td>4</td><td>75</td><td>90</td><td>0</td><td>0</td><td>Mostly compliant</td></tr>
+<tr><td>7</td><td>Authentication and authorization</td><td>3</td><td>4</td><td>75</td><td>90</td><td>0</td><td>2</td><td>Mostly compliant</td></tr>
+<tr><td>8</td><td><strong>Multi-tenancy</strong></td><td>3</td><td>4</td><td>75</td><td><strong>95</strong></td><td><strong>0</strong></td><td>0</td><td>Mostly compliant — <strong>no cross-tenant exposure</strong></td></tr>
+<tr><td>9</td><td>Database and EF Core</td><td>3</td><td>4</td><td>75</td><td>90</td><td>0</td><td>0</td><td>Mostly compliant</td></tr>
+<tr><td>10</td><td>Transactions, consistency, messaging</td><td>3</td><td>4</td><td>75</td><td>85</td><td>0</td><td>0</td><td>Mostly compliant</td></tr>
+<tr><td>11</td><td>Background processing (Hangfire N/A)</td><td>3</td><td>4</td><td>75</td><td>75</td><td>0</td><td>0</td><td>Mostly compliant</td></tr>
+<tr><td>12</td><td>SignalR and real-time features</td><td>N/A</td><td>—</td><td>—</td><td>—</td><td>0</td><td>0</td><td><strong>Not applicable</strong></td></tr>
+<tr><td>13</td><td>Angular frontend</td><td>3</td><td>4</td><td>75</td><td>80</td><td>0</td><td>0</td><td>Mostly compliant</td></tr>
+<tr><td>14</td><td>Validation and error handling</td><td>3</td><td>4</td><td>75</td><td>90</td><td>0</td><td>0</td><td>Mostly compliant</td></tr>
+<tr><td>15</td><td>Audit and e-signatures</td><td>3</td><td>4</td><td>75</td><td>90</td><td>0</td><td>1</td><td>Mostly compliant</td></tr>
+<tr><td>16</td><td>Security architecture (STRIDE)</td><td>3</td><td>4</td><td>75</td><td>80</td><td>0</td><td>0</td><td>Mostly compliant</td></tr>
+<tr><td>17</td><td>Logging and observability</td><td>3</td><td>4</td><td>75</td><td>80</td><td>0</td><td>0</td><td>Mostly compliant</td></tr>
+<tr><td>18</td><td>Configuration and secrets</td><td>3</td><td>4</td><td>75</td><td>90</td><td>0</td><td>0</td><td>Mostly compliant</td></tr>
+<tr><td>19</td><td>Health, resilience and operations</td><td>3</td><td>4</td><td>75</td><td>65</td><td>0</td><td>0</td><td>Mostly compliant</td></tr>
+<tr><td>20</td><td>Docker and deployment</td><td>3</td><td>4</td><td>75</td><td>75</td><td>0</td><td>0</td><td>Mostly compliant</td></tr>
+<tr><td>21</td><td>Testing</td><td>3</td><td>4</td><td>75</td><td>95</td><td>0</td><td>0</td><td>Mostly compliant</td></tr>
+<tr><td>22</td><td>Documentation and traceability</td><td>3</td><td>4</td><td>75</td><td>85</td><td>0</td><td>0</td><td>Mostly compliant</td></tr>
+<tr><th colspan="2">Total (21 applicable categories)</th><th>64</th><th>84</th><th>76 %</th><th>≈ 83 %</th><th>0</th><th>3</th><th>Generally aligned</th></tr>
+</table>
+</div>
+
+<h2>10 · Mandatory-rule assessment</h2>
+<h4>Table B · Mandatory rule compliance</h4>
+<div class="scroll">
+<table>
+<tr><th>Rule</th><th>Status</th><th>Score</th><th>Evidence</th><th>Main gap</th><th>Blocker</th></tr>
+<tr><td>1 · Business and functional alignment</td><td>PARTIALLY COMPLIANT</td><td>3</td><td>Objective/scope in 4 architecture references; actors = 7 roles in <code>UserRole</code>; workflows and acceptance criteria in the CSV set (URS, FRA, RTM); business rules surface as stable structured codes (<code>DOC-001</code>, <code>SOD-DOC-001</code>, <code>NC-*</code>, <code>SCOPE-001</code>) traceable to the aggregate methods that raise them; <code>PermissionCatalog</code> maps permissions to business actions; commands/queries are named use cases; terminology consistent across code, DB (<code>controlled_document</code>, <code>nonconformance</code>), API and UI</td><td>The named standard document was not supplied, so alignment to the organisation's own wording is NOT VERIFIED; no stakeholder sign-off artefacts evidence which rules were confirmed vs inferred</td><td>No</td></tr>
+<tr><td>2 · Solution architecture</td><td><strong>COMPLIANT</strong></td><td>4</td><td><code>LayerRulesTests</code> (5 rules) proves Domain depends only on SharedKernel — no EF Core, ASP.NET Core, MediatR, logging, Npgsql, HTTP or external SDK; Application never references Infrastructure or ASP.NET Core; Contracts carry no domain types; Infrastructure never references WebApi. <code>ModuleBoundaryTests</code> proves per-module independence for every domain module. <code>ApiSurfaceSnapshotTests</code> gates contract stability; ADR-0004 versions the API. Modular monolith; no circular dependencies; 9 ADRs. All 33 architecture tests executed and passing</td><td>None material. Application references <code>Microsoft.EntityFrameworkCore</code> — permitted (the prohibition is on Domain) and documented as the persistence port in ADR-0008</td><td>No</td></tr>
+<tr><td>3 · SOLID and code structure</td><td>PARTIALLY COMPLIANT</td><td>3</td><td><code>Roles.cs</code>, <code>PermissionCatalog</code>, <code>ConfigGuard</code>, <code>RateLimiting</code> and structured error codes centralize policy; DI inverted at infrastructure/external boundaries; no interface-per-class pattern; domain behaviour lives in aggregates rather than procedural services; no user-supplied sort/filter strings anywhere</td><td>Primitive obsession (DOMAIN-001); a few files group several controllers (<code>GovernanceControllers</code>, <code>OperationsControllers</code>, <code>AnalyticalQualityControllers</code>)</td><td>No</td></tr>
+<tr><td>4 · Domain-driven design</td><td>PARTIALLY COMPLIANT</td><td>3</td><td>45 aggregate roots; private setters + factories + guarded state machines (<code>RequireInFlight</code>); invariants inside aggregates, not validators; 90 past-tense domain events; SoD in <code>AggregateRoot.EnsureSignerIsNotPreparer</code>; stable UUIDv7 identity with <code>ValueGeneratedNever</code>; concurrency defined (<code>xmin</code>); entities never exposed through contracts (test-enforced); no persistence leakage into Domain</td><td><strong>One</strong> value object (<code>TenantSlug</code>) across the entire domain; email validated as <code>!email.Contains('@')</code> on a raw string (DOMAIN-001)</td><td>No</td></tr>
+<tr><td>5 · CQRS and MediatR</td><td>PARTIALLY COMPLIANT</td><td>3</td><td>Commands and queries separately represented (<code>ICommand</code>/<code>IQuery</code>); handlers single-purpose; controllers hold no use-case logic; queries project to DTOs; <code>IQueryable</code> confined to an internal <code>Paging</code> extension and never crosses a boundary; FluentValidation on commands; 5 open behaviors in intentional order — Tracing → Logging → Authorization → Idempotency → Validation; <code>CommandPolicyTests</code> makes “every command declares exactly one policy” build-breaking; idempotent retry verified at runtime</td><td>Pipeline ordering is intentional but <strong>not tested</strong>; queries are not gated in the pipeline (controller-only) with no read-side equivalent of the command CI gate; no explicit transaction, audit or performance behaviors (transactions align to aggregates via one <code>SaveChanges</code>; audit via interceptors; exceptions via middleware — defensible but undocumented as decisions)</td><td>No</td></tr>
+<tr><td>6 · API design</td><td>PARTIALLY COMPLIANT</td><td>3</td><td>DTOs only; resource routes plus explicit business-action endpoints; semantically correct methods; dual <code>api/…</code> + <code>api/v1/…</code> routing (ADR-0004); problem+json verified on 400/401/404; safe authorization failures via <code>ProblemAuthorizationResultHandler</code>; <code>409 CONCURRENCY-409</code> mapping; pagination envelope verified <code>{items,total,page,pageSize,hasMore}</code> with <code>MaxPageSize</code>; no user-supplied sort or filter field exists, so allow-listing has no attack surface; rate limiting verified; upload validated for size (50 MB), extension allow-list, magic-byte sniff and tenant; downloads forced to attachment; correlation and trace ids returned</td><td><code>429</code> returns an empty body (API-001); deserialization errors disclose internal type names (API-002); no client-visible concurrency token (API-003); one export lacks its permission gate (ACCESS-002)</td><td>No</td></tr>
+<tr><td>7 · Authentication and authorization</td><td>PARTIALLY COMPLIANT</td><td>3</td><td>Issuer, audience, signature, lifetime and required claims all validated; <code>Jwt:Secret</code> absent aborts start-up; framework fallback policy requires an authenticated user on every endpoint; 144 <code>[RequirePermission]</code> action gates + 57 controller <code>[Authorize]</code>; <code>AuthorizationBehavior</code> fails closed (<code>AUTHZ-000</code> for an unannotated command, <code>AUTHZ-008</code> for an unknown permission key); <code>ActiveSessionMiddleware</code> revalidates account, role and privileges from the database on <em>every</em> request (<code>AUTH-006</code>/<code>AUTH-007</code>); MFA enrollment gate + signature PIN; rotating refresh cookie with reuse-detection family revocation — live <code>security_event</code> shows <code>REFRESH_REUSE_DETECTED</code> ×6, so replay detection actually fires; non-disclosing auth failures; privilege changes audited (<code>RoleCreated</code> ×227, <code>UserRoleAssigned</code> ×68, <code>RolePermissionsChanged</code> ×4, <code>UserScopeChanged</code> ×3 in the hash-chained ledger); escalation blocked — injected <code>tenantId</code> ignored (verified), RLS bypass reachable only via <code>Elevate()</code> whose sole request-path caller is <code>[RequireRole(PlatformAdmin)]</code>; unauthenticated request verified <code>401</code> problem+json</td><td>Shipped access-token lifetime 120 min vs 15 in code and ADR-0009 (SEC-002); resource-level scope missing on file downloads (ACCESS-001); individual <em>deny</em> decisions are logged as errors but not as security events</td><td><strong>Yes</strong> (ACCESS-001, conditional)</td></tr>
+<tr><td>8 · Multi-tenancy</td><td>PARTIALLY COMPLIANT</td><td>3</td><td><strong>Verified in depth — see §14.</strong> Tenant identity from the validated JWT <code>tenant_id</code> claim ONLY, never headers or query strings (<code>TenantResolutionMiddleware</code>); body-supplied <code>tenantId</code> ignored (<strong>runtime-verified</strong>); reads and writes scoped by an EF global filter on 45 <code>ITenantScoped</code> types <em>and</em> 90 <code>FORCE RLS</code> <code>tenant_isolation</code> policies whose <code>WITH CHECK</code> refuses writes for another tenant; jobs resolve tenant explicitly per unit of work via <code>Elevate()</code>; files tenant-scoped by filter and by storage key <code>tenant/{id}/{sha256}</code> (cross-tenant download <strong>runtime-verified 404</strong>); tenant in logs (<code>LoggingBehavior</code>) and audit (<code>audit_trail.tenant_id</code>, per-tenant hash sequences); tenant propagated on integration messages (<code>outbox_event.tenant_id</code> + <code>trace_parent</code>); cross-tenant references structurally impossible via 29 tenant-composite FKs; administrative cross-tenant access explicit, authorized and <strong>audited</strong> (58 <code>TenantProvisioned</code> ledger entries); RLS evaluated, implemented and tested (<code>RlsTenantIsolationTests</code>, <code>OwnedChildTenancyTests</code>, <code>SecurityEventRlsTests</code>, <code>RuntimeRolePrivilegeTests</code> — executed, passing); <strong>connection-pool leakage prevented</strong> — <code>TenantConnectionInterceptor</code> re-applies the session GUCs on every <code>ConnectionOpened</code>, failing closed to the nil UUID which matches no row; runtime role holds neither <code>SUPERUSER</code> nor <code>BYPASSRLS</code> (verified)</td><td>Cross-tenant denial tests cover reads, writes, updates, deletes and jobs, but <strong>not exports or files</strong> (files verified manually here, not by test) — TEST-002; caches and real-time are N/A (no cache tier, no SignalR — both verified absent); 4 tables carry no RLS (DB-001)</td><td>No</td></tr>
+<tr><td>9 · Database and EF Core</td><td>PARTIALLY COMPLIANT</td><td>3</td><td>Measured live: 96 tables · 90 FORCE RLS + 90 policies · 85 CHECK · 36 FK (29 tenant-composite, 5 deferrable to <code>saas.tenant</code>) · 24 unique (tenant-scoped, e.g. <code>ux_user_account_tenant_id_email</code>) · 265 indexes · 88 tenant-first composite PKs · 695 NOT NULL vs 496 nullable · 56 migrations. All 30 CASCADE deletes are child→parent inside one aggregate; cross-aggregate FKs are RESTRICT — no unsafe cascade. Exactly one JSONB column (<code>supplier_evaluation.criteria</code>) and it is genuinely document-like. No comma-separated identifier columns; no universal lookup table. Explicit join entities where attributes exist (<code>role_permission</code>, <code>user_department_access</code>). Timestamps <code>timestamptz</code> from an injected <code>IClock</code>. No generic repository, no repository-per-table, no redundant Unit of Work (ADR-0008); direct projections used. Integration tests validate constraints, transactions, mappings and concurrency — executed, passing</td><td>4 tables carry no RLS (DB-001); retention, archival and partitioning documented but unimplemented, with evidence bytes on mutable local disk (DB-002); query plans for critical operations NOT VERIFIED. Monetary precision is <strong>NOT APPLICABLE</strong> — the domain holds no monetary column; the 80 unbounded <code>numeric</code> columns are analytical measurements (<code>lod</code>, <code>blank_sd</code>, <code>carryover_pct</code>) where unbounded precision is appropriate</td><td>No</td></tr>
+<tr><td>10 · Transactions, consistency, messaging</td><td>PARTIALLY COMPLIANT</td><td>3</td><td>Transaction boundaries align to aggregates (one <code>SaveChanges</code> per use case); optimistic conflicts detected via <code>xmin</code> → <code>409</code>; domain events drained to the outbox <em>in the same transaction</em> as the state change, so nothing publishes before durability; outbox claim uses <code>FOR UPDATE SKIP LOCKED</code> with a lease, bounded backoff, dead-lettering and a retention purge; <code>trace_parent</code> persisted per row so trace context survives the async boundary; leader election via advisory lock; <code>OutboxResilienceTests</code> and <code>OptimisticConcurrencyTests</code> executed against real PostgreSQL and passing</td><td>Event-ordering assumptions not documented; no reconciliation mechanism documented for critical integrations; eventual-consistency behaviour not surfaced to users. Inbox/deduplication is <strong>N/A</strong> — the system consumes no inbound messages</td><td>No</td></tr>
+<tr><td>11 · Background processing</td><td>PARTIALLY COMPLIANT</td><td>3</td><td><strong>Hangfire is not used</strong> — 4 <code>IHostedService</code> workers (<code>OutboxProcessor</code>, <code>ScheduledSweepService</code>, <code>KpiSnapshotService</code>, <code>SingleReplicaGuardService</code>). The rule's substance still applies and largely holds: jobs orchestrate and delegate to Application use cases; they pass stable identifiers, never serialized aggregates; tenant context resolved explicitly per unit of work; overlap prevented by PostgreSQL advisory locks; correlation and trace context propagated; <code>stoppingToken</code> honoured with <code>OperationCanceledException</code> handling for graceful shutdown; failures logged without payloads; outbox has dead-letter handling; <code>ScheduledSweepTests</code> covers tenant isolation in sweeps</td><td>Jobs run under blanket cross-tenant elevation rather than a narrow system identity, and the elevation act itself is not recorded (SEC-004); time-zone behaviour not explicit; no dead-letter path for the sweep/KPI workers (only the outbox); job retry/duplicate-execution tests thin</td><td>No</td></tr>
+<tr><td>12 · SignalR and real-time</td><td><strong>NOT APPLICABLE</strong></td><td>N/A</td><td>No SignalR package reference, no hub type and no <code>MapHub</code> call exists anywhere in <code>src/</code> (searched <code>.cs</code> and <code>.csproj</code>). The product has no real-time requirement; notifications are persisted rows (<code>notification_dispatch</code>) read on request</td><td>—</td><td>No</td></tr>
+<tr><td>13 · Angular frontend</td><td>PARTIALLY COMPLIANT</td><td>3</td><td>Angular <strong>22.0.8</strong> (exceeds the 19 baseline); 100 components with <strong>zero</strong> <code>@NgModule</code>; 83 lazy-loaded routes; feature-per-capability layout (<code>core</code>/<code>features</code>/<code>shared</code>/<code>shell</code>); <strong>typed non-nullable reactive forms</strong> via <code>fb.nonNullable.group(...)</code> in 73 files with <strong>zero</strong> <code>ngModel</code>; <code>strict: true</code> + <code>strictTemplates</code> + <code>strictInjectionParameters</code> + <code>strictInputAccessModifiers</code>; <strong>zero</strong> <code>: any</code>; signals in 123 files; API access centralized in <code>core/api</code> behind typed services and two interceptors; duplicate submission prevented by a <code>busy()</code> signal gating <code>[disabled]</code>; localization centralized in <code>i18n.service.ts</code>, permissions in <code>permissions.service.ts</code>; <strong>accessibility genuinely addressed</strong> — 104 ARIA attributes across 56 files including <code>aria-live</code> regions and 7 <code>aria-modal</code> dialogs with focus move-and-restore plus Escape dismissal, 24 explicit <code>role=</code> attributes, and an axe-core scan in CI; access token held in memory only — <code>localStorage</code> holds solely tenant slug, language, theme and sidebar state; refresh token is httpOnly and unreadable by script; 76/76 unit specs executed and passing</td><td>Optimistic-update rollback and concurrency-conflict presentation NOT VERIFIED (the latter is moot until API-003 gives the client a token); per-screen loading/empty/error-state completeness only spot-verified; e2e specs read but not executed here</td><td>No</td></tr>
+<tr><td>14 · Validation and error handling</td><td>PARTIALLY COMPLIANT</td><td>3</td><td>FluentValidation for command and request shape; invariants enforced by the Domain, not duplicated in validators; stable documented error codes; problem+json consistently applied with safe field-level <code>errors</code>; business-rule failures (coded <code>DomainException</code>) distinguishable from technical failures; <code>409</code> distinct from <code>400</code>; <code>401</code> distinct from <code>403</code>; <code>DomainExceptionHandler</code> centralizes unexpected exceptions; no stack traces, SQL or secrets in any observed response; every problem carries <code>traceId</code> and <code>correlationId</code>; sensitive resource existence not disclosed (cross-tenant read is a bare <code>404</code>); <code>ProblemContractTests</code> executed and passing</td><td><strong>No unit tests exist for any validator</strong> — no test project references FluentValidation and no <code>ValidationBehavior</code>/<code>ValidationException</code> test exists (TEST-001); <code>429</code> carries no body (API-001); deserialization messages leak internal type names (API-002)</td><td>No</td></tr>
+<tr><td>15 · Audit and e-signatures</td><td>PARTIALLY COMPLIANT</td><td>3</td><td><strong>Attacked and held:</strong> <code>UPDATE audit.audit_trail SET event_type=…</code> and <code>DELETE</code> both refused by <code>audit.reject_mutation()</code>; same for <code>audit.electronic_signature</code>. Append-only triggers on all 4 audit tables plus 13 <code>reject_frozen_mutation</code> triggers on regulated study tables. Hash chain: 387 entries, per-tenant sequences, <strong>0 breaks</strong> under a continuity check. Records carry actor, tenant, action, target, UTC time, outcome and correlation id; <code>FieldChangeInterceptor</code> captures before/after with credential-bearing properties redacted; <code>X-Change-Reason</code> mandatory on every DELETE; exports recorded (<code>RECORD_EXPORTED</code> ×10); administrative and security actions audited (<code>TenantProvisioned</code> ×58, role/permission/scope changes, <code>LOGIN_FAILED</code> ×89); material change to a signed study calls <code>Invalidate()</code>, so signatures are not silently carried forward; content hash anchors the signed bytes</td><td>Signature binds signer, meaning, subject, hash and timestamp — but record <strong>version</strong> only inside free-text <code>meaning</code>, with no discrete <code>reason</code>, authentication-level or audit-linkage column (SIG-001); the immutable ledger stores assembly-qualified CLR type names as its event taxonomy (AUDIT-002); audit retention defined but unenforced (DB-002)</td><td>No</td></tr>
+<tr><td>16 · Security architecture</td><td>PARTIALLY COMPLIANT</td><td>3</td><td>STRIDE review in §15. Verified by probe: mass assignment defeated; IDOR blocked; throttling effective (22×<code>429</code> after 8 attempts); audit immutability enforced by the database; runtime role cannot bypass RLS. Trust boundaries documented (ADR-0001/0002/0007); no secrets in source, bundles, images or logs (scanned); production secrets from environment/secret store with <code>${VAR:?}</code> abort-on-missing; CSP/XCTO/XFO/Referrer verified on every response and HSTS outside Development; TLS at proxy; CORS absent by deliberate design (ADR-0007); dependency (.NET + npm allow-listed) and container (Trivy HIGH/CRITICAL) scanning in CI; upload hardened by allow-list + magic-byte sniff storing the canonical type, never the client's claim; path traversal contained by <code>Path.GetFileName</code> + content-addressed keys; injection risk low (EF parameterized; single raw-SQL site interpolated); health endpoints expose only “Healthy”; OpenAPI mapped only in Development</td><td><code>/metrics</code> anonymous and rate-limit-exempt (SEC-001); <code>AllowedHosts: "*"</code> and three response headers absent (SEC-003); no malware/content scanning of uploads (DB-002); key rotation NOT VERIFIED; no <code>.dockerignore</code> and floating base-image tags (OPS-002)</td><td>No</td></tr>
+<tr><td>17 · Logging and observability</td><td>PARTIALLY COMPLIANT</td><td>3</td><td>OpenTelemetry traces HTTP, database (Npgsql), MediatR (<code>ApplicationDiagnostics</code>), background jobs and outbox messages, with <code>trace_parent</code> persisted so context crosses the async boundary; probe noise filtered out. Structured logs carry service, environment, tenant, user, correlation id, trace id, operation, duration and outcome; <code>X-Correlation-Id</code> verified on every response and <code>traceId</code>+<code>correlationId</code> in every problem body. <code>LoggingBehavior</code> logs request name and timing but explicitly never payloads; a search found no credential, token or connection-string log site; <code>FieldChangeInterceptor</code> redacts before values reach the ledger. Exceptions logged once at the correct boundary. Prometheus <code>/metrics</code> with RED, Npgsql pool and custom meters; alert set documented in <code>deploy/OBSERVABILITY.md</code></td><td><strong>Serilog is not used</strong> — the implementation is <code>Microsoft.Extensions.Logging</code> with JSON console output. Functionally equivalent to the requirement's intent, but a deviation from the technology the checklist names, and no ADR records it (DOC-001). <code>/metrics</code> unsecured (SEC-001); sampling not configured; alert and dashboard effectiveness NOT VERIFIED without a live environment; SignalR tracing N/A</td><td>No</td></tr>
+<tr><td>18 · Configuration and secrets</td><td>PARTIALLY COMPLIANT</td><td>3</td><td>Configuration externalized; <code>appsettings*.json</code> ship empty secret slots (verified by scan); strongly-typed options; <code>ConfigGuard</code> validates at start-up and unsafe critical configuration prevents boot (<code>ConfigGuardTests</code> passing); dev secrets isolated in .NET user-secrets, production from environment/secret store; <code>compose.production.yml</code> uses <code>${VAR:?}</code> so a missing secret aborts start-up; connection strings never logged; permission and policy names centralized; Angular environment files contain no secrets; Docker build args expose no secrets; errors do not reveal configuration values</td><td><code>Jwt:ExpiryMinutes: 120</code> in <code>appsettings.json</code> silently overrides the safer code default of 15 (SEC-002); <code>AllowedHosts: "*"</code>. No feature-flag framework exists, so flag ownership/retirement is <strong>N/A</strong>; configuration-change auditing is NOT VERIFIED</td><td>No</td></tr>
+<tr><td>19 · Health, resilience and operations</td><td>PARTIALLY COMPLIANT</td><td>3</td><td><code>/health/live</code> is deliberately check-free (<code>Predicate = _ => false</code>) so a database outage recycles traffic rather than the process; <code>/health/ready</code> is PostgreSQL-backed — both verified <code>200</code> with a bare “Healthy” body that leaks nothing, anonymous and rate-limit-exempt as probes require. Npgsql retry and command timeouts; cancellation tokens propagated through 78 Application files; graceful shutdown via <code>stoppingToken</code>; connection-pool behaviour configured; deferred start-up seeding retries instead of crash-looping (<code>StartupSeedingResilienceTests</code>). Backup/restore/DR runbook with RPO ≤ 5 min, RTO ≤ 4 h, daily/weekly/monthly retention to a 7-year floor, AES-256 at rest, off-site replication, quarterly drills; <code>harden-runtime-role.sql</code>; deployment rollback and runbooks documented; capacity in the load-test report</td><td>Restore and DR procedures documented but <strong>never demonstrated</strong> — no drill evidence (OPS-001); no circuit breaker (defensible with a single database dependency, but undocumented as a decision); external-service failure modes minimal because there are few external services; production support-access controls NOT VERIFIED</td><td>No</td></tr>
+<tr><td>20 · Docker and deployment</td><td>PARTIALLY COMPLIANT</td><td>3</td><td>Supported base images (<code>dotnet/sdk:9.0</code>, <code>dotnet/aspnet:9.0</code>, <code>postgres:17-alpine</code>); multi-stage build with the runtime stage copying only <code>/app/publish</code>; runs as <code>$APP_UID</code> with CI asserting the runtime user is not root; <code>read_only: true</code> root filesystem plus tmpfs and a single writable evidence volume; no secrets baked in; <code>HEALTHCHECK</code> targets readiness, aligning with orchestration; CPU/memory limits and reservations; loopback-only port publish; Trivy HIGH/CRITICAL gate; migrations applied as the owning role, not the runtime role, with <code>MigrateOnStartup: false</code> in production; logs to stdout for the platform; OpenAPI mapped only in Development</td><td>No <code>.dockerignore</code> while the Dockerfile begins <code>COPY . .</code>, so the build context includes <code>.git</code>, <code>deploy/publish-win-x64/</code> and release zips (no leak into the shipped image, but non-minimal context); base images on floating tags rather than digests, so builds are not reproducible (OPS-002); container capabilities not explicitly dropped</td><td>No</td></tr>
+<tr><td>21 · Testing</td><td>PARTIALLY COMPLIANT</td><td>3</td><td><strong>522 tests executed · 0 failed · 1 skipped.</strong> Present and passing: domain unit, aggregate-invariant and state-transition tests (228); command/query handler and behavior tests (72); architecture boundary tests (33) enforcing layers, module independence, command-policy coverage and tenant-bounded <code>user_account</code> queries; EF/PostgreSQL integration tests (31) covering RLS tenant isolation, owned-child tenancy, constraints, transactions, optimistic concurrency, outbox resilience and runtime-role privileges; API integration tests (82) covering the role-endpoint matrix, auditor deny matrix, role-privilege flow, Problem Details contracts, pagination, idempotency, file hardening, concurrency mapping, API-surface snapshot, config guard, observability, refresh sessions and health; Angular component/service tests (76); migration round-trip and audit-tamper tests; security regression tests</td><td><strong>No value-object tests</strong> (only one VO exists) and <strong>no FluentValidation tests at all</strong> (TEST-001); cross-tenant denial has no automated <strong>export</strong> or <strong>file</strong> case (TEST-002); pipeline-ordering untested; intra-tenant scope denial is a single assertion (TEST-003); <code>LoadTests</code> is not referenced by the solution so it never builds or runs; e2e not executed here; inbox/dedup and SignalR tests N/A</td><td>No</td></tr>
+<tr><td>22 · Documentation and traceability</td><td>PARTIALLY COMPLIANT</td><td>3</td><td>Objective, scope, module boundaries, aggregate definitions, API contracts, database design, security design and tenant-isolation strategy all documented; operational and deployment procedures in <code>deploy/</code>; 9 ADRs explain significant decisions and exceptions; requirements traceable through the CSV set (URS → FRA → RTM → tests). <strong>Documentation accuracy independently confirmed:</strong> every figure in <code>NT_QMS_Database_AsBuilt.md</code> was reproduced from <code>pg_catalog</code> in this assessment — 96 tables, 90 FORCE RLS, 90 policies, 85 CHECK, 36 FK, 24 unique, 265 indexes, 88 tenant-first PKs, 56 migrations — all matched exactly. Known limitations and risks recorded in the closure report and road-to-100 plan</td><td><code>CLAUDE.md</code> §1 states Angular 18 while the app is on 22, and its current-state section is 5 releases stale; no ADR covers local-filesystem evidence storage in place of the documented WORM object storage, nor the substitution of <code>Microsoft.Extensions.Logging</code> for Serilog (DOC-001); the named standard document was not supplied</td><td>No</td></tr>
+</table>
+</div>
+
+<h2>11 · Production blockers</h2>
+<h4>Table C · Production blockers</h4>
+<div class="scroll">
+<table>
+<tr><th>Finding ID</th><th>Blocker</th><th>Severity</th><th>Risk</th><th>Required action</th></tr>
+<tr><td>ACCESS-001</td><td>File attachments do not inherit the resource-level (branch/department) scope of the record they belong to</td><td><span class="tag t-high">HIGH</span></td><td>Within a tenant, a scope-restricted user who obtains a <code>file_reference</code> id can download regulated evidence outside their working scope — including complaint attachments whose reporter identity the domain deliberately masks for that same user</td><td>Authorize the download through the owning record's scope, or record an ADR accepting tenant-wide file access. Write the denial test first — its result decides whether code changes are needed</td></tr>
+</table>
+</div>
+<div class="callout">
+<p><strong>No cross-tenant blocker exists.</strong> The instruction to treat any verified cross-tenant data exposure as CRITICAL and P0 was applied, and no such exposure was found. Cross-tenant document read, cross-tenant file download, body-supplied <code>tenantId</code> injection, and direct mutation of the audit ledger were each attempted against the running system and each was refused. ACCESS-001 is an <em>intra</em>-tenant resource-authorization gap, not a tenancy defect.</p>
+<p class="small">ACCESS-001 is listed as a blocker on a statically verified mechanism rather than a runtime exploit: no branch-restricted credentials were available. If the proving test shows the download is already denied, the blocker falls away.</p>
+</div>
+
+<h2>12 · Detailed checklist findings</h2>
+
+<div class="finding high">
+<h3>ACCESS-001 · File attachments are tenant-scoped but not resource-scoped</h3>
+<dl>
+<dt>Category</dt><dd>7 · Authentication and authorization (resource-level access) · 6 · API design</dd>
+<dt>Requirement</dt><dd>“Role-based access is supplemented by claims, policies, tenant checks, and resource-level authorization where required”; “File upload and download endpoints validate size, type, authorization, tenancy, malware risk, and storage access”</dd>
+<dt>Status</dt><dd><strong>PARTIALLY COMPLIANT</strong></dd>
+<dt>Score</dt><dd>1</dd>
+<dt>Severity</dt><dd><span class="tag t-high">HIGH</span></dd>
+<dt>Priority</dt><dd>P1</dd>
+<dt>Production blocker</dt><dd><strong>Yes</strong>, conditional on the proving test</dd>
+<dt>Evidence</dt><dd><code>src/NT.QAMS.Domain/Files/FileReference.cs</code> — declares <code>: AggregateRoot, ITenantScoped</code> and <strong>not</strong> <code>IAllocatable</code> · <code>src/NT.QAMS.WebApi/Controllers/FilesController.cs</code> — class carries only <code>[Authorize]</code>; <code>Download</code> has no <code>[RequirePermission]</code> and resolves by id alone: <code>db.Files.AsNoTracking().SingleOrDefaultAsync(f =&gt; f.Id == id, ct)</code> · <code>src/NT.QAMS.Infrastructure/Persistence/AppDbContext.cs:168-211</code> — branch/department terms are applied only to <code>IAllocatable</code> entities, which is 11 of 45 aggregates</dd>
+<dt>Observed implementation</dt><dd>Cross-<em>tenant</em> file access is correctly refused — a demo-lab token requesting an <code>arfa</code>-owned <code>file_reference</code> id returned <code>404</code> at runtime, and the storage key itself is tenant-partitioned (<code>tenant/{tenant_id}/{sha256}</code>). Within a tenant, <code>FileReference</code> falls on the non-allocatable side of the composed query filter, so no branch or department term applies and the download resolves on id alone. Attachments belonging to scope-restricted records — complaints, nonconformances, audits, risks, all <code>IAllocatable</code> — are therefore reachable by any authenticated tenant member.</dd>
+<dt>Compliance analysis</dt><dd>The parent record is scope-protected; its evidence file is not. Because the query filter is precisely what makes the parent unreadable, the file endpoint is the one path that reaches the same regulated content without passing the same check. Brute force is not required: file ids appear in document version histories, list payloads and export links.</dd>
+<dt>Risk</dt><dd>Intra-tenant confidentiality breach of regulated evidence. Concretely: <code>ComplaintCommands.cs:200-206</code> masks the complainant's name and contact for roles without the confidential-view privilege, yet an attachment naming that complainant is downloadable by any authenticated user in the tenant — defeating a control the domain implements deliberately.</dd>
+<dt>Required remediation</dt><dd>Preferred: resolve the file through its owning aggregate so the existing scope filter applies, or add an explicit scope check on the file→record link. Alternative, if lab-wide evidence access is intended: record it in an ADR and state it in the data-access documentation so it is an accepted risk rather than an oversight.</dd>
+<dt>Required tests</dt><dd>Functional: a department-restricted user requests the <code>file_reference</code> id of an out-of-scope record's attachment → expect <code>404</code>. Add equivalents for the controlled-copy and export download paths. Extend <code>RolePrivilegeFlowTests</code>, which already provisions scoped users and asserts <code>SCOPE-001</code>.</dd>
+<dt>Dependencies</dt><dd>Answer to the open question on whether branch/department is a security boundary</dd>
+<dt>Relevant standard</dt><dd>Checklist §7, §6; 21 CFR Part 11 §11.10(d); ISO/IEC 17025 §7.11</dd>
+<dt>Confidence</dt><dd><strong>Medium-High</strong> — mechanism verified statically, tenant-level control verified at runtime; the intra-tenant denial itself was not executed</dd>
+</dl>
+</div>
+
+<div class="finding high">
+<h3>SEC-002 · Shipped access-token lifetime is 120 minutes, contradicting the code default and ADR-0009</h3>
+<dl>
+<dt>Category</dt><dd>7 · Authentication and authorization · 18 · Configuration and secrets</dd>
+<dt>Requirement</dt><dd>“Session and token revocation behavior is defined”; “Production configuration does not fall back silently to insecure defaults”; documentation reflects implementation</dd>
+<dt>Status</dt><dd><strong>PARTIALLY COMPLIANT</strong></dd>
+<dt>Score</dt><dd>2</dd>
+<dt>Severity</dt><dd><span class="tag t-high">HIGH</span></dd>
+<dt>Priority</dt><dd>P1</dd>
+<dt>Production blocker</dt><dd>No — mitigated by per-request revalidation</dd>
+<dt>Evidence</dt><dd><code>src/NT.QAMS.WebApi/appsettings.json</code> → <code>"Jwt": { "ExpiryMinutes": 120 }</code> · <code>src/NT.QAMS.Infrastructure/Security/SecurityAdapters.cs:37,59</code> → code default <strong>15</strong> · ADR-0009 specifies 15 with silent refresh · ADR-0003 accepted in-memory token storage reasoning on 60 · <strong>runtime confirmation:</strong> a live token decoded to <code>exp − nbf = 7200 s</code></dd>
+<dt>Observed implementation</dt><dd><code>appsettings.json</code> is the base configuration layer for every environment, so 120 minutes overrides the safer code default everywhere unless an environment variable countermands it. Three documents state three different lifetimes — 15, 60 and 120 — and the shipped value is the longest.</dd>
+<dt>Compliance analysis</dt><dd>Substantially mitigated, which is why this is not a blocker: <code>ActiveSessionMiddleware</code> re-reads the account on <strong>every</strong> authenticated request, denying deactivated accounts (<code>AUTH-006</code>) and changed roles (<code>AUTH-007</code>), and re-resolving privileges from the database rather than trusting token claims. Deactivation and privilege revocation are therefore immediate regardless of token lifetime. Residual exposure is a <em>stolen</em> token for an account that remains active and unchanged: usable for up to two hours, since no per-token denylist exists.</dd>
+<dt>Risk</dt><dd>A token captured from memory, a crash dump or a compromised browser extension grants up to 120 minutes of authenticated access. It also invalidates ADR-0003's risk acceptance, which was reasoned on a 60-minute window — the accepted risk is not the shipped risk.</dd>
+<dt>Required remediation</dt><dd>Set <code>Jwt:ExpiryMinutes</code> to 15 (the refresh flow already covers session continuity), or amend ADR-0003/0009 to accept 120 with explicit reasoning. Add a <code>ConfigGuard</code> ceiling so a value above the accepted maximum aborts start-up rather than shipping quietly.</dd>
+<dt>Required tests</dt><dd>Extend <code>ConfigGuardTests</code>: an <code>ExpiryMinutes</code> above the ceiling must abort start-up. Functional: issued lifetime equals configuration; expired token → <code>401</code>; silent refresh succeeds.</dd>
+<dt>Dependencies</dt><dd>Refresh flow already shipped (ADR-0009)</dd>
+<dt>Relevant standard</dt><dd>Checklist §7, §18; ADR-0003; ADR-0009</dd>
+<dt>Confidence</dt><dd><strong>High</strong> — confirmed by decoding a live token</dd>
+</dl>
+</div>
+
+<div class="finding high">
+<h3>SIG-001 · Electronic signature binds record version, reason and authentication level only informally</h3>
+<dl>
+<dt>Category</dt><dd>15 · Audit and e-signatures</dd>
+<dt>Requirement</dt><dd>Each signature binds signer identity, intent, meaning, authentication level, record identifier, <strong>record version</strong>, timestamp, <strong>reason</strong>, content hash and audit linkage</dd>
+<dt>Status</dt><dd><strong>PARTIALLY COMPLIANT</strong></dd>
+<dt>Score</dt><dd>2</dd>
+<dt>Severity</dt><dd><span class="tag t-high">HIGH</span> (regulated context)</dd>
+<dt>Priority</dt><dd>P1</dd>
+<dt>Production blocker</dt><dd>No — the §11.50 mandatory trio (printed name, date/time, meaning) is present</dd>
+<dt>Evidence</dt><dd><code>src/NT.QAMS.Domain/ComplianceLedger/LedgerEntries.cs:27-36</code> — <code>SignatureRecord { Id, TenantId, SignerId, SignerDisplay, Meaning, SubjectRef, ContentHash, SignedAtUtc }</code> · live <code>audit.electronic_signature</code> confirms exactly those 8 columns · live row: <code>meaning = "Approved and published SOP-QA-100 v1.0"</code>, <code>subject_ref = "DOC:019f97d2…"</code></dd>
+<dt>Observed implementation</dt><dd>Six of the ten required bindings are discrete, queryable columns: signer identity (×2), meaning/intent, record identifier, content hash and timestamp. The signed record's <strong>version</strong> exists only as text inside <code>meaning</code> (“… v1.0”). There is no separate <code>reason</code> column, no authentication-level field recording that the PIN ceremony was satisfied, and no key linking the signature to its <code>audit.audit_trail</code> entry.</dd>
+<dt>Compliance analysis</dt><dd>The signature is immutable and tamper-evident — verified: <code>UPDATE</code> is refused by <code>signature_append_only</code>, and the content hash anchors the signed bytes. What is missing is machine-verifiable traceability. Proving to an inspector that a signature applies to version 1.0 and not 1.1 requires parsing a human-written sentence, which is not a control. Reason-for-change is captured elsewhere (<code>X-Change-Reason</code> → <code>FieldChangeRecord</code>) but is not bound into the signature.</dd>
+<dt>Risk</dt><dd>A Part 11 §11.50 / §11.70 finding on signature-to-record linkage. Practically: if <code>meaning</code> is ever written without the version, or a record is superseded, applicability becomes interpretation rather than record.</dd>
+<dt>Required remediation</dt><dd>Add discrete <code>record_version</code>, <code>reason</code>, <code>auth_level</code> and <code>audit_entry_id</code> columns in a forward-only migration; populate at signing; keep <code>meaning</code> as the human-readable rendering. The table is append-only, so historical rows cannot be backfilled — document the cut-over date in the validation record.</dd>
+<dt>Required tests</dt><dd>Integration: sign v1.0, materially change the record to v1.1, assert the stored signature still names 1.0 and verification against 1.1 fails; assert the signature references the audit entry written in the same transaction. Extend <code>SignedRecordImmutabilityTests</code>.</dd>
+<dt>Dependencies</dt><dd>Append-only trigger ⇒ additive migration only</dd>
+<dt>Relevant standard</dt><dd>Checklist §15; 21 CFR Part 11 §11.50, §11.70</dd>
+<dt>Confidence</dt><dd><strong>High</strong></dd>
+</dl>
+</div>
+
+<div class="finding med">
+<h3>AUDIT-002 · The immutable regulated ledger uses .NET assembly-qualified type names as its event taxonomy</h3>
+<dl>
+<dt>Category</dt><dd>15 · Audit and e-signatures · 4 · Domain-driven design</dd>
+<dt>Requirement</dt><dd>“Audit records identify actor, tenant, action, target, time, outcome, and correlation identifier”; APIs and exports do not expose infrastructure details; persistence concerns do not leak</dd>
+<dt>Status</dt><dd><strong>PARTIALLY COMPLIANT</strong></dd>
+<dt>Score</dt><dd>2</dd>
+<dt>Severity</dt><dd><span class="tag t-med">MEDIUM</span></dd>
+<dt>Priority</dt><dd>P2</dd>
+<dt>Production blocker</dt><dd>No</dd>
+<dt>Evidence</dt><dd>Live query <code>SELECT event_type, count(*) FROM audit.audit_trail GROUP BY 1</code> returns values such as <code>NT.QAMS.Domain.Authorization.RoleCreated, NT.QAMS.Domain</code> (227), <code>NT.QAMS.Domain.IdentityAccess.UserRoleAssigned, NT.QAMS.Domain</code> (68), <code>NT.QAMS.Domain.Tenancy.TenantProvisioned, NT.QAMS.Domain</code> (58) · appended by <code>OutboxProcessor.cs:126</code> via <code>ledger.AppendAsync(...)</code> · the table is protected by <code>audit_trail_append_only</code>, so existing values can never be corrected</dd>
+<dt>Observed implementation</dt><dd>The audit taxonomy is the CLR type's assembly-qualified name rather than a stable business action code. Everything else about the ledger is exemplary — hash-chained, append-only, per-tenant sequenced, correlation-carrying — which is precisely why this detail matters: it is the one mutable-by-refactor field in an otherwise immutable record.</dd>
+<dt>Compliance analysis</dt><dd>Two consequences. First, <strong>refactor fragility</strong>: renaming, moving or re-namespacing a domain event class silently forks the historical taxonomy, and because the table is append-only the old values can never be reconciled — a query for “all role changes” would need to know every historical class name. Second, <strong>disclosure</strong>: the audit-trail export (<code>GET /api/exports/audit-trail.xlsx</code>) is an inspector-facing artefact that renders internal namespaces and assembly names, which is both unprofessional in a regulated submission and mild information disclosure. The system already has a stable-code convention (<code>NC-001</code>, <code>SOD-DOC-001</code>) that this ledger does not use.</dd>
+<dt>Risk</dt><dd>Loss of long-term queryability of the compliance ledger across refactors — the exact property an audit trail exists to provide; internal implementation detail in regulatory exports.</dd>
+<dt>Required remediation</dt><dd>Introduce a stable business event code (for example <code>AUTHZ.ROLE_CREATED</code>, <code>TENANT.PROVISIONED</code>) declared on each domain event and written to a new <code>event_code</code> column, keeping <code>event_type</code> for continuity. Map historical type names to codes in a read-side view so existing entries remain queryable, and render only the code in exports. Add an architecture test asserting every domain event declares a code.</dd>
+<dt>Required tests</dt><dd>Architecture test: every <code>IDomainEvent</code> implementation declares a non-empty stable code, and codes are unique. Export test: the audit-trail export body contains no <code>NT.QAMS.</code> substring.</dd>
+<dt>Dependencies</dt><dd>Append-only table ⇒ additive column plus a mapping view; no rewrite possible</dd>
+<dt>Relevant standard</dt><dd>Checklist §15, §4, §6</dd>
+<dt>Confidence</dt><dd><strong>High</strong> — observed in live ledger data</dd>
+</dl>
+</div>
+
+<div class="finding med">
+<h3>TEST-001 · No unit tests exist for any FluentValidation validator</h3>
+<dl>
+<dt>Category</dt><dd>21 · Testing · 14 · Validation and error handling</dd>
+<dt>Requirement</dt><dd>“FluentValidation tests” are explicitly required; also value-object tests</dd>
+<dt>Status</dt><dd><strong>NON-COMPLIANT</strong> (for this checklist item)</dd>
+<dt>Score</dt><dd>1</dd>
+<dt>Severity</dt><dd><span class="tag t-med">MEDIUM</span></dd>
+<dt>Priority</dt><dd>P2</dd>
+<dt>Production blocker</dt><dd>No</dd>
+<dt>Evidence</dt><dd><code>grep -rn "FluentValidation" tests/*/*.csproj</code> → <strong>no matches</strong>: no test project even references the library · <code>grep -rn "ValidationBehavior\|ValidationException" tests</code> → <strong>no matches</strong> · a repository-wide search for validator test classes returns none, while <code>src/</code> contains dozens of <code>AbstractValidator&lt;T&gt;</code> implementations (e.g. <code>ProvisionTenantValidator</code> with <code>StrongPassword()</code>, <code>MaximumLength</code> and <code>EmailAddress</code> rules)</dd>
+<dt>Observed implementation</dt><dd>Validation is implemented properly — <code>ValidationBehavior</code> sits in the pipeline and validators are comprehensive — but no test exercises a validator directly, and no test exercises the behavior that invokes them. Coverage is entirely indirect: functional tests observe that a malformed request returns <code>400</code>, which confirms the pipeline runs without confirming any individual rule.</dd>
+<dt>Compliance analysis</dt><dd>This is the sharpest inversion in an otherwise disciplined suite. Rules that decide whether regulated data is admitted — password strength, field lengths, email shape, required references — have no direct assertions, so a weakened or deleted rule would not fail the build. The gap compounds DOMAIN-001: with validation living in validators rather than value objects, the validators <em>are</em> the control, and the control is untested. Value-object tests are near-vacuous only because a single value object exists.</dd>
+<dt>Risk</dt><dd>Silent weakening of input constraints; regressions in password policy or length bounds shipping undetected — the latter is material because column bounds were deliberately moved from the schema into validators (per the project's own column-sizing convention, free-text columns ≥ 1000 chars are <code>text</code> with the bound enforced only by <code>MaximumLength</code>). <strong>For those columns the validator is the only length control that exists.</strong></dd>
+<dt>Required remediation</dt><dd>Add a validator test project reference and a test class per validator asserting each rule's accept and reject cases. Prioritize <code>StrongPassword</code>, every <code>MaximumLength</code> that substitutes for a dropped <code>varchar</code> bound, and every <code>EmailAddress</code>. Add a <code>ValidationBehavior</code> test asserting a failing validator short-circuits before the handler runs.</dd>
+<dt>Required tests</dt><dd>As above; additionally an architecture test asserting every command with a validator has a corresponding test class, so new validators cannot ship untested.</dd>
+<dt>Dependencies</dt><dd>None</dd>
+<dt>Relevant standard</dt><dd>Checklist §21, §14, §5</dd>
+<dt>Confidence</dt><dd><strong>High</strong></dd>
+</dl>
+</div>
+
+<div class="finding med">
+<h3>TEST-002 · Cross-tenant denial tests omit the export and file paths</h3>
+<dl>
+<dt>Category</dt><dd>21 · Testing · 8 · Multi-tenancy</dd>
+<dt>Requirement</dt><dd>“Cross-tenant denial tests exist for reads, writes, updates, deletes, exports, jobs, caches, files, and real-time notifications”</dd>
+<dt>Status</dt><dd><strong>PARTIALLY COMPLIANT</strong></dd>
+<dt>Score</dt><dd>2</dd>
+<dt>Severity</dt><dd><span class="tag t-med">MEDIUM</span></dd>
+<dt>Priority</dt><dd>P2</dd>
+<dt>Production blocker</dt><dd>No</dd>
+<dt>Evidence</dt><dd>Present and passing: <code>RlsTenantIsolationTests.Rls_isolates_tenants_fails_closed_and_honours_bypass</code> (reads) and <code>.With_check_rejects_writing_a_row_for_another_tenant</code> (writes); <code>OwnedChildTenancyTests</code> — child visibility, cross-tenant child write rejection, and full-RLS coverage across owned child tables; <code>SecurityEventRlsTests</code>; <code>RuntimeRolePrivilegeTests</code>; <code>UserAccountTenantBoundTests</code>; <code>ScheduledSweepTests</code> (jobs) · <strong>absent:</strong> any test requesting another tenant's file id, or another tenant's data through <code>api/exports/*</code></dd>
+<dt>Observed implementation</dt><dd>Tenant isolation is tested from several angles at the database layer and for the job path. The two egress paths that remove data from the application — file download and XLSX/PDF export — have no cross-tenant case. This assessment verified the file path manually (cross-tenant download → <code>404</code>), which is exactly the evidence a test should have supplied.</dd>
+<dt>Compliance analysis</dt><dd>The controls appear sound: both paths route through tenant-filtered <code>DbSet</code>s and RLS sits beneath them, so the current risk is low. The defect is that the highest-consequence paths are the least regression-protected, and a future handler using <code>IgnoreQueryFilters()</code> on an export query would not be caught.</dd>
+<dt>Risk</dt><dd>A tenancy regression on an egress path shipping undetected — the failure mode with the largest blast radius, since exports leave the audited system entirely.</dd>
+<dt>Required remediation</dt><dd>Add two functional tests: tenant A's token requesting tenant B's <code>file_reference</code> id → <code>404</code>; tenant A's export containing no tenant B rows where a B fixture exists. Wire both into the CI gate.</dd>
+<dt>Required tests</dt><dd>As above. Caches and real-time remain <strong>N/A</strong> — no cache tier and no SignalR exist, both verified absent by search.</dd>
+<dt>Dependencies</dt><dd>Two-tenant fixtures already exist in <code>OwnedChildTenancyTests</code></dd>
+<dt>Relevant standard</dt><dd>Checklist §21, §8</dd>
+<dt>Confidence</dt><dd><strong>High</strong></dd>
+</dl>
+</div>
+
+<div class="finding med">
+<h3>ACCESS-003 · Resource scope has no database backstop and is dissolved by eight <code>IgnoreQueryFilters()</code> sites</h3>
+<dl>
+<dt>Category</dt><dd>7 · Authentication and authorization · 8 · Multi-tenancy (defence in depth)</dd>
+<dt>Requirement</dt><dd>“Access-control logic is centralized and testable”; defence in depth; “Tenant scope is applied to every tenant-owned read”</dd>
+<dt>Status</dt><dd><strong>PARTIALLY COMPLIANT</strong></dd>
+<dt>Score</dt><dd>2</dd>
+<dt>Severity</dt><dd><span class="tag t-med">MEDIUM</span></dd>
+<dt>Priority</dt><dd>P2</dd>
+<dt>Production blocker</dt><dd>No</dd>
+<dt>Evidence</dt><dd><code>AppDbContext.ApplyTenantAndScopeFilter</code> composes tenant + branch/department into one expression (EF only — all 90 RLS policies constrain <code>tenant_id</code> alone; none references branch or department) · <code>OrgScopeGuardInterceptor</code> covers the write side with <code>SCOPE-001</code>/<code>SCOPE-002</code> · <code>IgnoreQueryFilters()</code> at <code>SystemRoleCatalog.cs:58</code>, <code>DocumentReviewDuePolicy.cs:30,41</code>, <code>NotificationPolicies.cs:50,62</code>, <code>DefaultLovCatalog.cs:132</code>, <code>SlaSlice.cs:128,152</code> — all in the <strong>Application</strong> layer</dd>
+<dt>Observed implementation</dt><dd>Tenant isolation is three-layer and verified: EF filter, PostgreSQL FORCE RLS, tenant-composite foreign keys — and the runtime role can bypass none of it. Resource scope is one-layer: a single EF query filter plus the write-side interceptor. <code>IgnoreQueryFilters()</code> removes the tenant and scope terms together; for tenant reads PostgreSQL still refuses unless the unit of work called <code>Elevate()</code>, so tenancy survives, but for branch/department there is nothing behind the filter.</dd>
+<dt>Compliance analysis</dt><dd>No current leak — all eight sites are reached from background sweeps and seeding, not request handlers, and RLS covers the tenancy dimension regardless. The defect is structural: these are Application-layer types callable from any future handler, and the failure mode is silent. A scope-restricted user would simply see more than they should, with no error to reveal it.</dd>
+<dt>Risk</dt><dd>Latent intra-tenant over-disclosure introduced by ordinary feature work, invisible without a scope-denial test on the new path — and TEST-003 shows that test barely exists.</dd>
+<dt>Required remediation</dt><dd>Replace bare <code>IgnoreQueryFilters()</code> with a named helper (for example <code>CrossTenantSweep()</code>) that asserts the current unit of work is elevated and throws on a request path. Add an architecture test allow-listing permitted call sites. Evaluate an RLS policy on branch/department for the most sensitive tables, or record the decision not to in an ADR.</dd>
+<dt>Required tests</dt><dd>Architecture test enumerating permitted <code>IgnoreQueryFilters</code> sites — mirroring <code>UserAccountTenantBoundTests</code>, which already does exactly this for <code>user_account</code> and even self-tests its own rule. Functional: a scoped user's list, search and export results contain no out-of-scope record.</dd>
+<dt>Dependencies</dt><dd>Decision on whether branch/department is a security boundary</dd>
+<dt>Relevant standard</dt><dd>Checklist §7, §8, §16</dd>
+<dt>Confidence</dt><dd><strong>High</strong></dd>
+</dl>
+</div>
+
+<div class="finding med">
+<h3>ACCESS-002 · One export endpoint omits the permission gate its siblings carry</h3>
+<dl>
+<dt>Category</dt><dd>6 · API design · 7 · Authorization</dd>
+<dt>Requirement</dt><dd>“Backend authorization is enforced for every protected operation”; endpoint authorization recorded per endpoint</dd>
+<dt>Status</dt><dd><strong>PARTIALLY COMPLIANT</strong></dd>
+<dt>Score</dt><dd>2</dd>
+<dt>Severity</dt><dd><span class="tag t-med">MEDIUM</span></dd>
+<dt>Priority</dt><dd>P2</dd>
+<dt>Production blocker</dt><dd>No</dd>
+<dt>Evidence</dt><dd><code>src/NT.QAMS.WebApi/Controllers/ExportsController.cs:30-31</code> — <code>[HttpGet("nonconformances.xlsx")]</code> carries no <code>[RequirePermission]</code>, while lines 61, 106 and 126 gate the audit-trail, signature-manifest and review-pack exports with <code>PermissionAction.Export</code></dd>
+<dt>Observed implementation</dt><dd>The NC register export walks every page of <code>GetNcsQuery</code>, so tenant and resource scope <em>are</em> applied (<code>Nonconformance</code> is <code>IAllocatable</code>) and the export is recorded as a <code>RECORD_EXPORTED</code> security event. What is absent is the export permission check: any authenticated tenant member can bulk-extract their in-scope nonconformance register to XLSX.</dd>
+<dt>Compliance analysis</dt><dd>Not a data-scope leak — that would require the filter to be bypassed, and it is not. It is an authorization inconsistency: three of four exports on the same controller treat bulk extraction as privileged and the fourth does not. Bulk extraction differs materially from paged reading because it removes regulated data from the audited application.</dd>
+<dt>Risk</dt><dd>Uncontrolled data egress by low-privilege roles, and an inconsistent model that invites the same omission in the next export added.</dd>
+<dt>Required remediation</dt><dd>Add <code>[RequirePermission(PermissionCatalog.Nonconformances, PermissionAction.Export)]</code>, or document in the permission catalogue why this register is deliberately ungated.</dd>
+<dt>Required tests</dt><dd>Extend <code>RoleEndpointMatrixTests</code> to cover every <code>api/exports/*</code> route, asserting <code>403</code> problem+json for a role lacking the export permission; add a snapshot test that fails when an <code>ExportsController</code> action has no permission attribute.</dd>
+<dt>Dependencies</dt><dd>None</dd>
+<dt>Relevant standard</dt><dd>Checklist §6, §7</dd>
+<dt>Confidence</dt><dd><strong>High</strong></dd>
+</dl>
+</div>
+
+<div class="finding med">
+<h3>DOMAIN-001 · One value object across 45 aggregates — primitive obsession in a regulated domain</h3>
+<dl>
+<dt>Category</dt><dd>4 · Domain-driven design · 3 · SOLID and code structure</dd>
+<dt>Requirement</dt><dd>“Value objects are used for concepts requiring validation, equality, or semantic meaning”; “Primitive obsession is avoided where it creates business risk”</dd>
+<dt>Status</dt><dd><strong>PARTIALLY COMPLIANT</strong></dd>
+<dt>Score</dt><dd>2</dd>
+<dt>Severity</dt><dd><span class="tag t-med">MEDIUM</span></dd>
+<dt>Priority</dt><dd>P2</dd>
+<dt>Production blocker</dt><dd>No</dd>
+<dt>Evidence</dt><dd><code>ValueObject</code> exists in <code>SharedKernel/Primitives</code> with exactly <strong>one</strong> implementation, <code>src/NT.QAMS.Domain/Tenancy/TenantSlug.cs</code> · all 90 <code>record</code> declarations in the Domain are domain events, not value objects · <code>UserAccount.cs:89</code> validates an email as <code>string.IsNullOrWhiteSpace(email) || !email.Contains('@')</code> and stores a raw <code>string</code> · document codes, reference numbers, SHA-256 hashes, measurement values and units are all primitives</dd>
+<dt>Observed implementation</dt><dd>Invariants are enforced — but inside aggregate factories, per aggregate, on primitive parameters. <code>ControlledDocument.Create</code> checks and normalizes its code (<code>DOC-001</code>); <code>UserAccount.Create</code> checks its email (<code>USER-001</code>). Each rule lives where it is used rather than with the concept it constrains.</dd>
+<dt>Compliance analysis</dt><dd>The consequences are concrete, not stylistic. The email rule accepts <code>"@"</code> as valid. Two <code>string</code> parameters of the same type can be transposed at a call site with no compiler complaint — in a domain where a measurement, a document code and a hash are all <code>string</code>, that is a live defect class. Validation is also unenforceable by construction: a new handler can build an entity by another path and skip the check, because the type carries no guarantee. Combined with TEST-001 (no validator tests), the constraint layer is both decentralized and unasserted.</dd>
+<dt>Risk</dt><dd>Invalid regulated data admitted at an unguarded path; silent argument transposition; validation duplicated and divergent as each new aggregate re-checks the same concept.</dd>
+<dt>Required remediation</dt><dd>Introduce value objects for the concepts carrying business risk — start with <code>EmailAddress</code>, <code>DocumentCode</code>, <code>Sha256Hash</code> and <code>VersionLabel</code> — and use them in signatures rather than <code>string</code>. Apply to new code and those four concepts; do not retrofit all 45 aggregates at once.</dd>
+<dt>Required tests</dt><dd>Per value object: rejects invalid input, normalizes equivalently, equality by value. Regression: <code>UserAccount.Create</code> rejects <code>"@"</code> and other malformed addresses currently accepted.</dd>
+<dt>Dependencies</dt><dd>EF value conversions per type; no schema change required</dd>
+<dt>Relevant standard</dt><dd>Checklist §4, §3, §21</dd>
+<dt>Confidence</dt><dd><strong>High</strong></dd>
+</dl>
+</div>
+
+<div class="finding med">
+<h3>API-003 · Optimistic concurrency token is never exposed, so cross-request lost updates go undetected</h3>
+<dl>
+<dt>Category</dt><dd>6 · API design · 9 · Database and EF Core · 10 · Consistency</dd>
+<dt>Requirement</dt><dd>“Optimistic concurrency is implemented for contested records”; “Concurrency conflicts are represented consistently”</dd>
+<dt>Status</dt><dd><strong>PARTIALLY COMPLIANT</strong></dd>
+<dt>Score</dt><dd>2</dd>
+<dt>Severity</dt><dd><span class="tag t-med">MEDIUM</span></dd>
+<dt>Priority</dt><dd>P2</dd>
+<dt>Production blocker</dt><dd>No</dd>
+<dt>Evidence</dt><dd><code>AppDbContext.cs:114-132</code> maps <code>xmin</code> as the concurrency token by convention · <code>DomainExceptionHandler.cs:21,28</code> maps <code>DbUpdateConcurrencyException</code> → <code>409 CONCURRENCY-409</code> · <strong>no</strong> <code>ETag</code>, <code>If-Match</code> or <code>RowVersion</code> anywhere in <code>WebApi</code> or <code>Contracts</code> · runtime probe: <code>GET /api/documents/{id}</code> returned <code>[id, code, title, category, status, createdAtUtc, versions, reviewCycleMonths, nextReviewDue]</code> — no version token and no <code>ETag</code> header</dd>
+<dt>Observed implementation</dt><dd>The mechanism is well-built: applied by convention so no module can forget it, zero schema cost, correct 409 mapping with a functional test (<code>ConcurrencyConflictMappingTests</code>). It detects conflicts between requests whose read-modify-write windows overlap.</dd>
+<dt>Compliance analysis</dt><dd>It does not detect the lost update users actually cause. A handler loads the aggregate fresh inside the same request, so <code>xmin</code> matches whatever the database currently holds; a user who opened a form at 10:00 and saves at 10:05 overwrites a colleague's 10:01 change without a 409, because the handler never saw the 10:01 version. ADR-0005 states <code>xmin</code> “guards live records against concurrent-editor lost updates” — true for interleaved requests, not for stale client state, and the ADR does not draw the distinction.</dd>
+<dt>Risk</dt><dd>Silent loss of regulated edits in a multi-user laboratory — an ALCOA+ “Accurate” data-integrity exposure with no error surfaced to either user.</dd>
+<dt>Required remediation</dt><dd>Return the token to the client (<code>ETag</code> on GET, or an explicit version field in the response DTO) and require <code>If-Match</code> or the version on mutating requests for contested aggregates, rejecting a stale token with the existing <code>CONCURRENCY-409</code>. Amend ADR-0005 to state which class of conflict is covered.</dd>
+<dt>Required tests</dt><dd>Functional: two clients GET the same document; A saves; B saves with A's stale token → <code>409</code>. Frontend: the conflict is surfaced and the reload path works.</dd>
+<dt>Dependencies</dt><dd>SPA changes to carry and return the token (couples to UI-001)</dd>
+<dt>Relevant standard</dt><dd>Checklist §6, §9, §10; ADR-0005</dd>
+<dt>Confidence</dt><dd><strong>High</strong></dd>
+</dl>
+</div>
+
+<div class="finding med">
+<h3>DB-001 · Four tables carry no row-level security</h3>
+<dl>
+<dt>Category</dt><dd>9 · Database and EF Core · 8 · Multi-tenancy</dd>
+<dt>Requirement</dt><dd>“RLS policies are implemented and tested where selected”; defence in depth for tenant-owned data</dd>
+<dt>Status</dt><dd><strong>PARTIALLY COMPLIANT</strong></dd>
+<dt>Score</dt><dd>3</dd>
+<dt>Severity</dt><dd><span class="tag t-med">MEDIUM</span></dd>
+<dt>Priority</dt><dd>P2</dd>
+<dt>Production blocker</dt><dd>No</dd>
+<dt>Evidence</dt><dd>Live <code>pg_class</code> query: of 96 tables, 90 have <code>relforcerowsecurity = true</code>. Without RLS: <code>qams.user_account</code>, <code>qams.refresh_session</code>, <code>qams.idempotency_record</code>, <code>qams.outbox_event</code> (plus <code>saas.tenant</code>, <code>saas.password_history</code>, <code>public.__EFMigrationsHistory</code> — registry and infrastructure, correctly excluded)</dd>
+<dt>Observed implementation</dt><dd>Each exclusion has a structural cause and a compensating control. <code>user_account.tenant_id</code> is nullable because platform administrators belong to no tenant, so the type cannot implement <code>ITenantScoped</code> and receives neither the EF filter nor a policy — compensated by <code>UserAccountTenantBoundTests</code>, which statically proves every <code>user_account</code> query is bounded by tenant or identity, and which passes (and self-tests its own rule against known-good and known-bad statements). <code>refresh_session</code> is keyed by <code>user_id</code>; <code>idempotency_record</code> is uniquely keyed <code>(actor_id, idempotency_key, request_type)</code> so replay is actor-scoped; <code>outbox_event</code> has nullable <code>tenant_id</code> and is read only under <code>Elevate()</code>.</dd>
+<dt>Compliance analysis</dt><dd>Deliberate and defensible, and the compensating control is unusually strong because it is mechanical rather than procedural. But <code>user_account</code> is the authentication table, and it is the one place where the database provides no backstop: a query that escapes the static rule has nothing beneath it.</dd>
+<dt>Risk</dt><dd>A future unbounded <code>user_account</code> query — or one shaped so the static rule does not recognize it — could enumerate accounts across tenants. High impact, low likelihood given the passing gate.</dd>
+<dt>Required remediation</dt><dd>Add an RLS policy on <code>user_account</code> permitting rows whose <code>tenant_id</code> matches the session GUC <strong>or</strong> is null under elevation, so authentication still works while cross-tenant enumeration is refused by the database. Document the remaining three exclusions in the as-built reference.</dd>
+<dt>Required tests</dt><dd>Integration test in the <code>RlsTenantIsolationTests</code> style: with <code>app.current_tenant</code> set to tenant A and bypass off, selecting tenant B's user rows returns zero. Retain <code>UserAccountTenantBoundTests</code> as the static gate. Regression-test the pre-tenant login path.</dd>
+<dt>Dependencies</dt><dd>Login runs before tenant resolution, so the policy must tolerate that path</dd>
+<dt>Relevant standard</dt><dd>Checklist §8, §9</dd>
+<dt>Confidence</dt><dd><strong>High</strong></dd>
+</dl>
+</div>
+
+<div class="finding med">
+<h3>DB-002 · Retention, archival and partitioning documented but unimplemented; evidence bytes on mutable local disk</h3>
+<dl>
+<dt>Category</dt><dd>9 · Database and EF Core · 15 · Audit · 16 · Security</dd>
+<dt>Requirement</dt><dd>“Data retention and archival are defined”; “File processing is hardened”; malware risk assessed; “Encryption at rest … is assessed”</dd>
+<dt>Status</dt><dd><strong>PARTIALLY COMPLIANT</strong></dd>
+<dt>Score</dt><dd>2</dd>
+<dt>Severity</dt><dd><span class="tag t-med">MEDIUM</span></dd>
+<dt>Priority</dt><dd>P2</dd>
+<dt>Production blocker</dt><dd>No</dd>
+<dt>Evidence</dt><dd>Live: <code>SELECT count(*) FROM pg_class WHERE relkind='p'</code> → <strong>0</strong> partitioned tables; schemas are <code>qams, audit, saas, read, public</code> — no <code>ref</code> schema · <code>NT_QAMS_Database_Architecture.md</code> describes monthly audit partitions detached to object storage, a <code>qams_retention</code> role, <code>ref.retention_class</code>, and file bytes in object storage with bucket versioning, object lock (WORM) and a per-file scan status · actual: <code>services.AddSingleton&lt;IFileStorage, Storage.LocalFileStorage&gt;()</code>, <code>FileStorage__RootPath=/app/data/files</code>, and <code>FileReference</code> has no scan-status field · implemented retention is limited to <code>Outbox:RetentionDays</code></dd>
+<dt>Observed implementation</dt><dd>The design document is explicitly labelled target-state and superseded by the as-built reference — which is why this scores 2 rather than 0, and why there is no numeric documentation drift (every as-built figure was independently reproduced here). What remains is that retention, archival, partitioning and WORM storage are described as design with no implementation and no ADR recording their deferral.</dd>
+<dt>Compliance analysis</dt><dd>Retention is <em>defined</em> in documentation, satisfying the letter of the requirement; it is not <em>enforced</em>. For records under a 5–10 year obligation this cuts both ways: nothing purges data past its ceiling, and nothing prevents premature deletion of file bytes, because local-disk storage offers no object lock. The database-side triggers protect the ledger; the bytes those entries reference sit on a mutable filesystem, so the content-hash guarantee that Part 11 record protection rests on is only as durable as host filesystem permissions. No malware or content scanning exists at upload, and the documented scan status is unimplemented.</dd>
+<dt>Risk</dt><dd>Unbounded growth of <code>audit.*</code> and <code>notification_dispatch</code>; inability to demonstrate a retention and disposal control at inspection; evidence bytes alterable or deletable by anyone with host access; malware stored and later served to users (mitigated only by forced attachment download and the magic-byte allow-list).</dd>
+<dt>Required remediation</dt><dd>Implement the documented controls — a retention job under a dedicated role, audit partitioning, object storage with versioning and object lock — or record an ADR stating the interim position, its compensating controls (filesystem permissions, backup immutability, forced attachment download) and the trigger for revisiting. Add malware/content scanning at upload or accept the risk explicitly.</dd>
+<dt>Required tests</dt><dd>Retention job: rows past the ceiling are removed, rows inside it are not, and disposal is itself logged. Storage: a stored object cannot be overwritten in place. Restore: file bytes and their <code>file_reference</code> rows recover consistently.</dd>
+<dt>Dependencies</dt><dd>Object-storage provisioning; per-tenant retention-class policy decision</dd>
+<dt>Relevant standard</dt><dd>Checklist §9, §15, §16; 21 CFR Part 11 §11.10(c); ISO/IEC 17025 §7.11</dd>
+<dt>Confidence</dt><dd><strong>High</strong></dd>
+</dl>
+</div>
+
+<div class="finding med">
+<h3>SEC-001 · Prometheus <code>/metrics</code> is anonymous and rate-limit-exempt</h3>
+<dl>
+<dt>Category</dt><dd>16 · Security architecture · 17 · Logging and observability</dd>
+<dt>Requirement</dt><dd>“Administrative and diagnostic endpoints are protected”; “Observability configuration is environment-specific and secure”</dd>
+<dt>Status</dt><dd><strong>PARTIALLY COMPLIANT</strong></dd>
+<dt>Score</dt><dd>2</dd>
+<dt>Severity</dt><dd><span class="tag t-med">MEDIUM</span> — HIGH if reachable from an untrusted network in production (NOT VERIFIED)</dd>
+<dt>Priority</dt><dd>P2</dd>
+<dt>Production blocker</dt><dd>No</dd>
+<dt>Evidence</dt><dd><code>Program.cs:291</code> — <code>MapPrometheusScrapingEndpoint("/metrics").AllowAnonymous().DisableRateLimiting()</code> · runtime probe: unauthenticated <code>GET /metrics</code> → <code>200</code> with <strong>367 metric lines</strong> including <code>db_client_commands_duration_seconds_*</code>, <code>aspnetcore_diagnostics_exceptions_total</code>, <code>aspnetcore_rate_limiting_*</code> and <code>aspnetcore_routing_match_attempts_total</code></dd>
+<dt>Observed implementation</dt><dd>The inline comment claims “measurements only, no tenant data”, which is accurate — no tenant identifier or business value is exposed. The endpoint nonetheless reveals live route names, request volumes, database command counts and durations, exception counts and rate-limiter state, with neither authentication nor throttling.</dd>
+<dt>Compliance analysis</dt><dd>Partially mitigated by topology: <code>compose.production.yml</code> publishes the API on <code>127.0.0.1:5000</code>, so exposure depends entirely on the reverse-proxy configuration, which was not supplied. The application applies no control of its own, so the requirement is met by deployment convention rather than by design — and the health endpoints, which <em>are</em> safely minimal, show the team knows how to do this.</dd>
+<dt>Risk</dt><dd>Unauthenticated reconnaissance: mapping live routes, inferring tenant activity from request and DB-command rates, and observing error and throttling behaviour while probing. Also a cheap unauthenticated compute sink, since rate limiting is explicitly disabled here.</dd>
+<dt>Required remediation</dt><dd>Require a scrape credential, or bind metrics to a separate internal port, so protection does not depend on proxy configuration. If the proxy is to remain the control, document the rule and test it.</dd>
+<dt>Required tests</dt><dd>Functional: <code>GET /metrics</code> without the scrape credential → <code>401</code>. Deployment test asserting the proxy denies <code>/metrics</code> from an external address.</dd>
+<dt>Dependencies</dt><dd>Prometheus scrape configuration</dd>
+<dt>Relevant standard</dt><dd>Checklist §16, §17</dd>
+<dt>Confidence</dt><dd><strong>High</strong> for application behaviour; <strong>Low</strong> for production exposure</dd>
+</dl>
+</div>
+
+<div class="finding med">
+<h3>SEC-004 · RLS-bypass elevation is not itself recorded</h3>
+<dl>
+<dt>Category</dt><dd>8 · Multi-tenancy · 11 · Background processing · 15 · Audit</dd>
+<dt>Requirement</dt><dd>“Administrative cross-tenant access is explicit, authorized, and audited”; “Jobs resolve tenant context safely”</dd>
+<dt>Status</dt><dd><strong>PARTIALLY COMPLIANT</strong></dd>
+<dt>Score</dt><dd>3</dd>
+<dt>Severity</dt><dd><span class="tag t-med">MEDIUM</span></dd>
+<dt>Priority</dt><dd>P2</dd>
+<dt>Production blocker</dt><dd>No</dd>
+<dt>Evidence</dt><dd><code>Elevate()</code> callers: <code>ProvisionTenant.cs:41</code> (request path, gated <code>[RequireRole(PlatformAdmin)]</code>), <code>KpiSnapshotService.cs:63</code>, <code>ScheduledSweepService.cs:64</code>, <code>OutboxProcessor.cs:102,225,246</code>, <code>StartupSeeding.cs:99,132</code> · none writes a security event for the elevation itself · <strong>however</strong> the business outcome <em>is</em> audited: live <code>audit.audit_trail</code> holds 58 <code>TenantProvisioned</code> entries, so administrative provisioning is traceable through the hash-chained ledger</dd>
+<dt>Observed implementation</dt><dd>Elevation is tightly designed: <code>ICurrentTenantSetter.Elevate()</code> is documented as reserved for trusted infrastructure, scoped to a single unit of work, and translated into <code>app.bypass_rls='on'</code> only for that connection. The sole request-path caller is role-gated. What is absent is a record of the act of bypassing RLS — who or what elevated, when, and for which operation.</dd>
+<dt>Compliance analysis</dt><dd>The requirement is met for the administrative case through the domain-event ledger, which is why this is a 3 rather than a 2: provisioning cannot happen unaudited. It is not met for the infrastructure callers — three background workers and start-up seeding routinely read across all tenants with no corresponding entry. For a regulated multi-tenant system, “the sweep read every tenant's records at 02:00” is exactly the kind of event an inspector expects to see evidenced.</dd>
+<dt>Risk</dt><dd>Cross-tenant reads by infrastructure are invisible after the fact; an unexpected or malicious elevation added in future code would leave no trace distinguishable from normal operation.</dd>
+<dt>Required remediation</dt><dd>Emit a security event on every <code>Elevate()</code> recording the caller, the reason and the unit of work — cheap because there are only eight call sites and each is deliberate. Consider narrowing background access from blanket elevation to a system principal with an explicit tenant iteration list.</dd>
+<dt>Required tests</dt><dd>Functional: provisioning a tenant writes both the ledger entry and an elevation security event. Job test: a sweep cycle writes exactly one elevation event per cycle.</dd>
+<dt>Dependencies</dt><dd>None — <code>ISecurityEventLog</code> already exists and is used by Login, MFA, refresh and exports</dd>
+<dt>Relevant standard</dt><dd>Checklist §8, §11, §15</dd>
+<dt>Confidence</dt><dd><strong>High</strong></dd>
+</dl>
+</div>
+
+<div class="finding med">
+<h3>TEST-003 · Intra-tenant scope denial is a single assertion; pipeline ordering is untested; <code>LoadTests</code> never runs</h3>
+<dl>
+<dt>Category</dt><dd>21 · Testing · 5 · CQRS and MediatR</dd>
+<dt>Requirement</dt><dd>“Pipeline ordering is intentional and tested”; authorization tests; “Do not treat code coverage alone as proof of correctness”</dd>
+<dt>Status</dt><dd><strong>PARTIALLY COMPLIANT</strong></dd>
+<dt>Score</dt><dd>2</dd>
+<dt>Severity</dt><dd><span class="tag t-med">MEDIUM</span></dd>
+<dt>Priority</dt><dd>P2</dd>
+<dt>Production blocker</dt><dd>No</dd>
+<dt>Evidence</dt><dd>Repository-wide search for <code>SCOPE-001</code>/<code>SCOPE-002</code> in <code>tests/</code> returns one assertion, <code>RolePrivilegeFlowTests.cs:240</code> · no test asserts behavior order across the five registered behaviors · <code>grep -c LoadTests NT.QAMS.sln</code> → <strong>0</strong>, so the project neither builds nor runs (0 test attributes collected)</dd>
+<dt>Observed implementation</dt><dd>522 tests execute and pass, with tenant isolation covered from five angles. The intra-tenant boundary — the weaker of the two, being single-layer — has one write-path assertion and no read, list, search, export or file variant. Pipeline order is deliberate and documented in <code>DependencyInjection.cs</code> (Tracing → Logging → Authorization → Idempotency → Validation) but nothing fails if someone reorders it, even though placing Validation before Authorization would leak validation detail to unauthorized callers.</dd>
+<dt>Compliance analysis</dt><dd>Test coverage is inverse to risk in exactly one dimension. The boundary with three enforcement layers has five suites; the boundary with one has one assertion. This is also why ACCESS-001 could not be settled by running the suite — no existing test exercises that path, so the audit had to probe manually.</dd>
+<dt>Risk</dt><dd>Scope regressions ship undetected; a pipeline reorder silently changes security semantics; an unreferenced test project reads as coverage that does not exist.</dd>
+<dt>Required remediation</dt><dd>Add a scope-denial matrix mirroring <code>RoleEndpointMatrixTests</code>: for branch- and department-restricted users, assert GET-by-id, list, search, export and file download all exclude or refuse out-of-scope records. Add a behavior-order test asserting Authorization runs before Validation. Add <code>LoadTests</code> to the solution or delete it.</dd>
+<dt>Required tests</dt><dd>As above, wired into the CI gate alongside the existing command-policy and API-surface gates.</dd>
+<dt>Dependencies</dt><dd>Scoped-user fixtures already exist in <code>RolePrivilegeFlowTests</code></dd>
+<dt>Relevant standard</dt><dd>Checklist §21, §5</dd>
+<dt>Confidence</dt><dd><strong>High</strong></dd>
+</dl>
+</div>
+
+<div class="finding low">
+<h3>API-001 · <code>429</code> responses carry no problem+json body</h3>
+<dl>
+<dt>Category</dt><dd>6 · API design · 14 · Validation and error handling</dd>
+<dt>Requirement</dt><dd>“Problem Details are used consistently”; “Errors include safe correlation or trace identifiers”</dd>
+<dt>Status</dt><dd><strong>PARTIALLY COMPLIANT</strong></dd>
+<dt>Score</dt><dd>3</dd>
+<dt>Severity</dt><dd><span class="tag t-low">LOW</span></dd>
+<dt>Priority</dt><dd>P2</dd>
+<dt>Production blocker</dt><dd>No</dd>
+<dt>Evidence</dt><dd>Runtime probe: 30 rapid login attempts produced 8×<code>401</code> then 22×<code>429</code>. The <code>429</code> carried <code>Content-Length: 0</code>, <code>Retry-After: 60</code> and the security headers — but no body, no <code>traceId</code> and no <code>correlationId</code>, unlike every other error path verified</dd>
+<dt>Observed implementation</dt><dd>Throttling works correctly and returns the right status and <code>Retry-After</code>. The ASP.NET rate limiter's rejection response was left unconfigured, so it alone bypasses the <code>ProblemDetails</code> customization that gives every other failure a correlation id.</dd>
+<dt>Compliance analysis</dt><dd>Behaviourally sound, contractually inconsistent. A throttled user has no id to quote in a support ticket — the specific capability the observability work added — and a client must special-case one status.</dd>
+<dt>Risk</dt><dd>Support and diagnostic friction; a throttling incident that cannot be correlated to server traces.</dd>
+<dt>Required remediation</dt><dd>Configure <code>RateLimiterOptions.OnRejected</code> to write problem+json through the existing <code>ProblemResponse</code> writer with a stable code (for example <code>RATE-429</code>), preserving <code>Retry-After</code>.</dd>
+<dt>Required tests</dt><dd>Extend <code>ProblemContractTests</code>: a throttled request returns <code>application/problem+json</code>, <code>status: 429</code>, a stable code, <code>traceId</code>, <code>correlationId</code> and <code>Retry-After</code>.</dd>
+<dt>Dependencies</dt><dd>None</dd>
+<dt>Relevant standard</dt><dd>Checklist §6, §14; RFC 9457</dd>
+<dt>Confidence</dt><dd><strong>High</strong></dd>
+</dl>
+</div>
+
+<div class="finding low">
+<h3>API-002 · Deserialization failures disclose internal contract type names</h3>
+<dl>
+<dt>Category</dt><dd>6 · API design · 16 · Security architecture</dd>
+<dt>Requirement</dt><dd>“APIs do not expose stack traces, SQL, secrets, internal identifiers, or infrastructure details”</dd>
+<dt>Status</dt><dd><strong>PARTIALLY COMPLIANT</strong></dd>
+<dt>Score</dt><dd>3</dd>
+<dt>Severity</dt><dd><span class="tag t-low">LOW</span></dd>
+<dt>Priority</dt><dd>P2</dd>
+<dt>Production blocker</dt><dd>No</dd>
+<dt>Evidence</dt><dd>Runtime probe: <code>POST /api/documents</code> with <code>"fileId": null</code> returned <code>400</code> containing <code>"$.fileId": ["The JSON value could not be converted to NT.QAMS.Contracts.DocumentControl.CreateDocumentRequest. Path: $.fileId | LineNumber: 0 | BytePositionInLine: 194."]</code></dd>
+<dt>Observed implementation</dt><dd><code>System.Text.Json</code>'s converter message is surfaced verbatim in the validation-problem <code>errors</code> dictionary. No stack trace, SQL or secret is exposed — but the fully-qualified internal type name, namespace layout and byte offsets are.</dd>
+<dt>Compliance analysis</dt><dd>Low impact alone — much of this is inferable from the OpenAPI document in Development — but it is information the API should not volunteer, and it is inconsistent with the deliberate care shown elsewhere, where a cross-tenant read returns a bare <code>404</code> rather than confirming existence.</dd>
+<dt>Risk</dt><dd>Minor information disclosure aiding reconnaissance of internal namespaces and contract shapes.</dd>
+<dt>Required remediation</dt><dd>Add a JSON-exception handler or <code>InvalidModelStateResponseFactory</code> replacing converter messages with field-scoped, non-revealing text such as “The value for <code>fileId</code> is not valid.”, retaining the field path for client use.</dd>
+<dt>Required tests</dt><dd>Extend <code>ProblemContractTests</code>: a malformed-type payload yields a <code>400</code> whose body contains no <code>NT.QAMS.</code> substring and no byte-position detail.</dd>
+<dt>Dependencies</dt><dd>None</dd>
+<dt>Relevant standard</dt><dd>Checklist §6, §14, §16</dd>
+<dt>Confidence</dt><dd><strong>High</strong></dd>
+</dl>
+</div>
+
+<div class="finding low">
+<h3>SEC-003 · Header and host-filtering hardening gaps</h3>
+<dl>
+<dt>Category</dt><dd>16 · Security architecture · 18 · Configuration</dd>
+<dt>Requirement</dt><dd>“Security headers are configured”; “Production configuration disables unsafe development behavior”</dd>
+<dt>Status</dt><dd><strong>PARTIALLY COMPLIANT</strong></dd>
+<dt>Score</dt><dd>3</dd>
+<dt>Severity</dt><dd><span class="tag t-low">LOW</span></dd>
+<dt>Priority</dt><dd>P3</dd>
+<dt>Production blocker</dt><dd>No</dd>
+<dt>Evidence</dt><dd><code>SecurityHeadersMiddleware</code> emits CSP (<code>default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'</code>), <code>X-Content-Type-Options</code>, <code>X-Frame-Options: DENY</code> and <code>Referrer-Policy: no-referrer</code> on every response — all four verified at runtime — plus <code>Strict-Transport-Security: max-age=63072000; includeSubDomains</code> outside Development. Absent: <code>Permissions-Policy</code>, <code>Cross-Origin-Opener-Policy</code>, <code>Cross-Origin-Resource-Policy</code> · <code>appsettings.json</code> → <code>"AllowedHosts": "*"</code></dd>
+<dt>Observed implementation</dt><dd>The API's CSP is genuinely locked down, which makes several missing headers largely redundant for a JSON API that loads nothing. <code>AllowedHosts: "*"</code> disables ASP.NET host filtering, leaving Host-header validation entirely to the reverse proxy.</dd>
+<dt>Compliance analysis</dt><dd>The material headers are present and verified; these are completeness gaps. Host filtering carries the real substance, since an unvalidated Host header can enable cache poisoning or absolute-URL redirection depending on proxy behaviour — and the proxy configuration was not supplied.</dd>
+<dt>Risk</dt><dd>Low; Host-header handling depends on an unverified external component.</dd>
+<dt>Required remediation</dt><dd>Set <code>AllowedHosts</code> to the deployment's real hostnames per environment; add <code>Permissions-Policy</code>, <code>Cross-Origin-Opener-Policy: same-origin</code> and <code>Cross-Origin-Resource-Policy: same-origin</code>.</dd>
+<dt>Required tests</dt><dd>Extend <code>SecurityHardeningTests</code> to assert the added headers and that a request with an unexpected <code>Host</code> is refused.</dd>
+<dt>Dependencies</dt><dd>Deployment hostname list</dd>
+<dt>Relevant standard</dt><dd>Checklist §16, §18</dd>
+<dt>Confidence</dt><dd><strong>High</strong></dd>
+</dl>
+</div>
+
+<div class="finding low">
+<h3>OPS-002 · Container build hygiene: no <code>.dockerignore</code>, floating base-image tags, capabilities not dropped</h3>
+<dl>
+<dt>Category</dt><dd>20 · Docker and deployment</dd>
+<dt>Requirement</dt><dd>“Images contain only required runtime artifacts”; “Dependencies are pinned or controlled”; “Container capabilities are minimized”</dd>
+<dt>Status</dt><dd><strong>PARTIALLY COMPLIANT</strong></dd>
+<dt>Score</dt><dd>3</dd>
+<dt>Severity</dt><dd><span class="tag t-low">LOW</span></dd>
+<dt>Priority</dt><dd>P3</dd>
+<dt>Production blocker</dt><dd>No</dd>
+<dt>Evidence</dt><dd>No <code>.dockerignore</code> at the repository root while the Dockerfile begins <code>COPY . .</code>, so the build context includes <code>.git</code>, <code>deploy/publish-win-x64/</code> and release zips · base images <code>mcr.microsoft.com/dotnet/sdk:9.0</code>, <code>mcr.microsoft.com/dotnet/aspnet:9.0</code>, <code>postgres:17-alpine</code> — floating tags, no digests · <code>compose.production.yml</code> sets <code>read_only</code>, tmpfs, limits and a non-root user but no <code>cap_drop</code></dd>
+<dt>Observed implementation</dt><dd>The runtime stage copies only <code>/app/publish</code>, so nothing extraneous reaches the shipped image — this is build-context bloat, not image contamination, and no secret is at risk (user-secrets live outside the repository, verified by scan). Floating tags mean two builds of the same commit can produce different base layers.</dd>
+<dt>Compliance analysis</dt><dd>“Only required runtime artifacts” is satisfied for the image. “Pinned or controlled” is partly satisfied: Trivy gates HIGH/CRITICAL CVEs on every build, which controls the risk without pinning it. For a validated GxP system, reproducible builds are usually an expectation in their own right.</dd>
+<dt>Risk</dt><dd>Non-reproducible builds complicate validated-state evidence; larger context surface and slower builds; unnecessary Linux capabilities retained.</dd>
+<dt>Required remediation</dt><dd>Add a <code>.dockerignore</code> excluding <code>.git</code>, <code>bin</code>, <code>obj</code>, <code>node_modules</code>, <code>deploy/publish-*</code> and <code>*.zip</code>. Pin base images by digest and bump deliberately, keeping the Trivy gate. Add <code>cap_drop: [ALL]</code> to the compose service.</dd>
+<dt>Required tests</dt><dd>CI assertion that the image contains no <code>.git</code> directory and that the recorded base digest matches the expected value.</dd>
+<dt>Dependencies</dt><dd>None</dd>
+<dt>Relevant standard</dt><dd>Checklist §20</dd>
+<dt>Confidence</dt><dd><strong>High</strong></dd>
+</dl>
+</div>
+
+<div class="finding low">
+<h3>DOC-001 · Stale operating guide; three architectural deviations without ADRs</h3>
+<dl>
+<dt>Category</dt><dd>22 · Documentation and traceability</dd>
+<dt>Requirement</dt><dd>“Documentation reflects the current implementation”; “ADRs explain significant decisions and exceptions”</dd>
+<dt>Status</dt><dd><strong>PARTIALLY COMPLIANT</strong></dd>
+<dt>Score</dt><dd>3</dd>
+<dt>Severity</dt><dd><span class="tag t-low">LOW</span></dd>
+<dt>Priority</dt><dd>P3</dd>
+<dt>Production blocker</dt><dd>No</dd>
+<dt>Evidence</dt><dd><code>CLAUDE.md:13</code> states “Angular 18” while <code>frontend/package.json</code> pins <code>@angular/core ^22.0.8</code> and §6 of the same file discusses Angular 22 · <strong><code>.claude/skills/ntqms-architecture/SKILL.md:7</code> repeats “Angular 18 standalone/signals”</strong> in a skill whose stated purpose is to be consulted “before writing or modifying ANY backend or frontend code in this repo” · <code>CLAUDE.md</code> §3 is dated 2026-07-28 citing <code>v1.46.0</code>; the tree is at <code>v1.51.1-13</code> · no ADR covers (a) <code>LocalFileStorage</code> in place of the documented WORM object storage, (b) the substitution of <code>Microsoft.Extensions.Logging</code> + JSON console for Serilog, or (c) the decision to gate queries at the controller rather than in the MediatR pipeline</dd>
+<dt>Observed implementation</dt><dd>Documentation is otherwise a genuine strength — nine ADRs, a full CSV validation set, and an as-built database reference whose figures this assessment reproduced exactly from <code>pg_catalog</code>. The drift is confined to the fast-moving operating guide and three unrecorded deviations.</dd>
+<dt>Compliance analysis</dt><dd>A single controlled document contradicting itself on the framework version is the kind of detail an inspector notices. The missing ADRs matter more: each is a deliberate departure from either a documented design or a named standard, and two of the three carry regulatory or observability weight.</dd>
+<dt>Risk</dt><dd>Worse than onboarding confusion: the stale version sits in the repository's <em>authoring guidance</em>, not only its README, so a developer or agent following the skill would apply Angular 18 idioms to an Angular 22 codebase by design rather than by mistake. Separately, three architectural decisions have no recorded rationale, so a future reviewer cannot distinguish a decision from an oversight — precisely the ambiguity ADRs exist to remove.</dd>
+<dt>Required remediation</dt><dd>Correct the Angular version and refresh the current-state section. Add the three ADRs (file storage, logging stack, read-side authorization model), each stating the decision, its compensating controls and its revisit trigger.</dd>
+<dt>Required tests</dt><dd>Not test-provable. Add a release-checklist step reconciling the stated stack against manifests.</dd>
+<dt>Dependencies</dt><dd>None</dd>
+<dt>Relevant standard</dt><dd>Checklist §22, §2</dd>
+<dt>Confidence</dt><dd><strong>High</strong></dd>
+</dl>
+</div>
+
+<div class="finding low">
+<h3>UI-001 · Optimistic rollback and conflict presentation not verified</h3>
+<dl>
+<dt>Category</dt><dd>13 · Angular frontend</dd>
+<dt>Requirement</dt><dd>“Optimistic updates have rollback behavior”; “Concurrency conflicts are presented meaningfully”; loading/empty/success/validation/error states</dd>
+<dt>Status</dt><dd><strong>NOT VERIFIED</strong></dd>
+<dt>Score</dt><dd>N/V (excluded from scoring)</dd>
+<dt>Severity</dt><dd><span class="tag t-info">INFORMATIONAL</span></dd>
+<dt>Priority</dt><dd>P3</dd>
+<dt>Production blocker</dt><dd>No</dd>
+<dt>Evidence</dt><dd>Verified: Angular 22, 100 standalone components, 83 lazy routes, typed <code>nonNullable</code> reactive forms in 73 files with zero <code>ngModel</code>, <code>strict</code> + <code>strictTemplates</code>, zero <code>: any</code>, signals in 123 files, centralized typed API layer, duplicate submission blocked by <code>busy()</code>, 104 ARIA attributes across 56 files including <code>aria-live</code> and 7 <code>aria-modal</code> dialogs with focus restore and Escape handling, token never in web storage, 76/76 unit specs passing, axe-core in CI. Not exercised: per-screen state completeness, optimistic-update rollback, and <code>CONCURRENCY-409</code> presentation</dd>
+<dt>Observed implementation</dt><dd>Client architecture is modern and disciplined on every dimension checkable statically or by unit test. The unverified items require driving the running SPA through each screen, which this assessment did not do. Conflict presentation is moot until API-003 gives the client a token to conflict on.</dd>
+<dt>Compliance analysis</dt><dd>Recorded as NOT VERIFIED rather than assumed compliant, per the integrity rules. The three Playwright specs (auth gate, accessibility, regulated workflow) exist and CI runs two of them, but none was executed here.</dd>
+<dt>Risk</dt><dd>Unknown; no adverse indicator was found.</dd>
+<dt>Required remediation</dt><dd>None pending verification.</dd>
+<dt>Required tests</dt><dd>Execute the Playwright suite against a running stack; extend it to assert loading/empty/error states and rollback on a representative create-and-edit workflow.</dd>
+<dt>Dependencies</dt><dd>Running API + SPA under the test harness</dd>
+<dt>Relevant standard</dt><dd>Checklist §13, §21</dd>
+<dt>Confidence</dt><dd><strong>High</strong> on what was verified; the gap is explicitly unverified</dd>
+</dl>
+</div>
+
+<div class="finding low">
+<h3>OPS-001 · Restore and disaster recovery documented but never demonstrated</h3>
+<dl>
+<dt>Category</dt><dd>19 · Health, resilience and operations</dd>
+<dt>Requirement</dt><dd>“Backup and restore procedures exist”; “Recovery procedures are tested”</dd>
+<dt>Status</dt><dd><strong>NOT VERIFIED</strong></dd>
+<dt>Score</dt><dd>N/V (excluded from scoring)</dd>
+<dt>Severity</dt><dd><span class="tag t-med">MEDIUM</span></dd>
+<dt>Priority</dt><dd>P2</dd>
+<dt>Production blocker</dt><dd>No</dd>
+<dt>Evidence</dt><dd><code>deploy/BACKUP-RESTORE-DR.md</code> defines RPO ≤ 5 min (continuous WAL archiving), RTO ≤ 4 h, daily 35 days / weekly 3 months / monthly 7 years retention, AES-256 at rest, off-site regional replication and quarterly documented drills, and is itself declared a controlled document · <code>deploy/backup.sh</code> and <code>restore.sh</code> exist · <strong>no drill record, restore log or recovery-test evidence exists anywhere in the repository</strong></dd>
+<dt>Observed implementation</dt><dd>The runbook is a strong artefact — objectives quantified, retention exceeding record retention, encryption and off-site copies specified. The scripts exist. What is missing is any evidence that a restore has ever been performed.</dd>
+<dt>Compliance analysis</dt><dd>“Procedures exist” is satisfied; “recovery procedures are tested” is not evidenced. For a regulated system this is the difference between a documented control and an effective one — and restore is the control whose failure is discovered at the worst possible moment. The requirement is explicitly separate in the checklist for that reason.</dd>
+<dt>Risk</dt><dd>Untested restore path: backup corruption, an incorrect <code>pg_restore</code> ordering against FORCE-RLS tables, or missing file-storage bytes would surface only during a real incident. The RLS and append-only trigger design makes restore ordering non-trivial, which raises rather than lowers this risk.</dd>
+<dt>Required remediation</dt><dd>Execute a full restore drill into an isolated environment: restore the database, verify the audit hash chain end-to-end, verify <code>file_reference</code> rows resolve to actual bytes, measure achieved RPO and RTO, and retain the evidence as a validation record.</dd>
+<dt>Required tests</dt><dd>Documented drill with measured RPO/RTO; automated post-restore assertion that the audit chain verifies and that every <code>file_reference</code> has a resolvable object.</dd>
+<dt>Dependencies</dt><dd>Isolated environment and a production-representative backup</dd>
+<dt>Relevant standard</dt><dd>Checklist §19; 21 CFR Part 11 §11.10(c); EU Annex 11 §16</dd>
+<dt>Confidence</dt><dd><strong>High</strong> that no evidence exists; the procedures themselves may well work</dd>
+</dl>
+</div>
+
+<h2>13 · Aggregate and domain-model assessment</h2>
+<p>45 aggregate roots across 20 bounded modules, with module independence enforced mechanically — <code>ModuleBoundaryTests.A_domain_module_references_no_other_domain_module</code> passes for every module. <code>AggregateRoot</code> supplies event collection, audit stamps and the segregation-of-duties guard <code>EnsureSignerIsNotPreparer</code> that Part 11 §11.10(g) requires: a shared invariant placed in the base class rather than re-implemented per aggregate.</p>
+<p>One aggregate was read in full as a fairness check on the whole:</p>
+<div class="scroll">
+<table>
+<tr><th>Facet</th><th><code>ControlledDocument</code> — <code>src/NT.QAMS.Domain/DocumentControl/ControlledDocument.cs</code> (273 lines)</th></tr>
+<tr><td>Responsibility</td><td>Controlled-document lifecycle and version control — “the aggregate owns control, not content”; bytes live behind <code>FileReference</code></td></tr>
+<tr><td>Entities</td><td><code>DocumentVersion</code> — <code>internal</code> constructor, all setters <code>private</code> or <code>internal</code>, so only the root mutates it</td></tr>
+<tr><td>Value objects</td><td><strong>None.</strong> <code>Code</code>, <code>Title</code>, <code>Category</code> are <code>string</code>; <code>VersionLabel</code> is a computed <code>string</code> (DOMAIN-001)</td></tr>
+<tr><td>Invariants</td><td>Exactly one <code>Published</code> version (publishing v<sub>n</sub> atomically obsoletes v<sub>n−1</sub>); at most one in-flight version; SoD — the version author may neither recommend nor approve it (<code>SOD-DOC-001/002</code>); code and title required (<code>DOC-001/002</code>); review cycle clamped to 1–120 months</td></tr>
+<tr><td>State transitions</td><td>Draft → UnderReview → Approved → Published → Obsolete, plus Rejected. Every transition passes <code>RequireInFlight(expectedState, code, verb)</code>, so an out-of-order call raises a coded <code>DomainException</code> instead of corrupting state — invalid states are unreachable through normal paths</td></tr>
+<tr><td>Transaction boundary</td><td>The document and its versions — one aggregate, one <code>SaveChanges</code></td></tr>
+<tr><td>Domain events</td><td><code>DocumentSubmittedForReview</code>, <code>DocumentRecommended</code>, <code>DocumentPublished</code>, <code>DocumentVersionObsoleted</code>, <code>DocumentVersionRejected</code>, <code>DocumentReviewDue</code>, <code>DocumentReviewConfirmed</code>, <code>DocumentRetired</code> — past-tense completed facts, drained to the outbox in the same transaction as the state change</td></tr>
+<tr><td>Concurrency</td><td><code>xmin</code> applied by convention → <code>409 CONCURRENCY-409</code>; token not exposed to clients (API-003)</td></tr>
+<tr><td>Authorization</td><td>Command-side <code>[RequirePermission(Documents, …)]</code>; 8 permission gates on <code>DocumentsController</code></td></tr>
+<tr><td>Tenant ownership</td><td><code>ITenantScoped</code> — EF global filter + <code>tenant_isolation</code> RLS policy + tenant-first composite PK <code>(tenant_id, id)</code>; <code>document_version</code> is a tenant-composite child with CASCADE inside the aggregate</td></tr>
+<tr><td>Audit</td><td>Field changes captured with redaction; publication signed into <code>audit.electronic_signature</code>; a material change requires a new version and fresh approval, so signatures are never silently carried forward</td></tr>
+</table>
+</div>
+<p><strong>Domain strengths verified across the layer:</strong> private setters and factories throughout; invariants inside aggregates rather than in validators; guarded state machines with stable coded exceptions; 90 past-tense domain events; <code>Invalidate()</code> on analytical studies so a material change revokes a prior sign-off; UUIDv7 identity with <code>ValueGeneratedNever</code>; enums persisted as strings; time exclusively from an injected <code>IClock</code> (never <code>DateTime.Now</code>); domain entities never exposed through contracts (test-enforced); no persistence concern leaks into the Domain — it references only <code>SharedKernel</code>.</p>
+<p><strong>The one systemic weakness</strong> is the near-total absence of value objects (DOMAIN-001), which pushes validation into factories and validators — and TEST-001 shows those validators are untested. <code>TenantId</code> is a public settable property on every scoped entity, a minor encapsulation compromise mitigated by the stamp interceptor being its only writer and documented as such in <code>ITenantScoped</code>.</p>
+
+<h2>14 · Database and tenant-isolation assessment</h2>
+<div class="callout">
+<p><strong>Tenant isolation: VERIFIED. No cross-tenant exposure exists.</strong> Three independent enforcement layers, each confirmed against the running system rather than inferred from a <code>TenantId</code> property:</p>
+<ol>
+<li><strong>Application layer</strong> — an EF global query filter on all 45 <code>ITenantScoped</code> types, composed per entity in <code>AppDbContext.OnModelCreating</code> so a new module cannot forget it; tenant resolved from the validated JWT <code>tenant_id</code> claim only.</li>
+<li><strong>Database layer</strong> — 90 tables with <code>FORCE ROW LEVEL SECURITY</code> and a <code>tenant_isolation</code> policy whose <code>USING</code> clause requires <code>tenant_id = NULLIF(current_setting('app.current_tenant',true),'')::uuid</code> and whose <code>WITH CHECK</code> refuses writes for another tenant. <strong>Effective, not decorative:</strong> the runtime role <code>qams_app</code> has <code>rolsuper = f</code> and <code>rolbypassrls = f</code> and does not own the tables, so it cannot escape its own policies — and <code>DatabaseRoleGuard</code> refuses to boot Production if that ever changes.</li>
+<li><strong>Schema layer</strong> — 88 tenant-first composite primary keys and 29 tenant-composite foreign keys, so a child row under another tenant's parent is structurally impossible rather than merely checked.</li>
+</ol>
+<p><strong>Connection-pool leakage is specifically prevented.</strong> <code>TenantConnectionInterceptor</code> re-applies both session GUCs on <em>every</em> <code>ConnectionOpened</code>, not once per request or per context — so a pooled physical connection can never carry a previous request's tenant — and fails closed to the nil UUID, which matches no row, when no tenant is resolved.</p>
+</div>
+<h4>Tenant-isolation checklist, item by item</h4>
+<div class="scroll">
+<table>
+<tr><th>§8 requirement</th><th>Status</th><th>Evidence</th></tr>
+<tr><td>Tenant identity from trusted claims / server-side context</td><td><span class="tag t-ok">COMPLIANT</span></td><td><code>TenantResolutionMiddleware</code> reads <code>tenant_id</code> from the validated JWT only; the XML doc states headers and query strings are “explicitly banned by the architecture”</td></tr>
+<tr><td>TenantId from request bodies never trusted</td><td><span class="tag t-ok">COMPLIANT</span></td><td><strong>Runtime-verified:</strong> <code>POST /api/documents</code> with an injected foreign <code>tenantId</code> and a chosen <code>id</code> returned <code>201</code>; the row landed in the caller's tenant with a server-generated id. <code>TenantStampInterceptor</code> is the sole writer</td></tr>
+<tr><td>Tenant scope on every tenant-owned read</td><td><span class="tag t-ok">COMPLIANT</span></td><td>EF filter on 45 types + 90 RLS policies; <strong>runtime-verified</strong> cross-tenant document read → <code>404</code>; list endpoint returned only own-tenant rows</td></tr>
+<tr><td>Tenant scope on every tenant-owned write</td><td><span class="tag t-ok">COMPLIANT</span></td><td>RLS <code>WITH CHECK</code>; <code>RlsTenantIsolationTests.With_check_rejects_writing_a_row_for_another_tenant</code> passing; <code>OwnedChildTenancyTests.A_child_cannot_be_written_with_a_tenant_that_differs_from_its_parent</code> passing</td></tr>
+<tr><td>Tenant scope in background jobs</td><td><span class="tag t-ok">COMPLIANT</span></td><td>Each worker opens its own scope and calls <code>Elevate()</code> for that unit of work only, then iterates tenants explicitly; <code>ScheduledSweepTests</code> passing (elevation itself unrecorded — SEC-004)</td></tr>
+<tr><td>Tenant scope in caches</td><td><span class="tag t-info">NOT APPLICABLE</span></td><td>No cache tier exists — searched all projects for <code>IMemoryCache</code>, <code>IDistributedCache</code>, Redis and response caching: <strong>no matches</strong></td></tr>
+<tr><td>Tenant scope in files / object storage</td><td><span class="tag t-ok">COMPLIANT</span></td><td>Tenant-filtered <code>db.Files</code> plus a tenant-partitioned storage key <code>tenant/{tenant_id}/{sha256}</code>; <strong>runtime-verified</strong> cross-tenant file download → <code>404</code> (no automated test — TEST-002)</td></tr>
+<tr><td>Tenant scope in SignalR groups and messages</td><td><span class="tag t-info">NOT APPLICABLE</span></td><td>No SignalR anywhere in <code>src/</code></td></tr>
+<tr><td>Tenant context safely in logs and audit</td><td><span class="tag t-ok">COMPLIANT</span></td><td><code>LoggingBehavior</code> logs <code>tenant={TenantId}</code> (id only, no business data); <code>audit_trail.tenant_id</code> with per-tenant hash sequences; all four audit tables RLS-protected</td></tr>
+<tr><td>Tenant context propagated through integration messages</td><td><span class="tag t-ok">COMPLIANT</span></td><td><code>outbox_event.tenant_id</code> + <code>trace_parent</code> persisted per row</td></tr>
+<tr><td>Cross-tenant references prevented by constraints</td><td><span class="tag t-ok">COMPLIANT</span></td><td>29 of 36 FKs are tenant-composite <code>(fk, tenant_id) → parent (id, tenant_id)</code>; <code>OwnedChildTenancyTests.Every_owned_child_table_carries_tenant_id_and_full_rls</code> passing</td></tr>
+<tr><td>Administrative cross-tenant access explicit, authorized, audited</td><td><span class="tag t-ok">COMPLIANT</span></td><td><code>ProvisionTenantCommand</code> is <code>[RequireRole(PlatformAdmin)]</code>; <strong>58 <code>TenantProvisioned</code> entries</strong> in the live hash-chained ledger (elevation act itself unrecorded — SEC-004)</td></tr>
+<tr><td>PostgreSQL RLS evaluated</td><td><span class="tag t-ok">COMPLIANT</span></td><td>Selected and implemented; rationale in the architecture references and the project's standing rules</td></tr>
+<tr><td>RLS policies implemented and tested</td><td><span class="tag t-ok">COMPLIANT</span></td><td>90 policies live; <code>RlsTenantIsolationTests</code>, <code>OwnedChildTenancyTests</code>, <code>SecurityEventRlsTests</code>, <code>RuntimeRolePrivilegeTests</code> — all executed against real PostgreSQL and passing</td></tr>
+<tr><td>Connection pooling cannot leak tenant context</td><td><span class="tag t-ok">COMPLIANT</span></td><td><code>TenantConnectionInterceptor.ConnectionOpenedAsync</code> re-applies GUCs on every open, parameterized, failing closed to the nil UUID</td></tr>
+<tr><td>Cross-tenant denial tests for reads, writes, updates, deletes, exports, jobs, caches, files, real-time</td><td><span class="tag t-med">PARTIAL</span></td><td>Reads, writes, updates, deletes and jobs covered; caches and real-time N/A; <strong>exports and files have no automated test</strong> — TEST-002</td></tr>
+</table>
+</div>
+<h4>Database integrity — measured live, not read from documentation</h4>
+<div class="scroll">
+<table>
+<tr><th>Property</th><th>Measured</th><th>Assessment</th></tr>
+<tr><td>Tables</td><td>96 — <code>qams</code> 89 · <code>audit</code> 4 · <code>saas</code> 2 · <code>read</code> 1 · <code>public</code> 1</td><td>Each has a clear business purpose; normalized to 3NF in the areas inspected; no universal lookup table; no comma-separated identifier column</td></tr>
+<tr><td>FORCE RLS / policies</td><td>90 / 90</td><td>Enforced by PostgreSQL against a role that cannot bypass it</td></tr>
+<tr><td>Primary keys</td><td>96 — 88 tenant-first composite <code>(tenant_id, id)</code></td><td>UUIDv7, stable, partition-ready. The 4 nullable-tenant tables keep single-column keys of necessity — a key column cannot be null</td></tr>
+<tr><td>Foreign keys</td><td>36 — 29 tenant-composite, 5 deferrable to <code>saas.tenant</code>, 2 to <code>user_account</code></td><td>Deferrable initially deferred on the tenant references so intra-transaction insert order cannot break provisioning</td></tr>
+<tr><td>Delete behaviour</td><td>30 CASCADE · 6 RESTRICT</td><td><strong>Intentional and correct.</strong> Every CASCADE is child→parent inside one aggregate (<code>document_version→controlled_document</code>, <code>capa_action→nonconformance</code>, <code>measurement_pair→method_comparison_study</code>, …); cross-aggregate references are RESTRICT (<code>department→branch</code>, <code>user_account→saas.tenant</code>). No unsafe cascade exists</td></tr>
+<tr><td>CHECK constraints</td><td>85 — 67 enum domains, 5 hash formats, 13 range/order rules</td><td>Database-level invariants on regulated tables, not application-only validation</td></tr>
+<tr><td>Unique constraints</td><td>24 — e.g. <code>ux_user_account_tenant_id_email</code>, <code>ux_idempotency_actor_key</code></td><td>Tenant-aware uniqueness includes the tenant column</td></tr>
+<tr><td>Indexes</td><td>265 secondary</td><td>Named via an abbreviation map to survive PostgreSQL's 63-byte identifier limit. Query-plan assessment for critical operations NOT VERIFIED</td></tr>
+<tr><td>NOT NULL</td><td>695 NOT NULL vs 496 nullable (<code>qams</code> + <code>audit</code>)</td><td>Required data protected; nullable columns dominated by genuinely optional workflow timestamps</td></tr>
+<tr><td>Numeric types</td><td>80 unbounded <code>numeric</code>, 8 <code>(18,6)</code>, 5 <code>(10,3)</code>, 1 <code>(5,2)</code></td><td>Monetary precision <strong>N/A</strong> — the domain has no monetary column (searched <code>cost|price|amount|currency|fee|budget</code>: only <code>*_ref</code> varchars and a <code>budget_id</code> uuid matched). The unbounded columns are analytical measurements where unbounded precision is appropriate</td></tr>
+<tr><td>JSONB</td><td>1 column — <code>supplier_evaluation.criteria</code></td><td>Genuinely document-like; justified use</td></tr>
+<tr><td>Immutability triggers</td><td>4 append-only + 13 frozen-record</td><td><strong>Attacked and held:</strong> <code>UPDATE audit.audit_trail SET event_type='TAMPERED'</code> → <code>ERROR: audit ledgers are append-only</code>; <code>DELETE</code> likewise; <code>UPDATE audit.electronic_signature</code> likewise</td></tr>
+<tr><td>Audit hash chain</td><td>387 entries, per-tenant sequences 1–82 across 22 tenant scopes, all with <code>prev_hash</code> and <code>entry_hash</code></td><td><strong>0 chain breaks</strong> under a window-function check comparing each row's <code>prev_hash</code> to the previous <code>entry_hash</code> in its sequence. Tamper-evidence is real</td></tr>
+<tr><td>Partitioning</td><td><strong>0</strong> partitioned tables</td><td>Documented as target-state for audit retention; unimplemented (DB-002). The tenant-first PK design correctly keeps the option open</td></tr>
+<tr><td>Migrations</td><td>56 applied; run as the owning role, not the runtime role</td><td>Forward-only; RLS added in its own migration per project rule; transaction-local bypass declared in migrations that backfill from FORCE-RLS tables</td></tr>
+</table>
+</div>
+<p><strong>EF Core discipline:</strong> no generic repository, no repository-per-table, no redundant Unit of Work — the DbContext is the persistence port under ADR-0008. <code>LayerRulesTests</code> proves <code>IQueryable</code> never crosses into <code>Contracts</code>; the only <code>IQueryable</code> signature is an internal <code>Paging</code> extension inside the Application layer. One raw-SQL site exists (<code>OutboxProcessor</code>'s <code>FOR UPDATE SKIP LOCKED</code> claim) and it is parameterized via <code>FromSqlInterpolated</code>. Integration tests validate constraints, transactions, mappings and concurrency, and were executed against real PostgreSQL.</p>
+
+<h2>15 · Security and STRIDE assessment</h2>
+<div class="scroll">
+<table>
+<tr><th>Threat</th><th>Controls verified</th><th>Residual risk</th></tr>
+<tr><td><strong>Spoofing</strong></td><td>JWT validated for issuer, audience, signature, lifetime and required claims; <code>Jwt:Secret</code> absent aborts start-up; per-request account revalidation; MFA enrollment gate + signature PIN; credential throttling <strong>verified</strong> (22×<code>429</code> after 8 attempts); lockout fields (<code>failed_login_attempts</code>, <code>locked_until_utc</code>); login failures do not disclose account existence; refresh reuse detection <strong>observed firing</strong> in live data (<code>REFRESH_REUSE_DETECTED</code> ×6)</td><td>120-min access token with no denylist (SEC-002)</td></tr>
+<tr><td><strong>Tampering</strong></td><td>Append-only triggers on all 4 audit tables — <code>UPDATE</code> and <code>DELETE</code> both refused under direct attack; 13 frozen-record triggers; 387-entry hash chain with 0 breaks; content-addressed files with SHA-256; 85 CHECK constraints; tenant-composite FKs; mass assignment defeated in a live probe; <code>DatabaseRoleGuard</code> refuses to boot Production on an over-privileged role</td><td>File bytes on mutable local disk without object lock (DB-002)</td></tr>
+<tr><td><strong>Repudiation</strong></td><td>Hash-chained ledger with actor, tenant, action, target, UTC time and correlation id; field-change ledger with before/after and redaction; <code>X-Change-Reason</code> mandatory on every DELETE; exports recorded; SoD enforced in the domain base class; administrative provisioning audited (58 entries)</td><td>Signature binds version and reason only informally (SIG-001); RLS elevation unrecorded (SEC-004); CLR type names as the ledger taxonomy (AUDIT-002)</td></tr>
+<tr><td><strong>Information disclosure</strong></td><td>Cross-tenant reads return a bare <code>404</code>, never a leaky <code>403</code>; RLS effective against a non-bypassing role; no secrets in source, bundles, images or logs (scanned); no payloads or credentials logged; locked CSP; confidential complainant identity masked by privilege; downloads forced to <code>Content-Disposition: attachment</code>; health endpoints return only “Healthy”</td><td><code>/metrics</code> anonymous (SEC-001); internal type names in deserialization errors (API-002); files not resource-scoped within a tenant (ACCESS-001)</td></tr>
+<tr><td><strong>Denial of service</strong></td><td>Global plus auth, refresh and e-sign rate-limit partitions — <strong>verified</strong>; 50 MB upload cap via <code>[RequestSizeLimit]</code>; <code>MaxPageSize</code> bound on pagination; Npgsql timeouts and retry; container CPU/memory limits; outbox claim lease with bounded backoff and dead-lettering; single-replica guard</td><td><code>/metrics</code> explicitly rate-limit-exempt (SEC-001); no per-tenant fairness quota</td></tr>
+<tr><td><strong>Elevation of privilege</strong></td><td><code>AuthorizationBehavior</code> fails closed on an unannotated command (<code>AUTHZ-000</code>) with a build-breaking CI gate; RLS bypass reachable only via <code>Elevate()</code>, whose sole request-path caller is <code>[RequireRole(PlatformAdmin)]</code>; platform admins hold no tenant role; <code>OrgScopeGuardInterceptor</code> blocks writes into an out-of-scope branch/department; injected <code>tenantId</code> ignored (<strong>verified</strong>); framework fallback policy denies by default</td><td>Resource scope is EF-only and removed by 8 <code>IgnoreQueryFilters()</code> sites (ACCESS-003)</td></tr>
+</table>
+</div>
+<p><strong>Trust boundaries</strong> are documented: TLS terminates at the reverse proxy (ADR-0002), the SPA is same-origin so no CORS grant exists at all (ADR-0007), and topology is a single replica behind a proxy (ADR-0001). External entry points are the API, the health and metrics probes, and file upload/download. <strong>Injection risk is low</strong> — EF parameterizes throughout and the single raw-SQL site is safely interpolated. <strong>Path traversal</strong> is contained by <code>Path.GetFileName</code> plus content-addressed storage keys, so a client filename never becomes a path. <strong>Mass assignment</strong> was probed and defeated. <strong>SSRF</strong> has no surface — the application makes no outbound HTTP calls. <strong>Insecure deserialization</strong> is limited to <code>System.Text.Json</code> with typed contracts. <strong>Upload hardening is genuinely strong:</strong> an extension allow-list combined with a magic-byte sniff, storing the <em>canonical</em> content type for the sniffed format rather than the client's claim. What is missing is malware/content scanning (DB-002), key-rotation evidence (NOT VERIFIED), and encryption-at-rest confirmation for the file volume (documented for backups, unverified for the live volume).</p>
+
+<h2>16 · API assessment</h2>
+<p>42 controllers over dual <code>api/…</code> and <code>api/v1/…</code> routing (ADR-0004). Contracts are DTO-only, enforced by the passing <code>Contracts_carry_no_domain_types</code> test. Endpoint records for the paths exercised at runtime:</p>
+<div class="scroll">
+<table>
+<tr><th>Method + route</th><th>Command/Query · DTOs</th><th>Authn</th><th>Authorization</th><th>Tenant · resource rule</th><th>Audit</th><th>Idempotency</th><th>Concurrency</th><th>Errors</th><th>Rate limit</th><th>Tests</th></tr>
+<tr><td><code>POST /api/auth/login</code></td><td><code>LoginCommand</code> · <code>LoginRequest</code> → <code>AuthResponse</code> + <code>qams_rt</code> cookie</td><td>Anonymous</td><td><code>AllowUnauthenticated</code>; handler verifies credentials</td><td>Tenant from slug; no resource rule</td><td><code>LOGIN_SUCCESS</code>/<code>LOGIN_FAILED</code></td><td>n/a</td><td>n/a</td><td><code>401</code> problem+json, non-disclosing</td><td><strong>Auth partition</strong> — verified 429</td><td><code>AuthActorFunctionalTests</code>, <code>RefreshSessionTests</code></td></tr>
+<tr><td><code>POST /api/auth/change-password</code></td><td><code>ChangePasswordCommand</code> → <code>204</code></td><td>Anonymous <em>by design</em> — an expired password must remain changeable</td><td>Handler requires tenant + email + current password</td><td>Tenant from slug</td><td><code>PASSWORD_CHANGED</code></td><td>n/a</td><td>n/a</td><td><code>400</code>/<code>401</code> problem+json</td><td>Auth partition</td><td><code>AuthActorFunctionalTests</code></td></tr>
+<tr><td><code>GET /api/documents</code></td><td><code>GetDocumentsQuery</code> → <code>PagedResponse&lt;DocumentListItemDto&gt;</code></td><td>Bearer</td><td><code>[Authorize]</code> + action permission</td><td>Tenant filter; documents are tenant-wide (not <code>IAllocatable</code>)</td><td>Read — not audited</td><td>n/a</td><td>n/a</td><td><code>401</code> verified problem+json</td><td>Global</td><td><code>PaginationTests</code></td></tr>
+<tr><td><code>GET /api/documents/{id}</code></td><td>→ <code>DocumentDetailDto</code></td><td>Bearer</td><td>Permission gate</td><td>Tenant filter → cross-tenant <strong>verified 404</strong></td><td>Read</td><td>n/a</td><td><code>xmin</code>, not exposed (API-003)</td><td><code>404 DOC-404</code></td><td>Global</td><td><code>RoleEndpointMatrixTests</code></td></tr>
+<tr><td><code>POST /api/documents</code></td><td><code>CreateDocumentCommand</code> · <code>CreateDocumentRequest</code> → <code>201 {id}</code></td><td>Bearer</td><td><code>[RequirePermission(Documents, Create)]</code></td><td>Tenant stamped server-side; injected <code>tenantId</code>/<code>id</code> <strong>verified ignored</strong></td><td>Field-change ledger</td><td><code>Idempotency-Key</code> <strong>verified</strong></td><td>n/a</td><td><code>400</code> problem+json (API-002 on type errors)</td><td>Global</td><td><code>IdempotencyTests</code></td></tr>
+<tr><td><code>POST /api/files</code></td><td>→ <code>201 FileUploadedDto</code></td><td>Bearer</td><td><code>[Authorize]</code> only</td><td>Tenant-partitioned storage key</td><td>Content hash recorded</td><td>Content-addressed</td><td>Immutable</td><td><code>FILE-415</code> on refusal</td><td>Global</td><td><code>FileHardeningTests</code></td></tr>
+<tr><td><code>GET /api/files/{id}</code></td><td>→ file stream, forced attachment</td><td>Bearer</td><td><code>[Authorize]</code> only — <strong>no permission, no resource scope</strong></td><td>Tenant <strong>verified 404</strong>; resource scope <strong>absent</strong> (ACCESS-001)</td><td>Not audited</td><td>n/a</td><td>n/a</td><td><code>404</code></td><td>Global</td><td>Tenant case not automated (TEST-002)</td></tr>
+<tr><td><code>GET /api/exports/nonconformances.xlsx</code></td><td><code>GetNcsQuery</code> (all pages) → XLSX</td><td>Bearer</td><td><strong>No permission gate</strong> (ACCESS-002)</td><td>Tenant + resource scope via the query</td><td><code>RECORD_EXPORTED</code></td><td>n/a</td><td>n/a</td><td>problem+json</td><td>Global</td><td>Not covered (TEST-002)</td></tr>
+<tr><td><code>GET /api/exports/audit-trail.xlsx</code></td><td>→ XLSX + chain verification</td><td>Bearer</td><td><code>[RequirePermission(Compliance, Export)]</code></td><td>Tenant</td><td><code>RECORD_EXPORTED</code></td><td>n/a</td><td>n/a</td><td>problem+json</td><td>Global</td><td><code>AuditorDenyMatrixTests</code></td></tr>
+<tr><td><code>GET /metrics</code></td><td>→ 367 Prometheus series</td><td><strong>Anonymous</strong></td><td><strong>None</strong> (SEC-001)</td><td>No tenant data</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td><td><strong>Disabled</strong></td><td><code>ObservabilityTests</code></td></tr>
+</table>
+</div>
+<p><strong>Verified API strengths:</strong> problem+json on every error path tested, each carrying <code>traceId</code> and <code>correlationId</code>; a consistent pagination envelope with an enforced maximum page size; no user-supplied sort or filter field anywhere in the codebase, so the allow-listing requirement has no attack surface to cover; idempotent retries; semantically correct HTTP methods with explicit business-action endpoints for state transitions (publish, recommend, approve, void); no stack traces, SQL or secrets in any observed response. <strong>Gaps:</strong> API-001, API-002, API-003, ACCESS-001 and ACCESS-002.</p>
+
+<h2>17 · Angular assessment</h2>
+<p>Angular <strong>22.0.8</strong> — ahead of the checklist's Angular 19 baseline, so the intent (modern standalone Angular) is exceeded, though <code>CLAUDE.md</code> still says 18 (DOC-001).</p>
+<p><strong>Verified:</strong> 100 components with <strong>zero</strong> <code>@NgModule</code>; 83 lazy-loaded routes; feature-per-capability layout (<code>core</code>, <code>features</code>, <code>shared</code>, <code>shell</code>); <strong>typed non-nullable reactive forms</strong> via <code>fb.nonNullable.group(...)</code> across 73 files with <strong>zero</strong> <code>ngModel</code> — no template-driven forms at all; <code>strict: true</code>, <code>noImplicitReturns</code>, <code>strictTemplates</code>, <code>strictInjectionParameters</code>, <code>strictInputAccessModifiers</code>; <strong>zero</strong> occurrences of <code>: any</code> outside specs; signals in 123 files for local and derived state, RxJS retained for streams; API access centralized in <code>core/api</code> behind typed services with auth and change-reason interceptors; duplicate submission prevented by a <code>busy()</code> signal gating <code>[disabled]</code> with the label switching to a loading string; localization centralized in <code>i18n.service.ts</code>, permissions in <code>permissions.service.ts</code>, route guards in <code>auth.guard.ts</code> / <code>role.guard.ts</code>.</p>
+<p><strong>Accessibility is genuinely addressed</strong> — 104 ARIA attributes across 56 files: 66 <code>aria-label</code>, 18 <code>aria-hidden</code>, 7 <code>aria-modal</code>, 4 <code>aria-labelledby</code>, 3 <code>aria-expanded</code>, 2 <code>aria-pressed</code>, 2 <code>aria-live</code>, plus <code>aria-selected</code> and <code>aria-haspopup</code>; 24 explicit <code>role=</code> attributes including 13 dialogs, a listbox/option pair and an alert region. The change-reason dialog is exemplary: <code>role="dialog"</code> with <code>aria-modal</code>, labelled by its visible title, focus moved to the textarea on open and restored to the invoking control on close, dismissible by Escape or Cancel. An axe-core scan runs in CI on every push alongside a production AOT build.</p>
+<p><strong>Token handling</strong> matches ADR-0009 and is the security-relevant detail: <code>localStorage</code> holds only tenant slug, interface language, theme and sidebar state — the access token is never written to web storage, and the refresh token is an httpOnly <code>Secure SameSite=Strict</code> cookie the SPA cannot read. Client-side logs expose no secrets or tokens. Authorization-driven visibility is treated as usability, with the server enforcing independently on every request.</p>
+<p><strong>Executed:</strong> 76/76 unit specs pass. <strong>Not verified (UI-001):</strong> per-screen loading/empty/error-state completeness, optimistic-update rollback, and concurrency-conflict presentation — the last moot until API-003 gives the client a token to conflict on. The three Playwright specs were read but not executed here.</p>
+
+<h2>18 · Testing and quality assessment</h2>
+<div class="scroll">
+<table>
+<tr><th>Suite</th><th>Executed result</th><th>Coverage of note</th></tr>
+<tr><td>Domain.UnitTests</td><td><strong>228 passed</strong></td><td>Aggregate invariants, state transitions, SoD, user scope, password rules, Westgard evaluation</td></tr>
+<tr><td>Application.UnitTests</td><td><strong>72 passed</strong></td><td><code>AuthorizationBehaviorTests</code>, <code>SystemRoleCatalogTests</code>, <code>ScheduledSweepTests</code> (job tenant isolation), policies</td></tr>
+<tr><td>Architecture.Tests</td><td><strong>33 passed</strong></td><td>5 layer rules; per-module boundary rule; “every command declares exactly one authorization policy”; <code>UserAccountTenantBoundTests</code>, which additionally self-tests its own rule against a known-bad and a known-good statement</td></tr>
+<tr><td>IntegrationTests (real PostgreSQL)</td><td><strong>31 passed · 1 skipped</strong></td><td>RLS tenant isolation (read + <code>WITH CHECK</code> write), owned-child tenancy (3 cases), signed-record immutability, audit-tamper, check constraints, optimistic concurrency, outbox resilience, runtime-role privileges, readiness/topology, security-event RLS</td></tr>
+<tr><td>WebApi.FunctionalTests</td><td><strong>82 passed</strong></td><td>Role-endpoint matrix, auditor deny matrix, role-privilege flow, Problem Details contracts, pagination, idempotency, file hardening, concurrency mapping, API-surface snapshot, API versioning, config guard, observability, refresh sessions, start-up-seeding resilience, bulk import, child-entity persistence, field-change interceptor, real-database regulated flow</td></tr>
+<tr><td>Angular unit</td><td><strong>76 passed</strong></td><td>Auth service and interceptor, permissions service, change-reason interceptor and dialog, i18n, text-prompt</td></tr>
+<tr><td>Playwright e2e</td><td>Not executed here</td><td>3 specs — auth gate, axe-core a11y, regulated workflow. CI runs auth + a11y on every push</td></tr>
+<tr><td>LoadTests</td><td><strong>Never runs</strong></td><td>Project exists but is not referenced by <code>NT.QAMS.sln</code> (TEST-003)</td></tr>
+</table>
+</div>
+<p><strong>Total executed: 522 tests · 0 failures · 1 skip.</strong> The suite's distinguishing quality is that architectural and security rules are enforced <em>mechanically</em> rather than reviewed: layer direction, module independence, command-policy coverage, API-surface stability and tenant-bounded <code>user_account</code> queries all break the build when violated. That is a materially stronger guarantee than test count alone conveys, and it is why category 2 scores 4.</p>
+<h4>Acceptance criterion → test → evidence → result, for the critical workflows</h4>
+<div class="scroll">
+<table>
+<tr><th>Acceptance criterion</th><th>Test</th><th>Evidence</th><th>Result</th></tr>
+<tr><td>One tenant cannot read another tenant's rows</td><td><code>RlsTenantIsolationTests</code>, <code>OwnedChildTenancyTests</code>, <code>SecurityEventRlsTests</code> + live IDOR probe</td><td><code>404</code> on cross-tenant document and file; RLS effective against a non-bypassing role</td><td><span class="tag t-ok">PASS</span></td></tr>
+<tr><td>One tenant cannot write a row for another tenant</td><td><code>RlsTenantIsolationTests.With_check_rejects_writing_a_row_for_another_tenant</code>; <code>OwnedChildTenancyTests.A_child_cannot_be_written_with_a_tenant_that_differs_from_its_parent</code></td><td>RLS <code>WITH CHECK</code>; tenant-composite FKs</td><td><span class="tag t-ok">PASS</span></td></tr>
+<tr><td>A request body cannot choose its own tenant</td><td>No automated test — live probe only</td><td>Injected <code>tenantId</code> + <code>id</code> ignored; row landed in the caller's tenant with a server-generated id</td><td><span class="tag t-ok">PASS</span> <span class="small">(untested — see TEST-002)</span></td></tr>
+<tr><td>A signed or frozen regulated record cannot be altered</td><td><code>SignedRecordImmutabilityTests</code> + direct SQL attack in this audit</td><td><code>reject_frozen_mutation</code>; <code>ERROR: audit ledgers are append-only</code> on both <code>UPDATE</code> and <code>DELETE</code></td><td><span class="tag t-ok">PASS</span></td></tr>
+<tr><td>The audit trail is tamper-evident</td><td>Migration round-trip + audit-tamper tests + hash-chain check in this audit</td><td>387 entries, 0 chain breaks</td><td><span class="tag t-ok">PASS</span></td></tr>
+<tr><td>The document author cannot approve their own version</td><td>Domain SoD tests</td><td><code>SOD-DOC-001/002</code>; <code>EnsureSignerIsNotPreparer</code></td><td><span class="tag t-ok">PASS</span></td></tr>
+<tr><td>Every DELETE records a reason</td><td><code>FieldChangeInterceptorTests</code></td><td><code>ChangeReasonMiddleware</code> → <code>CHANGE-REASON-REQUIRED</code></td><td><span class="tag t-ok">PASS</span></td></tr>
+<tr><td>A retried command does not duplicate its effect</td><td><code>IdempotencyTests</code> + live replay probe</td><td>Same id returned twice; one row created</td><td><span class="tag t-ok">PASS</span></td></tr>
+<tr><td>An unannotated command cannot execute</td><td><code>CommandPolicyTests</code> + <code>AuthorizationBehaviorTests</code></td><td><code>AUTHZ-000</code> at runtime; build fails on omission</td><td><span class="tag t-ok">PASS</span></td></tr>
+<tr><td>A read-only auditor cannot reach the admin surface</td><td><code>RoleEndpointMatrixTests</code>, <code>AuditorDenyMatrixTests</code></td><td><code>403</code> problem+json across the role matrix</td><td><span class="tag t-ok">PASS</span></td></tr>
+<tr><td>Command input constraints hold</td><td><strong>No validator test exists</strong></td><td>Only indirect: functional tests observe <code>400</code></td><td><span class="tag t-med">GAP</span> (TEST-001)</td></tr>
+<tr><td>A user cannot reach data outside their branch/department</td><td><code>RolePrivilegeFlowTests:240</code> only</td><td><code>SCOPE-001</code> on the write path</td><td><span class="tag t-med">PARTIAL</span> (TEST-003; read/file/export untested)</td></tr>
+</table>
+</div>
+
+<h2>19 · Observability and operational assessment</h2>
+<p><strong>Observability.</strong> OpenTelemetry traces span HTTP → MediatR → EF/Npgsql → outbox and background jobs, with <code>trace_parent</code> persisted on outbox rows so a single trace survives the asynchronous boundary — a detail frequently missed. Probe and scrape paths are filtered out of traces so monitoring does not pollute the trace store. Production logging is structured JSON with scopes carrying service, environment, tenant, user, correlation id and trace id; OTLP export activates when <code>Otlp:Endpoint</code> is configured. Every response carries <code>X-Correlation-Id</code> (verified) and every problem body carries <code>traceId</code> and <code>correlationId</code> (verified). <code>LoggingBehavior</code> emits request name, tenant, actor, elapsed milliseconds and outcome, and explicitly never payload contents; a repository-wide search found no log site passing a password, secret, token, PIN or connection string, and <code>FieldChangeInterceptor</code> redacts those property names before values reach the ledger. Exceptions are logged once, at the correct boundary. Metrics cover RED, the Npgsql pool and custom business meters, with an alert set documented in <code>deploy/OBSERVABILITY.md</code>.</p>
+<p><strong>Two honest deviations.</strong> First, the checklist names Serilog; the implementation uses <code>Microsoft.Extensions.Logging</code> with <code>AddJsonConsole</code>. Every structural property the requirement asks for is present, so the intent is met, but the named technology is not used and no ADR records the substitution (DOC-001). Second, <code>/metrics</code> is anonymous and rate-limit-exempt (SEC-001), so the observability surface is the one part of the security posture protected by deployment convention rather than by the application. Trace sampling is unconfigured — all traces export, which is a cost rather than a correctness concern, and it does mean sampling cannot hide failures. Alert and dashboard effectiveness could not be verified without a live environment.</p>
+<p><strong>Operations.</strong> <code>/health/live</code> is deliberately check-free (<code>Predicate = _ =&gt; false</code>) so a database outage recycles traffic rather than the process, and <code>/health/ready</code> is PostgreSQL-backed — both verified <code>200</code> with a bare “Healthy” body that discloses nothing, both anonymous and rate-limit-exempt as probes require. Resilience: Npgsql retry with command timeouts; cancellation tokens propagated through 78 Application files; graceful shutdown via <code>stoppingToken</code> with <code>OperationCanceledException</code> handled; advisory-lock leader election so recurring sweeps cannot overlap; outbox claim leases with bounded backoff and dead-lettering; deferred start-up seeding that retries instead of crash-looping when the database is cold, proven by <code>StartupSeedingResilienceTests</code>. No circuit breaker exists, which is defensible with a single database dependency and no outbound HTTP calls, but is not recorded as a decision.</p>
+<p>The <code>DatabaseRoleGuard</code> deserves specific credit: Production refuses to start if the connection role is SUPERUSER, holds BYPASSRLS, or owns the tables. It is the deployment gate that makes the tenant-isolation story credible rather than aspirational, and its premise was confirmed here against the live role. The backup/DR runbook is a strong artefact — RPO ≤ 5 min via continuous WAL archiving, RTO ≤ 4 h, retention to a 7-year floor, AES-256 at rest, off-site replication, quarterly drills — but <strong>no drill evidence exists</strong>, so restore capability is documented, not demonstrated (OPS-001). Given that restore must contend with FORCE-RLS tables and append-only triggers, that untested path carries more risk than the runbook's quality suggests.</p>
+
+<h2>20 · Risk register</h2>
+<h4>Table D · Risk register</h4>
+<div class="scroll">
+<table>
+<tr><th>Finding ID</th><th>Risk</th><th>Likelihood</th><th>Impact</th><th>Severity</th><th>Owner</th><th>Mitigation</th></tr>
+<tr><td>ACCESS-001</td><td>Intra-tenant download of out-of-scope regulated evidence, including masked-complainant attachments</td><td>Medium</td><td>High</td><td><span class="tag t-high">HIGH</span></td><td>Unassigned</td><td>Authorize file access through the owning record, or record an ADR; prove with a denial test</td></tr>
+<tr><td>SIG-001</td><td>Part 11 finding on signature-to-version traceability; applicability becomes interpretation</td><td>Medium</td><td>High</td><td><span class="tag t-high">HIGH</span></td><td>Unassigned</td><td>Add discrete version, reason, auth-level and audit-link columns before the next validation cycle</td></tr>
+<tr><td>SEC-002</td><td>Stolen access token usable up to 2 h; ADR-0003 risk acceptance invalid</td><td>Low</td><td>High</td><td><span class="tag t-high">HIGH</span></td><td>Unassigned</td><td>Set 15 min; add a ConfigGuard ceiling; per-request revalidation already limits blast radius</td></tr>
+<tr><td>AUDIT-002</td><td>Compliance ledger loses long-term queryability across refactors; .NET internals in regulatory exports</td><td>Medium</td><td>Medium</td><td><span class="tag t-med">MEDIUM</span></td><td>Unassigned</td><td>Stable <code>event_code</code> column + mapping view; architecture test enforcing codes</td></tr>
+<tr><td>TEST-001</td><td>Input constraints — including the only length control for text columns — can be weakened undetected</td><td>Medium</td><td>Medium</td><td><span class="tag t-med">MEDIUM</span></td><td>Unassigned</td><td>Validator test class per validator; architecture test requiring one</td></tr>
+<tr><td>TEST-002</td><td>A tenancy regression on an egress path (export, file) ships undetected</td><td>Medium</td><td>High</td><td><span class="tag t-med">MEDIUM</span></td><td>Unassigned</td><td>Two functional cross-tenant tests wired into the CI gate</td></tr>
+<tr><td>ACCESS-003</td><td>Latent intra-tenant over-disclosure via <code>IgnoreQueryFilters</code>, silent by nature</td><td>Medium</td><td>Medium</td><td><span class="tag t-med">MEDIUM</span></td><td>Unassigned</td><td>Named elevation helper + architecture allow-list test</td></tr>
+<tr><td>ACCESS-002</td><td>Ungated bulk export of the NC register by low-privilege roles</td><td>Medium</td><td>Medium</td><td><span class="tag t-med">MEDIUM</span></td><td>Unassigned</td><td>Add the export permission gate; cover all export routes in the role matrix</td></tr>
+<tr><td>DB-002</td><td>No retention enforcement; evidence bytes on mutable storage; no malware scanning</td><td>Medium</td><td>Medium</td><td><span class="tag t-med">MEDIUM</span></td><td>Unassigned</td><td>Implement retention job + WORM storage, or ADR with compensating controls</td></tr>
+<tr><td>API-003</td><td>Silent lost update of regulated edits between user sessions</td><td>Medium</td><td>Medium</td><td><span class="tag t-med">MEDIUM</span></td><td>Unassigned</td><td>Expose the token (ETag/version) and require it on writes; amend ADR-0005</td></tr>
+<tr><td>DOMAIN-001</td><td>Invalid data admitted at an unguarded path; silent argument transposition</td><td>Medium</td><td>Medium</td><td><span class="tag t-med">MEDIUM</span></td><td>Unassigned</td><td>Value objects for the four highest-risk concepts first</td></tr>
+<tr><td>SEC-001</td><td>Unauthenticated reconnaissance and compute sink via <code>/metrics</code></td><td>Medium</td><td>Medium</td><td><span class="tag t-med">MEDIUM</span></td><td>Unassigned</td><td>Scrape credential or internal-only binding; do not rely on proxy config alone</td></tr>
+<tr><td>SEC-004</td><td>Cross-tenant reads by infrastructure invisible after the fact</td><td>Medium</td><td>Medium</td><td><span class="tag t-med">MEDIUM</span></td><td>Unassigned</td><td>Security event on every <code>Elevate()</code> — only 8 call sites</td></tr>
+<tr><td>OPS-001</td><td>Untested restore path against RLS + append-only triggers</td><td>Medium</td><td>High</td><td><span class="tag t-med">MEDIUM</span></td><td>Unassigned</td><td>Execute a full restore drill; verify the hash chain and file resolution; retain the evidence</td></tr>
+<tr><td>DB-001</td><td>Cross-tenant account enumeration if the static <code>user_account</code> rule is evaded</td><td>Low</td><td>High</td><td><span class="tag t-med">MEDIUM</span></td><td>Unassigned</td><td>RLS policy on <code>user_account</code>; keep the architecture test as the outer gate</td></tr>
+<tr><td>TEST-003</td><td>Scope regressions and pipeline reorders ship undetected; unreferenced test project reads as coverage</td><td>Medium</td><td>Medium</td><td><span class="tag t-med">MEDIUM</span></td><td>Unassigned</td><td>Scope-denial matrix; behavior-order test; add or delete <code>LoadTests</code></td></tr>
+<tr><td>API-001</td><td>Throttled requests not correlatable; contract inconsistent on one status</td><td>High</td><td>Low</td><td><span class="tag t-low">LOW</span></td><td>Unassigned</td><td>Configure <code>OnRejected</code> to emit problem+json</td></tr>
+<tr><td>API-002</td><td>Internal namespace and contract-shape disclosure</td><td>High</td><td>Low</td><td><span class="tag t-low">LOW</span></td><td>Unassigned</td><td>Replace converter messages with safe field-scoped text</td></tr>
+<tr><td>SEC-003</td><td>Host-header validation delegated entirely to an unverified proxy</td><td>Low</td><td>Low</td><td><span class="tag t-low">LOW</span></td><td>Unassigned</td><td>Set real <code>AllowedHosts</code>; add the three remaining headers</td></tr>
+<tr><td>OPS-002</td><td>Non-reproducible container builds; capabilities not dropped</td><td>Medium</td><td>Low</td><td><span class="tag t-low">LOW</span></td><td>Unassigned</td><td><code>.dockerignore</code>; digest-pinned base images; <code>cap_drop: [ALL]</code></td></tr>
+<tr><td>DOC-001</td><td>Stale stack statement; three deviations with no recorded rationale</td><td>High</td><td>Low</td><td><span class="tag t-low">LOW</span></td><td>Unassigned</td><td>Correct <code>CLAUDE.md</code>; add three ADRs</td></tr>
+<tr><td>UI-001</td><td>Unknown — rollback and conflict presentation unverified</td><td>Unknown</td><td>Low</td><td><span class="tag t-info">INFORMATIONAL</span></td><td>Unassigned</td><td>Execute and extend the Playwright suite</td></tr>
+</table>
+</div>
+
+<h2>21 · Prioritized remediation backlog</h2>
+<h4>Table E · Remediation backlog</h4>
+<div class="scroll">
+<table>
+<tr><th>Priority</th><th>Finding ID</th><th>Corrective action</th><th>Affected components</th><th>Required tests</th><th>Dependencies</th></tr>
+<tr><td><strong>P1</strong></td><td>ACCESS-001</td><td>Authorize file download through the owning record's scope, or record an ADR accepting tenant-wide file access</td><td><code>FilesController</code>, <code>FileReference</code>, <code>AppDbContext</code> filter</td><td>Scoped-user file-download denial test</td><td>Security-vs-usability boundary decision</td></tr>
+<tr><td><strong>P1</strong></td><td>ACCESS-002</td><td>Add the export permission gate to the NC register</td><td><code>ExportsController</code></td><td>All export routes in the role matrix; attribute-coverage snapshot</td><td>None</td></tr>
+<tr><td><strong>P1</strong></td><td>SEC-002</td><td>Set <code>Jwt:ExpiryMinutes</code> to 15; add a ConfigGuard ceiling; reconcile ADR-0003/0009</td><td><code>appsettings.json</code>, <code>ConfigGuard</code>, ADRs</td><td><code>ConfigGuardTests</code> ceiling case; token-lifetime functional test</td><td>None — refresh flow already shipped</td></tr>
+<tr><td><strong>P1</strong></td><td>TEST-002</td><td>Cross-tenant denial tests for the export and file egress paths</td><td>FunctionalTests, CI gate</td><td>The two tests themselves</td><td>Two-tenant fixtures already exist</td></tr>
+<tr><td><strong>P1</strong></td><td>SIG-001</td><td>Add discrete <code>record_version</code>, <code>reason</code>, <code>auth_level</code>, <code>audit_entry_id</code> to <code>audit.electronic_signature</code></td><td>Signature ledger, signing handlers, additive migration</td><td>Sign → change → verify-fails; audit-linkage assertion</td><td>Append-only table ⇒ additive only; no backfill possible</td></tr>
+<tr><td>P2</td><td>ACCESS-003</td><td>Named elevation helper + architecture allow-list for <code>IgnoreQueryFilters</code>; evaluate resource-level RLS</td><td>Application policies, <code>AppDbContext</code>, Architecture.Tests</td><td>Allow-list architecture test; scoped list/search/export tests</td><td>Boundary decision</td></tr>
+<tr><td>P2</td><td>SEC-004</td><td>Emit a security event on every <code>Elevate()</code>; consider a narrower system principal for jobs</td><td><code>RequestContext</code>, 8 call sites</td><td>Provisioning writes ledger + elevation event; one event per sweep cycle</td><td><code>ISecurityEventLog</code> already exists</td></tr>
+<tr><td>P2</td><td>DB-001</td><td>RLS policy on <code>user_account</code> tolerating null tenant under elevation</td><td>Migration, login path</td><td>RLS isolation test for <code>user_account</code>; login regression</td><td>Login runs pre-tenant-resolution</td></tr>
+<tr><td>P2</td><td>AUDIT-002</td><td>Stable <code>event_code</code> on every domain event + read-side mapping view; render codes in exports</td><td>Domain events, ledger append, exports, additive migration</td><td>Architecture test requiring a unique code per event; export contains no <code>NT.QAMS.</code></td><td>Append-only ⇒ additive column + view</td></tr>
+<tr><td>P2</td><td>TEST-001</td><td>Validator test class per validator, prioritizing <code>StrongPassword</code> and every <code>MaximumLength</code> substituting for a dropped column bound</td><td>Test projects, CI</td><td>The tests; architecture test requiring one per validator</td><td>None</td></tr>
+<tr><td>P2</td><td>DB-002</td><td>Implement retention/archival and WORM storage and add upload scanning, or record an ADR with compensating controls</td><td><code>IFileStorage</code>, retention job, audit partitioning</td><td>Retention purge; object immutability; restore consistency</td><td>Object-storage provisioning; retention-class policy</td></tr>
+<tr><td>P2</td><td>API-003</td><td>Expose the concurrency token (ETag/version) and require it on writes; amend ADR-0005</td><td>Contracts, controllers, SPA</td><td>Stale-token → <code>409</code>; SPA conflict presentation</td><td>Couples to UI-001</td></tr>
+<tr><td>P2</td><td>SEC-001</td><td>Require a scrape credential or bind metrics to an internal port</td><td><code>Program.cs</code>, Prometheus config, proxy</td><td>Unauthenticated <code>/metrics</code> → <code>401</code></td><td>Monitoring configuration</td></tr>
+<tr><td>P2</td><td>OPS-001</td><td>Execute a full restore drill; verify the hash chain and file resolution; retain the evidence</td><td><code>deploy/BACKUP-RESTORE-DR.md</code>, scripts</td><td>Documented drill with measured RPO/RTO; post-restore chain assertion</td><td>Isolated environment + representative backup</td></tr>
+<tr><td>P2</td><td>TEST-003</td><td>Scope-denial matrix; behavior-order test; add or delete <code>LoadTests</code></td><td>FunctionalTests, solution file, CI</td><td>The matrix and the ordering test</td><td>Scoped fixtures already exist</td></tr>
+<tr><td>P2</td><td>DOMAIN-001</td><td>Introduce <code>EmailAddress</code>, <code>DocumentCode</code>, <code>Sha256Hash</code>, <code>VersionLabel</code>; use them in signatures</td><td>Domain, EF value conversions</td><td>Per-VO validation and equality; <code>"@"</code>-rejection regression</td><td>None — no schema change</td></tr>
+<tr><td>P2</td><td>API-001</td><td>Emit problem+json from the rate limiter's <code>OnRejected</code></td><td><code>RateLimiting</code>, <code>ProblemResponse</code></td><td><code>ProblemContractTests</code> 429 case</td><td>None</td></tr>
+<tr><td>P2</td><td>API-002</td><td>Replace JSON converter messages with safe field-scoped text</td><td>JSON options / model-state factory</td><td>No <code>NT.QAMS.</code> substring in a 400 body</td><td>None</td></tr>
+<tr><td>P3</td><td>SEC-003</td><td>Real <code>AllowedHosts</code>; add Permissions-Policy, COOP, CORP</td><td><code>appsettings</code>, <code>SecurityHeadersMiddleware</code></td><td><code>SecurityHardeningTests</code> additions</td><td>Deployment hostname list</td></tr>
+<tr><td>P3</td><td>OPS-002</td><td><code>.dockerignore</code>; digest-pinned base images; <code>cap_drop: [ALL]</code></td><td>Repo root, Dockerfile, compose</td><td>Image-content and digest assertions in CI</td><td>None</td></tr>
+<tr><td>P3</td><td>DOC-001</td><td>Correct <code>CLAUDE.md</code>; add ADRs for file storage, logging stack and read-side authorization</td><td><code>CLAUDE.md</code>, <code>docs/adr/</code></td><td>Release-checklist documentation review</td><td>None</td></tr>
+<tr><td>P3</td><td>UI-001</td><td>Execute and extend the Playwright suite (states, rollback, conflict)</td><td><code>frontend/e2e</code></td><td>The extended specs</td><td>Running stack</td></tr>
+</table>
+</div>
+<p class="small">Ordering follows the required sequence. There are no cross-tenant vulnerabilities to place first, so the backlog opens with the authorization gaps (ACCESS-001, ACCESS-002, SEC-002) and the tests that would have caught them (TEST-002), then data-integrity and consistency (SIG-001, AUDIT-002, DB-002, API-003), then production availability (OPS-001), then database integrity (DB-001), then architectural consistency (ACCESS-003, DOMAIN-001), then remaining tests (TEST-001, TEST-003), then maintainability.</p>
+
+<h2>22 · Recommended implementation sequence</h2>
+<ol>
+<li><strong>Answer the one question that changes the work.</strong> Is branch/department a security boundary or a relevance filter? It determines whether ACCESS-001 and ACCESS-003 are defects or documentation, and it is answerable in a short conversation.</li>
+<li><strong>Write the ACCESS-001 proving test before touching code.</strong> A scoped user requesting an out-of-scope attachment either gets <code>404</code> or does not. That single test converts the only production blocker into either a closed item or a scoped fix.</li>
+<li><strong>Ship the one-line corrections.</strong> <code>Jwt:ExpiryMinutes: 15</code> with a ConfigGuard ceiling (SEC-002), the NC export permission gate (ACCESS-002), and real <code>AllowedHosts</code> (SEC-003). Low risk, immediate benefit, no design work.</li>
+<li><strong>Close the two egress test gaps</strong> (TEST-002). Cross-tenant export and file tests use fixtures that already exist and protect the paths with the largest blast radius.</li>
+<li><strong>Extend the signature ledger</strong> (SIG-001) and <strong>add the stable event code</strong> (AUDIT-002) together — both are additive migrations against append-only tables, so they share a cut-over and should be done before the next validation cycle, since neither can be backfilled.</li>
+<li><strong>Close the contract inconsistencies</strong> — problem+json on 429 (API-001) and safe deserialization messages (API-002). Small, testable, and they complete a contract that is otherwise uniform.</li>
+<li><strong>Make the weaker boundary mechanical.</strong> The <code>IgnoreQueryFilters</code> allow-list test (ACCESS-003) and the scope-denial matrix (TEST-003) convert resource scope from convention into a build-breaking rule — the same treatment tenancy already receives, and the reason tenancy is verifiable today.</li>
+<li><strong>Add validator tests</strong> (TEST-001), starting with <code>StrongPassword</code> and every <code>MaximumLength</code> that is the only length control for a <code>text</code> column.</li>
+<li><strong>Record elevation</strong> (SEC-004) — eight call sites, one security event each.</li>
+<li><strong>Add RLS to <code>user_account</code></strong> (DB-001), verifying the pre-tenant login path against the new policy.</li>
+<li><strong>Secure <code>/metrics</code></strong> (SEC-001) so the control lives in the application rather than in proxy configuration.</li>
+<li><strong>Run the restore drill</strong> (OPS-001). It needs an environment, not a code change, and it is the largest untested control in the system.</li>
+<li><strong>Address retention and storage</strong> (DB-002) — the biggest item, and the one most needing an explicit decision before code.</li>
+<li><strong>Expose the concurrency token</strong> (API-003) across API and SPA together, then present conflicts in the UI (UI-001).</li>
+<li><strong>Introduce the first value objects</strong> (DOMAIN-001) on new code and the four highest-risk concepts; do not retrofit wholesale. Finish with documentation (DOC-001) and container hygiene (OPS-002).</li>
+</ol>
+
+<h2>23 · Required ADRs</h2>
+<ol>
+<li><strong>ADR — Resource scope as a security boundary.</strong> Declare whether branch/department is a confidentiality control or a relevance filter. If the former, commit to file and export coverage plus a database backstop; if the latter, say so explicitly, because the current implementation reads as security and will be maintained as such by default.</li>
+<li><strong>ADR — Evidence file storage.</strong> Record local-filesystem storage in place of the documented WORM object storage, its compensating controls (filesystem permissions, backup immutability, forced attachment download, content hashing) and the revisit trigger (DB-002).</li>
+<li><strong>ADR — Retention and archival.</strong> Retention classes, the purge role, audit partitioning and disposal logging — or the accepted interim position and its expiry.</li>
+<li><strong>ADR — Logging stack.</strong> Record the use of <code>Microsoft.Extensions.Logging</code> with JSON console output in place of Serilog, and how the required structured properties are guaranteed without it (DOC-001).</li>
+<li><strong>ADR — Read-side authorization model.</strong> Document the deliberate decision to gate queries at the controller rather than in the MediatR pipeline, and state how omissions are prevented on the read side as <code>CommandPolicyTests</code> prevents them on the write side.</li>
+<li><strong>ADR — Audit event taxonomy.</strong> Record the move from CLR type names to stable business event codes, and how historical entries remain queryable across the cut-over (AUDIT-002).</li>
+<li><strong>Amend ADR-0003 / ADR-0009</strong> to a single agreed access-token lifetime, with the risk acceptance reasoned on the value actually shipped (SEC-002).</li>
+<li><strong>Amend ADR-0005</strong> to state which class of concurrency conflict <code>xmin</code> detects and which it does not, plus the decision on exposing the token (API-003).</li>
+</ol>
+
+<h2>24 · Compliance status</h2>
+<h4>Table F · Evidence coverage</h4>
+<div class="scroll">
+<table>
+<tr><th>Area</th><th>Evidence reviewed</th><th>Missing evidence</th><th>Confidence</th></tr>
+<tr><td>Multi-tenancy</td><td>Source (filter, 2 interceptors, middleware); live schema (90 policies, 88 composite PKs, 29 composite FKs); role privileges; 4 executed test suites; 4 runtime probes including cross-tenant read, cross-tenant file and tenant injection</td><td>Automated export/file cross-tenant tests</td><td><strong>High</strong></td></tr>
+<tr><td>Authentication and authorization</td><td>JWT config; 3 middleware; <code>AuthorizationBehavior</code>; 144 permission gates; 115 executed authz-relevant tests; live 401 and role-matrix evidence; live security-event data</td><td>Runtime proof of intra-tenant resource denial</td><td><strong>High</strong></td></tr>
+<tr><td>Database integrity</td><td>Full <code>pg_catalog</code> measurement; policy expressions; trigger inventory; hash-chain continuity check; direct mutation attacks; 31 executed integration tests</td><td>Query plans; production data volumes</td><td><strong>High</strong></td></tr>
+<tr><td>Domain model</td><td>Layer/module architecture tests; one aggregate read in full; 228 executed domain tests; value-object and event inventories</td><td>Full read of all 45 aggregates</td><td><strong>High</strong></td></tr>
+<tr><td>API</td><td>42 controllers; attribute inventories; 82 executed functional tests; 10 live probes</td><td>Full endpoint-by-endpoint matrix for all 42 controllers</td><td>Medium-High</td></tr>
+<tr><td>Audit and e-signatures</td><td>Ledger schema; triggers; live event-type and security-event distributions; hash chain; redaction logic</td><td>Signature volume is thin (2 rows) — the signing surface is narrowly exercised in dev data</td><td><strong>High</strong></td></tr>
+<tr><td>Angular</td><td><code>package.json</code>, <code>tsconfig</code>; component/route/form/signal/ARIA inventories; token storage; 76 executed unit tests; CI a11y config</td><td>Executed e2e; per-screen state and rollback behaviour</td><td>Medium</td></tr>
+<tr><td>Security</td><td>Headers (live); rate limiting (live); mass assignment (live); secret scan; role guard; CI scanning config; STRIDE walk-through</td><td>Production/proxy configuration; key rotation; malware scanning; penetration test</td><td>Medium</td></tr>
+<tr><td>Observability</td><td>OTel registration; log-scope properties; live correlation headers; problem-detail ids; metrics output; runbook</td><td>Live dashboards and alert delivery; sampling under load</td><td>Medium</td></tr>
+<tr><td>Operations and deployment</td><td>Health probes (live); Dockerfile; compose; CI workflow; DR runbook; role-hardening SQL</td><td><strong>Restore drill evidence</strong>; production support-access controls</td><td>Medium-Low</td></tr>
+<tr><td>Testing</td><td>All 6 projects enumerated; 522 tests executed with per-suite results</td><td>Validator tests (absent); e2e execution; load tests (never run)</td><td><strong>High</strong></td></tr>
+<tr><td>Documentation</td><td>4 architecture references; as-built DB doc reproduced from <code>pg_catalog</code>; 9 ADRs; CSV set; runbooks</td><td>The named <code>Enterprise_Application_Development_Standard.txt</code></td><td>Medium-High</td></tr>
+</table>
+</div>
+<div class="scroll">
+<table>
+<tr><th>Question</th><th>Answer</th></tr>
+<tr><td>Overall score</td><td><strong>76 %</strong> (64 / 84 across 21 applicable categories)</td></tr>
+<tr><td>Verification coverage</td><td><strong>≈ 83 %</strong></td></tr>
+<tr><td>Confidence level</td><td><strong>Medium</strong> (High requires ≥ 85 %)</td></tr>
+<tr><td>Critical findings</td><td><strong>0</strong></td></tr>
+<tr><td>High findings</td><td><strong>3</strong> — ACCESS-001, SIG-001, SEC-002</td></tr>
+<tr><td>Production blockers</td><td><strong>1, conditional</strong> — ACCESS-001</td></tr>
+<tr><td>Has tenant isolation been verified?</td><td><strong>YES.</strong> Three enforcement layers confirmed by attack, not inference: cross-tenant document read → <code>404</code>; cross-tenant file download → <code>404</code>; body-injected <code>tenantId</code> ignored with the row landing in the caller's tenant; 90 FORCE-RLS policies enforced against a role holding neither SUPERUSER nor BYPASSRLS; 29 tenant-composite FKs making cross-tenant children structurally impossible; session GUCs re-applied on every connection open so the pool cannot leak; 4 tenant-isolation test suites executed and passing. <strong>No cross-tenant exposure was found.</strong></td></tr>
+<tr><td>Has backend authorization been verified?</td><td><strong>YES.</strong> Deny-by-default fallback policy; 144 action-level permission gates; a pipeline that denies an unannotated command (<code>AUTHZ-000</code>) with a build-breaking CI gate; per-request account, role and privilege revalidation; verified <code>401</code> problem+json for an unauthenticated request and <code>403</code> across the executed role matrix. Two gaps remain within it: resource-level scope on file downloads (ACCESS-001) and one ungated export (ACCESS-002)</td></tr>
+<tr><td>Has database integrity been verified?</td><td><strong>YES.</strong> Measured live: 90 FORCE-RLS policies, 85 CHECK constraints, 36 FKs (29 tenant-composite), 24 tenant-scoped unique constraints, 88 tenant-first composite PKs, 265 indexes, 695 NOT NULL columns, all 30 CASCADE deletes confined within aggregates. Append-only triggers refused both <code>UPDATE</code> and <code>DELETE</code> under direct attack, and the 387-entry audit hash chain showed zero breaks</td></tr>
+<tr><td>Do automated tests provide sufficient evidence?</td><td><strong>Largely.</strong> 522 executed, 0 failures, with architectural and authorization rules enforced as build gates — a stronger guarantee than coverage. Insufficient in four specific places: no validator tests at all (TEST-001), no cross-tenant export or file test (TEST-002), no pipeline-ordering test and a single intra-tenant scope assertion (TEST-003)</td></tr>
+<tr><td>Can the application reasonably proceed to production?</td><td><strong>Yes, with conditions</strong> — see the decision below</td></tr>
+</table>
+</div>
+
+<p><strong>PRODUCTION DECISION: APPROVED WITH CONDITIONS</strong></p>
+<p>Conditions, each small relative to the system's maturity:</p>
+<ol>
+<li><strong>Prove or fix ACCESS-001</strong> — write the scoped-user file-download denial test first; its result decides whether code changes are needed.</li>
+<li><strong>Add the export permission gate</strong> (ACCESS-002) and <strong>correct the token-lifetime drift</strong> (SEC-002), reconciling the ADRs to the value actually shipped.</li>
+<li><strong>Add the two cross-tenant egress tests</strong> (TEST-002) so the tenancy guarantee this report verified manually is protected by CI rather than by audit.</li>
+<li><strong>Structure the signature bindings</strong> (SIG-001) and <strong>add the stable audit event code</strong> (AUDIT-002) before the next validation cycle — both tables are append-only and cannot be backfilled later.</li>
+</ol>
+<p>The basis for approving rather than blocking: every control this assessment attacked directly held. Cross-tenant reads returned <code>404</code>. Injected <code>tenantId</code> and <code>id</code> were ignored. Audit ledger <code>UPDATE</code> and <code>DELETE</code> were refused by the database. The hash chain was intact across 387 entries. The runtime role can neither bypass RLS nor own the tables, and Production refuses to boot if that changes. 522 tests passed with architectural and authorization rules enforced as build gates. The open items are gaps in a second, internal boundary, in regulated-evidence metadata, and in contract consistency — not in the controls separating one customer's regulated records from another's.</p>
+
+<h2>25 · Limitations and unverified areas</h2>
+<ul>
+<li><strong>The named standard was not supplied.</strong> <code>Enterprise_Application_Development_Standard.txt</code> is neither attached nor on disk. Compliance is assessed against the checklist in the instructions; alignment to the organisation's own wording is NOT VERIFIED.</li>
+<li><strong>No production or validation environment.</strong> All runtime evidence is from Development on a developer workstation. HSTS emission, the <code>DatabaseRoleGuard</code> hard failure, JSON console logging and proxy-terminated TLS were read from code, not observed.</li>
+<li><strong>Reverse-proxy configuration not supplied</strong> — production reachability of <code>/metrics</code> and <code>/health/*</code>, and Host-header validation, are NOT VERIFIED. SEC-001's severity depends on this.</li>
+<li><strong>Intra-tenant resource-scope denial not executed.</strong> No branch- or department-restricted credentials were available, so ACCESS-001 rests on a statically verified mechanism rather than a runtime exploit.</li>
+<li><strong>Playwright e2e not executed</strong> — 3 specs read only, so UI-001 remains NOT VERIFIED.</li>
+<li><strong>Backup, restore and DR documented but undemonstrated</strong> — no drill evidence anywhere in the repository (OPS-001).</li>
+<li><strong>Not assessed:</strong> query plans for critical operations; load and capacity behaviour at production volume (<code>LoadTests</code> never runs); malware/content scanning (absent); key management and rotation; encryption-at-rest for the live file volume; monitoring dashboards and alert delivery; penetration-test results (SOW only); localization completeness.</li>
+<li><strong>Dev-data caveat:</strong> the inspected database holds mostly test fixtures — 20 tenants, 387 audit entries, and only <strong>2 electronic signatures</strong>. Control <em>behaviour</em> was verified; the signing surface is narrowly exercised, and behaviour at production volume was not observed.</li>
+<li><strong>Migrations were not applied by this assessment.</strong> The 56 already-applied migrations were read from <code>__EFMigrationsHistory</code>; no migration was executed, so migration correctness is evidenced by the resulting schema and by the passing round-trip test, not by an applied run.</li>
+<li><strong>Audit artefacts left in the dev database.</strong> Runtime probes created three rows in <code>demo-lab</code>: documents <code>AUDIT-PROBE-1</code> (×2, one from the mass-assignment probe) and <code>AUDIT-IDEM-1</code> (idempotency replay). They were deliberately not deleted — they are audited regulated records, and removing them by SQL would be a worse act than disclosing them. Remove them through the application's own void/change-reason workflow if unwanted.</li>
+</ul>
+
+<h4>Incomplete items</h4>
+<p><strong>NON-COMPLIANT (1 checklist item):</strong> FluentValidation tests — no test project references the library and no validator test exists (TEST-001).</p>
+<p><strong>PARTIALLY COMPLIANT (20 categories):</strong> 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22 — each with its gap named in Table B and a finding in §12.</p>
+<p><strong>COMPLIANT (1 category):</strong> 2 — Solution architecture.</p>
+<p><strong>NOT VERIFIED:</strong> alignment to <code>Enterprise_Application_Development_Standard.txt</code>; UI-001 (frontend states, rollback, conflict presentation); OPS-001 (restore/DR execution); production and staging behaviour; reverse-proxy configuration; intra-tenant resource-scope denial at runtime; query plans; load behaviour; malware scanning; key rotation; live encryption-at-rest for file storage; alerting effectiveness; configuration-change auditing.</p>
+<p><strong>NOT APPLICABLE (with justification):</strong> Category 12 (SignalR and real-time) — no SignalR package, hub type or <code>MapHub</code> call exists in <code>src/</code>; notifications are persisted rows read on request. Within other categories: Hangfire specifics (§11 — replaced by four <code>IHostedService</code> workers, whose substantive requirements were assessed); tenant scope in caches (§8 — no cache tier exists, verified by search); inbox/deduplication (§10 — the system consumes no inbound messages); monetary numeric precision (§9 — the domain holds no monetary column); feature-flag ownership and retirement (§18 — no feature-flag framework exists).</p>
+
+<hr>
+<p class="small"><strong>Integrity statement.</strong> The solution was compiled (0 warnings, 0 errors) and 522 tests were executed — 446 backend against a real PostgreSQL 17 instance, 76 frontend in ChromeHeadless — and results are reported as observed. Migrations were <em>not</em> applied by this assessment; the 56 applied migrations were read from <code>__EFMigrationsHistory</code>. No claim of security rests on static inspection alone: authentication, authorization, cross-tenant read, cross-tenant file access, tenant injection via request body, rate limiting, idempotent replay, error contracts, security headers, metrics exposure and database immutability were each exercised against the running system, and every such claim cites the observed result. Tenant isolation is asserted as verified because it was attacked, not because <code>TenantId</code> properties and RLS migrations exist. Where evidence was unavailable the item is marked NOT VERIFIED rather than assumed. One earlier conclusion in this assessment was corrected during evidence gathering — an initial search suggested the frontend contained no ARIA attributes, which was a search error (inline templates live in <code>.ts</code> files, not <code>.html</code>); the corrected count is 104 across 56 files, and accessibility is reported as addressed. No finding's severity was reduced to improve the score.</p>
+<p class="small">Report EAC-NTQMS-002 · supersedes EAC-NMT-NTQMS-001 · NT.QMS <code>v1.51.1-13-g10e784e</code> · 2026-08-01</p>
+
+</div>
+</body>
+</html>

@@ -289,16 +289,25 @@ public sealed class GetRoleHandler(IAppDbContext db) : IQueryHandler<GetRoleQuer
 /// </summary>
 public sealed record GetMyPrivilegesQuery : IQuery<MyPrivilegesDto>;
 
-public sealed class GetMyPrivilegesHandler(IUserPrivileges privileges)
+public sealed class GetMyPrivilegesHandler(IUserPrivileges privileges, IAppDbContext db, ICurrentUser user)
     : IQueryHandler<GetMyPrivilegesQuery, MyPrivilegesDto>
 {
-    public Task<MyPrivilegesDto> Handle(GetMyPrivilegesQuery q, CancellationToken ct) =>
-        Task.FromResult(new MyPrivilegesDto(
+    public async Task<MyPrivilegesDto> Handle(GetMyPrivilegesQuery q, CancellationToken ct)
+    {
+        // The fact that a PIN exists, never its hash: the UI needs it to steer a
+        // user to configure signing before their first attempt fails.
+        var pinConfigured = user.UserId is { } id
+            && await db.Users.AsNoTracking().Where(u => u.Id == id)
+                .Select(u => u.PinHash != null).SingleOrDefaultAsync(ct);
+
+        return new MyPrivilegesDto(
             privileges.RoleId,
             privileges.RoleName,
             privileges.IsPlatformAdmin,
             privileges.Permissions.Order(StringComparer.Ordinal).ToArray(),
             privileges.AllowedBranchIds.Order().ToArray(),
             privileges.AllowedDepartmentIds.Order().ToArray(),
-            privileges.PreferredLanguage));
+            privileges.PreferredLanguage,
+            pinConfigured);
+    }
 }

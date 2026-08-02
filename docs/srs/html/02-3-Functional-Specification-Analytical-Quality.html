@@ -1,0 +1,934 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Functional Spec 3 — Analytical Quality — NT.QMS As-Built SRS</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📐</text></svg>">
+<style>
+:root{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);
+ --mono:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace;
+ --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,ui-serif,serif;
+ --sans:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}}
+:root[data-theme="dark"]{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}
+:root[data-theme="light"]{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+ font-size:15.5px;line-height:1.62;-webkit-text-size-adjust:100%}
+.wrap{display:grid;grid-template-columns:288px minmax(0,1fr);gap:0;max-width:1560px;margin:0 auto}
+/* ---- sidebar ---- */
+aside{position:sticky;top:0;height:100vh;overflow-y:auto;padding:22px 16px 60px;
+ border-right:1px solid var(--line);background:var(--panel)}
+aside .brand{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:-.01em;
+ margin:0 0 2px}
+aside .sub{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;
+ margin:0 0 16px}
+aside nav a{display:block;padding:5px 9px;border-radius:7px;color:var(--ink);text-decoration:none;
+ font-size:13.2px;border-left:2px solid transparent}
+aside nav a:hover{background:var(--panel-2)}
+aside nav a.cur{background:var(--accent-soft);border-left-color:var(--accent);font-weight:600}
+aside nav a .n{color:var(--muted);font-variant-numeric:tabular-nums;margin-right:7px;font-size:11.5px}
+aside .sec{margin:16px 0 5px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+ color:var(--muted);font-weight:700}
+#toc{margin-top:6px;border-top:1px solid var(--line);padding-top:10px}
+#toc a{display:block;padding:2.5px 9px;font-size:12.4px;color:var(--muted);text-decoration:none;
+ border-left:2px solid transparent;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#toc a:hover{color:var(--ink)}
+#toc a.h3{padding-left:22px;font-size:11.8px}
+/* ---- main ---- */
+main{padding:34px 46px 120px;min-width:0;overflow-wrap:anywhere}
+.doc-head{border-bottom:2px solid var(--accent);padding-bottom:14px;margin-bottom:26px}
+.kicker{color:var(--accent);font-size:11.5px;font-weight:700;letter-spacing:.11em;
+ text-transform:uppercase;margin:0 0 4px}
+h1{font-family:var(--serif);font-size:31px;line-height:1.2;margin:0;letter-spacing:-.015em}
+h2{font-family:var(--serif);font-size:24px;margin:38px 0 12px;padding-bottom:6px;
+ border-bottom:1px solid var(--line);letter-spacing:-.01em;scroll-margin-top:14px}
+h3{font-size:18px;margin:26px 0 9px;letter-spacing:-.005em;scroll-margin-top:14px}
+h4{font-size:15px;margin:20px 0 7px;color:var(--accent)}
+h5,h6{font-size:13.5px;margin:16px 0 6px;color:var(--muted);text-transform:uppercase;
+ letter-spacing:.05em}
+p{margin:10px 0}
+a{color:var(--accent)}
+hr{border:0;border-top:1px solid var(--line);margin:30px 0}
+ul,ol{margin:9px 0;padding-left:24px}
+li{margin:3px 0}
+blockquote{margin:16px 0;padding:12px 18px;background:var(--accent-soft);
+ border-left:3px solid var(--accent);border-radius:0 8px 8px 0}
+blockquote p:first-child{margin-top:0}blockquote p:last-child{margin-bottom:0}
+code{font-family:var(--mono);font-size:.875em;background:var(--panel-2);
+ padding:1.5px 5px;border-radius:4px;border:1px solid var(--line)}
+pre{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;
+ padding:14px 16px;overflow-x:auto;margin:14px 0}
+pre code{background:none;border:0;padding:0;font-size:12.6px;line-height:1.5}
+/* ---- tables ---- */
+.tw{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:10px;
+ background:var(--panel);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;font-size:13.4px}
+th,td{padding:8px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:var(--panel-2);font-weight:700;font-size:12.2px;letter-spacing:.02em;
+ position:sticky;top:0;z-index:1}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--accent-soft)}
+td code,th code{font-size:.9em;white-space:nowrap}
+/* ---- diagrams ---- */
+figure.d{margin:18px 0;padding:18px;background:var(--panel);border:1px solid var(--line);
+ border-radius:12px;box-shadow:var(--shadow);overflow-x:auto;text-align:center}
+figure.d svg{max-width:100%;height:auto;display:inline-block}
+/* ---- misc ---- */
+.tools{position:fixed;top:12px;right:16px;display:flex;gap:6px;z-index:50}
+.tools button{font:inherit;font-size:12px;padding:5px 11px;border-radius:8px;cursor:pointer;
+ border:1px solid var(--line);background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+.tools button:hover{background:var(--panel-2)}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:52px;padding-top:18px;
+ border-top:1px solid var(--line)}
+.pager a{display:block;max-width:46%;padding:10px 14px;border:1px solid var(--line);
+ border-radius:10px;background:var(--panel);text-decoration:none;font-size:13px}
+.pager a span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;
+ letter-spacing:.08em}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:14px;margin:20px 0}
+.card{padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--panel);
+ box-shadow:var(--shadow);text-decoration:none;color:var(--ink);display:block}
+.card:hover{border-color:var(--accent)}
+.card .num{color:var(--accent);font-weight:700;font-size:11.5px;letter-spacing:.1em}
+.card .t{font-family:var(--serif);font-size:17px;margin:3px 0 5px}
+.card .d{color:var(--muted);font-size:12.7px;line-height:1.5}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin:20px 0}
+.stat{padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.stat b{display:block;font-size:23px;font-family:var(--serif);line-height:1.1}
+.stat span{color:var(--muted);font-size:11.4px}
+@media print{
+ aside,.tools,.pager{display:none!important}
+ .wrap{display:block;max-width:none}
+ main{padding:0}
+ .tw,figure.d{break-inside:avoid;box-shadow:none}
+ h2{break-after:avoid}
+ a{color:inherit;text-decoration:none}
+}
+@media (max-width:1080px){
+ .wrap{grid-template-columns:1fr}
+ aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+ main{padding:22px 18px 80px}
+ #toc{display:none}
+}
+</style>
+</head><body>
+<div class="tools"><button id="th">◐ Theme</button><button id="pr">⎙ Print</button></div>
+<div class="wrap">
+<aside><p class="brand">NT.QMS</p><p class="sub">As-Built SRS · v1.51.x</p><a class="card" style="padding:9px 12px;margin-bottom:10px;font-size:13px" href="index.html">◂ Document set</a><div class="sec">Documents</div><nav><a class="" href="00-SRS-Index-and-Conventions.html"><span class="n">00</span>Index, Conventions &amp; Glossary</a><a class="" href="01-Software-Requirements-Specification.html"><span class="n">01</span>Software Requirements Specification</a><a class="" href="02-1-Functional-Specification-Quality-and-Improvement.html"><span class="n">02-1</span>Functional Spec 1 — Quality &amp; Improvement</a><a class="" href="02-2-Functional-Specification-Resources-People-Governance.html"><span class="n">02-2</span>Functional Spec 2 — Resources, People &amp; Governance</a><a class="cur" href="02-3-Functional-Specification-Analytical-Quality.html"><span class="n">02-3</span>Functional Spec 3 — Analytical Quality</a><a class="" href="02-4-Functional-Specification-Operations-and-Platform.html"><span class="n">02-4</span>Functional Spec 4 — Operations &amp; Platform</a><a class="" href="03-Business-Rules.html"><span class="n">03</span>Business Rules &amp; Error Catalogue</a><a class="" href="04-Configuration-Reference.html"><span class="n">04</span>Configuration Reference</a><a class="" href="05-Screen-Specification.html"><span class="n">05</span>Screen Specification</a><a class="" href="06-Workflow-Specification.html"><span class="n">06</span>Workflow Specification</a><a class="" href="07-File-System-Specification.html"><span class="n">07</span>File System Specification</a><a class="" href="08-API-Specification.html"><span class="n">08</span>API Specification</a><a class="" href="09-Security-Specification.html"><span class="n">09</span>Security Specification</a><a class="" href="10-Deployment-Specification.html"><span class="n">10</span>Deployment Specification</a><a class="" href="11-Architecture-Constraints.html"><span class="n">11</span>Architecture Constraints</a><a class="" href="12-Requirements-Traceability-Matrix.html"><span class="n">12</span>Requirements Traceability Matrix</a><a class="" href="13-Implementation-vs-SRS-Gap-Analysis.html"><span class="n">13</span>Implementation vs SRS — Gap Analysis</a><a class="" href="14-Technical-Debt-Report.html"><span class="n">14</span>Technical Debt Report</a><a class="" href="15-Recommendations.html"><span class="n">15</span>Recommendations</a></nav><div class='sec'>On this page</div><div id='toc'><a class="h2" href="#shared-lifecycle-wf-13">Shared lifecycle — WF-13</a><a class="h2" href="#shared-rules-apply-to-all-twelve-unless-a-module-overrides">Shared rules (apply to all twelve unless a module overrides)</a><a class="h2" href="#shared-api-shape">Shared API shape</a><a class="h2" href="#purpose">Purpose</a><a class="h2" href="#business-goal">Business goal</a><a class="h2" href="#actors">Actors</a><a class="h2" href="#inputs">Inputs</a><a class="h2" href="#outputs">Outputs</a><a class="h2" href="#dependencies">Dependencies</a><a class="h2" href="#workflow-wf-14">Workflow — WF-14</a><a class="h2" href="#calculation-specification-westgard-multi-rule">Calculation specification — Westgard multi-rule</a><a class="h2" href="#business-rules">Business rules</a><a class="h2" href="#validation-rules">Validation rules</a><a class="h2" href="#error-cases">Error cases</a><a class="h2" href="#edge-cases">Edge cases</a><a class="h2" href="#configuration">Configuration</a><a class="h2" href="#performance">Performance</a><a class="h2" href="#security">Security</a><a class="h2" href="#limitations">Limitations</a><a class="h2" href="#future-improvements">Future improvements</a><a class="h2" href="#acceptance-criteria">Acceptance criteria</a><a class="h2" href="#261-method-validation-study-mv-apivalidation-studies">26.1 · Method validation study (MV) — /api/validation-studies</a><a class="h2" href="#262-precision-study-pr-apiprecision-studies">26.2 · Precision study (PR) — /api/precision-studies</a><a class="h2" href="#263-method-comparison-study-mc-apimethod-comparisons">26.3 · Method comparison study (MC) — /api/method-comparisons</a><a class="h2" href="#264-linearity-study-lin-apilinearity-studies">26.4 · Linearity study (LIN) — /api/linearity-studies</a><a class="h2" href="#265-detection-limit-study-dl-apidetection-limit-studies">26.5 · Detection limit study (DL) — /api/detection-limit-studies</a><a class="h2" href="#266-reference-interval-study-ri-apireference-interval-studies">26.6 · Reference interval study (RI) — /api/reference-interval-studies</a><a class="h2" href="#267-carryover-study-car-apicarryover-studies">26.7 · Carryover study (CAR) — /api/carryover-studies</a><a class="h2" href="#268-interference-study-int-apiinterference-studies">26.8 · Interference study (INT) — /api/interference-studies</a><a class="h2" href="#269-lot-comparison-study-lot-apilot-comparisons">26.9 · Lot comparison study (LOT) — /api/lot-comparisons</a><a class="h2" href="#2610-instrument-comparability-study-icp-apiinstrument-comparabilities">26.10 · Instrument comparability study (ICP) — /api/instrument-comparabilities</a><a class="h2" href="#2611-outlier-screening-out-apioutlier-screenings">26.11 · Outlier screening (OUT) — /api/outlier-screenings</a><a class="h2" href="#2612-sigma-metric-assessment-sig-apisigma-assessments">26.12 · Sigma metric assessment (SIG) — /api/sigma-assessments</a><a class="h2" href="#2613-measurement-uncertainty-budget-mu-apiuncertainty-budgets">26.13 · Measurement uncertainty budget (MU) — /api/uncertainty-budgets</a><a class="h2" href="#purpose">Purpose</a><a class="h2" href="#business-goal">Business goal</a><a class="h2" href="#actors">Actors</a><a class="h2" href="#inputs">Inputs</a><a class="h2" href="#outputs">Outputs</a><a class="h2" href="#dependencies">Dependencies</a><a class="h2" href="#workflow-wf-15">Workflow — WF-15</a><a class="h2" href="#calculation-specification-z-score">Calculation specification — z-score</a><a class="h2" href="#business-rules">Business rules</a><a class="h2" href="#validation-rules">Validation rules</a><a class="h2" href="#error-cases">Error cases</a><a class="h2" href="#edge-cases">Edge cases</a><a class="h2" href="#configuration">Configuration</a><a class="h2" href="#performance">Performance</a><a class="h2" href="#security">Security</a><a class="h2" href="#limitations">Limitations</a><a class="h2" href="#future-improvements">Future improvements</a><a class="h2" href="#acceptance-criteria">Acceptance criteria</a></div></aside>
+<main>
+<div class="doc-head"><p class="kicker">Document 02-3 · NT.QMS Production SRS</p><h1>Functional Spec 3 — Analytical Quality</h1></div>
+<blockquote>
+<p>Part 3 of 4. <a href="02-1-Functional-Specification-Quality-and-Improvement.html">Part 1</a> ·
+<a href="02-2-Functional-Specification-Resources-People-Governance.html">Part 2</a> ·
+<a href="02-4-Functional-Specification-Operations-and-Platform.html">Part 4</a> ·
+<a href="00-SRS-Index-and-Conventions.html">Conventions</a></p>
+</blockquote>
+<p>This part specifies the analytical-quality subsystem: statistical quality control, twelve study types,
+measurement-uncertainty budgeting, and proficiency testing. <strong>The calculation specifications here are
+normative</strong> — they are the algorithms as implemented, stated precisely enough to reimplement.</p>
+<hr>
+<h1>3.0 The common study pattern</h1>
+<p>Twelve of the modules in this part are <strong>studies</strong> and share one structure. Specifying it once avoids
+repeating it twelve times.</p>
+<h2 id="shared-lifecycle-wf-13">Shared lifecycle — <code>WF-13</code></h2>
+<figure class="d"><svg width="318" height="439" preserveAspectRatio="xMidYMid meet" id="mmd-fd20953ba694" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="statediagram" style="max-width:318px;height:auto" viewBox="56.9248046875 0 317.6556701660156 439" role="graphics-document document" aria-roledescription="stateDiagram"><style>#mmd-fd20953ba694{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;fill:#000000;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#mmd-fd20953ba694 .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#mmd-fd20953ba694 .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#mmd-fd20953ba694 .error-icon{fill:#552222;}#mmd-fd20953ba694 .error-text{fill:#552222;stroke:#552222;}#mmd-fd20953ba694 .edge-thickness-normal{stroke-width:1px;}#mmd-fd20953ba694 .edge-thickness-thick{stroke-width:3.5px;}#mmd-fd20953ba694 .edge-pattern-solid{stroke-dasharray:0;}#mmd-fd20953ba694 .edge-thickness-invisible{stroke-width:0;fill:none;}#mmd-fd20953ba694 .edge-pattern-dashed{stroke-dasharray:3;}#mmd-fd20953ba694 .edge-pattern-dotted{stroke-dasharray:2;}#mmd-fd20953ba694 .marker{fill:#666;stroke:#666;}#mmd-fd20953ba694 .marker.cross{stroke:#666;}#mmd-fd20953ba694 svg{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;}#mmd-fd20953ba694 p{margin:0;}#mmd-fd20953ba694 defs [id$="-barbEnd"]{fill:#000;stroke:#000;}#mmd-fd20953ba694 g.stateGroup text{fill:#999;stroke:none;font-size:10px;}#mmd-fd20953ba694 g.stateGroup text{fill:#000000;stroke:none;font-size:10px;}#mmd-fd20953ba694 g.stateGroup .state-title{font-weight:bolder;fill:#111111;}#mmd-fd20953ba694 g.stateGroup rect{fill:#eee;stroke:#999;}#mmd-fd20953ba694 g.stateGroup line{stroke:#666;stroke-width:1;}#mmd-fd20953ba694 .transition{stroke:#000;stroke-width:1;fill:none;}#mmd-fd20953ba694 .stateGroup .composit{fill:#ffffff;border-bottom:1px;}#mmd-fd20953ba694 .stateGroup .alt-composit{fill:#e0e0e0;border-bottom:1px;}#mmd-fd20953ba694 .state-note{stroke:#999;fill:#666;}#mmd-fd20953ba694 .state-note text{fill:#fff;stroke:none;font-size:10px;}#mmd-fd20953ba694 .stateLabel .box{stroke:none;stroke-width:0;fill:#eee;opacity:0.5;}#mmd-fd20953ba694 .edgeLabel .label rect{fill:#eee;opacity:0.5;}#mmd-fd20953ba694 .edgeLabel{background-color:white;text-align:center;}#mmd-fd20953ba694 .edgeLabel p{background-color:white;}#mmd-fd20953ba694 .edgeLabel rect{opacity:0.5;background-color:white;fill:white;}#mmd-fd20953ba694 .edgeLabel .label text{fill:#000000;}#mmd-fd20953ba694 .label div .edgeLabel{color:#000000;}#mmd-fd20953ba694 .stateLabel text{fill:#111111;font-size:10px;font-weight:bold;}#mmd-fd20953ba694 .node circle.state-start{fill:#222;stroke:#222;}#mmd-fd20953ba694 .node .fork-join{fill:#222;stroke:#222;}#mmd-fd20953ba694 .node circle.state-end{fill:hsl(0, 0%, 83.3333333333%);stroke:#ffffff;stroke-width:1.5;}#mmd-fd20953ba694 .end-state-inner{fill:#ffffff;stroke-width:1.5;}#mmd-fd20953ba694 .node rect{fill:#eee;stroke:#000;stroke-width:1px;}#mmd-fd20953ba694 .node polygon{fill:#eee;stroke:#000;stroke-width:1px;}#mmd-fd20953ba694 [id$="-barbEnd"]{fill:#666;}#mmd-fd20953ba694 .statediagram-cluster rect{fill:#eee;stroke:#000;stroke-width:1px;}#mmd-fd20953ba694 .cluster-label,#mmd-fd20953ba694 .nodeLabel{color:#111111;}#mmd-fd20953ba694 .statediagram-cluster rect.outer{rx:5px;ry:5px;}#mmd-fd20953ba694 .statediagram-state .divider{stroke:#000;}#mmd-fd20953ba694 .statediagram-state .title-state{rx:5px;ry:5px;}#mmd-fd20953ba694 .statediagram-cluster.statediagram-cluster .inner{fill:#ffffff;}#mmd-fd20953ba694 .statediagram-cluster.statediagram-cluster-alt .inner{fill:#f4f4f4;}#mmd-fd20953ba694 .statediagram-cluster .inner{rx:0;ry:0;}#mmd-fd20953ba694 .statediagram-state rect.basic{rx:5px;ry:5px;}#mmd-fd20953ba694 .statediagram-state rect.divider{stroke-dasharray:10,10;fill:#f4f4f4;}#mmd-fd20953ba694 .note-edge{stroke-dasharray:5;}#mmd-fd20953ba694 .statediagram-note rect{fill:#666;stroke:#999;stroke-width:1px;rx:0;ry:0;}#mmd-fd20953ba694 .statediagram-note rect{fill:#666;stroke:#999;stroke-width:1px;rx:0;ry:0;}#mmd-fd20953ba694 .statediagram-note text{fill:#fff;}#mmd-fd20953ba694 .statediagram-note .nodeLabel{color:#fff;}#mmd-fd20953ba694 .statediagram .edgeLabel{color:red;}#mmd-fd20953ba694 [id$="-dependencyStart"],#mmd-fd20953ba694 [id$="-dependencyEnd"]{fill:#666;stroke:#666;stroke-width:1;}#mmd-fd20953ba694 .statediagramTitleText{text-anchor:middle;font-size:18px;fill:#000000;}#mmd-fd20953ba694 [data-look="neo"].statediagram-cluster rect{fill:#eee;stroke:url(#mmd-fd20953ba694-gradient);stroke-width:1;}#mmd-fd20953ba694 [data-look="neo"].statediagram-cluster rect.outer{rx:5px;ry:5px;filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-fd20953ba694 .node .neo-node{stroke:#999;}#mmd-fd20953ba694 [data-look="neo"].node rect,#mmd-fd20953ba694 [data-look="neo"].cluster rect,#mmd-fd20953ba694 [data-look="neo"].node polygon{stroke:url(#mmd-fd20953ba694-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-fd20953ba694 [data-look="neo"].swimlane.cluster rect{filter:none;}#mmd-fd20953ba694 [data-look="neo"].node path{stroke:url(#mmd-fd20953ba694-gradient);stroke-width:1px;}#mmd-fd20953ba694 [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-fd20953ba694 [data-look="neo"].node .neo-line path{stroke:#999;filter:none;}#mmd-fd20953ba694 [data-look="neo"].node circle{stroke:url(#mmd-fd20953ba694-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-fd20953ba694 [data-look="neo"].node circle .state-start{fill:#000000;}#mmd-fd20953ba694 [data-look="neo"].icon-shape .icon{fill:url(#mmd-fd20953ba694-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-fd20953ba694 [data-look="neo"].icon-shape .icon-neo path{stroke:url(#mmd-fd20953ba694-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-fd20953ba694 :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><g><defs><marker id="my-svg_stateDiagram-barbEnd" refX="19" refY="7" markerWidth="20" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto"><path d="M 19,7 L9,13 L14,7 L9,1 Z"/></marker></defs><g class="root"><g class="clusters"/><g class="edgePaths"><path d="M256.09,22L256.09,27.917C256.09,33.833,256.09,45.667,256.09,57.5C256.09,69.333,256.09,81.167,256.09,87.083L256.09,93" id="my-svg-edge0" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge0" data-points="W3sieCI6MjU2LjA4OTg0Mzc1LCJ5IjoyMn0seyJ4IjoyNTYuMDg5ODQzNzUsInkiOjU3LjV9LHsieCI6MjU2LjA4OTg0Mzc1LCJ5Ijo5M31d" data-look="classic" marker-end="url(#mmd-fd20953ba694_stateDiagram-barbEnd)"/><path d="M217.988,122.67L187.67,131.558C157.352,140.447,96.715,158.223,75.197,174.778C53.679,191.333,71.28,206.667,80.081,214.333L88.881,222" id="my-svg-edge2" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge2" data-points="W3sieCI6MjE3Ljk4ODI4MTI1LCJ5IjoxMjIuNjcwMDkwMzcxNjA2NjJ9LHsieCI6MzYuMDc4MTI1LCJ5IjoxNzZ9LHsieCI6ODguODgxMTc3MzI1NTgxMzksInkiOjIyMn1d" data-look="classic" marker-end="url(#mmd-fd20953ba694_stateDiagram-barbEnd)"/><path d="M131.353,222L140.154,214.333C148.954,206.667,166.555,191.333,183.906,176C201.257,160.667,218.357,145.333,226.907,137.667L235.458,130" id="my-svg-edge3" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge3" data-points="W3sieCI6MTMxLjM1MzE5NzY3NDQxODYsInkiOjIyMn0seyJ4IjoxODQuMTU2MjUsInkiOjE3Nn0seyJ4IjoyMzUuNDU3NzI3NzEzMTc4MywieSI6MTMwfV0=" data-look="classic" marker-end="url(#mmd-fd20953ba694_stateDiagram-barbEnd)"/><path d="M110.117,259L110.117,264.917C110.117,270.833,110.117,282.667,110.117,294.5C110.117,306.333,110.117,318.167,110.117,324.083L110.117,330" id="my-svg-edge4" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge4" data-points="W3sieCI6MTEwLjExNzE4NzUsInkiOjI1OX0seyJ4IjoxMTAuMTE3MTg3NSwieSI6Mjk0LjV9LHsieCI6MTEwLjExNzE4NzUsInkiOjMzMH1d" data-look="classic" marker-end="url(#mmd-fd20953ba694_stateDiagram-barbEnd)"/><path d="M110.117,367L110.117,371.167C110.117,375.333,110.117,383.667,110.117,391.999C110.117,400.331,110.117,408.662,110.117,412.828L110.117,416.993" id="my-svg-edge5" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge5" data-points="W3sieCI6MTEwLjExNzE4NzUsInkiOjM2N30seyJ4IjoxMTAuMTE3MTg3NSwieSI6MzkyfSx7IngiOjExMC4xMTcxODc1LCJ5Ijo0MTYuOTkzMzUzMzY2ODUxOH1d" data-look="classic" marker-end="url(#mmd-fd20953ba694_stateDiagram-barbEnd)"/><path d="M242.822,130L239.953,134C237.084,138,231.346,146,238.638,150C245.929,154,266.25,154,273.542,150C280.833,146,275.096,138,272.227,134L269.358,130" id="my-svg-edge1" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge1" data-points="W3sieCI6MjQyLjgyMTUzNDkyNjQ3MDYsInkiOjEzMH0seyJ4IjoyMjUuNjA4NTkzNzUsInkiOjE1NH0seyJ4IjoyODYuNTcxMDkzNzUsInkiOjE1NH0seyJ4IjoyNjkuMzU4MTUyNTczNTI5NCwieSI6MTMwfV0=" data-look="classic" marker-end="url(#mmd-fd20953ba694_stateDiagram-barbEnd)"/></g><g class="edgeLabels"><g class="edgeLabel" transform="translate(256.08984375, 57.5)"><g class="label" data-id="edge0" transform="translate(-69.484375, -10.5)"><foreignObject width="138.96875" height="21"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"><p>Configure(parameters)</p></span></div></foreignObject></g></g><g class="edgeLabel" transform="translate(256.08984375, 168.5)"><g class="label" data-id="edge1" transform="translate(-80.78125, -10.5)"><foreignObject width="161.5625" height="21"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"><p>Add / Remove data points</p></span></div></foreignObject></g></g><g class="edgeLabel" transform="translate(93.43251, 159.18563)"><g class="label" data-id="edge2" transform="translate(-28.078125, -10.5)"><foreignObject width="56.15625" height="21"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"><p>Calculate</p></span></div></foreignObject></g></g><g class="edgeLabel" transform="translate(184.15625, 176)"><g class="label" data-id="edge3" transform="translate(-100, -21)"><foreignObject width="200" height="42"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="edgeLabel"><p>Add / Remove data points (invalidates results)</p></span></div></foreignObject></g></g><g class="edgeLabel" transform="translate(110.1171875, 294.5)"><g class="label" data-id="edge4" transform="translate(-43.0859375, -10.5)"><foreignObject width="86.171875" height="21"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"><p>SignOff(actor)</p></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="edge5" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g></g><g class="nodes"><g class="node default" id="my-svg-state-root_start-0" data-look="classic" transform="translate(256.08984375, 15)"><circle class="state-start" r="7" width="14" height="14"/></g><g class="node  statediagram-state" id="my-svg-state-DataEntry-3" data-look="classic" transform="translate(256.08984375, 111.5)"><rect class="basic label-container" style="" rx="5" ry="5" x="-38.1015625" y="-18.5" width="76.203125" height="37"/><g class="label" style="" transform="translate(-30.1015625, -10.5)"><rect/><foreignObject width="60.203125" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel markdown-node-label"><p>DataEntry</p></span></div></foreignObject></g></g><g class="node  statediagram-state" id="my-svg-state-Calculated-4" data-look="classic" transform="translate(110.1171875, 240.5)"><rect class="basic label-container" style="" rx="5" ry="5" x="-40.203125" y="-18.5" width="80.40625" height="37"/><g class="label" style="" transform="translate(-32.203125, -10.5)"><rect/><foreignObject width="64.40625" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel markdown-node-label"><p>Calculated</p></span></div></foreignObject></g></g><g class="node  statediagram-state" id="my-svg-state-SignedOff-5" data-look="classic" transform="translate(110.1171875, 348.5)"><rect class="basic label-container" style="" rx="5" ry="5" x="-38.9453125" y="-18.5" width="77.890625" height="37"/><g class="label" style="" transform="translate(-30.9453125, -10.5)"><rect/><foreignObject width="61.890625" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel markdown-node-label"><p>SignedOff</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-state-root_end-5" data-look="classic" transform="translate(110.1171875, 424)"><g class="outer-path"><path d="M7 0 C7 0.40517908122283747, 6.964012880168563 0.816513743121899, 6.893654271085456 1.2155372436685123 C6.823295662002349 1.6145607442151257, 6.716427752933756 2.013397210557766, 6.5778483455013586 2.394141003279681 C6.439268938068961 2.7748847960015954, 6.26476736710249 3.149104622578984, 6.062177826491071 3.4999999999999996 C5.859588285879653 3.8508953774210153, 5.622755194947063 4.189128084166967, 5.362311101832846 4.499513267805774 C5.10186700871863 4.809898451444582, 4.809898451444583 5.10186700871863, 4.499513267805775 5.362311101832846 C4.189128084166968 5.622755194947063, 3.8508953774210166 5.859588285879652, 3.500000000000001 6.06217782649107 C3.149104622578985 6.264767367102489, 2.7748847960015963 6.439268938068961, 2.3941410032796817 6.5778483455013586 C2.013397210557767 6.716427752933756, 1.6145607442151264 6.823295662002349, 1.2155372436685128 6.893654271085456 C0.8165137431218992 6.964012880168563, 0.4051790812228379 7, 4.286263797015736e-16 7 C-0.405179081222837 7, -0.8165137431218985 6.964012880168563, -1.2155372436685121 6.893654271085456 C-1.6145607442151257 6.823295662002349, -2.0133972105577667 6.716427752933756, -2.394141003279681 6.5778483455013586 C-2.774884796001595 6.439268938068961, -3.149104622578983 6.26476736710249, -3.4999999999999982 6.062177826491071 C-3.8508953774210135 5.859588285879653, -4.189128084166966 5.6227551949470636, -4.499513267805773 5.362311101832848 C-4.809898451444581 5.101867008718632, -5.101867008718628 4.809898451444586, -5.3623111018328435 4.499513267805779 C-5.622755194947059 4.189128084166971, -5.859588285879649 3.8508953774210206, -6.062177826491068 3.5000000000000053 C-6.264767367102486 3.14910462257899, -6.439268938068958 2.774884796001602, -6.577848345501356 2.394141003279688 C-6.716427752933754 2.0133972105577738, -6.823295662002347 1.614560744215134, -6.893654271085454 1.215537243668521 C-6.9640128801685615 0.816513743121908, -6.999999999999999 0.4051790812228472, -7 1.0183126166254463e-14 C-7.000000000000001 -0.40517908122282686, -6.964012880168565 -0.8165137431218878, -6.893654271085459 -1.215537243668501 C-6.823295662002352 -1.6145607442151142, -6.716427752933759 -2.0133972105577542, -6.577848345501363 -2.394141003279669 C-6.439268938068967 -2.7748847960015834, -6.264767367102496 -3.149104622578972, -6.062177826491078 -3.4999999999999876 C-5.859588285879661 -3.8508953774210033, -5.6227551949470715 -4.1891280841669545, -5.362311101832856 -4.499513267805763 C-5.10186700871864 -4.809898451444571, -4.809898451444594 -5.10186700871862, -4.499513267805787 -5.362311101832836 C-4.189128084166979 -5.622755194947053, -3.850895377421028 -5.859588285879643, -3.5000000000000133 -6.062177826491062 C-3.1491046225789985 -6.264767367102482, -2.774884796001611 -6.439268938068954, -2.3941410032796973 -6.577848345501353 C-2.0133972105577835 -6.716427752933752, -1.6145607442151435 -6.823295662002345, -1.2155372436685306 -6.893654271085453 C-0.8165137431219176 -6.9640128801685615, -0.40517908122285695 -6.999999999999999, -1.9937625952807352e-14 -7 C0.4051790812228171 -7.000000000000001, 0.8165137431218781 -6.964012880168565, 1.2155372436684913 -6.89365427108546 C1.6145607442151044 -6.823295662002354, 2.013397210557745 -6.716427752933763, 2.3941410032796595 -6.5778483455013665 C2.774884796001574 -6.43926893806897, 3.149104622578963 -6.2647673671025, 3.499999999999979 -6.062177826491083 C3.8508953774209953 -5.859588285879665, 4.189128084166947 -5.622755194947077, 4.499513267805756 -5.362311101832862 C4.809898451444564 -5.1018670087186475, 5.101867008718613 -4.809898451444602, 5.362311101832829 -4.499513267805796 C5.622755194947046 -4.189128084166989, 5.859588285879637 -3.8508953774210393, 6.062177826491056 -3.500000000000025 C6.2647673671024755 -3.1491046225790105, 6.439268938068949 -2.774884796001623, 6.577848345501348 -2.3941410032797092 C6.716427752933747 -2.0133972105577955, 6.823295662002342 -1.6145607442151562, 6.893654271085451 -1.2155372436685434 C6.96401288016856 -0.8165137431219307, 6.982275711847575 -0.2025895406114567, 7 -3.2800750208310675e-14 C7.017724288152425 0.2025895406113911, 7.017724288152424 -0.2025895406114242, 7 0" stroke="none" stroke-width="0" fill="#eee" style=""/><path d="M7 0 C7 0.40517908122283747, 6.964012880168563 0.816513743121899, 6.893654271085456 1.2155372436685123 C6.823295662002349 1.6145607442151257, 6.716427752933756 2.013397210557766, 6.5778483455013586 2.394141003279681 C6.439268938068961 2.7748847960015954, 6.26476736710249 3.149104622578984, 6.062177826491071 3.4999999999999996 C5.859588285879653 3.8508953774210153, 5.622755194947063 4.189128084166967, 5.362311101832846 4.499513267805774 C5.10186700871863 4.809898451444582, 4.809898451444583 5.10186700871863, 4.499513267805775 5.362311101832846 C4.189128084166968 5.622755194947063, 3.8508953774210166 5.859588285879652, 3.500000000000001 6.06217782649107 C3.149104622578985 6.264767367102489, 2.7748847960015963 6.439268938068961, 2.3941410032796817 6.5778483455013586 C2.013397210557767 6.716427752933756, 1.6145607442151264 6.823295662002349, 1.2155372436685128 6.893654271085456 C0.8165137431218992 6.964012880168563, 0.4051790812228379 7, 4.286263797015736e-16 7 C-0.405179081222837 7, -0.8165137431218985 6.964012880168563, -1.2155372436685121 6.893654271085456 C-1.6145607442151257 6.823295662002349, -2.0133972105577667 6.716427752933756, -2.394141003279681 6.5778483455013586 C-2.774884796001595 6.439268938068961, -3.149104622578983 6.26476736710249, -3.4999999999999982 6.062177826491071 C-3.8508953774210135 5.859588285879653, -4.189128084166966 5.6227551949470636, -4.499513267805773 5.362311101832848 C-4.809898451444581 5.101867008718632, -5.101867008718628 4.809898451444586, -5.3623111018328435 4.499513267805779 C-5.622755194947059 4.189128084166971, -5.859588285879649 3.8508953774210206, -6.062177826491068 3.5000000000000053 C-6.264767367102486 3.14910462257899, -6.439268938068958 2.774884796001602, -6.577848345501356 2.394141003279688 C-6.716427752933754 2.0133972105577738, -6.823295662002347 1.614560744215134, -6.893654271085454 1.215537243668521 C-6.9640128801685615 0.816513743121908, -6.999999999999999 0.4051790812228472, -7 1.0183126166254463e-14 C-7.000000000000001 -0.40517908122282686, -6.964012880168565 -0.8165137431218878, -6.893654271085459 -1.215537243668501 C-6.823295662002352 -1.6145607442151142, -6.716427752933759 -2.0133972105577542, -6.577848345501363 -2.394141003279669 C-6.439268938068967 -2.7748847960015834, -6.264767367102496 -3.149104622578972, -6.062177826491078 -3.4999999999999876 C-5.859588285879661 -3.8508953774210033, -5.6227551949470715 -4.1891280841669545, -5.362311101832856 -4.499513267805763 C-5.10186700871864 -4.809898451444571, -4.809898451444594 -5.10186700871862, -4.499513267805787 -5.362311101832836 C-4.189128084166979 -5.622755194947053, -3.850895377421028 -5.859588285879643, -3.5000000000000133 -6.062177826491062 C-3.1491046225789985 -6.264767367102482, -2.774884796001611 -6.439268938068954, -2.3941410032796973 -6.577848345501353 C-2.0133972105577835 -6.716427752933752, -1.6145607442151435 -6.823295662002345, -1.2155372436685306 -6.893654271085453 C-0.8165137431219176 -6.9640128801685615, -0.40517908122285695 -6.999999999999999, -1.9937625952807352e-14 -7 C0.4051790812228171 -7.000000000000001, 0.8165137431218781 -6.964012880168565, 1.2155372436684913 -6.89365427108546 C1.6145607442151044 -6.823295662002354, 2.013397210557745 -6.716427752933763, 2.3941410032796595 -6.5778483455013665 C2.774884796001574 -6.43926893806897, 3.149104622578963 -6.2647673671025, 3.499999999999979 -6.062177826491083 C3.8508953774209953 -5.859588285879665, 4.189128084166947 -5.622755194947077, 4.499513267805756 -5.362311101832862 C4.809898451444564 -5.1018670087186475, 5.101867008718613 -4.809898451444602, 5.362311101832829 -4.499513267805796 C5.622755194947046 -4.189128084166989, 5.859588285879637 -3.8508953774210393, 6.062177826491056 -3.500000000000025 C6.2647673671024755 -3.1491046225790105, 6.439268938068949 -2.774884796001623, 6.577848345501348 -2.3941410032797092 C6.716427752933747 -2.0133972105577955, 6.823295662002342 -1.6145607442151562, 6.893654271085451 -1.2155372436685434 C6.96401288016856 -0.8165137431219307, 6.982275711847575 -0.2025895406114567, 7 -3.2800750208310675e-14 C7.017724288152425 0.2025895406113911, 7.017724288152424 -0.2025895406114242, 7 0" stroke="#666" stroke-width="2" fill="none" stroke-dasharray="0 0" style=""/><g><path d="M2.5 0 C2.5 0.14470681472244193, 2.487147457203058 0.29161205111496386, 2.46201938253052 0.4341204441673258 C2.436891307857982 0.5766288372196877, 2.3987241974763416 0.7190704323420595, 2.3492315519647713 0.8550503583141718 C2.299738906453201 0.991030284286284, 2.2374169168223177 1.124680222349637, 2.165063509461097 1.2499999999999998 C2.092710102099876 1.3753197776503625, 2.0081268553382365 1.496117172916774, 1.915111107797445 1.6069690242163481 C1.8220953602566536 1.7178208755159223, 1.7178208755159226 1.8220953602566536, 1.6069690242163484 1.915111107797445 C1.4961171729167742 2.0081268553382365, 1.375319777650363 2.0927101020998755, 1.2500000000000002 2.1650635094610964 C1.1246802223496375 2.2374169168223172, 0.9910302842862845 2.2997389064532, 0.8550503583141721 2.349231551964771 C0.7190704323420597 2.3987241974763416, 0.576628837219688 2.436891307857982, 0.43412044416732604 2.46201938253052 C0.291612051114964 2.487147457203058, 0.14470681472244212 2.5, 1.5308084989341916e-16 2.5 C-0.1447068147224418 2.5, -0.2916120511149638 2.487147457203058, -0.43412044416732576 2.46201938253052 C-0.5766288372196877 2.436891307857982, -0.7190704323420595 2.3987241974763416, -0.8550503583141718 2.3492315519647713 C-0.991030284286284 2.299738906453201, -1.124680222349637 2.2374169168223177, -1.2499999999999996 2.165063509461097 C-1.375319777650362 2.092710102099876, -1.4961171729167733 2.008126855338237, -1.6069690242163475 1.9151111077974459 C-1.7178208755159217 1.8220953602566548, -1.822095360256653 1.7178208755159234, -1.9151111077974443 1.6069690242163495 C-2.0081268553382357 1.4961171729167755, -2.0927101020998746 1.3753197776503645, -2.1650635094610955 1.250000000000002 C-2.2374169168223164 1.1246802223496395, -2.2997389064531992 0.9910302842862865, -2.34923155196477 0.8550503583141743 C-2.3987241974763407 0.7190704323420621, -2.436891307857981 0.5766288372196907, -2.4620193825305194 0.434120444167329 C-2.487147457203058 0.29161205111496724, -2.5 0.14470681472244545, -2.5 3.636830773662308e-15 C-2.5 -0.14470681472243818, -2.4871474572030587 -0.2916120511149599, -2.4620193825305208 -0.4341204441673218 C-2.436891307857983 -0.5766288372196837, -2.398724197476343 -0.7190704323420553, -2.3492315519647726 -0.8550503583141675 C-2.2997389064532023 -0.9910302842862798, -2.23741691682232 -1.1246802223496328, -2.165063509461099 -1.2499999999999956 C-2.092710102099878 -1.3753197776503583, -2.00812685533824 -1.4961171729167695, -1.9151111077974488 -1.606969024216344 C-1.8220953602566576 -1.7178208755159183, -1.7178208755159263 -1.82209536025665, -1.6069690242163523 -1.9151111077974416 C-1.4961171729167784 -2.0081268553382334, -1.3753197776503672 -2.0927101020998724, -1.2500000000000047 -2.1650635094610937 C-1.1246802223496422 -2.237416916822315, -0.9910302842862897 -2.299738906453198, -0.8550503583141776 -2.3492315519647686 C-0.7190704323420656 -2.3987241974763394, -0.5766288372196942 -2.4368913078579806, -0.43412044416733236 -2.462019382530519 C-0.29161205111497057 -2.4871474572030574, -0.1447068147224489 -2.4999999999999996, -7.120580697431198e-15 -2.5 C0.14470681472243463 -2.5000000000000004, 0.29161205111495647 -2.487147457203059, 0.4341204441673183 -2.4620193825305217 C0.5766288372196802 -2.436891307857984, 0.7190704323420518 -2.3987241974763442, 0.8550503583141642 -2.349231551964774 C0.9910302842862766 -2.2997389064532037, 1.1246802223496295 -2.2374169168223212, 1.2499999999999925 -2.165063509461101 C1.3753197776503554 -2.0927101020998804, 1.4961171729167668 -2.008126855338242, 1.6069690242163412 -1.915111107797451 C1.7178208755159157 -1.82209536025666, 1.8220953602566472 -1.7178208755159294, 1.915111107797439 -1.6069690242163557 C2.0081268553382308 -1.496117172916782, 2.09271010209987 -1.3753197776503712, 2.1650635094610915 -1.2500000000000089 C2.237416916822313 -1.1246802223496466, 2.299738906453196 -0.9910302842862939, 2.3492315519647673 -0.855050358314182 C2.3987241974763385 -0.71907043234207, 2.4368913078579792 -0.5766288372196986, 2.462019382530518 -0.4341204441673369 C2.487147457203057 -0.29161205111497523, 2.4936698970884197 -0.07235340736123454, 2.5 -1.1714553645825241e-14 C2.5063301029115803 0.07235340736121111, 2.50633010291158 -0.07235340736122292, 2.5 0" stroke="none" stroke-width="0" fill="#000" style=""/><path d="M2.5 0 C2.5 0.14470681472244193, 2.487147457203058 0.29161205111496386, 2.46201938253052 0.4341204441673258 C2.436891307857982 0.5766288372196877, 2.3987241974763416 0.7190704323420595, 2.3492315519647713 0.8550503583141718 C2.299738906453201 0.991030284286284, 2.2374169168223177 1.124680222349637, 2.165063509461097 1.2499999999999998 C2.092710102099876 1.3753197776503625, 2.0081268553382365 1.496117172916774, 1.915111107797445 1.6069690242163481 C1.8220953602566536 1.7178208755159223, 1.7178208755159226 1.8220953602566536, 1.6069690242163484 1.915111107797445 C1.4961171729167742 2.0081268553382365, 1.375319777650363 2.0927101020998755, 1.2500000000000002 2.1650635094610964 C1.1246802223496375 2.2374169168223172, 0.9910302842862845 2.2997389064532, 0.8550503583141721 2.349231551964771 C0.7190704323420597 2.3987241974763416, 0.576628837219688 2.436891307857982, 0.43412044416732604 2.46201938253052 C0.291612051114964 2.487147457203058, 0.14470681472244212 2.5, 1.5308084989341916e-16 2.5 C-0.1447068147224418 2.5, -0.2916120511149638 2.487147457203058, -0.43412044416732576 2.46201938253052 C-0.5766288372196877 2.436891307857982, -0.7190704323420595 2.3987241974763416, -0.8550503583141718 2.3492315519647713 C-0.991030284286284 2.299738906453201, -1.124680222349637 2.2374169168223177, -1.2499999999999996 2.165063509461097 C-1.375319777650362 2.092710102099876, -1.4961171729167733 2.008126855338237, -1.6069690242163475 1.9151111077974459 C-1.7178208755159217 1.8220953602566548, -1.822095360256653 1.7178208755159234, -1.9151111077974443 1.6069690242163495 C-2.0081268553382357 1.4961171729167755, -2.0927101020998746 1.3753197776503645, -2.1650635094610955 1.250000000000002 C-2.2374169168223164 1.1246802223496395, -2.2997389064531992 0.9910302842862865, -2.34923155196477 0.8550503583141743 C-2.3987241974763407 0.7190704323420621, -2.436891307857981 0.5766288372196907, -2.4620193825305194 0.434120444167329 C-2.487147457203058 0.29161205111496724, -2.5 0.14470681472244545, -2.5 3.636830773662308e-15 C-2.5 -0.14470681472243818, -2.4871474572030587 -0.2916120511149599, -2.4620193825305208 -0.4341204441673218 C-2.436891307857983 -0.5766288372196837, -2.398724197476343 -0.7190704323420553, -2.3492315519647726 -0.8550503583141675 C-2.2997389064532023 -0.9910302842862798, -2.23741691682232 -1.1246802223496328, -2.165063509461099 -1.2499999999999956 C-2.092710102099878 -1.3753197776503583, -2.00812685533824 -1.4961171729167695, -1.9151111077974488 -1.606969024216344 C-1.8220953602566576 -1.7178208755159183, -1.7178208755159263 -1.82209536025665, -1.6069690242163523 -1.9151111077974416 C-1.4961171729167784 -2.0081268553382334, -1.3753197776503672 -2.0927101020998724, -1.2500000000000047 -2.1650635094610937 C-1.1246802223496422 -2.237416916822315, -0.9910302842862897 -2.299738906453198, -0.8550503583141776 -2.3492315519647686 C-0.7190704323420656 -2.3987241974763394, -0.5766288372196942 -2.4368913078579806, -0.43412044416733236 -2.462019382530519 C-0.29161205111497057 -2.4871474572030574, -0.1447068147224489 -2.4999999999999996, -7.120580697431198e-15 -2.5 C0.14470681472243463 -2.5000000000000004, 0.29161205111495647 -2.487147457203059, 0.4341204441673183 -2.4620193825305217 C0.5766288372196802 -2.436891307857984, 0.7190704323420518 -2.3987241974763442, 0.8550503583141642 -2.349231551964774 C0.9910302842862766 -2.2997389064532037, 1.1246802223496295 -2.2374169168223212, 1.2499999999999925 -2.165063509461101 C1.3753197776503554 -2.0927101020998804, 1.4961171729167668 -2.008126855338242, 1.6069690242163412 -1.915111107797451 C1.7178208755159157 -1.82209536025666, 1.8220953602566472 -1.7178208755159294, 1.915111107797439 -1.6069690242163557 C2.0081268553382308 -1.496117172916782, 2.09271010209987 -1.3753197776503712, 2.1650635094610915 -1.2500000000000089 C2.237416916822313 -1.1246802223496466, 2.299738906453196 -0.9910302842862939, 2.3492315519647673 -0.855050358314182 C2.3987241974763385 -0.71907043234207, 2.4368913078579792 -0.5766288372196986, 2.462019382530518 -0.4341204441673369 C2.487147457203057 -0.29161205111497523, 2.4936698970884197 -0.07235340736123454, 2.5 -1.1714553645825241e-14 C2.5063301029115803 0.07235340736121111, 2.50633010291158 -0.07235340736122292, 2.5 0" stroke="#000" stroke-width="2" fill="none" stroke-dasharray="0 0" style=""/></g></g></g><g class="label edgeLabel" id="DataEntry---DataEntry---1" transform="translate(316.08984375, 240.5)"><rect width="0.1" height="0.1"/><g class="label" style="" transform="translate(0, 0)"><rect/><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 10px; text-align: center;"><span class="nodeLabel"></span></div></foreignObject></g></g><g class="label edgeLabel" id="DataEntry---DataEntry---2" transform="translate(366.48046875, 348.5)"><rect width="0.1" height="0.1"/><g class="label" style="" transform="translate(0, 0)"><rect/><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 10px; text-align: center;"><span class="nodeLabel"></span></div></foreignObject></g></g></g></g></g><defs><filter id="my-svg-drop-shadow" height="130%" width="130%"><feDropShadow dx="4" dy="4" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs><defs><filter id="my-svg-drop-shadow-small" height="150%" width="150%"><feDropShadow dx="2" dy="2" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs><linearGradient id="my-svg-gradient" gradientUnits="objectBoundingBox" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="hsl(0, 0%, 83.3333333333%)" stop-opacity="1"/><stop offset="100%" stop-color="hsl(0, 0%, 88.9215686275%)" stop-opacity="1"/></linearGradient></svg></figure>
+
+<h2 id="shared-rules-apply-to-all-twelve-unless-a-module-overrides">Shared rules (apply to all twelve unless a module overrides)</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Rule</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>BR-AQ-01</strong></td>
+<td>A study is created in <code>DataEntry</code> by a <code>Configure</code> factory that fixes its acceptance parameters.</td>
+</tr>
+<tr>
+<td><strong>BR-AQ-02</strong></td>
+<td>Data points may be added and removed only while the study is <strong>editable</strong> (<code>DataEntry</code> or <code>Calculated</code>).</td>
+</tr>
+<tr>
+<td><strong>BR-AQ-03</strong></td>
+<td><code>Calculate</code> requires the module's minimum data and writes the derived statistics, moving the study to <code>Calculated</code>.</td>
+</tr>
+<tr>
+<td><strong>BR-AQ-04</strong></td>
+<td><strong>Only a <code>Calculated</code> study can be signed off</strong> (<code>{PREFIX}-01x</code>).</td>
+</tr>
+<tr>
+<td><strong>BR-AQ-05</strong></td>
+<td><strong>A signed-off study is immutable</strong> at the domain level (<code>{PREFIX}-01x</code>) <strong>and at the database level</strong> — <code>qams.reject_frozen_mutation()</code> is a <code>BEFORE UPDATE/DELETE</code> trigger on all twelve study roots.</td>
+</tr>
+<tr>
+<td><strong>BR-AQ-06</strong></td>
+<td>Sign-off is a segregation-of-duties gate: <code>EnsureSignerIsNotPreparer(signer, "SOD-AQ-001")</code>.</td>
+</tr>
+<tr>
+<td><strong>BR-AQ-07</strong></td>
+<td>Sign-off records <code>SignedOffBy</code> and <code>SignedOffAtUtc</code> and raises a module-specific signed-off domain event.</td>
+</tr>
+<tr>
+<td><strong>BR-AQ-08</strong></td>
+<td><strong>Removing a data point is an HTTP <code>DELETE</code></strong> and therefore requires the <code>X-Change-Reason</code> header — every void of analytical evidence carries a recorded justification.</td>
+</tr>
+<tr>
+<td><strong>BR-AQ-09</strong></td>
+<td>Adding or removing a point on a <code>Calculated</code> study returns it to <code>DataEntry</code>, invalidating the results. <strong><code>[Assumption]</code></strong> — inferred from <code>RequireEditable()</code> permitting both states; confirm the exact state reset per module.</td>
+</tr>
+<tr>
+<td><strong>BR-AQ-10</strong></td>
+<td>Study references (<code>StudyRef</code>, <code>ScreeningRef</code>, <code>AssessmentRef</code>, <code>BudgetRef</code>) are generated server-side by <code>IReferenceNumberGenerator</code> from a per-tenant sequence and a module prefix.</td>
+</tr>
+<tr>
+<td><strong>BR-AQ-11</strong></td>
+<td>Analyte ≤ 200 chars and required; unit ≤ 50; percentage acceptance criteria are <code>&gt; 0</code> and (for most) <code>≤ 50</code>.</td>
+</tr>
+<tr>
+<td><strong>BR-AQ-12</strong></td>
+<td>All twelve studies share <strong>one</strong> permission module, <code>analytical-quality</code>, with all eight actions.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="shared-api-shape">Shared API shape</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Verb</th>
+<th>Route</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/{studies}</code></td>
+<td>list (filter <code>state</code>)</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/{studies}/{id}</code></td>
+<td>detail with computed results</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/{studies}</code></td>
+<td>configure (<code>analytical-quality.create</code>)</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/{studies}/{id}/{points}</code></td>
+<td>add a data point</td>
+</tr>
+<tr>
+<td><code>DELETE</code></td>
+<td><code>/api/{studies}/{id}/{points}/{pointId}</code></td>
+<td>remove a data point (<strong><code>X-Change-Reason</code> required</strong>)</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/{studies}/{id}/calculate</code></td>
+<td>run the calculation</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/{studies}/{id}/sign-off</code></td>
+<td>sign off (<code>analytical-quality.sign</code>)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Two studies additionally accept bulk import: <code>POST /api/method-comparisons/{id}/pairs/import</code> and
+<code>POST /api/precision-studies/{id}/measurements/import</code> (CSV).</p>
+<hr>
+<h1>M-25 · Statistical quality control — Westgard (<code>AQ.QC</code>)</h1>
+<h2 id="purpose">Purpose</h2>
+<p>Maintains QC profiles (analyte × instrument × control lot with a target mean and SD), records daily QC
+runs, grades each run against the Westgard multi-rule set, and captures troubleshooting for
+out-of-control runs.</p>
+<h2 id="business-goal">Business goal</h2>
+<p>ISO/IEC 17025 §7.7 / ISO 15189 — monitor the validity of results using internal quality control, and
+act on out-of-control conditions before releasing results.</p>
+<h2 id="actors">Actors</h2>
+<p><code>analytical-quality.manage</code> (create profile, update targets); any authorised user (record run, log
+troubleshooting).</p>
+<h2 id="inputs">Inputs</h2>
+<p>Profile: <code>analyte</code> (≤100), <code>instrument</code> (≤100), <code>controlLot</code>, <code>targetMean</code>, <code>targetSd</code> (&gt; 0).
+Target change: <code>targetMean</code>, <code>targetSd</code>, <strong><code>reason</code> (≤500, required)</strong>, <code>effectiveFrom</code>.
+Run: <code>value</code>, <code>operator</code>, <code>measuredAt</code>. Troubleshooting: <code>note</code> (≤2000).</p>
+<h2 id="outputs">Outputs</h2>
+<p><code>QcProfile</code>; <code>QcRun</code> rows carrying the <strong>frozen</strong> <code>ZScore</code>, <code>Outcome</code> and <code>ViolatedRules</code>; event
+<code>QcOutOfControl</code>.</p>
+<h2 id="dependencies">Dependencies</h2>
+<p><code>WestgardLimits</code> configuration, <code>NC</code> (an out-of-control run is an NC source), <code>NTF</code>.</p>
+<h2 id="workflow-wf-14">Workflow — <code>WF-14</code></h2>
+<figure class="d"><svg width="2021" height="615" preserveAspectRatio="xMidYMid meet" id="mmd-61b2eeb9ca6a" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="max-width:2021px;height:auto" viewBox="-50 -10 2021 615" role="graphics-document document" aria-roledescription="sequence"><g><rect x="1643" y="529" fill="#eaeaea" stroke="#666" width="150" height="65" name="Led" rx="3" ry="3" class="actor actor-bottom"/><text x="1718" y="561.5" dominant-baseline="central" alignment-baseline="central" class="actor actor-box" style="text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x="1718" dy="0">Led</tspan></text></g><g><rect x="1259" y="529" fill="#eaeaea" stroke="#666" width="150" height="65" name="P" rx="3" ry="3" class="actor actor-bottom"/><text x="1334" y="561.5" dominant-baseline="central" alignment-baseline="central" class="actor actor-box" style="text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x="1334" dy="0">QcProfile / QcRun</tspan></text></g><g><rect x="1059" y="529" fill="#eaeaea" stroke="#666" width="150" height="65" name="W" rx="3" ry="3" class="actor actor-bottom"/><text x="1134" y="561.5" dominant-baseline="central" alignment-baseline="central" class="actor actor-box" style="text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x="1134" dy="0">WestgardEvaluator</tspan></text></g><g><rect x="697.5" y="529" fill="#eaeaea" stroke="#666" width="165" height="65" name="H" rx="3" ry="3" class="actor actor-bottom"/><text x="780" y="561.5" dominant-baseline="central" alignment-baseline="central" class="actor actor-box" style="text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x="780" dy="0">RecordQcRunHandler</tspan></text></g><g><rect x="475" y="529" fill="#eaeaea" stroke="#666" width="150" height="65" name="API" rx="3" ry="3" class="actor actor-bottom"/><text x="550" y="561.5" dominant-baseline="central" alignment-baseline="central" class="actor actor-box" style="text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x="550" dy="0">API</tspan></text></g><g/><g><line id="actor5" x1="1718" y1="65" x2="1718" y2="529" class="actor-line 200" stroke-width="0.5px" stroke="#999" name="Led" data-et="life-line" data-id="Led"/><g id="root-5" data-et="participant" data-type="participant" data-id="Led"><rect x="1643" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" name="Led" rx="3" ry="3" class="actor actor-top"/><text x="1718" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor actor-box" style="text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x="1718" dy="0">Led</tspan></text></g></g><g><line id="actor4" x1="1334" y1="65" x2="1334" y2="529" class="actor-line 200" stroke-width="0.5px" stroke="#999" name="P" data-et="life-line" data-id="P"/><g id="root-4" data-et="participant" data-type="participant" data-id="P"><rect x="1259" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" name="P" rx="3" ry="3" class="actor actor-top"/><text x="1334" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor actor-box" style="text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x="1334" dy="0">QcProfile / QcRun</tspan></text></g></g><g><line id="actor3" x1="1134" y1="65" x2="1134" y2="529" class="actor-line 200" stroke-width="0.5px" stroke="#999" name="W" data-et="life-line" data-id="W"/><g id="root-3" data-et="participant" data-type="participant" data-id="W"><rect x="1059" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" name="W" rx="3" ry="3" class="actor actor-top"/><text x="1134" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor actor-box" style="text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x="1134" dy="0">WestgardEvaluator</tspan></text></g></g><g><line id="actor2" x1="780" y1="65" x2="780" y2="529" class="actor-line 200" stroke-width="0.5px" stroke="#999" name="H" data-et="life-line" data-id="H"/><g id="root-2" data-et="participant" data-type="participant" data-id="H"><rect x="697.5" y="0" fill="#eaeaea" stroke="#666" width="165" height="65" name="H" rx="3" ry="3" class="actor actor-top"/><text x="780" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor actor-box" style="text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x="780" dy="0">RecordQcRunHandler</tspan></text></g></g><g><line id="actor1" x1="550" y1="65" x2="550" y2="529" class="actor-line 200" stroke-width="0.5px" stroke="#999" name="API" data-et="life-line" data-id="API"/><g id="root-1" data-et="participant" data-type="participant" data-id="API"><rect x="475" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" name="API" rx="3" ry="3" class="actor actor-top"/><text x="550" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor actor-box" style="text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x="550" dy="0">API</tspan></text></g></g><g><line id="actor0" x1="75" y1="80" x2="75" y2="529" class="actor-line 200" stroke-width="0.5px" stroke="#999" name="Op" data-et="life-line" data-id="Op"/></g><style>#mmd-61b2eeb9ca6a{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;fill:#000000;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#mmd-61b2eeb9ca6a .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#mmd-61b2eeb9ca6a .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#mmd-61b2eeb9ca6a .error-icon{fill:#552222;}#mmd-61b2eeb9ca6a .error-text{fill:#552222;stroke:#552222;}#mmd-61b2eeb9ca6a .edge-thickness-normal{stroke-width:1px;}#mmd-61b2eeb9ca6a .edge-thickness-thick{stroke-width:3.5px;}#mmd-61b2eeb9ca6a .edge-pattern-solid{stroke-dasharray:0;}#mmd-61b2eeb9ca6a .edge-thickness-invisible{stroke-width:0;fill:none;}#mmd-61b2eeb9ca6a .edge-pattern-dashed{stroke-dasharray:3;}#mmd-61b2eeb9ca6a .edge-pattern-dotted{stroke-dasharray:2;}#mmd-61b2eeb9ca6a .marker{fill:#666;stroke:#666;}#mmd-61b2eeb9ca6a .marker.cross{stroke:#666;}#mmd-61b2eeb9ca6a svg{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;}#mmd-61b2eeb9ca6a p{margin:0;}#mmd-61b2eeb9ca6a .actor{stroke:hsl(0, 0%, 83%);fill:#eee;stroke-width:1;}#mmd-61b2eeb9ca6a rect.actor.outer-path[data-look="neo"]{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-61b2eeb9ca6a rect.note[data-look="neo"]{stroke:#999;fill:#666;filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-61b2eeb9ca6a text.actor&gt;tspan{fill:#333;stroke:none;}#mmd-61b2eeb9ca6a .actor-line{stroke:hsl(0, 0%, 83%);}#mmd-61b2eeb9ca6a .innerArc{stroke-width:1.5;stroke-dasharray:none;}#mmd-61b2eeb9ca6a .messageLine0{stroke-width:1.5;stroke-dasharray:none;stroke:#333;}#mmd-61b2eeb9ca6a .messageLine1{stroke-width:1.5;stroke-dasharray:2,2;stroke:#333;}#mmd-61b2eeb9ca6a [id$="-arrowhead"] path{fill:#333;stroke:#333;}#mmd-61b2eeb9ca6a .sequenceNumber{fill:white;}#mmd-61b2eeb9ca6a [id$="-sequencenumber"]{fill:#333;}#mmd-61b2eeb9ca6a [id$="-crosshead"] path{fill:#333;stroke:#333;}#mmd-61b2eeb9ca6a .messageText{fill:#333;stroke:none;}#mmd-61b2eeb9ca6a .labelBox{stroke:hsl(0, 0%, 83%);fill:#eee;filter:none;}#mmd-61b2eeb9ca6a .labelText,#mmd-61b2eeb9ca6a .labelText&gt;tspan{fill:#333;stroke:none;}#mmd-61b2eeb9ca6a .loopText,#mmd-61b2eeb9ca6a .loopText&gt;tspan{fill:#333;stroke:none;}#mmd-61b2eeb9ca6a .sectionTitle,#mmd-61b2eeb9ca6a .sectionTitle&gt;tspan{fill:#333;stroke:none;}#mmd-61b2eeb9ca6a .loopLine{stroke-width:2px;stroke-dasharray:2,2;stroke:hsl(0, 0%, 83%);fill:hsl(0, 0%, 83%);}#mmd-61b2eeb9ca6a .note{stroke:#999;fill:#666;}#mmd-61b2eeb9ca6a .noteText,#mmd-61b2eeb9ca6a .noteText&gt;tspan{fill:#fff;stroke:none;font-weight:normal;}#mmd-61b2eeb9ca6a .activation0{fill:#f4f4f4;stroke:#666;}#mmd-61b2eeb9ca6a .activation1{fill:#f4f4f4;stroke:#666;}#mmd-61b2eeb9ca6a .activation2{fill:#f4f4f4;stroke:#666;}#mmd-61b2eeb9ca6a .actorPopupMenu{position:absolute;}#mmd-61b2eeb9ca6a .actorPopupMenuPanel{position:absolute;fill:#eee;box-shadow:0px 8px 16px 0px rgba(0,0,0,0.2);filter:drop-shadow(3px 5px 2px rgb(0 0 0 / 0.4));}#mmd-61b2eeb9ca6a .actor-man circle,#mmd-61b2eeb9ca6a line{fill:#eee;stroke-width:2px;}#mmd-61b2eeb9ca6a g rect.rect{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));stroke:#999;}#mmd-61b2eeb9ca6a .node .neo-node{stroke:#999;}#mmd-61b2eeb9ca6a [data-look="neo"].node rect,#mmd-61b2eeb9ca6a [data-look="neo"].cluster rect,#mmd-61b2eeb9ca6a [data-look="neo"].node polygon{stroke:url(#mmd-61b2eeb9ca6a-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-61b2eeb9ca6a [data-look="neo"].swimlane.cluster rect{filter:none;}#mmd-61b2eeb9ca6a [data-look="neo"].node path{stroke:url(#mmd-61b2eeb9ca6a-gradient);stroke-width:1px;}#mmd-61b2eeb9ca6a [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-61b2eeb9ca6a [data-look="neo"].node .neo-line path{stroke:#999;filter:none;}#mmd-61b2eeb9ca6a [data-look="neo"].node circle{stroke:url(#mmd-61b2eeb9ca6a-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-61b2eeb9ca6a [data-look="neo"].node circle .state-start{fill:#000000;}#mmd-61b2eeb9ca6a [data-look="neo"].icon-shape .icon{fill:url(#mmd-61b2eeb9ca6a-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-61b2eeb9ca6a [data-look="neo"].icon-shape .icon-neo path{stroke:url(#mmd-61b2eeb9ca6a-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-61b2eeb9ca6a :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><g/><defs><symbol id="my-svg-computer" width="24" height="24"><path transform="scale(.5)" d="M2 2v13h20v-13h-20zm18 11h-16v-9h16v9zm-10.228 6l.466-1h3.524l.467 1h-4.457zm14.228 3h-24l2-6h2.104l-1.33 4h18.45l-1.297-4h2.073l2 6zm-5-10h-14v-7h14v7z"/></symbol></defs><defs><symbol id="my-svg-database" fill-rule="evenodd" clip-rule="evenodd"><path transform="scale(.5)" d="M12.258.001l.256.004.255.005.253.008.251.01.249.012.247.015.246.016.242.019.241.02.239.023.236.024.233.027.231.028.229.031.225.032.223.034.22.036.217.038.214.04.211.041.208.043.205.045.201.046.198.048.194.05.191.051.187.053.183.054.18.056.175.057.172.059.168.06.163.061.16.063.155.064.15.066.074.033.073.033.071.034.07.034.069.035.068.035.067.035.066.035.064.036.064.036.062.036.06.036.06.037.058.037.058.037.055.038.055.038.053.038.052.038.051.039.05.039.048.039.047.039.045.04.044.04.043.04.041.04.04.041.039.041.037.041.036.041.034.041.033.042.032.042.03.042.029.042.027.042.026.043.024.043.023.043.021.043.02.043.018.044.017.043.015.044.013.044.012.044.011.045.009.044.007.045.006.045.004.045.002.045.001.045v17l-.001.045-.002.045-.004.045-.006.045-.007.045-.009.044-.011.045-.012.044-.013.044-.015.044-.017.043-.018.044-.02.043-.021.043-.023.043-.024.043-.026.043-.027.042-.029.042-.03.042-.032.042-.033.042-.034.041-.036.041-.037.041-.039.041-.04.041-.041.04-.043.04-.044.04-.045.04-.047.039-.048.039-.05.039-.051.039-.052.038-.053.038-.055.038-.055.038-.058.037-.058.037-.06.037-.06.036-.062.036-.064.036-.064.036-.066.035-.067.035-.068.035-.069.035-.07.034-.071.034-.073.033-.074.033-.15.066-.155.064-.16.063-.163.061-.168.06-.172.059-.175.057-.18.056-.183.054-.187.053-.191.051-.194.05-.198.048-.201.046-.205.045-.208.043-.211.041-.214.04-.217.038-.22.036-.223.034-.225.032-.229.031-.231.028-.233.027-.236.024-.239.023-.241.02-.242.019-.246.016-.247.015-.249.012-.251.01-.253.008-.255.005-.256.004-.258.001-.258-.001-.256-.004-.255-.005-.253-.008-.251-.01-.249-.012-.247-.015-.245-.016-.243-.019-.241-.02-.238-.023-.236-.024-.234-.027-.231-.028-.228-.031-.226-.032-.223-.034-.22-.036-.217-.038-.214-.04-.211-.041-.208-.043-.204-.045-.201-.046-.198-.048-.195-.05-.19-.051-.187-.053-.184-.054-.179-.056-.176-.057-.172-.059-.167-.06-.164-.061-.159-.063-.155-.064-.151-.066-.074-.033-.072-.033-.072-.034-.07-.034-.069-.035-.068-.035-.067-.035-.066-.035-.064-.036-.063-.036-.062-.036-.061-.036-.06-.037-.058-.037-.057-.037-.056-.038-.055-.038-.053-.038-.052-.038-.051-.039-.049-.039-.049-.039-.046-.039-.046-.04-.044-.04-.043-.04-.041-.04-.04-.041-.039-.041-.037-.041-.036-.041-.034-.041-.033-.042-.032-.042-.03-.042-.029-.042-.027-.042-.026-.043-.024-.043-.023-.043-.021-.043-.02-.043-.018-.044-.017-.043-.015-.044-.013-.044-.012-.044-.011-.045-.009-.044-.007-.045-.006-.045-.004-.045-.002-.045-.001-.045v-17l.001-.045.002-.045.004-.045.006-.045.007-.045.009-.044.011-.045.012-.044.013-.044.015-.044.017-.043.018-.044.02-.043.021-.043.023-.043.024-.043.026-.043.027-.042.029-.042.03-.042.032-.042.033-.042.034-.041.036-.041.037-.041.039-.041.04-.041.041-.04.043-.04.044-.04.046-.04.046-.039.049-.039.049-.039.051-.039.052-.038.053-.038.055-.038.056-.038.057-.037.058-.037.06-.037.061-.036.062-.036.063-.036.064-.036.066-.035.067-.035.068-.035.069-.035.07-.034.072-.034.072-.033.074-.033.151-.066.155-.064.159-.063.164-.061.167-.06.172-.059.176-.057.179-.056.184-.054.187-.053.19-.051.195-.05.198-.048.201-.046.204-.045.208-.043.211-.041.214-.04.217-.038.22-.036.223-.034.226-.032.228-.031.231-.028.234-.027.236-.024.238-.023.241-.02.243-.019.245-.016.247-.015.249-.012.251-.01.253-.008.255-.005.256-.004.258-.001.258.001zm-9.258 20.499v.01l.001.021.003.021.004.022.005.021.006.022.007.022.009.023.01.022.011.023.012.023.013.023.015.023.016.024.017.023.018.024.019.024.021.024.022.025.023.024.024.025.052.049.056.05.061.051.066.051.07.051.075.051.079.052.084.052.088.052.092.052.097.052.102.051.105.052.11.052.114.051.119.051.123.051.127.05.131.05.135.05.139.048.144.049.147.047.152.047.155.047.16.045.163.045.167.043.171.043.176.041.178.041.183.039.187.039.19.037.194.035.197.035.202.033.204.031.209.03.212.029.216.027.219.025.222.024.226.021.23.02.233.018.236.016.24.015.243.012.246.01.249.008.253.005.256.004.259.001.26-.001.257-.004.254-.005.25-.008.247-.011.244-.012.241-.014.237-.016.233-.018.231-.021.226-.021.224-.024.22-.026.216-.027.212-.028.21-.031.205-.031.202-.034.198-.034.194-.036.191-.037.187-.039.183-.04.179-.04.175-.042.172-.043.168-.044.163-.045.16-.046.155-.046.152-.047.148-.048.143-.049.139-.049.136-.05.131-.05.126-.05.123-.051.118-.052.114-.051.11-.052.106-.052.101-.052.096-.052.092-.052.088-.053.083-.051.079-.052.074-.052.07-.051.065-.051.06-.051.056-.05.051-.05.023-.024.023-.025.021-.024.02-.024.019-.024.018-.024.017-.024.015-.023.014-.024.013-.023.012-.023.01-.023.01-.022.008-.022.006-.022.006-.022.004-.022.004-.021.001-.021.001-.021v-4.127l-.077.055-.08.053-.083.054-.085.053-.087.052-.09.052-.093.051-.095.05-.097.05-.1.049-.102.049-.105.048-.106.047-.109.047-.111.046-.114.045-.115.045-.118.044-.12.043-.122.042-.124.042-.126.041-.128.04-.13.04-.132.038-.134.038-.135.037-.138.037-.139.035-.142.035-.143.034-.144.033-.147.032-.148.031-.15.03-.151.03-.153.029-.154.027-.156.027-.158.026-.159.025-.161.024-.162.023-.163.022-.165.021-.166.02-.167.019-.169.018-.169.017-.171.016-.173.015-.173.014-.175.013-.175.012-.177.011-.178.01-.179.008-.179.008-.181.006-.182.005-.182.004-.184.003-.184.002h-.37l-.184-.002-.184-.003-.182-.004-.182-.005-.181-.006-.179-.008-.179-.008-.178-.01-.176-.011-.176-.012-.175-.013-.173-.014-.172-.015-.171-.016-.17-.017-.169-.018-.167-.019-.166-.02-.165-.021-.163-.022-.162-.023-.161-.024-.159-.025-.157-.026-.156-.027-.155-.027-.153-.029-.151-.03-.15-.03-.148-.031-.146-.032-.145-.033-.143-.034-.141-.035-.14-.035-.137-.037-.136-.037-.134-.038-.132-.038-.13-.04-.128-.04-.126-.041-.124-.042-.122-.042-.12-.044-.117-.043-.116-.045-.113-.045-.112-.046-.109-.047-.106-.047-.105-.048-.102-.049-.1-.049-.097-.05-.095-.05-.093-.052-.09-.051-.087-.052-.085-.053-.083-.054-.08-.054-.077-.054v4.127zm0-5.654v.011l.001.021.003.021.004.021.005.022.006.022.007.022.009.022.01.022.011.023.012.023.013.023.015.024.016.023.017.024.018.024.019.024.021.024.022.024.023.025.024.024.052.05.056.05.061.05.066.051.07.051.075.052.079.051.084.052.088.052.092.052.097.052.102.052.105.052.11.051.114.051.119.052.123.05.127.051.131.05.135.049.139.049.144.048.147.048.152.047.155.046.16.045.163.045.167.044.171.042.176.042.178.04.183.04.187.038.19.037.194.036.197.034.202.033.204.032.209.03.212.028.216.027.219.025.222.024.226.022.23.02.233.018.236.016.24.014.243.012.246.01.249.008.253.006.256.003.259.001.26-.001.257-.003.254-.006.25-.008.247-.01.244-.012.241-.015.237-.016.233-.018.231-.02.226-.022.224-.024.22-.025.216-.027.212-.029.21-.03.205-.032.202-.033.198-.035.194-.036.191-.037.187-.039.183-.039.179-.041.175-.042.172-.043.168-.044.163-.045.16-.045.155-.047.152-.047.148-.048.143-.048.139-.05.136-.049.131-.05.126-.051.123-.051.118-.051.114-.052.11-.052.106-.052.101-.052.096-.052.092-.052.088-.052.083-.052.079-.052.074-.051.07-.052.065-.051.06-.05.056-.051.051-.049.023-.025.023-.024.021-.025.02-.024.019-.024.018-.024.017-.024.015-.023.014-.023.013-.024.012-.022.01-.023.01-.023.008-.022.006-.022.006-.022.004-.021.004-.022.001-.021.001-.021v-4.139l-.077.054-.08.054-.083.054-.085.052-.087.053-.09.051-.093.051-.095.051-.097.05-.1.049-.102.049-.105.048-.106.047-.109.047-.111.046-.114.045-.115.044-.118.044-.12.044-.122.042-.124.042-.126.041-.128.04-.13.039-.132.039-.134.038-.135.037-.138.036-.139.036-.142.035-.143.033-.144.033-.147.033-.148.031-.15.03-.151.03-.153.028-.154.028-.156.027-.158.026-.159.025-.161.024-.162.023-.163.022-.165.021-.166.02-.167.019-.169.018-.169.017-.171.016-.173.015-.173.014-.175.013-.175.012-.177.011-.178.009-.179.009-.179.007-.181.007-.182.005-.182.004-.184.003-.184.002h-.37l-.184-.002-.184-.003-.182-.004-.182-.005-.181-.007-.179-.007-.179-.009-.178-.009-.176-.011-.176-.012-.175-.013-.173-.014-.172-.015-.171-.016-.17-.017-.169-.018-.167-.019-.166-.02-.165-.021-.163-.022-.162-.023-.161-.024-.159-.025-.157-.026-.156-.027-.155-.028-.153-.028-.151-.03-.15-.03-.148-.031-.146-.033-.145-.033-.143-.033-.141-.035-.14-.036-.137-.036-.136-.037-.134-.038-.132-.039-.13-.039-.128-.04-.126-.041-.124-.042-.122-.043-.12-.043-.117-.044-.116-.044-.113-.046-.112-.046-.109-.046-.106-.047-.105-.048-.102-.049-.1-.049-.097-.05-.095-.051-.093-.051-.09-.051-.087-.053-.085-.052-.083-.054-.08-.054-.077-.054v4.139zm0-5.666v.011l.001.02.003.022.004.021.005.022.006.021.007.022.009.023.01.022.011.023.012.023.013.023.015.023.016.024.017.024.018.023.019.024.021.025.022.024.023.024.024.025.052.05.056.05.061.05.066.051.07.051.075.052.079.051.084.052.088.052.092.052.097.052.102.052.105.051.11.052.114.051.119.051.123.051.127.05.131.05.135.05.139.049.144.048.147.048.152.047.155.046.16.045.163.045.167.043.171.043.176.042.178.04.183.04.187.038.19.037.194.036.197.034.202.033.204.032.209.03.212.028.216.027.219.025.222.024.226.021.23.02.233.018.236.017.24.014.243.012.246.01.249.008.253.006.256.003.259.001.26-.001.257-.003.254-.006.25-.008.247-.01.244-.013.241-.014.237-.016.233-.018.231-.02.226-.022.224-.024.22-.025.216-.027.212-.029.21-.03.205-.032.202-.033.198-.035.194-.036.191-.037.187-.039.183-.039.179-.041.175-.042.172-.043.168-.044.163-.045.16-.045.155-.047.152-.047.148-.048.143-.049.139-.049.136-.049.131-.051.126-.05.123-.051.118-.052.114-.051.11-.052.106-.052.101-.052.096-.052.092-.052.088-.052.083-.052.079-.052.074-.052.07-.051.065-.051.06-.051.056-.05.051-.049.023-.025.023-.025.021-.024.02-.024.019-.024.018-.024.017-.024.015-.023.014-.024.013-.023.012-.023.01-.022.01-.023.008-.022.006-.022.006-.022.004-.022.004-.021.001-.021.001-.021v-4.153l-.077.054-.08.054-.083.053-.085.053-.087.053-.09.051-.093.051-.095.051-.097.05-.1.049-.102.048-.105.048-.106.048-.109.046-.111.046-.114.046-.115.044-.118.044-.12.043-.122.043-.124.042-.126.041-.128.04-.13.039-.132.039-.134.038-.135.037-.138.036-.139.036-.142.034-.143.034-.144.033-.147.032-.148.032-.15.03-.151.03-.153.028-.154.028-.156.027-.158.026-.159.024-.161.024-.162.023-.163.023-.165.021-.166.02-.167.019-.169.018-.169.017-.171.016-.173.015-.173.014-.175.013-.175.012-.177.01-.178.01-.179.009-.179.007-.181.006-.182.006-.182.004-.184.003-.184.001-.185.001-.185-.001-.184-.001-.184-.003-.182-.004-.182-.006-.181-.006-.179-.007-.179-.009-.178-.01-.176-.01-.176-.012-.175-.013-.173-.014-.172-.015-.171-.016-.17-.017-.169-.018-.167-.019-.166-.02-.165-.021-.163-.023-.162-.023-.161-.024-.159-.024-.157-.026-.156-.027-.155-.028-.153-.028-.151-.03-.15-.03-.148-.032-.146-.032-.145-.033-.143-.034-.141-.034-.14-.036-.137-.036-.136-.037-.134-.038-.132-.039-.13-.039-.128-.041-.126-.041-.124-.041-.122-.043-.12-.043-.117-.044-.116-.044-.113-.046-.112-.046-.109-.046-.106-.048-.105-.048-.102-.048-.1-.05-.097-.049-.095-.051-.093-.051-.09-.052-.087-.052-.085-.053-.083-.053-.08-.054-.077-.054v4.153zm8.74-8.179l-.257.004-.254.005-.25.008-.247.011-.244.012-.241.014-.237.016-.233.018-.231.021-.226.022-.224.023-.22.026-.216.027-.212.028-.21.031-.205.032-.202.033-.198.034-.194.036-.191.038-.187.038-.183.04-.179.041-.175.042-.172.043-.168.043-.163.045-.16.046-.155.046-.152.048-.148.048-.143.048-.139.049-.136.05-.131.05-.126.051-.123.051-.118.051-.114.052-.11.052-.106.052-.101.052-.096.052-.092.052-.088.052-.083.052-.079.052-.074.051-.07.052-.065.051-.06.05-.056.05-.051.05-.023.025-.023.024-.021.024-.02.025-.019.024-.018.024-.017.023-.015.024-.014.023-.013.023-.012.023-.01.023-.01.022-.008.022-.006.023-.006.021-.004.022-.004.021-.001.021-.001.021.001.021.001.021.004.021.004.022.006.021.006.023.008.022.01.022.01.023.012.023.013.023.014.023.015.024.017.023.018.024.019.024.02.025.021.024.023.024.023.025.051.05.056.05.06.05.065.051.07.052.074.051.079.052.083.052.088.052.092.052.096.052.101.052.106.052.11.052.114.052.118.051.123.051.126.051.131.05.136.05.139.049.143.048.148.048.152.048.155.046.16.046.163.045.168.043.172.043.175.042.179.041.183.04.187.038.191.038.194.036.198.034.202.033.205.032.21.031.212.028.216.027.22.026.224.023.226.022.231.021.233.018.237.016.241.014.244.012.247.011.25.008.254.005.257.004.26.001.26-.001.257-.004.254-.005.25-.008.247-.011.244-.012.241-.014.237-.016.233-.018.231-.021.226-.022.224-.023.22-.026.216-.027.212-.028.21-.031.205-.032.202-.033.198-.034.194-.036.191-.038.187-.038.183-.04.179-.041.175-.042.172-.043.168-.043.163-.045.16-.046.155-.046.152-.048.148-.048.143-.048.139-.049.136-.05.131-.05.126-.051.123-.051.118-.051.114-.052.11-.052.106-.052.101-.052.096-.052.092-.052.088-.052.083-.052.079-.052.074-.051.07-.052.065-.051.06-.05.056-.05.051-.05.023-.025.023-.024.021-.024.02-.025.019-.024.018-.024.017-.023.015-.024.014-.023.013-.023.012-.023.01-.023.01-.022.008-.022.006-.023.006-.021.004-.022.004-.021.001-.021.001-.021-.001-.021-.001-.021-.004-.021-.004-.022-.006-.021-.006-.023-.008-.022-.01-.022-.01-.023-.012-.023-.013-.023-.014-.023-.015-.024-.017-.023-.018-.024-.019-.024-.02-.025-.021-.024-.023-.024-.023-.025-.051-.05-.056-.05-.06-.05-.065-.051-.07-.052-.074-.051-.079-.052-.083-.052-.088-.052-.092-.052-.096-.052-.101-.052-.106-.052-.11-.052-.114-.052-.118-.051-.123-.051-.126-.051-.131-.05-.136-.05-.139-.049-.143-.048-.148-.048-.152-.048-.155-.046-.16-.046-.163-.045-.168-.043-.172-.043-.175-.042-.179-.041-.183-.04-.187-.038-.191-.038-.194-.036-.198-.034-.202-.033-.205-.032-.21-.031-.212-.028-.216-.027-.22-.026-.224-.023-.226-.022-.231-.021-.233-.018-.237-.016-.241-.014-.244-.012-.247-.011-.25-.008-.254-.005-.257-.004-.26-.001-.26.001z"/></symbol></defs><defs><symbol id="my-svg-clock" width="24" height="24"><path transform="scale(.5)" d="M12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm5.848 12.459c.202.038.202.333.001.372-1.907.361-6.045 1.111-6.547 1.111-.719 0-1.301-.582-1.301-1.301 0-.512.77-5.447 1.125-7.445.034-.192.312-.181.343.014l.985 6.238 5.394 1.011z"/></symbol></defs><defs><marker id="my-svg-arrowhead" refX="7.9" refY="5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto-start-reverse"><path d="M -1 0 L 10 5 L 0 10 z"/></marker></defs><defs><marker id="my-svg-crosshead" markerWidth="15" markerHeight="8" orient="auto" refX="4" refY="4.5"><path fill="none" stroke="#000000" stroke-width="1pt" d="M 1,2 L 6,7 M 6,2 L 1,7" style="stroke-dasharray: 0, 0;"/></marker></defs><defs><marker id="my-svg-filled-head" refX="15.5" refY="7" markerWidth="20" markerHeight="28" orient="auto"><path d="M 18,7 L9,13 L14,7 L9,1 Z"/></marker></defs><defs><marker id="my-svg-sequencenumber" refX="15" refY="15" markerWidth="60" markerHeight="40" orient="auto"><circle cx="15" cy="15" r="6"/></marker></defs><defs><marker id="my-svg-solidTopArrowHead" refX="7.9" refY="7.25" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto-start-reverse"><path d="M 0 0 L 10 8 L 0 8 z"/></marker></defs><defs><marker id="my-svg-solidBottomArrowHead" refX="7.9" refY="0.75" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto-start-reverse"><path d="M 0 0 L 10 0 L 0 8 z"/></marker></defs><defs><marker id="my-svg-stickTopArrowHead" refX="7.5" refY="7" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto-start-reverse"><path d="M 0 0 L 7 7" stroke="black" stroke-width="1.5" fill="none"/></marker></defs><defs><marker id="my-svg-stickBottomArrowHead" refX="7.5" refY="0" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto-start-reverse"><path d="M 0 7 L 7 0" stroke="black" stroke-width="1.5" fill="none"/></marker></defs><g data-et="note" data-id="i9"><rect x="1525" y="458" fill="#EDF2AE" stroke="#666" width="386" height="41" class="note"/><text x="1718" y="463" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="noteText" dy="1em" style="font-size: 16px; font-weight: 400;"><tspan x="1718">notification rules fire, troubleshooting becomes available</tspan></text></g><g data-et="control-structure" data-id="i10"><line x1="1323" y1="369" x2="1921" y2="369" class="loopLine"/><line x1="1921" y1="369" x2="1921" y2="509" class="loopLine"/><line x1="1323" y1="509" x2="1921" y2="509" class="loopLine"/><line x1="1323" y1="369" x2="1323" y2="509" class="loopLine"/><polygon points="1323,369 1373,369 1373,382 1364.6,389 1323,389" class="labelBox"/><text x="1348" y="382" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="labelText" style="font-size: 16px; font-weight: 400;">alt</text><text x="1647" y="387" text-anchor="middle" class="loopText" style="font-size: 16px; font-weight: 400;"><tspan x="1647">[Outcome == OutOfControl]</tspan></text></g><g class="actor-man actor-top" name="Op" data-et="participant" data-type="actor" data-id="Op" style="stroke: rgb(212, 212, 212);"><line id="actor-man-torso0" x1="75" y1="25" x2="75" y2="45"/><line id="actor-man-arms0" x1="57" y1="33" x2="93" y2="33"/><line x1="57" y1="60" x2="75" y2="45"/><line x1="75" y1="45" x2="91" y2="60"/><circle cx="75" cy="10" r="15" width="150" height="65"/><text x="75" y="67.5" dominant-baseline="central" alignment-baseline="central" class="actor actor-man" style="text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x="75" dy="0">Operator</tspan></text></g><text x="311" y="80" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="messageText" dy="1em" style="font-size: 16px; font-weight: 400;">POST /api/qc/profiles/{id}/runs {value, operator, measuredAt}</text><line x1="82" y1="109" x2="546" y2="109" class="messageLine0" data-et="message" data-id="i1" data-from="Op" data-to="API" stroke-width="2" stroke="none" marker-end="url(#mmd-61b2eeb9ca6a-arrowhead)" style="fill: none;"/><line x1="75" y1="109" x2="75" y2="109" stroke-width="0" marker-start="url(#mmd-61b2eeb9ca6a-sequencenumber)"/><text x="75" y="113" font-family="sans-serif" font-size="12px" text-anchor="middle" class="sequenceNumber">1</text><text x="664" y="124" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="messageText" dy="1em" style="font-size: 16px; font-weight: 400;">RecordQcRunCommand</text><line x1="557" y1="153" x2="776" y2="153" class="messageLine0" data-et="message" data-id="i2" data-from="API" data-to="H" stroke-width="2" stroke="none" marker-end="url(#mmd-61b2eeb9ca6a-arrowhead)" style="fill: none;"/><line x1="550" y1="153" x2="550" y2="153" stroke-width="0" marker-start="url(#mmd-61b2eeb9ca6a-sequencenumber)"/><text x="550" y="157" font-family="sans-serif" font-size="12px" text-anchor="middle" class="sequenceNumber">2</text><text x="781" y="168" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="messageText" dy="1em" style="font-size: 16px; font-weight: 400;">z = (value − TargetMean) / TargetSd</text><path d="M 781,197 C 841,187 841,227 781,217" class="messageLine0" data-et="message" data-id="i3" data-from="H" data-to="H" stroke-width="2" stroke="none" marker-end="url(#mmd-61b2eeb9ca6a-arrowhead)" x1="787" style="fill: none;"/><line x1="780" y1="197" x2="780" y2="197" stroke-width="0" marker-start="url(#mmd-61b2eeb9ca6a-sequencenumber)"/><text x="780" y="201" font-family="sans-serif" font-size="12px" text-anchor="middle" class="sequenceNumber">3</text><text x="956" y="242" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="messageText" dy="1em" style="font-size: 16px; font-weight: 400;">Evaluate(z, priorZ[], WestgardLimits)</text><line x1="787" y1="271" x2="1130" y2="271" class="messageLine0" data-et="message" data-id="i4" data-from="H" data-to="W" stroke-width="2" stroke="none" marker-end="url(#mmd-61b2eeb9ca6a-arrowhead)" style="fill: none;"/><line x1="780" y1="271" x2="780" y2="271" stroke-width="0" marker-start="url(#mmd-61b2eeb9ca6a-sequencenumber)"/><text x="780" y="275" font-family="sans-serif" font-size="12px" text-anchor="middle" class="sequenceNumber">4</text><text x="959" y="286" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="messageText" dy="1em" style="font-size: 16px; font-weight: 400;">WestgardVerdict(Outcome, ViolatedRules[])</text><line x1="1139" y1="315" x2="784" y2="315" class="messageLine1" data-et="message" data-id="i5" data-from="W" data-to="H" stroke-width="2" stroke="none" marker-end="url(#mmd-61b2eeb9ca6a-arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"/><line x1="1134" y1="315" x2="1134" y2="315" stroke-width="0" marker-start="url(#mmd-61b2eeb9ca6a-sequencenumber)"/><text x="1134" y="319" font-family="sans-serif" font-size="12px" text-anchor="middle" class="sequenceNumber">5</text><text x="1056" y="330" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="messageText" dy="1em" style="font-size: 16px; font-weight: 400;">QcRun.Record(profileId, value, z, verdict, operator, measuredAt)</text><line x1="787" y1="359" x2="1330" y2="359" class="messageLine0" data-et="message" data-id="i6" data-from="H" data-to="P" stroke-width="2" stroke="none" marker-end="url(#mmd-61b2eeb9ca6a-arrowhead)" style="fill: none;"/><line x1="780" y1="359" x2="780" y2="359" stroke-width="0" marker-start="url(#mmd-61b2eeb9ca6a-sequencenumber)"/><text x="780" y="363" font-family="sans-serif" font-size="12px" text-anchor="middle" class="sequenceNumber">6</text><text x="1525" y="419" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="messageText" dy="1em" style="font-size: 16px; font-weight: 400;">QcOutOfControl(runId, profileId, violatedRules)</text><line x1="1341" y1="448" x2="1714" y2="448" class="messageLine0" data-et="message" data-id="i8" data-from="P" data-to="Led" stroke-width="2" stroke="none" marker-end="url(#mmd-61b2eeb9ca6a-arrowhead)" style="fill: none;"/><line x1="1334" y1="448" x2="1334" y2="448" stroke-width="0" marker-start="url(#mmd-61b2eeb9ca6a-sequencenumber)"/><text x="1334" y="452" font-family="sans-serif" font-size="12px" text-anchor="middle" class="sequenceNumber">7</text><g class="actor-man actor-bottom" name="Op" style="stroke: rgb(212, 212, 212);"><line id="actor-man-torso5" x1="75" y1="554" x2="75" y2="574"/><line id="actor-man-arms5" x1="57" y1="562" x2="93" y2="562"/><line x1="57" y1="589" x2="75" y2="574"/><line x1="75" y1="574" x2="91" y2="589"/><circle cx="75" cy="539" r="15" width="150" height="65"/><text x="75" y="596.5" dominant-baseline="central" alignment-baseline="central" class="actor actor-man" style="text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x="75" dy="0">Operator</tspan></text></g></svg></figure>
+
+<h2 id="calculation-specification-westgard-multi-rule">Calculation specification — Westgard multi-rule</h2>
+<p><code>z = (value − TargetMean) / TargetSd</code>, evaluated against <code>WestgardLimits</code>
+(<code>WarningSd</code> default <strong>2</strong>, <code>RejectSd</code> default <strong>3</strong>, <code>RangeSd</code> default <strong>4</strong>, <code>RunLength</code> default
+<strong>10</strong>). Rule labels are <strong>derived from the configured limits</strong>, so the default output is byte-identical
+to the canonical labels.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Condition</th>
+<th>Outcome</th>
+<th>Label emitted</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1-3s</strong></td>
+<td><code>abs(z) &gt; RejectSd</code></td>
+<td>Reject</td>
+<td><code>1-3s</code></td>
+</tr>
+<tr>
+<td><strong>2-2s</strong></td>
+<td>this value <strong>and the immediately prior one</strong> both exceed the <strong>same</strong> <code>±WarningSd</code> limit (same sign)</td>
+<td>Reject</td>
+<td><code>2-2s</code></td>
+</tr>
+<tr>
+<td><strong>R-4s</strong></td>
+<td><code>abs(z − priorZ) &gt; RangeSd</code> <strong>and</strong> the pair lies on opposite sides</td>
+<td>Reject</td>
+<td><code>R-4s</code></td>
+</tr>
+<tr>
+<td><strong>10-x</strong></td>
+<td><code>RunLength</code> consecutive values all on the same side of the mean</td>
+<td>Reject</td>
+<td><code>10-x</code></td>
+</tr>
+<tr>
+<td><strong>1-2s</strong></td>
+<td><code>abs(z) &gt; WarningSd</code>, <strong>only when no rejection rule fired</strong></td>
+<td>Warning</td>
+<td><code>1-2s</code></td>
+</tr>
+<tr>
+<td><em>(none)</em></td>
+<td>otherwise</td>
+<td>InControl</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>WestgardLimits.Validated()</code> refuses a configuration where any limit is ≤ 0, where
+<code>WarningSd &gt;= RejectSd</code>, or where <code>RunLength &lt; 2</code> — the application will not start.</p>
+<h2 id="business-rules">Business rules</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Rule</th>
+<th>Code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>BR-QC-01</strong></td>
+<td><strong>The verdict is computed at entry time and frozen on the run.</strong> Later runs change the window statistics but never re-grade a past verdict — a released result stands on the QC judgement in force when it was made.</td>
+<td><code>WestgardVerdict</code> doc comment</td>
+</tr>
+<tr>
+<td><strong>BR-QC-02</strong></td>
+<td><strong>A QC target change requires a reason.</strong></td>
+<td><code>QC-012</code></td>
+</tr>
+<tr>
+<td><strong>BR-QC-03</strong></td>
+<td><strong>Target changes are forward-only</strong> — the effective date cannot precede the current one.</td>
+<td><code>QC-013</code></td>
+</tr>
+<tr>
+<td><strong>BR-QC-04</strong></td>
+<td>Target changes stamp <code>TargetEffectiveFromUtc</code> and <code>LastTargetChangeReason</code>; the full history lives in the field-change ledger.</td>
+<td><code>UpdateTargets</code></td>
+</tr>
+<tr>
+<td><strong>BR-QC-05</strong></td>
+<td><strong>Troubleshooting notes apply only to out-of-control runs.</strong></td>
+<td><code>QC-010</code></td>
+</tr>
+<tr>
+<td><strong>BR-QC-06</strong></td>
+<td>A troubleshooting note is required when logged.</td>
+<td><code>QC-011</code></td>
+</tr>
+<tr>
+<td><strong>BR-QC-07</strong></td>
+<td>Target SD must be positive (a zero SD makes z undefined).</td>
+<td><code>QC-002</code></td>
+</tr>
+<tr>
+<td><strong>BR-QC-08</strong></td>
+<td>An out-of-control run raises <code>QcOutOfControl</code> carrying the violated-rule list.</td>
+<td><code>QcProfile.cs</code></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="validation-rules">Validation rules</h2>
+<p><code>Analyte</code> required ≤100; <code>Instrument</code> required ≤100; <code>TargetSd</code> &gt; 0; <code>Reason</code> required ≤500;
+<code>Note</code> required ≤2000.</p>
+<h2 id="error-cases">Error cases</h2>
+<p><code>QC-001</code> · <code>QC-002</code> · <code>QC-010</code> · <code>QC-011</code> · <code>QC-012</code> · <code>QC-013</code> · <code>QC-404</code>.</p>
+<h2 id="edge-cases">Edge cases</h2>
+<ul>
+<li><code>GET /api/qc/profiles/{id}/runs?take=60</code> defaults to the <strong>last 60 runs</strong> — the Levey-Jennings chart
+  window. Older runs are not returned unless <code>take</code> is raised.</li>
+<li>The prior-z window used for the 2-2s / R-4s / 10-x rules is drawn from the profile's run history; a
+  back-dated <code>measuredAt</code> does <strong>not</strong> re-order the evaluation window. <strong><code>[Assumption]</code></strong> — the window
+  is built from persisted order, so out-of-order entry can mis-evaluate the multi-rules.</li>
+<li>Deactivating a profile (<code>QcProfile.Deactivate</code>) exists on the aggregate but has <strong>no endpoint</strong> —
+  see Limitations.</li>
+</ul>
+<h2 id="configuration">Configuration</h2>
+<p><code>AnalyticalQuality:Westgard:WarningSd | RejectSd | RangeSd | RunLength</code> — see
+<a href="04-Configuration-Reference.html">Document 04 CFG-08…11</a>.</p>
+<h2 id="performance">Performance</h2>
+<p>Run history is bounded by <code>take</code>; the multi-rule evaluation is O(RunLength).</p>
+<h2 id="security">Security</h2>
+<p>Profile creation and target changes require <code>analytical-quality.manage</code>.</p>
+<h2 id="limitations">Limitations</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Limitation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LIM-QC-01</td>
+<td><strong><code>QcProfile.Deactivate()</code> is unreachable</strong> — no command, no endpoint. A profile cannot be retired. <strong><code>[Dead / Unused]</code></strong></td>
+</tr>
+<tr>
+<td>LIM-QC-02</td>
+<td>No control-level concept (L1/L2/L3): a level is modelled by creating separate profiles. The previous SRS's level selector is <strong>not built</strong> as a first-class field.</td>
+</tr>
+<tr>
+<td>LIM-QC-03</td>
+<td>No cumulative/moving statistics (no rolling mean/SD recalculation, no peer-group comparison).</td>
+</tr>
+<tr>
+<td>LIM-QC-04</td>
+<td>Westgard limits are <strong>global to the deployment</strong>, not per profile or per tenant.</td>
+</tr>
+<tr>
+<td>LIM-QC-05</td>
+<td>No result-release interlock: an out-of-control run does not block anything downstream.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="future-improvements">Future improvements</h2>
+<p>Per-profile Westgard limit overrides; profile deactivation endpoint; control-level field; rolling
+statistics with target re-derivation proposals.</p>
+<h2 id="acceptance-criteria">Acceptance criteria</h2>
+<ul>
+<li><strong>AT-FR-QC-01</strong> — A value at z = 3.5 yields <code>OutOfControl</code> with <code>["1-3s"]</code>.</li>
+<li><strong>AT-FR-QC-02</strong> — Two consecutive values at z = +2.3 yield <code>OutOfControl</code> with <code>["2-2s"]</code>.</li>
+<li><strong>AT-FR-QC-03</strong> — A single value at z = 2.3 with an in-control predecessor yields <code>Warning</code> <code>["1-2s"]</code>.</li>
+<li><strong>AT-FR-QC-04</strong> — Changing targets without a reason returns 422 <code>QC-012</code>; with an earlier effective
+  date, 422 <code>QC-013</code>.</li>
+</ul>
+<hr>
+<h1>M-26 · Analytical studies (twelve types)</h1>
+<p>All twelve follow §3.0. Each subsection gives the module's <strong>parameters, minimum data, calculation and
+verdict</strong>.</p>
+<hr>
+<h2 id="261-method-validation-study-mv-apivalidation-studies">26.1 · Method validation study (<code>MV</code>) — <code>/api/validation-studies</code></h2>
+<p><strong>Parameters:</strong> <code>analyte</code> (≤100), <code>protocol</code> (≤30, a CLSI protocol name), <code>totalAllowableError</code> (TEa, &gt; 0).
+<strong>Data:</strong> replicates of <code>level</code> (Low/Mid/High), <code>measured</code>, optional <code>reference</code>.
+<strong>Minimum:</strong> 2 replicates.
+<strong>States:</strong> <code>ProtocolConfigured → DataEntered → StatsCalculated → SignedOff</code> (this module has its own
+four-state enum rather than the shared three).</p>
+<p><strong>Calculation:</strong></p>
+<pre><code>mean      = average(measured)                       ; refuse if mean == 0  (MV-014)
+variance  = Σ(m − mean)² / (n − 1)
+sd        = √variance
+CV%       = round( sd / |mean| × 100 , 3 )
+MeanBias% = round( average( (measured − reference)/reference × 100 ) , 3 )   ; only replicates with reference &gt; 0
+TotalError = |MeanBias%| + 1.65 × CV%                ; one-sided 95 %
+Passed     = TotalError ≤ TotalAllowableError
+</code></pre>
+<p><strong>Rules:</strong> statistics must be calculated before sign-off (<code>MV-015</code>); a signed-off study is immutable
+(<code>MV-010</code>); a replicate level is required (<code>MV-011</code>).
+<strong>Errors:</strong> <code>MV-001</code>, <code>MV-002</code>, <code>MV-010</code>…<code>MV-015</code>, <code>MV-404</code>.
+<strong>Limitation:</strong> the "CLSI protocol" is a free-text label ≤30 chars — <strong>no protocol-specific logic runs</strong>.
+The previous SRS's four protocol cards (EP05/EP09/EP06/EP17) map to <em>separate modules</em> in this system
+(precision, method comparison, linearity, detection limit), not to a protocol switch here.</p>
+<hr>
+<h2 id="262-precision-study-pr-apiprecision-studies">26.2 · Precision study (<code>PR</code>) — <code>/api/precision-studies</code></h2>
+<p><strong>Parameters:</strong> <code>analyte</code>, <code>unit</code>, <code>level</code> (≤100), optional <code>claimedRepeatabilityCvPct</code>,
+<code>claimedWithinLabCvPct</code> (positive when given).
+<strong>Data:</strong> measurements of <code>runLabel</code> + <code>value</code>; replicates are grouped by run label.
+<strong>Minimum:</strong> ≥ <strong>2 runs</strong> (<code>PR-010</code>), each with ≥ <strong>2 replicates</strong> (<code>PR-011</code>).</p>
+<p><strong>Calculation — one-way ANOVA (CLSI EP05 style):</strong></p>
+<pre><code>k   = number of runs ; n = total measurements ; grand = mean(all)
+SSwithin  = Σ_runs Σ_i (x_i − runMean)²          dfWithin  = n − k
+SSbetween = Σ_runs len(run) × (runMean − grand)²  dfBetween = k − 1
+MSwithin  = SSwithin / dfWithin                  ; repeatability variance
+MSbetween = SSbetween / dfBetween
+n₀        = ( n − Σ len(run)² / n ) / dfBetween  ; = common replicate count when balanced
+betweenVar = max( 0 , (MSbetween − MSwithin) / n₀ )
+
+RepeatabilitySd = √MSwithin
+BetweenRunSd    = √betweenVar
+WithinLabSd     = √( MSwithin + betweenVar )
+each CV%        = sd / grand × 100
+MeetsRepeatabilityClaim = RepeatabilityCvPct ≤ claimedRepeatabilityCvPct   (null when no claim)
+MeetsWithinLabClaim     = WithinLabCvPct     ≤ claimedWithinLabCvPct       (null when no claim)
+</code></pre>
+<p><strong>Note:</strong> <code>betweenVar</code> is floored at zero — a negative between-run variance estimate (possible when
+<code>MSbetween &lt; MSwithin</code>) is reported as zero, not as a negative variance.</p>
+<p><strong>Errors:</strong> <code>PR-001</code>, <code>PR-002</code>, <code>PR-003</code> (run label required), <code>PR-010</code>…<code>PR-013</code>, <code>PR-404</code>.
+<strong>Import:</strong> <code>POST /{id}/measurements/import</code> accepts a CSV batch.</p>
+<hr>
+<h2 id="263-method-comparison-study-mc-apimethod-comparisons">26.3 · Method comparison study (<code>MC</code>) — <code>/api/method-comparisons</code></h2>
+<p><strong>Parameters:</strong> <code>analyte</code>, <code>unit</code>, <code>referenceMethod</code> (X, ≤200), <code>testMethod</code> (Y, ≤200).
+<strong>Data:</strong> measurement pairs (<code>referenceValue</code>, <code>testValue</code>, optional <code>sampleId</code>); values must be
+positive (<code>MC-003</code>).
+<strong>Minimum:</strong> 2 pairs (<code>MC-010</code>); <strong>40 pairs is the documented recommendation</strong>
+(<code>RecommendedMinimumPairs = 40</code>, CLSI EP09) but is <strong>not enforced</strong>.</p>
+<p><strong>Calculation:</strong></p>
+<pre><code>Pearson r = Sxy / √(Sxx · Syy)                     ; refuse if Sxx == 0 or Syy == 0 (MC-011)
+
+Deming regression, λ = 1 (ordinary Deming):
+  slope     = ( Syy − λ·Sxx + √( (Syy − λ·Sxx)² + 4·λ·Sxy² ) ) / (2·Sxy)
+  intercept = meanY − slope · meanX
+
+Passing–Bablok: non-parametric median-of-pairwise-slopes fit
+  (slope, intercept) = PassingBablok(x, y)
+
+Bland–Altman agreement on d_i = y_i − x_i :
+  MeanBias              = mean(d)
+  BiasSd                = sample SD of d
+  LimitOfAgreementLower = MeanBias − 1.96 · BiasSd      [Assumption: standard ±1.96 SD]
+  LimitOfAgreementUpper = MeanBias + 1.96 · BiasSd
+</code></pre>
+<p><strong>Errors:</strong> <code>MC-001</code>…<code>MC-003</code>, <code>MC-010</code>…<code>MC-013</code>, <code>MC-404</code>.
+<strong>Import:</strong> <code>POST /{id}/pairs/import</code> (CSV).
+<strong>Limitation:</strong> there is <strong>no acceptance verdict</strong> — the study reports statistics but does not grade
+pass/fail against a criterion. Interpretation is the signer's judgement.</p>
+<hr>
+<h2 id="264-linearity-study-lin-apilinearity-studies">26.4 · Linearity study (<code>LIN</code>) — <code>/api/linearity-studies</code></h2>
+<p><strong>Parameters:</strong> <code>analyte</code>, <code>unit</code>, <code>method</code> (≤300), <code>allowableDeviationPct</code> (&gt; 0, ≤ 50).
+<strong>Data:</strong> measurements of <code>assignedValue</code> (must be positive, <code>LIN-003</code>) and <code>measuredValue</code>.
+<strong>Minimum:</strong> <strong>4 distinct levels</strong> (<code>MinimumLevels = 4</code>; the message notes EP06 recommends 5–9).</p>
+<p><strong>Calculation:</strong></p>
+<pre><code>Levels are grouped by assigned value; x = assigned, y = mean(measured) per level.
+slope     = Sxy / Sxx                     ; refuse if Sxx == 0 (LIN-011)
+intercept = meanY − slope·meanX
+r         = Sxy / √(Sxx·Syy)              ; 1 when Syy == 0
+Per-level deviation is assessed against allowableDeviationPct.
+IsLinear  = every level passes.
+
+Verified AMR (analytical measuring range):
+  When the full range fails, sub-ranges are REFITTED on their own levels
+  (EP06 range-restriction practice) — because a nonlinear extreme also distorts
+  the full-range fit. AmrLow/AmrHigh = the passing contiguous window with the
+  MOST levels; ties broken by the wider span.
+</code></pre>
+<p><strong>Errors:</strong> <code>LIN-001</code>…<code>LIN-003</code>, <code>LIN-010</code>…<code>LIN-013</code>, <code>LIN-404</code>.</p>
+<hr>
+<h2 id="265-detection-limit-study-dl-apidetection-limit-studies">26.5 · Detection limit study (<code>DL</code>) — <code>/api/detection-limit-studies</code></h2>
+<p><strong>Parameters:</strong> <code>analyte</code>, <code>unit</code>, <code>method</code> (≤300), <code>loqCvTargetPct</code> (&gt; 0, ≤ 50).
+<strong>Data:</strong> measurements of kind <code>Blank</code> (no assigned value — <code>DL-004</code>) or <code>LowLevel</code> (positive assigned
+concentration required — <code>DL-003</code>).
+<strong>Minimum:</strong> <strong>10 blank replicates</strong> and <strong>10 low-level replicates</strong>; every low-level sample needs ≥ 2
+replicates so a within-sample SD can be pooled (<code>DL-012</code>).</p>
+<p><strong>Calculation (CLSI EP17):</strong> with <code>Z = 1.645</code> (one-sided 95 %)</p>
+<pre><code>BlankMean = mean(blanks)
+BlankSd   = sample SD(blanks)
+LoB       = BlankMean + Z · BlankSd
+
+Pooled low-level SD: for each assigned-value group with ≥ 2 replicates,
+  SSwithin += Σ(v − groupMean)² ; dfWithin += n − 1
+  PooledLowSd = √( SSwithin / dfWithin )
+LoD       = LoB + Z · PooledLowSd
+
+LoQ (functional sensitivity) = the LOWEST assigned level that meets the CV goal
+            (loqCvTargetPct) at or above the LoD; null when no level qualifies.
+</code></pre>
+<p>All results rounded to 4 decimals.</p>
+<p><strong>Errors:</strong> <code>DL-001</code>…<code>DL-004</code>, <code>DL-010</code>…<code>DL-014</code>, <code>DL-404</code>.</p>
+<hr>
+<h2 id="266-reference-interval-study-ri-apireference-interval-studies">26.6 · Reference interval study (<code>RI</code>) — <code>/api/reference-interval-studies</code></h2>
+<p><strong>Parameters:</strong> <code>analyte</code>, <code>unit</code>, <code>population</code> (≤150), <code>source</code> (≤300 — required "for traceability"),
+<code>claimedLower</code>, <code>claimedUpper</code> (upper must exceed lower, <code>RI-003</code>).
+<strong>Data:</strong> reference samples (<code>value</code>, optional <code>subjectRef</code>).
+<strong>Minimum:</strong> <strong>20 samples</strong> (<code>RecommendedSampleCount = 20</code>, CLSI EP28-A3c).</p>
+<p><strong>Calculation — verification of a claimed interval:</strong></p>
+<pre><code>outside = count( value &lt; ClaimedLower OR value &gt; ClaimedUpper )
+allowed = floor( sampleCount × AllowedOutsideFraction )      ; AllowedOutsideFraction = 0.10
+Verdict = outside ≤ allowed ? Verified : Rejected
+</code></pre>
+<p>This is <strong>verification of a transferred interval</strong>, not de-novo interval derivation — the system never
+computes percentiles to establish a new interval.</p>
+<p><strong>Errors:</strong> <code>RI-001</code>…<code>RI-003</code>, <code>RI-010</code>…<code>RI-012</code>, <code>RI-404</code>.</p>
+<hr>
+<h2 id="267-carryover-study-car-apicarryover-studies">26.7 · Carryover study (<code>CAR</code>) — <code>/api/carryover-studies</code></h2>
+<p><strong>Parameters:</strong> <code>analyte</code>, <code>unit</code>, <code>allowableCarryoverPct</code> (&gt; 0, ≤ 50).
+<strong>Data:</strong> readings of kind <code>High</code> or <code>Low</code>, each with a <code>sequence</code>.
+<strong>Minimum:</strong> ≥ 1 high reading, ≥ 3 low readings ("first low + steady state").</p>
+<p><strong>Calculation:</strong></p>
+<pre><code>meanHigh  = mean(High readings)
+firstLow  = the Low reading with the LOWEST sequence
+steadyLow = mean(remaining Low readings, ordered by sequence)
+refuse if meanHigh == steadyLow                                  (CAR-012)
+Carryover% = (firstLow − steadyLow) / (meanHigh − steadyLow) × 100
+Passes     = |Carryover%| ≤ allowableCarryoverPct
+</code></pre>
+<p><strong>Errors:</strong> <code>CAR-001</code>, <code>CAR-002</code>, <code>CAR-010</code>…<code>CAR-014</code>, <code>CAR-404</code>.</p>
+<hr>
+<h2 id="268-interference-study-int-apiinterference-studies">26.8 · Interference study (<code>INT</code>) — <code>/api/interference-studies</code></h2>
+<p><strong>Parameters:</strong> <code>analyte</code>, <code>unit</code>, <code>allowableBiasPct</code> (&gt; 0, ≤ 100 — note the wider bound than the other
+modules).
+<strong>Data:</strong> control readings (<code>AddControl(value)</code>) and test readings (<code>AddTest(interferent, value)</code> — the
+interferent name is required, <code>INT-003</code>).
+<strong>Minimum:</strong> <strong>3 control replicates</strong>; ≥ 1 interferent test set.</p>
+<p><strong>Calculation:</strong></p>
+<pre><code>controlMean = mean(controls)     ; refuse if zero (INT-012)
+Tests are grouped by interferent.
+InterferentCount = number of distinct interferents
+For each interferent: bias% vs controlMean; SignificantInterference when |bias%| &gt; allowableBiasPct
+SignificantCount = count of interferents with significant interference
+</code></pre>
+<p><strong>Errors:</strong> <code>INT-001</code>…<code>INT-003</code>, <code>INT-010</code>…<code>INT-014</code>, <code>INT-404</code>.</p>
+<hr>
+<h2 id="269-lot-comparison-study-lot-apilot-comparisons">26.9 · Lot comparison study (<code>LOT</code>) — <code>/api/lot-comparisons</code></h2>
+<p><strong>Parameters:</strong> <code>analyte</code>, <code>unit</code>, <code>currentLot</code> (≤60), <code>newLot</code> (≤60), <code>allowableBiasPct</code> (&gt; 0, ≤ 50).
+<strong>Data:</strong> paired samples (<code>currentLotValue</code>, <code>newLotValue</code>, optional <code>sampleId</code>); values must be
+positive (<code>LOT-004</code>).
+<strong>Minimum:</strong> <strong>3 pairs</strong>.</p>
+<p><strong>Calculation:</strong></p>
+<pre><code>meanCurrent = mean(currentLotValue)   ; refuse if zero (LOT-011)
+meanNew     = mean(newLotValue)
+MeanBias%   = (meanNew − meanCurrent) / meanCurrent × 100
+Passes      = |MeanBias%| ≤ allowableBiasPct
+</code></pre>
+<p><strong>Errors:</strong> <code>LOT-001</code>…<code>LOT-004</code>, <code>LOT-010</code>…<code>LOT-013</code>, <code>LOT-404</code>.</p>
+<hr>
+<h2 id="2610-instrument-comparability-study-icp-apiinstrument-comparabilities">26.10 · Instrument comparability study (<code>ICP</code>) — <code>/api/instrument-comparabilities</code></h2>
+<p><strong>Parameters:</strong> <code>analyte</code>, <code>unit</code>, <code>referenceInstrument</code> (≤100), <code>allowableBiasPct</code> (&gt; 0, ≤ 50).
+<strong>Data:</strong> readings of <code>instrument</code>, <code>sampleId</code>, <code>value</code> (both identifiers required, <code>ICP-004</code>).</p>
+<p><strong>Calculation:</strong></p>
+<pre><code>Reference readings are indexed by sampleId (case-insensitive instrument matching).
+refuse if the reference instrument has no readings          (ICP-010)
+refuse if there is no non-reference instrument              (ICP-011)
+refuse if ANY instrument shares no sample with the reference (ICP-012)
+Per non-reference instrument: paired bias% against the reference on shared samples;
+  Comparable = |bias%| ≤ allowableBiasPct
+InstrumentCount    = number of non-reference instruments
+NonComparableCount = how many failed
+</code></pre>
+<p><strong>Errors:</strong> <code>ICP-001</code>…<code>ICP-004</code>, <code>ICP-010</code>…<code>ICP-014</code>, <code>ICP-404</code>.</p>
+<hr>
+<h2 id="2611-outlier-screening-out-apioutlier-screenings">26.11 · Outlier screening (<code>OUT</code>) — <code>/api/outlier-screenings</code></h2>
+<p><strong>Parameters:</strong> <code>dataset</code> (≤200), <code>unit</code>. <em>(No acceptance criterion — this is a diagnostic.)</em>
+<strong>Data:</strong> points of <code>value</code> and optional <code>label</code>.
+<strong>Minimum:</strong> <strong>4 points</strong>.</p>
+<p><strong>Calculation:</strong></p>
+<pre><code>mean, sample SD, median
+Q1 = quantile(0.25) ; Q3 = quantile(0.75) ; IQR = Q3 − Q1
+TukeyLower = Q1 − 1.5 · IQR
+TukeyUpper = Q3 + 1.5 · IQR
+MAD        = median( |v − median| )
+OutlierCount = count of points flagged by IsOutlier(value, mean, sd, median, mad, q1, q3, iqr)
+</code></pre>
+<p>The flagging function combines the z-score, the <strong>robust MAD-based</strong> score and the Tukey fence — a
+multi-criteria screen rather than a single test. <strong><code>[Assumption]</code></strong> — the exact combination logic lives
+in the private <code>IsOutlier</code> helper; the reported <code>TukeyLower/Upper</code> bounds and <code>OutlierCount</code> are the
+contractual outputs.</p>
+<p><strong>Errors:</strong> <code>OUT-001</code>, <code>OUT-010</code>…<code>OUT-012</code>, <code>OUT-404</code>.</p>
+<hr>
+<h2 id="2612-sigma-metric-assessment-sig-apisigma-assessments">26.12 · Sigma metric assessment (<code>SIG</code>) — <code>/api/sigma-assessments</code></h2>
+<p><strong>Parameters:</strong> <code>analyte</code>, <code>unit</code>, <code>allowableTotalErrorPct</code> (&gt; 0), <code>biasPct</code>, <code>cvPct</code> (&gt; 0 — "sigma is
+undefined at zero imprecision", <code>SIG-003</code>).
+<strong>States:</strong> <code>Draft → SignedOff</code> (a two-state variant — there is no separate <code>Calculated</code>; the sigma is
+computed on every <code>SetInputs</code>).
+<strong>Endpoints:</strong> <code>PUT /api/sigma-assessments/{id}</code> updates the inputs; <code>POST /{id}/sign-off</code>.</p>
+<p><strong>Calculation:</strong></p>
+<pre><code>numerator  = AllowableTotalErrorPct − |BiasPct|
+SigmaValue = numerator ≤ 0 ? 0 : round( numerator / CvPct , 2 )
+</code></pre>
+<p><strong>Grade table (decision table):</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Sigma</th>
+<th>Grade</th>
+<th>QC recommendation emitted</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>≥ 6</td>
+<td><code>WorldClass</code></td>
+<td>1:3s, N=2, R=1 — a single rule with minimal QC (world-class capability).</td>
+</tr>
+<tr>
+<td>≥ 5</td>
+<td><code>Excellent</code></td>
+<td>1:3s / 2:2s / R:4s, N=2, R=1 — a short multirule.</td>
+</tr>
+<tr>
+<td>≥ 4</td>
+<td><code>Good</code></td>
+<td>1:3s / 2:2s / R:4s / 4:1s, N=4, R=1 — full multirule.</td>
+</tr>
+<tr>
+<td>≥ 3</td>
+<td><code>Marginal</code></td>
+<td>1:3s / 2:2s / R:4s / 4:1s / 8:x, N=6 — maximum multirule QC.</td>
+</tr>
+<tr>
+<td>&lt; 3</td>
+<td><code>Unacceptable</code></td>
+<td><em>(see <code>QcRecommendation</code> for the sub-3 text)</em></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>The recommended QC rule sets in this table reference rules (<code>4:1s</code>, <code>8:x</code>) that the <strong>Westgard
+evaluator does not implement</strong>. The recommendation is advisory text, not an executable configuration.</p>
+</blockquote>
+<p><strong>Rules:</strong> a signed-off assessment is immutable (<code>SIG-010</code>); already signed off (<code>SIG-011</code>).
+<strong>Errors:</strong> <code>SIG-001</code>…<code>SIG-003</code>, <code>SIG-010</code>, <code>SIG-011</code>, <code>SIG-404</code>.</p>
+<blockquote>
+<p><strong>Prefix collision:</strong> <code>SIG-001/002/003</code> are used <strong>both</strong> for sigma-assessment validation <strong>and</strong> for
+e-signature failures (incorrect PIN, incorrect password, locked account). Two entirely different
+meanings share three codes. See <a href="14-Technical-Debt-Report.html">Document 14</a>.</p>
+</blockquote>
+<hr>
+<h2 id="2613-measurement-uncertainty-budget-mu-apiuncertainty-budgets">26.13 · Measurement uncertainty budget (<code>MU</code>) — <code>/api/uncertainty-budgets</code></h2>
+<p><strong>Purpose:</strong> builds a GUM-style uncertainty budget from Type A and Type B components and expands it.
+<strong>Parameters:</strong> <code>analyte</code> (≤200), <code>method</code> (≤300), <code>unit</code>, <code>level</code> (≤100), <code>coverageFactor</code> k
+(<strong>1–4</strong>, "k=2 ≈ 95 %"), optional <code>targetExpandedUncertainty</code> (positive when set).
+<strong>Data:</strong> components of <code>name</code> (≤300), <code>type</code> (<code>TypeA | TypeB</code>), <code>relativeStandardUncertainty</code> (≥ 0),
+optional <code>source</code> (≤500).
+<strong>States:</strong> <code>Draft → Calculated → Approved</code> (uses <strong><code>Approve</code></strong>, not <code>SignOff</code>).
+<strong>Minimum:</strong> ≥ 1 component (<code>MU-007</code>).</p>
+<p><strong>Calculation (root-sum-square):</strong></p>
+<pre><code>u_c = √( Σ u_i² )                     over all components' relative standard uncertainties
+U   = k · u_c                          rounded to 4 decimals
+MeetsTarget = TargetExpandedUncertainty is set ? (U ≤ target) : null
+</code></pre>
+<p><strong>Rules:</strong> only a calculated budget can be approved (<code>MU-010</code>); <strong>an approved budget is immutable —
+"create a successor budget to revise"</strong> (<code>MU-011</code>), enforced by the database trigger as well.
+<strong>Errors:</strong> <code>MU-001</code>…<code>MU-007</code>, <code>MU-010</code>, <code>MU-011</code>, <code>MU-404</code>.
+<strong>Limitation:</strong> components are <strong>relative</strong> standard uncertainties only; there is no sensitivity
+coefficient, no distribution/divisor helper (rectangular ÷√3, triangular ÷√6), and no absolute-value
+input. The analyst must pre-convert every contribution to a relative standard uncertainty by hand.</p>
+<hr>
+<h1>M-27 · Proficiency testing &amp; PT plans (<code>PT</code>)</h1>
+<h2 id="purpose">Purpose</h2>
+<p>Two related capabilities: an <strong>annual PT plan</strong> (which schemes and analytes will be enrolled, how many
+cycles, and whether they were fulfilled) and <strong>PT enrolments</strong> with z-score performance grading.</p>
+<h2 id="business-goal">Business goal</h2>
+<p>ISO/IEC 17025 §7.7.2 — participate in interlaboratory comparison or proficiency testing where
+available and appropriate; monitor performance and act on unsatisfactory results.</p>
+<h2 id="actors">Actors</h2>
+<p><code>proficiency-testing.create</code> (create plan, add lines, enrol); <code>.approve</code> (approve plan);
+<code>.void</code>/<code>.edit</code> (close plan, record fulfilment, record results).</p>
+<h2 id="inputs">Inputs</h2>
+<p><strong>Plan:</strong> <code>year</code>; lines of <code>scheme</code> (≤200), <code>analyte</code> (≤200), <code>provider</code> (≤200), <code>plannedCycles</code>
+(<strong>1–52</strong>), <code>notes</code> (≤1000); closure <code>closureSummary</code> (≤4000).
+<strong>Enrolment:</strong> <code>ptRef</code>, <code>scheme</code>, <code>analyte</code>, <code>cycle</code>; result: <code>submitted</code>, <code>assigned</code>,
+<code>standardDeviation</code> (&gt; 0).</p>
+<h2 id="outputs">Outputs</h2>
+<p><code>PtPlan</code> (Draft/Approved/Closed) with <code>PtPlanItem</code> lines carrying <code>PlannedCycles</code>, <code>FulfilledCycles</code>
+and <code>LastEnrollmentRef</code>; <code>PtEnrollment</code> with <code>ZScore</code> and <code>Performance</code>; event <code>PtUnsatisfactory</code>;
+automatically raised NC.</p>
+<h2 id="dependencies">Dependencies</h2>
+<p><code>NC</code> (<code>PtToNcPolicy</code>), <code>NTF</code>, <code>RPT</code> (the <code>PtUnsatisfactory</code> KPI).</p>
+<h2 id="workflow-wf-15">Workflow — <code>WF-15</code></h2>
+<figure class="d"><svg width="745" height="642" preserveAspectRatio="xMidYMid meet" id="mmd-020ba0bf6ee1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="statediagram" style="max-width:745px;height:auto" viewBox="0 0 744.6609497070312 642.0999755859375" role="graphics-document document" aria-roledescription="stateDiagram"><style>#mmd-020ba0bf6ee1{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;fill:#000000;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#mmd-020ba0bf6ee1 .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#mmd-020ba0bf6ee1 .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#mmd-020ba0bf6ee1 .error-icon{fill:#552222;}#mmd-020ba0bf6ee1 .error-text{fill:#552222;stroke:#552222;}#mmd-020ba0bf6ee1 .edge-thickness-normal{stroke-width:1px;}#mmd-020ba0bf6ee1 .edge-thickness-thick{stroke-width:3.5px;}#mmd-020ba0bf6ee1 .edge-pattern-solid{stroke-dasharray:0;}#mmd-020ba0bf6ee1 .edge-thickness-invisible{stroke-width:0;fill:none;}#mmd-020ba0bf6ee1 .edge-pattern-dashed{stroke-dasharray:3;}#mmd-020ba0bf6ee1 .edge-pattern-dotted{stroke-dasharray:2;}#mmd-020ba0bf6ee1 .marker{fill:#666;stroke:#666;}#mmd-020ba0bf6ee1 .marker.cross{stroke:#666;}#mmd-020ba0bf6ee1 svg{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;}#mmd-020ba0bf6ee1 p{margin:0;}#mmd-020ba0bf6ee1 defs [id$="-barbEnd"]{fill:#000;stroke:#000;}#mmd-020ba0bf6ee1 g.stateGroup text{fill:#999;stroke:none;font-size:10px;}#mmd-020ba0bf6ee1 g.stateGroup text{fill:#000000;stroke:none;font-size:10px;}#mmd-020ba0bf6ee1 g.stateGroup .state-title{font-weight:bolder;fill:#111111;}#mmd-020ba0bf6ee1 g.stateGroup rect{fill:#eee;stroke:#999;}#mmd-020ba0bf6ee1 g.stateGroup line{stroke:#666;stroke-width:1;}#mmd-020ba0bf6ee1 .transition{stroke:#000;stroke-width:1;fill:none;}#mmd-020ba0bf6ee1 .stateGroup .composit{fill:#ffffff;border-bottom:1px;}#mmd-020ba0bf6ee1 .stateGroup .alt-composit{fill:#e0e0e0;border-bottom:1px;}#mmd-020ba0bf6ee1 .state-note{stroke:#999;fill:#666;}#mmd-020ba0bf6ee1 .state-note text{fill:#fff;stroke:none;font-size:10px;}#mmd-020ba0bf6ee1 .stateLabel .box{stroke:none;stroke-width:0;fill:#eee;opacity:0.5;}#mmd-020ba0bf6ee1 .edgeLabel .label rect{fill:#eee;opacity:0.5;}#mmd-020ba0bf6ee1 .edgeLabel{background-color:white;text-align:center;}#mmd-020ba0bf6ee1 .edgeLabel p{background-color:white;}#mmd-020ba0bf6ee1 .edgeLabel rect{opacity:0.5;background-color:white;fill:white;}#mmd-020ba0bf6ee1 .edgeLabel .label text{fill:#000000;}#mmd-020ba0bf6ee1 .label div .edgeLabel{color:#000000;}#mmd-020ba0bf6ee1 .stateLabel text{fill:#111111;font-size:10px;font-weight:bold;}#mmd-020ba0bf6ee1 .node circle.state-start{fill:#222;stroke:#222;}#mmd-020ba0bf6ee1 .node .fork-join{fill:#222;stroke:#222;}#mmd-020ba0bf6ee1 .node circle.state-end{fill:hsl(0, 0%, 83.3333333333%);stroke:#ffffff;stroke-width:1.5;}#mmd-020ba0bf6ee1 .end-state-inner{fill:#ffffff;stroke-width:1.5;}#mmd-020ba0bf6ee1 .node rect{fill:#eee;stroke:#000;stroke-width:1px;}#mmd-020ba0bf6ee1 .node polygon{fill:#eee;stroke:#000;stroke-width:1px;}#mmd-020ba0bf6ee1 [id$="-barbEnd"]{fill:#666;}#mmd-020ba0bf6ee1 .statediagram-cluster rect{fill:#eee;stroke:#000;stroke-width:1px;}#mmd-020ba0bf6ee1 .cluster-label,#mmd-020ba0bf6ee1 .nodeLabel{color:#111111;}#mmd-020ba0bf6ee1 .statediagram-cluster rect.outer{rx:5px;ry:5px;}#mmd-020ba0bf6ee1 .statediagram-state .divider{stroke:#000;}#mmd-020ba0bf6ee1 .statediagram-state .title-state{rx:5px;ry:5px;}#mmd-020ba0bf6ee1 .statediagram-cluster.statediagram-cluster .inner{fill:#ffffff;}#mmd-020ba0bf6ee1 .statediagram-cluster.statediagram-cluster-alt .inner{fill:#f4f4f4;}#mmd-020ba0bf6ee1 .statediagram-cluster .inner{rx:0;ry:0;}#mmd-020ba0bf6ee1 .statediagram-state rect.basic{rx:5px;ry:5px;}#mmd-020ba0bf6ee1 .statediagram-state rect.divider{stroke-dasharray:10,10;fill:#f4f4f4;}#mmd-020ba0bf6ee1 .note-edge{stroke-dasharray:5;}#mmd-020ba0bf6ee1 .statediagram-note rect{fill:#666;stroke:#999;stroke-width:1px;rx:0;ry:0;}#mmd-020ba0bf6ee1 .statediagram-note rect{fill:#666;stroke:#999;stroke-width:1px;rx:0;ry:0;}#mmd-020ba0bf6ee1 .statediagram-note text{fill:#fff;}#mmd-020ba0bf6ee1 .statediagram-note .nodeLabel{color:#fff;}#mmd-020ba0bf6ee1 .statediagram .edgeLabel{color:red;}#mmd-020ba0bf6ee1 [id$="-dependencyStart"],#mmd-020ba0bf6ee1 [id$="-dependencyEnd"]{fill:#666;stroke:#666;stroke-width:1;}#mmd-020ba0bf6ee1 .statediagramTitleText{text-anchor:middle;font-size:18px;fill:#000000;}#mmd-020ba0bf6ee1 [data-look="neo"].statediagram-cluster rect{fill:#eee;stroke:url(#mmd-020ba0bf6ee1-gradient);stroke-width:1;}#mmd-020ba0bf6ee1 [data-look="neo"].statediagram-cluster rect.outer{rx:5px;ry:5px;filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-020ba0bf6ee1 .node .neo-node{stroke:#999;}#mmd-020ba0bf6ee1 [data-look="neo"].node rect,#mmd-020ba0bf6ee1 [data-look="neo"].cluster rect,#mmd-020ba0bf6ee1 [data-look="neo"].node polygon{stroke:url(#mmd-020ba0bf6ee1-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-020ba0bf6ee1 [data-look="neo"].swimlane.cluster rect{filter:none;}#mmd-020ba0bf6ee1 [data-look="neo"].node path{stroke:url(#mmd-020ba0bf6ee1-gradient);stroke-width:1px;}#mmd-020ba0bf6ee1 [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-020ba0bf6ee1 [data-look="neo"].node .neo-line path{stroke:#999;filter:none;}#mmd-020ba0bf6ee1 [data-look="neo"].node circle{stroke:url(#mmd-020ba0bf6ee1-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-020ba0bf6ee1 [data-look="neo"].node circle .state-start{fill:#000000;}#mmd-020ba0bf6ee1 [data-look="neo"].icon-shape .icon{fill:url(#mmd-020ba0bf6ee1-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-020ba0bf6ee1 [data-look="neo"].icon-shape .icon-neo path{stroke:url(#mmd-020ba0bf6ee1-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-020ba0bf6ee1 :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><g><defs><marker id="my-svg_stateDiagram-barbEnd" refX="19" refY="7" markerWidth="20" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto"><path d="M 19,7 L9,13 L14,7 L9,1 Z"/></marker></defs><g class="root"><g class="clusters"/><g class="edgePaths"/><g class="edgeLabels"/><g class="nodes"><g class="root" transform="translate(0, 0)"><g class="clusters"><g class="statediagram-state statediagram-cluster" id="my-svg-state-P-0" data-id="P" data-look="classic"><g><rect class="outer" x="8" y="8" width="438.6609375011176" height="626.1000000014901" data-look="classic"/></g><g class="cluster-label" transform="translate(204.4867187505588, 9)"><foreignObject width="45.6875" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5;"><span class="nodeLabel"><p>PT plan</p></span></div></foreignObject></g><rect class="inner" x="8" y="31" width="438.6609375011176" height="599.1000000014901"/></g></g><g class="edgePaths"><path d="M191.922,59.5L191.922,67.5C191.922,75.5,191.922,91.5,191.922,107.5C191.922,123.5,191.922,139.5,191.922,147.5L191.922,155.5" id="my-svg-edge0" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge0" data-points="W3sieCI6MTkxLjkyMTg3NSwieSI6NTkuNX0seyJ4IjoxOTEuOTIxODc1LCJ5IjoxMDcuNX0seyJ4IjoxOTEuOTIxODc1LCJ5IjoxNTUuNX1d" data-look="classic" marker-end="url(#mmd-020ba0bf6ee1_stateDiagram-barbEnd)"/><path d="M215.391,187.412L233.936,198.01C252.481,208.608,289.571,229.804,308.116,250.152C326.661,270.5,326.661,290,326.661,299.75L326.661,309.5" id="my-svg-edge2" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge2" data-points="W3sieCI6MjE1LjM5MDYyNSwieSI6MTg3LjQxMTgwMjkwNTk2ODc4fSx7IngiOjMyNi42NjA5Mzc1MDExMTc2LCJ5IjoyNTF9LHsieCI6MzI2LjY2MDkzNzUwMTExNzYsInkiOjMwOS41fV0=" data-look="classic" marker-end="url(#mmd-020ba0bf6ee1_stateDiagram-barbEnd)"/><path d="M325.657,346.5L325.224,354.5C324.79,362.5,323.922,378.5,323.488,394.5C323.054,410.5,323.054,426.5,323.054,434.5L323.054,442.5" id="my-svg-edge4" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge4" data-points="W3sieCI6MzI1LjY1NzQ3NzY3OTU4NTQsInkiOjM0Ni41fSx7IngiOjMyMy4wNTM5MDYyNTA3NDUwNiwieSI6Mzk0LjV9LHsieCI6MzIzLjA1MzkwNjI1MDc0NTA2LCJ5Ijo0NDIuNX1d" data-look="classic" marker-end="url(#mmd-020ba0bf6ee1_stateDiagram-barbEnd)"/><path d="M183.749,192.5L181.982,196.5C180.215,200.5,176.681,208.5,181.172,212.5C185.664,216.5,198.18,216.5,202.671,212.5C207.163,208.5,203.629,200.5,201.862,196.5L200.095,192.5" id="my-svg-edge1" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge1" data-points="W3sieCI6MTgzLjc0OTIyNzk0MTE3NjQ2LCJ5IjoxOTIuNX0seyJ4IjoxNzMuMTQ2ODc1LCJ5IjoyMTYuNX0seyJ4IjoyMTAuNjk2ODc1LCJ5IjoyMTYuNX0seyJ4IjoyMDAuMDk0NTIyMDU4ODIzNTQsInkiOjE5Mi41fV0=" data-look="classic" marker-end="url(#mmd-020ba0bf6ee1_stateDiagram-barbEnd)"/><path d="M313.281,346.5L310.388,350.5C307.495,354.5,301.709,362.5,309.062,366.5C316.415,370.5,336.907,370.5,344.26,366.5C351.613,362.5,345.827,354.5,342.934,350.5L340.041,346.5" id="my-svg-edge3" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge3" data-points="W3sieCI6MzEzLjI4MTA4NDU1OTk0MTEsInkiOjM0Ni41fSx7IngiOjI5NS45MjM0Mzc1MDExMTc2LCJ5IjozNzAuNX0seyJ4IjozNTcuMzk4NDM3NTAxMTE3NiwieSI6MzcwLjV9LHsieCI6MzQwLjA0MDc5MDQ0MjI5NDA1LCJ5IjozNDYuNX1d" data-look="classic" marker-end="url(#mmd-020ba0bf6ee1_stateDiagram-barbEnd)"/></g><g class="edgeLabels"><g class="edgeLabel" transform="translate(191.921875, 107.5)"><g class="label" data-id="edge0" transform="translate(-37.296875, -10.5)"><foreignObject width="74.59375" height="21"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"><p>Create(year)</p></span></div></foreignObject></g></g><g class="edgeLabel" transform="translate(191.921875, 231)"><g class="label" data-id="edge1" transform="translate(-71.9609375, -10.5)"><foreignObject width="143.921875" height="21"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"><p>AddItem / RemoveItem</p></span></div></foreignObject></g></g><g class="edgeLabel" transform="translate(326.6609375011176, 251)"><g class="label" data-id="edge2" transform="translate(-100, -21)"><foreignObject width="200" height="42"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="edgeLabel"><p>Approve            %% refused when empty</p></span></div></foreignObject></g></g><g class="edgeLabel" transform="translate(326.6609375011176, 395.5)"><g class="label" data-id="edge3" transform="translate(-100, -21)"><foreignObject width="200" height="42"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="edgeLabel"><p>RecordFulfilment(itemId, enrollmentRef)</p></span></div></foreignObject></g></g><g class="edgeLabel" transform="translate(323.05390625074506, 394.5)"><g class="label" data-id="edge4" transform="translate(-72.1640625, -10.5)"><foreignObject width="144.328125" height="21"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"><p>Close(closureSummary)</p></span></div></foreignObject></g></g></g><g class="nodes"><g class="node default" id="my-svg-state-P_start-0" data-look="classic" transform="translate(191.921875, 52.5)"><circle class="state-start" r="7" width="14" height="14"/></g><g class="node  statediagram-state" id="my-svg-state-Draft-2" data-look="classic" transform="translate(191.921875, 174)"><rect class="basic label-container" style="" rx="5" ry="5" x="-23.46875" y="-18.5" width="46.9375" height="37"/><g class="label" style="" transform="translate(-15.46875, -10.5)"><rect/><foreignObject width="30.9375" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel markdown-node-label"><p>Draft</p></span></div></foreignObject></g></g><g class="label edgeLabel" id="Draft---Draft---1" transform="translate(99.9609375, 328)"><rect width="0.1" height="0.1"/><g class="label" style="" transform="translate(0, 0)"><rect/><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 10px; text-align: center;"><span class="nodeLabel"></span></div></foreignObject></g></g><g class="label edgeLabel" id="Draft---Draft---2" transform="translate(114.70000000111759, 461)"><rect width="0.1" height="0.1"/><g class="label" style="" transform="translate(0, 0)"><rect/><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 10px; text-align: center;"><span class="nodeLabel"></span></div></foreignObject></g></g><g class="node  statediagram-state" id="my-svg-state-Approved-4" data-look="classic" transform="translate(326.6609375011176, 328)"><rect class="basic label-container" style="" rx="5" ry="5" x="-38.421875" y="-18.5" width="76.84375" height="37"/><g class="label" style="" transform="translate(-30.421875, -10.5)"><rect/><foreignObject width="60.84375" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel markdown-node-label"><p>Approved</p></span></div></foreignObject></g></g><g class="label edgeLabel" id="Approved---Approved---1" transform="translate(230.88984375074506, 461)"><rect width="0.1" height="0.1"/><g class="label" style="" transform="translate(0, 0)"><rect/><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 10px; text-align: center;"><span class="nodeLabel"></span></div></foreignObject></g></g><g class="label edgeLabel" id="Approved---Approved---2" transform="translate(326.6609375011176, 596.5500000007451)"><rect width="0.1" height="0.1"/><g class="label" style="" transform="translate(0, 0)"><rect/><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 10px; text-align: center;"><span class="nodeLabel"></span></div></foreignObject></g></g><g class="node  statediagram-state" id="my-svg-state-Closed-4" data-look="classic" transform="translate(323.05390625074506, 461)"><rect class="basic label-container" style="" rx="5" ry="5" x="-28.890625" y="-18.5" width="57.78125" height="37"/><g class="label" style="" transform="translate(-20.890625, -10.5)"><rect/><foreignObject width="41.78125" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel markdown-node-label"><p>Closed</p></span></div></foreignObject></g></g></g></g><g class="root" transform="translate(488.66094970703125, 125.04998779296875)"><g class="clusters"><g class="statediagram-state statediagram-cluster" id="my-svg-state-E-5" data-id="E" data-look="classic"><g><rect class="outer" x="8" y="8" width="240" height="376" data-look="classic"/></g><g class="cluster-label" transform="translate(86.6171875, 9)"><foreignObject width="82.765625" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5;"><span class="nodeLabel"><p>PT enrolment</p></span></div></foreignObject></g><rect class="inner" x="8" y="31" width="240" height="349"/></g></g><g class="edgePaths"><path d="M128,59.5L128,67.5C128,75.5,128,91.5,128,107.5C128,123.5,128,139.5,128,147.5L128,155.5" id="my-svg-edge5" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge5" data-points="W3sieCI6MTI4LCJ5Ijo1OS41fSx7IngiOjEyOCwieSI6MTA3LjV9LHsieCI6MTI4LCJ5IjoxNTUuNX1d" data-look="classic" marker-end="url(#mmd-020ba0bf6ee1_stateDiagram-barbEnd)"/><path d="M128,192.5L128,202.25C128,212,128,231.5,128,251C128,270.5,128,290,128,299.75L128,309.5" id="my-svg-edge6" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge6" data-points="W3sieCI6MTI4LCJ5IjoxOTIuNX0seyJ4IjoxMjgsInkiOjI1MX0seyJ4IjoxMjgsInkiOjMwOS41fV0=" data-look="classic" marker-end="url(#mmd-020ba0bf6ee1_stateDiagram-barbEnd)"/></g><g class="edgeLabels"><g class="edgeLabel" transform="translate(128, 107.5)"><g class="label" data-id="edge5" transform="translate(-17.4296875, -10.5)"><foreignObject width="34.859375" height="21"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"><p>Enroll</p></span></div></foreignObject></g></g><g class="edgeLabel" transform="translate(128, 251)"><g class="label" data-id="edge6" transform="translate(-100, -21)"><foreignObject width="200" height="42"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="edgeLabel"><p>RecordResult(submitted, assigned, sd)</p></span></div></foreignObject></g></g></g><g class="nodes"><g class="node default" id="my-svg-state-E_start-5" data-look="classic" transform="translate(128, 52.5)"><circle class="state-start" r="7" width="14" height="14"/></g><g class="node  statediagram-state" id="my-svg-state-Pending-6" data-look="classic" transform="translate(128, 174)"><rect class="basic label-container" style="" rx="5" ry="5" x="-33.1875" y="-18.5" width="66.375" height="37"/><g class="label" style="" transform="translate(-25.1875, -10.5)"><rect/><foreignObject width="50.375" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel markdown-node-label"><p>Pending</p></span></div></foreignObject></g></g><g class="node  statediagram-state" id="my-svg-state-Graded-6" data-look="classic" transform="translate(128, 328)"><rect class="basic label-container" style="" rx="5" ry="5" x="-30.703125" y="-18.5" width="61.40625" height="37"/><g class="label" style="" transform="translate(-22.703125, -10.5)"><rect/><foreignObject width="45.40625" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel markdown-node-label"><p>Graded</p></span></div></foreignObject></g></g></g></g></g></g></g><defs><filter id="my-svg-drop-shadow" height="130%" width="130%"><feDropShadow dx="4" dy="4" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs><defs><filter id="my-svg-drop-shadow-small" height="150%" width="150%"><feDropShadow dx="2" dy="2" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs><linearGradient id="my-svg-gradient" gradientUnits="objectBoundingBox" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="hsl(0, 0%, 83.3333333333%)" stop-opacity="1"/><stop offset="100%" stop-color="hsl(0, 0%, 88.9215686275%)" stop-opacity="1"/></linearGradient></svg></figure>
+
+<h2 id="calculation-specification-z-score">Calculation specification — z-score</h2>
+<pre><code>z = (submitted − assigned) / standardDeviation      ; sd must be &gt; 0 (PT-011)
+ZScore = round(z, 3)
+absZ = |z|
+Performance = absZ ≥ 3 ? Unsatisfactory
+            : absZ &gt; 2 ? Questionable
+            :            Satisfactory
+</code></pre>
+<p><code>QuestionableThreshold = 2</code>, <code>UnsatisfactoryThreshold = 3</code> — <strong>hard-coded constants</strong>, matching
+ISO 13528 convention.</p>
+<blockquote>
+<p>Note the asymmetry: <code>absZ == 2</code> grades <strong>Satisfactory</strong> (strict <code>&gt;</code> for Questionable) while
+<code>absZ == 3</code> grades <strong>Unsatisfactory</strong> (inclusive <code>≥</code>). This is deliberate but easy to misread.</p>
+</blockquote>
+<h2 id="business-rules">Business rules</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Rule</th>
+<th>Code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>BR-PT-01</strong></td>
+<td>**An unsatisfactory PT result (</td>
+<td>z</td>
+</tr>
+<tr>
+<td><strong>BR-PT-02</strong></td>
+<td><strong>A PT result may be recorded once</strong> — a second attempt is refused.</td>
+<td><code>PT-010</code></td>
+</tr>
+<tr>
+<td><strong>BR-PT-03</strong></td>
+<td><strong>One PT plan per tenant per year.</strong></td>
+<td><code>PTP-020</code></td>
+</tr>
+<tr>
+<td><strong>BR-PT-04</strong></td>
+<td><strong>An empty plan cannot be approved</strong> — at least one scheme/analyte line is required.</td>
+<td><code>PTP-011</code></td>
+</tr>
+<tr>
+<td><strong>BR-PT-05</strong></td>
+<td><strong>An approved plan is frozen</strong>: lines cannot be edited; only fulfilment is recorded.</td>
+<td><code>PTP-015</code></td>
+</tr>
+<tr>
+<td><strong>BR-PT-06</strong></td>
+<td>Fulfilment can only be recorded against an <strong>approved</strong> plan.</td>
+<td><code>PTP-012</code></td>
+</tr>
+<tr>
+<td><strong>BR-PT-07</strong></td>
+<td><strong>A pending enrolment is not fulfilment</strong> — an enrolment with no result cannot be counted.</td>
+<td><code>PTP-021</code></td>
+</tr>
+<tr>
+<td><strong>BR-PT-08</strong></td>
+<td>Closing a plan requires a closure summary covering <strong>coverage and gaps</strong>.</td>
+<td><code>PTP-014</code></td>
+</tr>
+<tr>
+<td><strong>BR-PT-09</strong></td>
+<td>Planned cycles per line: 1–52.</td>
+<td>validator</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="validation-rules">Validation rules</h2>
+<p><code>Scheme</code> required ≤200; <code>Analyte</code> required ≤200; <code>Provider</code> ≤200; <code>PlannedCycles</code> 1–52;
+<code>Notes</code> ≤1000; <code>ClosureSummary</code> required ≤4000.</p>
+<h2 id="error-cases">Error cases</h2>
+<p><code>PT-001</code>, <code>PT-010</code>, <code>PT-011</code>, <code>PT-404</code> · <code>PTP-001</code>…<code>PTP-003</code>, <code>PTP-010</code>…<code>PTP-015</code>, <code>PTP-020</code>,
+<code>PTP-021</code>, <code>PTP-404</code>.</p>
+<h2 id="edge-cases">Edge cases</h2>
+<ul>
+<li>A <code>Questionable</code> result (2 &lt; |z| &lt; 3) raises <strong>no</strong> event and no NC — it is recorded and visible but
+  triggers nothing. <strong><code>[Needs Business Confirmation]</code></strong> — many laboratories require investigation of
+  questionable results too.</li>
+<li><code>FulfilledCycles</code> can exceed <code>PlannedCycles</code>; nothing caps it.</li>
+<li>The PT plan register screen has <strong>no proportion meter</strong> (fulfilled/planned is available per line but
+  is not surfaced as a page-level statistic).</li>
+<li><code>PtEnrollment</code> is not linked to a plan line by foreign key — fulfilment is recorded by writing the
+  enrolment <strong>reference string</strong> onto the line (<code>LastEnrollmentRef</code>).</li>
+</ul>
+<h2 id="configuration">Configuration</h2>
+<p>None. The z-score thresholds are hard-coded constants (<code>CON-</code>, <a href="04-Configuration-Reference.html">Document 04</a>).</p>
+<h2 id="performance">Performance</h2>
+<p><code>GET /api/pt-plans</code> and <code>/api/proficiency-tests</code> unpaged.</p>
+<h2 id="security">Security</h2>
+<p>Plan approval <code>proficiency-testing.approve</code>; the module shares <code>FullRecordLifecycle</code> actions.</p>
+<h2 id="limitations">Limitations</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Limitation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LIM-PT-01</td>
+<td>Only z-score grading. No z′, no zeta score, no En number — so <strong>calibration ILCs (which conventionally use En) cannot be graded correctly</strong>.</td>
+</tr>
+<tr>
+<td>LIM-PT-02</td>
+<td>Questionable results trigger nothing.</td>
+</tr>
+<tr>
+<td>LIM-PT-03</td>
+<td>No PT provider register or scheme catalogue (both are free text).</td>
+</tr>
+<tr>
+<td>LIM-PT-04</td>
+<td>No trend analysis across cycles for the same scheme/analyte.</td>
+</tr>
+<tr>
+<td>LIM-PT-05</td>
+<td>The plan-to-enrolment link is a string reference, not a relation.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="future-improvements">Future improvements</h2>
+<p>En-number and zeta-score grading for calibration comparisons; questionable-result investigation
+trigger; multi-cycle trending; provider/scheme reference data.</p>
+<h2 id="acceptance-criteria">Acceptance criteria</h2>
+<ul>
+<li><strong>AT-FR-PT-01</strong> — submitted 12, assigned 10, sd 1 → z = 2.0 → <code>Satisfactory</code> (boundary).</li>
+<li><strong>AT-FR-PT-02</strong> — submitted 13, assigned 10, sd 1 → z = 3.0 → <code>Unsatisfactory</code>, raises an NC.</li>
+<li><strong>AT-FR-PT-03</strong> — Recording a result twice returns 409 <code>PT-010</code>.</li>
+<li><strong>AT-FR-PT-04</strong> — Approving a plan with no lines returns 422 <code>PTP-011</code>; a second plan for the same
+  year returns 422 <code>PTP-020</code>.</li>
+</ul>
+<div class="pager"><a href="02-2-Functional-Specification-Resources-People-Governance.html"><span>Previous</span>Functional Spec 2 — Resources, People &amp; Governance</a><a href="02-4-Functional-Specification-Operations-and-Platform.html" style="text-align:right"><span>Next</span>Functional Spec 4 — Operations &amp; Platform</a></div>
+</main></div>
+<script>
+(function(){
+ var r=document.documentElement, K='ntqms-srs-theme', s=localStorage.getItem(K);
+ if(s) r.setAttribute('data-theme',s);
+ var b=document.getElementById('th');
+ if(b) b.onclick=function(){
+   var cur=r.getAttribute('data-theme');
+   if(!cur) cur=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+   var nx=cur==='dark'?'light':'dark';
+   r.setAttribute('data-theme',nx); localStorage.setItem(K,nx);
+ };
+ var p=document.getElementById('pr'); if(p) p.onclick=function(){window.print();};
+ // scroll-spy on the in-page TOC
+ var links=[].slice.call(document.querySelectorAll('#toc a'));
+ if(!links.length) return;
+ var tgt=links.map(function(a){return document.getElementById(a.getAttribute('href').slice(1));});
+ function spy(){
+   var y=window.scrollY+90, i=0;
+   for(var k=0;k<tgt.length;k++){ if(tgt[k]&&tgt[k].offsetTop<=y) i=k; }
+   links.forEach(function(a,n){a.style.color=n===i?'var(--accent)':'';
+     a.style.borderLeftColor=n===i?'var(--accent)':'transparent';});
+ }
+ addEventListener('scroll',spy,{passive:true}); spy();
+})();
+</script>
+</body></html>

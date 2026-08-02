@@ -5,18 +5,22 @@ import { Router, RouterOutlet } from '@angular/router';
 import { LotComparisonFacade } from './lot-comparison.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
+import { LotComparisonListItem } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 
 /** Lot-to-lot comparison register: paired current/new lot readings, mean % bias. */
 @Component({
     selector: 'qams-lot-comparison-list',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DecimalPipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent],
+    imports: [ReactiveFormsModule, DecimalPipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('lot.title')" [subtitle]="i18n.t('lot.subtitle')">
+      <qams-export-menu [title]="i18n.t('lot.title')" [stats]="stats()" [columns]="exportColumns"
+                        [rows]="filtered()" [filtersSummary]="filtersSummary()" />
       @if (perms.can('analytical-quality.create')) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('lot.new') }}</button>
       }
@@ -113,6 +117,25 @@ export class LotComparisonListComponent implements OnInit {
     const q = this.search().trim().toLowerCase();
     return this.facade.list().filter((s) =>
       !q || `${s.studyRef} ${s.analyte} ${s.currentLot} ${s.newLot} ${s.state}`.toLowerCase().includes(q));
+  });
+
+  /** Export columns — the printed grid mirrors the on-screen table. */
+  readonly exportColumns: ExportColumn<LotComparisonListItem>[] = [
+    { header: this.i18n.t('mu.ref'), cell: (s) => s.studyRef },
+    { header: this.i18n.t('qc.analyte'), cell: (s) => s.analyte },
+    { header: this.i18n.t('lot.currentLot'), cell: (s) => s.currentLot },
+    { header: this.i18n.t('lot.newLot'), cell: (s) => s.newLot },
+    { header: this.i18n.t('lot.bias'), cell: (s) => s.meanBiasPct !== null ? `${s.meanBiasPct.toFixed(2)}%` : '—' },
+    { header: this.i18n.t('val.verdict'), cell: (s) => s.passes === true ? 'Pass' : s.passes === false ? 'Failed' : '—' },
+    { header: this.i18n.t('nc.status'), cell: (s) => s.state },
+  ];
+
+  /** The filter line printed on the document, mirroring the filter bar. */
+  readonly filtersSummary = computed(() => {
+    const parts: string[] = [];
+    if (this.stateFilter()) { parts.push(this.stateFilter()); }
+    if (this.search().trim()) { parts.push(`"${this.search().trim()}"`); }
+    return parts.length ? parts.join(' · ') : this.i18n.t('exp.allRecords');
   });
 
   readonly stats = computed<ListStat[]>(() => {

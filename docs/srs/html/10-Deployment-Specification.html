@@ -1,0 +1,1057 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deployment Specification — NT.QMS As-Built SRS</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+<style>
+:root{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);
+ --mono:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace;
+ --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,ui-serif,serif;
+ --sans:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}}
+:root[data-theme="dark"]{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}
+:root[data-theme="light"]{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+ font-size:15.5px;line-height:1.62;-webkit-text-size-adjust:100%}
+.wrap{display:grid;grid-template-columns:288px minmax(0,1fr);gap:0;max-width:1560px;margin:0 auto}
+/* ---- sidebar ---- */
+aside{position:sticky;top:0;height:100vh;overflow-y:auto;padding:22px 16px 60px;
+ border-right:1px solid var(--line);background:var(--panel)}
+aside .brand{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:-.01em;
+ margin:0 0 2px}
+aside .sub{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;
+ margin:0 0 16px}
+aside nav a{display:block;padding:5px 9px;border-radius:7px;color:var(--ink);text-decoration:none;
+ font-size:13.2px;border-left:2px solid transparent}
+aside nav a:hover{background:var(--panel-2)}
+aside nav a.cur{background:var(--accent-soft);border-left-color:var(--accent);font-weight:600}
+aside nav a .n{color:var(--muted);font-variant-numeric:tabular-nums;margin-right:7px;font-size:11.5px}
+aside .sec{margin:16px 0 5px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+ color:var(--muted);font-weight:700}
+#toc{margin-top:6px;border-top:1px solid var(--line);padding-top:10px}
+#toc a{display:block;padding:2.5px 9px;font-size:12.4px;color:var(--muted);text-decoration:none;
+ border-left:2px solid transparent;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#toc a:hover{color:var(--ink)}
+#toc a.h3{padding-left:22px;font-size:11.8px}
+/* ---- main ---- */
+main{padding:34px 46px 120px;min-width:0;overflow-wrap:anywhere}
+.doc-head{border-bottom:2px solid var(--accent);padding-bottom:14px;margin-bottom:26px}
+.kicker{color:var(--accent);font-size:11.5px;font-weight:700;letter-spacing:.11em;
+ text-transform:uppercase;margin:0 0 4px}
+h1{font-family:var(--serif);font-size:31px;line-height:1.2;margin:0;letter-spacing:-.015em}
+h2{font-family:var(--serif);font-size:24px;margin:38px 0 12px;padding-bottom:6px;
+ border-bottom:1px solid var(--line);letter-spacing:-.01em;scroll-margin-top:14px}
+h3{font-size:18px;margin:26px 0 9px;letter-spacing:-.005em;scroll-margin-top:14px}
+h4{font-size:15px;margin:20px 0 7px;color:var(--accent)}
+h5,h6{font-size:13.5px;margin:16px 0 6px;color:var(--muted);text-transform:uppercase;
+ letter-spacing:.05em}
+p{margin:10px 0}
+a{color:var(--accent)}
+hr{border:0;border-top:1px solid var(--line);margin:30px 0}
+ul,ol{margin:9px 0;padding-left:24px}
+li{margin:3px 0}
+blockquote{margin:16px 0;padding:12px 18px;background:var(--accent-soft);
+ border-left:3px solid var(--accent);border-radius:0 8px 8px 0}
+blockquote p:first-child{margin-top:0}blockquote p:last-child{margin-bottom:0}
+code{font-family:var(--mono);font-size:.875em;background:var(--panel-2);
+ padding:1.5px 5px;border-radius:4px;border:1px solid var(--line)}
+pre{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;
+ padding:14px 16px;overflow-x:auto;margin:14px 0}
+pre code{background:none;border:0;padding:0;font-size:12.6px;line-height:1.5}
+/* ---- tables ---- */
+.tw{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:10px;
+ background:var(--panel);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;font-size:13.4px}
+th,td{padding:8px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:var(--panel-2);font-weight:700;font-size:12.2px;letter-spacing:.02em;
+ position:sticky;top:0;z-index:1}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--accent-soft)}
+td code,th code{font-size:.9em;white-space:nowrap}
+/* ---- diagrams ---- */
+figure.d{margin:18px 0;padding:18px;background:var(--panel);border:1px solid var(--line);
+ border-radius:12px;box-shadow:var(--shadow);overflow-x:auto;text-align:center}
+figure.d svg{max-width:100%;height:auto;display:inline-block}
+/* ---- misc ---- */
+.tools{position:fixed;top:12px;right:16px;display:flex;gap:6px;z-index:50}
+.tools button{font:inherit;font-size:12px;padding:5px 11px;border-radius:8px;cursor:pointer;
+ border:1px solid var(--line);background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+.tools button:hover{background:var(--panel-2)}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:52px;padding-top:18px;
+ border-top:1px solid var(--line)}
+.pager a{display:block;max-width:46%;padding:10px 14px;border:1px solid var(--line);
+ border-radius:10px;background:var(--panel);text-decoration:none;font-size:13px}
+.pager a span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;
+ letter-spacing:.08em}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:14px;margin:20px 0}
+.card{padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--panel);
+ box-shadow:var(--shadow);text-decoration:none;color:var(--ink);display:block}
+.card:hover{border-color:var(--accent)}
+.card .num{color:var(--accent);font-weight:700;font-size:11.5px;letter-spacing:.1em}
+.card .t{font-family:var(--serif);font-size:17px;margin:3px 0 5px}
+.card .d{color:var(--muted);font-size:12.7px;line-height:1.5}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin:20px 0}
+.stat{padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.stat b{display:block;font-size:23px;font-family:var(--serif);line-height:1.1}
+.stat span{color:var(--muted);font-size:11.4px}
+@media print{
+ aside,.tools,.pager{display:none!important}
+ .wrap{display:block;max-width:none}
+ main{padding:0}
+ .tw,figure.d{break-inside:avoid;box-shadow:none}
+ h2{break-after:avoid}
+ a{color:inherit;text-decoration:none}
+}
+@media (max-width:1080px){
+ .wrap{grid-template-columns:1fr}
+ aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+ main{padding:22px 18px 80px}
+ #toc{display:none}
+}
+</style>
+</head><body>
+<div class="tools"><button id="th">◐ Theme</button><button id="pr">⎙ Print</button></div>
+<div class="wrap">
+<aside><p class="brand">NT.QMS</p><p class="sub">As-Built SRS · v1.51.x</p><a class="card" style="padding:9px 12px;margin-bottom:10px;font-size:13px" href="index.html">◂ Document set</a><div class="sec">Documents</div><nav><a class="" href="00-SRS-Index-and-Conventions.html"><span class="n">00</span>Index, Conventions &amp; Glossary</a><a class="" href="01-Software-Requirements-Specification.html"><span class="n">01</span>Software Requirements Specification</a><a class="" href="02-1-Functional-Specification-Quality-and-Improvement.html"><span class="n">02-1</span>Functional Spec 1 — Quality &amp; Improvement</a><a class="" href="02-2-Functional-Specification-Resources-People-Governance.html"><span class="n">02-2</span>Functional Spec 2 — Resources, People &amp; Governance</a><a class="" href="02-3-Functional-Specification-Analytical-Quality.html"><span class="n">02-3</span>Functional Spec 3 — Analytical Quality</a><a class="" href="02-4-Functional-Specification-Operations-and-Platform.html"><span class="n">02-4</span>Functional Spec 4 — Operations &amp; Platform</a><a class="" href="03-Business-Rules.html"><span class="n">03</span>Business Rules &amp; Error Catalogue</a><a class="" href="04-Configuration-Reference.html"><span class="n">04</span>Configuration Reference</a><a class="" href="05-Screen-Specification.html"><span class="n">05</span>Screen Specification</a><a class="" href="06-Workflow-Specification.html"><span class="n">06</span>Workflow Specification</a><a class="" href="07-File-System-Specification.html"><span class="n">07</span>File System Specification</a><a class="" href="08-API-Specification.html"><span class="n">08</span>API Specification</a><a class="" href="09-Security-Specification.html"><span class="n">09</span>Security Specification</a><a class="cur" href="10-Deployment-Specification.html"><span class="n">10</span>Deployment Specification</a><a class="" href="11-Architecture-Constraints.html"><span class="n">11</span>Architecture Constraints</a><a class="" href="12-Requirements-Traceability-Matrix.html"><span class="n">12</span>Requirements Traceability Matrix</a><a class="" href="13-Implementation-vs-SRS-Gap-Analysis.html"><span class="n">13</span>Implementation vs SRS — Gap Analysis</a><a class="" href="14-Technical-Debt-Report.html"><span class="n">14</span>Technical Debt Report</a><a class="" href="15-Recommendations.html"><span class="n">15</span>Recommendations</a></nav><div class='sec'>On this page</div><div id='toc'><a class="h2" href="#dep-01-single-replica-constraint-adr-0001">DEP-01 · Single-replica constraint (ADR-0001)</a><a class="h3" href="#container-image">Container image</a><a class="h2" href="#dep-02-prerequisites">DEP-02 · Prerequisites</a><a class="h2" href="#dep-03-sequence">DEP-03 · Sequence</a><a class="h3" href="#dep-04-migration-policy">DEP-04 · Migration policy</a><a class="h3" href="#dep-05-start-up-gates-the-deployment-will-refuse-to-proceed">DEP-05 · Start-up gates (the deployment will refuse to proceed)</a><a class="h3" href="#probe-wiring">Probe wiring</a><a class="h2" href="#logs">Logs</a><a class="h2" href="#traces">Traces</a><a class="h2" href="#metrics-get-metrics-prometheus-text">Metrics — GET /metrics (Prometheus text)</a><a class="h2" href="#dep-06-the-alert-set-seven-alerts-defined-but-never-deployed">DEP-06 · The alert set (seven alerts, defined but never deployed)</a><a class="h2" href="#job-1-build-test">Job 1 — build-test</a><a class="h2" href="#job-2-frontend">Job 2 — frontend</a><a class="h2" href="#job-3-container">Job 3 — container</a><a class="h2" href="#merge-gates-any-failure-blocks-the-merge">Merge gates (any failure blocks the merge)</a><a class="h2" href="#test-baseline-last-recorded-green-run">Test baseline (last recorded green run)</a><a class="h3" href="#environment-gotchas-recorded-in-repo">Environment gotchas recorded in-repo</a></div></aside>
+<main>
+<div class="doc-head"><p class="kicker">Document 10 · NT.QMS Production SRS</p><h1>Deployment Specification</h1></div>
+<blockquote>
+<p><a href="00-SRS-Index-and-Conventions.html">Conventions</a> · Configuration keys:
+<a href="04-Configuration-Reference.html">Document 04</a> · File layout:
+<a href="07-File-System-Specification.html">Document 07</a></p>
+</blockquote>
+<hr>
+<h1>10.1 Deployment topology</h1>
+<figure class="d"><svg width="1933" height="671" preserveAspectRatio="xMidYMid meet" id="mmd-b4193fbce75d" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="flowchart" style="max-width:1933px;height:auto" viewBox="0 0 1933.12109375 670.9839477539062" role="graphics-document document" aria-roledescription="flowchart-v2"><style>#mmd-b4193fbce75d{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;fill:#000000;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#mmd-b4193fbce75d .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#mmd-b4193fbce75d .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#mmd-b4193fbce75d .error-icon{fill:#552222;}#mmd-b4193fbce75d .error-text{fill:#552222;stroke:#552222;}#mmd-b4193fbce75d .edge-thickness-normal{stroke-width:1px;}#mmd-b4193fbce75d .edge-thickness-thick{stroke-width:3.5px;}#mmd-b4193fbce75d .edge-pattern-solid{stroke-dasharray:0;}#mmd-b4193fbce75d .edge-thickness-invisible{stroke-width:0;fill:none;}#mmd-b4193fbce75d .edge-pattern-dashed{stroke-dasharray:3;}#mmd-b4193fbce75d .edge-pattern-dotted{stroke-dasharray:2;}#mmd-b4193fbce75d .marker{fill:#666;stroke:#666;}#mmd-b4193fbce75d .marker.cross{stroke:#666;}#mmd-b4193fbce75d svg{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;}#mmd-b4193fbce75d p{margin:0;}#mmd-b4193fbce75d .label{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#000000;}#mmd-b4193fbce75d .cluster-label text{fill:#333;}#mmd-b4193fbce75d .cluster-label span{color:#333;}#mmd-b4193fbce75d .cluster-label span p{background-color:transparent;}#mmd-b4193fbce75d .label text,#mmd-b4193fbce75d span{fill:#000000;color:#000000;}#mmd-b4193fbce75d .node rect,#mmd-b4193fbce75d .node circle,#mmd-b4193fbce75d .node ellipse,#mmd-b4193fbce75d .node polygon,#mmd-b4193fbce75d .node path{fill:#eee;stroke:#999;stroke-width:1px;}#mmd-b4193fbce75d .rough-node .label text,#mmd-b4193fbce75d .node .label text,#mmd-b4193fbce75d .image-shape .label,#mmd-b4193fbce75d .icon-shape .label{text-anchor:middle;}#mmd-b4193fbce75d .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#mmd-b4193fbce75d .rough-node .label,#mmd-b4193fbce75d .node .label,#mmd-b4193fbce75d .image-shape .label,#mmd-b4193fbce75d .icon-shape .label{text-align:center;}#mmd-b4193fbce75d .node.clickable{cursor:pointer;}#mmd-b4193fbce75d .root .anchor path{fill:#666!important;stroke-width:0;stroke:#666;}#mmd-b4193fbce75d .arrowheadPath{fill:#333333;}#mmd-b4193fbce75d .edgePath .path{stroke:#666;stroke-width:1px;}#mmd-b4193fbce75d .flowchart-link{stroke:#666;fill:none;}#mmd-b4193fbce75d .edgeLabel{background-color:white;text-align:center;}#mmd-b4193fbce75d .edgeLabel p{background-color:white;}#mmd-b4193fbce75d .edgeLabel rect{opacity:0.5;background-color:white;fill:white;}#mmd-b4193fbce75d .labelBkg{background-color:rgba(255, 255, 255, 0.5);}#mmd-b4193fbce75d .cluster rect{fill:hsl(0, 0%, 98.9215686275%);stroke:#707070;stroke-width:1px;}#mmd-b4193fbce75d .cluster text{fill:#333;}#mmd-b4193fbce75d .cluster span{color:#333;}#mmd-b4193fbce75d div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:12px;background:hsl(-160, 0%, 93.3333333333%);border:1px solid #707070;border-radius:2px;pointer-events:none;z-index:100;}#mmd-b4193fbce75d .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#000000;}#mmd-b4193fbce75d rect.text{fill:none;stroke-width:0;}#mmd-b4193fbce75d .icon-shape,#mmd-b4193fbce75d .image-shape{background-color:white;text-align:center;}#mmd-b4193fbce75d .icon-shape p,#mmd-b4193fbce75d .image-shape p{background-color:white;padding:2px;}#mmd-b4193fbce75d .icon-shape .label rect,#mmd-b4193fbce75d .image-shape .label rect{opacity:0.5;background-color:white;fill:white;}#mmd-b4193fbce75d .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#mmd-b4193fbce75d .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#mmd-b4193fbce75d .node .neo-node{stroke:#999;}#mmd-b4193fbce75d [data-look="neo"].node rect,#mmd-b4193fbce75d [data-look="neo"].cluster rect,#mmd-b4193fbce75d [data-look="neo"].node polygon{stroke:url(#mmd-b4193fbce75d-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-b4193fbce75d [data-look="neo"].swimlane.cluster rect{filter:none;}#mmd-b4193fbce75d [data-look="neo"].node path{stroke:url(#mmd-b4193fbce75d-gradient);stroke-width:1px;}#mmd-b4193fbce75d [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-b4193fbce75d [data-look="neo"].node .neo-line path{stroke:#999;filter:none;}#mmd-b4193fbce75d [data-look="neo"].node circle{stroke:url(#mmd-b4193fbce75d-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-b4193fbce75d [data-look="neo"].node circle .state-start{fill:#000000;}#mmd-b4193fbce75d [data-look="neo"].icon-shape .icon{fill:url(#mmd-b4193fbce75d-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-b4193fbce75d [data-look="neo"].icon-shape .icon-neo path{stroke:url(#mmd-b4193fbce75d-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-b4193fbce75d :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}#mmd-b4193fbce75d .job&gt;*{fill:rgba(0, 0, 0, 0)!important;stroke-dasharray:3,3!important;}#mmd-b4193fbce75d .job span{fill:rgba(0, 0, 0, 0)!important;stroke-dasharray:3,3!important;}</style><g><marker id="my-svg_flowchart-v2-pointEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="4.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 5 L 10 10 L 10 0 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointEnd-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="11.5" refY="7" markerUnits="userSpaceOnUse" markerWidth="10.5" markerHeight="14" orient="auto"><path d="M 0 0 L 11.5 7 L 0 14 z" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="1" refY="7" markerUnits="userSpaceOnUse" markerWidth="11.5" markerHeight="14" orient="auto"><polygon points="0,7 11.5,14 11.5,0" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="11" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-1" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refY="5" refX="12.25" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-2" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="12" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossStart" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="-1" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="17.7" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5;"/></marker><marker id="my-svg_flowchart-v2-crossStart-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="-3.5" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5; stroke-dasharray: 1, 0;"/></marker><g class="root"><g class="clusters"><g class="cluster" id="my-svg-Optional" data-look="classic"><rect style="" x="8" y="516" width="508.5" height="146.98394012451172"/><g class="cluster-label" transform="translate(235.46875, 516)"><foreignObject width="53.5625" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5;"><span class="nodeLabel"><p>Optional</p></span></div></foreignObject></g></g><g class="cluster" id="my-svg-Data" data-look="classic"><rect style="" x="536.5" y="516" width="1306.76953125" height="146.98394012451172"/><g class="cluster-label" transform="translate(1175.478515625, 516)"><foreignObject width="28.8125" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5;"><span class="nodeLabel"><p>Data</p></span></div></foreignObject></g></g><g class="cluster" id="my-svg-App" data-look="classic"><rect style="" x="70.5" y="323" width="1854.62109375" height="143"/><g class="cluster-label" transform="translate(833.857421875, 323)"><foreignObject width="327.90625" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5;"><span class="nodeLabel"><p>Application host — EXACTLY ONE replica (ADR-0001)</p></span></div></foreignObject></g></g><g class="cluster" id="my-svg-Edge" data-look="classic"><rect style="" x="365.05859375" y="109" width="330" height="164"/><g class="cluster-label" transform="translate(514.60546875, 109)"><foreignObject width="30.90625" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5;"><span class="nodeLabel"><p>Edge</p></span></div></foreignObject></g></g></g><g class="edgePaths"><path d="M530.059,59L530.059,63.167C530.059,67.333,530.059,75.667,530.059,84C530.059,92.333,530.059,100.667,530.059,108.333C530.059,116,530.059,123,530.059,126.5L530.059,130" id="my-svg-L_Browser_RP_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_Browser_RP_0" data-points="W3sieCI6NTMwLjA1ODU5Mzc1LCJ5Ijo1OX0seyJ4Ijo1MzAuMDU4NTkzNzUsInkiOjg0fSx7IngiOjUzMC4wNTg1OTM3NSwieSI6MTA5fSx7IngiOjUzMC4wNTg1OTM3NSwieSI6MTM0fV0=" data-look="classic" marker-end="url(#mmd-b4193fbce75d_flowchart-v2-pointEnd)"/><path d="M530.059,248L530.059,252.167C530.059,256.333,530.059,264.667,530.059,273C530.059,281.333,530.059,289.667,530.059,298C530.059,306.333,530.059,314.667,530.059,322.333C530.059,330,530.059,337,530.059,340.5L530.059,344" id="my-svg-L_RP_API_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_RP_API_0" data-points="W3sieCI6NTMwLjA1ODU5Mzc1LCJ5IjoyNDh9LHsieCI6NTMwLjA1ODU5Mzc1LCJ5IjoyNzN9LHsieCI6NTMwLjA1ODU5Mzc1LCJ5IjoyOTh9LHsieCI6NTMwLjA1ODU5Mzc1LCJ5IjozMjN9LHsieCI6NTMwLjA1ODU5Mzc1LCJ5IjozNDh9XQ==" data-look="classic" marker-end="url(#mmd-b4193fbce75d_flowchart-v2-pointEnd)"/><path d="M616.431,441L624.17,445.167C631.909,449.333,647.388,457.667,655.128,466C662.867,474.333,662.867,482.667,662.867,491C662.867,499.333,662.867,507.667,735.196,522.67C807.525,537.674,952.183,559.348,1024.512,570.185L1096.841,581.022" id="my-svg-L_API_PG_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_API_PG_0" data-points="W3sieCI6NjE2LjQzMDYxNjI1ODc0MTIsInkiOjQ0MX0seyJ4Ijo2NjIuODY3MTg3NSwieSI6NDY2fSx7IngiOjY2Mi44NjcxODc1LCJ5Ijo0OTF9LHsieCI6NjYyLjg2NzE4NzUsInkiOjUxNn0seyJ4IjoxMTAwLjc5Njg3NSwieSI6NTgxLjYxNDI3NzAwNjI4NzR9XQ==" data-look="classic" marker-end="url(#mmd-b4193fbce75d_flowchart-v2-pointEnd)"/><path d="M603.424,441L609.998,445.167C616.571,449.333,629.719,457.667,636.293,466C642.867,474.333,642.867,482.667,642.867,491C642.867,499.333,642.867,507.667,642.867,515.333C642.867,523,642.867,530,642.867,533.5L642.867,537" id="my-svg-L_API_VOL_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_API_VOL_0" data-points="W3sieCI6NjAzLjQyMzYyMzI1MTc0ODMsInkiOjQ0MX0seyJ4Ijo2NDIuODY3MTg3NSwieSI6NDY2fSx7IngiOjY0Mi44NjcxODc1LCJ5Ijo0OTF9LHsieCI6NjQyLjg2NzE4NzUsInkiOjUxNn0seyJ4Ijo2NDIuODY3MTg3NSwieSI6NTQxfV0=" data-look="classic" marker-end="url(#mmd-b4193fbce75d_flowchart-v2-pointEnd)"/><path d="M794.301,420L794.301,427.667C794.301,435.333,794.301,450.667,794.301,462.5C794.301,474.333,794.301,482.667,794.301,491C794.301,499.333,794.301,507.667,844.73,522.155C895.16,536.643,996.019,557.286,1046.449,567.607L1096.878,577.929" id="my-svg-L_J1_PG_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_J1_PG_0" data-points="W3sieCI6Nzk0LjMwMDc4MTI1LCJ5Ijo0MjB9LHsieCI6Nzk0LjMwMDc4MTI1LCJ5Ijo0NjZ9LHsieCI6Nzk0LjMwMDc4MTI1LCJ5Ijo0OTF9LHsieCI6Nzk0LjMwMDc4MTI1LCJ5Ijo1MTZ9LHsieCI6MTEwMC43OTY4NzUsInkiOjU3OC43MzA3Njg2NTQxNDI5fV0=" data-look="classic" marker-end="url(#mmd-b4193fbce75d_flowchart-v2-pointEnd)"/><path d="M1031.176,420L1031.176,427.667C1031.176,435.333,1031.176,450.667,1031.176,462.5C1031.176,474.333,1031.176,482.667,1031.176,491C1031.176,499.333,1031.176,507.667,1042.208,518.468C1053.24,529.27,1075.305,542.54,1086.337,549.174L1097.369,555.809" id="my-svg-L_J2_PG_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_J2_PG_0" data-points="W3sieCI6MTAzMS4xNzU3ODEyNSwieSI6NDIwfSx7IngiOjEwMzEuMTc1NzgxMjUsInkiOjQ2Nn0seyJ4IjoxMDMxLjE3NTc4MTI1LCJ5Ijo0OTF9LHsieCI6MTAzMS4xNzU3ODEyNSwieSI6NTE2fSx7IngiOjExMDAuNzk2ODc1LCJ5Ijo1NTcuODcwOTAwNTY2NDI4Nn1d" data-look="classic" marker-end="url(#mmd-b4193fbce75d_flowchart-v2-pointEnd)"/><path d="M1275.574,420L1275.574,427.667C1275.574,435.333,1275.574,450.667,1275.574,462.5C1275.574,474.333,1275.574,482.667,1275.574,491C1275.574,499.333,1275.574,507.667,1264.542,518.468C1253.51,529.27,1231.445,542.54,1220.413,549.174L1209.381,555.809" id="my-svg-L_J3_PG_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_J3_PG_0" data-points="W3sieCI6MTI3NS41NzQyMTg3NSwieSI6NDIwfSx7IngiOjEyNzUuNTc0MjE4NzUsInkiOjQ2Nn0seyJ4IjoxMjc1LjU3NDIxODc1LCJ5Ijo0OTF9LHsieCI6MTI3NS41NzQyMTg3NSwieSI6NTE2fSx7IngiOjEyMDUuOTUzMTI1LCJ5Ijo1NTcuODcwOTAwNTY2NDI4Nn1d" data-look="classic" marker-end="url(#mmd-b4193fbce75d_flowchart-v2-pointEnd)"/><path d="M1527.402,420L1527.402,427.667C1527.402,435.333,1527.402,450.667,1527.402,462.5C1527.402,474.333,1527.402,482.667,1527.402,491C1527.402,499.333,1527.402,507.667,1474.482,522.232C1421.561,536.797,1315.719,557.593,1262.799,567.991L1209.878,578.39" id="my-svg-L_J4_PG_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_J4_PG_0" data-points="W3sieCI6MTUyNy40MDIzNDM3NSwieSI6NDIwfSx7IngiOjE1MjcuNDAyMzQzNzUsInkiOjQ2Nn0seyJ4IjoxNTI3LjQwMjM0Mzc1LCJ5Ijo0OTF9LHsieCI6MTUyNy40MDIzNDM3NSwieSI6NTE2fSx7IngiOjEyMDUuOTUzMTI1LCJ5Ijo1NzkuMTYwOTg3NDQwMjY4fV0=" data-look="classic" marker-end="url(#mmd-b4193fbce75d_flowchart-v2-pointEnd)"/><path d="M1789.48,420L1789.48,427.667C1789.48,435.333,1789.48,450.667,1789.48,462.5C1789.48,474.333,1789.48,482.667,1789.48,491C1789.48,499.333,1789.48,507.667,1692.888,522.993C1596.296,538.319,1403.111,560.639,1306.519,571.799L1209.927,582.958" id="my-svg-L_J5_PG_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_J5_PG_0" data-points="W3sieCI6MTc4OS40ODA0Njg3NSwieSI6NDIwfSx7IngiOjE3ODkuNDgwNDY4NzUsInkiOjQ2Nn0seyJ4IjoxNzg5LjQ4MDQ2ODc1LCJ5Ijo0OTF9LHsieCI6MTc4OS40ODA0Njg3NSwieSI6NTE2fSx7IngiOjEyMDUuOTUzMTI1LCJ5Ijo1ODMuNDE3Mzk1Njc0NDIyNH1d" data-look="classic" marker-end="url(#mmd-b4193fbce75d_flowchart-v2-pointEnd)"/><path d="M456.694,441L450.12,445.167C443.546,449.333,430.398,457.667,423.824,466C417.25,474.333,417.25,482.667,417.25,491C417.25,499.333,417.25,507.667,417.25,519.165C417.25,530.664,417.25,545.328,417.25,552.66L417.25,559.992" id="my-svg-L_API_SMTP_0" class="edge-thickness-normal edge-pattern-dotted edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_API_SMTP_0" data-points="W3sieCI6NDU2LjY5MzU2NDI0ODI1MTczLCJ5Ijo0NDF9LHsieCI6NDE3LjI1LCJ5Ijo0NjZ9LHsieCI6NDE3LjI1LCJ5Ijo0OTF9LHsieCI6NDE3LjI1LCJ5Ijo1MTZ9LHsieCI6NDE3LjI1LCJ5Ijo1NjMuOTkxOTcwMDYyMjU1OX1d" data-look="classic" marker-end="url(#mmd-b4193fbce75d_flowchart-v2-pointEnd)"/><path d="M400.059,420.532L362.215,428.11C324.372,435.688,248.686,450.844,210.843,462.589C173,474.333,173,482.667,173,491C173,499.333,173,507.667,173,517.415C173,527.164,173,538.328,173,543.91L173,549.492" id="my-svg-L_API_OTEL_0" class="edge-thickness-normal edge-pattern-dotted edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_API_OTEL_0" data-points="W3sieCI6NDAwLjA1ODU5Mzc1LCJ5Ijo0MjAuNTMyMTQxOTU4NDkzMzZ9LHsieCI6MTczLCJ5Ijo0NjZ9LHsieCI6MTczLCJ5Ijo0OTF9LHsieCI6MTczLCJ5Ijo1MTZ9LHsieCI6MTczLCJ5Ijo1NTMuNDkxOTcwMDYyMjU1OX1d" data-look="classic" marker-end="url(#mmd-b4193fbce75d_flowchart-v2-pointEnd)"/></g><g class="edgeLabels"><g class="edgeLabel"><g class="label" data-id="L_Browser_RP_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_RP_API_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_API_PG_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_API_VOL_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_J1_PG_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_J2_PG_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_J3_PG_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_J4_PG_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_J5_PG_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_API_SMTP_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_API_OTEL_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g></g><g class="nodes"><g class="node default" id="my-svg-flowchart-RP-0" data-look="classic" transform="translate(530.05859375, 191)"><rect class="basic label-container" style="" x="-130" y="-57" width="260" height="114"/><g class="label" style="" transform="translate(-100, -42)"><rect/><foreignObject width="200" height="84"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>Reverse proxy / IIS<br />TLS termination · X-Forwarded-For/-Proto<br />serves the SPA static bundle</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-API-1" data-look="classic" transform="translate(530.05859375, 394.5)"><rect class="basic label-container" style="" x="-130" y="-46.5" width="260" height="93"/><g class="label" style="" transform="translate(-100, -31.5)"><rect/><foreignObject width="200" height="63"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>NT.QAMS.WebApi<br />Kestrel :8080 (container) / :5080 (dev)</p></span></div></foreignObject></g></g><g class="node default job" id="my-svg-flowchart-J1-2" data-look="classic" transform="translate(794.30078125, 394.5)"><rect class="basic label-container" style="fill:#0000 !important;stroke-dasharray:3 3 !important" x="-82.8671875" y="-25.5" width="165.734375" height="51"/><g class="label" style="" transform="translate(-52.8671875, -10.5)"><rect/><foreignObject width="105.734375" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>OutboxProcessor</p></span></div></foreignObject></g></g><g class="node default job" id="my-svg-flowchart-J2-3" data-look="classic" transform="translate(1031.17578125, 394.5)"><rect class="basic label-container" style="fill:#0000 !important;stroke-dasharray:3 3 !important" x="-104.0078125" y="-25.5" width="208.015625" height="51"/><g class="label" style="" transform="translate(-74.0078125, -10.5)"><rect/><foreignObject width="148.015625" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>ScheduledSweepService</p></span></div></foreignObject></g></g><g class="node default job" id="my-svg-flowchart-J3-4" data-look="classic" transform="translate(1275.57421875, 394.5)"><rect class="basic label-container" style="fill:#0000 !important;stroke-dasharray:3 3 !important" x="-90.390625" y="-25.5" width="180.78125" height="51"/><g class="label" style="" transform="translate(-60.390625, -10.5)"><rect/><foreignObject width="120.78125" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>KpiSnapshotService</p></span></div></foreignObject></g></g><g class="node default job" id="my-svg-flowchart-J4-5" data-look="classic" transform="translate(1527.40234375, 394.5)"><rect class="basic label-container" style="fill:#0000 !important;stroke-dasharray:3 3 !important" x="-111.4375" y="-25.5" width="222.875" height="51"/><g class="label" style="" transform="translate(-81.4375, -10.5)"><rect/><foreignObject width="162.875" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>SingleReplicaGuardService</p></span></div></foreignObject></g></g><g class="node default job" id="my-svg-flowchart-J5-6" data-look="classic" transform="translate(1789.48046875, 394.5)"><rect class="basic label-container" style="fill:#0000 !important;stroke-dasharray:3 3 !important" x="-100.640625" y="-25.5" width="201.28125" height="51"/><g class="label" style="" transform="translate(-70.640625, -10.5)"><rect/><foreignObject width="141.28125" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>DeferredStartupSeeder</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-PG-7" data-look="classic" transform="translate(1153.375, 589.4919700622559)"><path d="M0,11.422267481330618 a52.578125,11.422267481330618 0,0,0 105.15625,0 a52.578125,11.422267481330618 0,0,0 -105.15625,0 l0,68.42226748133062 a52.578125,11.422267481330618 0,0,0 105.15625,0 l0,-68.42226748133062" class="basic label-container outer-path" style="" transform="translate(-52.578125, -45.633401221995925)"/><g class="label" style="" transform="translate(-45.078125, -11)"><rect/><foreignObject width="90.15625" height="42"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>PostgreSQL 17<br />db: ntqams</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-VOL-8" data-look="classic" transform="translate(642.8671875, 589.4919700622559)"><path d="M0,13.327983659177123 a71.3671875,13.327983659177123 0,0,0 142.734375,0 a71.3671875,13.327983659177123 0,0,0 -142.734375,0 l0,70.32798365917712 a71.3671875,13.327983659177123 0,0,0 142.734375,0 l0,-70.32798365917712" class="basic label-container outer-path" style="" transform="translate(-71.3671875, -48.49197548876568)"/><g class="label" style="" transform="translate(-63.8671875, -11)"><rect/><foreignObject width="127.734375" height="42"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>File volume<br />FileStorage:RootPath</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-SMTP-9" data-look="classic" transform="translate(417.25, 589.4919700622559)"><rect class="basic label-container" style="" x="-64.25" y="-25.5" width="128.5" height="51"/><g class="label" style="" transform="translate(-34.25, -10.5)"><rect/><foreignObject width="68.5" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>SMTP relay</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-OTEL-10" data-look="classic" transform="translate(173, 589.4919700622559)"><rect class="basic label-container" style="" x="-130" y="-36" width="260" height="72"/><g class="label" style="" transform="translate(-100, -21)"><rect/><foreignObject width="200" height="42"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>OTLP collector → Prometheus / Grafana</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-Browser-11" data-look="classic" transform="translate(530.05859375, 33.5)"><rect class="basic label-container" style="" x="-54.671875" y="-25.5" width="109.34375" height="51"/><g class="label" style="" transform="translate(-24.671875, -10.5)"><rect/><foreignObject width="49.34375" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>Browser</p></span></div></foreignObject></g></g></g></g></g><defs><filter id="my-svg-drop-shadow" height="130%" width="130%"><feDropShadow dx="4" dy="4" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs><defs><filter id="my-svg-drop-shadow-small" height="150%" width="150%"><feDropShadow dx="2" dy="2" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs><linearGradient id="my-svg-gradient" gradientUnits="objectBoundingBox" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="hsl(0, 0%, 83.3333333333%)" stop-opacity="1"/><stop offset="100%" stop-color="hsl(0, 0%, 88.9215686275%)" stop-opacity="1"/></linearGradient></svg></figure>
+
+<h2 id="dep-01-single-replica-constraint-adr-0001">DEP-01 · Single-replica constraint (ADR-0001)</h2>
+<p>The system is <strong>not</strong> horizontally scalable as built.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>Behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SingleReplicaGuardService</code></td>
+<td>takes a PostgreSQL advisory lock at start-up; holds it for the process lifetime. A second instance <strong>logs a warning and retries every 60 s</strong> — it is detected and reported, <strong>not prevented</strong></td>
+</tr>
+<tr>
+<td>Per-job advisory locks</td>
+<td><code>ComplianceSweep</code> and <code>KpiSnapshot</code> each take their own lock, so even if two instances run, exactly one performs each scheduled round</td>
+</tr>
+<tr>
+<td>Outbox</td>
+<td><code>FOR UPDATE SKIP LOCKED</code> + a 2-minute claim lease makes concurrent processors safe by construction</td>
+</tr>
+</tbody>
+</table></div>
+<p>So a second instance is <em>survivable</em> (no duplicate scheduled work, no duplicate event delivery) but is
+<strong>not a supported configuration</strong>. Scale-out is a design change.</p>
+<hr>
+<h1>10.2 Supported deployment targets</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Target</th>
+<th>Status</th>
+<th>Artefacts</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Windows Server + IIS</strong></td>
+<td>✅ <strong>verified in this environment</strong></td>
+<td><code>deploy/iis/Install-NTQMS-IIS.ps1</code>, <code>Verify-NTQMS-IIS.ps1</code>, <code>web.config</code>, <code>publish-win-x64/</code></td>
+</tr>
+<tr>
+<td><strong>Windows service</strong></td>
+<td>✅ documented</td>
+<td><code>DEPLOY.md</code> §3</td>
+</tr>
+<tr>
+<td><strong>Linux container</strong></td>
+<td>⚠ <strong>authored, never executed here</strong> — no Docker on the build host</td>
+<td><code>src/NT.QAMS.WebApi/Dockerfile</code>, <code>deploy/compose.production.yml</code></td>
+</tr>
+<tr>
+<td><strong>Observability stack</strong></td>
+<td>⚠ <strong>authored, never brought up</strong> — residual R-7</td>
+<td><code>deploy/observability/</code> (otel-collector, Prometheus, alert rules, Grafana)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="container-image">Container image</h3>
+<pre><code class="language-dockerfile">FROM mcr.microsoft.com/dotnet/sdk:9.0     AS build     # /src
+FROM mcr.microsoft.com/dotnet/aspnet:9.0  AS runtime   # /app
+EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=5s --retries=3   → /health/ready
+USER $APP_UID          # NON-ROOT
+ENTRYPOINT [&quot;dotnet&quot;, &quot;NT.QAMS.WebApi.dll&quot;]
+</code></pre>
+<p>CI asserts the <strong>non-root uid</strong> and <strong>volume writability</strong>, and runs a <strong>Trivy</strong> image scan.</p>
+<hr>
+<h1>10.3 Deployment procedure</h1>
+<h2 id="dep-02-prerequisites">DEP-02 · Prerequisites</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>.NET runtime</td>
+<td>ASP.NET Core 9 (or a self-contained publish)</td>
+</tr>
+<tr>
+<td>PostgreSQL</td>
+<td><strong>17</strong></td>
+</tr>
+<tr>
+<td>Roles</td>
+<td><strong>two</strong>: an <em>owner</em> role that owns the schema and applies migrations, and a <strong>least-privilege non-owner runtime role</strong> (<code>qams_app</code>) that the application connects as</td>
+</tr>
+<tr>
+<td>TLS</td>
+<td>terminated at the proxy</td>
+</tr>
+<tr>
+<td>File volume</td>
+<td>durable, backed-up, writable by the application identity</td>
+</tr>
+<tr>
+<td>SMTP</td>
+<td>optional</td>
+</tr>
+<tr>
+<td>OTLP collector</td>
+<td>optional</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="dep-03-sequence">DEP-03 · Sequence</h2>
+<figure class="d"><svg width="276" height="1375" preserveAspectRatio="xMidYMid meet" id="mmd-4e8829cd24e2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="flowchart" style="max-width:276px;height:auto" viewBox="0 0 276 1375" role="graphics-document document" aria-roledescription="flowchart-v2"><style>#mmd-4e8829cd24e2{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;fill:#000000;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#mmd-4e8829cd24e2 .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#mmd-4e8829cd24e2 .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#mmd-4e8829cd24e2 .error-icon{fill:#552222;}#mmd-4e8829cd24e2 .error-text{fill:#552222;stroke:#552222;}#mmd-4e8829cd24e2 .edge-thickness-normal{stroke-width:1px;}#mmd-4e8829cd24e2 .edge-thickness-thick{stroke-width:3.5px;}#mmd-4e8829cd24e2 .edge-pattern-solid{stroke-dasharray:0;}#mmd-4e8829cd24e2 .edge-thickness-invisible{stroke-width:0;fill:none;}#mmd-4e8829cd24e2 .edge-pattern-dashed{stroke-dasharray:3;}#mmd-4e8829cd24e2 .edge-pattern-dotted{stroke-dasharray:2;}#mmd-4e8829cd24e2 .marker{fill:#666;stroke:#666;}#mmd-4e8829cd24e2 .marker.cross{stroke:#666;}#mmd-4e8829cd24e2 svg{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;}#mmd-4e8829cd24e2 p{margin:0;}#mmd-4e8829cd24e2 .label{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#000000;}#mmd-4e8829cd24e2 .cluster-label text{fill:#333;}#mmd-4e8829cd24e2 .cluster-label span{color:#333;}#mmd-4e8829cd24e2 .cluster-label span p{background-color:transparent;}#mmd-4e8829cd24e2 .label text,#mmd-4e8829cd24e2 span{fill:#000000;color:#000000;}#mmd-4e8829cd24e2 .node rect,#mmd-4e8829cd24e2 .node circle,#mmd-4e8829cd24e2 .node ellipse,#mmd-4e8829cd24e2 .node polygon,#mmd-4e8829cd24e2 .node path{fill:#eee;stroke:#999;stroke-width:1px;}#mmd-4e8829cd24e2 .rough-node .label text,#mmd-4e8829cd24e2 .node .label text,#mmd-4e8829cd24e2 .image-shape .label,#mmd-4e8829cd24e2 .icon-shape .label{text-anchor:middle;}#mmd-4e8829cd24e2 .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#mmd-4e8829cd24e2 .rough-node .label,#mmd-4e8829cd24e2 .node .label,#mmd-4e8829cd24e2 .image-shape .label,#mmd-4e8829cd24e2 .icon-shape .label{text-align:center;}#mmd-4e8829cd24e2 .node.clickable{cursor:pointer;}#mmd-4e8829cd24e2 .root .anchor path{fill:#666!important;stroke-width:0;stroke:#666;}#mmd-4e8829cd24e2 .arrowheadPath{fill:#333333;}#mmd-4e8829cd24e2 .edgePath .path{stroke:#666;stroke-width:1px;}#mmd-4e8829cd24e2 .flowchart-link{stroke:#666;fill:none;}#mmd-4e8829cd24e2 .edgeLabel{background-color:white;text-align:center;}#mmd-4e8829cd24e2 .edgeLabel p{background-color:white;}#mmd-4e8829cd24e2 .edgeLabel rect{opacity:0.5;background-color:white;fill:white;}#mmd-4e8829cd24e2 .labelBkg{background-color:rgba(255, 255, 255, 0.5);}#mmd-4e8829cd24e2 .cluster rect{fill:hsl(0, 0%, 98.9215686275%);stroke:#707070;stroke-width:1px;}#mmd-4e8829cd24e2 .cluster text{fill:#333;}#mmd-4e8829cd24e2 .cluster span{color:#333;}#mmd-4e8829cd24e2 div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:12px;background:hsl(-160, 0%, 93.3333333333%);border:1px solid #707070;border-radius:2px;pointer-events:none;z-index:100;}#mmd-4e8829cd24e2 .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#000000;}#mmd-4e8829cd24e2 rect.text{fill:none;stroke-width:0;}#mmd-4e8829cd24e2 .icon-shape,#mmd-4e8829cd24e2 .image-shape{background-color:white;text-align:center;}#mmd-4e8829cd24e2 .icon-shape p,#mmd-4e8829cd24e2 .image-shape p{background-color:white;padding:2px;}#mmd-4e8829cd24e2 .icon-shape .label rect,#mmd-4e8829cd24e2 .image-shape .label rect{opacity:0.5;background-color:white;fill:white;}#mmd-4e8829cd24e2 .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#mmd-4e8829cd24e2 .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#mmd-4e8829cd24e2 .node .neo-node{stroke:#999;}#mmd-4e8829cd24e2 [data-look="neo"].node rect,#mmd-4e8829cd24e2 [data-look="neo"].cluster rect,#mmd-4e8829cd24e2 [data-look="neo"].node polygon{stroke:url(#mmd-4e8829cd24e2-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-4e8829cd24e2 [data-look="neo"].swimlane.cluster rect{filter:none;}#mmd-4e8829cd24e2 [data-look="neo"].node path{stroke:url(#mmd-4e8829cd24e2-gradient);stroke-width:1px;}#mmd-4e8829cd24e2 [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-4e8829cd24e2 [data-look="neo"].node .neo-line path{stroke:#999;filter:none;}#mmd-4e8829cd24e2 [data-look="neo"].node circle{stroke:url(#mmd-4e8829cd24e2-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-4e8829cd24e2 [data-look="neo"].node circle .state-start{fill:#000000;}#mmd-4e8829cd24e2 [data-look="neo"].icon-shape .icon{fill:url(#mmd-4e8829cd24e2-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-4e8829cd24e2 [data-look="neo"].icon-shape .icon-neo path{stroke:url(#mmd-4e8829cd24e2-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-4e8829cd24e2 :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><g><marker id="my-svg_flowchart-v2-pointEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="4.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 5 L 10 10 L 10 0 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointEnd-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="11.5" refY="7" markerUnits="userSpaceOnUse" markerWidth="10.5" markerHeight="14" orient="auto"><path d="M 0 0 L 11.5 7 L 0 14 z" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="1" refY="7" markerUnits="userSpaceOnUse" markerWidth="11.5" markerHeight="14" orient="auto"><polygon points="0,7 11.5,14 11.5,0" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="11" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-1" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refY="5" refX="12.25" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-2" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="12" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossStart" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="-1" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="17.7" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5;"/></marker><marker id="my-svg_flowchart-v2-crossStart-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="-3.5" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5; stroke-dasharray: 1, 0;"/></marker><g class="root"><g class="clusters"/><g class="edgePaths"><path d="M138,101L138,105.167C138,109.333,138,117.667,138,125.333C138,133,138,140,138,143.5L138,147" id="my-svg-L_A_B_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_A_B_0" data-points="W3sieCI6MTM4LCJ5IjoxMDF9LHsieCI6MTM4LCJ5IjoxMjZ9LHsieCI6MTM4LCJ5IjoxNTF9XQ==" data-look="classic" marker-end="url(#mmd-4e8829cd24e2_flowchart-v2-pointEnd)"/><path d="M138,244L138,248.167C138,252.333,138,260.667,138,268.333C138,276,138,283,138,286.5L138,290" id="my-svg-L_B_C_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_B_C_0" data-points="W3sieCI6MTM4LCJ5IjoyNDR9LHsieCI6MTM4LCJ5IjoyNjl9LHsieCI6MTM4LCJ5IjoyOTR9XQ==" data-look="classic" marker-end="url(#mmd-4e8829cd24e2_flowchart-v2-pointEnd)"/><path d="M138,408L138,412.167C138,416.333,138,424.667,138,432.333C138,440,138,447,138,450.5L138,454" id="my-svg-L_C_D_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_C_D_0" data-points="W3sieCI6MTM4LCJ5Ijo0MDh9LHsieCI6MTM4LCJ5Ijo0MzN9LHsieCI6MTM4LCJ5Ijo0NTh9XQ==" data-look="classic" marker-end="url(#mmd-4e8829cd24e2_flowchart-v2-pointEnd)"/><path d="M138,551L138,555.167C138,559.333,138,567.667,138,575.333C138,583,138,590,138,593.5L138,597" id="my-svg-L_D_E_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_D_E_0" data-points="W3sieCI6MTM4LCJ5Ijo1NTF9LHsieCI6MTM4LCJ5Ijo1NzZ9LHsieCI6MTM4LCJ5Ijo2MDF9XQ==" data-look="classic" marker-end="url(#mmd-4e8829cd24e2_flowchart-v2-pointEnd)"/><path d="M138,694L138,698.167C138,702.333,138,710.667,138,718.333C138,726,138,733,138,736.5L138,740" id="my-svg-L_E_F_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_E_F_0" data-points="W3sieCI6MTM4LCJ5Ijo2OTR9LHsieCI6MTM4LCJ5Ijo3MTl9LHsieCI6MTM4LCJ5Ijo3NDR9XQ==" data-look="classic" marker-end="url(#mmd-4e8829cd24e2_flowchart-v2-pointEnd)"/><path d="M138,858L138,862.167C138,866.333,138,874.667,138,882.333C138,890,138,897,138,900.5L138,904" id="my-svg-L_F_G_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_F_G_0" data-points="W3sieCI6MTM4LCJ5Ijo4NTh9LHsieCI6MTM4LCJ5Ijo4ODN9LHsieCI6MTM4LCJ5Ijo5MDh9XQ==" data-look="classic" marker-end="url(#mmd-4e8829cd24e2_flowchart-v2-pointEnd)"/><path d="M138,980L138,984.167C138,988.333,138,996.667,138,1004.333C138,1012,138,1019,138,1022.5L138,1026" id="my-svg-L_G_H_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_G_H_0" data-points="W3sieCI6MTM4LCJ5Ijo5ODB9LHsieCI6MTM4LCJ5IjoxMDA1fSx7IngiOjEzOCwieSI6MTAzMH1d" data-look="classic" marker-end="url(#mmd-4e8829cd24e2_flowchart-v2-pointEnd)"/><path d="M138,1123L138,1127.167C138,1131.333,138,1139.667,138,1147.333C138,1155,138,1162,138,1165.5L138,1169" id="my-svg-L_H_I_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_H_I_0" data-points="W3sieCI6MTM4LCJ5IjoxMTIzfSx7IngiOjEzOCwieSI6MTE0OH0seyJ4IjoxMzgsInkiOjExNzN9XQ==" data-look="classic" marker-end="url(#mmd-4e8829cd24e2_flowchart-v2-pointEnd)"/><path d="M138,1245L138,1249.167C138,1253.333,138,1261.667,138,1269.333C138,1277,138,1284,138,1287.5L138,1291" id="my-svg-L_I_J_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_I_J_0" data-points="W3sieCI6MTM4LCJ5IjoxMjQ1fSx7IngiOjEzOCwieSI6MTI3MH0seyJ4IjoxMzgsInkiOjEyOTV9XQ==" data-look="classic" marker-end="url(#mmd-4e8829cd24e2_flowchart-v2-pointEnd)"/></g><g class="edgeLabels"><g class="edgeLabel"><g class="label" data-id="L_A_B_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_B_C_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_C_D_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_D_E_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_E_F_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_F_G_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_G_H_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_H_I_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_I_J_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g></g><g class="nodes"><g class="node default" id="my-svg-flowchart-A-0" data-look="classic" transform="translate(138, 54.5)"><rect class="basic label-container" style="" x="-130" y="-46.5" width="260" height="93"/><g class="label" style="" transform="translate(-100, -31.5)"><rect/><foreignObject width="200" height="63"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>1 · Create the database and roles<br />deploy/db-init.sql</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-B-1" data-look="classic" transform="translate(138, 197.5)"><rect class="basic label-container" style="" x="-130" y="-46.5" width="260" height="93"/><g class="label" style="" transform="translate(-100, -31.5)"><rect/><foreignObject width="200" height="63"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>2 · Apply the least-privilege runtime role<br />deploy/harden-runtime-role.sql</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-C-3" data-look="classic" transform="translate(138, 351)"><rect class="basic label-container" style="" x="-130" y="-57" width="260" height="114"/><g class="label" style="" transform="translate(-100, -42)"><rect/><foreignObject width="200" height="84"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>3 · Apply migrations AS THE OWNER<br />dotnet ef database update  (NOT MigrateOnStartup)</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-D-5" data-look="classic" transform="translate(138, 504.5)"><rect class="basic label-container" style="" x="-130" y="-46.5" width="260" height="93"/><g class="label" style="" transform="translate(-100, -31.5)"><rect/><foreignObject width="200" height="63"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>4 · Deploy the API<br />Database__MigrateOnStartup = false</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-E-7" data-look="classic" transform="translate(138, 647.5)"><rect class="basic label-container" style="" x="-130" y="-46.5" width="260" height="93"/><g class="label" style="" transform="translate(-100, -31.5)"><rect/><foreignObject width="200" height="63"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>5 · Provide configuration + secrets<br />env vars / secret store</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-F-9" data-look="classic" transform="translate(138, 801)"><rect class="basic label-container" style="" x="-130" y="-57" width="260" height="114"/><g class="label" style="" transform="translate(-100, -42)"><rect/><foreignObject width="200" height="84"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>6 · Build and deploy the SPA<br />edit environment.ts first, then ng build --configuration production</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-G-11" data-look="classic" transform="translate(138, 944)"><rect class="basic label-container" style="" x="-130" y="-36" width="260" height="72"/><g class="label" style="" transform="translate(-100, -21)"><rect/><foreignObject width="200" height="42"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>7 · Point the proxy at the SPA bundle and the API, same origin</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-H-13" data-look="classic" transform="translate(138, 1076.5)"><rect class="basic label-container" style="" x="-130" y="-46.5" width="260" height="93"/><g class="label" style="" transform="translate(-100, -31.5)"><rect/><foreignObject width="200" height="63"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>8 · Verify: /health/live 200 · /health/ready 200 · sign in · /metrics</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-I-15" data-look="classic" transform="translate(138, 1209)"><rect class="basic label-container" style="" x="-130" y="-36" width="260" height="72"/><g class="label" style="" transform="translate(-100, -21)"><rect/><foreignObject width="200" height="42"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>9 · Remove the PlatformAdmin bootstrap credentials</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-J-17" data-look="classic" transform="translate(138, 1331)"><rect class="basic label-container" style="" x="-130" y="-36" width="260" height="72"/><g class="label" style="" transform="translate(-100, -21)"><rect/><foreignObject width="200" height="42"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>10 · Configure backups (BOTH legs) and the alert set</p></span></div></foreignObject></g></g></g></g></g><defs><filter id="my-svg-drop-shadow" height="130%" width="130%"><feDropShadow dx="4" dy="4" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs><defs><filter id="my-svg-drop-shadow-small" height="150%" width="150%"><feDropShadow dx="2" dy="2" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs><linearGradient id="my-svg-gradient" gradientUnits="objectBoundingBox" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="hsl(0, 0%, 83.3333333333%)" stop-opacity="1"/><stop offset="100%" stop-color="hsl(0, 0%, 88.9215686275%)" stop-opacity="1"/></linearGradient></svg></figure>
+
+<h3 id="dep-04-migration-policy">DEP-04 · Migration policy</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Apply migrations as the OWNER role</strong>, never as the runtime role</td>
+<td>the runtime role deliberately cannot alter schema</td>
+</tr>
+<tr>
+<td><strong>Keep <code>Database:MigrateOnStartup = false</code> in production</strong></td>
+<td>a deliberate residual: this path still fails fast on a schema gate</td>
+</tr>
+<tr>
+<td>Preferred mechanism</td>
+<td>the idempotent SQL script</td>
+</tr>
+<tr>
+<td>⚠ <strong><code>deploy/migrations.sql</code> is STALE</strong></td>
+<td>it covers <strong>migrations 1–10 of 56</strong> while <code>DEPLOY.md</code> instructs re-running it on each upgrade. <strong>Regenerate before any use:</strong> <code>dotnet ef migrations script --idempotent</code></td>
+</tr>
+<tr>
+<td>Round-trip</td>
+<td>every migration's <code>Up</code>/<code>Down</code> is CI-tested</td>
+</tr>
+<tr>
+<td>RLS on new tables</td>
+<td>a new <code>ITenantScoped</code> table <strong>must</strong> add its policy in its own migration — EF will not</td>
+</tr>
+<tr>
+<td>Bypass in migrations</td>
+<td>a migration that backfills from, or adds an FK to, a FORCE-RLS table <strong>must</strong> put <code>SELECT set_config('app.bypass_rls','on',true);</code> at the top of <strong>both</strong> <code>Up()</code> and <code>Down()</code>, or the backfill updates <strong>zero rows</strong> and the FK check cannot see the parent</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="dep-05-start-up-gates-the-deployment-will-refuse-to-proceed">DEP-05 · Start-up gates (the deployment will refuse to proceed)</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Gate</th>
+<th>Failure mode</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ConnectionStrings:Postgres</code> absent</td>
+<td>throws, named</td>
+</tr>
+<tr>
+<td><code>Jwt:Secret</code> absent or &lt; 32 chars</td>
+<td>throws, named</td>
+</tr>
+<tr>
+<td>Any <code>ConfigGuard</code> key present but unparseable</td>
+<td>throws with the key, the bad value and the expected type (<code>CFG-002</code>)</td>
+</tr>
+<tr>
+<td><code>WestgardLimits</code> / <code>RateLimitSettings</code> / <code>OutboxOptions</code> / <code>RefreshSessionOptions</code> invalid</td>
+<td>throws</td>
+</tr>
+<tr>
+<td><strong>Production + over-privileged DB role</strong></td>
+<td><strong>refuses to boot</strong> (SUPERUSER / BYPASSRLS / owns application tables)</td>
+</tr>
+<tr>
+<td>Database unreachable</td>
+<td><strong>does not</strong> refuse — seeding defers, readiness reports 503</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>10.4 Health, readiness and probes</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Checks</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /health/live</code></td>
+<td><strong>none</strong></td>
+<td>process liveness. A database outage must recycle <em>traffic</em>, not the <em>process</em> — so this never fails on DB loss</td>
+</tr>
+<tr>
+<td><code>GET /health/ready</code></td>
+<td>PostgreSQL connectivity</td>
+<td><strong>503</strong> while unreachable. The container <code>HEALTHCHECK</code> target and the LB/orchestrator readiness gate</td>
+</tr>
+<tr>
+<td><code>GET /health</code></td>
+<td>none</td>
+<td>legacy liveness alias for existing probes and scripts</td>
+</tr>
+<tr>
+<td><code>GET /metrics</code></td>
+<td>—</td>
+<td>Prometheus scrape</td>
+</tr>
+</tbody>
+</table></div>
+<p>All four are <strong>anonymous and rate-limit exempt</strong>.</p>
+<h3 id="probe-wiring">Probe wiring</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Consumer</th>
+<th>Probe</th>
+<th>Interval</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Container <code>HEALTHCHECK</code></td>
+<td><code>/health/ready</code></td>
+<td>30 s, 5 s timeout, 3 retries</td>
+</tr>
+<tr>
+<td>Load balancer</td>
+<td><code>/health/ready</code></td>
+<td>site policy</td>
+</tr>
+<tr>
+<td>Process supervisor</td>
+<td><code>/health/live</code></td>
+<td>site policy</td>
+</tr>
+<tr>
+<td>Prometheus</td>
+<td><code>/metrics</code></td>
+<td>scrape interval</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>10.5 Reverse-proxy requirements</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Terminate TLS</td>
+<td>ADR-0002 — the application does not serve TLS</td>
+</tr>
+<tr>
+<td>Set <code>X-Forwarded-For</code> and <code>X-Forwarded-Proto</code></td>
+<td>otherwise <strong>every client shares one rate-limit budget</strong> (the proxy's address) and the scheme reads as http</td>
+</tr>
+<tr>
+<td>Serve the SPA <strong>on the same origin</strong> as the API</td>
+<td>ADR-0007 — no CORS is configured, and the refresh cookie is <code>SameSite=Strict</code></td>
+</tr>
+<tr>
+<td>Apply a <strong>CSP for the SPA</strong></td>
+<td>the API's CSP does not protect the SPA — see <a href="09-Security-Specification.html">Document 09 T-06</a></td>
+</tr>
+<tr>
+<td>Forward <code>/api/*</code> to the application</td>
+<td>—</td>
+</tr>
+<tr>
+<td>SPA fallback routing</td>
+<td>the Angular router uses path routing; unknown paths must fall back to <code>index.html</code></td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>10.6 Environment matrix</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Development</th>
+<th>Production</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ASPNETCORE_ENVIRONMENT</code></td>
+<td><code>Development</code></td>
+<td><strong><code>Production</code></strong></td>
+</tr>
+<tr>
+<td>Logging</td>
+<td>default console</td>
+<td><strong>JSON console</strong>, scopes, UTC, ISO-8601</td>
+</tr>
+<tr>
+<td>Role guard</td>
+<td>warns and continues</td>
+<td><strong>refuses to boot</strong></td>
+</tr>
+<tr>
+<td>OpenAPI</td>
+<td>mapped at <code>/openapi</code> (anonymous)</td>
+<td><strong>not exposed</strong></td>
+</tr>
+<tr>
+<td>HSTS</td>
+<td>not emitted</td>
+<td>emitted</td>
+</tr>
+<tr>
+<td>DB role</td>
+<td><code>qams_app</code> <strong>owns</strong> the tables (weakened RLS — deliberate)</td>
+<td>non-owner, non-superuser, non-BYPASSRLS</td>
+</tr>
+<tr>
+<td>Secrets</td>
+<td>.NET user-secrets</td>
+<td>env vars / secret store</td>
+</tr>
+<tr>
+<td><code>MigrateOnStartup</code></td>
+<td><code>true</code> (convenience)</td>
+<td><strong><code>false</code></strong></td>
+</tr>
+<tr>
+<td><code>Jwt:ExpiryMinutes</code></td>
+<td>120</td>
+<td><strong>15</strong> (align with ADR-0009)</td>
+</tr>
+<tr>
+<td>Rate limit (global)</td>
+<td>300</td>
+<td><strong>sized to the site's peak concurrency</strong></td>
+</tr>
+<tr>
+<td><code>FileStorage:RootPath</code></td>
+<td>default</td>
+<td><strong>durable, backed-up volume</strong></td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>10.7 Observability deployment</h1>
+<h2 id="logs">Logs</h2>
+<p>Production emits <strong>structured JSON to stdout</strong> with scopes (service, tenant, trace, correlation), UTC
+timestamps in ISO-8601 <code>"O"</code>. The application writes <strong>no log files</strong>; retention is the host's concern
+and <strong>is not configured anywhere in the repository</strong>.</p>
+<h2 id="traces">Traces</h2>
+<p>One trace spans HTTP → MediatR → EF/Npgsql → outbox/jobs. The <code>traceparent</code> is <strong>persisted on outbox
+rows</strong>, so asynchronous delivery joins the originating trace. Health and metrics traffic is filtered
+out. OTLP export when <code>Otlp:Endpoint</code> is set.</p>
+<h2 id="metrics-get-metrics-prometheus-text">Metrics — <code>GET /metrics</code> (Prometheus text)</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>http.server.request.duration</code></td>
+<td>RED: rate, errors, latency</td>
+</tr>
+<tr>
+<td>Npgsql meter (<code>db.client.*</code>)</td>
+<td>connection-pool usage and wait</td>
+</tr>
+<tr>
+<td><code>qams.outbox.processed</code> / <code>.failed</code> / <code>.dead_lettered</code></td>
+<td>delivery counters</td>
+</tr>
+<tr>
+<td><code>qams.outbox.backlog</code></td>
+<td>live unprocessed rows</td>
+</tr>
+<tr>
+<td><code>qams.outbox.oldest_pending_age_seconds</code></td>
+<td>delivery lag</td>
+</tr>
+<tr>
+<td><code>qams.outbox.dead_letters</code></td>
+<td>rows awaiting triage</td>
+</tr>
+<tr>
+<td><code>qams.job.last_success_timestamp_seconds{job}</code></td>
+<td>liveness for <code>compliance-sweep</code> and <code>kpi-snapshot</code></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="dep-06-the-alert-set-seven-alerts-defined-but-never-deployed">DEP-06 · The alert set (seven alerts, <strong>defined but never deployed</strong>)</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Alert</th>
+<th>Condition</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Error rate</td>
+<td>5xx ratio &gt; 5 % over 5 m</td>
+<td><strong>page</strong> — check the recent deploy and DB health</td>
+</tr>
+<tr>
+<td>Latency</td>
+<td>p95 <code>http.server.request.duration</code> &gt; 2 s over 10 m</td>
+<td>investigate slow queries / pool wait</td>
+</tr>
+<tr>
+<td><strong>Outbox dead-letter</strong></td>
+<td><code>qams_outbox_dead_letters &gt; 0</code></td>
+<td>triage <code>qams.outbox_event WHERE dead_lettered_at_utc IS NOT NULL</code>; fix, then clear <code>dead_lettered_at_utc</code> + <code>attempts</code> to replay</td>
+</tr>
+<tr>
+<td>Outbox backlog age</td>
+<td><code>qams_outbox_oldest_pending_age_seconds &gt; 600</code></td>
+<td>processor stuck or crashed</td>
+</tr>
+<tr>
+<td>Sweep liveness</td>
+<td><code>time() − qams_job_last_success_timestamp_seconds{job="compliance-sweep"} &gt; 7200</code> (2× interval)</td>
+<td>sweep not running — check leader election</td>
+</tr>
+<tr>
+<td>Snapshot liveness</td>
+<td>same for <code>kpi-snapshot</code>, &gt; 43200 (2× 6 h)</td>
+<td>as above</td>
+</tr>
+<tr>
+<td>Readiness flapping</td>
+<td><code>/health/ready</code> non-200</td>
+<td>PostgreSQL down or unreachable</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong><code>[Not Executed]</code></strong> — <code>deploy/observability/</code> was authored but never brought up (no Docker on the
+build host). <strong>No alert in this set has ever been observed firing.</strong> Residual risk <strong>R-7</strong>.
+Where no metrics stack exists, the dead-letter <strong>ERROR log</strong> (<code>Outbox event … DEAD-LETTERED</code>) doubles
+as a log-based alert channel.</p>
+</blockquote>
+<hr>
+<h1>10.8 Backup and disaster recovery</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Target</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>RPO</strong></td>
+<td>≤ <strong>5 minutes</strong> (continuous WAL archiving with PITR)</td>
+</tr>
+<tr>
+<td><strong>RTO</strong></td>
+<td>≤ <strong>4 hours</strong></td>
+</tr>
+<tr>
+<td>Nightly</td>
+<td>logical dump (<code>pg_dump --format=custom --compress=9</code>)</td>
+</tr>
+<tr>
+<td><strong>Second leg</strong></td>
+<td><code>tar</code> of the file store — <strong>mandatory</strong>; the database dump does <strong>not</strong> contain uploaded evidence</td>
+</tr>
+<tr>
+<td>Manifest</td>
+<td>SHA-256 of both artefacts</td>
+</tr>
+<tr>
+<td><strong>Post-restore verification</strong></td>
+<td><strong>mandatory, and includes audit-trail hash-chain verification</strong></td>
+</tr>
+<tr>
+<td>Runbook</td>
+<td><code>deploy/BACKUP-RESTORE-DR.md</code>; scripts <code>backup.sh</code> / <code>restore.sh</code></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>⚠ <code>backup.sh</code> <strong>warns and continues</strong> if the file-store directory is missing, producing a <strong>DB-only
+backup</strong>. That is not a complete backup: every controlled-document version, calibration certificate
+and archive snapshot would be unrecoverable. Verify the path.</p>
+<p>⚠ <strong>No restore drill has been executed in this environment.</strong> RPO/RTO are documented targets, not
+demonstrated capability. <strong><code>[Not Executed]</code></strong></p>
+</blockquote>
+<hr>
+<h1>10.9 CI/CD pipeline</h1>
+<p><code>.github/workflows/ci.yml</code> — triggers on push (including <code>master</code>). <strong>Three jobs.</strong></p>
+<h2 id="job-1-build-test">Job 1 — <code>build-test</code></h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>.NET</td>
+<td>9.0.x</td>
+</tr>
+<tr>
+<td><strong>Service container</strong></td>
+<td><code>postgres:17</code></td>
+</tr>
+<tr>
+<td>Database preparation</td>
+<td>creates a <strong>NON-superuser <code>qams_app</code> role</strong> owning <code>ntqms_ci</code>, then applies EF migrations</td>
+</tr>
+<tr>
+<td>Test run</td>
+<td>the whole solution with <code>QMS_ITEST_POSTGRES</code> set, <strong>so the integration suite executes for real</strong></td>
+</tr>
+<tr>
+<td>Gate note</td>
+<td>because <code>QMS_ITEST_POSTGRES</code> is set, the <strong>RLS suite runs</strong> — the TENANT-004 gate is exercised, not skipped</td>
+</tr>
+<tr>
+<td>.NET SCA</td>
+<td><code>dotnet list package --vulnerable</code> — fails on High/Critical</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="job-2-frontend">Job 2 — <code>frontend</code></h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Node</td>
+<td><strong>24</strong> (required — npm 10 on Node 22 falsely rejects the npm-11 lockfile)</td>
+</tr>
+<tr>
+<td>Build</td>
+<td><code>ng build --configuration production</code></td>
+</tr>
+<tr>
+<td>Unit</td>
+<td>Karma/Jasmine headless</td>
+</tr>
+<tr>
+<td>e2e</td>
+<td>Playwright against a live API</td>
+</tr>
+<tr>
+<td><strong>axe</strong></td>
+<td>always-on accessibility gate</td>
+</tr>
+<tr>
+<td>npm SCA</td>
+<td>production dependencies vs <code>.github/npm-audit-allowlist.txt</code> (currently <strong>empty</strong>)</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="job-3-container">Job 3 — <code>container</code></h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Build</td>
+<td>the hardened image</td>
+</tr>
+<tr>
+<td>Assert</td>
+<td><strong>non-root uid</strong> and <strong>volume writability</strong></td>
+</tr>
+<tr>
+<td>Scan</td>
+<td><strong>Trivy</strong> (CLI install — <code>trivy-action@0.24.0</code> failed to resolve at job setup)</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="merge-gates-any-failure-blocks-the-merge">Merge gates (any failure blocks the merge)</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Gate</th>
+<th>Prevents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ApiSurface.approved.txt</code> (658 lines)</td>
+<td>silent API-surface drift</td>
+</tr>
+<tr>
+<td><code>CommandPolicyTests</code></td>
+<td>an unauthorised command</td>
+</tr>
+<tr>
+<td>Module-boundary test</td>
+<td>a cross-module reference</td>
+</tr>
+<tr>
+<td>Architecture tests (24)</td>
+<td>a layering violation</td>
+</tr>
+<tr>
+<td>Migration round-trip</td>
+<td>an irreversible migration</td>
+</tr>
+<tr>
+<td>Audit-tamper tests</td>
+<td>a mutable ledger</td>
+</tr>
+<tr>
+<td><code>RoleEndpointMatrixTests</code></td>
+<td>a gate that 401s or 500s instead of 403ing</td>
+</tr>
+<tr>
+<td><code>ContractCoverageTests</code></td>
+<td>a broken list envelope or 404 contract</td>
+</tr>
+<tr>
+<td>axe</td>
+<td>an accessibility regression</td>
+</tr>
+<tr>
+<td>3× SCA/Trivy</td>
+<td>a vulnerable dependency or image</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="test-baseline-last-recorded-green-run">Test baseline (last recorded green run)</h2>
+<p><strong>436 backend tests, 0 skipped</strong> · <strong>74 frontend unit specs</strong> · <strong>6 Playwright e2e</strong>.</p>
+<blockquote>
+<p><strong>Not in CI:</strong> <code>tests/NT.QAMS.LoadTests</code> is <strong>outside the solution</strong> — run it with <code>dotnet run</code>, not
+<code>dotnet test</code>.</p>
+</blockquote>
+<hr>
+<h1>10.10 Operational runbook summary</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Situation</th>
+<th>First action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"The app is not working" (dev)</td>
+<td><strong><code>scripts/dev-status.ps1</code></strong> — it separates the three look-alike failures: port DOWN (ERR_CONNECTION_REFUSED) · API up but readiness <strong>503</strong> (PostgreSQL unreachable) · both healthy (so it is credentials or tenant, not the stack)</td>
+</tr>
+<tr>
+<td>Start the dev stack</td>
+<td><code>scripts/dev-up.ps1</code> (detached, idempotent)</td>
+</tr>
+<tr>
+<td>After a code change</td>
+<td><code>scripts/dev-rebuild.ps1</code> — stop → build → <strong>always restart</strong></td>
+</tr>
+<tr>
+<td>Stop the dev stack</td>
+<td><code>scripts/dev-down.ps1</code> (stops <strong>only the port owner</strong>)</td>
+</tr>
+<tr>
+<td>Outbox dead-letters</td>
+<td>query <code>qams.outbox_event WHERE dead_lettered_at_utc IS NOT NULL</code>; fix the cause; clear <code>dead_lettered_at_utc</code> and <code>attempts</code> to replay</td>
+</tr>
+<tr>
+<td>Sweep not running</td>
+<td>check <code>qams_job_last_success_timestamp_seconds{job="compliance-sweep"}</code>; check advisory-lock contention</td>
+</tr>
+<tr>
+<td>Readiness 503</td>
+<td>PostgreSQL is unreachable; the process is healthy and will recover without a restart</td>
+</tr>
+<tr>
+<td>Rotate the JWT secret</td>
+<td>update <code>Jwt:Secret</code>, restart — <strong>all access tokens become invalid immediately</strong></td>
+</tr>
+<tr>
+<td>Audit rows invisible in psql</td>
+<td><code>SELECT set_config('app.bypass_rls','on',false);</code> first, or set the tenant GUC</td>
+</tr>
+<tr>
+<td>Build fails with a DLL lock</td>
+<td><strong>stop the running API</strong> before <code>dotnet build</code> / <code>dotnet ef</code></td>
+</tr>
+<tr>
+<td>Stale SPA after a style change</td>
+<td><code>ng build</code> does <strong>not</strong> refresh <code>ng serve</code> — restart the SPA</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="environment-gotchas-recorded-in-repo">Environment gotchas recorded in-repo</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Gotcha</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Windows PowerShell 5.1 misreads non-ASCII (em-dash, arrows, box-drawing) in UTF-8-no-BOM <code>.ps1</code> files → phantom "missing terminator" parse errors. <strong>Keep scripts ASCII-only.</strong></td>
+</tr>
+<tr>
+<td>PS 5.1 rejects <code>(if …)</code> as an argument value at <strong>runtime</strong> though it parses.</td>
+</tr>
+<tr>
+<td>PS 5.1 here-strings with embedded double quotes mangle <code>git -m</code> arguments → use <code>git commit -F file</code>.</td>
+</tr>
+<tr>
+<td>Playwright <code>reuseExistingServer</code> can run e2e against a <strong>stale</strong> dev server on :4200 — kill it first.</td>
+</tr>
+<tr>
+<td>After adding EF columns, run <code>dotnet ef database update</code> before integration tests, or they fail on model↔schema drift.</td>
+</tr>
+<tr>
+<td>Live refresh over plain-HTTP localhost needs a manual non-secure cookie — the <code>Secure</code> flag blocks the jar. The functional tests are the proof.</td>
+</tr>
+<tr>
+<td>Dev servers must be started via <code>scripts/dev-up.ps1</code> (detached) or they die with the launching session.</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>10.11 Validation and release status</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GAMP 5 CSV documentation set</td>
+<td>✅ complete — VMP, URS, FRA, IQ/OQ/PQ protocols, RTM, VSR (<code>docs/validation/</code>)</td>
+</tr>
+<tr>
+<td>OQ execution</td>
+<td>✅ <strong>18 cases executed and transcribed with actual results</strong> across three execution records</td>
+</tr>
+<tr>
+<td>Real defect found by that execution</td>
+<td><strong>OPS-010</strong> — cold start with PostgreSQL unreachable crashed. Fixed; 6 regression tests added</td>
+</tr>
+<tr>
+<td>Engineering dry-run evidence</td>
+<td>✅ recorded</td>
+</tr>
+<tr>
+<td>System-owner release decision</td>
+<td>✅ conditional approval with risk acceptance — <strong>signature lines left BLANK</strong></td>
+</tr>
+<tr>
+<td><strong>Formal signed IQ/OQ/PQ execution</strong></td>
+<td>❌ pending — execution and signature are events, not documents</td>
+</tr>
+<tr>
+<td><strong>Supplier assessment</strong></td>
+<td>❌ pending</td>
+</tr>
+<tr>
+<td><strong>Restore drill</strong></td>
+<td>❌ pending</td>
+</tr>
+<tr>
+<td><strong>SOPs</strong></td>
+<td>❌ pending</td>
+</tr>
+<tr>
+<td><strong>Independent penetration test</strong></td>
+<td>❌ pending</td>
+</tr>
+<tr>
+<td><strong>Staging soak + alert confirmation</strong></td>
+<td>❌ pending (R-5 / R-7)</td>
+</tr>
+<tr>
+<td><strong>CSV re-validation</strong></td>
+<td>❌ pending (R-6)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong>No claim of a validated state is made by the software.</strong> Remaining work before a validated go-live
+is execution and operations, not development.</p>
+</blockquote>
+<hr>
+<h1>10.12 Deployment acceptance criteria</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Given</th>
+<th>When</th>
+<th>Then</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AT-DEP-01</strong></td>
+<td>Production + a DB role owning application tables</td>
+<td>the app starts</td>
+<td>it <strong>refuses to boot</strong> naming the violation</td>
+</tr>
+<tr>
+<td><strong>AT-DEP-02</strong></td>
+<td>Production + a correct least-privilege role</td>
+<td>the app starts</td>
+<td>it boots; <code>/health/live</code> 200, <code>/health/ready</code> 200</td>
+</tr>
+<tr>
+<td><strong>AT-DEP-03</strong></td>
+<td>PostgreSQL stopped, then started</td>
+<td>probes are polled throughout</td>
+<td>live stays 200; ready 503 → 200; <strong>deferred seeding completes without a restart</strong></td>
+</tr>
+<tr>
+<td><strong>AT-DEP-04</strong></td>
+<td>a fresh clone with no user-secrets</td>
+<td><code>dotnet run</code></td>
+<td>it refuses to start — <strong>by design</strong></td>
+</tr>
+<tr>
+<td><strong>AT-DEP-05</strong></td>
+<td>a mistyped boolean in configuration</td>
+<td>the app starts</td>
+<td>it refuses, quoting the key, the value and the expected type</td>
+</tr>
+<tr>
+<td><strong>AT-DEP-06</strong></td>
+<td>a container image build</td>
+<td>CI runs</td>
+<td>non-root uid asserted, volume writability asserted, Trivy scan clean</td>
+</tr>
+<tr>
+<td><strong>AT-DEP-07</strong></td>
+<td>a route added without updating the snapshot</td>
+<td>CI runs</td>
+<td>the build <strong>fails</strong></td>
+</tr>
+<tr>
+<td><strong>AT-DEP-08</strong></td>
+<td><code>backup.sh</code> with a valid file-store path</td>
+<td>it runs</td>
+<td>three artefacts (<code>.dump</code>, <code>.tar</code>, <code>.sha256</code>)</td>
+</tr>
+<tr>
+<td><strong>AT-DEP-09</strong></td>
+<td>a restore</td>
+<td>it completes</td>
+<td>verification includes an audit-chain check</td>
+</tr>
+<tr>
+<td><strong>AT-DEP-10</strong></td>
+<td>two application instances against one database</td>
+<td>both start</td>
+<td>the second logs the sentinel warning; <strong>each scheduled round runs exactly once</strong></td>
+</tr>
+</tbody>
+</table></div>
+<div class="pager"><a href="09-Security-Specification.html"><span>Previous</span>Security Specification</a><a href="11-Architecture-Constraints.html" style="text-align:right"><span>Next</span>Architecture Constraints</a></div>
+</main></div>
+<script>
+(function(){
+ var r=document.documentElement, K='ntqms-srs-theme', s=localStorage.getItem(K);
+ if(s) r.setAttribute('data-theme',s);
+ var b=document.getElementById('th');
+ if(b) b.onclick=function(){
+   var cur=r.getAttribute('data-theme');
+   if(!cur) cur=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+   var nx=cur==='dark'?'light':'dark';
+   r.setAttribute('data-theme',nx); localStorage.setItem(K,nx);
+ };
+ var p=document.getElementById('pr'); if(p) p.onclick=function(){window.print();};
+ // scroll-spy on the in-page TOC
+ var links=[].slice.call(document.querySelectorAll('#toc a'));
+ if(!links.length) return;
+ var tgt=links.map(function(a){return document.getElementById(a.getAttribute('href').slice(1));});
+ function spy(){
+   var y=window.scrollY+90, i=0;
+   for(var k=0;k<tgt.length;k++){ if(tgt[k]&&tgt[k].offsetTop<=y) i=k; }
+   links.forEach(function(a,n){a.style.color=n===i?'var(--accent)':'';
+     a.style.borderLeftColor=n===i?'var(--accent)':'transparent';});
+ }
+ addEventListener('scroll',spy,{passive:true}); spy();
+})();
+</script>
+</body></html>

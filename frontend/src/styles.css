@@ -246,3 +246,17 @@ tbody tr:hover { background: var(--nt-brand-soft); }
 
 /* Numbers always tabular so codes, versions and KPIs align. */
 td, .rpn, .kpi-n { font-variant-numeric: tabular-nums; }
+
+/* Grid and flex items default to `min-width: auto`, which means a control
+   refuses to shrink below its own content. Every form row in the app is a
+   `repeat(auto-fit, minmax(150px, 1fr))` grid, so a <select> whose longest
+   option is wider than its track (e.g. "Out of Specification (OOS)" at 195px
+   in a 164px column) overflowed and overlapped the field beside it. Letting
+   the item shrink makes the control clip inside its own track instead. */
+.grid > * { min-width: 0; }
+/* And the controls inside those cells: 36 components override the global
+   width:100% with `select, button { width: auto }` for their filterbars, which
+   also lets a drawer-form select size itself to its longest option and overlap
+   the neighbouring field. A cap cannot widen a filterbar control, only stop a
+   grid-cell control escaping its track. */
+.grid select, .grid input, .grid textarea { width: 100%; max-width: 100%; }

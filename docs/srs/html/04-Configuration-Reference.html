@@ -1,0 +1,1345 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configuration Reference — NT.QMS As-Built SRS</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎛️</text></svg>">
+<style>
+:root{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);
+ --mono:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace;
+ --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,ui-serif,serif;
+ --sans:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}}
+:root[data-theme="dark"]{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}
+:root[data-theme="light"]{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+ font-size:15.5px;line-height:1.62;-webkit-text-size-adjust:100%}
+.wrap{display:grid;grid-template-columns:288px minmax(0,1fr);gap:0;max-width:1560px;margin:0 auto}
+/* ---- sidebar ---- */
+aside{position:sticky;top:0;height:100vh;overflow-y:auto;padding:22px 16px 60px;
+ border-right:1px solid var(--line);background:var(--panel)}
+aside .brand{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:-.01em;
+ margin:0 0 2px}
+aside .sub{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;
+ margin:0 0 16px}
+aside nav a{display:block;padding:5px 9px;border-radius:7px;color:var(--ink);text-decoration:none;
+ font-size:13.2px;border-left:2px solid transparent}
+aside nav a:hover{background:var(--panel-2)}
+aside nav a.cur{background:var(--accent-soft);border-left-color:var(--accent);font-weight:600}
+aside nav a .n{color:var(--muted);font-variant-numeric:tabular-nums;margin-right:7px;font-size:11.5px}
+aside .sec{margin:16px 0 5px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+ color:var(--muted);font-weight:700}
+#toc{margin-top:6px;border-top:1px solid var(--line);padding-top:10px}
+#toc a{display:block;padding:2.5px 9px;font-size:12.4px;color:var(--muted);text-decoration:none;
+ border-left:2px solid transparent;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#toc a:hover{color:var(--ink)}
+#toc a.h3{padding-left:22px;font-size:11.8px}
+/* ---- main ---- */
+main{padding:34px 46px 120px;min-width:0;overflow-wrap:anywhere}
+.doc-head{border-bottom:2px solid var(--accent);padding-bottom:14px;margin-bottom:26px}
+.kicker{color:var(--accent);font-size:11.5px;font-weight:700;letter-spacing:.11em;
+ text-transform:uppercase;margin:0 0 4px}
+h1{font-family:var(--serif);font-size:31px;line-height:1.2;margin:0;letter-spacing:-.015em}
+h2{font-family:var(--serif);font-size:24px;margin:38px 0 12px;padding-bottom:6px;
+ border-bottom:1px solid var(--line);letter-spacing:-.01em;scroll-margin-top:14px}
+h3{font-size:18px;margin:26px 0 9px;letter-spacing:-.005em;scroll-margin-top:14px}
+h4{font-size:15px;margin:20px 0 7px;color:var(--accent)}
+h5,h6{font-size:13.5px;margin:16px 0 6px;color:var(--muted);text-transform:uppercase;
+ letter-spacing:.05em}
+p{margin:10px 0}
+a{color:var(--accent)}
+hr{border:0;border-top:1px solid var(--line);margin:30px 0}
+ul,ol{margin:9px 0;padding-left:24px}
+li{margin:3px 0}
+blockquote{margin:16px 0;padding:12px 18px;background:var(--accent-soft);
+ border-left:3px solid var(--accent);border-radius:0 8px 8px 0}
+blockquote p:first-child{margin-top:0}blockquote p:last-child{margin-bottom:0}
+code{font-family:var(--mono);font-size:.875em;background:var(--panel-2);
+ padding:1.5px 5px;border-radius:4px;border:1px solid var(--line)}
+pre{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;
+ padding:14px 16px;overflow-x:auto;margin:14px 0}
+pre code{background:none;border:0;padding:0;font-size:12.6px;line-height:1.5}
+/* ---- tables ---- */
+.tw{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:10px;
+ background:var(--panel);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;font-size:13.4px}
+th,td{padding:8px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:var(--panel-2);font-weight:700;font-size:12.2px;letter-spacing:.02em;
+ position:sticky;top:0;z-index:1}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--accent-soft)}
+td code,th code{font-size:.9em;white-space:nowrap}
+/* ---- diagrams ---- */
+figure.d{margin:18px 0;padding:18px;background:var(--panel);border:1px solid var(--line);
+ border-radius:12px;box-shadow:var(--shadow);overflow-x:auto;text-align:center}
+figure.d svg{max-width:100%;height:auto;display:inline-block}
+/* ---- misc ---- */
+.tools{position:fixed;top:12px;right:16px;display:flex;gap:6px;z-index:50}
+.tools button{font:inherit;font-size:12px;padding:5px 11px;border-radius:8px;cursor:pointer;
+ border:1px solid var(--line);background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+.tools button:hover{background:var(--panel-2)}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:52px;padding-top:18px;
+ border-top:1px solid var(--line)}
+.pager a{display:block;max-width:46%;padding:10px 14px;border:1px solid var(--line);
+ border-radius:10px;background:var(--panel);text-decoration:none;font-size:13px}
+.pager a span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;
+ letter-spacing:.08em}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:14px;margin:20px 0}
+.card{padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--panel);
+ box-shadow:var(--shadow);text-decoration:none;color:var(--ink);display:block}
+.card:hover{border-color:var(--accent)}
+.card .num{color:var(--accent);font-weight:700;font-size:11.5px;letter-spacing:.1em}
+.card .t{font-family:var(--serif);font-size:17px;margin:3px 0 5px}
+.card .d{color:var(--muted);font-size:12.7px;line-height:1.5}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin:20px 0}
+.stat{padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.stat b{display:block;font-size:23px;font-family:var(--serif);line-height:1.1}
+.stat span{color:var(--muted);font-size:11.4px}
+@media print{
+ aside,.tools,.pager{display:none!important}
+ .wrap{display:block;max-width:none}
+ main{padding:0}
+ .tw,figure.d{break-inside:avoid;box-shadow:none}
+ h2{break-after:avoid}
+ a{color:inherit;text-decoration:none}
+}
+@media (max-width:1080px){
+ .wrap{grid-template-columns:1fr}
+ aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+ main{padding:22px 18px 80px}
+ #toc{display:none}
+}
+</style>
+</head><body>
+<div class="tools"><button id="th">◐ Theme</button><button id="pr">⎙ Print</button></div>
+<div class="wrap">
+<aside><p class="brand">NT.QMS</p><p class="sub">As-Built SRS · v1.51.x</p><a class="card" style="padding:9px 12px;margin-bottom:10px;font-size:13px" href="index.html">◂ Document set</a><div class="sec">Documents</div><nav><a class="" href="00-SRS-Index-and-Conventions.html"><span class="n">00</span>Index, Conventions &amp; Glossary</a><a class="" href="01-Software-Requirements-Specification.html"><span class="n">01</span>Software Requirements Specification</a><a class="" href="02-1-Functional-Specification-Quality-and-Improvement.html"><span class="n">02-1</span>Functional Spec 1 — Quality &amp; Improvement</a><a class="" href="02-2-Functional-Specification-Resources-People-Governance.html"><span class="n">02-2</span>Functional Spec 2 — Resources, People &amp; Governance</a><a class="" href="02-3-Functional-Specification-Analytical-Quality.html"><span class="n">02-3</span>Functional Spec 3 — Analytical Quality</a><a class="" href="02-4-Functional-Specification-Operations-and-Platform.html"><span class="n">02-4</span>Functional Spec 4 — Operations &amp; Platform</a><a class="" href="03-Business-Rules.html"><span class="n">03</span>Business Rules &amp; Error Catalogue</a><a class="cur" href="04-Configuration-Reference.html"><span class="n">04</span>Configuration Reference</a><a class="" href="05-Screen-Specification.html"><span class="n">05</span>Screen Specification</a><a class="" href="06-Workflow-Specification.html"><span class="n">06</span>Workflow Specification</a><a class="" href="07-File-System-Specification.html"><span class="n">07</span>File System Specification</a><a class="" href="08-API-Specification.html"><span class="n">08</span>API Specification</a><a class="" href="09-Security-Specification.html"><span class="n">09</span>Security Specification</a><a class="" href="10-Deployment-Specification.html"><span class="n">10</span>Deployment Specification</a><a class="" href="11-Architecture-Constraints.html"><span class="n">11</span>Architecture Constraints</a><a class="" href="12-Requirements-Traceability-Matrix.html"><span class="n">12</span>Requirements Traceability Matrix</a><a class="" href="13-Implementation-vs-SRS-Gap-Analysis.html"><span class="n">13</span>Implementation vs SRS — Gap Analysis</a><a class="" href="14-Technical-Debt-Report.html"><span class="n">14</span>Technical Debt Report</a><a class="" href="15-Recommendations.html"><span class="n">15</span>Recommendations</a></nav><div class='sec'>On this page</div><div id='toc'><a class="h2" href="#sources-and-precedence">Sources and precedence</a><a class="h2" href="#read-discipline-configguard-cfg-001-cfg-002">Read discipline — ConfigGuard (CFG-001 / CFG-002)</a><a class="h2" href="#validation-at-composition">Validation at composition</a><a class="h2" href="#connectivity">Connectivity</a><a class="h2" href="#authentication-amp-session">Authentication &amp;amp; session</a><a class="h2" href="#password-policy">Password policy</a><a class="h2" href="#rate-limiting">Rate limiting</a><a class="h2" href="#analytical-quality">Analytical quality</a><a class="h2" href="#messaging-amp-storage">Messaging &amp;amp; storage</a><a class="h2" href="#e-mail-optional">E-mail (optional)</a><a class="h2" href="#observability">Observability</a><a class="h2" href="#environment-not-a-config-key-but-decisive">Environment (not a config key, but decisive)</a><a class="h2" href="#frontend">Frontend</a><a class="h2" href="#security-amp-session">Security &amp;amp; session</a><a class="h2" href="#timing-amp-reliability">Timing &amp;amp; reliability</a><a class="h2" href="#business-thresholds">Business thresholds</a><a class="h2" href="#pagination-amp-query-defaults">Pagination &amp;amp; query defaults</a></div></aside>
+<main>
+<div class="doc-head"><p class="kicker">Document 04 · NT.QMS Production SRS</p><h1>Configuration Reference</h1></div>
+<blockquote>
+<p><a href="00-SRS-Index-and-Conventions.html">Conventions</a> · Deployment procedure:
+<a href="10-Deployment-Specification.html">Document 10</a> · Security implications:
+<a href="09-Security-Specification.html">Document 09</a></p>
+</blockquote>
+<p>This document is the <strong>complete</strong> configuration surface: every key the application reads, plus every
+hard-coded constant that a laboratory might reasonably expect to be configurable but is not.</p>
+<hr>
+<h1>4.1 Configuration model</h1>
+<h2 id="sources-and-precedence">Sources and precedence</h2>
+<p>Standard ASP.NET Core layering, highest precedence last:</p>
+<pre><code>1. appsettings.json                       (shipped defaults, no secrets)
+2. appsettings.{Environment}.json         (Development shape only, no secrets)
+3. .NET user-secrets                      (Development ONLY — UserSecretsId &quot;nt-qams-webapi&quot;)
+4. Environment variables                  (Production secret channel; &quot;__&quot; is the section separator)
+5. Command-line arguments
+</code></pre>
+<p><strong>Secrets are never in source control.</strong> <code>appsettings.json</code> ships every secret as an empty string;
+<code>appsettings.Development.json</code> does the same and carries an explicit comment pointing at
+<code>deploy/DEV-SECRETS.md</code>. A fresh clone <strong>will not start</strong> until the developer provisions user-secrets
+— by design.</p>
+<p>Environment-variable form: <code>Jwt:Secret</code> → <code>Jwt__Secret</code>; <code>ConnectionStrings:Postgres</code> →
+<code>ConnectionStrings__Postgres</code>.</p>
+<h2 id="read-discipline-configguard-cfg-001-cfg-002">Read discipline — <code>ConfigGuard</code> (CFG-001 / CFG-002)</h2>
+<p>Typed settings are <strong>not</strong> read with <code>GetValue&lt;T&gt;()</code>. They go through
+<code>NT.QAMS.Infrastructure.Configuration.ConfigGuard</code>, which implements one rule:</p>
+<blockquote>
+<p><strong>A missing key falls back to its documented default. A present-but-invalid value throws at
+start-up.</strong></p>
+</blockquote>
+<pre><code>ReadInt(config, key, fallback)      → missing ⇒ fallback ; unparseable ⇒ InvalidOperationException
+ReadBool(config, key, fallback)     → same, expects true/false
+ReadDecimal(config, key, fallback)  → same, InvariantCulture
+</code></pre>
+<p>The refusal message is deliberately explicit:</p>
+<blockquote>
+<p><code>Configuration '{key}' has invalid value '{raw}' — expected {expected}. Refusing to start rather
+than silently applying the default (CFG-002).</code></p>
+</blockquote>
+<p>The motivating case is named in the source comment: a mistyped <code>"Securty:RequireMfa=treu"</code> must never
+quietly disable an MFA policy.</p>
+<h2 id="validation-at-composition">Validation at composition</h2>
+<p>Four settings objects self-validate at DI registration and abort start-up if invalid:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Object</th>
+<th>Rule</th>
+<th>Refusal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>WestgardLimits.Validated()</code></td>
+<td>all SD limits &gt; 0; <code>WarningSd &lt; RejectSd</code>; <code>RunLength ≥ 2</code></td>
+<td><code>InvalidOperationException</code></td>
+</tr>
+<tr>
+<td><code>RateLimitSettings.Validated()</code></td>
+<td>all four permits &gt; 0</td>
+<td><code>"RateLimit:* permits must all be positive."</code></td>
+</tr>
+<tr>
+<td><code>OutboxOptions.Validated()</code></td>
+<td><code>RetentionDays &gt; 0</code></td>
+<td><code>"Outbox:RetentionDays must be a positive number of days."</code></td>
+</tr>
+<tr>
+<td><code>RefreshSessionOptions.Validated()</code></td>
+<td><code>RefreshTokenDays &gt; 0</code></td>
+<td><code>"Auth:RefreshTokenDays must be a positive number of days."</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Two keys are hard-required with no default — the application throws immediately if absent:
+<code>ConnectionStrings:Postgres</code> and <code>Jwt:Secret</code>.</p>
+<hr>
+<h1>4.2 Configuration key catalogue</h1>
+<p>Legend — <strong>Req</strong>: ✅ required, ⭕ optional. <strong>Restart</strong>: all keys are read once at start-up; nothing is
+hot-reloaded.</p>
+<h2 id="connectivity">Connectivity</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Key</th>
+<th>Type</th>
+<th>Default</th>
+<th>Req</th>
+<th>Validation</th>
+<th>Impact of change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CFG-01</strong></td>
+<td><code>ConnectionStrings:Postgres</code></td>
+<td>connection string</td>
+<td><em>(empty in all shipped files)</em></td>
+<td>✅</td>
+<td>Absent ⇒ <code>InvalidOperationException: "ConnectionStrings:Postgres is not configured."</code> at start-up</td>
+<td>The single database. Also read directly by <code>DatabaseRoleGuard</code> and <code>PostgresReadinessHealthCheck</code>. Wrong value ⇒ readiness 503 and deferred seeding retries every 15 s.</td>
+</tr>
+<tr>
+<td><strong>CFG-02</strong></td>
+<td><code>Database:MigrateOnStartup</code></td>
+<td>bool</td>
+<td><code>false</code></td>
+<td>⭕</td>
+<td><code>ConfigGuard</code>-style bool via <code>GetValue&lt;bool&gt;</code></td>
+<td><code>true</code> applies pending EF migrations at boot. <strong>Deliberate residual: this path still fails fast if the schema gate refuses — keep it OFF in production.</strong> Pipelines should use the idempotent SQL script instead.</td>
+</tr>
+<tr>
+<td><strong>CFG-03</strong></td>
+<td><code>AllowedHosts</code></td>
+<td>string</td>
+<td><code>"*"</code></td>
+<td>⭕</td>
+<td>none</td>
+<td>ASP.NET host filtering. Left permissive because TLS and host routing terminate at the proxy.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="authentication-amp-session">Authentication &amp; session</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Key</th>
+<th>Type</th>
+<th>Default</th>
+<th>Req</th>
+<th>Validation</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CFG-04</strong></td>
+<td><code>Jwt:Secret</code></td>
+<td>string</td>
+<td><em>(empty)</em></td>
+<td>✅</td>
+<td>Absent ⇒ throw; <strong>must be ≥ 32 characters</strong></td>
+<td>HMAC signing key for access tokens. Rotating it invalidates every live access token immediately (refresh cookies survive until their own rotation fails validation).</td>
+</tr>
+<tr>
+<td><strong>CFG-05</strong></td>
+<td><code>Jwt:Issuer</code></td>
+<td>string</td>
+<td><code>"nt-qams"</code></td>
+<td>⭕</td>
+<td>validated on every token</td>
+<td>Must match between issuer and validator or <strong>all</strong> tokens fail.</td>
+</tr>
+<tr>
+<td><strong>CFG-06</strong></td>
+<td><code>Jwt:Audience</code></td>
+<td>string</td>
+<td><code>"nt-qams"</code></td>
+<td>⭕</td>
+<td>validated on every token</td>
+<td>As above.</td>
+</tr>
+<tr>
+<td><strong>CFG-07</strong></td>
+<td><code>Jwt:ExpiryMinutes</code></td>
+<td>int</td>
+<td><strong>120</strong></td>
+<td>⭕</td>
+<td>—</td>
+<td>Access-token lifetime. <strong>⚠ ADR-0009 specifies 15 minutes; the shipped value is 120.</strong> This is a real drift between the decision record and the configuration — see <a href="13-Implementation-vs-SRS-Gap-Analysis.html">GAP</a>. Longer ⇒ a stolen in-memory token is useful for longer; shorter ⇒ more silent-refresh traffic.</td>
+</tr>
+<tr>
+<td><strong>CFG-08</strong></td>
+<td><code>Auth:RefreshTokenDays</code></td>
+<td>int</td>
+<td><strong>14</strong></td>
+<td>⭕</td>
+<td><code>Validated()</code> — must be &gt; 0</td>
+<td>The sign-in horizon: how long a user stays signed in across silent refreshes.</td>
+</tr>
+<tr>
+<td><strong>CFG-09</strong></td>
+<td><code>Security:RequireMfaForPrivilegedRoles</code></td>
+<td>bool</td>
+<td><strong>false</strong></td>
+<td>⭕</td>
+<td><code>ConfigGuard.ReadBool</code></td>
+<td><strong>Platform-admin fallback only</strong> — tenant users are governed by the per-tenant <code>TenantSettings.RequireMfaForPrivilegedRoles</code>.</td>
+</tr>
+<tr>
+<td><strong>CFG-10</strong></td>
+<td><code>PlatformAdmin:Email</code></td>
+<td>string</td>
+<td><em>(empty)</em></td>
+<td>⭕</td>
+<td>—</td>
+<td>Bootstrap platform administrator. When both this and the password are set and no such account exists, one is created at start-up.</td>
+</tr>
+<tr>
+<td><strong>CFG-11</strong></td>
+<td><code>PlatformAdmin:Password</code></td>
+<td>string</td>
+<td><em>(empty)</em></td>
+<td>⭕</td>
+<td>hashed on use</td>
+<td>As above. <strong>Must be removed or rotated after first boot</strong> — it is a standing credential in configuration.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="password-policy">Password policy</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Key</th>
+<th>Type</th>
+<th>Default</th>
+<th>Req</th>
+<th>Validation</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CFG-12</strong></td>
+<td><code>PasswordPolicy:MaxAgeDays</code></td>
+<td>int</td>
+<td><strong>90</strong></td>
+<td>⭕</td>
+<td><code>ConfigGuard.ReadInt</code></td>
+<td>Password expiry horizon.</td>
+</tr>
+<tr>
+<td><strong>CFG-13</strong></td>
+<td><code>PasswordPolicy:HistoryDepth</code></td>
+<td>int</td>
+<td><strong>5</strong></td>
+<td>⭕</td>
+<td><code>ConfigGuard.ReadInt</code></td>
+<td>A new password must differ from the last <code>HistoryDepth + 1</code> (= 6 by default) — see <code>AUTH-102</code>, whose message quotes the computed number.</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>Length (12), maximum (200), character-class requirements and the breached-password blocklist are
+<strong>not configurable</strong> — see §4.4 CON-01…CON-04.</p>
+</blockquote>
+<h2 id="rate-limiting">Rate limiting</h2>
+<p>All four are per-minute permits in a <strong>fixed window</strong> with <code>QueueLimit = 0</code> (excess is rejected, never
+queued). Rejection is <strong>429</strong> with <code>Retry-After: 60</code>.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Key</th>
+<th>Type</th>
+<th>Default</th>
+<th>Partition</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CFG-14</strong></td>
+<td><code>RateLimit:GlobalPermitPerMinute</code></td>
+<td>int</td>
+<td><strong>300</strong></td>
+<td>client IP address</td>
+<td>Whole API surface. <strong>This is an abuse ceiling, not a concurrency ceiling</strong> — the load test showed ~50 % 429s from one origin at 50 virtual users. <strong>Must be sized per site to legitimate peak concurrency, especially where a laboratory shares one NAT address.</strong></td>
+</tr>
+<tr>
+<td><strong>CFG-15</strong></td>
+<td><code>RateLimit:AuthPermitPerMinute</code></td>
+<td>int</td>
+<td><strong>10</strong></td>
+<td>client IP address</td>
+<td><code>/api/auth/*</code>. A burst here is credential guessing, not a workload.</td>
+</tr>
+<tr>
+<td><strong>CFG-16</strong></td>
+<td><code>RateLimit:RefreshPermitPerMinute</code></td>
+<td>int</td>
+<td><strong>60</strong></td>
+<td>client IP address</td>
+<td>Deliberately more generous than the credential budget: whole laboratories share NAT addresses and every signed-in tab refreshes periodically.</td>
+</tr>
+<tr>
+<td><strong>CFG-17</strong></td>
+<td><code>RateLimit:ESignaturePermitPerMinute</code></td>
+<td>int</td>
+<td><strong>10</strong></td>
+<td><strong>actor (<code>sub</code> claim)</strong></td>
+<td>Signing ceremonies are authenticated, so the <em>person</em> is throttled, not the address — this is PIN-guessing protection.</td>
+</tr>
+</tbody>
+</table></div>
+<p>All four must be positive or the application refuses to start.</p>
+<h2 id="analytical-quality">Analytical quality</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Key</th>
+<th>Type</th>
+<th>Default</th>
+<th>Validation</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CFG-18</strong></td>
+<td><code>AnalyticalQuality:Westgard:WarningSd</code></td>
+<td>decimal</td>
+<td><strong>2</strong></td>
+<td>&gt; 0 and <code>&lt; RejectSd</code></td>
+<td>The <code>1-2s</code> warning limit and the <code>2-2s</code> rejection limit. <strong>Rule labels are derived from these values</strong>, so changing it changes the emitted rule name (e.g. <code>1-2.5s</code>).</td>
+</tr>
+<tr>
+<td><strong>CFG-19</strong></td>
+<td><code>AnalyticalQuality:Westgard:RejectSd</code></td>
+<td>decimal</td>
+<td><strong>3</strong></td>
+<td>&gt; 0 and <code>&gt; WarningSd</code></td>
+<td>The <code>1-3s</code> rejection limit.</td>
+</tr>
+<tr>
+<td><strong>CFG-20</strong></td>
+<td><code>AnalyticalQuality:Westgard:RangeSd</code></td>
+<td>decimal</td>
+<td><strong>4</strong></td>
+<td>&gt; 0</td>
+<td>The <code>R-4s</code> range-rule span.</td>
+</tr>
+<tr>
+<td><strong>CFG-21</strong></td>
+<td><code>AnalyticalQuality:Westgard:RunLength</code></td>
+<td>int</td>
+<td><strong>10</strong></td>
+<td>≥ 2</td>
+<td>The <code>10-x</code> shift-rule window.</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>These are <strong>global to the deployment</strong>, not per tenant and not per QC profile. A multi-tenant host
+cannot give two laboratories different Westgard limits. See <a href="02-3-Functional-Specification-Analytical-Quality.html">LIM-QC-04</a>.</p>
+</blockquote>
+<h2 id="messaging-amp-storage">Messaging &amp; storage</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Key</th>
+<th>Type</th>
+<th>Default</th>
+<th>Req</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CFG-22</strong></td>
+<td><code>Outbox:RetentionDays</code></td>
+<td>int</td>
+<td><strong>30</strong></td>
+<td>⭕ (validated &gt; 0)</td>
+<td>How long <strong>processed</strong> outbox rows are kept before the hourly purge deletes them. Processed rows are transport, not the record — the hash-chained ledger keeps the history (MSG-007).</td>
+</tr>
+<tr>
+<td><strong>CFG-23</strong></td>
+<td><code>FileStorage:RootPath</code></td>
+<td>path</td>
+<td><code>{AppContext.BaseDirectory}/data/files</code></td>
+<td>⭕</td>
+<td>Root of content-addressed evidence storage. <strong>The default is inside the deployment directory and would be lost on a clean redeploy — set this to a durable, backed-up volume.</strong> The directory is created at start-up if absent.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="e-mail-optional">E-mail (optional)</h2>
+<p>The <strong>presence of <code>Smtp:Host</code> alone</strong> decides which sender is bound:</p>
+<pre><code>Smtp:Host empty/absent  → LoggingEmailSender  (e-mails written to the log, marked Sent)
+Smtp:Host set           → SmtpEmailSender     (real delivery)
+</code></pre>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Key</th>
+<th>Type</th>
+<th>Default</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CFG-24</strong></td>
+<td><code>Smtp:Host</code></td>
+<td>string</td>
+<td><em>(unset)</em></td>
+<td><strong>The switch.</strong> Unset ⇒ no e-mail leaves the system, silently.</td>
+</tr>
+<tr>
+<td><strong>CFG-25</strong></td>
+<td><code>Smtp:Port</code></td>
+<td>int</td>
+<td><strong>587</strong></td>
+<td>Unparseable values fall back to 587 (this key does <strong>not</strong> use <code>ConfigGuard</code>, so a typo is silently tolerated).</td>
+</tr>
+<tr>
+<td><strong>CFG-26</strong></td>
+<td><code>Smtp:From</code></td>
+<td>string</td>
+<td><code>Smtp:User</code>, else <code>ntqams@localhost</code></td>
+<td>Sender address.</td>
+</tr>
+<tr>
+<td><strong>CFG-27</strong></td>
+<td><code>Smtp:User</code></td>
+<td>string</td>
+<td><em>(unset)</em></td>
+<td>When set, credentials are attached.</td>
+</tr>
+<tr>
+<td><strong>CFG-28</strong></td>
+<td><code>Smtp:Password</code></td>
+<td>string</td>
+<td><em>(unset)</em></td>
+<td>Paired with <code>Smtp:User</code>. <strong>A secret — use the environment/secret store.</strong></td>
+</tr>
+<tr>
+<td><strong>CFG-29</strong></td>
+<td><code>Smtp:Ssl</code></td>
+<td>string</td>
+<td><em>(unset ⇒ SSL </em><em>enabled</em><em>)</em></td>
+<td>Inverted logic: SSL is on unless the value is literally <code>"false"</code> (case-insensitive).</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="observability">Observability</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Key</th>
+<th>Type</th>
+<th>Default</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CFG-30</strong></td>
+<td><code>Otlp:Endpoint</code></td>
+<td>URI</td>
+<td><em>(unset)</em></td>
+<td>When set, adds OTLP exporters for <strong>traces, metrics and logs</strong>. When unset, tracing and metrics still run locally and <code>/metrics</code> still serves Prometheus text — only the push exporters are omitted.</td>
+</tr>
+<tr>
+<td><strong>CFG-31</strong></td>
+<td><code>Logging:LogLevel:Default</code></td>
+<td>string</td>
+<td><code>"Information"</code></td>
+<td>Standard .NET logging.</td>
+</tr>
+<tr>
+<td><strong>CFG-32</strong></td>
+<td><code>Logging:LogLevel:Microsoft.AspNetCore</code></td>
+<td>string</td>
+<td><code>"Warning"</code></td>
+<td>Suppresses framework request noise.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="environment-not-a-config-key-but-decisive">Environment (not a config key, but decisive)</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Variable</th>
+<th>Values</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CFG-33</strong></td>
+<td><code>ASPNETCORE_ENVIRONMENT</code></td>
+<td><code>Development</code> / <code>Production</code> / other</td>
+<td><strong>Four behaviours switch on this:</strong> (1) <code>Production</code> ⇒ JSON console logging with scopes and UTC ISO-8601 timestamps; anything else ⇒ default console. (2) <code>Production</code> ⇒ <code>DatabaseRoleGuard.EnsureLeastPrivilegeAsync</code> <strong>refuses to boot</strong> on an over-privileged role; otherwise it logs warnings and continues. (3) <code>Development</code> ⇒ OpenAPI document mapped at <code>/openapi</code> (anonymous); otherwise not exposed. (4) non-<code>Development</code> ⇒ HSTS header emitted.</td>
+</tr>
+<tr>
+<td><strong>CFG-34</strong></td>
+<td><code>ASPNETCORE_URLS</code></td>
+<td>URL list</td>
+<td>Listen addresses (dev: <code>http://localhost:5080</code>).</td>
+</tr>
+<tr>
+<td><strong>CFG-35</strong></td>
+<td><code>QMS_ITEST_POSTGRES</code></td>
+<td>connection string</td>
+<td><strong>Test-only.</strong> Integration tests run against this live PostgreSQL; absent ⇒ those tests skip cleanly.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="frontend">Frontend</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Location</th>
+<th>Key</th>
+<th>Default</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CFG-36</strong></td>
+<td><code>frontend/src/environments/environment.ts</code></td>
+<td><code>production</code></td>
+<td><code>true</code></td>
+<td>Angular build flag.</td>
+</tr>
+<tr>
+<td><strong>CFG-37</strong></td>
+<td>same</td>
+<td><code>apiBaseUrl</code></td>
+<td><code>'/api'</code></td>
+<td><strong>Same-origin by default</strong> (ADR-0007 — no CORS is configured server-side). Overriding this to an absolute cross-origin URL <strong>will fail</strong>: there is no CORS policy and the refresh cookie is <code>SameSite=Strict</code>. Change it only for a same-origin path change.</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>Note: the frontend has <strong>one</strong> environment file, not the usual <code>environment.ts</code> +
+<code>environment.prod.ts</code> pair. The deployment procedure is "edit this file before building".</p>
+</blockquote>
+<hr>
+<h1>4.3 Configuration by environment — recommended values</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Development</th>
+<th>Production</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ASPNETCORE_ENVIRONMENT</code></td>
+<td><code>Development</code></td>
+<td><strong><code>Production</code></strong> (required for the role guard and JSON logs)</td>
+</tr>
+<tr>
+<td><code>ConnectionStrings:Postgres</code></td>
+<td>user-secrets, owner role acceptable</td>
+<td>env var, <strong>non-owner, non-superuser, non-BYPASSRLS role</strong></td>
+</tr>
+<tr>
+<td><code>Jwt:Secret</code></td>
+<td>user-secrets</td>
+<td>env var / secret store, ≥ 32 chars, rotated on a schedule</td>
+</tr>
+<tr>
+<td><code>Jwt:ExpiryMinutes</code></td>
+<td>120 (convenience)</td>
+<td><strong>15</strong> (align with ADR-0009)</td>
+</tr>
+<tr>
+<td><code>Database:MigrateOnStartup</code></td>
+<td><code>true</code> (convenience)</td>
+<td><strong><code>false</code></strong> — run migrations as the owner role out of band</td>
+</tr>
+<tr>
+<td><code>RateLimit:GlobalPermitPerMinute</code></td>
+<td>300</td>
+<td><strong>sized to the site's peak concurrent users</strong>, not left at 300</td>
+</tr>
+<tr>
+<td><code>Security:RequireMfaForPrivilegedRoles</code></td>
+<td>false</td>
+<td>site decision</td>
+</tr>
+<tr>
+<td><code>FileStorage:RootPath</code></td>
+<td>default</td>
+<td><strong>durable backed-up volume</strong>, outside the deployment folder</td>
+</tr>
+<tr>
+<td><code>Smtp:Host</code></td>
+<td>unset (log-only)</td>
+<td>set, or accept that notifications are in-app only</td>
+</tr>
+<tr>
+<td><code>Otlp:Endpoint</code></td>
+<td>unset</td>
+<td>set to the collector</td>
+</tr>
+<tr>
+<td><code>PlatformAdmin:Email/Password</code></td>
+<td>user-secrets</td>
+<td>set for first boot, <strong>then removed</strong></td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>4.4 Hard-coded constants (not configurable)</h1>
+<p>These behave like configuration from a laboratory's point of view but require a code change. Each is a
+candidate for externalisation — see <a href="15-Recommendations.html">Document 15</a>.</p>
+<h2 id="security-amp-session">Security &amp; session</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Constant</th>
+<th>Value</th>
+<th>Location</th>
+<th>Why it matters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CON-01</strong></td>
+<td>Password minimum length</td>
+<td><strong>12</strong></td>
+<td><code>PasswordRules.MinLength</code></td>
+<td>A site policy requiring 14 cannot be expressed.</td>
+</tr>
+<tr>
+<td><strong>CON-02</strong></td>
+<td>Password maximum length</td>
+<td><strong>200</strong></td>
+<td><code>PasswordRules.MaxLength</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>CON-03</strong></td>
+<td>Character-class requirements</td>
+<td>upper + lower + digit + symbol</td>
+<td><code>PasswordRules</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>CON-04</strong></td>
+<td>Breached-password blocklist</td>
+<td>shipped list, offline</td>
+<td><code>PasswordRules</code></td>
+<td>No refresh mechanism; no HIBP integration.</td>
+</tr>
+<tr>
+<td><strong>CON-05</strong></td>
+<td>Max failed login attempts</td>
+<td><strong>5</strong></td>
+<td><code>UserAccount.MaxFailedAttempts</code></td>
+<td>Also governs e-signature failures.</td>
+</tr>
+<tr>
+<td><strong>CON-06</strong></td>
+<td>Lockout duration</td>
+<td><strong>30 minutes</strong></td>
+<td><code>UserAccount.LockoutMinutes</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>CON-07</strong></td>
+<td>E-signature PIN format</td>
+<td>exactly 4 digits</td>
+<td><code>SetPinValidator</code> regex</td>
+<td>10,000-value keyspace; mitigated only by the 10/min per-actor throttle and the shared lockout counter.</td>
+</tr>
+<tr>
+<td><strong>CON-08</strong></td>
+<td>JWT clock skew</td>
+<td><strong>1 minute</strong></td>
+<td><code>TokenValidationParameters</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>CON-09</strong></td>
+<td>SPA idle timeout</td>
+<td><strong>30 minutes</strong></td>
+<td><code>auth.service</code></td>
+<td>Part-11 §11.10(d) automatic logoff — a site requiring 15 minutes cannot configure it.</td>
+</tr>
+<tr>
+<td><strong>CON-10</strong></td>
+<td>Refresh cookie name / path</td>
+<td><code>qams_rt</code> / <code>/api/auth</code></td>
+<td><code>AuthController</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>CON-11</strong></td>
+<td>HSTS max-age</td>
+<td><strong>63,072,000 s</strong> + <code>includeSubDomains</code></td>
+<td><code>SecurityHeadersMiddleware</code></td>
+<td>2 years; no <code>preload</code>.</td>
+</tr>
+<tr>
+<td><strong>CON-12</strong></td>
+<td>Content-Security-Policy</td>
+<td><code>default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'</code></td>
+<td><code>SecurityHeadersMiddleware</code></td>
+<td>The <strong>API's</strong> policy. The SPA is served by the proxy and needs its own.</td>
+</tr>
+<tr>
+<td><strong>CON-13</strong></td>
+<td>Rate-limit window</td>
+<td><strong>1 minute</strong>, <code>QueueLimit = 0</code></td>
+<td><code>RateLimiting.Window</code></td>
+<td>Only the permits are configurable, not the window.</td>
+</tr>
+<tr>
+<td><strong>CON-14</strong></td>
+<td>Upload sniff window</td>
+<td><strong>512 bytes</strong></td>
+<td><code>FileContentPolicy.HeaderLength</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>CON-15</strong></td>
+<td>Upload allow-list</td>
+<td>pdf, png, jpg, jpeg, docx, xlsx, doc, xls, csv, txt</td>
+<td><code>FileContentPolicy.Allowed</code></td>
+<td>A laboratory needing <code>.zip</code> or <code>.xml</code> evidence cannot add it.</td>
+</tr>
+<tr>
+<td><strong>CON-16</strong></td>
+<td>Maximum upload size</td>
+<td><strong>none in application code</strong></td>
+<td>—</td>
+<td>Only the host body limit applies. <strong>This is a gap, not a constant.</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="timing-amp-reliability">Timing &amp; reliability</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Constant</th>
+<th>Value</th>
+<th>Location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CON-17</strong></td>
+<td>DB retry attempts / max delay</td>
+<td><strong>5</strong> / <strong>10 s</strong></td>
+<td><code>DependencyInjection</code></td>
+</tr>
+<tr>
+<td><strong>CON-18</strong></td>
+<td>DB command timeout</td>
+<td><strong>30 s</strong></td>
+<td><code>DependencyInjection</code></td>
+</tr>
+<tr>
+<td><strong>CON-19</strong></td>
+<td>Outbox poll interval</td>
+<td><strong>2 s</strong></td>
+<td><code>OutboxProcessor</code></td>
+</tr>
+<tr>
+<td><strong>CON-20</strong></td>
+<td>Outbox batch size</td>
+<td><strong>50</strong></td>
+<td><code>OutboxProcessor.BatchSize</code></td>
+</tr>
+<tr>
+<td><strong>CON-21</strong></td>
+<td>Outbox max attempts</td>
+<td><strong>5</strong></td>
+<td><code>OutboxProcessor.MaxAttempts</code></td>
+</tr>
+<tr>
+<td><strong>CON-22</strong></td>
+<td>Outbox backoff base</td>
+<td><strong>5 s</strong> exponential</td>
+<td><code>OutboxProcessor.BackoffBase</code></td>
+</tr>
+<tr>
+<td><strong>CON-23</strong></td>
+<td>Outbox claim lease</td>
+<td><strong>2 min</strong></td>
+<td><code>OutboxProcessor.ClaimLease</code></td>
+</tr>
+<tr>
+<td><strong>CON-24</strong></td>
+<td>Outbox purge interval</td>
+<td><strong>1 h</strong></td>
+<td><code>OutboxProcessor.PurgeInterval</code></td>
+</tr>
+<tr>
+<td><strong>CON-25</strong></td>
+<td>Outbox queue-stats interval</td>
+<td><strong>30 s</strong></td>
+<td><code>OutboxProcessor</code></td>
+</tr>
+<tr>
+<td><strong>CON-26</strong></td>
+<td>Compliance sweep interval</td>
+<td><strong>1 h</strong></td>
+<td><code>ScheduledSweepService.Interval</code></td>
+</tr>
+<tr>
+<td><strong>CON-27</strong></td>
+<td>Compliance sweep start delay</td>
+<td><strong>15 s</strong></td>
+<td><code>ScheduledSweepService</code></td>
+</tr>
+<tr>
+<td><strong>CON-28</strong></td>
+<td>KPI snapshot interval</td>
+<td><strong>6 h</strong></td>
+<td><code>KpiSnapshotService.Interval</code></td>
+</tr>
+<tr>
+<td><strong>CON-29</strong></td>
+<td>KPI snapshot start delay</td>
+<td><strong>20 s</strong></td>
+<td><code>KpiSnapshotService</code></td>
+</tr>
+<tr>
+<td><strong>CON-30</strong></td>
+<td>Replica sentinel retry</td>
+<td><strong>60 s</strong></td>
+<td><code>SingleReplicaGuardService.RetryInterval</code></td>
+</tr>
+<tr>
+<td><strong>CON-31</strong></td>
+<td>Deferred seeding retry</td>
+<td><strong>15 s</strong></td>
+<td><code>DeferredStartupSeeder.RetryInterval</code></td>
+</tr>
+<tr>
+<td><strong>CON-32</strong></td>
+<td>Escalation ladder</td>
+<td>+24 h / +48 h / +72 h, 3 levels</td>
+<td><code>EscalationTimer</code></td>
+</tr>
+<tr>
+<td><strong>CON-33</strong></td>
+<td>Escalation recipient role</td>
+<td><code>"QualityManager"</code> (string literal)</td>
+<td><code>EscalationTimer.EscalationRole</code></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="business-thresholds">Business thresholds</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Constant</th>
+<th>Value</th>
+<th>Location</th>
+<th>Laboratory impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CON-34</strong></td>
+<td>Competency pass mark</td>
+<td><strong>80</strong></td>
+<td><code>CompetencyRecord.PassMark</code></td>
+<td>A site whose procedure uses 85 % cannot configure it. <strong>Highest-value externalisation candidate.</strong></td>
+</tr>
+<tr>
+<td><strong>CON-35</strong></td>
+<td>PT questionable threshold</td>
+<td><code>\|z\| &gt; 2</code></td>
+<td><code>PtEnrollment.QuestionableThreshold</code></td>
+<td>ISO 13528 convention.</td>
+</tr>
+<tr>
+<td><strong>CON-36</strong></td>
+<td>PT unsatisfactory threshold</td>
+<td><code>\|z\| ≥ 3</code></td>
+<td><code>PtEnrollment.UnsatisfactoryThreshold</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>CON-37</strong></td>
+<td>Detection-limit Z</td>
+<td><strong>1.645</strong></td>
+<td><code>DetectionLimitStudy.Z</code></td>
+<td>One-sided 95 %; CLSI EP17. A site wanting 99 % cannot change it.</td>
+</tr>
+<tr>
+<td><strong>CON-38</strong></td>
+<td>Minimum blank replicates</td>
+<td><strong>10</strong></td>
+<td><code>DetectionLimitStudy</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>CON-39</strong></td>
+<td>Minimum low-level replicates</td>
+<td><strong>10</strong></td>
+<td><code>DetectionLimitStudy</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>CON-40</strong></td>
+<td>Minimum linearity levels</td>
+<td><strong>4</strong></td>
+<td><code>LinearityStudy.MinimumLevels</code></td>
+<td>Message says EP06 recommends 5–9.</td>
+</tr>
+<tr>
+<td><strong>CON-41</strong></td>
+<td>Minimum precision runs / replicates</td>
+<td><strong>2</strong> / <strong>2</strong></td>
+<td><code>PrecisionStudy</code></td>
+<td>Well below EP05's 20×2×2 design.</td>
+</tr>
+<tr>
+<td><strong>CON-42</strong></td>
+<td>Reference-interval sample count</td>
+<td><strong>20</strong></td>
+<td><code>ReferenceIntervalStudy.RecommendedSampleCount</code></td>
+<td>CLSI EP28-A3c verification.</td>
+</tr>
+<tr>
+<td><strong>CON-43</strong></td>
+<td>Reference-interval allowed-outside fraction</td>
+<td><strong>0.10</strong></td>
+<td><code>ReferenceIntervalStudy.AllowedOutsideFraction</code></td>
+<td>10 % — the EP28 verification rule.</td>
+</tr>
+<tr>
+<td><strong>CON-44</strong></td>
+<td>Method-comparison minimum pairs</td>
+<td><strong>2</strong> enforced, <strong>40</strong> recommended</td>
+<td><code>MethodComparisonStudy</code></td>
+<td>The EP09 recommendation of 40 is <strong>documented but not enforced</strong>.</td>
+</tr>
+<tr>
+<td><strong>CON-45</strong></td>
+<td>Carryover minimum readings</td>
+<td>1 high / 3 low</td>
+<td><code>CarryoverStudy</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>CON-46</strong></td>
+<td>Interference minimum controls</td>
+<td><strong>3</strong></td>
+<td><code>InterferenceStudy</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>CON-47</strong></td>
+<td>Lot-comparison minimum pairs</td>
+<td><strong>3</strong></td>
+<td><code>LotComparisonStudy</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>CON-48</strong></td>
+<td>Outlier minimum points</td>
+<td><strong>4</strong></td>
+<td><code>OutlierScreening</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>CON-49</strong></td>
+<td>Outlier Tukey multiplier</td>
+<td><strong>1.5 × IQR</strong></td>
+<td><code>OutlierScreening</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>CON-50</strong></td>
+<td>Method-validation total-error factor</td>
+<td><strong>1.65</strong></td>
+<td><code>ValidationStudy</code></td>
+<td>One-sided 95 %.</td>
+</tr>
+<tr>
+<td><strong>CON-51</strong></td>
+<td>Bland–Altman limit factor</td>
+<td><strong>1.96 SD</strong></td>
+<td><code>MethodComparisonStudy</code></td>
+<td><strong><code>[Assumption]</code></strong> — standard 95 % limits.</td>
+</tr>
+<tr>
+<td><strong>CON-52</strong></td>
+<td>Sigma grade bands</td>
+<td>3 / 4 / 5 / 6</td>
+<td><code>SigmaAssessment.GradeFor</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>CON-53</strong></td>
+<td>Deming λ</td>
+<td><strong>1.0</strong></td>
+<td><code>MethodComparisonStudy</code></td>
+<td>Ordinary Deming; unequal error variances cannot be modelled.</td>
+</tr>
+<tr>
+<td><strong>CON-54</strong></td>
+<td>Supplier evaluation criteria cap</td>
+<td><strong>50</strong></td>
+<td><code>RecordEvaluationValidator</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>CON-55</strong></td>
+<td>Document default review cycle</td>
+<td><strong>24 months</strong></td>
+<td><code>ControlledDocument.Create</code> default parameter</td>
+<td>Per-document override at creation; no tenant default.</td>
+</tr>
+<tr>
+<td><strong>CON-56</strong></td>
+<td>Retention classes</td>
+<td>5 years / 10 years / Permanent</td>
+<td><code>RetentionClass</code> enum</td>
+<td>A 7-year jurisdiction cannot be represented.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="pagination-amp-query-defaults">Pagination &amp; query defaults</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Default</th>
+<th>Applies to</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CON-57</strong></td>
+<td><code>pageSize = 50</code></td>
+<td>all 13 paged list endpoints</td>
+</tr>
+<tr>
+<td><strong>CON-58</strong></td>
+<td><code>take = 200</code></td>
+<td>compliance audit-trail / field-change / signature / security-event reads</td>
+</tr>
+<tr>
+<td><strong>CON-59</strong></td>
+<td><code>take = 1000</code></td>
+<td>XLSX exports</td>
+</tr>
+<tr>
+<td><strong>CON-60</strong></td>
+<td><code>take = 60</code></td>
+<td>QC run history (the Levey-Jennings window)</td>
+</tr>
+<tr>
+<td><strong>CON-61</strong></td>
+<td><code>days = 90</code></td>
+<td>KPI history</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>None of these have an enforced upper bound</strong> — a caller may request an arbitrarily large page or
+<code>take</code>. See <a href="14-Technical-Debt-Report.html">Document 14</a>.</p>
+<hr>
+<h1>4.5 Secrets inventory</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Secret</th>
+<th>Key</th>
+<th>Dev channel</th>
+<th>Production channel</th>
+<th>Rotation impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Database password</td>
+<td><code>ConnectionStrings:Postgres</code></td>
+<td>user-secrets</td>
+<td>env var / secret store</td>
+<td>Restart required</td>
+</tr>
+<tr>
+<td>JWT signing key</td>
+<td><code>Jwt:Secret</code></td>
+<td>user-secrets</td>
+<td>env var / secret store</td>
+<td><strong>All access tokens invalid immediately</strong></td>
+</tr>
+<tr>
+<td>Platform-admin bootstrap password</td>
+<td><code>PlatformAdmin:Password</code></td>
+<td>user-secrets</td>
+<td>env var, then removed</td>
+<td>Only used when the account does not exist</td>
+</tr>
+<tr>
+<td>SMTP password</td>
+<td><code>Smtp:Password</code></td>
+<td><em>(unset)</em></td>
+<td>env var / secret store</td>
+<td>Restart required</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Provisioning a fresh clone</strong> (<code>deploy/DEV-SECRETS.md</code>, UserSecretsId <code>nt-qams-webapi</code>): set
+<code>ConnectionStrings:Postgres</code>, <code>Jwt:Secret</code>, <code>PlatformAdmin:Email</code>, <code>PlatformAdmin:Password</code>. Without
+them the API will not start — that is intentional (finding F-17).</p>
+<hr>
+<h1>4.6 Configuration acceptance criteria</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Given</th>
+<th>When</th>
+<th>Then</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AT-CFG-01</strong></td>
+<td><code>Security:RequireMfaForPrivilegedRoles = "treu"</code></td>
+<td>the application starts</td>
+<td>it <strong>refuses to start</strong> with the <code>CFG-002</code> message naming the key and the bad value</td>
+</tr>
+<tr>
+<td><strong>AT-CFG-02</strong></td>
+<td><code>Security:RequireMfaForPrivilegedRoles</code> absent</td>
+<td>the application starts</td>
+<td>it starts with the documented default <code>false</code></td>
+</tr>
+<tr>
+<td><strong>AT-CFG-03</strong></td>
+<td><code>AnalyticalQuality:Westgard:WarningSd = 3</code>, <code>RejectSd = 3</code></td>
+<td>the application starts</td>
+<td>it <strong>refuses to start</strong> (<code>WarningSd &gt;= RejectSd</code>)</td>
+</tr>
+<tr>
+<td><strong>AT-CFG-04</strong></td>
+<td><code>RateLimit:GlobalPermitPerMinute = 0</code></td>
+<td>the application starts</td>
+<td>it <strong>refuses to start</strong> ("permits must all be positive")</td>
+</tr>
+<tr>
+<td><strong>AT-CFG-05</strong></td>
+<td><code>Jwt:Secret</code> set to a 20-character string</td>
+<td>the application starts</td>
+<td>it <strong>refuses to start</strong> (≥ 32 characters required)</td>
+</tr>
+<tr>
+<td><strong>AT-CFG-06</strong></td>
+<td><code>ConnectionStrings:Postgres</code> absent</td>
+<td>the application starts</td>
+<td>it throws immediately with the named key</td>
+</tr>
+<tr>
+<td><strong>AT-CFG-07</strong></td>
+<td><code>Smtp:Host</code> unset</td>
+<td>a notification fires</td>
+<td>the dispatch row exists and is marked sent; the e-mail body appears <strong>in the log</strong>, not in a mailbox</td>
+</tr>
+<tr>
+<td><strong>AT-CFG-08</strong></td>
+<td><code>ASPNETCORE_ENVIRONMENT=Production</code> and the DB role owns the tables</td>
+<td>the application starts</td>
+<td>it <strong>refuses to boot</strong> (<code>DatabaseRoleGuard</code>)</td>
+</tr>
+<tr>
+<td><strong>AT-CFG-09</strong></td>
+<td><code>AnalyticalQuality:Westgard:WarningSd = 2.5</code></td>
+<td>a QC run at z = 2.6 is recorded</td>
+<td>the emitted rule label is <code>1-2.5s</code>, not <code>1-2s</code></td>
+</tr>
+</tbody>
+</table></div>
+<div class="pager"><a href="03-Business-Rules.html"><span>Previous</span>Business Rules &amp; Error Catalogue</a><a href="05-Screen-Specification.html" style="text-align:right"><span>Next</span>Screen Specification</a></div>
+</main></div>
+<script>
+(function(){
+ var r=document.documentElement, K='ntqms-srs-theme', s=localStorage.getItem(K);
+ if(s) r.setAttribute('data-theme',s);
+ var b=document.getElementById('th');
+ if(b) b.onclick=function(){
+   var cur=r.getAttribute('data-theme');
+   if(!cur) cur=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+   var nx=cur==='dark'?'light':'dark';
+   r.setAttribute('data-theme',nx); localStorage.setItem(K,nx);
+ };
+ var p=document.getElementById('pr'); if(p) p.onclick=function(){window.print();};
+ // scroll-spy on the in-page TOC
+ var links=[].slice.call(document.querySelectorAll('#toc a'));
+ if(!links.length) return;
+ var tgt=links.map(function(a){return document.getElementById(a.getAttribute('href').slice(1));});
+ function spy(){
+   var y=window.scrollY+90, i=0;
+   for(var k=0;k<tgt.length;k++){ if(tgt[k]&&tgt[k].offsetTop<=y) i=k; }
+   links.forEach(function(a,n){a.style.color=n===i?'var(--accent)':'';
+     a.style.borderLeftColor=n===i?'var(--accent)':'transparent';});
+ }
+ addEventListener('scroll',spy,{passive:true}); spy();
+})();
+</script>
+</body></html>

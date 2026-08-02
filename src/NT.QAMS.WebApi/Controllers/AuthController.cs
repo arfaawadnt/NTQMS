@@ -130,12 +130,25 @@ public sealed class AuthController(ISender sender) : ControllerBase
         return NoContent();
     }
 
-    /// <summary>Set the caller's 4-digit electronic-signature PIN.</summary>
+    /// <summary>
+    /// Change the signed-in caller's own password. The anonymous
+    /// <c>change-password</c> endpoint remains for the expired-password path;
+    /// this one resolves identity from the session and never takes an email.
+    /// </summary>
+    [HttpPost("me/change-password")]
+    [Authorize]
+    public async Task<IActionResult> ChangeMyPassword(ChangeMyPasswordRequest request, CancellationToken ct)
+    {
+        await sender.Send(new ChangeMyPasswordCommand(request.CurrentPassword, request.NewPassword), ct);
+        return NoContent();
+    }
+
+    /// <summary>Set or change the caller's 4-digit electronic-signature PIN (password re-verified).</summary>
     [HttpPost("signature-pin")]
     [Authorize]
     public async Task<IActionResult> SetPin(SetPinRequest request, CancellationToken ct)
     {
-        await sender.Send(new SetPinCommand(request.Pin), ct);
+        await sender.Send(new SetPinCommand(request.CurrentPassword, request.Pin), ct);
         return NoContent();
     }
 

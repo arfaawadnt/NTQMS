@@ -6,6 +6,7 @@ import { PermissionsService } from '../core/permissions.service';
 import { NAV_ICONS } from '../core/nav-icons';
 import { ChangeReasonDialogComponent } from '../core/change-reason-dialog.component';
 import { TextPromptDialogComponent } from '../core/text-prompt-dialog.component';
+import { MyAccountDrawerComponent } from './my-account-drawer.component';
 import { PageHelpComponent } from '../shared/ui/page-help.component';
 
 /** One sidebar destination: route, i18n label key, and its descriptive icon. */
@@ -38,7 +39,7 @@ const GROUPS_STATE_KEY = 'qams.sidebar.groups';
  */
 @Component({
     selector: 'qams-shell',
-    imports: [RouterOutlet, RouterLink, RouterLinkActive, PageHelpComponent, ChangeReasonDialogComponent, TextPromptDialogComponent],
+    imports: [RouterOutlet, RouterLink, RouterLinkActive, PageHelpComponent, ChangeReasonDialogComponent, TextPromptDialogComponent, MyAccountDrawerComponent],
     template: `
     <div class="app">
       <header class="hdr">
@@ -77,11 +78,12 @@ const GROUPS_STATE_KEY = 'qams.sidebar.groups';
               <button type="button" [class.active]="i18n.lang() === l.code" (click)="switchLang(l.code)">{{ l.label }}</button>
             }
           </div>
-          <div class="who">
+          <button class="who" type="button" (click)="accountOpen.set(true)"
+                  [attr.aria-label]="i18n.t('acct.title')" aria-haspopup="dialog">
             <span class="avatar">{{ initials() }}</span>
             <span class="nm">{{ auth.displayName() }}</span>
             <span class="rl">{{ auth.role() }}</span>
-          </div>
+          </button>
           <button class="hbtn" (click)="signOut()">{{ i18n.t('nav.signout') }}</button>
         </div>
       </header>
@@ -132,6 +134,7 @@ const GROUPS_STATE_KEY = 'qams.sidebar.groups';
 
     <!-- Accessible text/password prompt modal (R-4), overlaying every screen. -->
     <qams-text-prompt-dialog />
+    <qams-my-account-drawer [(open)]="accountOpen" />
   `,
     changeDetection: ChangeDetectionStrategy.Eager,
     styles: [`
@@ -166,7 +169,11 @@ const GROUPS_STATE_KEY = 'qams.sidebar.groups';
       font-size: 11.5px; font-weight: 700; padding: 4px 11px; border-radius: 999px; border: none;
     }
     .langswitch button.active { background: #fff; color: var(--nt-blue); }
-    .who { display: flex; align-items: center; gap: 8px; }
+    /* The user identity is a button (opens My account) — strip the global
+       button chrome so it keeps reading as part of the header. */
+    .who { display: flex; align-items: center; gap: 8px; background: none; border: none;
+           padding: 4px 8px; border-radius: var(--nt-radius-btn); cursor: pointer; color: inherit; }
+    .who:hover { background: rgba(255, 255, 255, 0.12); }
     .avatar {
       width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,.22);
       display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;
@@ -241,6 +248,9 @@ export class ShellComponent {
 
   readonly i18n = inject(I18nService);
   readonly perms = inject(PermissionsService);
+
+  /** My-account drawer visibility (header user button). */
+  readonly accountOpen = signal(false);
   private readonly router = inject(Router);
 
   /** Whole-sidebar rail mode: expanded on first use until the user collapses it. */

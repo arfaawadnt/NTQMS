@@ -112,8 +112,14 @@ export class AuthService {
     return this.http.post<void>(`${this.base}/mfa/confirm`, { code });
   }
 
-  setPin(pin: string): Observable<void> {
-    return this.http.post<void>(`${this.base}/signature-pin`, { pin });
+  /** Set or change the e-signature PIN; the account password is re-verified server-side. */
+  setPin(currentPassword: string, pin: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/signature-pin`, { currentPassword, pin });
+  }
+
+  /** Password change for the signed-in user — identity comes from the session, not an email. */
+  changeMyPassword(currentPassword: string, newPassword: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/me/change-password`, { currentPassword, newPassword });
   }
 
   /** Current tenant's privileged-MFA enforcement policy (TenantAdmin). */

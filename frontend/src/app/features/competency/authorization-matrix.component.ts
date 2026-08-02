@@ -9,11 +9,12 @@ import { PermissionsService } from '../../core/permissions.service';
 import { OrgDataService } from '../../core/org-data.service';
 import { ReferenceApiService } from '../../core/api/reference-api.service';
 import { CompetencyApiService } from '../../core/api/competency-api.service';
-import { AUTHORIZATION_SCOPES, CompetencyListItem, TestCatalogItem } from '../../core/models';
+import { AUTHORIZATION_SCOPES, CompetencyListItem, TestAuthorizationListItem, TestCatalogItem } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
 import { UserSelectComponent } from '../../shared/ui/user-select.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 
 /**
  * Personnel authorization matrix (ISO 17025 §6.2.6): people × catalog tests,
@@ -24,9 +25,11 @@ import { UserSelectComponent } from '../../shared/ui/user-select.component';
 @Component({
     selector: 'qams-authorization-matrix',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, ListStatsComponent, UserSelectComponent],
+    imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, ListStatsComponent, UserSelectComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('authz.title')" [subtitle]="i18n.t('authz.subtitle')">
+      <qams-export-menu [title]="i18n.t('authz.title')" [stats]="stats()" [columns]="exportColumns"
+                        [rows]="filtered()" [filtersSummary]="filtersSummary()" />
       @if (perms.can('test-authorizations.create')) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('authz.new') }}</button>
       }
@@ -163,6 +166,27 @@ export class AuthorizationMatrixComponent implements OnInit {
     return this.facade.list().filter((a) =>
       (!status || a.status === status)
       && (!q || `${a.testCode} ${a.testName} ${this.org.userName(a.userId)} ${a.scope} ${a.status}`.toLowerCase().includes(q)));
+  });
+
+  /**
+   * Export columns — the printed grid flattens the on-screen matrix: one row
+   * per authorization, carrying exactly what the cell chip and its tooltip show
+   * (person, test, scope, status, expiry).
+   */
+  readonly exportColumns: ExportColumn<TestAuthorizationListItem>[] = [
+    { header: this.i18n.t('authz.person'), cell: (a) => this.org.userName(a.userId) || a.userId.slice(0, 8) },
+    { header: this.i18n.t('authz.test'), cell: (a) => `${a.testCode} — ${a.testName}` },
+    { header: this.i18n.t('authz.scope'), cell: (a) => this.i18n.t('authz.scope' + a.scope) },
+    { header: this.i18n.t('nc.status'), cell: (a) => a.status },
+    { header: this.i18n.t('authz.until'), cell: (a) => a.expiresOn },
+  ];
+
+  /** The filter line printed on the document, mirroring the filter bar. */
+  readonly filtersSummary = computed(() => {
+    const parts: string[] = [];
+    if (this.statusFilter()) { parts.push(this.statusFilter()); }
+    if (this.search().trim()) { parts.push(`"${this.search().trim()}"`); }
+    return parts.length ? parts.join(' · ') : this.i18n.t('exp.allRecords');
   });
 
   /** Matrix rows: every person holding at least one (filtered) authorization. */

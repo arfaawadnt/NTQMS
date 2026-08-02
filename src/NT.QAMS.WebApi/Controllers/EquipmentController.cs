@@ -47,7 +47,7 @@ public sealed class EquipmentController(ISender sender) : ControllerBase
     public async Task<IActionResult> LogMaintenance(
         Guid id, LogMaintenanceRequest request, CancellationToken ct)
     {
-        await sender.Send(new LogMaintenanceCommand(id, request.PerformedAt, request.WorkDescription), ct);
+        await sender.Send(new LogMaintenanceCommand(id, request.PerformedAt, request.WorkDescription, request.CertificateFileId), ct);
         return NoContent();
     }
 

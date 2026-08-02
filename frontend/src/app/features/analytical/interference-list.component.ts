@@ -4,18 +4,22 @@ import { Router, RouterOutlet } from '@angular/router';
 import { InterferenceFacade } from './interference.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
+import { InterferenceListItem } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 
 /** Interference-study register (CLSI EP07): control baseline vs spiked interferents. */
 @Component({
     selector: 'qams-interference-list',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent],
+    imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('inf.title')" [subtitle]="i18n.t('inf.subtitle')">
+      <qams-export-menu [title]="i18n.t('inf.title')" [stats]="stats()" [columns]="exportColumns"
+                        [rows]="filtered()" [filtersSummary]="filtersSummary()" />
       @if (perms.can('analytical-quality.create')) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('inf.new') }}</button>
       }
@@ -106,6 +110,26 @@ export class InterferenceListComponent implements OnInit {
     const q = this.search().trim().toLowerCase();
     return this.facade.list().filter((s) =>
       !q || `${s.studyRef} ${s.analyte} ${s.state}`.toLowerCase().includes(q));
+  });
+
+  /** Export columns — the printed grid mirrors the on-screen table. */
+  readonly exportColumns: ExportColumn<InterferenceListItem>[] = [
+    { header: this.i18n.t('mu.ref'), cell: (s) => s.studyRef },
+    { header: this.i18n.t('qc.analyte'), cell: (s) => s.analyte },
+    { header: this.i18n.t('inf.interferents'), cell: (s) => s.interferentCount === null ? '—' : `${s.interferentCount}` },
+    {
+      header: this.i18n.t('inf.significant'),
+      cell: (s) => s.significantCount === null ? '—' : s.significantCount === 0 ? 'Pass' : `Failed ${s.significantCount}`,
+    },
+    { header: this.i18n.t('nc.status'), cell: (s) => s.state },
+  ];
+
+  /** The filter line printed on the document, mirroring the filter bar. */
+  readonly filtersSummary = computed(() => {
+    const parts: string[] = [];
+    if (this.stateFilter()) { parts.push(this.stateFilter()); }
+    if (this.search().trim()) { parts.push(`"${this.search().trim()}"`); }
+    return parts.length ? parts.join(' · ') : this.i18n.t('exp.allRecords');
   });
 
   readonly stats = computed<ListStat[]>(() => {

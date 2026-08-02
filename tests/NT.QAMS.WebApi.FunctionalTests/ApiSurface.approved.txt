@@ -259,6 +259,7 @@ POST /api/audits/{id}/start
 POST /api/auth/change-password
 POST /api/auth/login
 POST /api/auth/logout
+POST /api/auth/me/change-password
 POST /api/auth/mfa/confirm
 POST /api/auth/mfa/enroll
 POST /api/auth/refresh
@@ -313,6 +314,8 @@ POST /api/equipment/{id}/calibrations
 POST /api/equipment/{id}/checks
 POST /api/equipment/{id}/maintenance
 POST /api/equipment/{id}/retire
+POST /api/exports/page.pdf
+POST /api/exports/page.xlsx
 POST /api/feedback
 POST /api/feedback/{id}/close
 POST /api/feedback/{id}/escalate
@@ -433,6 +436,7 @@ POST /api/users/{id}/deactivate
 POST /api/users/{id}/reactivate
 POST /api/users/{id}/reset-password
 POST /api/users/{id}/role
+POST /api/users/{id}/signature-pin
 POST /api/validation-studies
 POST /api/validation-studies/{id}/calculate
 POST /api/validation-studies/{id}/replicates
@@ -452,6 +456,7 @@ POST /api/v{version}/audits/{id}/start
 POST /api/v{version}/auth/change-password
 POST /api/v{version}/auth/login
 POST /api/v{version}/auth/logout
+POST /api/v{version}/auth/me/change-password
 POST /api/v{version}/auth/mfa/confirm
 POST /api/v{version}/auth/mfa/enroll
 POST /api/v{version}/auth/refresh
@@ -506,6 +511,8 @@ POST /api/v{version}/equipment/{id}/calibrations
 POST /api/v{version}/equipment/{id}/checks
 POST /api/v{version}/equipment/{id}/maintenance
 POST /api/v{version}/equipment/{id}/retire
+POST /api/v{version}/exports/page.pdf
+POST /api/v{version}/exports/page.xlsx
 POST /api/v{version}/feedback
 POST /api/v{version}/feedback/{id}/close
 POST /api/v{version}/feedback/{id}/escalate
@@ -626,6 +633,7 @@ POST /api/v{version}/users/{id}/deactivate
 POST /api/v{version}/users/{id}/reactivate
 POST /api/v{version}/users/{id}/reset-password
 POST /api/v{version}/users/{id}/role
+POST /api/v{version}/users/{id}/signature-pin
 POST /api/v{version}/validation-studies
 POST /api/v{version}/validation-studies/{id}/calculate
 POST /api/v{version}/validation-studies/{id}/replicates

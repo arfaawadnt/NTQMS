@@ -36,6 +36,11 @@ export class EquipmentFacade {
 
   downloadUrl(fileId: string): string { return this.files.downloadUrl(fileId); }
 
+  /** Authenticated certificate download (a bare anchor would 401). */
+  async downloadCertificate(fileId: string, fallbackName: string): Promise<void> {
+    await this.files.download(fileId, fallbackName);
+  }
+
   async loadList(status?: string): Promise<void> {
     this.lastStatus = status;
     await this.run(async () => {
@@ -77,8 +82,13 @@ export class EquipmentFacade {
     });
   }
 
-  async logMaintenance(id: string, request: LogMaintenanceRequest): Promise<void> {
-    await this.mutate(id, () => this.api.logMaintenance(id, request));
+  /** Logs maintenance, uploading the certificate first when one is provided. */
+  async logMaintenance(id: string, performedAt: string, workDescription: string, certificate: File | null): Promise<void> {
+    await this.run(async () => {
+      const certificateFileId = certificate ? (await firstValueFrom(this.files.upload(certificate))).id : null;
+      await firstValueFrom(this.api.logMaintenance(id, { performedAt, workDescription, certificateFileId }));
+      this._selected.set(await firstValueFrom(this.api.getById(id)));
+    });
   }
 
   async recordCheck(id: string, request: RecordIntermediateCheckRequest): Promise<void> {

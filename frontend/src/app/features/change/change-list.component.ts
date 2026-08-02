@@ -1,23 +1,29 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterOutlet } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { ChangeFacade } from './change.facade';
 import { I18nService } from '../../core/i18n.service';
 import { OrgDataService } from '../../core/org-data.service';
+import { ChangeApiService } from '../../core/api/change-api.service';
+import { ChangeListItem } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { AllocationPickerComponent } from '../../shared/ui/allocation-picker.component';
 import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 import { LoadMoreComponent } from '../../shared/ui/load-more.component';
 
 /** Change Control register: live statistics, filterable list + a propose form. */
 @Component({
     selector: 'qams-change-list',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent, LoadMoreComponent],
+    imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent, LoadMoreComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('chg.title')">
+      <qams-export-menu [title]="i18n.t('chg.title')" [stats]="stats()" [columns]="exportColumns"
+                        [rows]="filtered()" [fetchAll]="exportAll" [filtersSummary]="filtersSummary()" />
       <button (click)="showForm.set(!showForm())">{{ i18n.t('chg.new') }}</button>
     </qams-page-header>
 
@@ -97,6 +103,7 @@ export class ChangeListComponent implements OnInit {
   readonly facade = inject(ChangeFacade);
   readonly i18n = inject(I18nService);
   readonly org = inject(OrgDataService);
+  private readonly api = inject(ChangeApiService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
 
@@ -116,6 +123,43 @@ export class ChangeListComponent implements OnInit {
       (!branch || c.branchId === branch)
       && (!q || `${c.changeRef} ${c.title} ${c.status}`.toLowerCase().includes(q)));
   });
+
+  /** Export columns — the printed grid mirrors the on-screen table. */
+  readonly exportColumns: ExportColumn<ChangeListItem>[] = [
+    { header: this.i18n.t('chg.ref'), cell: (c) => c.changeRef },
+    { header: this.i18n.t('chg.changeTitle'), cell: (c) => c.title },
+    { header: this.i18n.t('nc.status'), cell: (c) => c.status },
+    { header: this.i18n.t('chg.riskLinked'), cell: (c) => c.riskItemId ? this.i18n.t('common.yes') : this.i18n.t('common.no') },
+    { header: this.i18n.t('alloc.branch'), cell: (c) => this.org.branchName(c.branchId) || '—' },
+  ];
+
+  /** The filter line printed on the document, mirroring the filter bar. */
+  readonly filtersSummary = computed(() => {
+    const parts: string[] = [];
+    if (this.statusFilter()) { parts.push(this.statusFilter()); }
+    if (this.branchFilter()) { parts.push(this.org.branchName(this.branchFilter())); }
+    if (this.search().trim()) { parts.push(`"${this.search().trim()}"`); }
+    return parts.length ? parts.join(' · ') : this.i18n.t('exp.allRecords');
+  });
+
+  /**
+   * Pulls every page of the current server-side filter so the document holds
+   * the whole filtered register, then applies the same client-side narrowing
+   * the screen applies.
+   */
+  readonly exportAll = async (): Promise<readonly ChangeListItem[]> => {
+    const all: ChangeListItem[] = [];
+    for (let page = 1; page <= 25; page++) {
+      const batch = await firstValueFrom(this.api.list(this.statusFilter() || undefined, page, 200));
+      all.push(...batch.items);
+      if (!batch.hasMore) { break; }
+    }
+    const q = this.search().trim().toLowerCase();
+    const branch = this.branchFilter();
+    return all.filter((c) =>
+      (!branch || c.branchId === branch)
+      && (!q || `${c.changeRef} ${c.title} ${c.status}`.toLowerCase().includes(q)));
+  };
 
   /** Live statistics computed from the real register. */
   readonly stats = computed<ListStat[]>(() => {

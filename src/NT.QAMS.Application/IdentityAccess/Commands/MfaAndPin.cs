@@ -57,17 +57,27 @@ public sealed class ConfirmMfaHandler(
 
 // â”€â”€ E-signature PIN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+/// <summary>
+/// Sets or changes the caller's e-signature PIN. The account password is
+/// re-verified even inside a live session: the PIN is one of the two Part 11
+/// §11.200(a)(1) signing components, and a component that a hijacked session
+/// could silently replace by holding only the other would not be a component.
+/// </summary>
 [RequireAuthenticatedActor]
-public sealed record SetPinCommand(string Pin) : ICommand;
+public sealed record SetPinCommand(string CurrentPassword, string Pin) : ICommand;
 
 public sealed class SetPinValidator : AbstractValidator<SetPinCommand>
 {
-    public SetPinValidator() =>
+    public SetPinValidator()
+    {
+        RuleFor(x => x.CurrentPassword).NotEmpty();
         RuleFor(x => x.Pin).NotEmpty().Matches("^[0-9]{4}$")
             .WithMessage("The e-signature PIN must be exactly 4 digits.");
+    }
 }
 
-public sealed class SetPinHandler(IAppDbContext db, ICurrentUser user, IPasswordHasher hasher)
+public sealed class SetPinHandler(
+    IAppDbContext db, ICurrentUser user, IPasswordHasher hasher, ISecurityEventLog security, ICurrentTenant tenant)
     : ICommandHandler<SetPinCommand>
 {
     public async Task Handle(SetPinCommand c, CancellationToken ct)
@@ -76,8 +86,18 @@ public sealed class SetPinHandler(IAppDbContext db, ICurrentUser user, IPassword
         var account = await db.Users.SingleOrDefaultAsync(u => u.Id == userId, ct)
             ?? throw new DomainException("USER-404", "User not found.");
 
+        if (!hasher.Verify(account.PasswordHash, c.CurrentPassword))
+        {
+            await security.WriteAsync("PIN_CHANGE_DENIED", tenant.TenantId, account.DisplayName, "bad-password", ct);
+            throw new DomainException("AUTH-001", "Invalid credentials.");
+        }
+
+        var isChange = !string.IsNullOrWhiteSpace(account.PinHash);
+
         // Reuse the PBKDF2 password hasher for the PIN (salted, slow).
         account.SetPin(hasher.Hash(c.Pin));
+        await security.WriteAsync(
+            isChange ? "PIN_CHANGED" : "PIN_SET", tenant.TenantId, account.DisplayName, "self-service", ct);
         await db.SaveChangesAsync(ct);
     }
 }

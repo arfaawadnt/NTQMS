@@ -39,6 +39,19 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
       </div>
       @if (facade.error()) { <div class="error">{{ facade.error() }}</div> }
 
+      @if (r.meetingLink || r.agenda) {
+        <section class="card">
+          <h3>{{ i18n.t('mrv.meeting') }}</h3>
+          @if (r.meetingLink) {
+            <p><a [href]="r.meetingLink" target="_blank" rel="noopener noreferrer" class="mlink">{{ r.meetingLink }}</a></p>
+          }
+          @if (r.agenda) {
+            <h4 class="agh">{{ i18n.t('mrv.agenda') }}</h4>
+            <p class="pre">{{ r.agenda }}</p>
+          }
+        </section>
+      }
+
       @if (r.participants) {
         <section class="card"><h3>{{ i18n.t('mrv.participants') }}</h3><p class="pre">{{ r.participants }}</p></section>
       }
@@ -83,6 +96,8 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
     }
   `,
     styles: [`
+    .mlink { color: var(--nt-navy-deep); font-weight: 600; overflow-wrap: anywhere; }
+    .agh { font-size: 12px; text-transform: uppercase; letter-spacing: .03em; color: var(--nt-grey-m); margin: 10px 0 4px; }
     .meta { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; margin-bottom: 1rem; }
     .meta span.muted { display: block; font-size: .75rem; }
     .pre { white-space: pre-wrap; margin: 0; }

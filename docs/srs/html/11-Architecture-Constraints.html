@@ -1,0 +1,902 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Architecture Constraints — NT.QMS As-Built SRS</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>">
+<style>
+:root{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);
+ --mono:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace;
+ --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,ui-serif,serif;
+ --sans:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}}
+:root[data-theme="dark"]{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}
+:root[data-theme="light"]{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+ font-size:15.5px;line-height:1.62;-webkit-text-size-adjust:100%}
+.wrap{display:grid;grid-template-columns:288px minmax(0,1fr);gap:0;max-width:1560px;margin:0 auto}
+/* ---- sidebar ---- */
+aside{position:sticky;top:0;height:100vh;overflow-y:auto;padding:22px 16px 60px;
+ border-right:1px solid var(--line);background:var(--panel)}
+aside .brand{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:-.01em;
+ margin:0 0 2px}
+aside .sub{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;
+ margin:0 0 16px}
+aside nav a{display:block;padding:5px 9px;border-radius:7px;color:var(--ink);text-decoration:none;
+ font-size:13.2px;border-left:2px solid transparent}
+aside nav a:hover{background:var(--panel-2)}
+aside nav a.cur{background:var(--accent-soft);border-left-color:var(--accent);font-weight:600}
+aside nav a .n{color:var(--muted);font-variant-numeric:tabular-nums;margin-right:7px;font-size:11.5px}
+aside .sec{margin:16px 0 5px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+ color:var(--muted);font-weight:700}
+#toc{margin-top:6px;border-top:1px solid var(--line);padding-top:10px}
+#toc a{display:block;padding:2.5px 9px;font-size:12.4px;color:var(--muted);text-decoration:none;
+ border-left:2px solid transparent;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#toc a:hover{color:var(--ink)}
+#toc a.h3{padding-left:22px;font-size:11.8px}
+/* ---- main ---- */
+main{padding:34px 46px 120px;min-width:0;overflow-wrap:anywhere}
+.doc-head{border-bottom:2px solid var(--accent);padding-bottom:14px;margin-bottom:26px}
+.kicker{color:var(--accent);font-size:11.5px;font-weight:700;letter-spacing:.11em;
+ text-transform:uppercase;margin:0 0 4px}
+h1{font-family:var(--serif);font-size:31px;line-height:1.2;margin:0;letter-spacing:-.015em}
+h2{font-family:var(--serif);font-size:24px;margin:38px 0 12px;padding-bottom:6px;
+ border-bottom:1px solid var(--line);letter-spacing:-.01em;scroll-margin-top:14px}
+h3{font-size:18px;margin:26px 0 9px;letter-spacing:-.005em;scroll-margin-top:14px}
+h4{font-size:15px;margin:20px 0 7px;color:var(--accent)}
+h5,h6{font-size:13.5px;margin:16px 0 6px;color:var(--muted);text-transform:uppercase;
+ letter-spacing:.05em}
+p{margin:10px 0}
+a{color:var(--accent)}
+hr{border:0;border-top:1px solid var(--line);margin:30px 0}
+ul,ol{margin:9px 0;padding-left:24px}
+li{margin:3px 0}
+blockquote{margin:16px 0;padding:12px 18px;background:var(--accent-soft);
+ border-left:3px solid var(--accent);border-radius:0 8px 8px 0}
+blockquote p:first-child{margin-top:0}blockquote p:last-child{margin-bottom:0}
+code{font-family:var(--mono);font-size:.875em;background:var(--panel-2);
+ padding:1.5px 5px;border-radius:4px;border:1px solid var(--line)}
+pre{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;
+ padding:14px 16px;overflow-x:auto;margin:14px 0}
+pre code{background:none;border:0;padding:0;font-size:12.6px;line-height:1.5}
+/* ---- tables ---- */
+.tw{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:10px;
+ background:var(--panel);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;font-size:13.4px}
+th,td{padding:8px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:var(--panel-2);font-weight:700;font-size:12.2px;letter-spacing:.02em;
+ position:sticky;top:0;z-index:1}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--accent-soft)}
+td code,th code{font-size:.9em;white-space:nowrap}
+/* ---- diagrams ---- */
+figure.d{margin:18px 0;padding:18px;background:var(--panel);border:1px solid var(--line);
+ border-radius:12px;box-shadow:var(--shadow);overflow-x:auto;text-align:center}
+figure.d svg{max-width:100%;height:auto;display:inline-block}
+/* ---- misc ---- */
+.tools{position:fixed;top:12px;right:16px;display:flex;gap:6px;z-index:50}
+.tools button{font:inherit;font-size:12px;padding:5px 11px;border-radius:8px;cursor:pointer;
+ border:1px solid var(--line);background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+.tools button:hover{background:var(--panel-2)}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:52px;padding-top:18px;
+ border-top:1px solid var(--line)}
+.pager a{display:block;max-width:46%;padding:10px 14px;border:1px solid var(--line);
+ border-radius:10px;background:var(--panel);text-decoration:none;font-size:13px}
+.pager a span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;
+ letter-spacing:.08em}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:14px;margin:20px 0}
+.card{padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--panel);
+ box-shadow:var(--shadow);text-decoration:none;color:var(--ink);display:block}
+.card:hover{border-color:var(--accent)}
+.card .num{color:var(--accent);font-weight:700;font-size:11.5px;letter-spacing:.1em}
+.card .t{font-family:var(--serif);font-size:17px;margin:3px 0 5px}
+.card .d{color:var(--muted);font-size:12.7px;line-height:1.5}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin:20px 0}
+.stat{padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.stat b{display:block;font-size:23px;font-family:var(--serif);line-height:1.1}
+.stat span{color:var(--muted);font-size:11.4px}
+@media print{
+ aside,.tools,.pager{display:none!important}
+ .wrap{display:block;max-width:none}
+ main{padding:0}
+ .tw,figure.d{break-inside:avoid;box-shadow:none}
+ h2{break-after:avoid}
+ a{color:inherit;text-decoration:none}
+}
+@media (max-width:1080px){
+ .wrap{grid-template-columns:1fr}
+ aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+ main{padding:22px 18px 80px}
+ #toc{display:none}
+}
+</style>
+</head><body>
+<div class="tools"><button id="th">◐ Theme</button><button id="pr">⎙ Print</button></div>
+<div class="wrap">
+<aside><p class="brand">NT.QMS</p><p class="sub">As-Built SRS · v1.51.x</p><a class="card" style="padding:9px 12px;margin-bottom:10px;font-size:13px" href="index.html">◂ Document set</a><div class="sec">Documents</div><nav><a class="" href="00-SRS-Index-and-Conventions.html"><span class="n">00</span>Index, Conventions &amp; Glossary</a><a class="" href="01-Software-Requirements-Specification.html"><span class="n">01</span>Software Requirements Specification</a><a class="" href="02-1-Functional-Specification-Quality-and-Improvement.html"><span class="n">02-1</span>Functional Spec 1 — Quality &amp; Improvement</a><a class="" href="02-2-Functional-Specification-Resources-People-Governance.html"><span class="n">02-2</span>Functional Spec 2 — Resources, People &amp; Governance</a><a class="" href="02-3-Functional-Specification-Analytical-Quality.html"><span class="n">02-3</span>Functional Spec 3 — Analytical Quality</a><a class="" href="02-4-Functional-Specification-Operations-and-Platform.html"><span class="n">02-4</span>Functional Spec 4 — Operations &amp; Platform</a><a class="" href="03-Business-Rules.html"><span class="n">03</span>Business Rules &amp; Error Catalogue</a><a class="" href="04-Configuration-Reference.html"><span class="n">04</span>Configuration Reference</a><a class="" href="05-Screen-Specification.html"><span class="n">05</span>Screen Specification</a><a class="" href="06-Workflow-Specification.html"><span class="n">06</span>Workflow Specification</a><a class="" href="07-File-System-Specification.html"><span class="n">07</span>File System Specification</a><a class="" href="08-API-Specification.html"><span class="n">08</span>API Specification</a><a class="" href="09-Security-Specification.html"><span class="n">09</span>Security Specification</a><a class="" href="10-Deployment-Specification.html"><span class="n">10</span>Deployment Specification</a><a class="cur" href="11-Architecture-Constraints.html"><span class="n">11</span>Architecture Constraints</a><a class="" href="12-Requirements-Traceability-Matrix.html"><span class="n">12</span>Requirements Traceability Matrix</a><a class="" href="13-Implementation-vs-SRS-Gap-Analysis.html"><span class="n">13</span>Implementation vs SRS — Gap Analysis</a><a class="" href="14-Technical-Debt-Report.html"><span class="n">14</span>Technical Debt Report</a><a class="" href="15-Recommendations.html"><span class="n">15</span>Recommendations</a></nav><div class='sec'>On this page</div><div id='toc'><a class="h2" href="#ac-01-ac-06-the-enforced-rules">AC-01 … AC-06 — the enforced rules</a><a class="h2" href="#ac-07-additional-enforced-invariants">AC-07 · Additional enforced invariants</a><a class="h2" href="#what-these-constraints-deliberately-sacrifice">What these constraints deliberately sacrifice</a></div></aside>
+<main>
+<div class="doc-head"><p class="kicker">Document 11 · NT.QMS Production SRS</p><h1>Architecture Constraints</h1></div>
+<blockquote>
+<p><a href="00-SRS-Index-and-Conventions.html">Conventions</a> · Deployment:
+<a href="10-Deployment-Specification.html">Document 10</a> · Debt these constraints create:
+<a href="14-Technical-Debt-Report.html">Document 14</a></p>
+</blockquote>
+<p>These are the <strong>binding constraints</strong> on the system. Most are enforced by an automated gate, which is
+what makes them constraints rather than conventions. A rebuild that ignores them will not be the same
+system.</p>
+<hr>
+<h1>11.1 Layering (Clean Architecture) — machine-enforced</h1>
+<figure class="d"><svg width="660" height="639" preserveAspectRatio="xMidYMid meet" id="mmd-05342a7729db" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="flowchart" style="max-width:660px;height:auto" viewBox="0 0 659.6015625 639" role="graphics-document document" aria-roledescription="flowchart-v2"><style>#mmd-05342a7729db{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;fill:#000000;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#mmd-05342a7729db .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#mmd-05342a7729db .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#mmd-05342a7729db .error-icon{fill:#552222;}#mmd-05342a7729db .error-text{fill:#552222;stroke:#552222;}#mmd-05342a7729db .edge-thickness-normal{stroke-width:1px;}#mmd-05342a7729db .edge-thickness-thick{stroke-width:3.5px;}#mmd-05342a7729db .edge-pattern-solid{stroke-dasharray:0;}#mmd-05342a7729db .edge-thickness-invisible{stroke-width:0;fill:none;}#mmd-05342a7729db .edge-pattern-dashed{stroke-dasharray:3;}#mmd-05342a7729db .edge-pattern-dotted{stroke-dasharray:2;}#mmd-05342a7729db .marker{fill:#666;stroke:#666;}#mmd-05342a7729db .marker.cross{stroke:#666;}#mmd-05342a7729db svg{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;}#mmd-05342a7729db p{margin:0;}#mmd-05342a7729db .label{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#000000;}#mmd-05342a7729db .cluster-label text{fill:#333;}#mmd-05342a7729db .cluster-label span{color:#333;}#mmd-05342a7729db .cluster-label span p{background-color:transparent;}#mmd-05342a7729db .label text,#mmd-05342a7729db span{fill:#000000;color:#000000;}#mmd-05342a7729db .node rect,#mmd-05342a7729db .node circle,#mmd-05342a7729db .node ellipse,#mmd-05342a7729db .node polygon,#mmd-05342a7729db .node path{fill:#eee;stroke:#999;stroke-width:1px;}#mmd-05342a7729db .rough-node .label text,#mmd-05342a7729db .node .label text,#mmd-05342a7729db .image-shape .label,#mmd-05342a7729db .icon-shape .label{text-anchor:middle;}#mmd-05342a7729db .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#mmd-05342a7729db .rough-node .label,#mmd-05342a7729db .node .label,#mmd-05342a7729db .image-shape .label,#mmd-05342a7729db .icon-shape .label{text-align:center;}#mmd-05342a7729db .node.clickable{cursor:pointer;}#mmd-05342a7729db .root .anchor path{fill:#666!important;stroke-width:0;stroke:#666;}#mmd-05342a7729db .arrowheadPath{fill:#333333;}#mmd-05342a7729db .edgePath .path{stroke:#666;stroke-width:1px;}#mmd-05342a7729db .flowchart-link{stroke:#666;fill:none;}#mmd-05342a7729db .edgeLabel{background-color:white;text-align:center;}#mmd-05342a7729db .edgeLabel p{background-color:white;}#mmd-05342a7729db .edgeLabel rect{opacity:0.5;background-color:white;fill:white;}#mmd-05342a7729db .labelBkg{background-color:rgba(255, 255, 255, 0.5);}#mmd-05342a7729db .cluster rect{fill:hsl(0, 0%, 98.9215686275%);stroke:#707070;stroke-width:1px;}#mmd-05342a7729db .cluster text{fill:#333;}#mmd-05342a7729db .cluster span{color:#333;}#mmd-05342a7729db div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:12px;background:hsl(-160, 0%, 93.3333333333%);border:1px solid #707070;border-radius:2px;pointer-events:none;z-index:100;}#mmd-05342a7729db .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#000000;}#mmd-05342a7729db rect.text{fill:none;stroke-width:0;}#mmd-05342a7729db .icon-shape,#mmd-05342a7729db .image-shape{background-color:white;text-align:center;}#mmd-05342a7729db .icon-shape p,#mmd-05342a7729db .image-shape p{background-color:white;padding:2px;}#mmd-05342a7729db .icon-shape .label rect,#mmd-05342a7729db .image-shape .label rect{opacity:0.5;background-color:white;fill:white;}#mmd-05342a7729db .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#mmd-05342a7729db .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#mmd-05342a7729db .node .neo-node{stroke:#999;}#mmd-05342a7729db [data-look="neo"].node rect,#mmd-05342a7729db [data-look="neo"].cluster rect,#mmd-05342a7729db [data-look="neo"].node polygon{stroke:url(#mmd-05342a7729db-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-05342a7729db [data-look="neo"].swimlane.cluster rect{filter:none;}#mmd-05342a7729db [data-look="neo"].node path{stroke:url(#mmd-05342a7729db-gradient);stroke-width:1px;}#mmd-05342a7729db [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-05342a7729db [data-look="neo"].node .neo-line path{stroke:#999;filter:none;}#mmd-05342a7729db [data-look="neo"].node circle{stroke:url(#mmd-05342a7729db-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-05342a7729db [data-look="neo"].node circle .state-start{fill:#000000;}#mmd-05342a7729db [data-look="neo"].icon-shape .icon{fill:url(#mmd-05342a7729db-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-05342a7729db [data-look="neo"].icon-shape .icon-neo path{stroke:url(#mmd-05342a7729db-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-05342a7729db :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><g><marker id="my-svg_flowchart-v2-pointEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="4.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 5 L 10 10 L 10 0 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointEnd-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="11.5" refY="7" markerUnits="userSpaceOnUse" markerWidth="10.5" markerHeight="14" orient="auto"><path d="M 0 0 L 11.5 7 L 0 14 z" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="1" refY="7" markerUnits="userSpaceOnUse" markerWidth="11.5" markerHeight="14" orient="auto"><polygon points="0,7 11.5,14 11.5,0" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="11" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-1" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refY="5" refX="12.25" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-2" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="12" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossStart" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="-1" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="17.7" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5;"/></marker><marker id="my-svg_flowchart-v2-crossStart-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="-3.5" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5; stroke-dasharray: 1, 0;"/></marker><g class="root"><g class="clusters"/><g class="edgePaths"><path d="M271.979,101L273.598,105.167C275.218,109.333,278.456,117.667,280.076,125.333C281.695,133,281.695,140,281.695,143.5L281.695,147" id="my-svg-L_WA_IN_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_WA_IN_0" data-points="W3sieCI6MjcxLjk3ODg1NzA4MDQxOTYsInkiOjEwMX0seyJ4IjoyODEuNjk1MzEyNSwieSI6MTI2fSx7IngiOjI4MS42OTUzMTI1LCJ5IjoxNTF9XQ==" data-look="classic" marker-end="url(#mmd-05342a7729db_flowchart-v2-pointEnd)"/><path d="M281.695,244L281.695,248.167C281.695,252.333,281.695,260.667,285.999,268.563C290.303,276.46,298.911,283.92,303.215,287.65L307.519,291.38" id="my-svg-L_IN_AP_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_IN_AP_0" data-points="W3sieCI6MjgxLjY5NTMxMjUsInkiOjI0NH0seyJ4IjoyODEuNjk1MzEyNSwieSI6MjY5fSx7IngiOjMxMC41NDE0NjYzNDYxNTM4NywieSI6Mjk0fV0=" data-look="classic" marker-end="url(#mmd-05342a7729db_flowchart-v2-pointEnd)"/><path d="M378.882,387L380.197,391.167C381.513,395.333,384.145,403.667,390.561,411.604C396.976,419.541,407.174,427.081,412.273,430.852L417.373,434.622" id="my-svg-L_AP_DO_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_AP_DO_0" data-points="W3sieCI6Mzc4Ljg4MTUyODYyNzYyMjQsInkiOjM4N30seyJ4IjozODYuNzc3MzQzNzUsInkiOjQxMn0seyJ4Ijo0MjAuNTg4ODE5MTU5ODM2MSwieSI6NDM3fV0=" data-look="classic" marker-end="url(#mmd-05342a7729db_flowchart-v2-pointEnd)"/><path d="M469.277,509L469.277,513.167C469.277,517.333,469.277,525.667,474.206,533.596C479.135,541.524,488.993,549.049,493.922,552.811L498.851,556.573" id="my-svg-L_DO_SK_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_DO_SK_0" data-points="W3sieCI6NDY5LjI3NzM0Mzc1LCJ5Ijo1MDl9LHsieCI6NDY5LjI3NzM0Mzc1LCJ5Ijo1MzR9LHsieCI6NTAyLjAzMDYwOTYzMTE0NzUsInkiOjU1OX1d" data-look="classic" marker-end="url(#mmd-05342a7729db_flowchart-v2-pointEnd)"/><path d="M379.287,101L390.521,105.167C401.756,109.333,424.226,117.667,435.461,133.75C446.695,149.833,446.695,173.667,446.695,197.5C446.695,221.333,446.695,245.167,442.391,260.813C438.088,276.46,429.48,283.92,425.176,287.65L420.872,291.38" id="my-svg-L_WA_AP_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_WA_AP_0" data-points="W3sieCI6Mzc5LjI4NjU0OTM4ODExMTksInkiOjEwMX0seyJ4Ijo0NDYuNjk1MzEyNSwieSI6MTI2fSx7IngiOjQ0Ni42OTUzMTI1LCJ5IjoxOTcuNX0seyJ4Ijo0NDYuNjk1MzEyNSwieSI6MjY5fSx7IngiOjQxNy44NDkxNTg2NTM4NDYxMywieSI6Mjk0fV0=" data-look="classic" marker-end="url(#mmd-05342a7729db_flowchart-v2-pointEnd)"/><path d="M146.599,101L136.983,105.167C127.368,109.333,108.137,117.667,98.522,133.75C88.906,149.833,88.906,173.667,88.906,197.5C88.906,221.333,88.906,245.167,88.906,269C88.906,292.833,88.906,316.667,88.906,340.5C88.906,364.333,88.906,388.167,89.481,403.592C90.057,419.018,91.207,426.035,91.782,429.544L92.358,433.053" id="my-svg-L_WA_CO_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_WA_CO_0" data-points="W3sieCI6MTQ2LjU5ODU1NzY5MjMwNzY4LCJ5IjoxMDF9LHsieCI6ODguOTA2MjUsInkiOjEyNn0seyJ4Ijo4OC45MDYyNSwieSI6MTk3LjV9LHsieCI6ODguOTA2MjUsInkiOjI2OX0seyJ4Ijo4OC45MDYyNSwieSI6MzQwLjV9LHsieCI6ODguOTA2MjUsInkiOjQxMn0seyJ4Ijo5My4wMDQ2MTA2NTU3Mzc3MSwieSI6NDM3fV0=" data-look="classic" marker-end="url(#mmd-05342a7729db_flowchart-v2-pointEnd)"/><path d="M263.391,387L254.358,391.167C245.326,395.333,227.261,403.667,211.278,411.677C195.295,419.688,181.395,427.376,174.445,431.22L167.495,435.064" id="my-svg-L_AP_CO_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_AP_CO_0" data-points="W3sieCI6MjYzLjM5MTExNjY5NTgwNDIsInkiOjM4N30seyJ4IjoyMDkuMTk1MzEyNSwieSI6NDEyfSx7IngiOjE2My45OTQ4NzcwNDkxODAzMywieSI6NDM3fV0=" data-look="classic" marker-end="url(#mmd-05342a7729db_flowchart-v2-pointEnd)"/><path d="M494.195,375.586L516.682,381.655C539.168,387.724,584.141,399.862,606.627,416.098C629.113,432.333,629.113,452.667,629.113,473C629.113,493.333,629.113,513.667,624.184,527.596C619.255,541.524,609.398,549.049,604.469,552.811L599.54,556.573" id="my-svg-L_AP_SK_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_AP_SK_0" data-points="W3sieCI6NDk0LjE5NTMxMjUsInkiOjM3NS41ODYzMzI3Mzg2MTMwN30seyJ4Ijo2MjkuMTEzMjgxMjUsInkiOjQxMn0seyJ4Ijo2MjkuMTEzMjgxMjUsInkiOjQ3M30seyJ4Ijo2MjkuMTEzMjgxMjUsInkiOjUzNH0seyJ4Ijo1OTYuMzYwMDE1MzY4ODUyNSwieSI6NTU5fV0=" data-look="classic" marker-end="url(#mmd-05342a7729db_flowchart-v2-pointEnd)"/><path d="M411.695,233.597L432.945,239.498C454.195,245.398,496.695,257.199,517.945,275.016C539.195,292.833,539.195,316.667,539.195,340.5C539.195,364.333,539.195,388.167,534.922,403.812C530.648,419.457,522.101,426.914,517.828,430.642L513.555,434.37" id="my-svg-L_IN_DO_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_IN_DO_0" data-points="W3sieCI6NDExLjY5NTMxMjUsInkiOjIzMy41OTcwODczNzg2NDA3N30seyJ4Ijo1MzkuMTk1MzEyNSwieSI6MjY5fSx7IngiOjUzOS4xOTUzMTI1LCJ5IjozNDAuNX0seyJ4Ijo1MzkuMTk1MzEyNSwieSI6NDEyfSx7IngiOjUxMC41NDA0MDcyNzQ1OTAxNywieSI6NDM3fV0=" data-look="classic" marker-end="url(#mmd-05342a7729db_flowchart-v2-pointEnd)"/></g><g class="edgeLabels"><g class="edgeLabel"><g class="label" data-id="L_WA_IN_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_IN_AP_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_AP_DO_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_DO_SK_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_WA_AP_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_WA_CO_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_AP_CO_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_AP_SK_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_IN_DO_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g></g><g class="nodes"><g class="node default" id="my-svg-flowchart-WA-0" data-look="classic" transform="translate(253.90625, 54.5)"><rect class="basic label-container" style="" x="-130" y="-46.5" width="260" height="93"/><g class="label" style="" transform="translate(-100, -31.5)"><rect/><foreignObject width="200" height="63"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>NT.QAMS.WebApi<br />controllers · middleware · composition root</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-IN-1" data-look="classic" transform="translate(281.6953125, 197.5)"><rect class="basic label-container" style="" x="-130" y="-46.5" width="260" height="93"/><g class="label" style="" transform="translate(-100, -31.5)"><rect/><foreignObject width="200" height="63"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>NT.QAMS.Infrastructure<br />EF · jobs · security · storage · exports</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-AP-2" data-look="classic" transform="translate(364.1953125, 340.5)"><rect class="basic label-container" style="" x="-130" y="-46.5" width="260" height="93"/><g class="label" style="" transform="translate(-100, -31.5)"><rect/><foreignObject width="200" height="63"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>NT.QAMS.Application<br />commands · queries · behaviours · ports · policies</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-CO-3" data-look="classic" transform="translate(98.90625, 473)"><rect class="basic label-container" style="" x="-90.90625" y="-36" width="181.8125" height="72"/><g class="label" style="" transform="translate(-60.90625, -21)"><rect/><foreignObject width="121.8125" height="42"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>NT.QAMS.Contracts<br />DTOs only</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-DO-4" data-look="classic" transform="translate(469.27734375, 473)"><rect class="basic label-container" style="" x="-124.8359375" y="-36" width="249.671875" height="72"/><g class="label" style="" transform="translate(-94.8359375, -21)"><rect/><foreignObject width="189.671875" height="42"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>NT.QAMS.Domain<br />aggregates · invariants · events</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-SK-5" data-look="classic" transform="translate(549.1953125, 595)"><rect class="basic label-container" style="" x="-102.40625" y="-36" width="204.8125" height="72"/><g class="label" style="" transform="translate(-72.40625, -21)"><rect/><foreignObject width="144.8125" height="42"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>NT.QAMS.SharedKernel<br />primitives only</p></span></div></foreignObject></g></g></g></g></g><defs><filter id="my-svg-drop-shadow" height="130%" width="130%"><feDropShadow dx="4" dy="4" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs><defs><filter id="my-svg-drop-shadow-small" height="150%" width="150%"><feDropShadow dx="2" dy="2" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs><linearGradient id="my-svg-gradient" gradientUnits="objectBoundingBox" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="hsl(0, 0%, 83.3333333333%)" stop-opacity="1"/><stop offset="100%" stop-color="hsl(0, 0%, 88.9215686275%)" stop-opacity="1"/></linearGradient></svg></figure>
+
+<h2 id="ac-01-ac-06-the-enforced-rules">AC-01 … AC-06 — the enforced rules</h2>
+<p><code>tests/NT.QAMS.Architecture.Tests</code> — these are <strong>tests</strong>, so a violation is a build failure.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Rule</th>
+<th>Test</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AC-01</strong></td>
+<td><strong>SharedKernel references nothing of ours and no frameworks.</strong> It is pure primitives — 11 files, 248 lines.</td>
+<td><code>SharedKernel_references_nothing_of_ours_and_no_frameworks</code></td>
+</tr>
+<tr>
+<td><strong>AC-02</strong></td>
+<td><strong>Domain depends only on SharedKernel.</strong> No EF, no ASP.NET, no MediatR, no FluentValidation.</td>
+<td><code>Domain_depends_only_on_SharedKernel</code></td>
+</tr>
+<tr>
+<td><strong>AC-03</strong></td>
+<td><strong>Application never references Infrastructure or ASP.NET Core.</strong> It depends on <em>ports</em> it declares itself.</td>
+<td><code>Application_never_references_Infrastructure_or_AspNetCore</code></td>
+</tr>
+<tr>
+<td><strong>AC-04</strong></td>
+<td><strong>Contracts carry no domain types.</strong> A DTO never leaks an aggregate, an entity or a domain enum.</td>
+<td><code>Contracts_carry_no_domain_types</code></td>
+</tr>
+<tr>
+<td><strong>AC-05</strong></td>
+<td><strong>Infrastructure never references WebApi.</strong></td>
+<td><code>Infrastructure_never_references_WebApi</code></td>
+</tr>
+<tr>
+<td><strong>AC-06</strong></td>
+<td><strong>A domain module references no other domain module.</strong> The 20 bounded contexts inside <code>NT.QAMS.Domain</code> are isolated from one another — cross-context work happens through <strong>domain events and policies in the Application layer</strong>, never by a direct type reference.</td>
+<td><code>A_domain_module_references_no_other_domain_module</code></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong>AC-06 is the strongest and least common of these.</strong> It is why the six event→NC bridges exist as
+<code>*Policy.cs</code> files in Application rather than as method calls between aggregates. A rebuild that
+lets <code>Audit</code> call <code>Nonconformance.Raise()</code> directly has abandoned the design.</p>
+</blockquote>
+<h2 id="ac-07-additional-enforced-invariants">AC-07 · Additional enforced invariants</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Rule</th>
+<th>Test</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AC-07</strong></td>
+<td><strong>Every command declares exactly one authorisation policy</strong> — not zero, not two.</td>
+<td><code>Every_command_declares_exactly_one_authorization_policy</code></td>
+</tr>
+<tr>
+<td><strong>AC-08</strong></td>
+<td><strong>Every <code>user_account</code> query is bounded by tenant or by identity.</strong> <code>user_account</code> is one of the four tables deliberately outside RLS (nullable tenant), so an unbounded query over it would cross tenants. The rule is <em>tested against itself</em>: <code>The_rule_rejects_an_unbounded_query</code> and <code>The_rule_accepts_a_bounded_query</code> prove the detector works.</td>
+<td><code>UserAccountTenantBoundTests</code></td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>11.2 Domain design constraints</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Constraint</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AC-09</strong></td>
+<td><strong>The domain protects itself.</strong> Every invariant lives <em>inside</em> the aggregate: private setters, static factory methods, guarded state machines. A rule enforced only in a validator, a handler or the UI is a defect.</td>
+<td>a rule outside the aggregate can be bypassed by any new call path</td>
+</tr>
+<tr>
+<td><strong>AC-10</strong></td>
+<td><strong>DTOs live in Contracts; entities are never exposed.</strong></td>
+<td>prevents the API contract from being coupled to the model</td>
+</tr>
+<tr>
+<td><strong>AC-11</strong></td>
+<td><strong>Enums persist as strings</strong> (<code>HasConversion&lt;string&gt;()</code>).</td>
+<td>a reordered enum can never silently re-interpret stored data</td>
+</tr>
+<tr>
+<td><strong>AC-12</strong></td>
+<td><strong>Primary keys are UUIDv7, <code>ValueGeneratedNever</code></strong> — generated by the application.</td>
+<td>time-ordered, index-friendly, no round-trip</td>
+</tr>
+<tr>
+<td><strong>AC-13</strong></td>
+<td><strong>Time comes from the injected <code>IClock</code>.</strong> <code>DateTime.Now</code> is banned.</td>
+<td>testability, and contemporaneous ALCOA+ timestamps</td>
+</tr>
+<tr>
+<td><strong>AC-14</strong></td>
+<td><strong>Money is <code>decimal</code>; time is <code>DateTimeOffset</code> (UTC).</strong></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>AC-15</strong></td>
+<td><strong>Cross-aggregate coordination is by domain event + policy</strong>, never a direct reference (see AC-06).</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>AC-16</strong></td>
+<td><strong>XML doc comments on public domain and application types.</strong></td>
+<td>the domain is the specification</td>
+</tr>
+<tr>
+<td><strong>AC-17</strong></td>
+<td><strong>No magic strings or numbers.</strong> Roles in <code>Roles.cs</code>; error codes structured (<code>NC-001</code>); QC limits in configuration; permission keys in <code>PermissionCatalog</code>.</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>AC-18</strong></td>
+<td><strong>No dead code, no TODOs, no mocks, no placeholder screens in production paths.</strong></td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>11.3 Multi-tenancy constraints (the "sacred" rules)</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Constraint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AC-19</strong></td>
+<td>Every <code>ITenantScoped</code> entity is protected by <strong>BOTH</strong> an EF global query filter <strong>AND</strong> PostgreSQL <code>ENABLE + FORCE</code> row-level security. Either alone is insufficient.</td>
+</tr>
+<tr>
+<td><strong>AC-20</strong></td>
+<td><strong>A new <code>ITenantScoped</code> table MUST add its RLS policy in its own migration</strong> — EF will not. Verify with <code>SELECT relrowsecurity, relforcerowsecurity FROM pg_class WHERE relname='&lt;t&gt;'</code> → expect <code>t\|t</code>.</td>
+</tr>
+<tr>
+<td><strong>AC-21</strong></td>
+<td>The tenant is resolved <strong>only</strong> from the validated JWT <code>tenant_id</code> claim. Header and query-string tenant sources are <strong>banned</strong>.</td>
+</tr>
+<tr>
+<td><strong>AC-22</strong></td>
+<td>The tenant GUC is set on <strong>every connection open</strong> and <strong>fails closed to nil</strong>.</td>
+</tr>
+<tr>
+<td><strong>AC-23</strong></td>
+<td>Cross-tenant work requires <strong>explicit elevation</strong> (<code>ICurrentTenantSetter.Elevate()</code>). Implicit <code>IgnoreQueryFilters()</code> for tenancy purposes is banned.</td>
+</tr>
+<tr>
+<td><strong>AC-24</strong></td>
+<td><strong>Tenant-first composite primary keys</strong> <code>(tenant_id, id)</code> on all 88 tenant-scoped tables, and <strong>no <code>UNIQUE(id)</code></strong> — a unique index that omits the partition key is illegal on a partitioned table, and the schema is partition-ready.</td>
+</tr>
+<tr>
+<td><strong>AC-25</strong></td>
+<td>Cross-aggregate FKs are <strong>tenant-composite</strong>: <code>FOREIGN KEY (fk, tenant_id) REFERENCES parent (id, tenant_id)</code>.</td>
+</tr>
+<tr>
+<td><strong>AC-26</strong></td>
+<td>Owned children declare <code>child.HasKey("TenantId", "Id")</code> plus <code>child.WithOwner().HasForeignKey("TenantId", "&lt;fk&gt;")</code>, and carry their own RLS policy.</td>
+</tr>
+<tr>
+<td><strong>AC-27</strong></td>
+<td>The four nullable-tenant tables (<code>user_account</code>, <code>outbox_event</code>, <code>audit.security_event</code>, <code>audit.field_change</code>) keep single-column PKs — a key column cannot be null. This is <strong>accepted deviation B9</strong>, guarded by AC-08.</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>11.4 Persistence constraints</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Constraint</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AC-28</strong></td>
+<td><strong>The persistence port is <code>IAppDbContext</code> exposing <code>DbSet</code>s</strong> — there is deliberately <strong>no repository abstraction</strong>. Accepted coupling.</td>
+<td>ADR-0008</td>
+</tr>
+<tr>
+<td><strong>AC-29</strong></td>
+<td><strong>Optimistic concurrency uses PostgreSQL <code>xmin</code>.</strong> There is no <code>row_version</code> column. Scaffolded <code>AddColumn xmin</code> operations must be <strong>hand-removed</strong> from generated migrations.</td>
+<td>ADR-0005</td>
+</tr>
+<tr>
+<td><strong>AC-30</strong></td>
+<td>snake_case naming convention throughout (<code>UseSnakeCaseNamingConvention</code>).</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>AC-31</strong></td>
+<td><strong>Column sizing:</strong> free-text columns sized ≥ 1000 are <code>text</code> — the bound lives in the <strong>command validator</strong>, not the column. Bounded codes, refs, enum strings and hashes keep explicit <code>varchar(n)</code> under 1000. <strong>Never drop a <code>varchar</code> bound without a matching validator rule.</strong></td>
+<td>schema hardening 1.2</td>
+</tr>
+<tr>
+<td><strong>AC-32</strong></td>
+<td><strong>Index naming:</strong> PostgreSQL truncates identifiers at 63 bytes; <strong>EF truncates client-side at 62, silently, mid-word</strong>. Any index whose default name would exceed 62 chars must be pinned with <code>HasDatabaseName()</code> using the abbreviation map. Unique indexes use <code>ux_</code>.</td>
+<td>schema hardening 1.4</td>
+</tr>
+<tr>
+<td><strong>AC-33</strong></td>
+<td><strong>Migrations touching FORCE-RLS tables must declare a bypass</strong> — <code>SELECT set_config('app.bypass_rls','on',true);</code> at the top of <strong>both</strong> <code>Up()</code> and <code>Down()</code>. FORCE RLS applies to the migration's own session <strong>and to PostgreSQL's referential-integrity checks</strong>: without the bypass a data backfill silently updates <strong>zero rows</strong> and a later <code>ADD CONSTRAINT ... FOREIGN KEY</code> fails because the RI check cannot see the parent.</td>
+<td>hard-won</td>
+</tr>
+<tr>
+<td><strong>AC-34</strong></td>
+<td><strong>EF's model snapshot does not learn raw-SQL DDL.</strong> If a migration renames or replaces a constraint via <code>migrationBuilder.Sql(...)</code>, EF still believes the old name and the <em>next</em> scaffolded migration emits a drop for a constraint that no longer exists. Reconcile generated names against <code>pg_constraint</code> before applying; <code>Down()</code> must drop what <code>Up()</code> <strong>created</strong>, not what it replaced.</td>
+<td>hard-won</td>
+</tr>
+<tr>
+<td><strong>AC-35</strong></td>
+<td>Interceptor order is <strong>load-bearing</strong>: <code>TenantConnection → AuditStamp → TenantStamp → FieldChange → Outbox → OrgScopeGuard</code>. The tenant GUCs must be set before any query the other interceptors trigger.</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>11.5 Application-layer constraints</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Constraint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AC-36</strong></td>
+<td><strong>MediatR is pinned to <code>12.4.*</code>.</strong> v13 changes the licence <strong>and</strong> the pipeline <code>next()</code> delegate signature — in 12.x <code>next()</code> takes no arguments, so passing a <code>CancellationToken</code> is a compile error. This is a hard pin, not a preference.</td>
+</tr>
+<tr>
+<td><strong>AC-37</strong></td>
+<td>Pipeline order is fixed: <strong>Tracing → Logging → Authorization → Idempotency → Validation → Handler.</strong> Authorisation precedes idempotency so an unauthorised replay is refused; validation is last so only authorised, non-replayed commands are validated.</td>
+</tr>
+<tr>
+<td><strong>AC-38</strong></td>
+<td><strong>Vertical slices</strong>: one <code>*Slice.cs</code> per feature area holding its commands, validators, handlers and queries. Larger contexts split into <code>Commands/</code>, <code>Queries/</code>, <code>Policies/</code>.</td>
+</tr>
+<tr>
+<td><strong>AC-39</strong></td>
+<td>Every command carries exactly one <code>CommandPolicyAttribute</code> (AC-07).</td>
+</tr>
+<tr>
+<td><strong>AC-40</strong></td>
+<td>Validators enforce <strong>shape</strong> (required/length/range/pattern). They must not be the only place a business rule lives.</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>11.6 Deployment and runtime constraints</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Constraint</th>
+<th>ADR</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AC-41</strong></td>
+<td><strong>Exactly one application replica.</strong> Scale-out is a design change, not configuration.</td>
+<td>ADR-0001</td>
+</tr>
+<tr>
+<td><strong>AC-42</strong></td>
+<td><strong>TLS terminates at the reverse proxy</strong>; the application emits HSTS but does not serve TLS.</td>
+<td>ADR-0002</td>
+</tr>
+<tr>
+<td><strong>AC-43</strong></td>
+<td><strong>Same-origin deployment. CORS is deliberately not configured.</strong> A cross-origin client is impossible.</td>
+<td>ADR-0007</td>
+</tr>
+<tr>
+<td><strong>AC-44</strong></td>
+<td><strong>Access tokens in SPA memory only</strong>; refresh is a rotating httpOnly <code>Secure SameSite=Strict</code> cookie with family-revoking reuse detection.</td>
+<td>ADR-0009 (supersedes ADR-0003)</td>
+</tr>
+<tr>
+<td><strong>AC-45</strong></td>
+<td><strong>Dual routing</strong>: every literal <code>api/…</code> route also resolves at <code>api/v{version}/…</code>, applied centrally by a convention — never by editing controllers.</td>
+<td>ADR-0004</td>
+</tr>
+<tr>
+<td><strong>AC-46</strong></td>
+<td><strong>Outbox reliability model</strong>: at-least-once with <code>SKIP LOCKED</code> claim leases, exponential backoff with jitter, dead-lettering at 5 attempts, retention purge.</td>
+<td>ADR-0006</td>
+</tr>
+<tr>
+<td><strong>AC-47</strong></td>
+<td>Production <strong>refuses to boot</strong> on an over-privileged database role.</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>AC-48</strong></td>
+<td><code>Database:MigrateOnStartup</code> stays <strong>off</strong> in production; migrations run as the owner role out of band.</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>AC-49</strong></td>
+<td>The container runs as a <strong>non-root</strong> user, asserted in CI.</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>11.7 Frontend constraints</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Constraint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AC-50</strong></td>
+<td><strong>Strict TypeScript. <code>any</code> is banned.</strong></td>
+</tr>
+<tr>
+<td><strong>AC-51</strong></td>
+<td><strong>Standalone components with signal-based state</strong> — no NgModules.</td>
+</tr>
+<tr>
+<td><strong>AC-52</strong></td>
+<td><strong>The SPA is never a security control.</strong> Every gate it renders is re-enforced server-side; <code>GET /api/auth/me/privileges</code> drives presentation only.</td>
+</tr>
+<tr>
+<td><strong>AC-53</strong></td>
+<td><strong>One shared component per cross-cutting concern</strong> — statistic tiles, load-more pager, workflow stepper, status pill, audit trail. This is why the dashboard and the registers cannot drift.</td>
+</tr>
+<tr>
+<td><strong>AC-54</strong></td>
+<td><strong>No colour-only meaning.</strong> Tone rides meters and rails; values use AA-contrast ink steps.</td>
+</tr>
+<tr>
+<td><strong>AC-55</strong></td>
+<td><strong>Accessible dialogs, not <code>window.prompt</code>.</strong> Both former prompts (change reason, password reset) were replaced.</td>
+</tr>
+<tr>
+<td><strong>AC-56</strong></td>
+<td>i18n is an in-app typed dictionary service — <strong>not</strong> ngx-translate, <strong>not</strong> JSON asset files. Three languages, RTL for Arabic.</td>
+</tr>
+<tr>
+<td><strong>AC-57</strong></td>
+<td>The SPA and API are same-origin; <code>apiBaseUrl</code> defaults to <code>'/api'</code> (AC-43).</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>11.8 Technology constraints (fixed choices)</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Fixed to</th>
+<th>Substitution cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Runtime</td>
+<td>.NET 9</td>
+<td>whole rebuild</td>
+</tr>
+<tr>
+<td>Web</td>
+<td>ASP.NET Core 9</td>
+<td>whole rebuild</td>
+</tr>
+<tr>
+<td>Mediator</td>
+<td><strong>MediatR 12.4.*</strong> (hard pin, AC-36)</td>
+<td>pipeline rewrite</td>
+</tr>
+<tr>
+<td>ORM</td>
+<td>EF Core 9 + Npgsql</td>
+<td>the port is <code>DbSet</code>-shaped (AC-28), so a swap touches every handler</td>
+</tr>
+<tr>
+<td>Database</td>
+<td><strong>PostgreSQL 17</strong></td>
+<td><strong>very high</strong> — RLS, advisory locks, <code>xmin</code>, <code>SKIP LOCKED</code>, <code>set_config</code> GUCs and triggers are all PostgreSQL-specific and load-bearing. <strong>The system is not portable to another RDBMS.</strong></td>
+</tr>
+<tr>
+<td>Validation</td>
+<td>FluentValidation</td>
+<td>localised</td>
+</tr>
+<tr>
+<td>SPA</td>
+<td>Angular 22.0.8</td>
+<td>whole front-end rebuild</td>
+</tr>
+<tr>
+<td>Telemetry</td>
+<td>OpenTelemetry</td>
+<td>low</td>
+</tr>
+<tr>
+<td>File storage</td>
+<td>local filesystem via <code>IFileStorage</code></td>
+<td><strong>low — the port exists</strong>; an S3/MinIO adapter replaces <code>LocalFileStorage</code> without touching callers</td>
+</tr>
+<tr>
+<td>E-mail</td>
+<td><code>System.Net.Mail</code> via <code>IEmailSender</code></td>
+<td>low — the port exists</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong>Explicitly NOT used</strong> (contrary to the previous SRS): Redis, Hangfire, Dapper, Mapster,
+ngx-translate, Tailwind, SignalR, Serilog/Seq, hash routing. Background work is <code>IHostedService</code>;
+mapping is hand-written projections; caching is per-request only.</p>
+</blockquote>
+<hr>
+<h1>11.9 Forbidden patterns</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Forbidden</th>
+<th>Why</th>
+<th>Detection</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>A business rule outside its aggregate</td>
+<td>bypassable by a new call path</td>
+<td>review</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Tenant id from a header or query string</td>
+<td>spoofable</td>
+<td>review</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>IgnoreQueryFilters()</code> for tenancy</td>
+<td>silent cross-tenant leak</td>
+<td>review — the five legitimate uses are elevated and greppable</td>
+</tr>
+<tr>
+<td>4</td>
+<td>A new <code>ITenantScoped</code> table without an RLS migration</td>
+<td>half-protected table</td>
+<td>manual verification (<strong>not</strong> automated — see <a href="14-Technical-Debt-Report.html">TD</a>)</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>UNIQUE(id)</code> on a tenant-scoped table</td>
+<td>breaks partition-readiness</td>
+<td>review</td>
+</tr>
+<tr>
+<td>6</td>
+<td>A command without a policy attribute</td>
+<td>ungoverned write</td>
+<td><strong>CI gate</strong></td>
+</tr>
+<tr>
+<td>7</td>
+<td>A route change without updating <code>ApiSurface.approved.txt</code></td>
+<td>silent contract drift</td>
+<td><strong>CI gate</strong></td>
+</tr>
+<tr>
+<td>8</td>
+<td>A cross-domain-module reference</td>
+<td>breaks context isolation</td>
+<td><strong>CI gate</strong></td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>DateTime.Now</code></td>
+<td>untestable, non-UTC</td>
+<td>review</td>
+</tr>
+<tr>
+<td>10</td>
+<td>An anonymous-object error body</td>
+<td>contract drift between error paths</td>
+<td>review — <code>ProblemResponse</code> is the single writer</td>
+</tr>
+<tr>
+<td>11</td>
+<td>A parallel export format (e.g. CSV alongside XLSX)</td>
+<td>was built and <strong>deliberately reverted</strong></td>
+<td>review</td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>any</code> in TypeScript</td>
+<td>—</td>
+<td>compiler</td>
+</tr>
+<tr>
+<td>13</td>
+<td><code>window.prompt</code> / <code>window.confirm</code></td>
+<td>inaccessible</td>
+<td>review + axe</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Dropping a <code>varchar</code> bound without adding a validator rule</td>
+<td>removes the only length control</td>
+<td>review</td>
+</tr>
+<tr>
+<td>15</td>
+<td>A migration touching FORCE-RLS tables without a bypass</td>
+<td>silent zero-row backfill</td>
+<td>review</td>
+</tr>
+<tr>
+<td>16</td>
+<td>Rebuilding the domain into "services"</td>
+<td>the aggregates <em>are</em> the specification</td>
+<td>review</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>11.10 Architecture Decision Records</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ADR</th>
+<th>Title</th>
+<th>Status</th>
+<th>Constraint imposed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>0001</strong></td>
+<td>Single-replica API topology (until Phase-1 scale-out controls)</td>
+<td>accepted</td>
+<td>AC-41</td>
+</tr>
+<tr>
+<td><strong>0002</strong></td>
+<td>TLS terminates at the reverse proxy; HSTS emitted in-app</td>
+<td>accepted</td>
+<td>AC-42</td>
+</tr>
+<tr>
+<td><strong>0003</strong></td>
+<td>Access-token storage in the SPA (risk acceptance)</td>
+<td><strong>superseded by 0009</strong></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>0004</strong></td>
+<td>API versioning and contract evolution</td>
+<td>accepted</td>
+<td>AC-45</td>
+</tr>
+<tr>
+<td><strong>0005</strong></td>
+<td>Optimistic concurrency via PostgreSQL <code>xmin</code></td>
+<td>accepted</td>
+<td>AC-29</td>
+</tr>
+<tr>
+<td><strong>0006</strong></td>
+<td>Outbox reliability model</td>
+<td>accepted</td>
+<td>AC-46</td>
+</tr>
+<tr>
+<td><strong>0007</strong></td>
+<td>Same-origin deployment; no CORS by design</td>
+<td>accepted</td>
+<td>AC-43</td>
+</tr>
+<tr>
+<td><strong>0008</strong></td>
+<td>The persistence port exposes EF Core <code>DbSet</code> (accepted coupling)</td>
+<td>accepted</td>
+<td>AC-28</td>
+</tr>
+<tr>
+<td><strong>0009</strong></td>
+<td>Refresh-token session model (supersedes 0003)</td>
+<td>accepted</td>
+<td>AC-44</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>11.11 Quality attributes these constraints deliver</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Delivered by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Auditability</strong></td>
+<td>AC-09 (invariants in the aggregate), AC-13 (injected clock), the append-only ledgers, hash chaining</td>
+</tr>
+<tr>
+<td><strong>Tenant safety</strong></td>
+<td>AC-19…AC-27 — two layers, fail-closed, structural FKs, explicit elevation</td>
+</tr>
+<tr>
+<td><strong>Regression resistance</strong></td>
+<td>AC-01…AC-08 plus the seven CI merge gates</td>
+</tr>
+<tr>
+<td><strong>Testability</strong></td>
+<td>AC-02/03 (no framework in Domain/Application), AC-13 (clock), AC-28 (in-memory provider for unit tests)</td>
+</tr>
+<tr>
+<td><strong>Comprehensibility</strong></td>
+<td>AC-38 (vertical slices), AC-06 (isolated contexts), AC-17 (no magic values)</td>
+</tr>
+<tr>
+<td><strong>Regulated-record integrity</strong></td>
+<td>database triggers (SEC-17), reason-for-change, SoD, e-signatures</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="what-these-constraints-deliberately-sacrifice">What these constraints deliberately sacrifice</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Sacrificed</th>
+<th>For</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Horizontal scalability</strong></td>
+<td>operational simplicity and correctness guarantees (AC-41)</td>
+</tr>
+<tr>
+<td><strong>Database portability</strong></td>
+<td>the isolation and integrity that only PostgreSQL RLS + triggers provide</td>
+</tr>
+<tr>
+<td><strong>Cross-origin deployment</strong></td>
+<td>a smaller attack surface (AC-43)</td>
+</tr>
+<tr>
+<td><strong>Repository abstraction / ORM swappability</strong></td>
+<td>less indirection, straightforward queries (AC-28, ADR-0008)</td>
+</tr>
+<tr>
+<td><strong>Partial updates (<code>PATCH</code>)</strong></td>
+<td>explicit, auditable, whole-intent commands</td>
+</tr>
+<tr>
+<td><strong>Ad-hoc reporting flexibility</strong></td>
+<td>a fixed, testable, permission-gated reporting surface</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>11.12 Architecture acceptance criteria</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Criterion</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AT-AC-01</strong></td>
+<td>Adding a reference from <code>NT.QAMS.Domain</code> to any framework package <strong>fails the build</strong>.</td>
+</tr>
+<tr>
+<td><strong>AT-AC-02</strong></td>
+<td>Adding a reference from one domain module to another <strong>fails the build</strong>.</td>
+</tr>
+<tr>
+<td><strong>AT-AC-03</strong></td>
+<td>Adding a command without a policy attribute <strong>fails the build</strong>.</td>
+</tr>
+<tr>
+<td><strong>AT-AC-04</strong></td>
+<td>Adding, removing or renaming a route without updating <code>ApiSurface.approved.txt</code> <strong>fails the build</strong>.</td>
+</tr>
+<tr>
+<td><strong>AT-AC-05</strong></td>
+<td>An unbounded <code>user_account</code> query <strong>fails the build</strong>, and the detector itself is proven by two self-tests.</td>
+</tr>
+<tr>
+<td><strong>AT-AC-06</strong></td>
+<td>Exposing a domain type through <code>NT.QAMS.Contracts</code> <strong>fails the build</strong>.</td>
+</tr>
+<tr>
+<td><strong>AT-AC-07</strong></td>
+<td>A new tenant-scoped table without a FORCE-RLS policy is detectable by <code>SELECT relrowsecurity, relforcerowsecurity FROM pg_class</code> — <strong>but is not currently caught by any automated gate</strong> (see <a href="14-Technical-Debt-Report.html">TD</a>).</td>
+</tr>
+</tbody>
+</table></div>
+<div class="pager"><a href="10-Deployment-Specification.html"><span>Previous</span>Deployment Specification</a><a href="12-Requirements-Traceability-Matrix.html" style="text-align:right"><span>Next</span>Requirements Traceability Matrix</a></div>
+</main></div>
+<script>
+(function(){
+ var r=document.documentElement, K='ntqms-srs-theme', s=localStorage.getItem(K);
+ if(s) r.setAttribute('data-theme',s);
+ var b=document.getElementById('th');
+ if(b) b.onclick=function(){
+   var cur=r.getAttribute('data-theme');
+   if(!cur) cur=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+   var nx=cur==='dark'?'light':'dark';
+   r.setAttribute('data-theme',nx); localStorage.setItem(K,nx);
+ };
+ var p=document.getElementById('pr'); if(p) p.onclick=function(){window.print();};
+ // scroll-spy on the in-page TOC
+ var links=[].slice.call(document.querySelectorAll('#toc a'));
+ if(!links.length) return;
+ var tgt=links.map(function(a){return document.getElementById(a.getAttribute('href').slice(1));});
+ function spy(){
+   var y=window.scrollY+90, i=0;
+   for(var k=0;k<tgt.length;k++){ if(tgt[k]&&tgt[k].offsetTop<=y) i=k; }
+   links.forEach(function(a,n){a.style.color=n===i?'var(--accent)':'';
+     a.style.borderLeftColor=n===i?'var(--accent)':'transparent';});
+ }
+ addEventListener('scroll',spy,{passive:true}); spy();
+})();
+</script>
+</body></html>

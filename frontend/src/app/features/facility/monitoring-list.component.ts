@@ -5,20 +5,24 @@ import { Router, RouterOutlet } from '@angular/router';
 import { MonitoringFacade } from './monitoring.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
+import { MonitoringPointListItem } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { AllocationPickerComponent } from '../../shared/ui/allocation-picker.component';
 import { LovSelectComponent } from '../../shared/ui/lov-select.component';
 import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 
 /** Environmental monitoring register: points, latest readings, excursion counts (§6.3). */
 @Component({
     selector: 'qams-monitoring-list',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, LovSelectComponent, ListStatsComponent],
+    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, LovSelectComponent, ListStatsComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('env.title')" [subtitle]="i18n.t('env.subtitle')">
+      <qams-export-menu [title]="i18n.t('env.title')" [stats]="stats()" [columns]="exportColumns"
+                        [rows]="filtered()" [filtersSummary]="filtersSummary()" />
       @if (perms.can('monitoring-points.create')) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('env.new') }}</button>
       }
@@ -131,6 +135,30 @@ export class MonitoringListComponent implements OnInit {
     const q = this.search().trim().toLowerCase();
     return this.facade.list().filter((p) =>
       !q || `${p.pointRef} ${p.name} ${p.location ?? ''} ${p.parameter} ${p.status}`.toLowerCase().includes(q));
+  });
+
+  /** Export columns — the printed grid mirrors the on-screen table. */
+  readonly exportColumns: ExportColumn<MonitoringPointListItem>[] = [
+    { header: this.i18n.t('mu.ref'), cell: (p) => p.pointRef },
+    { header: this.i18n.t('std.name'), cell: (p) => p.name },
+    { header: this.i18n.t('env.parameter'), cell: (p) => `${p.parameter} (${p.unit})` },
+    { header: this.i18n.t('env.window'), cell: (p) => this.window(p.lowLimit, p.highLimit, p.unit) },
+    {
+      header: this.i18n.t('env.lastReading'),
+      cell: (p) => p.lastValue !== null
+        ? `${p.lastValue} ${p.unit}${p.lastRecordedAtUtc ? ` · ${p.lastRecordedAtUtc}` : ''}`
+        : '—',
+    },
+    { header: this.i18n.t('env.excursions'), cell: (p) => `${p.excursionCount}` },
+    { header: this.i18n.t('nc.status'), cell: (p) => p.status },
+  ];
+
+  /** The filter line printed on the document, mirroring the filter bar. */
+  readonly filtersSummary = computed(() => {
+    const parts: string[] = [];
+    if (this.statusFilter()) { parts.push(this.statusFilter()); }
+    if (this.search().trim()) { parts.push(`"${this.search().trim()}"`); }
+    return parts.length ? parts.join(' · ') : this.i18n.t('exp.allRecords');
   });
 
   readonly stats = computed<ListStat[]>(() => {

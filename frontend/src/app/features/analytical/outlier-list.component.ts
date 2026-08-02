@@ -4,18 +4,22 @@ import { Router, RouterOutlet } from '@angular/router';
 import { OutlierFacade } from './outlier.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
+import { OutlierScreeningListItem } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 
 /** Outlier-screening register: Tukey fences + MAD-based modified z-score. */
 @Component({
     selector: 'qams-outlier-list',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent],
+    imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('out.title')" [subtitle]="i18n.t('out.subtitle')">
+      <qams-export-menu [title]="i18n.t('out.title')" [stats]="stats()" [columns]="exportColumns"
+                        [rows]="filtered()" [filtersSummary]="filtersSummary()" />
       @if (perms.can('analytical-quality.create')) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('out.new') }}</button>
       }
@@ -104,6 +108,23 @@ export class OutlierListComponent implements OnInit {
     const q = this.search().trim().toLowerCase();
     return this.facade.list().filter((s) =>
       !q || `${s.screeningRef} ${s.dataset} ${s.state}`.toLowerCase().includes(q));
+  });
+
+  /** Export columns — the printed grid mirrors the on-screen table. */
+  readonly exportColumns: ExportColumn<OutlierScreeningListItem>[] = [
+    { header: this.i18n.t('mu.ref'), cell: (s) => s.screeningRef },
+    { header: this.i18n.t('out.dataset'), cell: (s) => s.dataset },
+    { header: this.i18n.t('out.points'), cell: (s) => s.pointCount === null ? '—' : `${s.pointCount}` },
+    { header: this.i18n.t('out.outliers'), cell: (s) => s.outlierCount === null ? '—' : s.outlierCount === 0 ? 'Pass' : `Failed ${s.outlierCount}` },
+    { header: this.i18n.t('nc.status'), cell: (s) => s.state },
+  ];
+
+  /** The filter line printed on the document, mirroring the filter bar. */
+  readonly filtersSummary = computed(() => {
+    const parts: string[] = [];
+    if (this.stateFilter()) { parts.push(this.stateFilter()); }
+    if (this.search().trim()) { parts.push(`"${this.search().trim()}"`); }
+    return parts.length ? parts.join(' · ') : this.i18n.t('exp.allRecords');
   });
 
   readonly stats = computed<ListStat[]>(() => {

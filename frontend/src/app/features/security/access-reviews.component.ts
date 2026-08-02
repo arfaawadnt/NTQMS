@@ -7,6 +7,7 @@ import { AccessReviewsApiService } from '../../core/api/access-reviews-api.servi
 import { I18nService } from '../../core/i18n.service';
 import { UserAccessReview } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 
 /**
  * Periodic user-access review / recertification (21 CFR Part 11 §11.10(d) /
@@ -17,9 +18,11 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 @Component({
     selector: 'qams-access-reviews',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [FormsModule, DatePipe, PageHeaderComponent],
+    imports: [FormsModule, DatePipe, PageHeaderComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('uar.title')" [subtitle]="i18n.t('uar.subtitle')">
+      <qams-export-menu [title]="i18n.t('uar.title')" [columns]="exportColumns" [rows]="reviews()"
+                        [filtersSummary]="i18n.t('exp.allRecords')" />
       <button (click)="open()" [disabled]="loading()">{{ i18n.t('uar.open') }}</button>
     </qams-page-header>
 
@@ -84,6 +87,21 @@ export class AccessReviewsComponent implements OnInit {
   readonly reviews = signal<UserAccessReview[]>([]);
   readonly loading = signal(false);
   readonly error = signal('');
+
+  /** Export columns — the printed grid mirrors the on-screen table. */
+  readonly exportColumns: ExportColumn<UserAccessReview>[] = [
+    { header: this.i18n.t('mu.ref'), cell: (r) => r.reviewRef },
+    { header: this.i18n.t('uar.openedOn'), cell: (r) => r.openedOn },
+    { header: this.i18n.t('nc.status'), cell: (r) => r.status },
+    { header: this.i18n.t('uar.accounts'), cell: (r) => r.accountsReviewed === null ? '—' : `${r.accountsReviewed}` },
+    {
+      header: this.i18n.t('uar.changes'),
+      cell: (r) => r.changesRequired === true
+        ? `✕ ${this.i18n.t('common.yes')}`
+        : r.changesRequired === false ? `✓ ${this.i18n.t('common.no')}` : '—',
+    },
+    { header: this.i18n.t('atr.conclusion'), cell: (r) => r.conclusion ?? '—' },
+  ];
   changesRequired = false;
   conclusion = '';
 

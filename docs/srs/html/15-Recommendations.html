@@ -1,0 +1,738 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recommendations — NT.QMS As-Built SRS</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✅</text></svg>">
+<style>
+:root{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);
+ --mono:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace;
+ --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,ui-serif,serif;
+ --sans:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}}
+:root[data-theme="dark"]{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}
+:root[data-theme="light"]{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+ font-size:15.5px;line-height:1.62;-webkit-text-size-adjust:100%}
+.wrap{display:grid;grid-template-columns:288px minmax(0,1fr);gap:0;max-width:1560px;margin:0 auto}
+/* ---- sidebar ---- */
+aside{position:sticky;top:0;height:100vh;overflow-y:auto;padding:22px 16px 60px;
+ border-right:1px solid var(--line);background:var(--panel)}
+aside .brand{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:-.01em;
+ margin:0 0 2px}
+aside .sub{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;
+ margin:0 0 16px}
+aside nav a{display:block;padding:5px 9px;border-radius:7px;color:var(--ink);text-decoration:none;
+ font-size:13.2px;border-left:2px solid transparent}
+aside nav a:hover{background:var(--panel-2)}
+aside nav a.cur{background:var(--accent-soft);border-left-color:var(--accent);font-weight:600}
+aside nav a .n{color:var(--muted);font-variant-numeric:tabular-nums;margin-right:7px;font-size:11.5px}
+aside .sec{margin:16px 0 5px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+ color:var(--muted);font-weight:700}
+#toc{margin-top:6px;border-top:1px solid var(--line);padding-top:10px}
+#toc a{display:block;padding:2.5px 9px;font-size:12.4px;color:var(--muted);text-decoration:none;
+ border-left:2px solid transparent;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#toc a:hover{color:var(--ink)}
+#toc a.h3{padding-left:22px;font-size:11.8px}
+/* ---- main ---- */
+main{padding:34px 46px 120px;min-width:0;overflow-wrap:anywhere}
+.doc-head{border-bottom:2px solid var(--accent);padding-bottom:14px;margin-bottom:26px}
+.kicker{color:var(--accent);font-size:11.5px;font-weight:700;letter-spacing:.11em;
+ text-transform:uppercase;margin:0 0 4px}
+h1{font-family:var(--serif);font-size:31px;line-height:1.2;margin:0;letter-spacing:-.015em}
+h2{font-family:var(--serif);font-size:24px;margin:38px 0 12px;padding-bottom:6px;
+ border-bottom:1px solid var(--line);letter-spacing:-.01em;scroll-margin-top:14px}
+h3{font-size:18px;margin:26px 0 9px;letter-spacing:-.005em;scroll-margin-top:14px}
+h4{font-size:15px;margin:20px 0 7px;color:var(--accent)}
+h5,h6{font-size:13.5px;margin:16px 0 6px;color:var(--muted);text-transform:uppercase;
+ letter-spacing:.05em}
+p{margin:10px 0}
+a{color:var(--accent)}
+hr{border:0;border-top:1px solid var(--line);margin:30px 0}
+ul,ol{margin:9px 0;padding-left:24px}
+li{margin:3px 0}
+blockquote{margin:16px 0;padding:12px 18px;background:var(--accent-soft);
+ border-left:3px solid var(--accent);border-radius:0 8px 8px 0}
+blockquote p:first-child{margin-top:0}blockquote p:last-child{margin-bottom:0}
+code{font-family:var(--mono);font-size:.875em;background:var(--panel-2);
+ padding:1.5px 5px;border-radius:4px;border:1px solid var(--line)}
+pre{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;
+ padding:14px 16px;overflow-x:auto;margin:14px 0}
+pre code{background:none;border:0;padding:0;font-size:12.6px;line-height:1.5}
+/* ---- tables ---- */
+.tw{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:10px;
+ background:var(--panel);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;font-size:13.4px}
+th,td{padding:8px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:var(--panel-2);font-weight:700;font-size:12.2px;letter-spacing:.02em;
+ position:sticky;top:0;z-index:1}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--accent-soft)}
+td code,th code{font-size:.9em;white-space:nowrap}
+/* ---- diagrams ---- */
+figure.d{margin:18px 0;padding:18px;background:var(--panel);border:1px solid var(--line);
+ border-radius:12px;box-shadow:var(--shadow);overflow-x:auto;text-align:center}
+figure.d svg{max-width:100%;height:auto;display:inline-block}
+/* ---- misc ---- */
+.tools{position:fixed;top:12px;right:16px;display:flex;gap:6px;z-index:50}
+.tools button{font:inherit;font-size:12px;padding:5px 11px;border-radius:8px;cursor:pointer;
+ border:1px solid var(--line);background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+.tools button:hover{background:var(--panel-2)}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:52px;padding-top:18px;
+ border-top:1px solid var(--line)}
+.pager a{display:block;max-width:46%;padding:10px 14px;border:1px solid var(--line);
+ border-radius:10px;background:var(--panel);text-decoration:none;font-size:13px}
+.pager a span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;
+ letter-spacing:.08em}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:14px;margin:20px 0}
+.card{padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--panel);
+ box-shadow:var(--shadow);text-decoration:none;color:var(--ink);display:block}
+.card:hover{border-color:var(--accent)}
+.card .num{color:var(--accent);font-weight:700;font-size:11.5px;letter-spacing:.1em}
+.card .t{font-family:var(--serif);font-size:17px;margin:3px 0 5px}
+.card .d{color:var(--muted);font-size:12.7px;line-height:1.5}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin:20px 0}
+.stat{padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.stat b{display:block;font-size:23px;font-family:var(--serif);line-height:1.1}
+.stat span{color:var(--muted);font-size:11.4px}
+@media print{
+ aside,.tools,.pager{display:none!important}
+ .wrap{display:block;max-width:none}
+ main{padding:0}
+ .tw,figure.d{break-inside:avoid;box-shadow:none}
+ h2{break-after:avoid}
+ a{color:inherit;text-decoration:none}
+}
+@media (max-width:1080px){
+ .wrap{grid-template-columns:1fr}
+ aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+ main{padding:22px 18px 80px}
+ #toc{display:none}
+}
+</style>
+</head><body>
+<div class="tools"><button id="th">◐ Theme</button><button id="pr">⎙ Print</button></div>
+<div class="wrap">
+<aside><p class="brand">NT.QMS</p><p class="sub">As-Built SRS · v1.51.x</p><a class="card" style="padding:9px 12px;margin-bottom:10px;font-size:13px" href="index.html">◂ Document set</a><div class="sec">Documents</div><nav><a class="" href="00-SRS-Index-and-Conventions.html"><span class="n">00</span>Index, Conventions &amp; Glossary</a><a class="" href="01-Software-Requirements-Specification.html"><span class="n">01</span>Software Requirements Specification</a><a class="" href="02-1-Functional-Specification-Quality-and-Improvement.html"><span class="n">02-1</span>Functional Spec 1 — Quality &amp; Improvement</a><a class="" href="02-2-Functional-Specification-Resources-People-Governance.html"><span class="n">02-2</span>Functional Spec 2 — Resources, People &amp; Governance</a><a class="" href="02-3-Functional-Specification-Analytical-Quality.html"><span class="n">02-3</span>Functional Spec 3 — Analytical Quality</a><a class="" href="02-4-Functional-Specification-Operations-and-Platform.html"><span class="n">02-4</span>Functional Spec 4 — Operations &amp; Platform</a><a class="" href="03-Business-Rules.html"><span class="n">03</span>Business Rules &amp; Error Catalogue</a><a class="" href="04-Configuration-Reference.html"><span class="n">04</span>Configuration Reference</a><a class="" href="05-Screen-Specification.html"><span class="n">05</span>Screen Specification</a><a class="" href="06-Workflow-Specification.html"><span class="n">06</span>Workflow Specification</a><a class="" href="07-File-System-Specification.html"><span class="n">07</span>File System Specification</a><a class="" href="08-API-Specification.html"><span class="n">08</span>API Specification</a><a class="" href="09-Security-Specification.html"><span class="n">09</span>Security Specification</a><a class="" href="10-Deployment-Specification.html"><span class="n">10</span>Deployment Specification</a><a class="" href="11-Architecture-Constraints.html"><span class="n">11</span>Architecture Constraints</a><a class="" href="12-Requirements-Traceability-Matrix.html"><span class="n">12</span>Requirements Traceability Matrix</a><a class="" href="13-Implementation-vs-SRS-Gap-Analysis.html"><span class="n">13</span>Implementation vs SRS — Gap Analysis</a><a class="" href="14-Technical-Debt-Report.html"><span class="n">14</span>Technical Debt Report</a><a class="cur" href="15-Recommendations.html"><span class="n">15</span>Recommendations</a></nav></aside>
+<main>
+<div class="doc-head"><p class="kicker">Document 15 · NT.QMS Production SRS</p><h1>Recommendations</h1></div>
+<blockquote>
+<p><a href="00-SRS-Index-and-Conventions.html">Conventions</a> · Sources:
+<a href="13-Implementation-vs-SRS-Gap-Analysis.html">Doc 13 gap analysis</a> ·
+<a href="14-Technical-Debt-Report.html">Doc 14 technical debt</a> ·
+<a href="09-Security-Specification.html">Doc 09 threats</a></p>
+</blockquote>
+<p>Every recommendation traces to a finding. Effort is <strong>S</strong> (&lt; 1 day), <strong>M</strong> (1–5 days),
+<strong>L</strong> (&gt; 5 days) or <strong>EXT</strong> (external party required).</p>
+<hr>
+<h1>15.0 The short version</h1>
+<p>If only five things are done, do these:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Action</th>
+<th>Why</th>
+<th>Effort</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Add the RLS policy to <code>audit.security_event</code></strong></td>
+<td>the one open tenant-isolation hole</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Add an automated RLS-parity test</strong></td>
+<td>the discipline that failed once will fail again</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Regenerate <code>deploy/migrations.sql</code> and gate it in CI</strong></td>
+<td>the runbook currently instructs an action that breaks the schema</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Run one backup/restore drill</strong></td>
+<td>RPO/RTO are hypotheses until proven once</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Decide the four business questions in §15.6</strong></td>
+<td>MFA, obsolete-document marking, equipment lock-out, analytical charts — each is a compliance posture, not a coding task</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<p>Items 1–4 together are <strong>under two days of engineering</strong> and close the entire high-severity list
+except the penetration test.</p>
+<hr>
+<h1>15.1 Priority 1 — Do before the next production deployment</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Recommendation</th>
+<th>Addresses</th>
+<th>Effort</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>REC-01</strong></td>
+<td><strong>Add a FORCE-RLS policy to <code>audit.security_event</code></strong> in its own migration, using the same policy shape as the other 90 tables (with the <code>audit.*</code> relaxed <code>WITH CHECK</code> that permits null-tenant appends). Verify with <code>SELECT relrowsecurity, relforcerowsecurity FROM pg_class</code>.</td>
+<td>T-01, TD-01, G-01, FR-CLD-06</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td><strong>REC-02</strong></td>
+<td><strong>Add an RLS-parity integration test.</strong> Enumerate every <code>ITenantScoped</code> implementation, resolve its table name from the EF model, and assert <code>relrowsecurity AND relforcerowsecurity</code> plus the presence of a <code>tenant_isolation</code> policy. The integration project already runs against real PostgreSQL, so this is a single new test class. <strong>This converts the system's most important invariant from a review discipline into a build gate.</strong></td>
+<td>TD-02, AC-19/20, AT-AC-07</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td><strong>REC-03</strong></td>
+<td><strong>Regenerate <code>deploy/migrations.sql</code></strong> (<code>dotnet ef migrations script --idempotent</code>) <strong>and add a CI step that regenerates and diffs it</strong>, so it can never silently go stale again.</td>
+<td>TD-05, G-15, D-08</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td><strong>REC-04</strong></td>
+<td><strong>Enforce a maximum upload size</strong> in application code (a configurable <code>FileStorage:MaxUploadBytes</code> with a documented default), refused with a clear message rather than a host-level truncation.</td>
+<td>T-10, TD-17, FR-FILE-03</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td><strong>REC-05</strong></td>
+<td><strong>Clamp <code>take</code> and <code>days</code></strong> using the existing <code>PageRequest.Normalized</code> pattern. Clamp, never reject — consistent with API-004.</td>
+<td>T-20, TD-18, LIM-API-03</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td><strong>REC-06</strong></td>
+<td><strong>Resolve the token-lifetime contradiction.</strong> <code>Jwt:ExpiryMinutes = 120</code> versus ADR-0009's 15. Either set it to 15 or amend the ADR with the reason. Do not leave configuration and the binding decision record disagreeing by 8×.</td>
+<td>TD-14, D-05, CFG-07</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td><strong>REC-07</strong></td>
+<td><strong>Warn loudly at start-up when <code>Smtp:Host</code> is unset outside Development.</strong> Silent degradation to log-only e-mail means a production system can believe it is notifying people when it is not.</td>
+<td>TD-11, G-11, BR-NTF-05</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td><strong>REC-08</strong></td>
+<td><strong>Make <code>backup.sh</code> fail — not warn — when the file store is missing</strong>, unless <code>--db-only</code> is passed explicitly. A backup that silently omits every controlled document should not exit 0.</td>
+<td>TD-04, FS-R5</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td><strong>REC-09</strong></td>
+<td><strong>Execute one full backup → restore → verify drill</strong> (including audit-chain verification) and record the actual RPO/RTO achieved.</td>
+<td>TD-04, NFR-RCV-05, F-23</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td><strong>REC-10</strong></td>
+<td><strong>Remove <code>deploy/publish-win-x64/</code> and the two ZIPs from version control</strong> and add them to <code>.gitignore</code>.</td>
+<td>TD-24, FS-R6</td>
+<td><strong>S</strong></td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>15.2 Priority 2 — Correctness defects</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Recommendation</th>
+<th>Addresses</th>
+<th>Effort</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>REC-11</strong></td>
+<td><strong>Fix the complaint-closure interlock</strong> so a <em>rejected</em> linked NC also satisfies <code>CMP-020</code>. Today a complaint whose auto-raised NC was rejected can <strong>never</strong> be closed.</td>
+<td>TD-06, G-02, FR-CMP-03</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td><strong>REC-12</strong></td>
+<td><strong>Add supplier reinstatement.</strong> A supplier auto-suspended for an expired certificate cannot be restored after renewal; the only remedy orphans the evaluation history. Guard it so reinstatement requires a current certificate.</td>
+<td>TD-07, G-03, FR-SUP-03</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td><strong>REC-13</strong></td>
+<td><strong>Add an excursion de-bounce</strong> — N consecutive out-of-limit readings, or a duration window, before raising an NC. Make it configurable per monitoring point. This is the system's most likely source of alert fatigue.</td>
+<td>TD-09, G-09, T-21, FR-ENV-02</td>
+<td><strong>M</strong></td>
+</tr>
+<tr>
+<td><strong>REC-14</strong></td>
+<td><strong>Retry the e-mail leg.</strong> Reuse the outbox pattern that already protects event delivery: attempts, exponential backoff, dead-letter. A transient SMTP outage currently loses the channel permanently.</td>
+<td>TD-10, G-10, FR-NTF-02</td>
+<td><strong>M</strong></td>
+</tr>
+<tr>
+<td><strong>REC-15</strong></td>
+<td><strong>Materialise management-review decisions as <code>WorkTask</code> rows.</strong> They already carry an owner and a due date; nothing chases them.</td>
+<td>TD-12, G-12, FR-MRV-02</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td><strong>REC-16</strong></td>
+<td><strong>Decide and then wire (or delete) <code>SlaDefinition</code>.</strong> Either derive escalation-timer deadlines from the SLA table, or remove the table. Right now it stores targets that may drive nothing.</td>
+<td>TD-13, G-13, FR-TASK-03</td>
+<td><strong>M</strong></td>
+</tr>
+<tr>
+<td><strong>REC-17</strong></td>
+<td><strong>Expose the tenant lifecycle</strong> (<code>suspend</code> / <code>reactivate</code> / <code>terminate</code>) as platform endpoints with the reason already required by the domain. Suspending a tenant should not mean editing the database.</td>
+<td>TD-15, G-06, FR-PLT-02</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td><strong>REC-18</strong></td>
+<td><strong>Either enforce or remove <code>AuthorizationScope</code>.</strong> A <code>Perform</code>-only holder is not prevented from reviewing and releasing — a recorded control that does not control is worse than no control, because it reads as one in an audit.</td>
+<td>TD-08, G-08, FR-AUTHZ-02</td>
+<td><strong>M</strong></td>
+</tr>
+<tr>
+<td><strong>REC-19</strong></td>
+<td><strong>Report the SoD-null population.</strong> Add a query listing records where <code>CreatedByUserId IS NULL</code> on aggregates that carry SoD gates, so the residual F-05b has a measured size rather than an assumed one.</td>
+<td>TD-16, G-20</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td><strong>REC-20</strong></td>
+<td><strong>Reach the QC-profile deactivation path</strong> — add the command and endpoint, or remove the unreachable aggregate method.</td>
+<td>G-07, FR-AQ-07, LIM-QC-01</td>
+<td><strong>S</strong></td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>15.3 Priority 3 — Configurability</h1>
+<p>The single largest debt theme. Recommended in the order a laboratory will actually ask for them.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Recommendation</th>
+<th>Addresses</th>
+<th>Effort</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>REC-21</strong></td>
+<td><strong>Make the competency pass mark configurable</strong> — per tenant, ideally per competency subject. Default 80. <strong>The most likely first customer request.</strong></td>
+<td>CON-34, FR-COMP-01</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td><strong>REC-22</strong></td>
+<td><strong>Make the SPA idle timeout configurable.</strong> 21 CFR Part 11 §11.10(d) automatic logoff is a site policy; 30 minutes is currently unchangeable.</td>
+<td>CON-09</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td><strong>REC-23</strong></td>
+<td><strong>Make lockout thresholds configurable</strong> (attempts and duration).</td>
+<td>CON-05, CON-06</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td><strong>REC-24</strong></td>
+<td><strong>Make the escalation ladder configurable</strong> — levels, intervals and recipient role. And replace the <code>"QualityManager"</code> <strong>string literal</strong> with a typed reference.</td>
+<td>CON-32, CON-33, C-4</td>
+<td><strong>M</strong></td>
+</tr>
+<tr>
+<td><strong>REC-25</strong></td>
+<td><strong>Move Westgard limits to per-tenant (ideally per-QC-profile) scope.</strong> A multi-tenant host currently cannot give two laboratories different QC rules. The evaluator already derives rule labels from the limits, so the mechanism exists — only the scope needs changing.</td>
+<td>CFG-18…21, LIM-QC-04</td>
+<td><strong>M</strong></td>
+</tr>
+<tr>
+<td><strong>REC-26</strong></td>
+<td><strong>Make password length and character classes configurable</strong>, keeping the current values as defaults.</td>
+<td>CON-01…CON-03</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td><strong>REC-27</strong></td>
+<td><strong>Make retention classes data-driven</strong> rather than a three-value enum, so a 7-year jurisdiction can be represented.</td>
+<td>CON-56, FR-ARC-02</td>
+<td><strong>M</strong></td>
+</tr>
+<tr>
+<td><strong>REC-28</strong></td>
+<td><strong>Make the detection-limit <code>Z</code> and the PT z-thresholds configurable</strong>, defaulting to 1.645 / 2 / 3.</td>
+<td>CON-37, CON-35, CON-36</td>
+<td><strong>S</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong>Design note:</strong> every one of these should go through <code>ConfigGuard</code>, which already implements the
+right rule — <em>missing falls back to the documented default; present-but-invalid refuses start-up</em>.
+Do not introduce a second configuration idiom.</p>
+</blockquote>
+<hr>
+<h1>15.4 Priority 4 — Resource, retention and scale</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Recommendation</th>
+<th>Addresses</th>
+<th>Effort</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>REC-29</strong></td>
+<td><strong>Page the remaining 15+ list endpoints.</strong> The shared <code>qams-load-more</code> footer and the paging envelope already exist; this is repetition, not design.</td>
+<td>TD-19, LIM-API-04</td>
+<td><strong>M</strong></td>
+</tr>
+<tr>
+<td><strong>REC-30</strong></td>
+<td><strong>Time-partition <code>audit.field_change</code> and <code>audit.security_event</code>.</strong> They grow without bound and are the fastest-growing tables. The schema is already partition-ready in shape.</td>
+<td>TD-20, LIM-CLD-02</td>
+<td><strong>L</strong></td>
+</tr>
+<tr>
+<td><strong>REC-31</strong></td>
+<td><strong>Add incremental hash-chain checkpoints</strong> so <code>chain-verification</code> does not rescan the entire ledger on every call.</td>
+<td>TD-20, LIM-CLD-03</td>
+<td><strong>M</strong></td>
+</tr>
+<tr>
+<td><strong>REC-32</strong></td>
+<td><strong>Purge expired <code>refresh_session</code> rows</strong> on the existing sweep.</td>
+<td>TD-21, FS-G1</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td><strong>REC-33</strong></td>
+<td><strong>Add reference counting to file storage before any delete path is ever introduced.</strong> Deduplication means two records can share one blob; a delete without counting will corrupt the survivor. Do this <em>before</em> it is needed, not after.</td>
+<td>TD-22, FS-G3</td>
+<td><strong>M</strong></td>
+</tr>
+<tr>
+<td><strong>REC-34</strong></td>
+<td><strong>Sweep orphaned <code>.upload-*.tmp</code> files</strong> left by killed processes.</td>
+<td>FS-G4</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td><strong>REC-35</strong></td>
+<td><strong>Document a log-retention policy</strong> — the application writes to stdout and nothing in the repository says what happens next.</td>
+<td>FS-G6, NFR-OBS</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td><strong>REC-36</strong></td>
+<td><strong>Declare resource budgets</strong> (memory, CPU, disk growth per tenant per year) so capacity can be planned. None exists today.</td>
+<td>NFR-RES-01</td>
+<td><strong>M</strong></td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>15.5 Priority 5 — Assurance and hygiene</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Recommendation</th>
+<th>Addresses</th>
+<th>Effort</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>REC-37</strong></td>
+<td><strong>Commission an independent penetration test on staging.</strong> The SOW and readiness checklist already exist. This is the largest remaining assurance gap and cannot be closed internally.</td>
+<td>T-22, TD-03</td>
+<td><strong>EXT</strong></td>
+</tr>
+<tr>
+<td><strong>REC-38</strong></td>
+<td><strong>Stand up the observability stack once and confirm each of the seven alerts fires.</strong> An alert that has never fired is not an alert.</td>
+<td>TD-23, R-7, NFR-OBS-07</td>
+<td><strong>M + host</strong></td>
+</tr>
+<tr>
+<td><strong>REC-39</strong></td>
+<td><strong>Run a 24-hour soak and the write-mix load profile</strong> from a separate host against staging, and record the numbers as the authoritative baseline.</td>
+<td>R-5, NFR-PERF</td>
+<td><strong>M + host</strong></td>
+</tr>
+<tr>
+<td><strong>REC-40</strong></td>
+<td><strong>Test the container image at runtime</strong>, not only at build time. It is built, scanned and asserted non-root in CI, but has never been run.</td>
+<td>TD, DEP-02</td>
+<td><strong>S + host</strong></td>
+</tr>
+<tr>
+<td><strong>REC-41</strong></td>
+<td><strong>Add tests for the two load-bearing orderings</strong> — EF interceptor order and middleware order. Both are enforced today only by comments, and reordering either silently breaks tenant isolation.</td>
+<td>C-4, C-5</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td><strong>REC-42</strong></td>
+<td><strong>Resolve the <code>AUTHZ-*</code> and <code>SIG-*</code> prefix collisions.</strong> <code>SIG-002</code> means both <em>"the allowable total error must be positive"</em> and <em>"account password is incorrect"</em>; a support engineer cannot resolve it without context. Renumber the sigma-assessment family (e.g. <code>SGA-*</code>) and the test-authorisation family (e.g. <code>TAU-*</code>). Note this is a <strong>breaking change to a documented contract</strong> — schedule it with a version bump.</td>
+<td>TD-27, TD-28</td>
+<td><strong>M</strong></td>
+</tr>
+<tr>
+<td><strong>REC-43</strong></td>
+<td><strong>Delete the dead <code>Roles.cs</code> group constants</strong>, or add a comment stating they are retained only as test labels. A future developer will otherwise believe they gate endpoints.</td>
+<td>TD-29, D-03</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td><strong>REC-44</strong></td>
+<td><strong>Add permission predicates to the remaining 39 nav items.</strong> Nothing leaks — the data calls still 403 — but the sidebar advertises modules the user cannot use.</td>
+<td>TD-42, LIM-UI-01</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td><strong>REC-45</strong></td>
+<td><strong>Add a not-found screen.</strong> Every unknown URL currently redirects silently to the dashboard.</td>
+<td>LIM-UI-02</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td><strong>REC-46</strong></td>
+<td><strong>Reconcile <code>docs/reference/</code> with the as-built.</strong> Six documented facts contradict the code. Since those documents are described as "law", the contradiction is load-bearing. Consider making <strong>this SRS set</strong> the as-built reference and marking <code>docs/reference/</code> explicitly as <em>design-time intent</em>.</td>
+<td>TD-25, D-01…D-11</td>
+<td><strong>M</strong></td>
+</tr>
+<tr>
+<td><strong>REC-47</strong></td>
+<td><strong>Remove the <code>ref</code> schema grant</strong> from <code>harden-runtime-role.sql</code>, or create the schema.</td>
+<td>TD-26, G-17</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td><strong>REC-48</strong></td>
+<td><strong>Formally supersede <code>NT_QMS_SRS.html</code>.</strong> It describes a different system and would cause a rebuild to implement the wrong privilege model, the wrong error contract and the wrong escalation path. Mark it superseded and point it at this set.</td>
+<td>Doc 13 headline</td>
+<td><strong>S</strong></td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>15.6 Decisions required from the business</h1>
+<p>These are <strong>not</strong> engineering choices. Each needs an owner.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Decision</th>
+<th>The situation</th>
+<th>If the answer is "yes, enforce it"</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>D1</strong></td>
+<td><strong>Is MFA mandatory?</strong></td>
+<td>The previous SRS says <em>"must require MFA for all active accounts"</em>. The system makes it <strong>optional per tenant, default off</strong>, and every tenant in the dev dataset has it off. If an accreditation body has been told MFA is enforced, <strong>it is not</strong>.</td>
+<td><strong>S</strong> — flip the default and add a platform-level override that a tenant cannot disable</td>
+</tr>
+<tr>
+<td><strong>D2</strong></td>
+<td><strong>Is record-level obsolescence marking sufficient?</strong></td>
+<td>ISO 17025 §8.3.2 requires obsolete documents to be clearly identified. The system marks the <em>record</em> obsolete; the <em>file</em> downloads unmarked, with no watermark and no PDF processing anywhere in the codebase.</td>
+<td><strong>L</strong> — introduces a PDF-processing dependency the system currently does not have</td>
+</tr>
+<tr>
+<td><strong>D3</strong></td>
+<td><strong>Must equipment lock-out be enforced by software?</strong></td>
+<td>Out-of-service equipment is flagged but not blocked, because instrument references are free text rather than foreign keys. The previous SRS says selection <em>must</em> be blocked.</td>
+<td><strong>L</strong> — a schema and data-migration change across QC and the studies</td>
+</tr>
+<tr>
+<td><strong>D4</strong></td>
+<td><strong>Are numeric-only analytical results acceptable?</strong></td>
+<td>Twelve study types compute Levey-Jennings, Passing-Bablok, Bland-Altman and linearity statistics but <strong>render no plots</strong>. Reviewers must sign off on numbers.</td>
+<td><strong>M–L</strong> — chart components for at least LJ, PB and BA</td>
+</tr>
+<tr>
+<td><strong>D5</strong></td>
+<td><strong>Is a 4-digit e-signature PIN acceptable?</strong></td>
+<td>10,000 keyspace, mitigated by a per-actor 10/min limiter and the shared lockout. Not configurable.</td>
+<td><strong>S</strong> — make the length configurable with a 6-digit default</td>
+</tr>
+<tr>
+<td><strong>D6</strong></td>
+<td><strong>Should <code>Questionable</code> PT results (2 &lt; |z| &lt; 3) trigger anything?</strong></td>
+<td>Today they are recorded and trigger nothing. Many laboratories require investigation.</td>
+<td><strong>S</strong></td>
+</tr>
+<tr>
+<td><strong>D7</strong></td>
+<td><strong>Is data-at-rest encryption in place?</strong></td>
+<td>The previous SRS requires AES-256 at rest. The application does no encryption; it relies entirely on the database and volume.</td>
+<td>Deployment, not code</td>
+</tr>
+<tr>
+<td><strong>D8</strong></td>
+<td><strong>What is the availability target?</strong></td>
+<td>None is defined anywhere. Health/readiness separation supports one; nobody has stated it.</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>D9</strong></td>
+<td><strong>What is the supported browser matrix?</strong></td>
+<td>None declared, none tested.</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>D10</strong></td>
+<td><strong>What WCAG level is claimed?</strong></td>
+<td>axe runs on every build and real violations were fixed, but no conformance level is claimed.</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>15.7 Suggested sequencing</h1>
+<figure class="d"><svg width="784" height="820" preserveAspectRatio="xMidYMid meet" id="mmd-fd0080a06a9a" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 784 820" style="max-width:784px;height:auto" role="graphics-document document" aria-roledescription="gantt"><style>#mmd-fd0080a06a9a{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;fill:#000000;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#mmd-fd0080a06a9a .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#mmd-fd0080a06a9a .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#mmd-fd0080a06a9a .error-icon{fill:#552222;}#mmd-fd0080a06a9a .error-text{fill:#552222;stroke:#552222;}#mmd-fd0080a06a9a .edge-thickness-normal{stroke-width:1px;}#mmd-fd0080a06a9a .edge-thickness-thick{stroke-width:3.5px;}#mmd-fd0080a06a9a .edge-pattern-solid{stroke-dasharray:0;}#mmd-fd0080a06a9a .edge-thickness-invisible{stroke-width:0;fill:none;}#mmd-fd0080a06a9a .edge-pattern-dashed{stroke-dasharray:3;}#mmd-fd0080a06a9a .edge-pattern-dotted{stroke-dasharray:2;}#mmd-fd0080a06a9a .marker{fill:#666;stroke:#666;}#mmd-fd0080a06a9a .marker.cross{stroke:#666;}#mmd-fd0080a06a9a svg{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;}#mmd-fd0080a06a9a p{margin:0;}#mmd-fd0080a06a9a .mermaid-main-font{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}#mmd-fd0080a06a9a .exclude-range{fill:#eeeeee;}#mmd-fd0080a06a9a .section{stroke:none;opacity:0.2;}#mmd-fd0080a06a9a .section0{fill:hsl(0, 0%, 73.9215686275%);}#mmd-fd0080a06a9a .section2{fill:hsl(0, 0%, 73.9215686275%);}#mmd-fd0080a06a9a .section1,#mmd-fd0080a06a9a .section3{fill:white;opacity:0.2;}#mmd-fd0080a06a9a .sectionTitle0{fill:#333;}#mmd-fd0080a06a9a .sectionTitle1{fill:#333;}#mmd-fd0080a06a9a .sectionTitle2{fill:#333;}#mmd-fd0080a06a9a .sectionTitle3{fill:#333;}#mmd-fd0080a06a9a .sectionTitle{text-anchor:start;font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}#mmd-fd0080a06a9a .grid .tick{stroke:hsl(0, 0%, 90%);opacity:0.8;shape-rendering:crispEdges;}#mmd-fd0080a06a9a .grid .tick text{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;fill:#000000;}#mmd-fd0080a06a9a .grid path{stroke-width:0;}#mmd-fd0080a06a9a .today{fill:none;stroke:#d42;stroke-width:2px;}#mmd-fd0080a06a9a .task{stroke-width:2;}#mmd-fd0080a06a9a .taskText{text-anchor:middle;font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}#mmd-fd0080a06a9a .taskTextOutsideRight{fill:#333;text-anchor:start;font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}#mmd-fd0080a06a9a .taskTextOutsideLeft{fill:#333;text-anchor:end;}#mmd-fd0080a06a9a .task.clickable{cursor:pointer;}#mmd-fd0080a06a9a .taskText.clickable{cursor:pointer;fill:#003163!important;font-weight:bold;}#mmd-fd0080a06a9a .taskTextOutsideLeft.clickable{cursor:pointer;fill:#003163!important;font-weight:bold;}#mmd-fd0080a06a9a .taskTextOutsideRight.clickable{cursor:pointer;fill:#003163!important;font-weight:bold;}#mmd-fd0080a06a9a .taskText0,#mmd-fd0080a06a9a .taskText1,#mmd-fd0080a06a9a .taskText2,#mmd-fd0080a06a9a .taskText3{fill:white;}#mmd-fd0080a06a9a .task0,#mmd-fd0080a06a9a .task1,#mmd-fd0080a06a9a .task2,#mmd-fd0080a06a9a .task3{fill:#707070;stroke:hsl(0, 0%, 33.9215686275%);}#mmd-fd0080a06a9a .taskTextOutside0,#mmd-fd0080a06a9a .taskTextOutside2{fill:#333;}#mmd-fd0080a06a9a .taskTextOutside1,#mmd-fd0080a06a9a .taskTextOutside3{fill:#333;}#mmd-fd0080a06a9a .active0,#mmd-fd0080a06a9a .active1,#mmd-fd0080a06a9a .active2,#mmd-fd0080a06a9a .active3{fill:#eee;stroke:hsl(0, 0%, 33.9215686275%);}#mmd-fd0080a06a9a .activeText0,#mmd-fd0080a06a9a .activeText1,#mmd-fd0080a06a9a .activeText2,#mmd-fd0080a06a9a .activeText3{fill:#333!important;}#mmd-fd0080a06a9a .done0,#mmd-fd0080a06a9a .done1,#mmd-fd0080a06a9a .done2,#mmd-fd0080a06a9a .done3{stroke:#666;fill:#bbb;stroke-width:2;}#mmd-fd0080a06a9a .doneText0,#mmd-fd0080a06a9a .doneText1,#mmd-fd0080a06a9a .doneText2,#mmd-fd0080a06a9a .doneText3{fill:#333!important;}#mmd-fd0080a06a9a .doneText0.taskTextOutsideLeft,#mmd-fd0080a06a9a .doneText0.taskTextOutsideRight,#mmd-fd0080a06a9a .doneText1.taskTextOutsideLeft,#mmd-fd0080a06a9a .doneText1.taskTextOutsideRight,#mmd-fd0080a06a9a .doneText2.taskTextOutsideLeft,#mmd-fd0080a06a9a .doneText2.taskTextOutsideRight,#mmd-fd0080a06a9a .doneText3.taskTextOutsideLeft,#mmd-fd0080a06a9a .doneText3.taskTextOutsideRight{fill:#333!important;}#mmd-fd0080a06a9a .crit0,#mmd-fd0080a06a9a .crit1,#mmd-fd0080a06a9a .crit2,#mmd-fd0080a06a9a .crit3{stroke:hsl(10.9090909091, 73.3333333333%, 40%);fill:#d42;stroke-width:2;}#mmd-fd0080a06a9a .activeCrit0,#mmd-fd0080a06a9a .activeCrit1,#mmd-fd0080a06a9a .activeCrit2,#mmd-fd0080a06a9a .activeCrit3{stroke:hsl(10.9090909091, 73.3333333333%, 40%);fill:#eee;stroke-width:2;}#mmd-fd0080a06a9a .doneCrit0,#mmd-fd0080a06a9a .doneCrit1,#mmd-fd0080a06a9a .doneCrit2,#mmd-fd0080a06a9a .doneCrit3{stroke:hsl(10.9090909091, 73.3333333333%, 40%);fill:#bbb;stroke-width:2;cursor:pointer;shape-rendering:crispEdges;}#mmd-fd0080a06a9a .milestone{transform:rotate(45deg) scale(0.8,0.8);}#mmd-fd0080a06a9a .milestoneText{font-style:italic;}#mmd-fd0080a06a9a .doneCritText0,#mmd-fd0080a06a9a .doneCritText1,#mmd-fd0080a06a9a .doneCritText2,#mmd-fd0080a06a9a .doneCritText3{fill:#333!important;}#mmd-fd0080a06a9a .doneCritText0.taskTextOutsideLeft,#mmd-fd0080a06a9a .doneCritText0.taskTextOutsideRight,#mmd-fd0080a06a9a .doneCritText1.taskTextOutsideLeft,#mmd-fd0080a06a9a .doneCritText1.taskTextOutsideRight,#mmd-fd0080a06a9a .doneCritText2.taskTextOutsideLeft,#mmd-fd0080a06a9a .doneCritText2.taskTextOutsideRight,#mmd-fd0080a06a9a .doneCritText3.taskTextOutsideLeft,#mmd-fd0080a06a9a .doneCritText3.taskTextOutsideRight{fill:#333!important;}#mmd-fd0080a06a9a .vert{stroke:#d42;}#mmd-fd0080a06a9a .vertText{font-size:15px;text-anchor:middle;fill:#d42!important;}#mmd-fd0080a06a9a .activeCritText0,#mmd-fd0080a06a9a .activeCritText1,#mmd-fd0080a06a9a .activeCritText2,#mmd-fd0080a06a9a .activeCritText3{fill:#333!important;}#mmd-fd0080a06a9a .titleText{text-anchor:middle;font-size:18px;fill:#333;font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}#mmd-fd0080a06a9a .node .neo-node{stroke:#999;}#mmd-fd0080a06a9a [data-look="neo"].node rect,#mmd-fd0080a06a9a [data-look="neo"].cluster rect,#mmd-fd0080a06a9a [data-look="neo"].node polygon{stroke:url(#mmd-fd0080a06a9a-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-fd0080a06a9a [data-look="neo"].swimlane.cluster rect{filter:none;}#mmd-fd0080a06a9a [data-look="neo"].node path{stroke:url(#mmd-fd0080a06a9a-gradient);stroke-width:1px;}#mmd-fd0080a06a9a [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-fd0080a06a9a [data-look="neo"].node .neo-line path{stroke:#999;filter:none;}#mmd-fd0080a06a9a [data-look="neo"].node circle{stroke:url(#mmd-fd0080a06a9a-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-fd0080a06a9a [data-look="neo"].node circle .state-start{fill:#000000;}#mmd-fd0080a06a9a [data-look="neo"].icon-shape .icon{fill:url(#mmd-fd0080a06a9a-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-fd0080a06a9a [data-look="neo"].icon-shape .icon-neo path{stroke:url(#mmd-fd0080a06a9a-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-fd0080a06a9a :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><g/><g class="grid" transform="translate(75, 770)" fill="none" font-size="10" font-family="sans-serif" text-anchor="middle"><path class="domain" stroke="currentColor" d="M0.5,-735V0.5H634.5V-735"/><g class="tick" opacity="1" transform="translate(0.5,0)"><line stroke="currentColor" y2="-735"/><text fill="#000" y="3" dy="1em" stroke="none" font-size="10" style="text-anchor: middle;">0</text></g><g class="tick" opacity="1" transform="translate(79.5,0)"><line stroke="currentColor" y2="-735"/><text fill="#000" y="3" dy="1em" stroke="none" font-size="10" style="text-anchor: middle;">1</text></g><g class="tick" opacity="1" transform="translate(159.5,0)"><line stroke="currentColor" y2="-735"/><text fill="#000" y="3" dy="1em" stroke="none" font-size="10" style="text-anchor: middle;">2</text></g><g class="tick" opacity="1" transform="translate(238.5,0)"><line stroke="currentColor" y2="-735"/><text fill="#000" y="3" dy="1em" stroke="none" font-size="10" style="text-anchor: middle;">3</text></g><g class="tick" opacity="1" transform="translate(317.5,0)"><line stroke="currentColor" y2="-735"/><text fill="#000" y="3" dy="1em" stroke="none" font-size="10" style="text-anchor: middle;">4</text></g><g class="tick" opacity="1" transform="translate(396.5,0)"><line stroke="currentColor" y2="-735"/><text fill="#000" y="3" dy="1em" stroke="none" font-size="10" style="text-anchor: middle;">5</text></g><g class="tick" opacity="1" transform="translate(476.5,0)"><line stroke="currentColor" y2="-735"/><text fill="#000" y="3" dy="1em" stroke="none" font-size="10" style="text-anchor: middle;">6</text></g><g class="tick" opacity="1" transform="translate(555.5,0)"><line stroke="currentColor" y2="-735"/><text fill="#000" y="3" dy="1em" stroke="none" font-size="10" style="text-anchor: middle;">7</text></g><g class="tick" opacity="1" transform="translate(634.5,0)"><line stroke="currentColor" y2="-735"/><text fill="#000" y="3" dy="1em" stroke="none" font-size="10" style="text-anchor: middle;">8</text></g></g><g><rect x="0" y="48" width="746.5" height="24" class="section section0"/><rect x="0" y="72" width="746.5" height="24" class="section section0"/><rect x="0" y="672" width="746.5" height="24" class="section section3"/><rect x="0" y="96" width="746.5" height="24" class="section section0"/><rect x="0" y="120" width="746.5" height="24" class="section section0"/><rect x="0" y="144" width="746.5" height="24" class="section section0"/><rect x="0" y="168" width="746.5" height="24" class="section section0"/><rect x="0" y="192" width="746.5" height="24" class="section section0"/><rect x="0" y="216" width="746.5" height="24" class="section section0"/><rect x="0" y="240" width="746.5" height="24" class="section section0"/><rect x="0" y="264" width="746.5" height="24" class="section section0"/><rect x="0" y="696" width="746.5" height="24" class="section section3"/><rect x="0" y="744" width="746.5" height="24" class="section section3"/><rect x="0" y="288" width="746.5" height="24" class="section section1"/><rect x="0" y="312" width="746.5" height="24" class="section section1"/><rect x="0" y="336" width="746.5" height="24" class="section section1"/><rect x="0" y="360" width="746.5" height="24" class="section section1"/><rect x="0" y="384" width="746.5" height="24" class="section section1"/><rect x="0" y="408" width="746.5" height="24" class="section section1"/><rect x="0" y="432" width="746.5" height="24" class="section section1"/><rect x="0" y="456" width="746.5" height="24" class="section section1"/><rect x="0" y="720" width="746.5" height="24" class="section section3"/><rect x="0" y="480" width="746.5" height="24" class="section section1"/><rect x="0" y="504" width="746.5" height="24" class="section section2"/><rect x="0" y="528" width="746.5" height="24" class="section section2"/><rect x="0" y="552" width="746.5" height="24" class="section section2"/><rect x="0" y="576" width="746.5" height="24" class="section section2"/><rect x="0" y="600" width="746.5" height="24" class="section section2"/><rect x="0" y="624" width="746.5" height="24" class="section section2"/><rect x="0" y="648" width="746.5" height="24" class="section section2"/></g><g><rect id="my-svg-a1" rx="3" ry="3" x="75" y="50" width="79" height="20" transform-origin="114.5px 60px" class="task task0"/><rect id="my-svg-a2" rx="3" ry="3" x="75" y="74" width="79" height="20" transform-origin="114.5px 84px" class="task task0"/><rect id="my-svg-d1" rx="3" ry="3" x="75" y="674" width="634" height="20" transform-origin="392px 684px" class="task task3"/><rect id="my-svg-a3" rx="3" ry="3" x="75" y="98" width="79" height="20" transform-origin="114.5px 108px" class="task task0"/><rect id="my-svg-a4" rx="3" ry="3" x="75" y="122" width="79" height="20" transform-origin="114.5px 132px" class="task task0"/><rect id="my-svg-a5" rx="3" ry="3" x="75" y="146" width="79" height="20" transform-origin="114.5px 156px" class="task task0"/><rect id="my-svg-a6" rx="3" ry="3" x="75" y="170" width="79" height="20" transform-origin="114.5px 180px" class="task task0"/><rect id="my-svg-a7" rx="3" ry="3" x="75" y="194" width="79" height="20" transform-origin="114.5px 204px" class="task task0"/><rect id="my-svg-a8" rx="3" ry="3" x="75" y="218" width="79" height="20" transform-origin="114.5px 228px" class="task task0"/><rect id="my-svg-a9" rx="3" ry="3" x="75" y="242" width="79" height="20" transform-origin="114.5px 252px" class="task task0"/><rect id="my-svg-a10" rx="3" ry="3" x="75" y="266" width="79" height="20" transform-origin="114.5px 276px" class="task task0"/><rect id="my-svg-d2" rx="3" ry="3" x="75" y="698" width="317" height="20" transform-origin="233.5px 708px" class="task task3"/><rect id="my-svg-d4" rx="3" ry="3" x="75" y="746" width="159" height="20" transform-origin="154.5px 756px" class="task task3"/><rect id="my-svg-b1" rx="3" ry="3" x="75" y="290" width="79" height="20" transform-origin="114.5px 300px" class="task task1"/><rect id="my-svg-b2" rx="3" ry="3" x="75" y="314" width="79" height="20" transform-origin="114.5px 324px" class="task task1"/><rect id="my-svg-b3" rx="3" ry="3" x="75" y="338" width="79" height="20" transform-origin="114.5px 348px" class="task task1"/><rect id="my-svg-b4" rx="3" ry="3" x="75" y="362" width="79" height="20" transform-origin="114.5px 372px" class="task task1"/><rect id="my-svg-b5" rx="3" ry="3" x="76" y="386" width="78" height="20" transform-origin="115px 396px" class="task task1"/><rect id="my-svg-b6" rx="3" ry="3" x="76" y="410" width="78" height="20" transform-origin="115px 420px" class="task task1"/><rect id="my-svg-b7" rx="3" ry="3" x="76" y="434" width="78" height="20" transform-origin="115px 444px" class="task task1"/><rect id="my-svg-b8" rx="3" ry="3" x="76" y="458" width="158" height="20" transform-origin="155px 468px" class="task task1"/><rect id="my-svg-d3" rx="3" ry="3" x="76" y="722" width="316" height="20" transform-origin="234px 732px" class="task task3"/><rect id="my-svg-b9" rx="3" ry="3" x="76" y="482" width="158" height="20" transform-origin="155px 492px" class="task task1"/><rect id="my-svg-c1" rx="3" ry="3" x="76" y="506" width="78" height="20" transform-origin="115px 516px" class="task task2"/><rect id="my-svg-c2" rx="3" ry="3" x="76" y="530" width="78" height="20" transform-origin="115px 540px" class="task task2"/><rect id="my-svg-c3" rx="3" ry="3" x="76" y="554" width="78" height="20" transform-origin="115px 564px" class="task task2"/><rect id="my-svg-c4" rx="3" ry="3" x="76" y="578" width="78" height="20" transform-origin="115px 588px" class="task task2"/><rect id="my-svg-c5" rx="3" ry="3" x="76" y="602" width="78" height="20" transform-origin="115px 612px" class="task task2"/><rect id="my-svg-c6" rx="3" ry="3" x="76" y="626" width="158" height="20" transform-origin="155px 636px" class="task task2"/><rect id="my-svg-c7" rx="3" ry="3" x="76" y="650" width="158" height="20" transform-origin="155px 660px" class="task task2"/><text id="my-svg-a1-text" font-size="11" x="159" y="63.5" class="taskTextOutsideRight taskTextOutside0  width-143.35302734375">REC-01 RLS on security_event        </text><text id="my-svg-a2-text" font-size="11" x="159" y="87.5" class="taskTextOutsideRight taskTextOutside0  width-107.60302734375">REC-02 RLS parity test              </text><text id="my-svg-d1-text" font-size="11" x="392" y="687.5" class="taskText taskText3  width-115.07958984375">REC-37 Penetration test             </text><text id="my-svg-a3-text" font-size="11" x="159" y="111.5" class="taskTextOutsideRight taskTextOutside0  width-164.328125">REC-03 Regenerate migrations.sql    </text><text id="my-svg-a4-text" font-size="11" x="159" y="135.5" class="taskTextOutsideRight taskTextOutside0  width-118.984375">REC-04 Upload size limit            </text><text id="my-svg-a5-text" font-size="11" x="159" y="159.5" class="taskTextOutsideRight taskTextOutside0  width-119.4794921875">REC-05 Clamp take/days              </text><text id="my-svg-a6-text" font-size="11" x="159" y="183.5" class="taskTextOutsideRight taskTextOutside0  width-148.953125">REC-06 Token lifetime decision      </text><text id="my-svg-a7-text" font-size="11" x="159" y="207.5" class="taskTextOutsideRight taskTextOutside0  width-145.109375">REC-07 SMTP startup warning         </text><text id="my-svg-a8-text" font-size="11" x="159" y="231.5" class="taskTextOutsideRight taskTextOutside0  width-178.63232421875">REC-08 Backup fails on missing store</text><text id="my-svg-a9-text" font-size="11" x="159" y="255.5" class="taskTextOutsideRight taskTextOutside0  width-95.96875">REC-09 Restore drill                </text><text id="my-svg-a10-text" font-size="11" x="159" y="279.5" class="taskTextOutsideRight taskTextOutside0  width-156.88818359375">REC-10 Un-commit build output       </text><text id="my-svg-d2-text" font-size="11" x="233.5" y="711.5" class="taskText taskText3  width-126.125">REC-38 Alert confirmation           </text><text id="my-svg-d4-text" font-size="11" x="154.5" y="759.5" class="taskText taskText3  width-147.56396484375">REC-40 Container runtime test       </text><text id="my-svg-b1-text" font-size="11" x="159" y="303.5" class="taskTextOutsideRight taskTextOutside1  width-133.69775390625">REC-11 Complaint interlock          </text><text id="my-svg-b2-text" font-size="11" x="159" y="327.5" class="taskTextOutsideRight taskTextOutside1  width-148.5361328125">REC-12 Supplier reinstatement       </text><text id="my-svg-b3-text" font-size="11" x="159" y="351.5" class="taskTextOutsideRight taskTextOutside1  width-160.2783203125">REC-15 Review decisions as tasks    </text><text id="my-svg-b4-text" font-size="11" x="159" y="375.5" class="taskTextOutsideRight taskTextOutside1  width-163.876953125">REC-17 Tenant lifecycle endpoints   </text><text id="my-svg-b5-text" font-size="11" x="159" y="399.5" class="taskTextOutsideRight taskTextOutside1  width-113.7314453125">REC-19 SoD-null report              </text><text id="my-svg-b6-text" font-size="11" x="159" y="423.5" class="taskTextOutsideRight taskTextOutside1  width-149.84375">REC-20 QC profile deactivation      </text><text id="my-svg-b7-text" font-size="11" x="159" y="447.5" class="taskTextOutsideRight taskTextOutside1  width-107.65234375">REC-41 Ordering tests               </text><text id="my-svg-b8-text" font-size="11" x="155" y="471.5" class="taskText taskText1  width-140.05712890625">REC-13 Excursion de-bounce          </text><text id="my-svg-d3-text" font-size="11" x="234" y="735.5" class="taskText taskText3  width-123.25">REC-39 Soak + write load            </text><text id="my-svg-b9-text" font-size="11" x="155" y="495.5" class="taskText taskText1  width-94.73046875">REC-14 E-mail retry                 </text><text id="my-svg-c1-text" font-size="11" x="159" y="519.5" class="taskTextOutsideRight taskTextOutside2  width-151.60498046875">REC-21 Competency pass mark         </text><text id="my-svg-c2-text" font-size="11" x="159" y="543.5" class="taskTextOutsideRight taskTextOutside2  width-97.349609375">REC-22 Idle timeout                 </text><text id="my-svg-c3-text" font-size="11" x="159" y="567.5" class="taskTextOutsideRight taskTextOutside2  width-130.81787109375">REC-23 Lockout thresholds           </text><text id="my-svg-c4-text" font-size="11" x="159" y="591.5" class="taskTextOutsideRight taskTextOutside2  width-115.97314453125">REC-26 Password policy              </text><text id="my-svg-c5-text" font-size="11" x="159" y="615.5" class="taskTextOutsideRight taskTextOutside2  width-129.20654296875">REC-28 Z and z-thresholds           </text><text id="my-svg-c6-text" font-size="11" x="155" y="639.5" class="taskText taskText2  width-121.43994140625">REC-24 Escalation ladder            </text><text id="my-svg-c7-text" font-size="11" x="155" y="663.5" class="taskText taskText2  width-138.59375">REC-25 Per-tenant Westgard          </text></g><g><text dy="0em" x="10" y="170" font-size="11" class="sectionTitle sectionTitle0"><tspan alignment-baseline="central" x="10">Sprint 1 — close the high-severity list</tspan></text><text dy="0em" x="10" y="398" font-size="11" class="sectionTitle sectionTitle1"><tspan alignment-baseline="central" x="10">Sprint 2 — correctness</tspan></text><text dy="0em" x="10" y="590" font-size="11" class="sectionTitle sectionTitle2"><tspan alignment-baseline="central" x="10">Sprint 3 — configurability</tspan></text><text dy="0em" x="10" y="722" font-size="11" class="sectionTitle sectionTitle3"><tspan alignment-baseline="central" x="10">External track (parallel, blocked on a host)</tspan></text></g><g class="today"><line x1="141508411908" x2="141508411908" y1="25" y2="795" class="today"/></g><text x="392" y="25" class="titleText">Recommended order (relative effort units, not calendar time)</text></svg></figure>
+
+<p><strong>The external track is genuinely parallel</strong> and is the long pole. Start REC-37 on day one; it blocks
+nothing else and nothing else blocks it.</p>
+<hr>
+<h1>15.8 What NOT to do</h1>
+<p>Recommendations are cheap; restraint is not. These would be mistakes.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Do not</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Do not generic-ise the twelve analytical study slices</strong></td>
+<td>~2,200 lines of structural duplication is real, but each slice is readable in isolation and the abstraction that would replace it would be harder to verify than the duplication. The regulated read of this code matters more than its line count.</td>
+</tr>
+<tr>
+<td><strong>Do not reintroduce CSV exports</strong></td>
+<td>Built once and <strong>deliberately reverted</strong>. XLSX is the single tabular format by decision.</td>
+</tr>
+<tr>
+<td><strong>Do not remove the <code>MediatR 12.4.*</code> pin</strong> without planning a pipeline rewrite</td>
+<td>v13 changes the licence <em>and</em> the <code>next()</code> signature.</td>
+</tr>
+<tr>
+<td><strong>Do not "simplify" the two-layer tenancy</strong> to EF filters alone</td>
+<td>FORCE RLS binds even the table owner. That is the property the whole compliance posture rests on.</td>
+</tr>
+<tr>
+<td><strong>Do not add a repository abstraction over <code>IAppDbContext</code></strong></td>
+<td>Explicitly decided (ADR-0008). Reversing it touches every handler for no verified benefit.</td>
+</tr>
+<tr>
+<td><strong>Do not scale out</strong> without addressing ADR-0001 first</td>
+<td>The advisory-lock sentinel <em>detects</em> a second replica; it does not make one correct.</td>
+</tr>
+<tr>
+<td><strong>Do not "fix" the in-memory display-name mapping</strong> in the document-acknowledgement coverage query</td>
+<td>A cross-<code>DbSet</code> <code>.Join</code> to users <strong>did not translate in EF Core and produced a 500</strong>. The two-query shape is deliberate.</td>
+</tr>
+<tr>
+<td><strong>Do not hash in-memory timestamps</strong> in the audit chain</td>
+<td>Chain hashes are computed over <strong>database-read, microsecond-truncated</strong> timestamps. Changing this breaks verification of every existing row.</td>
+</tr>
+<tr>
+<td><strong>Do not enable <code>Database:MigrateOnStartup</code> in production</strong></td>
+<td>It is a schema gate that fails fast by design.</td>
+</tr>
+<tr>
+<td><strong>Do not convert every remaining hard-coded constant to configuration</strong></td>
+<td>Several (the Tukey 1.5 multiplier, the 1.96 Bland-Altman factor, the 1.65 one-sided factor) are <strong>statistical definitions</strong>, not policy. Making them configurable invites a laboratory to invalidate its own statistics.</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>15.9 Closing assessment</h1>
+<p>NT.QMS is a <strong>substantially complete, well-disciplined regulated system</strong>. The engineering is
+better than the documentation: the code enforces more than the documents claim, the tests gate more
+than most projects attempt, and the places where a shortcut was taken are, with few exceptions,
+written down at the point where the shortcut lives.</p>
+<p>The findings in this set fall into three honest categories:</p>
+<ol>
+<li><strong>One real isolation hole</strong> (<code>audit.security_event</code>) and <strong>one missing gate</strong> that would have caught
+   it. Both fixable in a day.</li>
+<li><strong>A configurability debt</strong> that reflects a system built to one laboratory's assumptions and now
+   ready to serve several.</li>
+<li><strong>An assurance gap</strong> — penetration test, restore drill, alert confirmation, soak — that is
+   <em>external by nature</em> and cannot be closed by writing more code.</li>
+</ol>
+<p>The largest single risk to this project is <strong>not</strong> in the code. It is that
+<code>NT_QMS_SRS.html</code> remains in circulation as the specification of a system it does not describe.
+A team building against it would implement the wrong privilege model, the wrong error contract, the
+wrong escalation path and four features that do not exist. <strong>REC-48 is the cheapest high-value action
+in this document.</strong></p>
+<div class="pager"><a href="14-Technical-Debt-Report.html"><span>Previous</span>Technical Debt Report</a><span></span></div>
+</main></div>
+<script>
+(function(){
+ var r=document.documentElement, K='ntqms-srs-theme', s=localStorage.getItem(K);
+ if(s) r.setAttribute('data-theme',s);
+ var b=document.getElementById('th');
+ if(b) b.onclick=function(){
+   var cur=r.getAttribute('data-theme');
+   if(!cur) cur=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+   var nx=cur==='dark'?'light':'dark';
+   r.setAttribute('data-theme',nx); localStorage.setItem(K,nx);
+ };
+ var p=document.getElementById('pr'); if(p) p.onclick=function(){window.print();};
+ // scroll-spy on the in-page TOC
+ var links=[].slice.call(document.querySelectorAll('#toc a'));
+ if(!links.length) return;
+ var tgt=links.map(function(a){return document.getElementById(a.getAttribute('href').slice(1));});
+ function spy(){
+   var y=window.scrollY+90, i=0;
+   for(var k=0;k<tgt.length;k++){ if(tgt[k]&&tgt[k].offsetTop<=y) i=k; }
+   links.forEach(function(a,n){a.style.color=n===i?'var(--accent)':'';
+     a.style.borderLeftColor=n===i?'var(--accent)':'transparent';});
+ }
+ addEventListener('scroll',spy,{passive:true}); spy();
+})();
+</script>
+</body></html>

@@ -1,0 +1,1395 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Software Requirements Specification — NT.QMS As-Built SRS</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📘</text></svg>">
+<style>
+:root{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);
+ --mono:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace;
+ --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,ui-serif,serif;
+ --sans:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}}
+:root[data-theme="dark"]{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}
+:root[data-theme="light"]{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+ font-size:15.5px;line-height:1.62;-webkit-text-size-adjust:100%}
+.wrap{display:grid;grid-template-columns:288px minmax(0,1fr);gap:0;max-width:1560px;margin:0 auto}
+/* ---- sidebar ---- */
+aside{position:sticky;top:0;height:100vh;overflow-y:auto;padding:22px 16px 60px;
+ border-right:1px solid var(--line);background:var(--panel)}
+aside .brand{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:-.01em;
+ margin:0 0 2px}
+aside .sub{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;
+ margin:0 0 16px}
+aside nav a{display:block;padding:5px 9px;border-radius:7px;color:var(--ink);text-decoration:none;
+ font-size:13.2px;border-left:2px solid transparent}
+aside nav a:hover{background:var(--panel-2)}
+aside nav a.cur{background:var(--accent-soft);border-left-color:var(--accent);font-weight:600}
+aside nav a .n{color:var(--muted);font-variant-numeric:tabular-nums;margin-right:7px;font-size:11.5px}
+aside .sec{margin:16px 0 5px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+ color:var(--muted);font-weight:700}
+#toc{margin-top:6px;border-top:1px solid var(--line);padding-top:10px}
+#toc a{display:block;padding:2.5px 9px;font-size:12.4px;color:var(--muted);text-decoration:none;
+ border-left:2px solid transparent;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#toc a:hover{color:var(--ink)}
+#toc a.h3{padding-left:22px;font-size:11.8px}
+/* ---- main ---- */
+main{padding:34px 46px 120px;min-width:0;overflow-wrap:anywhere}
+.doc-head{border-bottom:2px solid var(--accent);padding-bottom:14px;margin-bottom:26px}
+.kicker{color:var(--accent);font-size:11.5px;font-weight:700;letter-spacing:.11em;
+ text-transform:uppercase;margin:0 0 4px}
+h1{font-family:var(--serif);font-size:31px;line-height:1.2;margin:0;letter-spacing:-.015em}
+h2{font-family:var(--serif);font-size:24px;margin:38px 0 12px;padding-bottom:6px;
+ border-bottom:1px solid var(--line);letter-spacing:-.01em;scroll-margin-top:14px}
+h3{font-size:18px;margin:26px 0 9px;letter-spacing:-.005em;scroll-margin-top:14px}
+h4{font-size:15px;margin:20px 0 7px;color:var(--accent)}
+h5,h6{font-size:13.5px;margin:16px 0 6px;color:var(--muted);text-transform:uppercase;
+ letter-spacing:.05em}
+p{margin:10px 0}
+a{color:var(--accent)}
+hr{border:0;border-top:1px solid var(--line);margin:30px 0}
+ul,ol{margin:9px 0;padding-left:24px}
+li{margin:3px 0}
+blockquote{margin:16px 0;padding:12px 18px;background:var(--accent-soft);
+ border-left:3px solid var(--accent);border-radius:0 8px 8px 0}
+blockquote p:first-child{margin-top:0}blockquote p:last-child{margin-bottom:0}
+code{font-family:var(--mono);font-size:.875em;background:var(--panel-2);
+ padding:1.5px 5px;border-radius:4px;border:1px solid var(--line)}
+pre{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;
+ padding:14px 16px;overflow-x:auto;margin:14px 0}
+pre code{background:none;border:0;padding:0;font-size:12.6px;line-height:1.5}
+/* ---- tables ---- */
+.tw{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:10px;
+ background:var(--panel);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;font-size:13.4px}
+th,td{padding:8px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:var(--panel-2);font-weight:700;font-size:12.2px;letter-spacing:.02em;
+ position:sticky;top:0;z-index:1}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--accent-soft)}
+td code,th code{font-size:.9em;white-space:nowrap}
+/* ---- diagrams ---- */
+figure.d{margin:18px 0;padding:18px;background:var(--panel);border:1px solid var(--line);
+ border-radius:12px;box-shadow:var(--shadow);overflow-x:auto;text-align:center}
+figure.d svg{max-width:100%;height:auto;display:inline-block}
+/* ---- misc ---- */
+.tools{position:fixed;top:12px;right:16px;display:flex;gap:6px;z-index:50}
+.tools button{font:inherit;font-size:12px;padding:5px 11px;border-radius:8px;cursor:pointer;
+ border:1px solid var(--line);background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+.tools button:hover{background:var(--panel-2)}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:52px;padding-top:18px;
+ border-top:1px solid var(--line)}
+.pager a{display:block;max-width:46%;padding:10px 14px;border:1px solid var(--line);
+ border-radius:10px;background:var(--panel);text-decoration:none;font-size:13px}
+.pager a span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;
+ letter-spacing:.08em}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:14px;margin:20px 0}
+.card{padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--panel);
+ box-shadow:var(--shadow);text-decoration:none;color:var(--ink);display:block}
+.card:hover{border-color:var(--accent)}
+.card .num{color:var(--accent);font-weight:700;font-size:11.5px;letter-spacing:.1em}
+.card .t{font-family:var(--serif);font-size:17px;margin:3px 0 5px}
+.card .d{color:var(--muted);font-size:12.7px;line-height:1.5}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin:20px 0}
+.stat{padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.stat b{display:block;font-size:23px;font-family:var(--serif);line-height:1.1}
+.stat span{color:var(--muted);font-size:11.4px}
+@media print{
+ aside,.tools,.pager{display:none!important}
+ .wrap{display:block;max-width:none}
+ main{padding:0}
+ .tw,figure.d{break-inside:avoid;box-shadow:none}
+ h2{break-after:avoid}
+ a{color:inherit;text-decoration:none}
+}
+@media (max-width:1080px){
+ .wrap{grid-template-columns:1fr}
+ aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+ main{padding:22px 18px 80px}
+ #toc{display:none}
+}
+</style>
+</head><body>
+<div class="tools"><button id="th">◐ Theme</button><button id="pr">⎙ Print</button></div>
+<div class="wrap">
+<aside><p class="brand">NT.QMS</p><p class="sub">As-Built SRS · v1.51.x</p><a class="card" style="padding:9px 12px;margin-bottom:10px;font-size:13px" href="index.html">◂ Document set</a><div class="sec">Documents</div><nav><a class="" href="00-SRS-Index-and-Conventions.html"><span class="n">00</span>Index, Conventions &amp; Glossary</a><a class="cur" href="01-Software-Requirements-Specification.html"><span class="n">01</span>Software Requirements Specification</a><a class="" href="02-1-Functional-Specification-Quality-and-Improvement.html"><span class="n">02-1</span>Functional Spec 1 — Quality &amp; Improvement</a><a class="" href="02-2-Functional-Specification-Resources-People-Governance.html"><span class="n">02-2</span>Functional Spec 2 — Resources, People &amp; Governance</a><a class="" href="02-3-Functional-Specification-Analytical-Quality.html"><span class="n">02-3</span>Functional Spec 3 — Analytical Quality</a><a class="" href="02-4-Functional-Specification-Operations-and-Platform.html"><span class="n">02-4</span>Functional Spec 4 — Operations &amp; Platform</a><a class="" href="03-Business-Rules.html"><span class="n">03</span>Business Rules &amp; Error Catalogue</a><a class="" href="04-Configuration-Reference.html"><span class="n">04</span>Configuration Reference</a><a class="" href="05-Screen-Specification.html"><span class="n">05</span>Screen Specification</a><a class="" href="06-Workflow-Specification.html"><span class="n">06</span>Workflow Specification</a><a class="" href="07-File-System-Specification.html"><span class="n">07</span>File System Specification</a><a class="" href="08-API-Specification.html"><span class="n">08</span>API Specification</a><a class="" href="09-Security-Specification.html"><span class="n">09</span>Security Specification</a><a class="" href="10-Deployment-Specification.html"><span class="n">10</span>Deployment Specification</a><a class="" href="11-Architecture-Constraints.html"><span class="n">11</span>Architecture Constraints</a><a class="" href="12-Requirements-Traceability-Matrix.html"><span class="n">12</span>Requirements Traceability Matrix</a><a class="" href="13-Implementation-vs-SRS-Gap-Analysis.html"><span class="n">13</span>Implementation vs SRS — Gap Analysis</a><a class="" href="14-Technical-Debt-Report.html"><span class="n">14</span>Technical Debt Report</a><a class="" href="15-Recommendations.html"><span class="n">15</span>Recommendations</a></nav><div class='sec'>On this page</div><div id='toc'><a class="h2" href="#11-purpose">1.1 Purpose</a><a class="h2" href="#12-product-scope">1.2 Product scope</a><a class="h3" href="#in-scope-built-and-shipping">In scope (built and shipping)</a><a class="h3" href="#explicitly-out-of-scope-not-built">Explicitly out of scope (not built)</a><a class="h2" href="#13-definitions">1.3 Definitions</a><a class="h2" href="#14-references">1.4 References</a><a class="h2" href="#21-product-perspective">2.1 Product perspective</a><a class="h3" href="#deployment-topology-constraint">Deployment topology constraint</a><a class="h2" href="#22-product-functions-summary">2.2 Product functions (summary)</a><a class="h2" href="#23-actors">2.3 Actors</a><a class="h3" href="#231-human-actors-system-roles">2.3.1 Human actors (system roles)</a><a class="h3" href="#232-organisational-scope">2.3.2 Organisational scope</a><a class="h3" href="#233-system-actors">2.3.3 System actors</a><a class="h2" href="#24-operating-environment">2.4 Operating environment</a><a class="h2" href="#25-design-and-implementation-constraints">2.5 Design and implementation constraints</a><a class="h2" href="#26-assumptions-and-dependencies">2.6 Assumptions and dependencies</a><a class="h2" href="#31-user-interfaces">3.1 User interfaces</a><a class="h2" href="#32-hardware-interfaces">3.2 Hardware interfaces</a><a class="h2" href="#33-software-interfaces">3.3 Software interfaces</a><a class="h2" href="#34-communications-interfaces">3.4 Communications interfaces</a><a class="h2" href="#41-performance">4.1 Performance</a><a class="h2" href="#42-reliability">4.2 Reliability</a><a class="h2" href="#43-availability">4.3 Availability</a><a class="h2" href="#44-recoverability">4.4 Recoverability</a><a class="h2" href="#45-maintainability">4.5 Maintainability</a><a class="h2" href="#46-scalability">4.6 Scalability</a><a class="h2" href="#47-observability-logging-and-monitoring">4.7 Observability, logging and monitoring</a><a class="h2" href="#48-security">4.8 Security</a><a class="h2" href="#49-localisation">4.9 Localisation</a><a class="h2" href="#410-accessibility">4.10 Accessibility</a><a class="h2" href="#411-resource-usage">4.11 Resource usage</a><a class="h2" href="#412-compliance-and-data-integrity-alcoa">4.12 Compliance and data integrity (ALCOA+)</a></div></aside>
+<main>
+<div class="doc-head"><p class="kicker">Document 01 · NT.QMS Production SRS</p><h1>Software Requirements Specification</h1></div>
+<blockquote>
+<p>Conventions, identifier schemes and the glossary are in
+<a href="00-SRS-Index-and-Conventions.html">Document 00</a>. Read it first.</p>
+</blockquote>
+<hr>
+<h1>1. Introduction</h1>
+<h2 id="11-purpose">1.1 Purpose</h2>
+<p>NT.QMS is a multi-tenant, browser-delivered Quality Management System for testing, calibration and
+medical laboratories. It replaces paper and spreadsheet quality systems with a single controlled,
+audit-trailed, electronically-signed record set that satisfies the record-integrity obligations of
+21 CFR Part 11, EU GMP Annex 11, ISO/IEC 17025, ISO 15189 and ISO 9001.</p>
+<p>This document specifies the system <strong>as it is built</strong>. It is the engineering baseline for
+maintenance, re-implementation, validation and audit.</p>
+<h2 id="12-product-scope">1.2 Product scope</h2>
+<p>The system covers the complete quality loop — <strong>detect → record → investigate → act → verify →
+close → retain</strong> — across 34 functional modules (Document 02), and adds an analytical-quality
+subsystem (13 statistical study types plus Westgard QC and measurement-uncertainty budgeting) that
+most general QMS products do not contain.</p>
+<h3 id="in-scope-built-and-shipping">In scope (built and shipping)</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Modules</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Improvement</td>
+<td>Nonconformance/CAPA, complaints, customer feedback, quality objectives, quality policy</td>
+</tr>
+<tr>
+<td>Governance</td>
+<td>Change control, management review, risk register, conflicts of interest, organisational context, user-access review</td>
+</tr>
+<tr>
+<td>Documents &amp; records</td>
+<td>Controlled documents with versioning/acknowledgement/controlled copies, archive &amp; retention with legal hold</td>
+</tr>
+<tr>
+<td>Assurance</td>
+<td>Internal &amp; external-hosted audits with checklists and findings</td>
+</tr>
+<tr>
+<td>Resources</td>
+<td>Equipment &amp; calibration, reference standards, environmental monitoring, suppliers</td>
+</tr>
+<tr>
+<td>People</td>
+<td>Competency records, training assignments, per-test authorisations, user administration</td>
+</tr>
+<tr>
+<td>Analytical quality</td>
+<td>Westgard QC, method validation, method comparison, precision, linearity, detection limit, reference interval, carryover, interference, lot comparison, instrument comparability, outlier screening, sigma metrics, measurement uncertainty</td>
+</tr>
+<tr>
+<td>Proficiency testing</td>
+<td>PT plans and PT/ILC enrolments with z-scoring</td>
+</tr>
+<tr>
+<td>Operations</td>
+<td>Tasks &amp; SLA escalation, notifications (in-app + e-mail), reporting &amp; KPI snapshots</td>
+</tr>
+<tr>
+<td>Compliance</td>
+<td>Audit-trail ledger, field-change ledger, security-event log, electronic signatures, hash-chain verification, audit-trail review, XLSX/PDF exports</td>
+</tr>
+<tr>
+<td>Administration</td>
+<td>Branches, departments, test catalogue, lists of values, roles &amp; privilege matrix, tenant settings</td>
+</tr>
+<tr>
+<td>Platform</td>
+<td>Tenant provisioning and listing (control plane)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="explicitly-out-of-scope-not-built">Explicitly out of scope (not built)</h3>
+<p>These are named because the previous SRS or common expectation implies them; <strong>none exist in the
+code</strong>:</p>
+<ul>
+<li>LIMS / sample-management / result-reporting (NT.QMS references a <em>test catalogue</em>, not samples).</li>
+<li>Instrument or LIS interfacing of any kind (no drivers, no HL7/ASTM, no "LIS loopback fetch").</li>
+<li>PDF rendering or watermarking of controlled documents (files are stored and served byte-for-byte).</li>
+<li>Real-time push (no SignalR/WebSocket); the SPA polls or refetches on navigation.</li>
+<li>Payment, billing or subscription management.</li>
+<li>Native mobile applications.</li>
+<li>Offline operation.</li>
+</ul>
+<h2 id="13-definitions">1.3 Definitions</h2>
+<p>See <a href="00-SRS-Index-and-Conventions.html#06-glossary">Document 00 §0.6</a>.</p>
+<h2 id="14-references">1.4 References</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Ref</th>
+<th>Document</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>R1</td>
+<td><code>docs/adr/ADR-0001 … ADR-0009</code> — binding architecture decisions</td>
+</tr>
+<tr>
+<td>R2</td>
+<td><code>docs/reference/NT_QAMS_Domain_Model.md</code>, <code>NT_QAMS_Database_Architecture.md</code>, <code>NT_QAMS_Application_Architecture.md</code> — design-time architecture ("law")</td>
+</tr>
+<tr>
+<td>R3</td>
+<td><code>docs/reference/NT_QMS_Database_AsBuilt.md</code>, <code>NT_QMS_Load_Test_Report.md</code></td>
+</tr>
+<tr>
+<td>R4</td>
+<td><code>docs/validation/</code> — GAMP 5 CSV set (VMP, URS, FRA, IQ/OQ/PQ, RTM, VSR, execution records)</td>
+</tr>
+<tr>
+<td>R5</td>
+<td><code>deploy/DEPLOY.md</code>, <code>BACKUP-RESTORE-DR.md</code>, <code>OBSERVABILITY.md</code>, <code>harden-runtime-role.sql</code></td>
+</tr>
+<tr>
+<td>R6</td>
+<td><code>CLAUDE.md</code> — standing engineering rules</td>
+</tr>
+<tr>
+<td>R7</td>
+<td><code>NT_QMS_SRS.html</code> — the superseded v1.0 SRS</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>2. Overall description</h1>
+<h2 id="21-product-perspective">2.1 Product perspective</h2>
+<p>NT.QMS is a <strong>single-deployment, multi-tenant SaaS</strong>: one application instance and one PostgreSQL
+database serve many laboratories, with tenant isolation enforced in two independent layers.</p>
+<figure class="d"><svg width="1894" height="946" preserveAspectRatio="xMidYMid meet" id="mmd-1287705429c0" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="flowchart" style="max-width:1894px;height:auto" viewBox="0 0 1894.3125 946.1844482421875" role="graphics-document document" aria-roledescription="flowchart-v2"><style>#mmd-1287705429c0{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;fill:#000000;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#mmd-1287705429c0 .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#mmd-1287705429c0 .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#mmd-1287705429c0 .error-icon{fill:#552222;}#mmd-1287705429c0 .error-text{fill:#552222;stroke:#552222;}#mmd-1287705429c0 .edge-thickness-normal{stroke-width:1px;}#mmd-1287705429c0 .edge-thickness-thick{stroke-width:3.5px;}#mmd-1287705429c0 .edge-pattern-solid{stroke-dasharray:0;}#mmd-1287705429c0 .edge-thickness-invisible{stroke-width:0;fill:none;}#mmd-1287705429c0 .edge-pattern-dashed{stroke-dasharray:3;}#mmd-1287705429c0 .edge-pattern-dotted{stroke-dasharray:2;}#mmd-1287705429c0 .marker{fill:#666;stroke:#666;}#mmd-1287705429c0 .marker.cross{stroke:#666;}#mmd-1287705429c0 svg{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;}#mmd-1287705429c0 p{margin:0;}#mmd-1287705429c0 .label{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#000000;}#mmd-1287705429c0 .cluster-label text{fill:#333;}#mmd-1287705429c0 .cluster-label span{color:#333;}#mmd-1287705429c0 .cluster-label span p{background-color:transparent;}#mmd-1287705429c0 .label text,#mmd-1287705429c0 span{fill:#000000;color:#000000;}#mmd-1287705429c0 .node rect,#mmd-1287705429c0 .node circle,#mmd-1287705429c0 .node ellipse,#mmd-1287705429c0 .node polygon,#mmd-1287705429c0 .node path{fill:#eee;stroke:#999;stroke-width:1px;}#mmd-1287705429c0 .rough-node .label text,#mmd-1287705429c0 .node .label text,#mmd-1287705429c0 .image-shape .label,#mmd-1287705429c0 .icon-shape .label{text-anchor:middle;}#mmd-1287705429c0 .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#mmd-1287705429c0 .rough-node .label,#mmd-1287705429c0 .node .label,#mmd-1287705429c0 .image-shape .label,#mmd-1287705429c0 .icon-shape .label{text-align:center;}#mmd-1287705429c0 .node.clickable{cursor:pointer;}#mmd-1287705429c0 .root .anchor path{fill:#666!important;stroke-width:0;stroke:#666;}#mmd-1287705429c0 .arrowheadPath{fill:#333333;}#mmd-1287705429c0 .edgePath .path{stroke:#666;stroke-width:1px;}#mmd-1287705429c0 .flowchart-link{stroke:#666;fill:none;}#mmd-1287705429c0 .edgeLabel{background-color:white;text-align:center;}#mmd-1287705429c0 .edgeLabel p{background-color:white;}#mmd-1287705429c0 .edgeLabel rect{opacity:0.5;background-color:white;fill:white;}#mmd-1287705429c0 .labelBkg{background-color:rgba(255, 255, 255, 0.5);}#mmd-1287705429c0 .cluster rect{fill:hsl(0, 0%, 98.9215686275%);stroke:#707070;stroke-width:1px;}#mmd-1287705429c0 .cluster text{fill:#333;}#mmd-1287705429c0 .cluster span{color:#333;}#mmd-1287705429c0 div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:12px;background:hsl(-160, 0%, 93.3333333333%);border:1px solid #707070;border-radius:2px;pointer-events:none;z-index:100;}#mmd-1287705429c0 .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#000000;}#mmd-1287705429c0 rect.text{fill:none;stroke-width:0;}#mmd-1287705429c0 .icon-shape,#mmd-1287705429c0 .image-shape{background-color:white;text-align:center;}#mmd-1287705429c0 .icon-shape p,#mmd-1287705429c0 .image-shape p{background-color:white;padding:2px;}#mmd-1287705429c0 .icon-shape .label rect,#mmd-1287705429c0 .image-shape .label rect{opacity:0.5;background-color:white;fill:white;}#mmd-1287705429c0 .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#mmd-1287705429c0 .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#mmd-1287705429c0 .node .neo-node{stroke:#999;}#mmd-1287705429c0 [data-look="neo"].node rect,#mmd-1287705429c0 [data-look="neo"].cluster rect,#mmd-1287705429c0 [data-look="neo"].node polygon{stroke:url(#mmd-1287705429c0-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-1287705429c0 [data-look="neo"].swimlane.cluster rect{filter:none;}#mmd-1287705429c0 [data-look="neo"].node path{stroke:url(#mmd-1287705429c0-gradient);stroke-width:1px;}#mmd-1287705429c0 [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-1287705429c0 [data-look="neo"].node .neo-line path{stroke:#999;filter:none;}#mmd-1287705429c0 [data-look="neo"].node circle{stroke:url(#mmd-1287705429c0-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-1287705429c0 [data-look="neo"].node circle .state-start{fill:#000000;}#mmd-1287705429c0 [data-look="neo"].icon-shape .icon{fill:url(#mmd-1287705429c0-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-1287705429c0 [data-look="neo"].icon-shape .icon-neo path{stroke:url(#mmd-1287705429c0-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-1287705429c0 :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><g><marker id="my-svg_flowchart-v2-pointEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="4.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 5 L 10 10 L 10 0 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointEnd-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="11.5" refY="7" markerUnits="userSpaceOnUse" markerWidth="10.5" markerHeight="14" orient="auto"><path d="M 0 0 L 11.5 7 L 0 14 z" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="1" refY="7" markerUnits="userSpaceOnUse" markerWidth="11.5" markerHeight="14" orient="auto"><polygon points="0,7 11.5,14 11.5,0" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="11" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-1" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refY="5" refX="12.25" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-2" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="12" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossStart" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="-1" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="17.7" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5;"/></marker><marker id="my-svg_flowchart-v2-crossStart-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="-3.5" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5; stroke-dasharray: 1, 0;"/></marker><g class="root"><g class="clusters"><g class="cluster" id="my-svg-Ext" data-look="classic"><rect style="" x="8" y="768" width="426.4375" height="170.18443298339844"/><g class="cluster-label" transform="translate(165.03125, 768)"><foreignObject width="112.375" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5;"><span class="nodeLabel"><p>External (optional)</p></span></div></foreignObject></g></g><g class="cluster" id="my-svg-Data" data-look="classic"><rect style="" x="454.4375" y="768" width="434.109375" height="170.18443298339844"/><g class="cluster-label" transform="translate(645.0078125, 768)"><foreignObject width="52.96875" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5;"><span class="nodeLabel"><p>Data tier</p></span></div></foreignObject></g></g><g class="cluster" id="my-svg-App" data-look="classic"><rect style="" x="908.546875" y="457" width="977.765625" height="481.18443298339844"/><g class="cluster-label" transform="translate(1261.390625, 457)"><foreignObject width="272.078125" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5;"><span class="nodeLabel"><p>Application tier — single replica (ADR-0001)</p></span></div></foreignObject></g></g><g class="cluster" id="my-svg-Edge" data-look="classic"><rect style="" x="1243.109375" y="264" width="287.78125" height="143"/><g class="cluster-label" transform="translate(1371.546875, 264)"><foreignObject width="30.90625" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5;"><span class="nodeLabel"><p>Edge</p></span></div></foreignObject></g></g><g class="cluster" id="my-svg-Client" data-look="classic"><rect style="" x="1222" y="8" width="330" height="164"/><g class="cluster-label" transform="translate(1357.1953125, 8)"><foreignObject width="59.609375" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5;"><span class="nodeLabel"><p>Client tier</p></span></div></foreignObject></g></g></g><g class="edgePaths"><path d="M1387,147L1387,151.167C1387,155.333,1387,163.667,1387,175.5C1387,187.333,1387,202.667,1387,218C1387,233.333,1387,248.667,1387,259.833C1387,271,1387,278,1387,281.5L1387,285" id="my-svg-L_SPA_RP_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_SPA_RP_0" data-points="W3sieCI6MTM4NywieSI6MTQ3fSx7IngiOjEzODcsInkiOjE3Mn0seyJ4IjoxMzg3LCJ5IjoyMTh9LHsieCI6MTM4NywieSI6MjY0fSx7IngiOjEzODcsInkiOjI4OX1d" data-look="classic" marker-end="url(#mmd-1287705429c0_flowchart-v2-pointEnd)"/><path d="M1387,382L1387,386.167C1387,390.333,1387,398.667,1387,407C1387,415.333,1387,423.667,1387,432C1387,440.333,1387,448.667,1387,456.333C1387,464,1387,471,1387,474.5L1387,478" id="my-svg-L_RP_API_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_RP_API_0" data-points="W3sieCI6MTM4NywieSI6MzgyfSx7IngiOjEzODcsInkiOjQwN30seyJ4IjoxMzg3LCJ5Ijo0MzJ9LHsieCI6MTM4NywieSI6NDU3fSx7IngiOjEzODcsInkiOjQ4Mn1d" data-look="classic" marker-end="url(#mmd-1287705429c0_flowchart-v2-pointEnd)"/><path d="M1497.219,544.93L1520.458,550.609C1543.698,556.287,1590.177,567.643,1613.417,578.572C1636.656,589.5,1636.656,600,1636.656,605.25L1636.656,610.5" id="my-svg-L_API_MED_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_API_MED_0" data-points="W3sieCI6MTQ5Ny4yMTg3NSwieSI6NTQ0LjkzMDQwNDMwNTkyMDd9LHsieCI6MTYzNi42NTYyNSwieSI6NTc5fSx7IngiOjE2MzYuNjU2MjUsInkiOjYxNC41fV0=" data-look="classic" marker-end="url(#mmd-1287705429c0_flowchart-v2-pointEnd)"/><path d="M1655.239,686.5L1659.197,694.167C1663.154,701.833,1671.069,717.167,1675.027,730.75C1678.984,744.333,1678.984,756.167,1678.984,767.849C1678.984,779.531,1678.984,791.061,1678.984,796.827L1678.984,802.592" id="my-svg-L_MED_DOM_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_MED_DOM_0" data-points="W3sieCI6MTY1NS4yMzkzMjkyNjgyOTI3LCJ5Ijo2ODYuNX0seyJ4IjoxNjc4Ljk4NDM3NSwieSI6NzMyLjV9LHsieCI6MTY3OC45ODQzNzUsInkiOjc2OH0seyJ4IjoxNjc4Ljk4NDM3NSwieSI6ODA2LjU5MjIxNjQ5MTY5OTJ9XQ==" data-look="classic" marker-end="url(#mmd-1287705429c0_flowchart-v2-pointEnd)"/><path d="M1586.244,686.5L1575.508,694.167C1564.772,701.833,1543.3,717.167,1532.564,730.75C1521.828,744.333,1521.828,756.167,1411.11,774.729C1300.392,793.292,1078.957,818.584,968.239,831.23L857.521,843.876" id="my-svg-L_MED_PG_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_MED_PG_0" data-points="W3sieCI6MTU4Ni4yNDM5MDI0MzkwMjQ0LCJ5Ijo2ODYuNX0seyJ4IjoxNTIxLjgyODEyNSwieSI6NzMyLjV9LHsieCI6MTUyMS44MjgxMjUsInkiOjc2OH0seyJ4Ijo4NTMuNTQ2ODc1LCJ5Ijo4NDQuMzMwMzc0Njc1Njk4Nn1d" data-look="classic" marker-end="url(#mmd-1287705429c0_flowchart-v2-pointEnd)"/><path d="M1387,554L1387,558.167C1387,562.333,1387,570.667,1387,586.75C1387,602.833,1387,626.667,1387,652.25C1387,677.833,1387,705.167,1387,724.75C1387,744.333,1387,756.167,1264.851,774.802C1142.701,793.437,898.402,818.875,776.253,831.594L654.103,844.312" id="my-svg-L_API_FS_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_API_FS_0" data-points="W3sieCI6MTM4NywieSI6NTU0fSx7IngiOjEzODcsInkiOjU3OX0seyJ4IjoxMzg3LCJ5Ijo2NTAuNX0seyJ4IjoxMzg3LCJ5Ijo3MzIuNX0seyJ4IjoxMzg3LCJ5Ijo3Njh9LHsieCI6NjUwLjEyNSwieSI6ODQ0LjcyNjQ5MDk1MTU2MDl9XQ==" data-look="classic" marker-end="url(#mmd-1287705429c0_flowchart-v2-pointEnd)"/><path d="M1263.113,697L1268.344,702.917C1273.575,708.833,1284.038,720.667,1289.269,732.5C1294.5,744.333,1294.5,756.167,1221.666,774.056C1148.831,791.945,1003.163,815.889,930.328,827.862L857.494,839.834" id="my-svg-L_JOBS_PG_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_JOBS_PG_0" data-points="W3sieCI6MTI2My4xMTI4MDQ4NzgwNDg4LCJ5Ijo2OTd9LHsieCI6MTI5NC41LCJ5Ijo3MzIuNX0seyJ4IjoxMjk0LjUsInkiOjc2OH0seyJ4Ijo4NTMuNTQ2ODc1LCJ5Ijo4NDAuNDgyNjgwMzU4MzQ3OH1d" data-look="classic" marker-end="url(#mmd-1287705429c0_flowchart-v2-pointEnd)"/><path d="M1176.114,697L1170.275,702.917C1164.436,708.833,1152.759,720.667,1146.921,732.5C1141.082,744.333,1141.082,756.167,1018.138,775.065C895.193,793.963,649.304,819.925,526.36,832.907L403.415,845.888" id="my-svg-L_JOBS_SMTP_0" class="edge-thickness-normal edge-pattern-dotted edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_JOBS_SMTP_0" data-points="W3sieCI6MTE3Ni4xMTM1OTA4OTE3Njg0LCJ5Ijo2OTd9LHsieCI6MTE0MS4wODIwMzEyNSwieSI6NzMyLjV9LHsieCI6MTE0MS4wODIwMzEyNSwieSI6NzY4fSx7IngiOjM5OS40Mzc1LCJ5Ijo4NDYuMzA4MjMzMzU1NDU0N31d" data-look="classic" marker-end="url(#mmd-1287705429c0_flowchart-v2-pointEnd)"/><path d="M1276.781,535.055L1229.447,542.379C1182.112,549.703,1087.443,564.352,1040.108,583.592C992.773,602.833,992.773,626.667,992.773,652.25C992.773,677.833,992.773,705.167,992.773,724.75C992.773,744.333,992.773,756.167,864.798,774.734C736.822,793.301,480.87,818.603,352.894,831.253L224.918,843.904" id="my-svg-L_API_OTLP_0" class="edge-thickness-normal edge-pattern-dotted edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_API_OTLP_0" data-points="W3sieCI6MTI3Ni43ODEyNSwieSI6NTM1LjA1NDUxNzM1MDAzMjd9LHsieCI6OTkyLjc3MzQzNzUsInkiOjU3OX0seyJ4Ijo5OTIuNzczNDM3NSwieSI6NjUwLjV9LHsieCI6OTkyLjc3MzQzNzUsInkiOjczMi41fSx7IngiOjk5Mi43NzM0Mzc1LCJ5Ijo3Njh9LHsieCI6MjIwLjkzNzUsInkiOjg0NC4yOTc0ODI2MjcwNjA2fV0=" data-look="classic" marker-end="url(#mmd-1287705429c0_flowchart-v2-pointEnd)"/></g><g class="edgeLabels"><g class="edgeLabel" transform="translate(1387, 218)"><g class="label" data-id="L_SPA_RP_0" transform="translate(-100, -21)"><foreignObject width="200" height="42"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="edgeLabel"><p>HTTPS · same-origin · JWT bearer</p></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_RP_API_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_API_MED_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_MED_DOM_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_MED_PG_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_API_FS_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_JOBS_PG_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel" transform="translate(1141.08203125, 732.5)"><g class="label" data-id="L_JOBS_SMTP_0" transform="translate(-47.390625, -10.5)"><foreignObject width="94.78125" height="21"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"><p>e-mail dispatch</p></span></div></foreignObject></g></g><g class="edgeLabel" transform="translate(992.7734375, 650.5)"><g class="label" data-id="L_API_OTLP_0" transform="translate(-64.2265625, -10.5)"><foreignObject width="128.453125" height="21"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"><p>traces · metrics · logs</p></span></div></foreignObject></g></g></g><g class="nodes"><g class="node default" id="my-svg-flowchart-SPA-0" data-look="classic" transform="translate(1387, 90)"><rect class="basic label-container" style="" x="-130" y="-57" width="260" height="114"/><g class="label" style="" transform="translate(-100, -42)"><rect/><foreignObject width="200" height="84"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>Angular SPA<br />standalone components + signals<br />Angular 22.0.8 / TypeScript 6</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-RP-1" data-look="classic" transform="translate(1387, 335.5)"><rect class="basic label-container" style="" x="-108.890625" y="-46.5" width="217.78125" height="93"/><g class="label" style="" transform="translate(-78.890625, -31.5)"><rect/><foreignObject width="157.78125" height="63"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>Reverse proxy / IIS<br />TLS 1.2+ termination<br />X-Forwarded-For / -Proto</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-API-2" data-look="classic" transform="translate(1387, 518)"><rect class="basic label-container" style="" x="-110.21875" y="-36" width="220.4375" height="72"/><g class="label" style="" transform="translate(-80.21875, -21)"><rect/><foreignObject width="160.4375" height="42"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>ASP.NET Core 9 Web API<br />54 controllers · 329 routes</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-MED-3" data-look="classic" transform="translate(1636.65625, 650.5)"><rect class="basic label-container" style="" x="-214.65625" y="-36" width="429.3125" height="72"/><g class="label" style="" transform="translate(-184.65625, -21)"><rect/><foreignObject width="369.3125" height="42"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>MediatR pipeline<br />Tracing→Logging→Authorization→Idempotency→Validation</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-DOM-4" data-look="classic" transform="translate(1678.984375, 853.0922164916992)"><rect class="basic label-container" style="" x="-130" y="-46.5" width="260" height="93"/><g class="label" style="" transform="translate(-100, -31.5)"><rect/><foreignObject width="200" height="63"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>Domain model<br />86 types · invariants inside aggregates</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-JOBS-5" data-look="classic" transform="translate(1222, 650.5)"><rect class="basic label-container" style="" x="-130" y="-46.5" width="260" height="93"/><g class="label" style="" transform="translate(-100, -31.5)"><rect/><foreignObject width="200" height="63"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>5 hosted services<br />outbox · sweep · KPI · replica sentinel · deferred seeder</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-PG-6" data-look="classic" transform="translate(776.8359375, 853.0922164916992)"><path d="M0,13.776025590661654 a76.7109375,13.776025590661654 0,0,0 153.421875,0 a76.7109375,13.776025590661654 0,0,0 -153.421875,0 l0,91.77602559066165 a76.7109375,13.776025590661654 0,0,0 153.421875,0 l0,-91.77602559066165" class="basic label-container outer-path" style="" transform="translate(-76.7109375, -59.66403838599248)"/><g class="label" style="" transform="translate(-69.2109375, -21.5)"><rect/><foreignObject width="138.421875" height="63"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>PostgreSQL 17<br />97 tables · 5 schemas<br />90 FORCE-RLS policies</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-FS-7" data-look="classic" transform="translate(569.78125, 853.0922164916992)"><path d="M0,14.061474513235616 a80.34375,14.061474513235616 0,0,0 160.6875,0 a80.34375,14.061474513235616 0,0,0 -160.6875,0 l0,92.06147451323562 a80.34375,14.061474513235616 0,0,0 160.6875,0 l0,-92.06147451323562" class="basic label-container outer-path" style="" transform="translate(-80.34375, -60.09221176985343)"/><g class="label" style="" transform="translate(-72.84375, -21.5)"><rect/><foreignObject width="145.6875" height="63"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>File storage<br />content-addressed<br />{root}/{tenant}/{sha256}</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-SMTP-8" data-look="classic" transform="translate(335.1875, 853.0922164916992)"><rect class="basic label-container" style="" x="-64.25" y="-25.5" width="128.5" height="51"/><g class="label" style="" transform="translate(-34.25, -10.5)"><rect/><foreignObject width="68.5" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>SMTP relay</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-OTLP-9" data-look="classic" transform="translate(131.96875, 853.0922164916992)"><rect class="basic label-container" style="" x="-88.96875" y="-36" width="177.9375" height="72"/><g class="label" style="" transform="translate(-58.96875, -21)"><rect/><foreignObject width="117.9375" height="42"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>OTLP collector<br />Prometheus scrape</p></span></div></foreignObject></g></g></g></g></g><defs><filter id="my-svg-drop-shadow" height="130%" width="130%"><feDropShadow dx="4" dy="4" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs><defs><filter id="my-svg-drop-shadow-small" height="150%" width="150%"><feDropShadow dx="2" dy="2" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs><linearGradient id="my-svg-gradient" gradientUnits="objectBoundingBox" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="hsl(0, 0%, 83.3333333333%)" stop-opacity="1"/><stop offset="100%" stop-color="hsl(0, 0%, 88.9215686275%)" stop-opacity="1"/></linearGradient></svg></figure>
+
+<h3 id="deployment-topology-constraint">Deployment topology constraint</h3>
+<p><strong>ADR-0001 fixes the system at a single application replica.</strong> A <code>SingleReplicaGuardService</code> takes a
+PostgreSQL advisory lock at start-up; a second instance that fails to acquire it logs a warning and
+retries every 60 s. Scale-out is a design change, not a configuration change — see
+<a href="11-Architecture-Constraints.html">Document 11 §11.6</a>.</p>
+<h2 id="22-product-functions-summary">2.2 Product functions (summary)</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Function</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F1</td>
+<td>Authenticate a laboratory user against their tenant and issue a short-lived access token plus a rotating refresh session</td>
+<td>Doc 02 <code>AUTH</code></td>
+</tr>
+<tr>
+<td>F2</td>
+<td>Enforce role- and privilege-based authorisation on every command, deny-by-default</td>
+<td>Doc 09 §9.4</td>
+</tr>
+<tr>
+<td>F3</td>
+<td>Isolate every tenant's data at both ORM and database level</td>
+<td>Doc 09 §9.5</td>
+</tr>
+<tr>
+<td>F4</td>
+<td>Capture, route and close quality events through guarded state machines</td>
+<td>Doc 06</td>
+</tr>
+<tr>
+<td>F5</td>
+<td>Record an immutable, hash-chained audit trail of every change with actor, time and reason</td>
+<td>Doc 02 <code>CLD</code></td>
+</tr>
+<tr>
+<td>F6</td>
+<td>Apply 21 CFR Part 11 electronic signatures at controlled gates</td>
+<td>Doc 09 §9.6</td>
+</tr>
+<tr>
+<td>F7</td>
+<td>Compute analytical-quality statistics and grade them against acceptance criteria</td>
+<td>Doc 03 §3.6</td>
+</tr>
+<tr>
+<td>F8</td>
+<td>Age records over time and raise the resulting quality events automatically</td>
+<td>Doc 06 §6.14</td>
+</tr>
+<tr>
+<td>F9</td>
+<td>Notify responsible people in-app and by e-mail, per configurable rules</td>
+<td>Doc 02 <code>NTF</code></td>
+</tr>
+<tr>
+<td>F10</td>
+<td>Export regulated record sets for inspection</td>
+<td>Doc 08 §8.9</td>
+</tr>
+<tr>
+<td>F11</td>
+<td>Retain, hold and dispose records under a retention policy</td>
+<td>Doc 02 <code>ARC</code></td>
+</tr>
+<tr>
+<td>F12</td>
+<td>Provision and administer tenants from a control plane</td>
+<td>Doc 02 <code>PLT</code></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="23-actors">2.3 Actors</h2>
+<h3 id="231-human-actors-system-roles">2.3.1 Human actors (system roles)</h3>
+<p><code>UserRole</code> — <code>src/NT.QAMS.Domain/IdentityAccess/UserAccount.cs</code>. Exactly six values; the JWT <code>role</code>
+claim carries the name verbatim.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Tenant member?</th>
+<th>Purpose</th>
+<th>Characteristic reach</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PlatformAdmin</strong> (0)</td>
+<td><strong>No</strong></td>
+<td>Operates the control plane</td>
+<td>Tenant provisioning/listing only. Redirected away from tenant modules by <code>platformOnlyGuard</code>. Holds no tenant privileges; <code>ActiveSessionMiddleware</code> sets a distinct platform-admin privilege state.</td>
+</tr>
+<tr>
+<td><strong>TenantAdmin</strong> (1)</td>
+<td>Yes</td>
+<td>Laboratory system administrator</td>
+<td>Everything inside their tenant, including users, roles, tenant settings, MFA policy</td>
+</tr>
+<tr>
+<td><strong>QualityManager</strong> (2)</td>
+<td>Yes</td>
+<td>Owns the quality system</td>
+<td>Approves, verifies, closes, signs; reads compliance ledgers; runs audit-trail and access reviews</td>
+</tr>
+<tr>
+<td><strong>DepartmentHead</strong> (3)</td>
+<td>Yes</td>
+<td>Owns a department's work</td>
+<td>Granted approver-level permission keys by convention (archiving, competency sign-off, documents, controlled copies). <strong>Note:</strong> the <code>Roles.QmDeptAdmin</code> constant is now dead code — reach is decided by the tenant's privilege configuration, not by a role list on the endpoint (see Doc 09 §9.4)</td>
+</tr>
+<tr>
+<td><strong>Analyst</strong> (4)</td>
+<td>Yes</td>
+<td>Performs laboratory work</td>
+<td>Raises records, enters data, completes assigned actions; cannot approve or sign at controlled gates</td>
+</tr>
+<tr>
+<td><strong>ExternalAuditor</strong> (5)</td>
+<td>Yes (guest)</td>
+<td>Inspects</td>
+<td><strong>Read-only by construction</strong> — the default command policy <code>[RequireInternalActor]</code> (193 of 215 commands) excludes this role outright; a write command reachable by it fails the <code>CommandPolicyTests</code> CI gate</td>
+</tr>
+</tbody>
+</table></div>
+<p>Beyond these six built-in roles, a tenant may define <strong>custom roles</strong> (<code>qams.role</code>) whose privilege
+set is any subset of the 171 permission keys. A user carries both a built-in <code>Role</code> (in the token)
+and an optional assigned custom <code>RoleId</code> (resolved per request).</p>
+<h3 id="232-organisational-scope">2.3.2 Organisational scope</h3>
+<p>Any user may additionally be scoped to a set of branches and departments
+(<code>user_branch_access</code>, <code>user_department_access</code>). <code>OrgScopeGuardInterceptor</code> and the <code>IAllocatable</code>
+interface restrict scoped users to records allocated to their branches/departments. An empty scope
+means unrestricted within the tenant.</p>
+<h3 id="233-system-actors">2.3.3 System actors</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Actor</th>
+<th>Nature</th>
+<th>Documented in</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Outbox processor</strong></td>
+<td>Hosted service; publishes domain events at-least-once</td>
+<td>Doc 06 §6.15</td>
+</tr>
+<tr>
+<td><strong>Compliance sweep</strong></td>
+<td>Hourly hosted service; time-based record ageing across 8 aggregates</td>
+<td>Doc 06 §6.14</td>
+</tr>
+<tr>
+<td><strong>KPI snapshot service</strong></td>
+<td>6-hourly hosted service; materialises KPI rows</td>
+<td>Doc 02 <code>RPT</code></td>
+</tr>
+<tr>
+<td><strong>Single-replica sentinel</strong></td>
+<td>Advisory-lock holder; warns on a second instance</td>
+<td>Doc 10 §10.4</td>
+</tr>
+<tr>
+<td><strong>Deferred startup seeder</strong></td>
+<td>Retries platform-admin bootstrap + LOV backfill every 15 s when the database was unreachable at boot</td>
+<td>Doc 10 §10.3</td>
+</tr>
+<tr>
+<td><strong>Reverse proxy</strong></td>
+<td>Terminates TLS, forwards client address and scheme</td>
+<td>Doc 10 §10.5</td>
+</tr>
+<tr>
+<td><strong>SMTP relay</strong></td>
+<td>Optional; absent ⇒ e-mail is logged not sent</td>
+<td>Doc 04 CFG-21</td>
+</tr>
+<tr>
+<td><strong>OTLP collector / Prometheus</strong></td>
+<td>Optional telemetry sink</td>
+<td>Doc 10 §10.7</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="24-operating-environment">2.4 Operating environment</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Technology</th>
+<th>Version (as built)</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Runtime</td>
+<td>.NET</td>
+<td>9.0</td>
+<td><code>net9.0</code> target across all projects</td>
+</tr>
+<tr>
+<td>Web framework</td>
+<td>ASP.NET Core</td>
+<td>9</td>
+<td>Minimal hosting model, <code>Program.cs</code> composition root</td>
+</tr>
+<tr>
+<td>Mediator</td>
+<td>MediatR</td>
+<td><strong>pinned 12.4.*</strong></td>
+<td>v13 changes the licence and the pipeline <code>next()</code> signature — a hard pin, see Doc 11 AC-13</td>
+</tr>
+<tr>
+<td>Validation</td>
+<td>FluentValidation</td>
+<td>—</td>
+<td>88 validators</td>
+</tr>
+<tr>
+<td>ORM</td>
+<td>EF Core + Npgsql</td>
+<td>9</td>
+<td>snake_case naming convention</td>
+</tr>
+<tr>
+<td>Database</td>
+<td>PostgreSQL</td>
+<td>17</td>
+<td>97 tables, 5 schemas</td>
+</tr>
+<tr>
+<td>SPA</td>
+<td>Angular</td>
+<td><strong>22.0.8</strong></td>
+<td>standalone components, signals; <strong>repository documentation still says 18 — drift, see GAP</strong></td>
+</tr>
+<tr>
+<td>Language (SPA)</td>
+<td>TypeScript</td>
+<td>6.0.3</td>
+<td>strict mode, <code>any</code> forbidden</td>
+</tr>
+<tr>
+<td>SPA runtime deps</td>
+<td>zone.js 0.15.1</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Node (build/CI)</td>
+<td>Node 24</td>
+<td></td>
+<td>Angular 22 requires ≥ 20.19; CI must use Node 24 (npm 10 misreads the npm-11 lockfile)</td>
+</tr>
+<tr>
+<td>Telemetry</td>
+<td>OpenTelemetry</td>
+<td>—</td>
+<td>traces + metrics + logs; Prometheus exporter</td>
+</tr>
+<tr>
+<td>Test</td>
+<td>xUnit, Karma/Jasmine, Playwright</td>
+<td>—</td>
+<td>436 backend · 74 frontend unit · 6 e2e (last recorded)</td>
+</tr>
+<tr>
+<td>Host OS (verified)</td>
+<td>Windows 10/Server + IIS</td>
+<td>—</td>
+<td><code>deploy/iis</code>, <code>web.config</code>, <code>publish-win-x64</code></td>
+</tr>
+<tr>
+<td>Host OS (authored, unverified)</td>
+<td>Linux container</td>
+<td>—</td>
+<td><code>Dockerfile</code>, <code>compose.production.yml</code> — <strong><code>[Not Executed]</code></strong> on this machine (no Docker)</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="25-design-and-implementation-constraints">2.5 Design and implementation constraints</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Constraint</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CON-A</td>
+<td>Clean Architecture layering is enforced by a test suite (<code>NT.QAMS.Architecture.Tests</code>) — Domain references nothing; Application references Domain + SharedKernel; Infrastructure/WebApi may reference inward only</td>
+<td><code>tests/NT.QAMS.Architecture.Tests</code></td>
+</tr>
+<tr>
+<td>CON-B</td>
+<td>Every command must declare an authorisation policy attribute; an unannotated command fails CI</td>
+<td><code>CommandPolicyTests</code></td>
+</tr>
+<tr>
+<td>CON-C</td>
+<td>The public API surface is snapshot-gated: any route change must update <code>ApiSurface.approved.txt</code> in the same commit</td>
+<td><code>tests/NT.QAMS.WebApi.FunctionalTests/ApiSurface.approved.txt</code></td>
+</tr>
+<tr>
+<td>CON-D</td>
+<td>Every <code>ITenantScoped</code> table must carry both an EF global query filter and a PostgreSQL FORCE-RLS policy, added in its own migration</td>
+<td><code>CLAUDE.md</code> §5, Doc 09 §9.5</td>
+</tr>
+<tr>
+<td>CON-E</td>
+<td>Tenant-scoped tables use a <strong>tenant-first composite primary key</strong> <code>(tenant_id, id)</code> and <strong>must not</strong> declare <code>UNIQUE(id)</code> — the schema is partition-ready</td>
+<td>Schema hardening Phase 5</td>
+</tr>
+<tr>
+<td>CON-F</td>
+<td>Primary keys are UUIDv7, <code>ValueGeneratedNever</code>; enums persist as strings; money is <code>decimal</code>; time is <code>DateTimeOffset</code> from the injected <code>IClock</code> (never <code>DateTime.Now</code>)</td>
+<td><code>CLAUDE.md</code> §5</td>
+</tr>
+<tr>
+<td>CON-G</td>
+<td>Single application replica (ADR-0001)</td>
+<td>ADR-0001</td>
+</tr>
+<tr>
+<td>CON-H</td>
+<td>TLS terminates at the proxy; the app emits HSTS but does not itself serve TLS (ADR-0002)</td>
+<td>ADR-0002</td>
+</tr>
+<tr>
+<td>CON-I</td>
+<td>Same-origin deployment — <strong>CORS is deliberately not configured</strong> (ADR-0007)</td>
+<td>ADR-0007</td>
+</tr>
+<tr>
+<td>CON-J</td>
+<td>Persistence port is <code>IAppDbContext</code> exposing <code>DbSet</code>s — no repository abstraction (ADR-0008)</td>
+<td>ADR-0008</td>
+</tr>
+<tr>
+<td>CON-K</td>
+<td>Access tokens live only in SPA memory; refresh is an httpOnly cookie (ADR-0009)</td>
+<td>ADR-0009</td>
+</tr>
+<tr>
+<td>CON-L</td>
+<td>Optimistic concurrency uses PostgreSQL <code>xmin</code>; there is no <code>row_version</code> column (ADR-0005)</td>
+<td>ADR-0005</td>
+</tr>
+<tr>
+<td>CON-M</td>
+<td>No magic strings/numbers, no dead code, no TODOs, no mocks in production paths; XML doc comments on public domain/application types</td>
+<td><code>CLAUDE.md</code> §2</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="26-assumptions-and-dependencies">2.6 Assumptions and dependencies</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Statement</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A-01</td>
+<td>A reverse proxy terminates TLS and sets <code>X-Forwarded-For</code>/<code>X-Forwarded-Proto</code>. Without it, rate limiting partitions on the proxy's address and every client shares one budget.</td>
+<td>Dependency</td>
+</tr>
+<tr>
+<td>A-02</td>
+<td>The SPA and API are served from the <strong>same origin</strong>. Cross-origin deployment will fail: no CORS policy is registered, and the refresh cookie is <code>SameSite=Strict</code>.</td>
+<td>Dependency (ADR-0007)</td>
+</tr>
+<tr>
+<td>A-03</td>
+<td>PostgreSQL is reachable. On loss, <code>/health/ready</code> returns 503, <code>/health/live</code> stays 200, and start-up seeding defers rather than crashing.</td>
+<td>Dependency</td>
+</tr>
+<tr>
+<td>A-04</td>
+<td>The runtime database role is <strong>not</strong> superuser, <strong>not</strong> <code>BYPASSRLS</code>, and <strong>not</strong> the table owner. Production refuses to boot otherwise (<code>DatabaseRoleGuard</code>). Development logs a warning and continues — <strong>the dev database is owned by <code>qams_app</code>, so dev deliberately runs with RLS weakened relative to production.</strong></td>
+<td>Dependency</td>
+</tr>
+<tr>
+<td>A-05</td>
+<td>System clock is accurate and UTC-based; all timestamps are <code>DateTimeOffset</code> UTC from <code>IClock</code>.</td>
+<td>Assumption</td>
+</tr>
+<tr>
+<td>A-06</td>
+<td>Laboratory users operate an evergreen desktop browser. No browser matrix is declared anywhere in the repository. <strong><code>[Needs Business Confirmation]</code></strong></td>
+<td>Assumption</td>
+</tr>
+<tr>
+<td>A-07</td>
+<td><code>FileStorage:RootPath</code> is a durable, backed-up volume. The default (<code>{AppBaseDirectory}/data/files</code>) is <strong>inside the deployment folder</strong> and would be lost on a clean redeploy.</td>
+<td>Assumption / risk</td>
+</tr>
+<tr>
+<td>A-08</td>
+<td>E-mail is optional. With <code>Smtp:Host</code> unset the system binds <code>LoggingEmailSender</code> and notifications are written to the log only — <strong>silently, with no operator warning</strong>.</td>
+<td>Dependency</td>
+</tr>
+<tr>
+<td>A-09</td>
+<td>Tenant slugs are stable and never reused; a slug is a public identifier appearing in URLs (<code>/t/{slug}</code>).</td>
+<td>Assumption</td>
+</tr>
+<tr>
+<td>A-10</td>
+<td>The laboratory owns its retention schedule; the system offers only three retention classes (5 years, 10 years, permanent). <strong><code>[Needs Business Confirmation]</code></strong> whether these satisfy every jurisdiction the product is sold into.</td>
+<td>Assumption</td>
+</tr>
+<tr>
+<td>A-11</td>
+<td>Validation status: the GAMP 5 documentation set is complete and 18 OQ cases have been executed and recorded, but <strong>formal signed IQ/OQ/PQ execution by the customer's QA is pending</strong>. No claim of a validated state is made by the software.</td>
+<td>Dependency</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>3. External interface requirements</h1>
+<h2 id="31-user-interfaces">3.1 User interfaces</h2>
+<p>Full specification in <a href="05-Screen-Specification.html">Document 05</a>. Summary:</p>
+<ul>
+<li>Single-page application, 46 routes, 100 components, all standalone with signal-based state.</li>
+<li>Three interface languages: <strong>English, Arabic (RTL), French (LTR)</strong>; direction switches with the
+  language. Language resolves in the order <strong>user preference → role default → tenant default</strong>.</li>
+<li>Shell provides grouped navigation matching the eight permission groups, a workspace pill, language
+  selector, notifications, and the user menu.</li>
+<li>Shared UI primitives: page header, drawer, workflow stepper, status pill, list stats/meters,
+  load-more pager, audit-trail viewer, LOV select, user select, allocation picker, CSV import,
+  change-reason dialog, text-prompt dialog, contextual help.</li>
+</ul>
+<h2 id="32-hardware-interfaces">3.2 Hardware interfaces</h2>
+<p>None. The system interfaces with no laboratory instrument, no card reader, no biometric device and
+no printer driver.</p>
+<h2 id="33-software-interfaces">3.3 Software interfaces</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Interface</th>
+<th>Direction</th>
+<th>Protocol</th>
+<th>Failure behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PostgreSQL 17</td>
+<td>Out</td>
+<td>Npgsql / TCP</td>
+<td>5 retries with backoff, 30 s command timeout; readiness fails</td>
+</tr>
+<tr>
+<td>SMTP relay</td>
+<td>Out</td>
+<td>SMTP</td>
+<td>Dispatch marked <code>Failed</code> with the error text on the dispatch row; <strong>no retry of the e-mail itself</strong></td>
+</tr>
+<tr>
+<td>OTLP collector</td>
+<td>Out</td>
+<td>gRPC/HTTP</td>
+<td>Best-effort; absence is not an error</td>
+</tr>
+<tr>
+<td>Prometheus</td>
+<td>In</td>
+<td>HTTP scrape of <code>/metrics</code></td>
+<td>Anonymous, rate-limit exempt</td>
+</tr>
+<tr>
+<td>Local file system</td>
+<td>Bi</td>
+<td>File I/O</td>
+<td>Missing object raises <code>FileNotFoundException</code> → 500</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="34-communications-interfaces">3.4 Communications interfaces</h2>
+<ul>
+<li>HTTPS at the proxy; HTTP inside the trust boundary.</li>
+<li>JSON (<code>application/json</code>) request/response; <code>multipart/form-data</code> for uploads; <code>problem+json</code> for
+  every error; XLSX and PDF binary for exports.</li>
+<li>Custom headers: <code>X-Change-Reason</code> (required on DELETE), <code>Idempotency-Key</code> (optional replay
+  protection), <code>X-Correlation-Id</code> (echoed; generated when absent), <code>Retry-After</code> (on 429).</li>
+</ul>
+<hr>
+<h1>4. Non-functional requirements</h1>
+<h2 id="41-performance">4.1 Performance</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Evidence / measured value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>NFR-PERF-01</strong></td>
+<td>Authenticated read endpoints shall complete within <strong>p95 &lt; 500 ms</strong> under a 50-concurrent-user read mix.</td>
+<td><strong>PASS.</strong> Measured 2026-07-28 on a single box also hosting the database and load generator: <code>GET /api/nonconformances</code> p95 104.7 ms (750.6 rps), <code>/api/documents</code> 101.4 ms, <code>/api/audits</code> 85.9 ms, <code>/api/risks</code> 85.8 ms; <strong>0.00 % errors</strong> across 91,404 requests. <code>docs/reference/NT_QMS_Load_Test_Report.md</code></td>
+</tr>
+<tr>
+<td><strong>NFR-PERF-02</strong></td>
+<td>Error rate under that load shall stay below 0.1 %.</td>
+<td><strong>PASS</strong> — 0.00 %.</td>
+</tr>
+<tr>
+<td><strong>NFR-PERF-03</strong></td>
+<td>Readiness, login and list latency on a dev box: p95 20.6 ms / 69.6 ms / 6.3 ms respectively.</td>
+<td><code>scripts/perf-smoke.ps1</code></td>
+</tr>
+<tr>
+<td><strong>NFR-PERF-04</strong></td>
+<td>List endpoints shall not materialise unbounded result sets: every paged list uses the API-004 envelope with a server-side page size, and read queries use <code>AsNoTracking</code>.</td>
+<td>13 paged lists; shared <code>qams-load-more</code> footer</td>
+</tr>
+<tr>
+<td><strong>NFR-PERF-05</strong></td>
+<td>The global rate limit (<code>RateLimit:GlobalPermitPerMinute</code>, default <strong>300/min per client address</strong>) is an <strong>abuse ceiling, not a concurrency ceiling</strong>. It must be sized to legitimate peak concurrency per site, especially where a laboratory shares one NAT address.</td>
+<td>Load-test finding 1</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Not specified / not measured:</strong> write-path throughput (the <code>--with-writes</code> mix exists but was never run), 24-hour soak behaviour, multi-node contention, real-network latency. <strong><code>[Not Executed]</code></strong></td>
+<td>Load report "Limitations"</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong>Gap vs previous SRS:</strong> the old SRS asserted "95 % of API requests &lt; 200 ms" and "Dapper report
+queries &lt; 500 ms" and "Redis cache hit ratio ≥ 85 %". There is <strong>no Dapper and no Redis</strong> in this
+system. See <a href="13-Implementation-vs-SRS-Gap-Analysis.html">GAP-32/33</a>.</p>
+</blockquote>
+<h2 id="42-reliability">4.2 Reliability</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>NFR-REL-01</strong></td>
+<td>Transient database faults shall be retried transparently.</td>
+<td><code>EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: 10 s)</code></td>
+</tr>
+<tr>
+<td><strong>NFR-REL-02</strong></td>
+<td>No statement shall hang a request thread indefinitely.</td>
+<td><code>CommandTimeout(30)</code> seconds</td>
+</tr>
+<tr>
+<td><strong>NFR-REL-03</strong></td>
+<td>Domain-event publication shall be at-least-once and survive process restart.</td>
+<td>Transactional outbox; rows written in the same transaction as the aggregate change</td>
+</tr>
+<tr>
+<td><strong>NFR-REL-04</strong></td>
+<td>Failed event delivery shall back off and eventually dead-letter rather than spin.</td>
+<td>5 attempts; exponential backoff from a 5 s base; <code>SKIP LOCKED</code> claim with a 2-minute lease; batch of 50; 2 s poll</td>
+</tr>
+<tr>
+<td><strong>NFR-REL-05</strong></td>
+<td>Dead-lettered events shall be visible and replayable.</td>
+<td><code>qams.outbox_event.dead_lettered_at_utc</code>; ERROR log; <code>qams.outbox.dead_lettered</code> counter; replay by clearing the dead-letter stamp and attempt count</td>
+</tr>
+<tr>
+<td><strong>NFR-REL-06</strong></td>
+<td>Concurrent edits shall not silently overwrite.</td>
+<td><code>xmin</code> optimistic concurrency → HTTP 409 <code>CONCURRENCY-409</code> (ADR-0005)</td>
+</tr>
+<tr>
+<td><strong>NFR-REL-07</strong></td>
+<td>Duplicate submission of the same command shall not duplicate its effect.</td>
+<td><code>Idempotency-Key</code> header + <code>IdempotencyBehavior</code> + persisted replay store</td>
+</tr>
+<tr>
+<td><strong>NFR-REL-08</strong></td>
+<td>A database outage at cold start shall not crash-loop the process.</td>
+<td><code>StartupSeeding.TryRunAsync</code> defers on connectivity failure; <code>DeferredStartupSeeder</code> retries every 15 s; only connectivity defers — real faults still propagate (OPS-010)</td>
+</tr>
+<tr>
+<td><strong>NFR-REL-09</strong></td>
+<td>Exactly one instance shall run scheduled work.</td>
+<td>Advisory-lock leader election on the sweep; single-replica sentinel</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="43-availability">4.3 Availability</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>NFR-AVL-01</strong></td>
+<td>Liveness shall be independent of the database. <code>/health/live</code> performs <strong>no checks</strong> — a database outage must recycle traffic, not the process.</td>
+<td><code>Program.cs:280</code></td>
+</tr>
+<tr>
+<td><strong>NFR-AVL-02</strong></td>
+<td>Readiness shall be database-backed. <code>/health/ready</code> returns 503 while PostgreSQL is unreachable.</td>
+<td><code>PostgresReadinessHealthCheck</code></td>
+</tr>
+<tr>
+<td><strong>NFR-AVL-03</strong></td>
+<td><code>/health</code> remains as a legacy liveness alias.</td>
+<td><code>Program.cs:286</code></td>
+</tr>
+<tr>
+<td><strong>NFR-AVL-04</strong></td>
+<td>Probes and the metrics scrape are exempt from rate limiting.</td>
+<td><code>.DisableRateLimiting()</code> on all four endpoints</td>
+</tr>
+<tr>
+<td><strong>NFR-AVL-05</strong></td>
+<td>No availability target (SLA %) is defined anywhere in the repository. <strong><code>[Needs Business Confirmation]</code></strong></td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="44-recoverability">4.4 Recoverability</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>NFR-RCV-01</strong></td>
+<td>RPO ≤ 5 minutes, RTO ≤ 4 hours.</td>
+<td><code>deploy/BACKUP-RESTORE-DR.md</code></td>
+</tr>
+<tr>
+<td><strong>NFR-RCV-02</strong></td>
+<td>Continuous WAL archiving with point-in-time recovery plus a nightly logical dump.</td>
+<td><code>deploy/backup.sh</code></td>
+</tr>
+<tr>
+<td><strong>NFR-RCV-03</strong></td>
+<td>Every restore shall be followed by mandatory verification <strong>including audit-trail hash-chain verification</strong>.</td>
+<td><code>deploy/restore.sh</code>, <code>GET /api/compliance/chain-verification</code></td>
+</tr>
+<tr>
+<td><strong>NFR-RCV-04</strong></td>
+<td>File storage must be backed up separately — it is <strong>not</strong> in the database dump.</td>
+<td>Doc 07 FS-04</td>
+</tr>
+<tr>
+<td><strong>NFR-RCV-05</strong></td>
+<td>A restore drill has <strong>not</strong> been executed in this environment. <strong><code>[Not Executed]</code></strong></td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="45-maintainability">4.5 Maintainability</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>NFR-MNT-01</strong></td>
+<td>Layer boundaries are machine-enforced, not conventional.</td>
+<td><code>NT.QAMS.Architecture.Tests</code> (24 tests)</td>
+</tr>
+<tr>
+<td><strong>NFR-MNT-02</strong></td>
+<td>Authorisation coverage is machine-enforced: every command carries a policy.</td>
+<td><code>CommandPolicyTests</code></td>
+</tr>
+<tr>
+<td><strong>NFR-MNT-03</strong></td>
+<td>The public API surface cannot drift silently.</td>
+<td><code>ApiSurface.approved.txt</code> snapshot gate (652 lines)</td>
+</tr>
+<tr>
+<td><strong>NFR-MNT-04</strong></td>
+<td>Module boundaries cannot be crossed silently.</td>
+<td>module-boundary merge gate</td>
+</tr>
+<tr>
+<td><strong>NFR-MNT-05</strong></td>
+<td>Migrations must round-trip (<code>Up</code>/<code>Down</code>) and the audit trail must resist tampering.</td>
+<td>migration round-trip + audit-tamper tests</td>
+</tr>
+<tr>
+<td><strong>NFR-MNT-06</strong></td>
+<td>Test baseline: <strong>436 backend tests, 0 skipped</strong>; 74 frontend unit specs; 6 Playwright e2e.</td>
+<td>Last recorded green run</td>
+</tr>
+<tr>
+<td><strong>NFR-MNT-07</strong></td>
+<td>Feature code is organised as vertical slices, one file per feature area, so a change touches one place.</td>
+<td><code>src/NT.QAMS.Application/**/*Slice.cs</code></td>
+</tr>
+<tr>
+<td><strong>NFR-MNT-08</strong></td>
+<td>Error codes are structured and centralised; role names are constants; QC limits are configuration.</td>
+<td><code>Roles.cs</code>, <code>WestgardLimits</code>, 411 structured codes</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="46-scalability">4.6 Scalability</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Statement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>NFR-SCL-01</strong></td>
+<td><strong>Vertical only.</strong> The application is fixed at one replica (ADR-0001).</td>
+</tr>
+<tr>
+<td><strong>NFR-SCL-02</strong></td>
+<td>The database schema is <strong>partition-ready</strong>: 88 tenant-scoped tables carry a tenant-first composite primary key and no <code>UNIQUE(id)</code>, which is the precondition for PostgreSQL declarative partitioning by tenant. Partitioning is <strong>not</strong> applied.</td>
+</tr>
+<tr>
+<td><strong>NFR-SCL-03</strong></td>
+<td>Read scaling via replicas is not implemented; there is no read/write split.</td>
+</tr>
+<tr>
+<td><strong>NFR-SCL-04</strong></td>
+<td>Tenant count is unbounded by design but untested beyond the development dataset. <strong><code>[Not Executed]</code></strong></td>
+</tr>
+<tr>
+<td><strong>NFR-SCL-05</strong></td>
+<td>Rate-limit partitioning is by <strong>client IP address</strong> for the global/auth/refresh policies and by <strong>actor (<code>sub</code> claim)</strong> for the e-signature policy — a shared NAT address therefore shares one global budget (see NFR-PERF-05).</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="47-observability-logging-and-monitoring">4.7 Observability, logging and monitoring</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>NFR-OBS-01</strong></td>
+<td>Production logs shall be structured JSON with scopes, UTC timestamps, ISO-8601 (<code>"O"</code>) format.</td>
+<td><code>Program.cs:38-47</code> — <strong>only when <code>ASPNETCORE_ENVIRONMENT=Production</code></strong></td>
+</tr>
+<tr>
+<td><strong>NFR-OBS-02</strong></td>
+<td>Every response shall carry a correlation identifier; every <code>ProblemDetails</code> shall carry <code>traceId</code> and <code>correlationId</code>.</td>
+<td><code>ObservabilityMiddleware</code>, <code>CustomizeProblemDetails</code></td>
+</tr>
+<tr>
+<td><strong>NFR-OBS-03</strong></td>
+<td>One trace shall span HTTP → MediatR → EF/Npgsql → outbox/jobs. <code>traceparent</code> is persisted on outbox rows so asynchronous delivery joins the originating trace.</td>
+<td>OTel sources: <code>ApplicationDiagnostics</code>, <code>QamsDiagnostics.Outbox</code>, <code>QamsDiagnostics.Jobs</code></td>
+</tr>
+<tr>
+<td><strong>NFR-OBS-04</strong></td>
+<td>Health and metrics traffic shall be excluded from traces.</td>
+<td><code>options.Filter</code> on ASP.NET instrumentation</td>
+</tr>
+<tr>
+<td><strong>NFR-OBS-05</strong></td>
+<td>Metrics shall be exposed at <code>GET /metrics</code> in Prometheus format, and over OTLP when configured.</td>
+<td><code>AddPrometheusExporter()</code></td>
+</tr>
+<tr>
+<td><strong>NFR-OBS-06</strong></td>
+<td>The following domain instruments shall exist under meter <code>NT.QAMS</code>: <code>qams.outbox.processed</code>, <code>.failed</code>, <code>.dead_lettered</code>, <code>qams.outbox.backlog</code>, <code>qams.outbox.oldest_pending_age_seconds</code>, <code>qams.outbox.dead_letters</code>, <code>qams.job.last_success_timestamp_seconds{job}</code>.</td>
+<td><code>QamsMetrics.cs</code></td>
+</tr>
+<tr>
+<td><strong>NFR-OBS-07</strong></td>
+<td>Seven actionable alerts are <strong>specified</strong> (error rate &gt; 5 %/5 m; p95 &gt; 2 s/10 m; dead-letters &gt; 0; backlog age &gt; 600 s; sweep liveness &gt; 7200 s; snapshot liveness &gt; 43200 s; readiness non-200).</td>
+<td><code>deploy/OBSERVABILITY.md</code></td>
+</tr>
+<tr>
+<td></td>
+<td><strong>The alert set has never been deployed or observed firing</strong> — the observability stack in <code>deploy/observability/</code> was authored but never brought up (no Docker on the build host). <strong><code>[Not Executed]</code></strong> — residual risk R-7.</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="48-security">4.8 Security</h2>
+<p>Full specification in <a href="09-Security-Specification.html">Document 09</a>. NFR summary:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>NFR-SEC-01</strong></td>
+<td>Tenant isolation shall be enforced in two independent layers: EF global query filter <strong>and</strong> PostgreSQL FORCE row-level security keyed on the <code>app.current_tenant</code> GUC, set on every connection open, fail-closed to nil.</td>
+</tr>
+<tr>
+<td><strong>NFR-SEC-02</strong></td>
+<td>Records in a signed terminal state shall be physically immutable: a <code>BEFORE UPDATE/DELETE</code> trigger rejects mutation on 12 analytical study roots and approved uncertainty budgets.</td>
+</tr>
+<tr>
+<td><strong>NFR-SEC-03</strong></td>
+<td>The audit trail shall be append-only and hash-chained, and shall accept null-tenant appends (pre-authentication events).</td>
+</tr>
+<tr>
+<td><strong>NFR-SEC-04</strong></td>
+<td>Every <code>DELETE</code> shall be refused without a reason (<code>400 CHANGE-REASON-REQUIRED</code>), and the reason shall be persisted on the ledger row in the same transaction.</td>
+</tr>
+<tr>
+<td><strong>NFR-SEC-05</strong></td>
+<td>Passwords: ≥ 12 characters, upper + lower + digit + symbol, checked against an offline breached/common-password blocklist, maximum 200 characters; history depth 5; maximum age 90 days (both configurable).</td>
+</tr>
+<tr>
+<td><strong>NFR-SEC-06</strong></td>
+<td>Accounts shall lock for <strong>30 minutes after 5 consecutive failed attempts</strong>; the same counter throttles failed e-signature attempts.</td>
+</tr>
+<tr>
+<td><strong>NFR-SEC-07</strong></td>
+<td>MFA shall be TOTP (RFC 6238), <strong>optional per tenant</strong>, default <strong>off</strong>, with a platform-wide fallback switch.</td>
+</tr>
+<tr>
+<td><strong>NFR-SEC-08</strong></td>
+<td>Access tokens shall live only in SPA memory; refresh shall use a rotating httpOnly <code>Secure SameSite=Strict</code> cookie scoped to <code>/api/auth</code>, stored SHA-256-only, with reuse detection revoking the whole family.</td>
+</tr>
+<tr>
+<td><strong>NFR-SEC-09</strong></td>
+<td>Every authenticated request shall re-check the account's active state and role against the database (401 <code>AUTH-006</code>/<code>AUTH-007</code>).</td>
+</tr>
+<tr>
+<td><strong>NFR-SEC-10</strong></td>
+<td>Uploads shall pass an extension allow-list <strong>and</strong> content sniffing; the client's declared content type shall never be trusted or stored.</td>
+</tr>
+<tr>
+<td><strong>NFR-SEC-11</strong></td>
+<td>Response headers shall include a deny-everything CSP, <code>X-Content-Type-Options: nosniff</code>, <code>X-Frame-Options: DENY</code>, <code>Referrer-Policy: no-referrer</code>, and (outside Development) HSTS <code>max-age=63072000; includeSubDomains</code>.</td>
+</tr>
+<tr>
+<td><strong>NFR-SEC-12</strong></td>
+<td>Rate limits: 300/min global per client, 10/min on <code>/api/auth/*</code>, 60/min on refresh, 10/min per actor on e-signature ceremonies; rejection is 429 with <code>Retry-After: 60</code>.</td>
+</tr>
+<tr>
+<td><strong>NFR-SEC-13</strong></td>
+<td>Production shall refuse to start if the database role is over-privileged.</td>
+</tr>
+<tr>
+<td><strong>NFR-SEC-14</strong></td>
+<td>Dependency scanning (.NET SCA, npm SCA, Trivy image scan) shall gate every merge, failing on High/Critical.</td>
+</tr>
+<tr>
+<td><strong>NFR-SEC-15</strong></td>
+<td><strong>An independent penetration test on a staging environment has not been performed.</strong> A dev-instance self-assessment (24 probes, 0 findings) exists but is explicitly not a substitute. <strong><code>[Not Executed]</code></strong></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="49-localisation">4.9 Localisation</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>NFR-LOC-01</strong></td>
+<td>Three languages: <code>en</code>, <code>ar</code>, <code>fr</code>. Arabic renders right-to-left; direction switches with language.</td>
+</tr>
+<tr>
+<td><strong>NFR-LOC-02</strong></td>
+<td>Language resolution order: user preference (<code>user_account.preferred_language</code>) → role default (<code>role.default_language</code>) → tenant default. Settable via <code>PUT /api/auth/me/language</code>, <code>PUT /api/users/{id}/language</code>, and role configuration.</td>
+</tr>
+<tr>
+<td><strong>NFR-LOC-03</strong></td>
+<td>Reference data (<code>LovEntry</code>) carries a <code>LocalizedText</code> value object so list values are translatable per tenant.</td>
+</tr>
+<tr>
+<td><strong>NFR-LOC-04</strong></td>
+<td>Translation is delivered by an in-app <code>I18nService</code> with typed dictionaries — <strong>not</strong> ngx-translate, and not JSON asset files.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="410-accessibility">4.10 Accessibility</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>NFR-A11Y-01</strong></td>
+<td>Automated <code>axe</code> accessibility checks run in CI on every build (always-on, not opt-in).</td>
+</tr>
+<tr>
+<td><strong>NFR-A11Y-02</strong></td>
+<td>Real violations found by that gate were fixed: a missing form label and a serious contrast failure on the login screen.</td>
+</tr>
+<tr>
+<td><strong>NFR-A11Y-03</strong></td>
+<td><code>window.prompt</code>-based dialogs were replaced with accessible in-app dialogs for the change-reason and password-reset flows.</td>
+</tr>
+<tr>
+<td><strong>NFR-A11Y-04</strong></td>
+<td>Statistic tiles do not encode meaning in colour alone: the seven tone tokens failed contrast as a categorical palette (gold 1.80:1, teal 2.58:1, red↔orange ΔE 8.9 for normal vision), so tone is carried by meter fills and rails while values use AA-contrast ink steps.</td>
+</tr>
+<tr>
+<td><strong>NFR-A11Y-05</strong></td>
+<td>No formal WCAG conformance level is claimed. <strong><code>[Needs Business Confirmation]</code></strong></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="411-resource-usage">4.11 Resource usage</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Statement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>NFR-RES-01</strong></td>
+<td>No memory, CPU or disk budget is declared anywhere in the repository. <strong><code>[Needs Business Confirmation]</code></strong></td>
+</tr>
+<tr>
+<td><strong>NFR-RES-02</strong></td>
+<td>Disk growth is driven by: uploaded evidence files (content-addressed, deduplicated by SHA-256), the append-only ledgers (<code>audit.field_change</code> already holds 19,296 null-tenant rows in the dev dataset), and outbox rows (purged after <code>Outbox:RetentionDays</code>, default 30).</td>
+</tr>
+<tr>
+<td><strong>NFR-RES-03</strong></td>
+<td>Connection-pool usage is observable via the Npgsql meter; no pool size is configured, so Npgsql defaults apply.</td>
+</tr>
+<tr>
+<td><strong>NFR-RES-04</strong></td>
+<td>The container image runs as a <strong>non-root</strong> user; CI asserts the non-root uid and volume writability.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="412-compliance-and-data-integrity-alcoa">4.12 Compliance and data integrity (ALCOA+)</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>How the system delivers it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Attributable</strong></td>
+<td>Every mutation carries <code>CreatedByUserId</code>/actor from the JWT <code>sub</code> claim, stamped by <code>AuditStampInterceptor</code>; never client-supplied.</td>
+</tr>
+<tr>
+<td><strong>Legible</strong></td>
+<td>Ledger rows are structured per-field before/after values, readable through the compliance UI and XLSX export.</td>
+</tr>
+<tr>
+<td><strong>Contemporaneous</strong></td>
+<td>Timestamps come from the injected <code>IClock</code> at the moment of the transaction; <code>DateTime.Now</code> is banned.</td>
+</tr>
+<tr>
+<td><strong>Original</strong></td>
+<td>The field-change ledger retains the original value alongside the new one; signed records are physically immutable.</td>
+</tr>
+<tr>
+<td><strong>Accurate</strong></td>
+<td>Domain invariants reject impossible states at the aggregate boundary, before persistence.</td>
+</tr>
+<tr>
+<td><strong>Complete</strong></td>
+<td>Every DELETE is a logical void with a mandatory reason; nothing is silently removed.</td>
+</tr>
+<tr>
+<td><strong>Consistent</strong></td>
+<td>Hash chaining links ledger rows; <code>chain-verification</code> proves the sequence.</td>
+</tr>
+<tr>
+<td><strong>Enduring</strong></td>
+<td>Append-only tables; retention classes; legal hold blocks disposal regardless of retention.</td>
+</tr>
+<tr>
+<td><strong>Available</strong></td>
+<td>Exports (<code>audit-trail.xlsx</code> with an integrity-attestation sheet, <code>signatures.xlsx</code>, <code>nonconformances.xlsx</code>, <code>review-pack.pdf</code>); export events are themselves logged as <code>RECORD_EXPORTED</code>.</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>5. System-level acceptance criteria</h1>
+<p>These are the top-level acceptance tests for the system as a whole. Per-requirement criteria are in
+Documents 02 and 12.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Given</th>
+<th>When</th>
+<th>Then</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AT-SYS-01</strong></td>
+<td>Two active tenants A and B, and a user of A</td>
+<td>The user issues any tenant-scoped query</td>
+<td>Only rows with <code>tenant_id = A</code> return — proven with the database GUC set, <strong>and</strong> proven again by <code>psql</code> as the owning role (FORCE RLS binds the owner)</td>
+</tr>
+<tr>
+<td><strong>AT-SYS-02</strong></td>
+<td>A signed-off analytical study</td>
+<td>A raw <code>UPDATE</code> or <code>DELETE</code> is issued directly in SQL</td>
+<td>PostgreSQL rejects it via <code>qams.reject_frozen_mutation()</code></td>
+</tr>
+<tr>
+<td><strong>AT-SYS-03</strong></td>
+<td>Any record</td>
+<td>A <code>DELETE</code> is issued without <code>X-Change-Reason</code></td>
+<td>400 <code>CHANGE-REASON-REQUIRED</code>; with the header, 204 and the ledger row carries the reason</td>
+</tr>
+<tr>
+<td><strong>AT-SYS-04</strong></td>
+<td>A user who prepared a record</td>
+<td>That same user attempts the approval/sign gate</td>
+<td>422 with the module's <code>SOD-*</code> code</td>
+</tr>
+<tr>
+<td><strong>AT-SYS-05</strong></td>
+<td>An authenticated user</td>
+<td>An administrator deactivates the account</td>
+<td>The <strong>next</strong> request with the same still-valid token returns 401 <code>AUTH-006</code></td>
+</tr>
+<tr>
+<td><strong>AT-SYS-06</strong></td>
+<td>A valid refresh cookie</td>
+<td>It is presented twice (replay)</td>
+<td>The whole refresh family is revoked; the session is dead</td>
+</tr>
+<tr>
+<td><strong>AT-SYS-07</strong></td>
+<td>An <code>ExternalAuditor</code> token</td>
+<td>Any write command is attempted</td>
+<td>403 problem+json; the CI <code>CommandPolicyTests</code> gate also fails if such a path is ever introduced</td>
+</tr>
+<tr>
+<td><strong>AT-SYS-08</strong></td>
+<td>PostgreSQL stopped</td>
+<td>Probes are polled</td>
+<td><code>/health/live</code> 200, <code>/health/ready</code> 503; on restore, readiness returns to 200 and deferred seeding completes <strong>without a process restart</strong></td>
+</tr>
+<tr>
+<td><strong>AT-SYS-09</strong></td>
+<td>A production environment whose DB role is superuser/owner/BYPASSRLS</td>
+<td>The application starts</td>
+<td>It refuses to boot</td>
+</tr>
+<tr>
+<td><strong>AT-SYS-10</strong></td>
+<td>Any 6 roles × the full endpoint set</td>
+<td>Each role calls each endpoint</td>
+<td>No role ever receives 401 or 5xx from a role gate; every denial is 403 problem+json (<code>RoleEndpointMatrixTests</code>)</td>
+</tr>
+</tbody>
+</table></div>
+<div class="pager"><a href="00-SRS-Index-and-Conventions.html"><span>Previous</span>Index, Conventions &amp; Glossary</a><a href="02-1-Functional-Specification-Quality-and-Improvement.html" style="text-align:right"><span>Next</span>Functional Spec 1 — Quality &amp; Improvement</a></div>
+</main></div>
+<script>
+(function(){
+ var r=document.documentElement, K='ntqms-srs-theme', s=localStorage.getItem(K);
+ if(s) r.setAttribute('data-theme',s);
+ var b=document.getElementById('th');
+ if(b) b.onclick=function(){
+   var cur=r.getAttribute('data-theme');
+   if(!cur) cur=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+   var nx=cur==='dark'?'light':'dark';
+   r.setAttribute('data-theme',nx); localStorage.setItem(K,nx);
+ };
+ var p=document.getElementById('pr'); if(p) p.onclick=function(){window.print();};
+ // scroll-spy on the in-page TOC
+ var links=[].slice.call(document.querySelectorAll('#toc a'));
+ if(!links.length) return;
+ var tgt=links.map(function(a){return document.getElementById(a.getAttribute('href').slice(1));});
+ function spy(){
+   var y=window.scrollY+90, i=0;
+   for(var k=0;k<tgt.length;k++){ if(tgt[k]&&tgt[k].offsetTop<=y) i=k; }
+   links.forEach(function(a,n){a.style.color=n===i?'var(--accent)':'';
+     a.style.borderLeftColor=n===i?'var(--accent)':'transparent';});
+ }
+ addEventListener('scroll',spy,{passive:true}); spy();
+})();
+</script>
+</body></html>

@@ -27,6 +27,77 @@ public sealed class ExportsController(
     ICurrentTenant tenant, ICurrentUser user, ISecurityEventLog security, IClock clock)
     : ControllerBase
 {
+    /// <summary>Hard ceilings for the generic page export — a formatter, not a bulk-data channel.</summary>
+    private const int MaxExportRows = 10_000;
+    private const int MaxExportColumns = 40;
+    private const int MaxExportStats = 16;
+
+    /// <summary>
+    /// Renders the caller's current register view as a branded document. The
+    /// payload is the caller's own filtered view — data they already fetched
+    /// under their permissions — so no extra permission gate applies beyond
+    /// authentication; the server formats and stamps, it does not re-query.
+    /// </summary>
+    [HttpPost("page.pdf")]
+    public async Task<IActionResult> PagePdf(Contracts.Common.PageExportRequest request, CancellationToken ct)
+    {
+        var pack = await BuildPagePackAsync(request, ct);
+        await LogExportAsync($"page/{request.Title}.pdf", ct);
+        return File(exports.ToPagePdf(pack), "application/pdf",
+            $"{FileSlug(request.Title)}-{clock.UtcNow:yyyyMMdd-HHmm}.pdf");
+    }
+
+    /// <summary>Same view rendered as a real workbook (frozen, filterable grid).</summary>
+    [HttpPost("page.xlsx")]
+    public async Task<IActionResult> PageXlsx(Contracts.Common.PageExportRequest request, CancellationToken ct)
+    {
+        var pack = await BuildPagePackAsync(request, ct);
+        await LogExportAsync($"page/{request.Title}.xlsx", ct);
+        return File(exports.ToPageXlsx(pack),
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            $"{FileSlug(request.Title)}-{clock.UtcNow:yyyyMMdd-HHmm}.xlsx");
+    }
+
+    private async Task<PageExportPack> BuildPagePackAsync(
+        Contracts.Common.PageExportRequest request, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(request.Title))
+        {
+            throw new NT.QAMS.SharedKernel.Primitives.DomainException(
+                "EXPORT-001", "An export title is required.");
+        }
+
+        if (request.Columns.Count is 0 or > MaxExportColumns
+            || request.Rows.Count > MaxExportRows
+            || request.Stats.Count > MaxExportStats
+            || request.Rows.Any(r => r.Count != request.Columns.Count))
+        {
+            throw new NT.QAMS.SharedKernel.Primitives.DomainException(
+                "EXPORT-002", "The export payload is malformed or exceeds the size ceiling.");
+        }
+
+        var tenantName = tenant.TenantId is { } id
+            ? (await db.Tenants.FindAsync([id], ct))?.Name ?? "(unknown)"
+            : "(platform)";
+        return new PageExportPack(
+            request.Title.Trim(),
+            tenantName,
+            user.DisplayName ?? "system",
+            clock.UtcNow,
+            string.IsNullOrWhiteSpace(request.FiltersSummary) ? null : request.FiltersSummary.Trim(),
+            request.Stats.Select(s => new ExportStat(s.Label, s.Value, s.Tone)).ToList(),
+            new ExportTable(request.Title.Trim(), request.Columns, request.Rows));
+    }
+
+    /// <summary>A filesystem-safe slug from the localized page title.</summary>
+    private static string FileSlug(string title)
+    {
+        var cleaned = new string(title.Select(ch => char.IsLetterOrDigit(ch) ? char.ToLowerInvariant(ch) : '-').ToArray());
+        while (cleaned.Contains("--")) { cleaned = cleaned.Replace("--", "-"); }
+        cleaned = cleaned.Trim('-');
+        return cleaned.Length == 0 ? "export" : cleaned.Length > 60 ? cleaned[..60] : cleaned;
+    }
+
     [HttpGet("nonconformances.xlsx")]
     public async Task<IActionResult> NcRegister(CancellationToken ct)
     {

@@ -108,10 +108,21 @@ public sealed class ESignatureService(
             throw new DomainException("SIG-002", "Account password is incorrect.");
         }
 
-        if (string.IsNullOrWhiteSpace(signer.PinHash) || !hasher.Verify(signer.PinHash, pin))
+        // "Never configured" is a setup state, not an attack: the password above
+        // already verified, so the actor is authenticated. Burning lockout
+        // attempts here locked new users out of the whole application for trying
+        // to sign before anyone told them a PIN existed.
+        if (string.IsNullOrWhiteSpace(signer.PinHash))
+        {
+            await security.WriteAsync("ESIGN_NO_PIN", tenant.TenantId, signer.DisplayName, subjectRef, ct);
+            throw new DomainException(
+                "SIG-004", "No e-signature PIN is configured. Set one from the account menu before signing.");
+        }
+
+        if (!hasher.Verify(signer.PinHash, pin))
         {
             await RecordFailureAsync(signer, "bad-pin", subjectRef, ct);
-            throw new DomainException("SIG-001", "Electronic-signature PIN is not set or is incorrect.");
+            throw new DomainException("SIG-001", "Electronic-signature PIN is incorrect.");
         }
 
         var record = new SignatureRecord

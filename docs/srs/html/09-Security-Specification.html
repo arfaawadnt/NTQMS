@@ -1,0 +1,1436 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Security Specification — NT.QMS As-Built SRS</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>">
+<style>
+:root{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);
+ --mono:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace;
+ --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,ui-serif,serif;
+ --sans:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}}
+:root[data-theme="dark"]{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}
+:root[data-theme="light"]{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+ font-size:15.5px;line-height:1.62;-webkit-text-size-adjust:100%}
+.wrap{display:grid;grid-template-columns:288px minmax(0,1fr);gap:0;max-width:1560px;margin:0 auto}
+/* ---- sidebar ---- */
+aside{position:sticky;top:0;height:100vh;overflow-y:auto;padding:22px 16px 60px;
+ border-right:1px solid var(--line);background:var(--panel)}
+aside .brand{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:-.01em;
+ margin:0 0 2px}
+aside .sub{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;
+ margin:0 0 16px}
+aside nav a{display:block;padding:5px 9px;border-radius:7px;color:var(--ink);text-decoration:none;
+ font-size:13.2px;border-left:2px solid transparent}
+aside nav a:hover{background:var(--panel-2)}
+aside nav a.cur{background:var(--accent-soft);border-left-color:var(--accent);font-weight:600}
+aside nav a .n{color:var(--muted);font-variant-numeric:tabular-nums;margin-right:7px;font-size:11.5px}
+aside .sec{margin:16px 0 5px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+ color:var(--muted);font-weight:700}
+#toc{margin-top:6px;border-top:1px solid var(--line);padding-top:10px}
+#toc a{display:block;padding:2.5px 9px;font-size:12.4px;color:var(--muted);text-decoration:none;
+ border-left:2px solid transparent;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#toc a:hover{color:var(--ink)}
+#toc a.h3{padding-left:22px;font-size:11.8px}
+/* ---- main ---- */
+main{padding:34px 46px 120px;min-width:0;overflow-wrap:anywhere}
+.doc-head{border-bottom:2px solid var(--accent);padding-bottom:14px;margin-bottom:26px}
+.kicker{color:var(--accent);font-size:11.5px;font-weight:700;letter-spacing:.11em;
+ text-transform:uppercase;margin:0 0 4px}
+h1{font-family:var(--serif);font-size:31px;line-height:1.2;margin:0;letter-spacing:-.015em}
+h2{font-family:var(--serif);font-size:24px;margin:38px 0 12px;padding-bottom:6px;
+ border-bottom:1px solid var(--line);letter-spacing:-.01em;scroll-margin-top:14px}
+h3{font-size:18px;margin:26px 0 9px;letter-spacing:-.005em;scroll-margin-top:14px}
+h4{font-size:15px;margin:20px 0 7px;color:var(--accent)}
+h5,h6{font-size:13.5px;margin:16px 0 6px;color:var(--muted);text-transform:uppercase;
+ letter-spacing:.05em}
+p{margin:10px 0}
+a{color:var(--accent)}
+hr{border:0;border-top:1px solid var(--line);margin:30px 0}
+ul,ol{margin:9px 0;padding-left:24px}
+li{margin:3px 0}
+blockquote{margin:16px 0;padding:12px 18px;background:var(--accent-soft);
+ border-left:3px solid var(--accent);border-radius:0 8px 8px 0}
+blockquote p:first-child{margin-top:0}blockquote p:last-child{margin-bottom:0}
+code{font-family:var(--mono);font-size:.875em;background:var(--panel-2);
+ padding:1.5px 5px;border-radius:4px;border:1px solid var(--line)}
+pre{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;
+ padding:14px 16px;overflow-x:auto;margin:14px 0}
+pre code{background:none;border:0;padding:0;font-size:12.6px;line-height:1.5}
+/* ---- tables ---- */
+.tw{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:10px;
+ background:var(--panel);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;font-size:13.4px}
+th,td{padding:8px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:var(--panel-2);font-weight:700;font-size:12.2px;letter-spacing:.02em;
+ position:sticky;top:0;z-index:1}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--accent-soft)}
+td code,th code{font-size:.9em;white-space:nowrap}
+/* ---- diagrams ---- */
+figure.d{margin:18px 0;padding:18px;background:var(--panel);border:1px solid var(--line);
+ border-radius:12px;box-shadow:var(--shadow);overflow-x:auto;text-align:center}
+figure.d svg{max-width:100%;height:auto;display:inline-block}
+/* ---- misc ---- */
+.tools{position:fixed;top:12px;right:16px;display:flex;gap:6px;z-index:50}
+.tools button{font:inherit;font-size:12px;padding:5px 11px;border-radius:8px;cursor:pointer;
+ border:1px solid var(--line);background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+.tools button:hover{background:var(--panel-2)}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:52px;padding-top:18px;
+ border-top:1px solid var(--line)}
+.pager a{display:block;max-width:46%;padding:10px 14px;border:1px solid var(--line);
+ border-radius:10px;background:var(--panel);text-decoration:none;font-size:13px}
+.pager a span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;
+ letter-spacing:.08em}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:14px;margin:20px 0}
+.card{padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--panel);
+ box-shadow:var(--shadow);text-decoration:none;color:var(--ink);display:block}
+.card:hover{border-color:var(--accent)}
+.card .num{color:var(--accent);font-weight:700;font-size:11.5px;letter-spacing:.1em}
+.card .t{font-family:var(--serif);font-size:17px;margin:3px 0 5px}
+.card .d{color:var(--muted);font-size:12.7px;line-height:1.5}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin:20px 0}
+.stat{padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.stat b{display:block;font-size:23px;font-family:var(--serif);line-height:1.1}
+.stat span{color:var(--muted);font-size:11.4px}
+@media print{
+ aside,.tools,.pager{display:none!important}
+ .wrap{display:block;max-width:none}
+ main{padding:0}
+ .tw,figure.d{break-inside:avoid;box-shadow:none}
+ h2{break-after:avoid}
+ a{color:inherit;text-decoration:none}
+}
+@media (max-width:1080px){
+ .wrap{grid-template-columns:1fr}
+ aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+ main{padding:22px 18px 80px}
+ #toc{display:none}
+}
+</style>
+</head><body>
+<div class="tools"><button id="th">◐ Theme</button><button id="pr">⎙ Print</button></div>
+<div class="wrap">
+<aside><p class="brand">NT.QMS</p><p class="sub">As-Built SRS · v1.51.x</p><a class="card" style="padding:9px 12px;margin-bottom:10px;font-size:13px" href="index.html">◂ Document set</a><div class="sec">Documents</div><nav><a class="" href="00-SRS-Index-and-Conventions.html"><span class="n">00</span>Index, Conventions &amp; Glossary</a><a class="" href="01-Software-Requirements-Specification.html"><span class="n">01</span>Software Requirements Specification</a><a class="" href="02-1-Functional-Specification-Quality-and-Improvement.html"><span class="n">02-1</span>Functional Spec 1 — Quality &amp; Improvement</a><a class="" href="02-2-Functional-Specification-Resources-People-Governance.html"><span class="n">02-2</span>Functional Spec 2 — Resources, People &amp; Governance</a><a class="" href="02-3-Functional-Specification-Analytical-Quality.html"><span class="n">02-3</span>Functional Spec 3 — Analytical Quality</a><a class="" href="02-4-Functional-Specification-Operations-and-Platform.html"><span class="n">02-4</span>Functional Spec 4 — Operations &amp; Platform</a><a class="" href="03-Business-Rules.html"><span class="n">03</span>Business Rules &amp; Error Catalogue</a><a class="" href="04-Configuration-Reference.html"><span class="n">04</span>Configuration Reference</a><a class="" href="05-Screen-Specification.html"><span class="n">05</span>Screen Specification</a><a class="" href="06-Workflow-Specification.html"><span class="n">06</span>Workflow Specification</a><a class="" href="07-File-System-Specification.html"><span class="n">07</span>File System Specification</a><a class="" href="08-API-Specification.html"><span class="n">08</span>API Specification</a><a class="cur" href="09-Security-Specification.html"><span class="n">09</span>Security Specification</a><a class="" href="10-Deployment-Specification.html"><span class="n">10</span>Deployment Specification</a><a class="" href="11-Architecture-Constraints.html"><span class="n">11</span>Architecture Constraints</a><a class="" href="12-Requirements-Traceability-Matrix.html"><span class="n">12</span>Requirements Traceability Matrix</a><a class="" href="13-Implementation-vs-SRS-Gap-Analysis.html"><span class="n">13</span>Implementation vs SRS — Gap Analysis</a><a class="" href="14-Technical-Debt-Report.html"><span class="n">14</span>Technical Debt Report</a><a class="" href="15-Recommendations.html"><span class="n">15</span>Recommendations</a></nav><div class='sec'>On this page</div><div id='toc'><a class="h2" href="#sec-01-credentials">SEC-01 · Credentials</a><a class="h2" href="#sec-02-multi-factor-authentication">SEC-02 · Multi-factor authentication</a><a class="h2" href="#sec-03-session-model-adr-0009-supersedes-adr-0003">SEC-03 · Session model (ADR-0009, supersedes ADR-0003)</a><a class="h2" href="#sec-04-live-session-revocation">SEC-04 · Live session revocation</a><a class="h3" href="#refusal-codes">Refusal codes</a><a class="h2" href="#the-current-model-v151">The current model (v1.51)</a><a class="h2" href="#sec-05-deny-by-default">SEC-05 · Deny-by-default</a><a class="h2" href="#sec-06-permission-model">SEC-06 · Permission model</a><a class="h2" href="#sec-07-read-only-auditor-by-construction">SEC-07 · Read-only auditor by construction</a><a class="h2" href="#sec-08-organisational-scope">SEC-08 · Organisational scope</a><a class="h2" href="#sec-09-segregation-of-duties">SEC-09 · Segregation of duties</a><a class="h2" href="#sec-10-two-independent-layers">SEC-10 · Two independent layers</a><a class="h2" href="#sec-11-tenant-source">SEC-11 · Tenant source</a><a class="h2" href="#sec-12-controlled-elevation">SEC-12 · Controlled elevation</a><a class="h2" href="#sec-13-structural-isolation-in-the-schema">SEC-13 · Structural isolation in the schema</a><a class="h2" href="#sec-14-databaseroleguard-the-deployment-gate">SEC-14 · DatabaseRoleGuard — the deployment gate</a><a class="h3" href="#verified-isolation-properties">Verified isolation properties</a><a class="h2" href="#sec-15-append-only-ledgers">SEC-15 · Append-only ledgers</a><a class="h2" href="#sec-16-hash-chain">SEC-16 · Hash chain</a><a class="h2" href="#sec-17-signed-record-immutability">SEC-17 · Signed-record immutability</a><a class="h2" href="#sec-18-reason-for-change">SEC-18 · Reason for change</a><a class="h2" href="#sec-19-attributability">SEC-19 · Attributability</a><a class="h2" href="#sec-20-security-event-catalogue">SEC-20 · Security-event catalogue</a><a class="h3" href="#the-angular-18-22-upgrade">The Angular 18 → 22 upgrade</a><a class="h3" href="#probe-execution-notes-learned-the-hard-way">Probe execution notes (learned the hard way)</a></div></aside>
+<main>
+<div class="doc-head"><p class="kicker">Document 09 · NT.QMS Production SRS</p><h1>Security Specification</h1></div>
+<blockquote>
+<p><a href="00-SRS-Index-and-Conventions.html">Conventions</a> · Configuration:
+<a href="04-Configuration-Reference.html">Document 04</a> · API contract:
+<a href="08-API-Specification.html">Document 08</a></p>
+</blockquote>
+<hr>
+<h1>9.1 Security model overview</h1>
+<p>Nine layers, each independently enforced. The design principle is that <strong>no single failure removes a
+control</strong>: application logic and the database enforce tenancy and immutability separately, and the
+build gates enforce that new code cannot quietly opt out.</p>
+<figure class="d"><svg width="586" height="1089" preserveAspectRatio="xMidYMid meet" id="mmd-562b0815f50f" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="flowchart" style="max-width:586px;height:auto" viewBox="0 0 586 1089" role="graphics-document document" aria-roledescription="flowchart-v2"><style>#mmd-562b0815f50f{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;fill:#000000;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#mmd-562b0815f50f .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#mmd-562b0815f50f .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#mmd-562b0815f50f .error-icon{fill:#552222;}#mmd-562b0815f50f .error-text{fill:#552222;stroke:#552222;}#mmd-562b0815f50f .edge-thickness-normal{stroke-width:1px;}#mmd-562b0815f50f .edge-thickness-thick{stroke-width:3.5px;}#mmd-562b0815f50f .edge-pattern-solid{stroke-dasharray:0;}#mmd-562b0815f50f .edge-thickness-invisible{stroke-width:0;fill:none;}#mmd-562b0815f50f .edge-pattern-dashed{stroke-dasharray:3;}#mmd-562b0815f50f .edge-pattern-dotted{stroke-dasharray:2;}#mmd-562b0815f50f .marker{fill:#666;stroke:#666;}#mmd-562b0815f50f .marker.cross{stroke:#666;}#mmd-562b0815f50f svg{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;}#mmd-562b0815f50f p{margin:0;}#mmd-562b0815f50f .label{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#000000;}#mmd-562b0815f50f .cluster-label text{fill:#333;}#mmd-562b0815f50f .cluster-label span{color:#333;}#mmd-562b0815f50f .cluster-label span p{background-color:transparent;}#mmd-562b0815f50f .label text,#mmd-562b0815f50f span{fill:#000000;color:#000000;}#mmd-562b0815f50f .node rect,#mmd-562b0815f50f .node circle,#mmd-562b0815f50f .node ellipse,#mmd-562b0815f50f .node polygon,#mmd-562b0815f50f .node path{fill:#eee;stroke:#999;stroke-width:1px;}#mmd-562b0815f50f .rough-node .label text,#mmd-562b0815f50f .node .label text,#mmd-562b0815f50f .image-shape .label,#mmd-562b0815f50f .icon-shape .label{text-anchor:middle;}#mmd-562b0815f50f .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#mmd-562b0815f50f .rough-node .label,#mmd-562b0815f50f .node .label,#mmd-562b0815f50f .image-shape .label,#mmd-562b0815f50f .icon-shape .label{text-align:center;}#mmd-562b0815f50f .node.clickable{cursor:pointer;}#mmd-562b0815f50f .root .anchor path{fill:#666!important;stroke-width:0;stroke:#666;}#mmd-562b0815f50f .arrowheadPath{fill:#333333;}#mmd-562b0815f50f .edgePath .path{stroke:#666;stroke-width:1px;}#mmd-562b0815f50f .flowchart-link{stroke:#666;fill:none;}#mmd-562b0815f50f .edgeLabel{background-color:white;text-align:center;}#mmd-562b0815f50f .edgeLabel p{background-color:white;}#mmd-562b0815f50f .edgeLabel rect{opacity:0.5;background-color:white;fill:white;}#mmd-562b0815f50f .labelBkg{background-color:rgba(255, 255, 255, 0.5);}#mmd-562b0815f50f .cluster rect{fill:hsl(0, 0%, 98.9215686275%);stroke:#707070;stroke-width:1px;}#mmd-562b0815f50f .cluster text{fill:#333;}#mmd-562b0815f50f .cluster span{color:#333;}#mmd-562b0815f50f div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:12px;background:hsl(-160, 0%, 93.3333333333%);border:1px solid #707070;border-radius:2px;pointer-events:none;z-index:100;}#mmd-562b0815f50f .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#000000;}#mmd-562b0815f50f rect.text{fill:none;stroke-width:0;}#mmd-562b0815f50f .icon-shape,#mmd-562b0815f50f .image-shape{background-color:white;text-align:center;}#mmd-562b0815f50f .icon-shape p,#mmd-562b0815f50f .image-shape p{background-color:white;padding:2px;}#mmd-562b0815f50f .icon-shape .label rect,#mmd-562b0815f50f .image-shape .label rect{opacity:0.5;background-color:white;fill:white;}#mmd-562b0815f50f .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#mmd-562b0815f50f .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#mmd-562b0815f50f .node .neo-node{stroke:#999;}#mmd-562b0815f50f [data-look="neo"].node rect,#mmd-562b0815f50f [data-look="neo"].cluster rect,#mmd-562b0815f50f [data-look="neo"].node polygon{stroke:url(#mmd-562b0815f50f-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-562b0815f50f [data-look="neo"].swimlane.cluster rect{filter:none;}#mmd-562b0815f50f [data-look="neo"].node path{stroke:url(#mmd-562b0815f50f-gradient);stroke-width:1px;}#mmd-562b0815f50f [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-562b0815f50f [data-look="neo"].node .neo-line path{stroke:#999;filter:none;}#mmd-562b0815f50f [data-look="neo"].node circle{stroke:url(#mmd-562b0815f50f-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-562b0815f50f [data-look="neo"].node circle .state-start{fill:#000000;}#mmd-562b0815f50f [data-look="neo"].icon-shape .icon{fill:url(#mmd-562b0815f50f-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-562b0815f50f [data-look="neo"].icon-shape .icon-neo path{stroke:url(#mmd-562b0815f50f-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-562b0815f50f :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><g><marker id="my-svg_flowchart-v2-pointEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="4.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 5 L 10 10 L 10 0 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointEnd-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="11.5" refY="7" markerUnits="userSpaceOnUse" markerWidth="10.5" markerHeight="14" orient="auto"><path d="M 0 0 L 11.5 7 L 0 14 z" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="1" refY="7" markerUnits="userSpaceOnUse" markerWidth="11.5" markerHeight="14" orient="auto"><polygon points="0,7 11.5,14 11.5,0" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="11" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-1" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refY="5" refX="12.25" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-2" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="12" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossStart" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="-1" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="17.7" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5;"/></marker><marker id="my-svg_flowchart-v2-crossStart-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="-3.5" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5; stroke-dasharray: 1, 0;"/></marker><g class="root"><g class="clusters"/><g class="edgePaths"><path d="M138,80L138,84.167C138,88.333,138,96.667,138,104.333C138,112,138,119,138,122.5L138,126" id="my-svg-L_L1_L2_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_L1_L2_0" data-points="W3sieCI6MTM4LCJ5Ijo4MH0seyJ4IjoxMzgsInkiOjEwNX0seyJ4IjoxMzgsInkiOjEzMH1d" data-look="classic" marker-end="url(#mmd-562b0815f50f_flowchart-v2-pointEnd)"/><path d="M138,202L138,206.167C138,210.333,138,218.667,138,226.333C138,234,138,241,138,244.5L138,248" id="my-svg-L_L2_L3_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_L2_L3_0" data-points="W3sieCI6MTM4LCJ5IjoyMDJ9LHsieCI6MTM4LCJ5IjoyMjd9LHsieCI6MTM4LCJ5IjoyNTJ9XQ==" data-look="classic" marker-end="url(#mmd-562b0815f50f_flowchart-v2-pointEnd)"/><path d="M138,324L138,328.167C138,332.333,138,340.667,138,348.333C138,356,138,363,138,366.5L138,370" id="my-svg-L_L3_L4_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_L3_L4_0" data-points="W3sieCI6MTM4LCJ5IjozMjR9LHsieCI6MTM4LCJ5IjozNDl9LHsieCI6MTM4LCJ5IjozNzR9XQ==" data-look="classic" marker-end="url(#mmd-562b0815f50f_flowchart-v2-pointEnd)"/><path d="M138,467L138,471.167C138,475.333,138,483.667,138,493.083C138,502.5,138,513,138,518.25L138,523.5" id="my-svg-L_L4_L5_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_L4_L5_0" data-points="W3sieCI6MTM4LCJ5Ijo0Njd9LHsieCI6MTM4LCJ5Ijo0OTJ9LHsieCI6MTM4LCJ5Ijo1MjcuNX1d" data-look="classic" marker-end="url(#mmd-562b0815f50f_flowchart-v2-pointEnd)"/><path d="M138,599.5L138,607.167C138,614.833,138,630.167,139.037,643.096C140.075,656.025,142.15,666.55,143.187,671.813L144.224,677.076" id="my-svg-L_L5_L6_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_L5_L6_0" data-points="W3sieCI6MTM4LCJ5Ijo1OTkuNX0seyJ4IjoxMzgsInkiOjY0NS41fSx7IngiOjE0NC45OTc4NTYzMjYyMTk1LCJ5Ijo2ODF9XQ==" data-look="classic" marker-end="url(#mmd-562b0815f50f_flowchart-v2-pointEnd)"/><path d="M154.164,774L154.164,778.167C154.164,782.333,154.164,790.667,160.053,798.638C165.942,806.61,177.721,814.22,183.61,818.024L189.499,821.829" id="my-svg-L_L6_L7_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_L6_L7_0" data-points="W3sieCI6MTU0LjE2NDA2MjUsInkiOjc3NH0seyJ4IjoxNTQuMTY0MDYyNSwieSI6Nzk5fSx7IngiOjE5Mi44NTkxNTY0Njg1MzE0NywieSI6ODI0fV0=" data-look="classic" marker-end="url(#mmd-562b0815f50f_flowchart-v2-pointEnd)"/><path d="M264.832,917L264.832,921.167C264.832,925.333,264.832,933.667,268.551,941.53C272.271,949.393,279.709,956.787,283.428,960.483L287.147,964.18" id="my-svg-L_L7_L8_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_L7_L8_0" data-points="W3sieCI6MjY0LjgzMjAzMTI1LCJ5Ijo5MTd9LHsieCI6MjY0LjgzMjAzMTI1LCJ5Ijo5NDJ9LHsieCI6Mjg5Ljk4NDQ3MDI3NDM5MDIsInkiOjk2N31d" data-look="classic" marker-end="url(#mmd-562b0815f50f_flowchart-v2-pointEnd)"/><path d="M360.104,610L348.92,615.917C337.736,621.833,315.368,633.667,294.74,645.161C274.113,656.655,255.226,667.811,245.782,673.388L236.338,678.966" id="my-svg-L_L9_L6_0" class="edge-thickness-normal edge-pattern-dotted edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_L9_L6_0" data-points="W3sieCI6MzYwLjEwMzY1ODUzNjU4NTQsInkiOjYxMH0seyJ4IjoyOTMsInkiOjY0NS41fSx7IngiOjIzMi44OTQxOTc3ODk2MzQxNSwieSI6NjgxfV0=" data-look="classic" marker-end="url(#mmd-562b0815f50f_flowchart-v2-pointEnd)"/><path d="M432.027,610L429.994,615.917C427.962,621.833,423.897,633.667,421.864,653.25C419.832,672.833,419.832,700.167,419.832,725.75C419.832,751.333,419.832,775.167,411.405,790.971C402.977,806.775,386.123,814.55,377.696,818.437L369.268,822.325" id="my-svg-L_L9_L7_0" class="edge-thickness-normal edge-pattern-dotted edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_L9_L7_0" data-points="W3sieCI6NDMyLjAyNjcwMDY0Nzg2NTksInkiOjYxMH0seyJ4Ijo0MTkuODMyMDMxMjUsInkiOjY0NS41fSx7IngiOjQxOS44MzIwMzEyNSwieSI6NzI3LjV9LHsieCI6NDE5LjgzMjAzMTI1LCJ5Ijo3OTl9LHsieCI6MzY1LjYzNjIyNzA1NDE5NTgsInkiOjgyNH1d" data-look="classic" marker-end="url(#mmd-562b0815f50f_flowchart-v2-pointEnd)"/><path d="M509.62,610L517.461,615.917C525.302,621.833,540.983,633.667,548.823,653.25C556.664,672.833,556.664,700.167,556.664,725.75C556.664,751.333,556.664,775.167,556.664,799C556.664,822.833,556.664,846.667,556.664,870.5C556.664,894.333,556.664,918.167,544.063,935.02C531.462,951.872,506.259,961.745,493.658,966.681L481.056,971.617" id="my-svg-L_L9_L8_0" class="edge-thickness-normal edge-pattern-dotted edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_L9_L8_0" data-points="W3sieCI6NTA5LjYyMDQ3NDQ2NjQ2MzQsInkiOjYxMH0seyJ4Ijo1NTYuNjY0MDYyNSwieSI6NjQ1LjV9LHsieCI6NTU2LjY2NDA2MjUsInkiOjcyNy41fSx7IngiOjU1Ni42NjQwNjI1LCJ5Ijo3OTl9LHsieCI6NTU2LjY2NDA2MjUsInkiOjg3MC41fSx7IngiOjU1Ni42NjQwNjI1LCJ5Ijo5NDJ9LHsieCI6NDc3LjMzMjAzMTI1LCJ5Ijo5NzMuMDc2MTE2MzY3MTY0OX1d" data-look="classic" marker-end="url(#mmd-562b0815f50f_flowchart-v2-pointEnd)"/></g><g class="edgeLabels"><g class="edgeLabel"><g class="label" data-id="L_L1_L2_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_L2_L3_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_L3_L4_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_L4_L5_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_L5_L6_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_L6_L7_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_L7_L8_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel" transform="translate(295.69989, 644.07167)"><g class="label" data-id="L_L9_L6_0" transform="translate(-68.6640625, -10.5)"><foreignObject width="137.328125" height="21"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"><p>prevents regression of</p></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_L9_L7_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_L9_L8_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g></g><g class="nodes"><g class="node default" id="my-svg-flowchart-L1-0" data-look="classic" transform="translate(138, 44)"><rect class="basic label-container" style="" x="-130" y="-36" width="260" height="72"/><g class="label" style="" transform="translate(-100, -21)"><rect/><foreignObject width="200" height="42"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>1 · Edge — TLS at the proxy, HSTS, forwarded headers</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-L2-1" data-look="classic" transform="translate(138, 166)"><rect class="basic label-container" style="" x="-130" y="-36" width="260" height="72"/><g class="label" style="" transform="translate(-100, -21)"><rect/><foreignObject width="200" height="42"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>2 · Transport headers — CSP, nosniff, DENY, no-referrer</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-L3-2" data-look="classic" transform="translate(138, 288)"><rect class="basic label-container" style="" x="-130" y="-36" width="260" height="72"/><g class="label" style="" transform="translate(-100, -21)"><rect/><foreignObject width="200" height="42"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>3 · Rate limiting — 4 partitions, 429 + Retry-After</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-L4-3" data-look="classic" transform="translate(138, 420.5)"><rect class="basic label-container" style="" x="-130" y="-46.5" width="260" height="93"/><g class="label" style="" transform="translate(-100, -31.5)"><rect/><foreignObject width="200" height="63"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>4 · Authentication — JWT (memory) + rotating refresh cookie + TOTP</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-L5-4" data-look="classic" transform="translate(138, 563.5)"><rect class="basic label-container" style="" x="-130" y="-36" width="260" height="72"/><g class="label" style="" transform="translate(-100, -21)"><rect/><foreignObject width="200" height="42"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>5 · Live session check — DB re-verify every request</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-L6-5" data-look="classic" transform="translate(154.1640625, 727.5)"><rect class="basic label-container" style="" x="-130" y="-46.5" width="260" height="93"/><g class="label" style="" transform="translate(-100, -31.5)"><rect/><foreignObject width="200" height="63"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>6 · Authorisation — permission gate (HTTP) + command policy (CQRS), deny-by-default</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-L7-6" data-look="classic" transform="translate(264.83203125, 870.5)"><rect class="basic label-container" style="" x="-130" y="-46.5" width="260" height="93"/><g class="label" style="" transform="translate(-100, -31.5)"><rect/><foreignObject width="200" height="63"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>7 · Tenant isolation — EF filter AND PostgreSQL FORCE RLS, fail-closed</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-L8-7" data-look="classic" transform="translate(347.33203125, 1024)"><rect class="basic label-container" style="" x="-130" y="-57" width="260" height="114"/><g class="label" style="" transform="translate(-100, -42)"><rect/><foreignObject width="200" height="84"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>8 · Record integrity — append-only ledgers, hash chain, immutability triggers, e-signatures</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-L9-8" data-look="classic" transform="translate(448, 563.5)"><rect class="basic label-container" style="" x="-130" y="-46.5" width="260" height="93"/><g class="label" style="" transform="translate(-100, -31.5)"><rect/><foreignObject width="200" height="63"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>9 · Build gates — command-policy, API-surface, role-matrix, SCA, Trivy, axe</p></span></div></foreignObject></g></g></g></g></g><defs><filter id="my-svg-drop-shadow" height="130%" width="130%"><feDropShadow dx="4" dy="4" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs><defs><filter id="my-svg-drop-shadow-small" height="150%" width="150%"><feDropShadow dx="2" dy="2" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs><linearGradient id="my-svg-gradient" gradientUnits="objectBoundingBox" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="hsl(0, 0%, 83.3333333333%)" stop-opacity="1"/><stop offset="100%" stop-color="hsl(0, 0%, 88.9215686275%)" stop-opacity="1"/></linearGradient></svg></figure>
+
+<hr>
+<h1>9.2 Authentication</h1>
+<h2 id="sec-01-credentials">SEC-01 · Credentials</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Password hashing</td>
+<td><code>Microsoft.AspNetCore.Identity.PasswordHasher&lt;UserAccount&gt;</code> (PBKDF2, framework-versioned format with embedded salt and iteration count)</td>
+</tr>
+<tr>
+<td>Password rules</td>
+<td>≥12 chars, ≤200, upper+lower+digit+symbol, offline breached/common blocklist — <strong>one shared rule set</strong> across register / reset / change / provision</td>
+</tr>
+<tr>
+<td>History</td>
+<td>must differ from the last <code>HistoryDepth + 1</code> (default 6) — <code>AUTH-102</code></td>
+</tr>
+<tr>
+<td>Maximum age</td>
+<td>90 days (<code>PasswordPolicy:MaxAgeDays</code>)</td>
+</tr>
+<tr>
+<td>Lockout</td>
+<td><strong>5 failed attempts → 30 minutes</strong></td>
+</tr>
+<tr>
+<td>Failure disclosure</td>
+<td><code>AUTH-001 "Invalid credentials."</code> — never distinguishes unknown user from wrong password</td>
+</tr>
+<tr>
+<td>Expired-password path</td>
+<td><code>POST /api/auth/change-password</code> is <strong>anonymous by design</strong> so an expired password can still be rotated; the handler verifies full credentials</td>
+</tr>
+<tr>
+<td>Self-service reset</td>
+<td><strong>none</strong> — an administrator resets, delivering the new password out of band</td>
+</tr>
+<tr>
+<td>E-mail verification</td>
+<td><strong>none</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="sec-02-multi-factor-authentication">SEC-02 · Multi-factor authentication</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mechanism</td>
+<td><strong>TOTP, RFC 6238</strong> — any authenticator application</td>
+</tr>
+<tr>
+<td>Scope</td>
+<td><strong>optional per tenant</strong>, default <strong>off</strong> (<code>TenantSettings.RequireMfaForPrivilegedRoles</code>)</td>
+</tr>
+<tr>
+<td>Platform admins</td>
+<td>fall back to the global <code>Security:RequireMfaForPrivilegedRoles</code> (default false)</td>
+</tr>
+<tr>
+<td>Enrolment gate</td>
+<td>a privileged, non-enrolled user gets a token with <code>scope=mfa_enrollment</code>; <code>MfaEnrollmentGateMiddleware</code> allows <strong>only</strong> <code>/api/auth/mfa/enroll</code> and <code>/mfa/confirm</code> (and their <code>/api/v1/</code> forms). Everything else → <strong>403 <code>MFA-ENROLL-REQUIRED</code></strong></td>
+</tr>
+<tr>
+<td>Secret storage</td>
+<td><code>user_account.mfa_secret</code></td>
+</tr>
+<tr>
+<td>Recovery codes</td>
+<td><strong>none</strong> — a lost authenticator requires administrator intervention</td>
+</tr>
+<tr>
+<td>Current state</td>
+<td>every tenant in the development dataset has MFA <strong>off</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="sec-03-session-model-adr-0009-supersedes-adr-0003">SEC-03 · Session model (ADR-0009, supersedes ADR-0003)</h2>
+<figure class="d"><svg width="1214" height="764" preserveAspectRatio="xMidYMid meet" id="mmd-5257a01c5dda" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="max-width:1214px;height:auto" viewBox="-224.5 -10 1214 764" role="graphics-document document" aria-roledescription="sequence"><g><rect x="782.5" y="678" fill="#eaeaea" stroke="#666" width="157" height="65" name="DB" rx="3" ry="3" class="actor actor-bottom"/><text x="861" y="710.5" dominant-baseline="central" alignment-baseline="central" class="actor actor-box" style="text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x="861" dy="0">qams.refresh_session</tspan></text></g><g><rect x="343" y="678" fill="#eaeaea" stroke="#666" width="150" height="65" name="API" rx="3" ry="3" class="actor actor-bottom"/><text x="418" y="710.5" dominant-baseline="central" alignment-baseline="central" class="actor actor-box" style="text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x="418" dy="0">API</tspan></text></g><g><rect x="0" y="678" fill="#eaeaea" stroke="#666" width="150" height="65" name="SPA" rx="3" ry="3" class="actor actor-bottom"/><text x="75" y="710.5" dominant-baseline="central" alignment-baseline="central" class="actor actor-box" style="text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x="75" dy="0">SPA (memory)</tspan></text></g><g><line id="actor2" x1="861" y1="65" x2="861" y2="678" class="actor-line 200" stroke-width="0.5px" stroke="#999" name="DB" data-et="life-line" data-id="DB"/><g id="root-2" data-et="participant" data-type="participant" data-id="DB"><rect x="782.5" y="0" fill="#eaeaea" stroke="#666" width="157" height="65" name="DB" rx="3" ry="3" class="actor actor-top"/><text x="861" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor actor-box" style="text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x="861" dy="0">qams.refresh_session</tspan></text></g></g><g><line id="actor1" x1="418" y1="65" x2="418" y2="678" class="actor-line 200" stroke-width="0.5px" stroke="#999" name="API" data-et="life-line" data-id="API"/><g id="root-1" data-et="participant" data-type="participant" data-id="API"><rect x="343" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" name="API" rx="3" ry="3" class="actor actor-top"/><text x="418" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor actor-box" style="text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x="418" dy="0">API</tspan></text></g></g><g><line id="actor0" x1="75" y1="65" x2="75" y2="678" class="actor-line 200" stroke-width="0.5px" stroke="#999" name="SPA" data-et="life-line" data-id="SPA"/><g id="root-0" data-et="participant" data-type="participant" data-id="SPA"><rect x="0" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" name="SPA" rx="3" ry="3" class="actor actor-top"/><text x="75" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor actor-box" style="text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x="75" dy="0">SPA (memory)</tspan></text></g></g><style>#mmd-5257a01c5dda{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;fill:#000000;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#mmd-5257a01c5dda .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#mmd-5257a01c5dda .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#mmd-5257a01c5dda .error-icon{fill:#552222;}#mmd-5257a01c5dda .error-text{fill:#552222;stroke:#552222;}#mmd-5257a01c5dda .edge-thickness-normal{stroke-width:1px;}#mmd-5257a01c5dda .edge-thickness-thick{stroke-width:3.5px;}#mmd-5257a01c5dda .edge-pattern-solid{stroke-dasharray:0;}#mmd-5257a01c5dda .edge-thickness-invisible{stroke-width:0;fill:none;}#mmd-5257a01c5dda .edge-pattern-dashed{stroke-dasharray:3;}#mmd-5257a01c5dda .edge-pattern-dotted{stroke-dasharray:2;}#mmd-5257a01c5dda .marker{fill:#666;stroke:#666;}#mmd-5257a01c5dda .marker.cross{stroke:#666;}#mmd-5257a01c5dda svg{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;}#mmd-5257a01c5dda p{margin:0;}#mmd-5257a01c5dda .actor{stroke:hsl(0, 0%, 83%);fill:#eee;stroke-width:1;}#mmd-5257a01c5dda rect.actor.outer-path[data-look="neo"]{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-5257a01c5dda rect.note[data-look="neo"]{stroke:#999;fill:#666;filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-5257a01c5dda text.actor&gt;tspan{fill:#333;stroke:none;}#mmd-5257a01c5dda .actor-line{stroke:hsl(0, 0%, 83%);}#mmd-5257a01c5dda .innerArc{stroke-width:1.5;stroke-dasharray:none;}#mmd-5257a01c5dda .messageLine0{stroke-width:1.5;stroke-dasharray:none;stroke:#333;}#mmd-5257a01c5dda .messageLine1{stroke-width:1.5;stroke-dasharray:2,2;stroke:#333;}#mmd-5257a01c5dda [id$="-arrowhead"] path{fill:#333;stroke:#333;}#mmd-5257a01c5dda .sequenceNumber{fill:white;}#mmd-5257a01c5dda [id$="-sequencenumber"]{fill:#333;}#mmd-5257a01c5dda [id$="-crosshead"] path{fill:#333;stroke:#333;}#mmd-5257a01c5dda .messageText{fill:#333;stroke:none;}#mmd-5257a01c5dda .labelBox{stroke:hsl(0, 0%, 83%);fill:#eee;filter:none;}#mmd-5257a01c5dda .labelText,#mmd-5257a01c5dda .labelText&gt;tspan{fill:#333;stroke:none;}#mmd-5257a01c5dda .loopText,#mmd-5257a01c5dda .loopText&gt;tspan{fill:#333;stroke:none;}#mmd-5257a01c5dda .sectionTitle,#mmd-5257a01c5dda .sectionTitle&gt;tspan{fill:#333;stroke:none;}#mmd-5257a01c5dda .loopLine{stroke-width:2px;stroke-dasharray:2,2;stroke:hsl(0, 0%, 83%);fill:hsl(0, 0%, 83%);}#mmd-5257a01c5dda .note{stroke:#999;fill:#666;}#mmd-5257a01c5dda .noteText,#mmd-5257a01c5dda .noteText&gt;tspan{fill:#fff;stroke:none;font-weight:normal;}#mmd-5257a01c5dda .activation0{fill:#f4f4f4;stroke:#666;}#mmd-5257a01c5dda .activation1{fill:#f4f4f4;stroke:#666;}#mmd-5257a01c5dda .activation2{fill:#f4f4f4;stroke:#666;}#mmd-5257a01c5dda .actorPopupMenu{position:absolute;}#mmd-5257a01c5dda .actorPopupMenuPanel{position:absolute;fill:#eee;box-shadow:0px 8px 16px 0px rgba(0,0,0,0.2);filter:drop-shadow(3px 5px 2px rgb(0 0 0 / 0.4));}#mmd-5257a01c5dda .actor-man circle,#mmd-5257a01c5dda line{fill:#eee;stroke-width:2px;}#mmd-5257a01c5dda g rect.rect{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));stroke:#999;}#mmd-5257a01c5dda .node .neo-node{stroke:#999;}#mmd-5257a01c5dda [data-look="neo"].node rect,#mmd-5257a01c5dda [data-look="neo"].cluster rect,#mmd-5257a01c5dda [data-look="neo"].node polygon{stroke:url(#mmd-5257a01c5dda-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-5257a01c5dda [data-look="neo"].swimlane.cluster rect{filter:none;}#mmd-5257a01c5dda [data-look="neo"].node path{stroke:url(#mmd-5257a01c5dda-gradient);stroke-width:1px;}#mmd-5257a01c5dda [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-5257a01c5dda [data-look="neo"].node .neo-line path{stroke:#999;filter:none;}#mmd-5257a01c5dda [data-look="neo"].node circle{stroke:url(#mmd-5257a01c5dda-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-5257a01c5dda [data-look="neo"].node circle .state-start{fill:#000000;}#mmd-5257a01c5dda [data-look="neo"].icon-shape .icon{fill:url(#mmd-5257a01c5dda-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-5257a01c5dda [data-look="neo"].icon-shape .icon-neo path{stroke:url(#mmd-5257a01c5dda-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-5257a01c5dda :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><g/><defs><symbol id="my-svg-computer" width="24" height="24"><path transform="scale(.5)" d="M2 2v13h20v-13h-20zm18 11h-16v-9h16v9zm-10.228 6l.466-1h3.524l.467 1h-4.457zm14.228 3h-24l2-6h2.104l-1.33 4h18.45l-1.297-4h2.073l2 6zm-5-10h-14v-7h14v7z"/></symbol></defs><defs><symbol id="my-svg-database" fill-rule="evenodd" clip-rule="evenodd"><path transform="scale(.5)" d="M12.258.001l.256.004.255.005.253.008.251.01.249.012.247.015.246.016.242.019.241.02.239.023.236.024.233.027.231.028.229.031.225.032.223.034.22.036.217.038.214.04.211.041.208.043.205.045.201.046.198.048.194.05.191.051.187.053.183.054.18.056.175.057.172.059.168.06.163.061.16.063.155.064.15.066.074.033.073.033.071.034.07.034.069.035.068.035.067.035.066.035.064.036.064.036.062.036.06.036.06.037.058.037.058.037.055.038.055.038.053.038.052.038.051.039.05.039.048.039.047.039.045.04.044.04.043.04.041.04.04.041.039.041.037.041.036.041.034.041.033.042.032.042.03.042.029.042.027.042.026.043.024.043.023.043.021.043.02.043.018.044.017.043.015.044.013.044.012.044.011.045.009.044.007.045.006.045.004.045.002.045.001.045v17l-.001.045-.002.045-.004.045-.006.045-.007.045-.009.044-.011.045-.012.044-.013.044-.015.044-.017.043-.018.044-.02.043-.021.043-.023.043-.024.043-.026.043-.027.042-.029.042-.03.042-.032.042-.033.042-.034.041-.036.041-.037.041-.039.041-.04.041-.041.04-.043.04-.044.04-.045.04-.047.039-.048.039-.05.039-.051.039-.052.038-.053.038-.055.038-.055.038-.058.037-.058.037-.06.037-.06.036-.062.036-.064.036-.064.036-.066.035-.067.035-.068.035-.069.035-.07.034-.071.034-.073.033-.074.033-.15.066-.155.064-.16.063-.163.061-.168.06-.172.059-.175.057-.18.056-.183.054-.187.053-.191.051-.194.05-.198.048-.201.046-.205.045-.208.043-.211.041-.214.04-.217.038-.22.036-.223.034-.225.032-.229.031-.231.028-.233.027-.236.024-.239.023-.241.02-.242.019-.246.016-.247.015-.249.012-.251.01-.253.008-.255.005-.256.004-.258.001-.258-.001-.256-.004-.255-.005-.253-.008-.251-.01-.249-.012-.247-.015-.245-.016-.243-.019-.241-.02-.238-.023-.236-.024-.234-.027-.231-.028-.228-.031-.226-.032-.223-.034-.22-.036-.217-.038-.214-.04-.211-.041-.208-.043-.204-.045-.201-.046-.198-.048-.195-.05-.19-.051-.187-.053-.184-.054-.179-.056-.176-.057-.172-.059-.167-.06-.164-.061-.159-.063-.155-.064-.151-.066-.074-.033-.072-.033-.072-.034-.07-.034-.069-.035-.068-.035-.067-.035-.066-.035-.064-.036-.063-.036-.062-.036-.061-.036-.06-.037-.058-.037-.057-.037-.056-.038-.055-.038-.053-.038-.052-.038-.051-.039-.049-.039-.049-.039-.046-.039-.046-.04-.044-.04-.043-.04-.041-.04-.04-.041-.039-.041-.037-.041-.036-.041-.034-.041-.033-.042-.032-.042-.03-.042-.029-.042-.027-.042-.026-.043-.024-.043-.023-.043-.021-.043-.02-.043-.018-.044-.017-.043-.015-.044-.013-.044-.012-.044-.011-.045-.009-.044-.007-.045-.006-.045-.004-.045-.002-.045-.001-.045v-17l.001-.045.002-.045.004-.045.006-.045.007-.045.009-.044.011-.045.012-.044.013-.044.015-.044.017-.043.018-.044.02-.043.021-.043.023-.043.024-.043.026-.043.027-.042.029-.042.03-.042.032-.042.033-.042.034-.041.036-.041.037-.041.039-.041.04-.041.041-.04.043-.04.044-.04.046-.04.046-.039.049-.039.049-.039.051-.039.052-.038.053-.038.055-.038.056-.038.057-.037.058-.037.06-.037.061-.036.062-.036.063-.036.064-.036.066-.035.067-.035.068-.035.069-.035.07-.034.072-.034.072-.033.074-.033.151-.066.155-.064.159-.063.164-.061.167-.06.172-.059.176-.057.179-.056.184-.054.187-.053.19-.051.195-.05.198-.048.201-.046.204-.045.208-.043.211-.041.214-.04.217-.038.22-.036.223-.034.226-.032.228-.031.231-.028.234-.027.236-.024.238-.023.241-.02.243-.019.245-.016.247-.015.249-.012.251-.01.253-.008.255-.005.256-.004.258-.001.258.001zm-9.258 20.499v.01l.001.021.003.021.004.022.005.021.006.022.007.022.009.023.01.022.011.023.012.023.013.023.015.023.016.024.017.023.018.024.019.024.021.024.022.025.023.024.024.025.052.049.056.05.061.051.066.051.07.051.075.051.079.052.084.052.088.052.092.052.097.052.102.051.105.052.11.052.114.051.119.051.123.051.127.05.131.05.135.05.139.048.144.049.147.047.152.047.155.047.16.045.163.045.167.043.171.043.176.041.178.041.183.039.187.039.19.037.194.035.197.035.202.033.204.031.209.03.212.029.216.027.219.025.222.024.226.021.23.02.233.018.236.016.24.015.243.012.246.01.249.008.253.005.256.004.259.001.26-.001.257-.004.254-.005.25-.008.247-.011.244-.012.241-.014.237-.016.233-.018.231-.021.226-.021.224-.024.22-.026.216-.027.212-.028.21-.031.205-.031.202-.034.198-.034.194-.036.191-.037.187-.039.183-.04.179-.04.175-.042.172-.043.168-.044.163-.045.16-.046.155-.046.152-.047.148-.048.143-.049.139-.049.136-.05.131-.05.126-.05.123-.051.118-.052.114-.051.11-.052.106-.052.101-.052.096-.052.092-.052.088-.053.083-.051.079-.052.074-.052.07-.051.065-.051.06-.051.056-.05.051-.05.023-.024.023-.025.021-.024.02-.024.019-.024.018-.024.017-.024.015-.023.014-.024.013-.023.012-.023.01-.023.01-.022.008-.022.006-.022.006-.022.004-.022.004-.021.001-.021.001-.021v-4.127l-.077.055-.08.053-.083.054-.085.053-.087.052-.09.052-.093.051-.095.05-.097.05-.1.049-.102.049-.105.048-.106.047-.109.047-.111.046-.114.045-.115.045-.118.044-.12.043-.122.042-.124.042-.126.041-.128.04-.13.04-.132.038-.134.038-.135.037-.138.037-.139.035-.142.035-.143.034-.144.033-.147.032-.148.031-.15.03-.151.03-.153.029-.154.027-.156.027-.158.026-.159.025-.161.024-.162.023-.163.022-.165.021-.166.02-.167.019-.169.018-.169.017-.171.016-.173.015-.173.014-.175.013-.175.012-.177.011-.178.01-.179.008-.179.008-.181.006-.182.005-.182.004-.184.003-.184.002h-.37l-.184-.002-.184-.003-.182-.004-.182-.005-.181-.006-.179-.008-.179-.008-.178-.01-.176-.011-.176-.012-.175-.013-.173-.014-.172-.015-.171-.016-.17-.017-.169-.018-.167-.019-.166-.02-.165-.021-.163-.022-.162-.023-.161-.024-.159-.025-.157-.026-.156-.027-.155-.027-.153-.029-.151-.03-.15-.03-.148-.031-.146-.032-.145-.033-.143-.034-.141-.035-.14-.035-.137-.037-.136-.037-.134-.038-.132-.038-.13-.04-.128-.04-.126-.041-.124-.042-.122-.042-.12-.044-.117-.043-.116-.045-.113-.045-.112-.046-.109-.047-.106-.047-.105-.048-.102-.049-.1-.049-.097-.05-.095-.05-.093-.052-.09-.051-.087-.052-.085-.053-.083-.054-.08-.054-.077-.054v4.127zm0-5.654v.011l.001.021.003.021.004.021.005.022.006.022.007.022.009.022.01.022.011.023.012.023.013.023.015.024.016.023.017.024.018.024.019.024.021.024.022.024.023.025.024.024.052.05.056.05.061.05.066.051.07.051.075.052.079.051.084.052.088.052.092.052.097.052.102.052.105.052.11.051.114.051.119.052.123.05.127.051.131.05.135.049.139.049.144.048.147.048.152.047.155.046.16.045.163.045.167.044.171.042.176.042.178.04.183.04.187.038.19.037.194.036.197.034.202.033.204.032.209.03.212.028.216.027.219.025.222.024.226.022.23.02.233.018.236.016.24.014.243.012.246.01.249.008.253.006.256.003.259.001.26-.001.257-.003.254-.006.25-.008.247-.01.244-.012.241-.015.237-.016.233-.018.231-.02.226-.022.224-.024.22-.025.216-.027.212-.029.21-.03.205-.032.202-.033.198-.035.194-.036.191-.037.187-.039.183-.039.179-.041.175-.042.172-.043.168-.044.163-.045.16-.045.155-.047.152-.047.148-.048.143-.048.139-.05.136-.049.131-.05.126-.051.123-.051.118-.051.114-.052.11-.052.106-.052.101-.052.096-.052.092-.052.088-.052.083-.052.079-.052.074-.051.07-.052.065-.051.06-.05.056-.051.051-.049.023-.025.023-.024.021-.025.02-.024.019-.024.018-.024.017-.024.015-.023.014-.023.013-.024.012-.022.01-.023.01-.023.008-.022.006-.022.006-.022.004-.021.004-.022.001-.021.001-.021v-4.139l-.077.054-.08.054-.083.054-.085.052-.087.053-.09.051-.093.051-.095.051-.097.05-.1.049-.102.049-.105.048-.106.047-.109.047-.111.046-.114.045-.115.044-.118.044-.12.044-.122.042-.124.042-.126.041-.128.04-.13.039-.132.039-.134.038-.135.037-.138.036-.139.036-.142.035-.143.033-.144.033-.147.033-.148.031-.15.03-.151.03-.153.028-.154.028-.156.027-.158.026-.159.025-.161.024-.162.023-.163.022-.165.021-.166.02-.167.019-.169.018-.169.017-.171.016-.173.015-.173.014-.175.013-.175.012-.177.011-.178.009-.179.009-.179.007-.181.007-.182.005-.182.004-.184.003-.184.002h-.37l-.184-.002-.184-.003-.182-.004-.182-.005-.181-.007-.179-.007-.179-.009-.178-.009-.176-.011-.176-.012-.175-.013-.173-.014-.172-.015-.171-.016-.17-.017-.169-.018-.167-.019-.166-.02-.165-.021-.163-.022-.162-.023-.161-.024-.159-.025-.157-.026-.156-.027-.155-.028-.153-.028-.151-.03-.15-.03-.148-.031-.146-.033-.145-.033-.143-.033-.141-.035-.14-.036-.137-.036-.136-.037-.134-.038-.132-.039-.13-.039-.128-.04-.126-.041-.124-.042-.122-.043-.12-.043-.117-.044-.116-.044-.113-.046-.112-.046-.109-.046-.106-.047-.105-.048-.102-.049-.1-.049-.097-.05-.095-.051-.093-.051-.09-.051-.087-.053-.085-.052-.083-.054-.08-.054-.077-.054v4.139zm0-5.666v.011l.001.02.003.022.004.021.005.022.006.021.007.022.009.023.01.022.011.023.012.023.013.023.015.023.016.024.017.024.018.023.019.024.021.025.022.024.023.024.024.025.052.05.056.05.061.05.066.051.07.051.075.052.079.051.084.052.088.052.092.052.097.052.102.052.105.051.11.052.114.051.119.051.123.051.127.05.131.05.135.05.139.049.144.048.147.048.152.047.155.046.16.045.163.045.167.043.171.043.176.042.178.04.183.04.187.038.19.037.194.036.197.034.202.033.204.032.209.03.212.028.216.027.219.025.222.024.226.021.23.02.233.018.236.017.24.014.243.012.246.01.249.008.253.006.256.003.259.001.26-.001.257-.003.254-.006.25-.008.247-.01.244-.013.241-.014.237-.016.233-.018.231-.02.226-.022.224-.024.22-.025.216-.027.212-.029.21-.03.205-.032.202-.033.198-.035.194-.036.191-.037.187-.039.183-.039.179-.041.175-.042.172-.043.168-.044.163-.045.16-.045.155-.047.152-.047.148-.048.143-.049.139-.049.136-.049.131-.051.126-.05.123-.051.118-.052.114-.051.11-.052.106-.052.101-.052.096-.052.092-.052.088-.052.083-.052.079-.052.074-.052.07-.051.065-.051.06-.051.056-.05.051-.049.023-.025.023-.025.021-.024.02-.024.019-.024.018-.024.017-.024.015-.023.014-.024.013-.023.012-.023.01-.022.01-.023.008-.022.006-.022.006-.022.004-.022.004-.021.001-.021.001-.021v-4.153l-.077.054-.08.054-.083.053-.085.053-.087.053-.09.051-.093.051-.095.051-.097.05-.1.049-.102.048-.105.048-.106.048-.109.046-.111.046-.114.046-.115.044-.118.044-.12.043-.122.043-.124.042-.126.041-.128.04-.13.039-.132.039-.134.038-.135.037-.138.036-.139.036-.142.034-.143.034-.144.033-.147.032-.148.032-.15.03-.151.03-.153.028-.154.028-.156.027-.158.026-.159.024-.161.024-.162.023-.163.023-.165.021-.166.02-.167.019-.169.018-.169.017-.171.016-.173.015-.173.014-.175.013-.175.012-.177.01-.178.01-.179.009-.179.007-.181.006-.182.006-.182.004-.184.003-.184.001-.185.001-.185-.001-.184-.001-.184-.003-.182-.004-.182-.006-.181-.006-.179-.007-.179-.009-.178-.01-.176-.01-.176-.012-.175-.013-.173-.014-.172-.015-.171-.016-.17-.017-.169-.018-.167-.019-.166-.02-.165-.021-.163-.023-.162-.023-.161-.024-.159-.024-.157-.026-.156-.027-.155-.028-.153-.028-.151-.03-.15-.03-.148-.032-.146-.032-.145-.033-.143-.034-.141-.034-.14-.036-.137-.036-.136-.037-.134-.038-.132-.039-.13-.039-.128-.041-.126-.041-.124-.041-.122-.043-.12-.043-.117-.044-.116-.044-.113-.046-.112-.046-.109-.046-.106-.048-.105-.048-.102-.048-.1-.05-.097-.049-.095-.051-.093-.051-.09-.052-.087-.052-.085-.053-.083-.053-.08-.054-.077-.054v4.153zm8.74-8.179l-.257.004-.254.005-.25.008-.247.011-.244.012-.241.014-.237.016-.233.018-.231.021-.226.022-.224.023-.22.026-.216.027-.212.028-.21.031-.205.032-.202.033-.198.034-.194.036-.191.038-.187.038-.183.04-.179.041-.175.042-.172.043-.168.043-.163.045-.16.046-.155.046-.152.048-.148.048-.143.048-.139.049-.136.05-.131.05-.126.051-.123.051-.118.051-.114.052-.11.052-.106.052-.101.052-.096.052-.092.052-.088.052-.083.052-.079.052-.074.051-.07.052-.065.051-.06.05-.056.05-.051.05-.023.025-.023.024-.021.024-.02.025-.019.024-.018.024-.017.023-.015.024-.014.023-.013.023-.012.023-.01.023-.01.022-.008.022-.006.023-.006.021-.004.022-.004.021-.001.021-.001.021.001.021.001.021.004.021.004.022.006.021.006.023.008.022.01.022.01.023.012.023.013.023.014.023.015.024.017.023.018.024.019.024.02.025.021.024.023.024.023.025.051.05.056.05.06.05.065.051.07.052.074.051.079.052.083.052.088.052.092.052.096.052.101.052.106.052.11.052.114.052.118.051.123.051.126.051.131.05.136.05.139.049.143.048.148.048.152.048.155.046.16.046.163.045.168.043.172.043.175.042.179.041.183.04.187.038.191.038.194.036.198.034.202.033.205.032.21.031.212.028.216.027.22.026.224.023.226.022.231.021.233.018.237.016.241.014.244.012.247.011.25.008.254.005.257.004.26.001.26-.001.257-.004.254-.005.25-.008.247-.011.244-.012.241-.014.237-.016.233-.018.231-.021.226-.022.224-.023.22-.026.216-.027.212-.028.21-.031.205-.032.202-.033.198-.034.194-.036.191-.038.187-.038.183-.04.179-.041.175-.042.172-.043.168-.043.163-.045.16-.046.155-.046.152-.048.148-.048.143-.048.139-.049.136-.05.131-.05.126-.051.123-.051.118-.051.114-.052.11-.052.106-.052.101-.052.096-.052.092-.052.088-.052.083-.052.079-.052.074-.051.07-.052.065-.051.06-.05.056-.05.051-.05.023-.025.023-.024.021-.024.02-.025.019-.024.018-.024.017-.023.015-.024.014-.023.013-.023.012-.023.01-.023.01-.022.008-.022.006-.023.006-.021.004-.022.004-.021.001-.021.001-.021-.001-.021-.001-.021-.004-.021-.004-.022-.006-.021-.006-.023-.008-.022-.01-.022-.01-.023-.012-.023-.013-.023-.014-.023-.015-.024-.017-.023-.018-.024-.019-.024-.02-.025-.021-.024-.023-.024-.023-.025-.051-.05-.056-.05-.06-.05-.065-.051-.07-.052-.074-.051-.079-.052-.083-.052-.088-.052-.092-.052-.096-.052-.101-.052-.106-.052-.11-.052-.114-.052-.118-.051-.123-.051-.126-.051-.131-.05-.136-.05-.139-.049-.143-.048-.148-.048-.152-.048-.155-.046-.16-.046-.163-.045-.168-.043-.172-.043-.175-.042-.179-.041-.183-.04-.187-.038-.191-.038-.194-.036-.198-.034-.202-.033-.205-.032-.21-.031-.212-.028-.216-.027-.22-.026-.224-.023-.226-.022-.231-.021-.233-.018-.237-.016-.241-.014-.244-.012-.247-.011-.25-.008-.254-.005-.257-.004-.26-.001-.26.001z"/></symbol></defs><defs><symbol id="my-svg-clock" width="24" height="24"><path transform="scale(.5)" d="M12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm5.848 12.459c.202.038.202.333.001.372-1.907.361-6.045 1.111-6.547 1.111-.719 0-1.301-.582-1.301-1.301 0-.512.77-5.447 1.125-7.445.034-.192.312-.181.343.014l.985 6.238 5.394 1.011z"/></symbol></defs><defs><marker id="my-svg-arrowhead" refX="7.9" refY="5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto-start-reverse"><path d="M -1 0 L 10 5 L 0 10 z"/></marker></defs><defs><marker id="my-svg-crosshead" markerWidth="15" markerHeight="8" orient="auto" refX="4" refY="4.5"><path fill="none" stroke="#000000" stroke-width="1pt" d="M 1,2 L 6,7 M 6,2 L 1,7" style="stroke-dasharray: 0, 0;"/></marker></defs><defs><marker id="my-svg-filled-head" refX="15.5" refY="7" markerWidth="20" markerHeight="28" orient="auto"><path d="M 18,7 L9,13 L14,7 L9,1 Z"/></marker></defs><defs><marker id="my-svg-sequencenumber" refX="15" refY="15" markerWidth="60" markerHeight="40" orient="auto"><circle cx="15" cy="15" r="6"/></marker></defs><defs><marker id="my-svg-solidTopArrowHead" refX="7.9" refY="7.25" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto-start-reverse"><path d="M 0 0 L 10 8 L 0 8 z"/></marker></defs><defs><marker id="my-svg-solidBottomArrowHead" refX="7.9" refY="0.75" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto-start-reverse"><path d="M 0 0 L 10 0 L 0 8 z"/></marker></defs><defs><marker id="my-svg-stickTopArrowHead" refX="7.5" refY="7" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto-start-reverse"><path d="M 0 0 L 7 7" stroke="black" stroke-width="1.5" fill="none"/></marker></defs><defs><marker id="my-svg-stickBottomArrowHead" refX="7.5" refY="0" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto-start-reverse"><path d="M 0 7 L 7 0" stroke="black" stroke-width="1.5" fill="none"/></marker></defs><g data-et="note" data-id="i4"><rect x="-174.5" y="207" fill="#EDF2AE" stroke="#666" width="499" height="41" class="note"/><text x="75" y="212" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="noteText" dy="1em" style="font-size: 16px; font-weight: 400;"><tspan x="75">access token lives ONLY in memory — never localStorage, never a cookie</tspan></text></g><g data-et="note" data-id="i5"><rect x="213" y="258" fill="#EDF2AE" stroke="#666" width="410" height="41" class="note"/><text x="418" y="263" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="noteText" dy="1em" style="font-size: 16px; font-weight: 400;"><tspan x="418">cookie: httpOnly · Secure · SameSite=Strict · Path=/api/auth</tspan></text></g><g data-et="note" data-id="i10"><rect x="-99.5" y="485" fill="#EDF2AE" stroke="#666" width="349" height="41" class="note"/><text x="75" y="490" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="noteText" dy="1em" style="font-size: 16px; font-weight: 400;"><tspan x="75">single-flight — concurrent 401s share ONE refresh</tspan></text></g><text x="245" y="80" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="messageText" dy="1em" style="font-size: 16px; font-weight: 400;">POST /api/auth/login</text><line x1="82" y1="109" x2="414" y2="109" class="messageLine0" data-et="message" data-id="i1" data-from="SPA" data-to="API" stroke-width="2" stroke="none" marker-end="url(#mmd-5257a01c5dda-arrowhead)" style="fill: none;"/><line x1="75" y1="109" x2="75" y2="109" stroke-width="0" marker-start="url(#mmd-5257a01c5dda-sequencenumber)"/><text x="75" y="113" font-family="sans-serif" font-size="12px" text-anchor="middle" class="sequenceNumber">1</text><text x="638" y="124" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="messageText" dy="1em" style="font-size: 16px; font-weight: 400;">RefreshSession.Start(familyId, SHA-256(token), lifetime)</text><line x1="425" y1="153" x2="857" y2="153" class="messageLine0" data-et="message" data-id="i2" data-from="API" data-to="DB" stroke-width="2" stroke="none" marker-end="url(#mmd-5257a01c5dda-arrowhead)" style="fill: none;"/><line x1="418" y1="153" x2="418" y2="153" stroke-width="0" marker-start="url(#mmd-5257a01c5dda-sequencenumber)"/><text x="418" y="157" font-family="sans-serif" font-size="12px" text-anchor="middle" class="sequenceNumber">2</text><text x="248" y="168" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="messageText" dy="1em" style="font-size: 16px; font-weight: 400;">200 {accessToken}  + Set-Cookie qams_rt</text><line x1="423" y1="197" x2="79" y2="197" class="messageLine1" data-et="message" data-id="i3" data-from="API" data-to="SPA" stroke-width="2" stroke="none" marker-end="url(#mmd-5257a01c5dda-arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"/><line x1="418" y1="197" x2="418" y2="197" stroke-width="0" marker-start="url(#mmd-5257a01c5dda-sequencenumber)"/><text x="418" y="201" font-family="sans-serif" font-size="12px" text-anchor="middle" class="sequenceNumber">3</text><text x="245" y="314" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="messageText" dy="1em" style="font-size: 16px; font-weight: 400;">any call with an expired token -&gt; 401</text><line x1="82" y1="343" x2="414" y2="343" class="messageLine0" data-et="message" data-id="i6" data-from="SPA" data-to="API" stroke-width="2" stroke="none" marker-end="url(#mmd-5257a01c5dda-arrowhead)" style="fill: none;"/><line x1="75" y1="343" x2="75" y2="343" stroke-width="0" marker-start="url(#mmd-5257a01c5dda-sequencenumber)"/><text x="75" y="347" font-family="sans-serif" font-size="12px" text-anchor="middle" class="sequenceNumber">4</text><text x="245" y="358" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="messageText" dy="1em" style="font-size: 16px; font-weight: 400;">POST /api/auth/refresh (cookie only)</text><line x1="82" y1="387" x2="414" y2="387" class="messageLine0" data-et="message" data-id="i7" data-from="SPA" data-to="API" stroke-width="2" stroke="none" marker-end="url(#mmd-5257a01c5dda-arrowhead)" style="fill: none;"/><line x1="75" y1="387" x2="75" y2="387" stroke-width="0" marker-start="url(#mmd-5257a01c5dda-sequencenumber)"/><text x="75" y="391" font-family="sans-serif" font-size="12px" text-anchor="middle" class="sequenceNumber">5</text><text x="638" y="402" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="messageText" dy="1em" style="font-size: 16px; font-weight: 400;">validate hash, Rotate(replacedById)</text><line x1="425" y1="431" x2="857" y2="431" class="messageLine0" data-et="message" data-id="i8" data-from="API" data-to="DB" stroke-width="2" stroke="none" marker-end="url(#mmd-5257a01c5dda-arrowhead)" style="fill: none;"/><line x1="418" y1="431" x2="418" y2="431" stroke-width="0" marker-start="url(#mmd-5257a01c5dda-sequencenumber)"/><text x="418" y="435" font-family="sans-serif" font-size="12px" text-anchor="middle" class="sequenceNumber">6</text><text x="248" y="446" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="messageText" dy="1em" style="font-size: 16px; font-weight: 400;">new access token + rotated cookie</text><line x1="423" y1="475" x2="79" y2="475" class="messageLine1" data-et="message" data-id="i9" data-from="API" data-to="SPA" stroke-width="2" stroke="none" marker-end="url(#mmd-5257a01c5dda-arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"/><line x1="418" y1="475" x2="418" y2="475" stroke-width="0" marker-start="url(#mmd-5257a01c5dda-sequencenumber)"/><text x="418" y="479" font-family="sans-serif" font-size="12px" text-anchor="middle" class="sequenceNumber">7</text><text x="245" y="541" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="messageText" dy="1em" style="font-size: 16px; font-weight: 400;">replay of an ALREADY-ROTATED token</text><line x1="82" y1="570" x2="414" y2="570" class="messageLine0" data-et="message" data-id="i11" data-from="SPA" data-to="API" stroke-width="2" stroke="none" marker-end="url(#mmd-5257a01c5dda-arrowhead)" style="fill: none;"/><line x1="75" y1="570" x2="75" y2="570" stroke-width="0" marker-start="url(#mmd-5257a01c5dda-sequencenumber)"/><text x="75" y="574" font-family="sans-serif" font-size="12px" text-anchor="middle" class="sequenceNumber">8</text><text x="638" y="585" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="messageText" dy="1em" style="font-size: 16px; font-weight: 400;">reuse detected -&gt; revoke the ENTIRE FAMILY</text><line x1="425" y1="614" x2="857" y2="614" class="messageLine0" data-et="message" data-id="i12" data-from="API" data-to="DB" stroke-width="2" stroke="none" marker-end="url(#mmd-5257a01c5dda-arrowhead)" style="fill: none;"/><line x1="418" y1="614" x2="418" y2="614" stroke-width="0" marker-start="url(#mmd-5257a01c5dda-sequencenumber)"/><text x="418" y="618" font-family="sans-serif" font-size="12px" text-anchor="middle" class="sequenceNumber">9</text><text x="248" y="629" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="messageText" dy="1em" style="font-size: 16px; font-weight: 400;">401 AUTH-008</text><line x1="423" y1="658" x2="79" y2="658" class="messageLine1" data-et="message" data-id="i13" data-from="API" data-to="SPA" stroke-width="2" stroke="none" marker-end="url(#mmd-5257a01c5dda-arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"/><line x1="418" y1="658" x2="418" y2="658" stroke-width="0" marker-start="url(#mmd-5257a01c5dda-sequencenumber)"/><text x="418" y="662" font-family="sans-serif" font-size="12px" text-anchor="middle" class="sequenceNumber">10</text></svg></figure>
+
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Access token</td>
+<td>JWT HS256, <strong>SPA memory only</strong>, <code>Jwt:ExpiryMinutes</code> — <strong>shipped 120, ADR-0009 specifies 15</strong> ⚠</td>
+</tr>
+<tr>
+<td>Claims</td>
+<td><code>sub</code>, <code>name</code>, <code>tenant_id</code>, role, optional <code>scope</code>; <strong>inbound claim remapping disabled</strong> (<code>MapInboundClaims = false</code>) so what is issued is exactly what handlers read</td>
+</tr>
+<tr>
+<td>Validation</td>
+<td>issuer, audience, lifetime, signing key; clock skew <strong>1 minute</strong></td>
+</tr>
+<tr>
+<td>Refresh cookie</td>
+<td><code>qams_rt</code>, <strong>httpOnly · Secure · SameSite=Strict · Path=/api/auth</strong>, <code>IsEssential</code></td>
+</tr>
+<tr>
+<td>Refresh storage</td>
+<td><strong>SHA-256 hash only</strong> — the plaintext exists solely in the cookie</td>
+</tr>
+<tr>
+<td>Rotation</td>
+<td>every refresh issues a new token and marks the old one <code>Rotated</code></td>
+</tr>
+<tr>
+<td><strong>Reuse detection</strong></td>
+<td>presenting an already-rotated token <strong>revokes the whole family</strong></td>
+</tr>
+<tr>
+<td>Lifetime</td>
+<td><code>Auth:RefreshTokenDays</code>, default <strong>14</strong></td>
+</tr>
+<tr>
+<td>Logout</td>
+<td>revokes the family server-side <strong>and</strong> clears the cookie</td>
+</tr>
+<tr>
+<td>SPA bootstrap</td>
+<td><code>APP_INITIALIZER</code> attempts a silent refresh before first render</td>
+</tr>
+<tr>
+<td>Idle timeout</td>
+<td><strong>30 minutes</strong>, client-side</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Why this shape:</strong> the access token is unreadable by script (it never leaves a JS closure) and the
+refresh token is unreadable by script (httpOnly) and un-sendable cross-site (<code>SameSite=Strict</code> +
+<code>Path</code>). XSS can still <em>use</em> the in-memory token while the page lives, but cannot exfiltrate a durable
+credential.</p>
+<h2 id="sec-04-live-session-revocation">SEC-04 · Live session revocation</h2>
+<p><code>ActiveSessionMiddleware</code> re-checks <strong>every authenticated request</strong> against the database:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Account row missing or <code>IsActive = false</code></td>
+<td><strong>401 <code>AUTH-006</code></strong> — "Your session is no longer valid."</td>
+</tr>
+<tr>
+<td>Token role ≠ database role</td>
+<td><strong>401 <code>AUTH-007</code></strong> — "Your permissions have changed."</td>
+</tr>
+<tr>
+<td>Otherwise</td>
+<td>resolves the actor's configurable privileges onto the request</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>Privileges are resolved <strong>per request</strong>, not baked into the token, for exactly the same reason as the
+active-account check: <em>an administrator who revokes a privilege must have revoked it on the user's
+next request, not whenever their token happens to expire.</em></p>
+</blockquote>
+<p>Platform administrators are not tenant members, so they receive a distinct platform-admin privilege
+state rather than a resolved tenant permission set.</p>
+<hr>
+<h1>9.3 Electronic signatures (21 CFR Part 11 §11.200)</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Two distinct components</strong></td>
+<td>account <strong>password</strong> + 4-digit <strong>PIN</strong> — both verified on every ceremony</td>
+</tr>
+<tr>
+<td>Component storage</td>
+<td>both hashed with the same identity hasher; the PIN as <code>user_account.pin_hash</code></td>
+</tr>
+<tr>
+<td>PIN format</td>
+<td>exactly 4 digits (<code>^[0-9]{4}$</code>)</td>
+</tr>
+<tr>
+<td>Signature manifest</td>
+<td>signer, meaning, subject reference, <strong>content hash</strong>, timestamp</td>
+</tr>
+<tr>
+<td>Continuous-session exemption</td>
+<td><strong>not implemented</strong> — every signing re-verifies both components</td>
+</tr>
+<tr>
+<td>Failure logging</td>
+<td><strong>every</strong> failure writes <code>ESIGN_FAILED</code> with the reason (<code>bad-password:</code> / <code>bad-pin:</code>) and the subject reference</td>
+</tr>
+<tr>
+<td>Throttling</td>
+<td>the failure increments <strong><code>UserAccount.RegisterFailedLogin</code></strong> — the <em>same</em> counter as login, so repeated signing failures <strong>lock the account</strong></td>
+</tr>
+<tr>
+<td>Locked signer</td>
+<td>refused <code>SIG-003</code>, and <code>ESIGN_LOCKED</code> is written</td>
+</tr>
+<tr>
+<td>Rate limit</td>
+<td><strong>10/minute per actor</strong> (<code>sub</code> claim), not per address</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="refusal-codes">Refusal codes</h3>
+<p><code>SIG-404</code> signer not found · <code>SIG-003</code> account temporarily locked · <code>SIG-002</code> password incorrect ·
+<code>SIG-001</code> PIN not set or incorrect.</p>
+<blockquote>
+<p><strong>Weakness — 4-digit PIN.</strong> The keyspace is 10,000. The mitigations are the per-actor 10/min limiter
+and the shared 5-attempt lockout, which together make online brute force impractical. But a 4-digit
+PIN is a weak second component by modern standards and is <strong>not configurable</strong>. See §9.11 T-07.</p>
+</blockquote>
+<hr>
+<h1>9.4 Authorisation</h1>
+<h2 id="the-current-model-v151">The current model (v1.51)</h2>
+<p><strong>Two independent gates.</strong> Full detail in <a href="08-API-Specification.html">Document 08 §8.2</a>.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Gate</th>
+<th>Attribute</th>
+<th style="text-align: right;">Count</th>
+<th>Failure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HTTP</td>
+<td><code>[Authorize]</code> (bare — authentication only)</td>
+<td style="text-align: right;">57</td>
+<td>401</td>
+</tr>
+<tr>
+<td>HTTP</td>
+<td><code>[RequirePermission(module, action)]</code></td>
+<td style="text-align: right;">144 (3 class, 141 method)</td>
+<td><strong>403 <code>AUTHZ-403</code></strong></td>
+</tr>
+<tr>
+<td>HTTP</td>
+<td><code>[Authorize(Roles = Roles.PlatformAdmin)]</code></td>
+<td style="text-align: right;"><strong>1</strong> (control plane only)</td>
+<td>403</td>
+</tr>
+<tr>
+<td>CQRS</td>
+<td><code>[RequireInternalActor]</code></td>
+<td style="text-align: right;">193</td>
+<td>denial</td>
+</tr>
+<tr>
+<td>CQRS</td>
+<td><code>[RequirePermissionPolicy(module, action)]</code></td>
+<td style="text-align: right;">12</td>
+<td><code>AUTHZ-002</code> / <code>AUTHZ-008</code></td>
+</tr>
+<tr>
+<td>CQRS</td>
+<td><code>[RequireAuthenticatedActor]</code></td>
+<td style="text-align: right;">4</td>
+<td>denial</td>
+</tr>
+<tr>
+<td>CQRS</td>
+<td><code>[AllowUnauthenticated]</code></td>
+<td style="text-align: right;">4</td>
+<td>n/a by design</td>
+</tr>
+<tr>
+<td>CQRS</td>
+<td><code>[RequireRole(...)]</code></td>
+<td style="text-align: right;">1</td>
+<td><code>AUTHZ-002</code></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="sec-05-deny-by-default">SEC-05 · Deny-by-default</h2>
+<pre><code class="language-csharp">options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+</code></pre>
+<p>Every endpoint requires an authenticated user unless it carries <code>[AllowAnonymous]</code> or an explicit
+anonymous mapping (health, metrics). At the command layer, a command with <strong>no</strong> policy attribute is
+denied with <code>AUTHZ-000</code> — <em>and the omission is a build failure</em>, not a runtime surprise.</p>
+<h2 id="sec-06-permission-model">SEC-06 · Permission model</h2>
+<ul>
+<li><strong>31 modules × up to 8 actions = 171 keys</strong>, all code-defined.</li>
+<li>Keys are <code>{module}.{action}</code> lower case, persisted <strong>verbatim as a stable contract</strong>.</li>
+<li>An administrator may grant and revoke but <strong>cannot invent</strong> a key (<code>ROLE-005</code>).</li>
+<li><strong><code>ROLE-006</code> lock-out guard:</strong> a change that would leave no active user able to manage roles and
+  privileges is refused. The system cannot be locked out of its own administration.</li>
+<li>Every permission change requires a <strong>reason</strong>, recorded on <code>RolePermissionsChanged</code> with the
+  granted/revoked deltas.</li>
+<li>System roles cannot be renamed or deactivated (<code>ROLE-003</code>, <code>ROLE-004</code>).</li>
+</ul>
+<h2 id="sec-07-read-only-auditor-by-construction">SEC-07 · Read-only auditor by construction</h2>
+<p><code>[RequireInternalActor]</code> — the policy on <strong>193 of 215 commands</strong> — excludes <code>ExternalAuditor</code> outright.
+A write command reachable by that role is impossible to introduce without failing <code>CommandPolicyTests</code>.</p>
+<h2 id="sec-08-organisational-scope">SEC-08 · Organisational scope</h2>
+<p><code>OrgScopeGuardInterceptor</code> plus <code>IAllocatable</code> restrict a branch/department-scoped user to records
+allocated to their scope. An empty scope means unrestricted within the tenant.</p>
+<h2 id="sec-09-segregation-of-duties">SEC-09 · Segregation of duties</h2>
+<p>Ten explicit SoD pairs covering 14 sign-off gates — see
+<a href="03-Business-Rules.html">Document 03 §3.4</a>. <strong>Known hole:</strong> <code>EnsureSignerIsNotPreparer</code> is a <strong>no-op</strong>
+when <code>CreatedByUserId</code> is null (legacy rows and system-raised records), so SoD is not enforced there.
+Accepted residual F-05b.</p>
+<hr>
+<h1>9.5 Tenant isolation</h1>
+<h2 id="sec-10-two-independent-layers">SEC-10 · Two independent layers</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Mechanism</th>
+<th>Fails how?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1 — ORM</strong></td>
+<td>EF Core global query filter on every <code>ITenantScoped</code> entity</td>
+<td>bypassed by <code>IgnoreQueryFilters()</code> (used deliberately by the sweep and snapshot jobs)</td>
+</tr>
+<tr>
+<td><strong>2 — Database</strong></td>
+<td>PostgreSQL <code>ENABLE</code> <strong>+ <code>FORCE</code></strong> ROW LEVEL SECURITY on <strong>90 of 97 tables</strong></td>
+<td>binds <strong>even the table owner</strong> — that is what <code>FORCE</code> buys</td>
+</tr>
+</tbody>
+</table></div>
+<pre><code class="language-sql">-- The policy shape, identical on every protected table
+USING / WITH CHECK (
+  tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+  OR current_setting('app.bypass_rls', true) = 'on'
+)
+</code></pre>
+<p><code>TenantConnectionInterceptor</code> calls <code>set_config</code> for both GUCs <strong>on every connection open</strong>, and
+<strong>fails closed to nil</strong> — an unresolved tenant yields <em>no rows</em>, never <em>all rows</em>.</p>
+<h2 id="sec-11-tenant-source">SEC-11 · Tenant source</h2>
+<p><strong>Only</strong> the validated JWT <code>tenant_id</code> claim. Headers and query strings are explicitly banned as tenant
+sources — the as-built v1.0 system's spoofable path.</p>
+<h2 id="sec-12-controlled-elevation">SEC-12 · Controlled elevation</h2>
+<p>Cross-tenant access exists only through <code>ICurrentTenantSetter.Elevate()</code>, used by <strong>exactly five</strong>
+trusted paths:</p>
+<ol>
+<li><code>ProvisionTenant</code> 2. <code>OutboxProcessor</code> 3. <code>ScheduledSweepService</code></li>
+<li><code>KpiSnapshotService</code> 5. the start-up LOV backfill</li>
+</ol>
+<p>This replaced implicit <code>IgnoreQueryFilters()</code> scattered through the codebase — elevation is now
+explicit, greppable and reviewable.</p>
+<h2 id="sec-13-structural-isolation-in-the-schema">SEC-13 · Structural isolation in the schema</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Composite PKs</td>
+<td>88 tenant-scoped tables use a tenant-first <code>(tenant_id, id)</code> PK and <strong>no <code>UNIQUE(id)</code></strong></td>
+</tr>
+<tr>
+<td>Tenant-composite FKs</td>
+<td><code>FOREIGN KEY (fk, tenant_id) REFERENCES parent (id, tenant_id)</code> — <strong>a child under another tenant's parent is structurally impossible</strong>, which a single-column FK never prevented</td>
+</tr>
+<tr>
+<td>Owned children</td>
+<td>carry a <strong>shadow <code>tenant_id</code></strong> and their own RLS policy</td>
+</tr>
+<tr>
+<td>Audit-ledger relaxation</td>
+<td><code>audit.*</code> <code>WITH CHECK</code> is <code>(tenant_id IS NULL OR tenant_id = GUC OR bypass)</code> so pre-authentication events can append; <code>qams.*</code> stays strict</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong>Why the relaxation exists.</strong> With a strict <code>WITH CHECK</code> on the audit ledgers, a <strong>failed login</strong>
+incremented <code>user_account</code> (which is not tenant-scoped) → wrote a null-tenant <code>field_change</code> row →
+was rejected → and the user saw <strong>HTTP 500 instead of 401</strong>. Lesson recorded in the migration:
+<em>audit ledgers must accept null-tenant appends.</em></p>
+</blockquote>
+<h2 id="sec-14-databaseroleguard-the-deployment-gate">SEC-14 · <code>DatabaseRoleGuard</code> — the deployment gate</h2>
+<p>At start-up the runtime role is inspected for three disqualifying properties:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Violation</th>
+<th>Why it voids isolation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>rolsuper</code> (SUPERUSER)</td>
+<td>RLS is not enforced for a superuser</td>
+</tr>
+<tr>
+<td><code>rolbypassrls</code></td>
+<td>the same, explicitly</td>
+</tr>
+<tr>
+<td><strong>owns (or inherits ownership of) application tables</strong></td>
+<td>an owner can <strong>drop the RLS policies and the immutability triggers</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Production refuses to boot</strong> on any violation. Non-production logs each one as a warning and
+continues — which is why <strong>the development database, owned by <code>qams_app</code>, deliberately runs with
+weaker isolation than production</strong>. An unreachable database is treated as a readiness concern, not a
+privilege violation.</p>
+<h3 id="verified-isolation-properties">Verified isolation properties</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GUC filters rows <strong>even for the owning role</strong></td>
+<td>verified by <code>psql</code> as the owner — FORCE works</td>
+</tr>
+<tr>
+<td>Fail-closed on nil tenant</td>
+<td>integration test</td>
+</tr>
+<tr>
+<td>Controlled bypass works</td>
+<td>integration test</td>
+</tr>
+<tr>
+<td><code>WITH CHECK</code> blocks cross-tenant writes</td>
+<td>integration test</td>
+</tr>
+<tr>
+<td>Cross-tenant IDOR</td>
+<td><strong>9/9 deep security probes, 0 findings</strong></td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>9.6 Record integrity (21 CFR Part 11 §11.10)</h1>
+<h2 id="sec-15-append-only-ledgers">SEC-15 · Append-only ledgers</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Contents</th>
+<th>Protection</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>audit.field_change</code></td>
+<td>per-column before/after, actor, timestamp, <strong>reason</strong></td>
+<td>append-only trigger; <strong>relaxed RLS</strong> (accepts null tenant)</td>
+</tr>
+<tr>
+<td><code>audit.security_event</code></td>
+<td>auth/signature/export events</td>
+<td>append-only trigger; <strong>⚠ NO RLS POLICY</strong> — see §9.11 T-01</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="sec-16-hash-chain">SEC-16 · Hash chain</h2>
+<p>Each audit-trail entry stores <code>PrevHash</code> and <code>EntryHash</code>, where
+<code>EntryHash = LedgerHash.Compute(prevHash, sequence, eventId, eventType, payload, occurredAtUtc)</code>
+starting from <code>LedgerHash.Genesis</code>.</p>
+<p><code>GET /api/compliance/chain-verification</code> recomputes the whole chain for the tenant and returns
+<code>(Ok, Verified, BrokenAtSequence)</code> — <strong>it identifies the first divergent row</strong>, not merely pass/fail.</p>
+<blockquote>
+<p><strong>Implementation constraint:</strong> chain hashes are computed over the <strong>database-read</strong>
+(microsecond-truncated) timestamps, not the in-memory values. A rebuild that hashes the in-memory
+<code>DateTimeOffset</code> will produce a chain that fails its own verification.</p>
+</blockquote>
+<h2 id="sec-17-signed-record-immutability">SEC-17 · Signed-record immutability</h2>
+<p><code>qams.reject_frozen_mutation()</code> — a <code>BEFORE UPDATE/DELETE</code> trigger on the <strong>12 analytical study roots</strong>
+(state <code>SignedOff</code>) and <code>uncertainty_budget</code> (status <code>Approved</code>). It permits the transition <em>into</em> the
+signed state and blocks every mutation after.</p>
+<p><strong>This is the only immutability enforced below the application.</strong> Ten other "immutable" states
+(closed audits, closed reviews, completed access reviews, …) are domain-only — a direct SQL <code>UPDATE</code>
+would succeed. That is precisely why <code>DatabaseRoleGuard</code> matters.</p>
+<h2 id="sec-18-reason-for-change">SEC-18 · Reason for change</h2>
+<p>Every <code>DELETE</code> refused without <code>X-Change-Reason</code> (400 <code>CHANGE-REASON-REQUIRED</code>), and the accepted
+reason is stamped onto the ledger row <strong>in the same transaction</strong>. Three commands additionally take a
+reason as a first-class field: QC target change, role permission change, legal hold.</p>
+<h2 id="sec-19-attributability">SEC-19 · Attributability</h2>
+<p>The actor is taken from the validated JWT <code>sub</code> claim by <code>AuditStampInterceptor</code> and
+<code>HttpCurrentUser</code>. <strong>A client-supplied actor field is never trusted anywhere in the system.</strong></p>
+<h2 id="sec-20-security-event-catalogue">SEC-20 · Security-event catalogue</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Event</th>
+<th>Written when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LOGIN_SUCCESS</code></td>
+<td>successful authentication</td>
+</tr>
+<tr>
+<td><code>LOGIN_FAILED</code></td>
+<td>failed authentication</td>
+</tr>
+<tr>
+<td><code>LOGIN_MFA_REQUIRED</code></td>
+<td>MFA challenge issued</td>
+</tr>
+<tr>
+<td><code>LOGIN_MFA_ENROLL_REQUIRED</code></td>
+<td>enrolment-scoped session issued</td>
+</tr>
+<tr>
+<td><code>LOGOUT</code></td>
+<td>explicit logout</td>
+</tr>
+<tr>
+<td><code>MFA_ENABLED</code></td>
+<td>enrolment confirmed</td>
+</tr>
+<tr>
+<td><code>PASSWORD_CHANGED</code></td>
+<td>password rotated</td>
+</tr>
+<tr>
+<td><code>ESIGN_FAILED</code></td>
+<td>signing ceremony failed (with reason)</td>
+</tr>
+<tr>
+<td><code>ESIGN_LOCKED</code></td>
+<td>signing attempted while locked</td>
+</tr>
+<tr>
+<td><code>RECORD_EXPORTED</code></td>
+<td>any of the four exports</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Ten event types.</strong> Notably <strong>absent</strong>: role/permission change (captured as a domain event and ledger
+row, not a security event), user deactivation, tenant provisioning, and privilege escalation attempts
+(403s are not recorded as security events).</p>
+<hr>
+<h1>9.7 Transport and browser security</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Header</th>
+<th>Value</th>
+<th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Content-Security-Policy</code></td>
+<td><code>default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'</code></td>
+<td><strong>the API</strong> — deny every load/embed/submit vector</td>
+</tr>
+<tr>
+<td><code>X-Content-Type-Options</code></td>
+<td><code>nosniff</code></td>
+<td>all</td>
+</tr>
+<tr>
+<td><code>X-Frame-Options</code></td>
+<td><code>DENY</code></td>
+<td>all</td>
+</tr>
+<tr>
+<td><code>Referrer-Policy</code></td>
+<td><code>no-referrer</code></td>
+<td>all</td>
+</tr>
+<tr>
+<td><code>Strict-Transport-Security</code></td>
+<td><code>max-age=63072000; includeSubDomains</code></td>
+<td><strong>non-Development only</strong></td>
+</tr>
+</tbody>
+</table></div>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TLS</td>
+<td>terminates at the reverse proxy (ADR-0002); the application emits HSTS but does not serve TLS. Browsers ignore HSTS on plain HTTP, so the header is safe everywhere</td>
+</tr>
+<tr>
+<td>Forwarded headers</td>
+<td><code>X-Forwarded-For</code> / <code>-Proto</code> honoured (loopback-trusted by default) so the client address survives for rate limiting and logs</td>
+</tr>
+<tr>
+<td>CORS</td>
+<td><strong>not configured — deliberately</strong> (ADR-0007, same-origin deployment)</td>
+</tr>
+<tr>
+<td>Cookies</td>
+<td>one cookie only (<code>qams_rt</code>), httpOnly + Secure + SameSite=Strict + Path-scoped</td>
+</tr>
+<tr>
+<td>CSRF tokens</td>
+<td><strong>none</strong> — and none are needed: the API is JWT-bearer (not cookie-authenticated) and the single cookie is <code>SameSite=Strict</code> and path-scoped to the refresh endpoint</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong>Note on the CSP.</strong> This is the <strong>API's</strong> policy and is correctly restrictive for a JSON API. The
+<strong>SPA</strong> is served by the reverse proxy and therefore needs its own, different CSP — which is
+<strong>outside this codebase</strong>. A deployment that serves the SPA without a CSP has an unprotected
+front-end regardless of this header. See §9.11 T-06.</p>
+</blockquote>
+<hr>
+<h1>9.8 Rate limiting</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Policy</th>
+<th style="text-align: right;">Permits/min</th>
+<th>Partition</th>
+<th>Applies to</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Global</td>
+<td style="text-align: right;"><strong>300</strong></td>
+<td>client IP</td>
+<td>everything</td>
+</tr>
+<tr>
+<td><code>auth</code></td>
+<td style="text-align: right;"><strong>10</strong></td>
+<td>client IP</td>
+<td>the whole <code>AuthController</code></td>
+</tr>
+<tr>
+<td><code>refresh</code></td>
+<td style="text-align: right;"><strong>60</strong></td>
+<td>client IP</td>
+<td><code>POST /api/auth/refresh</code></td>
+</tr>
+<tr>
+<td><code>esignature</code></td>
+<td style="text-align: right;"><strong>10</strong></td>
+<td><strong>actor (<code>sub</code>)</strong></td>
+<td>signing ceremonies</td>
+</tr>
+</tbody>
+</table></div>
+<p>Fixed 1-minute window, <code>QueueLimit = 0</code>, rejection <strong>429 + <code>Retry-After: 60</code></strong>. Health probes and
+<code>/metrics</code> are exempt (throttling them would break the monitoring).</p>
+<blockquote>
+<p><strong>Operational trap (measured):</strong> with the default 300/min global limit, a single-origin load run
+returns ~50 % 429s within the first minute. That is <em>correct</em> for one abusive client but means the
+value must be sized per site — a laboratory behind one NAT address shares one budget.</p>
+<p><strong>Testing trap:</strong> run the credential-burst probe <strong>last</strong> — it poisons the 10/min auth partition for
+the rest of the run. And a PostgreSQL-down plus rate-limit burst combination will lock the test
+account for 30 minutes.</p>
+</blockquote>
+<hr>
+<h1>9.9 Input and file security</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Validation</td>
+<td>88 FluentValidation validators; length, range, pattern; failures are 400 with per-field detail</td>
+</tr>
+<tr>
+<td>SQL injection</td>
+<td>EF Core parameterisation throughout; the <strong>only</strong> raw SQL is the outbox claim, which uses <code>FromSqlInterpolated</code> (parameterised)</td>
+</tr>
+<tr>
+<td>Upload allow-list</td>
+<td>10 extensions; the client's <code>Content-Type</code> is <strong>never trusted or stored</strong></td>
+</tr>
+<tr>
+<td>Content sniffing</td>
+<td>first <strong>512 bytes</strong> checked against the type's signature; text types rejected on any NUL byte</td>
+</tr>
+<tr>
+<td>Canonical type</td>
+<td>the <strong>extension's</strong> canonical type is stored, so a file can never replay with an attacker-chosen media type</td>
+</tr>
+<tr>
+<td>Content addressing</td>
+<td><code>{root}/{tenant}/{sha256}</code> — path traversal is impossible because the filename is a computed hash, not client input</td>
+</tr>
+<tr>
+<td>Tenant partitioning</td>
+<td>one directory per tenant</td>
+</tr>
+<tr>
+<td><strong>Size limit</strong></td>
+<td>⚠ <strong>none in application code</strong></td>
+</tr>
+<tr>
+<td><strong>AV scanning</strong></td>
+<td>⚠ <strong>none</strong></td>
+</tr>
+<tr>
+<td>Output encoding</td>
+<td>Angular's default contextual escaping; <strong>no <code>bypassSecurityTrust*</code> calls</strong> in the SPA</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>9.10 Secrets and supply chain</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Secrets in source</td>
+<td><strong>none</strong> — <code>appsettings*.json</code> ship every secret as an empty string</td>
+</tr>
+<tr>
+<td>Development</td>
+<td>.NET user-secrets (<code>nt-qams-webapi</code>); a fresh clone <strong>will not start</strong> until provisioned (by design, finding F-17)</td>
+</tr>
+<tr>
+<td>Production</td>
+<td>environment variables / secret store (<code>__</code> separator)</td>
+</tr>
+<tr>
+<td>JWT key</td>
+<td>must be ≥ 32 characters or the application refuses to start</td>
+</tr>
+<tr>
+<td>.NET SCA</td>
+<td><code>dotnet list package --vulnerable</code> — <strong>fails the build on High/Critical</strong></td>
+</tr>
+<tr>
+<td>npm SCA</td>
+<td>production dependencies vs an exception register (<code>.github/npm-audit-allowlist.txt</code>, currently <strong>empty</strong>)</td>
+</tr>
+<tr>
+<td>Container scan</td>
+<td>Trivy (CLI, not the action — <code>trivy-action@0.24.0</code> failed to resolve at job setup)</td>
+</tr>
+<tr>
+<td>Container hardening</td>
+<td><strong>non-root user</strong>; CI asserts the non-root uid and volume writability</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="the-angular-18-22-upgrade">The Angular 18 → 22 upgrade</h3>
+<p>The npm gate surfaced <strong>10 high-severity <code>@angular/{common,compiler,core}</code> ≤ 18.2.14 advisories</strong>
+(XSS / DoS / information leak) fixable only by a semver-major move. Angular was upgraded <strong>one major at
+a time</strong> (18→19→20→21→22) via <code>ng update</code>, with build + specs green at each step and one commit per
+major. Only manual fix: two deprecated <code>allowSignalWrites</code> removals. Post-upgrade
+<code>npm audit --omit=dev</code> = <strong>0 advisories</strong>.</p>
+<blockquote>
+<p><strong>CI constraint:</strong> the frontend job must use <strong>Node 24</strong> — npm 10 (Node 22) falsely rejects the
+npm-11 lockfile.</p>
+</blockquote>
+<hr>
+<h1>9.11 Threat assessment</h1>
+<p>Rated by likelihood × impact for a laboratory SaaS deployment.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Threat</th>
+<th>Status</th>
+<th>Severity</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>T-01</strong></td>
+<td><strong><code>audit.security_event</code> has no RLS policy</strong></td>
+<td>🔴 <strong>OPEN</strong></td>
+<td><strong>High</strong></td>
+<td>Both RLS migrations iterate <code>pg_policies</code> and therefore <em>skipped a table that had none</em>. Its store reads are <strong>not tenant-filtered</strong>. A tenant-scoped caller reaching that read path could see other tenants' security events (login failures, export events, display names). The append-only trigger is present; only isolation is missing. <strong>Fix: one migration adding the standard policy.</strong></td>
+</tr>
+<tr>
+<td><strong>T-02</strong></td>
+<td>Cross-tenant data access (IDOR)</td>
+<td>🟢 Mitigated</td>
+<td>—</td>
+<td>Two layers; FORCE RLS binds the owner; 9/9 deep probes found nothing; cross-tenant ids return 404</td>
+</tr>
+<tr>
+<td><strong>T-03</strong></td>
+<td>Privilege escalation via role editing</td>
+<td>🟢 Mitigated</td>
+<td>—</td>
+<td>Keys are code-defined; unknown keys rejected; <code>ROLE-006</code> prevents administrative lock-out; every change carries a reason and a ledger entry</td>
+</tr>
+<tr>
+<td><strong>T-04</strong></td>
+<td>Token theft (XSS)</td>
+<td>🟡 Partially mitigated</td>
+<td>Medium</td>
+<td>Access token is memory-only and the refresh cookie is httpOnly — <strong>but</strong> a live XSS can still use the in-memory token for the page's lifetime. Mitigated by Angular's default escaping and no <code>bypassSecurityTrust*</code>. <strong>The SPA's own CSP is outside this codebase.</strong></td>
+</tr>
+<tr>
+<td><strong>T-05</strong></td>
+<td>Token replay / session fixation</td>
+<td>🟢 Mitigated</td>
+<td>—</td>
+<td>Rotating refresh with family-revoking reuse detection, proven live</td>
+</tr>
+<tr>
+<td><strong>T-06</strong></td>
+<td><strong>SPA served without a Content-Security-Policy</strong></td>
+<td>🟡 <strong>Deployment-dependent</strong></td>
+<td>Medium</td>
+<td>The API's CSP does not protect the SPA. If the proxy serves the SPA without its own CSP, the front end has no script-source restriction. Not verifiable from this repository.</td>
+</tr>
+<tr>
+<td><strong>T-07</strong></td>
+<td><strong>4-digit e-signature PIN</strong></td>
+<td>🟡 Accepted</td>
+<td>Medium</td>
+<td>10,000 keyspace. Mitigated by 10/min per-actor throttle and the shared 5-attempt lockout; <strong>not configurable</strong>.</td>
+</tr>
+<tr>
+<td><strong>T-08</strong></td>
+<td><strong><code>change-password</code> as a credential oracle</strong></td>
+<td>🟡 Accepted</td>
+<td>Low–Medium</td>
+<td>Anonymous by design (expired passwords). An attacker can verify a tenant+e-mail+password triple without a session — at 10/min. Deliberate trade-off.</td>
+</tr>
+<tr>
+<td><strong>T-09</strong></td>
+<td>Credential brute force</td>
+<td>🟢 Mitigated</td>
+<td>—</td>
+<td>10/min per address + 5-attempt/30-minute lockout + every failure logged</td>
+</tr>
+<tr>
+<td><strong>T-10</strong></td>
+<td><strong>No upload size limit</strong></td>
+<td>🟡 <strong>OPEN</strong></td>
+<td>Medium</td>
+<td>Only the host body limit applies. An authenticated user can exhaust disk.</td>
+</tr>
+<tr>
+<td><strong>T-11</strong></td>
+<td><strong>No AV scanning on uploads</strong></td>
+<td>🟡 OPEN</td>
+<td>Medium</td>
+<td>The allow-list + sniff stops a renamed executable <em>entering</em>, but a genuinely malicious PDF/DOCX passes. Files are served back to users.</td>
+</tr>
+<tr>
+<td><strong>T-12</strong></td>
+<td>Audit-trail tampering</td>
+<td>🟢 Mitigated</td>
+<td>—</td>
+<td>Append-only trigger + hash chain + verification identifying the first break + audit-tamper tests</td>
+</tr>
+<tr>
+<td><strong>T-13</strong></td>
+<td>Signed-record tampering</td>
+<td>🟢 Mitigated</td>
+<td>—</td>
+<td>Database trigger on 13 tables</td>
+</tr>
+<tr>
+<td><strong>T-14</strong></td>
+<td><strong>Domain-only immutability on 10 other states</strong></td>
+<td>🟡 Accepted</td>
+<td>Low</td>
+<td>Direct SQL could mutate a closed audit or review. Mitigated entirely by <code>DatabaseRoleGuard</code> + least-privilege role.</td>
+</tr>
+<tr>
+<td><strong>T-15</strong></td>
+<td>Over-privileged database role</td>
+<td>🟢 Mitigated</td>
+<td>—</td>
+<td>Production refuses to boot; <code>harden-runtime-role.sql</code> codifies the safe role</td>
+</tr>
+<tr>
+<td><strong>T-16</strong></td>
+<td><strong>Dev runs with weakened isolation</strong></td>
+<td>🟡 Accepted</td>
+<td>Low</td>
+<td><code>qams_app</code> owns the dev tables, so dev does not exercise FORCE RLS as production does. Deliberate and logged as a warning.</td>
+</tr>
+<tr>
+<td><strong>T-17</strong></td>
+<td>Secrets leakage</td>
+<td>🟢 Mitigated</td>
+<td>—</td>
+<td>None in source; user-secrets/env; JWT key length enforced</td>
+</tr>
+<tr>
+<td><strong>T-18</strong></td>
+<td><strong><code>PlatformAdmin:Password</code> left in configuration</strong></td>
+<td>🟡 Operational</td>
+<td>Medium</td>
+<td>A standing bootstrap credential. Must be removed after first boot — nothing enforces this.</td>
+</tr>
+<tr>
+<td><strong>T-19</strong></td>
+<td>Dependency vulnerabilities</td>
+<td>🟢 Mitigated</td>
+<td>—</td>
+<td>Three scanners gate every merge; 0 advisories at last run</td>
+</tr>
+<tr>
+<td><strong>T-20</strong></td>
+<td>Denial of service via unbounded queries</td>
+<td>🟡 OPEN</td>
+<td>Medium</td>
+<td><code>pageSize</code> is clamped to 200, but <code>take</code> on compliance reads/exports and <code>days</code> on KPI history are <strong>not</strong>; 15+ endpoints are unpaged</td>
+</tr>
+<tr>
+<td><strong>T-21</strong></td>
+<td>Notification flooding</td>
+<td>🟡 OPEN</td>
+<td>Low–Medium</td>
+<td>No de-bounce, digest or throttle: an oscillating sensor produces one NC <strong>and one e-mail per recipient per reading</strong></td>
+</tr>
+<tr>
+<td><strong>T-22</strong></td>
+<td><strong>No independent penetration test</strong></td>
+<td>🔴 <strong>OPEN</strong></td>
+<td><strong>High (assurance)</strong></td>
+<td>A dev-instance self-assessment (24 probes, 0 findings) exists and is <strong>explicitly not</strong> a staging pen test. This is the single largest remaining assurance gap.</td>
+</tr>
+<tr>
+<td><strong>T-23</strong></td>
+<td>No account-recovery path</td>
+<td>🟡 Accepted</td>
+<td>Low</td>
+<td>No self-service reset and no MFA recovery codes — a lost authenticator needs an administrator</td>
+</tr>
+<tr>
+<td><strong>T-24</strong></td>
+<td>Nav advertises unpermitted modules</td>
+<td>🟢 Cosmetic</td>
+<td>Info</td>
+<td>39 of 44 nav items have no visibility predicate; the data calls still 403, so nothing leaks</td>
+</tr>
+<tr>
+<td><strong>T-25</strong></td>
+<td><strong><code>Roles.cs</code> group constants are dead code</strong></td>
+<td>🟡 Maintenance</td>
+<td>Low</td>
+<td>Four group constants are referenced only as <em>test labels</em>. A future developer may believe they still gate endpoints.</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>9.12 Security testing status</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Activity</th>
+<th>Status</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>scripts/security-probe.ps1</code> (15 fast probes)</td>
+<td>✅ executed</td>
+<td><strong>15/15</strong>, 0 findings</td>
+</tr>
+<tr>
+<td><code>scripts/security-probe-deep.ps1</code> (9 deep probes)</td>
+<td>✅ executed</td>
+<td><strong>9/9</strong>, 0 findings — cross-tenant IDOR, <strong>refresh reuse-detection proven LIVE</strong>, CORS/XST</td>
+</tr>
+<tr>
+<td><code>RoleEndpointMatrixTests</code> (6 roles × endpoints)</td>
+<td>✅ in CI</td>
+<td>no 401/5xx from a gate; every denial 403 problem+json</td>
+</tr>
+<tr>
+<td>Audit-tamper tests</td>
+<td>✅ in CI</td>
+<td>ledger rejects mutation</td>
+</tr>
+<tr>
+<td>RLS integration tests</td>
+<td>✅</td>
+<td>isolation, fail-closed, bypass, <code>WITH CHECK</code></td>
+</tr>
+<tr>
+<td>.NET SCA / npm SCA / Trivy</td>
+<td>✅ in CI</td>
+<td>0 High/Critical</td>
+</tr>
+<tr>
+<td>axe accessibility</td>
+<td>✅ in CI</td>
+<td>real violations found and fixed</td>
+</tr>
+<tr>
+<td><strong>Independent penetration test</strong></td>
+<td>❌ <strong>NOT PERFORMED</strong></td>
+<td>requires an independent party and a staging host</td>
+</tr>
+<tr>
+<td><strong>Staging soak / telemetry confirmation</strong></td>
+<td>❌ <strong>NOT PERFORMED</strong></td>
+<td>no Docker host available (residual R-5/R-7)</td>
+</tr>
+<tr>
+<td><strong>CSV re-validation</strong></td>
+<td>❌ <strong>NOT PERFORMED</strong></td>
+<td>residual R-6</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>docs/reference/NT_QMS_Security_Assessment_Report.html</code> is scoped as a <strong>DEV-INSTANCE assessment</strong> and
+explicitly states it is not a staging penetration test. A vendor attestation was <strong>refused</strong> rather
+than fabricated — independence plus a real staging environment are prerequisites, and forging that
+record would itself be a compliance failure.</p>
+<h3 id="probe-execution-notes-learned-the-hard-way">Probe execution notes (learned the hard way)</h3>
+<ul>
+<li>Run the <strong>credential burst last</strong> — it poisons the 10/min auth partition.</li>
+<li>Windows PowerShell <code>Invoke-WebRequest</code> <strong>drops a manual <code>Cookie</code> header</strong> and mangles inline JSON;
+  for cookie flows use <code>curl.exe</code> with <code>--data "@file"</code> and a temp-file header dump.</li>
+</ul>
+<hr>
+<h1>9.13 Security requirements summary</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Verified</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SEC-R-01</td>
+<td>Two independent tenant-isolation layers, fail-closed</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>SEC-R-02</td>
+<td>Production refuses to start on an over-privileged database role</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>SEC-R-03</td>
+<td>Access tokens never persist outside memory</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>SEC-R-04</td>
+<td>Refresh tokens rotate; reuse revokes the family</td>
+<td>✅ live</td>
+</tr>
+<tr>
+<td>SEC-R-05</td>
+<td>Every authenticated request re-verifies account state and role</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>SEC-R-06</td>
+<td>Deny-by-default at both HTTP and command layers, build-gated</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>SEC-R-07</td>
+<td>The read-only auditor role cannot reach any write command</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>SEC-R-08</td>
+<td>E-signatures require two components; failures are logged and throttled</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>SEC-R-09</td>
+<td>Ledgers are append-only and hash-chained; verification identifies the first break</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>SEC-R-10</td>
+<td>Signed analytical records are immutable <strong>in the database</strong></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>SEC-R-11</td>
+<td>Every DELETE carries a persisted reason</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>SEC-R-12</td>
+<td>Uploads pass an allow-list and content sniff; declared type never trusted</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>SEC-R-13</td>
+<td>Defensive headers on every response</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>SEC-R-14</td>
+<td>Four rate-limit partitions with 429 + Retry-After</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>SEC-R-15</td>
+<td>No secrets in source control</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>SEC-R-16</td>
+<td>Dependency and image scanning gate every merge</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>SEC-R-17</td>
+<td><code>audit.security_event</code> is tenant-isolated</td>
+<td>❌ <strong>NOT MET (T-01)</strong></td>
+</tr>
+<tr>
+<td>SEC-R-18</td>
+<td>Uploads are size-bounded</td>
+<td>❌ <strong>NOT MET (T-10)</strong></td>
+</tr>
+<tr>
+<td>SEC-R-19</td>
+<td>Independent penetration test on staging</td>
+<td>❌ <strong>NOT PERFORMED (T-22)</strong></td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>9.14 Security acceptance criteria</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Given</th>
+<th>When</th>
+<th>Then</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AT-SEC-01</strong></td>
+<td>tenants A and B</td>
+<td>a tenant-A user queries any scoped table</td>
+<td>only A's rows return — <strong>verified in <code>psql</code> as the owning role</strong>, proving FORCE</td>
+</tr>
+<tr>
+<td><strong>AT-SEC-02</strong></td>
+<td>Production + a table-owning DB role</td>
+<td>the app starts</td>
+<td>it <strong>refuses to boot</strong></td>
+</tr>
+<tr>
+<td><strong>AT-SEC-03</strong></td>
+<td>an authenticated session</td>
+<td>the account is deactivated</td>
+<td>the <strong>next</strong> request returns 401 <code>AUTH-006</code></td>
+</tr>
+<tr>
+<td><strong>AT-SEC-04</strong></td>
+<td>a rotated refresh token</td>
+<td>it is replayed</td>
+<td>the whole family is revoked</td>
+</tr>
+<tr>
+<td><strong>AT-SEC-05</strong></td>
+<td>an <code>ExternalAuditor</code> token</td>
+<td>any write command</td>
+<td>403; and <code>CommandPolicyTests</code> prevents such a path existing</td>
+</tr>
+<tr>
+<td><strong>AT-SEC-06</strong></td>
+<td>6 wrong e-signature attempts</td>
+<td>the 6th is made</td>
+<td><code>SIG-003</code>, 6 <code>ESIGN_FAILED</code> events, account locked 30 min</td>
+</tr>
+<tr>
+<td><strong>AT-SEC-07</strong></td>
+<td>a signed-off study</td>
+<td>a raw SQL <code>UPDATE</code></td>
+<td>PostgreSQL rejects it</td>
+</tr>
+<tr>
+<td><strong>AT-SEC-08</strong></td>
+<td>any ledger row</td>
+<td>it is altered</td>
+<td><code>chain-verification</code> returns <code>Ok = false</code> <strong>and the sequence number of the first break</strong></td>
+</tr>
+<tr>
+<td><strong>AT-SEC-09</strong></td>
+<td>an executable renamed <code>.pdf</code></td>
+<td>it is uploaded</td>
+<td>refused with a signature-mismatch message</td>
+</tr>
+<tr>
+<td><strong>AT-SEC-10</strong></td>
+<td>any response</td>
+<td>it is inspected</td>
+<td>CSP, nosniff, DENY and no-referrer are present; HSTS outside Development</td>
+</tr>
+<tr>
+<td><strong>AT-SEC-11</strong></td>
+<td>the last <code>roles.manage</code> holder</td>
+<td>that permission is removed</td>
+<td>422 <code>ROLE-006</code></td>
+</tr>
+<tr>
+<td><strong>AT-SEC-12</strong></td>
+<td>a tenant-B record id</td>
+<td>requested by a tenant-A user</td>
+<td><strong>404</strong>, never 403</td>
+</tr>
+<tr>
+<td><strong>AT-SEC-13</strong></td>
+<td>a wrong password at login</td>
+<td>submitted</td>
+<td><strong>401</strong> (not 500), and a null-tenant ledger row is written</td>
+</tr>
+</tbody>
+</table></div>
+<div class="pager"><a href="08-API-Specification.html"><span>Previous</span>API Specification</a><a href="10-Deployment-Specification.html" style="text-align:right"><span>Next</span>Deployment Specification</a></div>
+</main></div>
+<script>
+(function(){
+ var r=document.documentElement, K='ntqms-srs-theme', s=localStorage.getItem(K);
+ if(s) r.setAttribute('data-theme',s);
+ var b=document.getElementById('th');
+ if(b) b.onclick=function(){
+   var cur=r.getAttribute('data-theme');
+   if(!cur) cur=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+   var nx=cur==='dark'?'light':'dark';
+   r.setAttribute('data-theme',nx); localStorage.setItem(K,nx);
+ };
+ var p=document.getElementById('pr'); if(p) p.onclick=function(){window.print();};
+ // scroll-spy on the in-page TOC
+ var links=[].slice.call(document.querySelectorAll('#toc a'));
+ if(!links.length) return;
+ var tgt=links.map(function(a){return document.getElementById(a.getAttribute('href').slice(1));});
+ function spy(){
+   var y=window.scrollY+90, i=0;
+   for(var k=0;k<tgt.length;k++){ if(tgt[k]&&tgt[k].offsetTop<=y) i=k; }
+   links.forEach(function(a,n){a.style.color=n===i?'var(--accent)':'';
+     a.style.borderLeftColor=n===i?'var(--accent)':'transparent';});
+ }
+ addEventListener('scroll',spy,{passive:true}); spy();
+})();
+</script>
+</body></html>

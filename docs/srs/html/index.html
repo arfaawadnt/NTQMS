@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NT.QMS — As-Built Software Requirements Specification</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>
+:root{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);
+ --mono:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace;
+ --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,ui-serif,serif;
+ --sans:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}}
+:root[data-theme="dark"]{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}
+:root[data-theme="light"]{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+ font-size:15.5px;line-height:1.62;-webkit-text-size-adjust:100%}
+.wrap{display:grid;grid-template-columns:288px minmax(0,1fr);gap:0;max-width:1560px;margin:0 auto}
+/* ---- sidebar ---- */
+aside{position:sticky;top:0;height:100vh;overflow-y:auto;padding:22px 16px 60px;
+ border-right:1px solid var(--line);background:var(--panel)}
+aside .brand{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:-.01em;
+ margin:0 0 2px}
+aside .sub{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;
+ margin:0 0 16px}
+aside nav a{display:block;padding:5px 9px;border-radius:7px;color:var(--ink);text-decoration:none;
+ font-size:13.2px;border-left:2px solid transparent}
+aside nav a:hover{background:var(--panel-2)}
+aside nav a.cur{background:var(--accent-soft);border-left-color:var(--accent);font-weight:600}
+aside nav a .n{color:var(--muted);font-variant-numeric:tabular-nums;margin-right:7px;font-size:11.5px}
+aside .sec{margin:16px 0 5px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+ color:var(--muted);font-weight:700}
+#toc{margin-top:6px;border-top:1px solid var(--line);padding-top:10px}
+#toc a{display:block;padding:2.5px 9px;font-size:12.4px;color:var(--muted);text-decoration:none;
+ border-left:2px solid transparent;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#toc a:hover{color:var(--ink)}
+#toc a.h3{padding-left:22px;font-size:11.8px}
+/* ---- main ---- */
+main{padding:34px 46px 120px;min-width:0;overflow-wrap:anywhere}
+.doc-head{border-bottom:2px solid var(--accent);padding-bottom:14px;margin-bottom:26px}
+.kicker{color:var(--accent);font-size:11.5px;font-weight:700;letter-spacing:.11em;
+ text-transform:uppercase;margin:0 0 4px}
+h1{font-family:var(--serif);font-size:31px;line-height:1.2;margin:0;letter-spacing:-.015em}
+h2{font-family:var(--serif);font-size:24px;margin:38px 0 12px;padding-bottom:6px;
+ border-bottom:1px solid var(--line);letter-spacing:-.01em;scroll-margin-top:14px}
+h3{font-size:18px;margin:26px 0 9px;letter-spacing:-.005em;scroll-margin-top:14px}
+h4{font-size:15px;margin:20px 0 7px;color:var(--accent)}
+h5,h6{font-size:13.5px;margin:16px 0 6px;color:var(--muted);text-transform:uppercase;
+ letter-spacing:.05em}
+p{margin:10px 0}
+a{color:var(--accent)}
+hr{border:0;border-top:1px solid var(--line);margin:30px 0}
+ul,ol{margin:9px 0;padding-left:24px}
+li{margin:3px 0}
+blockquote{margin:16px 0;padding:12px 18px;background:var(--accent-soft);
+ border-left:3px solid var(--accent);border-radius:0 8px 8px 0}
+blockquote p:first-child{margin-top:0}blockquote p:last-child{margin-bottom:0}
+code{font-family:var(--mono);font-size:.875em;background:var(--panel-2);
+ padding:1.5px 5px;border-radius:4px;border:1px solid var(--line)}
+pre{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;
+ padding:14px 16px;overflow-x:auto;margin:14px 0}
+pre code{background:none;border:0;padding:0;font-size:12.6px;line-height:1.5}
+/* ---- tables ---- */
+.tw{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:10px;
+ background:var(--panel);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;font-size:13.4px}
+th,td{padding:8px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:var(--panel-2);font-weight:700;font-size:12.2px;letter-spacing:.02em;
+ position:sticky;top:0;z-index:1}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--accent-soft)}
+td code,th code{font-size:.9em;white-space:nowrap}
+/* ---- diagrams ---- */
+figure.d{margin:18px 0;padding:18px;background:var(--panel);border:1px solid var(--line);
+ border-radius:12px;box-shadow:var(--shadow);overflow-x:auto;text-align:center}
+figure.d svg{max-width:100%;height:auto;display:inline-block}
+/* ---- misc ---- */
+.tools{position:fixed;top:12px;right:16px;display:flex;gap:6px;z-index:50}
+.tools button{font:inherit;font-size:12px;padding:5px 11px;border-radius:8px;cursor:pointer;
+ border:1px solid var(--line);background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+.tools button:hover{background:var(--panel-2)}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:52px;padding-top:18px;
+ border-top:1px solid var(--line)}
+.pager a{display:block;max-width:46%;padding:10px 14px;border:1px solid var(--line);
+ border-radius:10px;background:var(--panel);text-decoration:none;font-size:13px}
+.pager a span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;
+ letter-spacing:.08em}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:14px;margin:20px 0}
+.card{padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--panel);
+ box-shadow:var(--shadow);text-decoration:none;color:var(--ink);display:block}
+.card:hover{border-color:var(--accent)}
+.card .num{color:var(--accent);font-weight:700;font-size:11.5px;letter-spacing:.1em}
+.card .t{font-family:var(--serif);font-size:17px;margin:3px 0 5px}
+.card .d{color:var(--muted);font-size:12.7px;line-height:1.5}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin:20px 0}
+.stat{padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.stat b{display:block;font-size:23px;font-family:var(--serif);line-height:1.1}
+.stat span{color:var(--muted);font-size:11.4px}
+@media print{
+ aside,.tools,.pager{display:none!important}
+ .wrap{display:block;max-width:none}
+ main{padding:0}
+ .tw,figure.d{break-inside:avoid;box-shadow:none}
+ h2{break-after:avoid}
+ a{color:inherit;text-decoration:none}
+}
+@media (max-width:1080px){
+ .wrap{grid-template-columns:1fr}
+ aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+ main{padding:22px 18px 80px}
+ #toc{display:none}
+}
+</style>
+</head><body>
+<div class="tools"><button id="th">◐ Theme</button><button id="pr">⎙ Print</button></div>
+<div class="wrap">
+<aside><p class="brand">NT.QMS</p><p class="sub">As-Built SRS · v1.51.x</p><a class="card" style="padding:9px 12px;margin-bottom:10px;font-size:13px" href="index.html">◂ Document set</a><div class="sec">Documents</div><nav><a class="" href="00-SRS-Index-and-Conventions.html"><span class="n">00</span>Index, Conventions &amp; Glossary</a><a class="" href="01-Software-Requirements-Specification.html"><span class="n">01</span>Software Requirements Specification</a><a class="" href="02-1-Functional-Specification-Quality-and-Improvement.html"><span class="n">02-1</span>Functional Spec 1 — Quality &amp; Improvement</a><a class="" href="02-2-Functional-Specification-Resources-People-Governance.html"><span class="n">02-2</span>Functional Spec 2 — Resources, People &amp; Governance</a><a class="" href="02-3-Functional-Specification-Analytical-Quality.html"><span class="n">02-3</span>Functional Spec 3 — Analytical Quality</a><a class="" href="02-4-Functional-Specification-Operations-and-Platform.html"><span class="n">02-4</span>Functional Spec 4 — Operations &amp; Platform</a><a class="" href="03-Business-Rules.html"><span class="n">03</span>Business Rules &amp; Error Catalogue</a><a class="" href="04-Configuration-Reference.html"><span class="n">04</span>Configuration Reference</a><a class="" href="05-Screen-Specification.html"><span class="n">05</span>Screen Specification</a><a class="" href="06-Workflow-Specification.html"><span class="n">06</span>Workflow Specification</a><a class="" href="07-File-System-Specification.html"><span class="n">07</span>File System Specification</a><a class="" href="08-API-Specification.html"><span class="n">08</span>API Specification</a><a class="" href="09-Security-Specification.html"><span class="n">09</span>Security Specification</a><a class="" href="10-Deployment-Specification.html"><span class="n">10</span>Deployment Specification</a><a class="" href="11-Architecture-Constraints.html"><span class="n">11</span>Architecture Constraints</a><a class="" href="12-Requirements-Traceability-Matrix.html"><span class="n">12</span>Requirements Traceability Matrix</a><a class="" href="13-Implementation-vs-SRS-Gap-Analysis.html"><span class="n">13</span>Implementation vs SRS — Gap Analysis</a><a class="" href="14-Technical-Debt-Report.html"><span class="n">14</span>Technical Debt Report</a><a class="" href="15-Recommendations.html"><span class="n">15</span>Recommendations</a></nav><div class='sec'>On this page</div><div id='toc'><a class="h2" href="#documents">The document set</a><a class="h2" href="#reading-order">Reading order</a></div></aside>
+<main>
+<div class="doc-head"><p class="kicker">Production specification set · v1.51.x</p><h1>NT.QMS — As-Built Software Requirements Specification</h1></div>
+
+<p>This is the <strong>as-built</strong> specification of NT.QMS — reverse-specified from the source
+tree at release line <strong>v1.51.x</strong>. It documents the system <em>that exists</em>: every
+module, rule, validation, error path, configuration key, screen, workflow and constraint found in the
+code. It supersedes <code>NT_QMS_SRS.html</code>, which describes a materially different system.</p>
+<div class="stats"><div class="stat"><b>19</b><span>documents</span></div><div class="stat"><b>~94k</b><span>words</span></div><div class="stat"><b>346</b><span>tables</span></div><div class="stat"><b>46</b><span>diagrams</span></div><div class="stat"><b>35</b><span>modules</span></div><div class="stat"><b>329</b><span>endpoints</span></div><div class="stat"><b>416</b><span>error codes</span></div><div class="stat"><b>94</b><span>gap findings</span></div></div>
+<blockquote><p><strong>Evidence convention.</strong> Statements without a marker are verified in
+source. Anything inferred is marked <code>[Assumption]</code>; behaviour whose business intent is
+undocumented is marked <code>[Needs Business Confirmation]</code>; capability never observed running
+in this environment is marked <code>[Not Executed]</code>; unreachable code is marked
+<code>[Dead / Unused]</code>.</p></blockquote>
+<h2 id="documents">The document set</h2>
+<div class="cards"><a class="card" href="00-SRS-Index-and-Conventions.html"><div class="num">DOC 00</div><div class="t">Index, Conventions &amp; Glossary</div><div class="d">Document map, identifier schemes, evidence conventions, measured inventory and glossary.</div></a><a class="card" href="01-Software-Requirements-Specification.html"><div class="num">DOC 01</div><div class="t">Software Requirements Specification</div><div class="d">Scope, actors, product perspective, operating environment, assumptions and the full non-functional requirement set.</div></a><a class="card" href="02-1-Functional-Specification-Quality-and-Improvement.html"><div class="num">DOC 02-1</div><div class="t">Functional Spec 1 — Quality &amp; Improvement</div><div class="d">Nonconformance/CAPA, complaints, feedback, objectives, quality policy, audits, change control, management review, documents, archive.</div></a><a class="card" href="02-2-Functional-Specification-Resources-People-Governance.html"><div class="num">DOC 02-2</div><div class="t">Functional Spec 2 — Resources, People &amp; Governance</div><div class="d">Equipment, reference standards, environmental monitoring, suppliers, competency, training, test authorisations, users, roles, risk, conflicts, context, access review, compliance ledger.</div></a><a class="card" href="02-3-Functional-Specification-Analytical-Quality.html"><div class="num">DOC 02-3</div><div class="t">Functional Spec 3 — Analytical Quality</div><div class="d">Westgard QC, twelve analytical study types with normative calculation specifications, measurement uncertainty and proficiency testing.</div></a><a class="card" href="02-4-Functional-Specification-Operations-and-Platform.html"><div class="num">DOC 02-4</div><div class="t">Functional Spec 4 — Operations &amp; Platform</div><div class="d">Tasks and SLA escalation, notifications, reporting, organisation data, tenant settings, platform control plane, authentication, files, exports, quality analytics.</div></a><a class="card" href="03-Business-Rules.html"><div class="num">DOC 03</div><div class="t">Business Rules &amp; Error Catalogue</div><div class="d">Cross-cutting rules, segregation-of-duties matrix, decision tables, timing constants and the complete 416-code error catalogue.</div></a><a class="card" href="04-Configuration-Reference.html"><div class="num">DOC 04</div><div class="t">Configuration Reference</div><div class="d">Every configuration key and every hard-coded constant: type, default, validation and impact.</div></a><a class="card" href="05-Screen-Specification.html"><div class="num">DOC 05</div><div class="t">Screen Specification</div><div class="d">Screen archetypes, the shell, cross-cutting client behaviour, known dead controls and a complete component inventory.</div></a><a class="card" href="06-Workflow-Specification.html"><div class="num">DOC 06</div><div class="t">Workflow Specification</div><div class="d">Thirty-four state machines as transition tables, the request pipeline, asynchronous processes, start-up and failure/recovery scenarios.</div></a><a class="card" href="07-File-System-Specification.html"><div class="num">DOC 07</div><div class="t">File System Specification</div><div class="d">Repository layout, runtime storage, deployment artefacts, operational scripts and the full retention/cleanup picture.</div></a><a class="card" href="08-API-Specification.html"><div class="num">DOC 08</div><div class="t">API Specification</div><div class="d">API conventions, the current authorisation model, the error contract, pagination, versioning and the complete route catalogue.</div></a><a class="card" href="09-Security-Specification.html"><div class="num">DOC 09</div><div class="t">Security Specification</div><div class="d">Nine security layers, authentication, authorisation, tenant isolation, record integrity and a rated threat assessment.</div></a><a class="card" href="10-Deployment-Specification.html"><div class="num">DOC 10</div><div class="t">Deployment Specification</div><div class="d">Topology, deployment procedure and gates, health probes, observability, backup/DR, the CI pipeline and the operational runbook.</div></a><a class="card" href="11-Architecture-Constraints.html"><div class="num">DOC 11</div><div class="t">Architecture Constraints</div><div class="d">Machine-enforced layering, domain and multi-tenancy constraints, technology constraints, forbidden patterns and the nine ADRs.</div></a><a class="card" href="12-Requirements-Traceability-Matrix.html"><div class="num">DOC 12</div><div class="t">Requirements Traceability Matrix</div><div class="d">Requirement-to-code traceability for functional, non-functional and architectural requirements, plus verification coverage.</div></a><a class="card" href="13-Implementation-vs-SRS-Gap-Analysis.html"><div class="num">DOC 13</div><div class="t">Implementation vs SRS — Gap Analysis</div><div class="d">Ninety-four findings comparing the superseded SRS with the implementation, classified and dispositioned.</div></a><a class="card" href="14-Technical-Debt-Report.html"><div class="num">DOC 14</div><div class="t">Technical Debt Report</div><div class="d">Forty-two measured debt items with severity, cause, cost of leaving and cost of fixing.</div></a><a class="card" href="15-Recommendations.html"><div class="num">DOC 15</div><div class="t">Recommendations</div><div class="d">Forty-eight prioritised recommendations, ten business decisions, a sequencing plan and an explicit do-not-do list.</div></a></div>
+<h2 id="reading-order">Reading order for a rebuild team</h2>
+<ol>
+<li><strong>Doc 01</strong> — scope, actors, constraints.</li>
+<li><strong>Doc 11</strong> — the architectural law, before designing anything.</li>
+<li><strong>Doc 06 + Doc 03</strong> — the state machines and rules <em>are</em> the product.</li>
+<li><strong>Doc 02</strong> — module by module; the dependency notes give a build order.</li>
+<li><strong>Doc 08 + Doc 05</strong> — surface contracts, API first then screens.</li>
+<li><strong>Doc 04 + Doc 07 + Doc 10</strong> — make it run.</li>
+<li><strong>Doc 09</strong> — security is not a phase; read it before, during and after.</li>
+<li><strong>Docs 12–15</strong> — verify what you built, and inherit the debt list knowingly.</li>
+</ol>
+
+<div class="pager"><span></span><a href="00-SRS-Index-and-Conventions.html" style="text-align:right"><span>Next</span>Index, Conventions &amp; Glossary</a></div>
+</main></div>
+<script>
+(function(){
+ var r=document.documentElement, K='ntqms-srs-theme', s=localStorage.getItem(K);
+ if(s) r.setAttribute('data-theme',s);
+ var b=document.getElementById('th');
+ if(b) b.onclick=function(){
+   var cur=r.getAttribute('data-theme');
+   if(!cur) cur=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+   var nx=cur==='dark'?'light':'dark';
+   r.setAttribute('data-theme',nx); localStorage.setItem(K,nx);
+ };
+ var p=document.getElementById('pr'); if(p) p.onclick=function(){window.print();};
+ // scroll-spy on the in-page TOC
+ var links=[].slice.call(document.querySelectorAll('#toc a'));
+ if(!links.length) return;
+ var tgt=links.map(function(a){return document.getElementById(a.getAttribute('href').slice(1));});
+ function spy(){
+   var y=window.scrollY+90, i=0;
+   for(var k=0;k<tgt.length;k++){ if(tgt[k]&&tgt[k].offsetTop<=y) i=k; }
+   links.forEach(function(a,n){a.style.color=n===i?'var(--accent)':'';
+     a.style.borderLeftColor=n===i?'var(--accent)':'transparent';});
+ }
+ addEventListener('scroll',spy,{passive:true}); spy();
+})();
+</script>
+</body></html>

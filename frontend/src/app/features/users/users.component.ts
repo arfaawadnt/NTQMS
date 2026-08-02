@@ -10,6 +10,7 @@ import { Branch, Department, RoleSummary, TenantRole, UserAccount } from '../../
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 
 /**
  * Tenant user administration: list staff, onboard a new user onto a
@@ -20,9 +21,11 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 @Component({
     selector: 'qams-users',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, StatusPillComponent],
+    imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, StatusPillComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('users.title')">
+      <qams-export-menu [title]="i18n.t('users.title')" [columns]="exportColumns"
+                        [rows]="facade.users()" [filtersSummary]="i18n.t('exp.allRecords')" />
       <button (click)="showForm.set(!showForm())">{{ i18n.t('users.new') }}</button>
     </qams-page-header>
 
@@ -46,6 +49,11 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
           <div>
             <label>{{ i18n.t('users.initialPassword') }}</label>
             <input formControlName="initialPassword" type="text" [placeholder]="i18n.t('users.passwordHint')" />
+          </div>
+          <div>
+            <label>{{ i18n.t('users.initialPin') }}</label>
+            <input formControlName="initialPin" inputmode="numeric" maxlength="4"
+                   [placeholder]="i18n.t('users.initialPinHint')" />
           </div>
         </div>
         <div class="row">
@@ -105,7 +113,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
             <tr>
               <th>{{ i18n.t('users.name') }}</th><th>{{ i18n.t('login.email') }}</th>
               <th>{{ i18n.t('users.role') }}</th><th>{{ i18n.t('users.scope') }}</th>
-              <th>MFA</th><th>{{ i18n.t('nc.status') }}</th><th></th>
+              <th>MFA</th><th>PIN</th><th>{{ i18n.t('nc.status') }}</th><th></th>
             </tr>
           </thead>
           <tbody>
@@ -129,6 +137,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
                   }
                 </td>
                 <td><qams-status-pill [status]="u.mfaEnabled ? 'Active' : 'Pending'" /></td>
+                <td><qams-status-pill [status]="u.pinConfigured ? 'Active' : 'Pending'" /></td>
                 <td><qams-status-pill [status]="u.isActive ? 'Active' : 'Suspended'" /></td>
                 <td class="row-actions">
                   <button class="ghost" (click)="openScope(u)">{{ i18n.t('users.scope') }}</button>
@@ -138,6 +147,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
                     <button class="ghost" (click)="facade.reactivate(u.id)">{{ i18n.t('users.reactivate') }}</button>
                   }
                   <button class="ghost" (click)="resetPassword(u)">{{ i18n.t('users.resetPassword') }}</button>
+                  <button class="ghost" (click)="setPin(u)">{{ i18n.t('users.setPin') }}</button>
                 </td>
               </tr>
             }
@@ -184,6 +194,7 @@ export class UsersComponent implements OnInit {
     displayName: ['', [Validators.required, Validators.maxLength(150)]],
     roleId: ['', [Validators.required]],
     initialPassword: ['', [Validators.required, Validators.minLength(12)]],
+    initialPin: ['', [Validators.pattern(/^\d{4}$/)]],
   });
 
   ngOnInit(): void {
@@ -218,6 +229,7 @@ export class UsersComponent implements OnInit {
       role: this.tierFor(value.roleId),
       initialPassword: value.initialPassword,
       roleId: value.roleId,
+      initialPin: value.initialPin || null,
     });
     if (registered) {
       this.cancel();
@@ -285,6 +297,18 @@ export class UsersComponent implements OnInit {
     });
     if (password) {
       void this.facade.resetPassword(user.id, { newPassword: password });
+    }
+  }
+
+  /** Admin-issued signing PIN via the accessible masked prompt (ledgered as PIN_ADMIN_SET). */
+  async setPin(user: UserAccount): Promise<void> {
+    const pin = await this.prompts.request({
+      titleKey: 'users.setPin',
+      labelKey: 'users.setPinPrompt',
+      inputType: 'password',
+    });
+    if (pin) {
+      void this.facade.setPin(user.id, pin);
     }
   }
 

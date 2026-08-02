@@ -5,18 +5,22 @@ import { Router, RouterOutlet } from '@angular/router';
 import { UncertaintyFacade } from './uncertainty.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
+import { UncertaintyBudgetListItem } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 
 /** MU budget register: statistics, filtration, and a create form (QM/DeptHead-gated). */
 @Component({
     selector: 'qams-uncertainty-list',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DecimalPipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent],
+    imports: [ReactiveFormsModule, DecimalPipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('mu.title')" [subtitle]="i18n.t('mu.subtitle')">
+      <qams-export-menu [title]="i18n.t('mu.title')" [stats]="stats()" [columns]="exportColumns"
+                        [rows]="filtered()" [filtersSummary]="filtersSummary()" />
       @if (perms.can('analytical-quality.create')) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('mu.new') }}</button>
       }
@@ -118,6 +122,25 @@ export class UncertaintyListComponent implements OnInit {
     const q = this.search().trim().toLowerCase();
     return this.facade.list().filter((b) =>
       !q || `${b.budgetRef} ${b.analyte} ${b.method} ${b.level} ${b.status}`.toLowerCase().includes(q));
+  });
+
+  /** Export columns — the printed grid mirrors the on-screen table. */
+  readonly exportColumns: ExportColumn<UncertaintyBudgetListItem>[] = [
+    { header: this.i18n.t('mu.ref'), cell: (b) => b.budgetRef },
+    { header: this.i18n.t('qc.analyte'), cell: (b) => b.analyte },
+    { header: this.i18n.t('mu.method'), cell: (b) => b.method },
+    { header: this.i18n.t('mu.level'), cell: (b) => b.level },
+    { header: 'U (%)', cell: (b) => b.expandedUncertainty !== null ? `${b.expandedUncertainty}` : '—' },
+    { header: this.i18n.t('val.verdict'), cell: (b) => b.meetsTarget === true ? 'Satisfactory' : b.meetsTarget === false ? 'Failed' : '—' },
+    { header: this.i18n.t('nc.status'), cell: (b) => b.status },
+  ];
+
+  /** The filter line printed on the document, mirroring the filter bar. */
+  readonly filtersSummary = computed(() => {
+    const parts: string[] = [];
+    if (this.statusFilter()) { parts.push(this.statusFilter()); }
+    if (this.search().trim()) { parts.push(`"${this.search().trim()}"`); }
+    return parts.length ? parts.join(' · ') : this.i18n.t('exp.allRecords');
   });
 
   readonly stats = computed<ListStat[]>(() => {

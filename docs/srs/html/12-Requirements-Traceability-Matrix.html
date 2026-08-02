@@ -1,0 +1,2049 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Requirements Traceability Matrix — NT.QMS As-Built SRS</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>">
+<style>
+:root{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);
+ --mono:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace;
+ --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,ui-serif,serif;
+ --sans:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}}
+:root[data-theme="dark"]{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}
+:root[data-theme="light"]{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+ font-size:15.5px;line-height:1.62;-webkit-text-size-adjust:100%}
+.wrap{display:grid;grid-template-columns:288px minmax(0,1fr);gap:0;max-width:1560px;margin:0 auto}
+/* ---- sidebar ---- */
+aside{position:sticky;top:0;height:100vh;overflow-y:auto;padding:22px 16px 60px;
+ border-right:1px solid var(--line);background:var(--panel)}
+aside .brand{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:-.01em;
+ margin:0 0 2px}
+aside .sub{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;
+ margin:0 0 16px}
+aside nav a{display:block;padding:5px 9px;border-radius:7px;color:var(--ink);text-decoration:none;
+ font-size:13.2px;border-left:2px solid transparent}
+aside nav a:hover{background:var(--panel-2)}
+aside nav a.cur{background:var(--accent-soft);border-left-color:var(--accent);font-weight:600}
+aside nav a .n{color:var(--muted);font-variant-numeric:tabular-nums;margin-right:7px;font-size:11.5px}
+aside .sec{margin:16px 0 5px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+ color:var(--muted);font-weight:700}
+#toc{margin-top:6px;border-top:1px solid var(--line);padding-top:10px}
+#toc a{display:block;padding:2.5px 9px;font-size:12.4px;color:var(--muted);text-decoration:none;
+ border-left:2px solid transparent;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#toc a:hover{color:var(--ink)}
+#toc a.h3{padding-left:22px;font-size:11.8px}
+/* ---- main ---- */
+main{padding:34px 46px 120px;min-width:0;overflow-wrap:anywhere}
+.doc-head{border-bottom:2px solid var(--accent);padding-bottom:14px;margin-bottom:26px}
+.kicker{color:var(--accent);font-size:11.5px;font-weight:700;letter-spacing:.11em;
+ text-transform:uppercase;margin:0 0 4px}
+h1{font-family:var(--serif);font-size:31px;line-height:1.2;margin:0;letter-spacing:-.015em}
+h2{font-family:var(--serif);font-size:24px;margin:38px 0 12px;padding-bottom:6px;
+ border-bottom:1px solid var(--line);letter-spacing:-.01em;scroll-margin-top:14px}
+h3{font-size:18px;margin:26px 0 9px;letter-spacing:-.005em;scroll-margin-top:14px}
+h4{font-size:15px;margin:20px 0 7px;color:var(--accent)}
+h5,h6{font-size:13.5px;margin:16px 0 6px;color:var(--muted);text-transform:uppercase;
+ letter-spacing:.05em}
+p{margin:10px 0}
+a{color:var(--accent)}
+hr{border:0;border-top:1px solid var(--line);margin:30px 0}
+ul,ol{margin:9px 0;padding-left:24px}
+li{margin:3px 0}
+blockquote{margin:16px 0;padding:12px 18px;background:var(--accent-soft);
+ border-left:3px solid var(--accent);border-radius:0 8px 8px 0}
+blockquote p:first-child{margin-top:0}blockquote p:last-child{margin-bottom:0}
+code{font-family:var(--mono);font-size:.875em;background:var(--panel-2);
+ padding:1.5px 5px;border-radius:4px;border:1px solid var(--line)}
+pre{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;
+ padding:14px 16px;overflow-x:auto;margin:14px 0}
+pre code{background:none;border:0;padding:0;font-size:12.6px;line-height:1.5}
+/* ---- tables ---- */
+.tw{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:10px;
+ background:var(--panel);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;font-size:13.4px}
+th,td{padding:8px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:var(--panel-2);font-weight:700;font-size:12.2px;letter-spacing:.02em;
+ position:sticky;top:0;z-index:1}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--accent-soft)}
+td code,th code{font-size:.9em;white-space:nowrap}
+/* ---- diagrams ---- */
+figure.d{margin:18px 0;padding:18px;background:var(--panel);border:1px solid var(--line);
+ border-radius:12px;box-shadow:var(--shadow);overflow-x:auto;text-align:center}
+figure.d svg{max-width:100%;height:auto;display:inline-block}
+/* ---- misc ---- */
+.tools{position:fixed;top:12px;right:16px;display:flex;gap:6px;z-index:50}
+.tools button{font:inherit;font-size:12px;padding:5px 11px;border-radius:8px;cursor:pointer;
+ border:1px solid var(--line);background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+.tools button:hover{background:var(--panel-2)}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:52px;padding-top:18px;
+ border-top:1px solid var(--line)}
+.pager a{display:block;max-width:46%;padding:10px 14px;border:1px solid var(--line);
+ border-radius:10px;background:var(--panel);text-decoration:none;font-size:13px}
+.pager a span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;
+ letter-spacing:.08em}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:14px;margin:20px 0}
+.card{padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--panel);
+ box-shadow:var(--shadow);text-decoration:none;color:var(--ink);display:block}
+.card:hover{border-color:var(--accent)}
+.card .num{color:var(--accent);font-weight:700;font-size:11.5px;letter-spacing:.1em}
+.card .t{font-family:var(--serif);font-size:17px;margin:3px 0 5px}
+.card .d{color:var(--muted);font-size:12.7px;line-height:1.5}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin:20px 0}
+.stat{padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.stat b{display:block;font-size:23px;font-family:var(--serif);line-height:1.1}
+.stat span{color:var(--muted);font-size:11.4px}
+@media print{
+ aside,.tools,.pager{display:none!important}
+ .wrap{display:block;max-width:none}
+ main{padding:0}
+ .tw,figure.d{break-inside:avoid;box-shadow:none}
+ h2{break-after:avoid}
+ a{color:inherit;text-decoration:none}
+}
+@media (max-width:1080px){
+ .wrap{grid-template-columns:1fr}
+ aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+ main{padding:22px 18px 80px}
+ #toc{display:none}
+}
+</style>
+</head><body>
+<div class="tools"><button id="th">◐ Theme</button><button id="pr">⎙ Print</button></div>
+<div class="wrap">
+<aside><p class="brand">NT.QMS</p><p class="sub">As-Built SRS · v1.51.x</p><a class="card" style="padding:9px 12px;margin-bottom:10px;font-size:13px" href="index.html">◂ Document set</a><div class="sec">Documents</div><nav><a class="" href="00-SRS-Index-and-Conventions.html"><span class="n">00</span>Index, Conventions &amp; Glossary</a><a class="" href="01-Software-Requirements-Specification.html"><span class="n">01</span>Software Requirements Specification</a><a class="" href="02-1-Functional-Specification-Quality-and-Improvement.html"><span class="n">02-1</span>Functional Spec 1 — Quality &amp; Improvement</a><a class="" href="02-2-Functional-Specification-Resources-People-Governance.html"><span class="n">02-2</span>Functional Spec 2 — Resources, People &amp; Governance</a><a class="" href="02-3-Functional-Specification-Analytical-Quality.html"><span class="n">02-3</span>Functional Spec 3 — Analytical Quality</a><a class="" href="02-4-Functional-Specification-Operations-and-Platform.html"><span class="n">02-4</span>Functional Spec 4 — Operations &amp; Platform</a><a class="" href="03-Business-Rules.html"><span class="n">03</span>Business Rules &amp; Error Catalogue</a><a class="" href="04-Configuration-Reference.html"><span class="n">04</span>Configuration Reference</a><a class="" href="05-Screen-Specification.html"><span class="n">05</span>Screen Specification</a><a class="" href="06-Workflow-Specification.html"><span class="n">06</span>Workflow Specification</a><a class="" href="07-File-System-Specification.html"><span class="n">07</span>File System Specification</a><a class="" href="08-API-Specification.html"><span class="n">08</span>API Specification</a><a class="" href="09-Security-Specification.html"><span class="n">09</span>Security Specification</a><a class="" href="10-Deployment-Specification.html"><span class="n">10</span>Deployment Specification</a><a class="" href="11-Architecture-Constraints.html"><span class="n">11</span>Architecture Constraints</a><a class="cur" href="12-Requirements-Traceability-Matrix.html"><span class="n">12</span>Requirements Traceability Matrix</a><a class="" href="13-Implementation-vs-SRS-Gap-Analysis.html"><span class="n">13</span>Implementation vs SRS — Gap Analysis</a><a class="" href="14-Technical-Debt-Report.html"><span class="n">14</span>Technical Debt Report</a><a class="" href="15-Recommendations.html"><span class="n">15</span>Recommendations</a></nav><div class='sec'>On this page</div><div id='toc'><a class="h2" href="#legend">Legend</a><a class="h2" href="#summary">Summary</a></div></aside>
+<main>
+<div class="doc-head"><p class="kicker">Document 12 · NT.QMS Production SRS</p><h1>Requirements Traceability Matrix</h1></div>
+<blockquote>
+<p><a href="00-SRS-Index-and-Conventions.html">Conventions</a> · Gap classification:
+<a href="13-Implementation-vs-SRS-Gap-Analysis.html">Document 13</a></p>
+</blockquote>
+<hr>
+<h1>12.1 Purpose and relationship to the CSV RTM</h1>
+<p>Two traceability matrices exist and they answer <strong>different questions</strong>:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Matrix</th>
+<th>Question it answers</th>
+<th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>docs/validation/04-Requirements-Traceability-Matrix.md</code> (RTM-NTQMS-001)</td>
+<td><em>"Is each of the 55 validated user requirements designed, built and verified?"</em></td>
+<td>the <strong>GAMP 5 CSV</strong> requirement set</td>
+</tr>
+<tr>
+<td><strong>This document</strong></td>
+<td><em>"Where does every requirement in this SRS live in the code, the UI and the configuration, and is it actually implemented?"</em></td>
+<td>the <strong>as-built specification</strong> set</td>
+</tr>
+</tbody>
+</table></div>
+<p>They are complementary; where a requirement appears in both, this matrix cites the URS identifier.</p>
+<h2 id="legend">Legend</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Priority</strong></td>
+<td><strong>M</strong> = mandatory (regulatory or system-breaking) · <strong>S</strong> = should · <strong>C</strong> = could</td>
+</tr>
+<tr>
+<td><strong>Source</strong></td>
+<td><code>CODE</code> (reverse-specified) · <code>URS-nnn</code> (CSV requirement) · <code>ADR-nnnn</code> · <code>AUDIT</code> (remediation finding) · <code>SRS-v1</code> (the superseded SRS)</td>
+</tr>
+<tr>
+<td><strong>Impl.</strong></td>
+<td>✅ fully implemented · ⚠ partially implemented · ❌ not implemented · 🔒 implemented but unreachable</td>
+</tr>
+<tr>
+<td><strong>Verified</strong></td>
+<td><code>AUTO</code> automated test · <code>OQ</code> executed qualification case · <code>PROBE</code> security probe · <code>INSP</code> inspection only · <code>—</code> not verified</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>12.2 Module-to-artefact map</h1>
+<p>Every module's code, UI and endpoint locations in one table. <code>Endpoints</code> counts unversioned routes
+(each also exists under <code>/api/v{version}/</code>).</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Module</th>
+<th>Code</th>
+<th>Name</th>
+<th style="text-align: right;">Endpoints</th>
+<th>Domain (src/NT.QAMS.Domain/)</th>
+<th>Application (src/NT.QAMS.Application/)</th>
+<th>Controller (src/NT.QAMS.WebApi/Controllers/)</th>
+<th>SPA route</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>M-01</strong></td>
+<td><code>NC</code></td>
+<td>Nonconformance &amp; CAPA</td>
+<td style="text-align: right;">12</td>
+<td><code>Improvement/Nonconformance.cs</code></td>
+<td><code>Improvement/Commands/NcWorkflowCommands.cs; Improvement/Queries/NcQueries.cs</code></td>
+<td><code>NonconformancesController.cs</code></td>
+<td><code>/nonconformances</code></td>
+</tr>
+<tr>
+<td><strong>M-02</strong></td>
+<td><code>CMP</code></td>
+<td>Complaints</td>
+<td style="text-align: right;">9</td>
+<td><code>Improvement/Complaint.cs</code></td>
+<td><code>Improvement/Commands/ComplaintCommands.cs; Improvement/ComplaintToNcPolicy.cs</code></td>
+<td><code>ComplaintsController.cs</code></td>
+<td><code>/complaints</code></td>
+</tr>
+<tr>
+<td><strong>M-03</strong></td>
+<td><code>FBK</code></td>
+<td>Customer feedback</td>
+<td style="text-align: right;">6</td>
+<td><code>Improvement/FeedbackEntry.cs</code></td>
+<td><code>Improvement/FeedbackSlice.cs</code></td>
+<td><code>FeedbackController.cs</code></td>
+<td><code>/feedback</code></td>
+</tr>
+<tr>
+<td><strong>M-04</strong></td>
+<td><code>OBJ</code></td>
+<td>Quality objectives</td>
+<td style="text-align: right;">5</td>
+<td><code>Improvement/QualityObjective.cs</code></td>
+<td><code>Improvement/QualityObjectiveSlice.cs</code></td>
+<td><code>QualityObjectivesController.cs</code></td>
+<td><code>/quality-objectives</code></td>
+</tr>
+<tr>
+<td><strong>M-05</strong></td>
+<td><code>QP</code></td>
+<td>Quality policy</td>
+<td style="text-align: right;">5</td>
+<td><code>Improvement/QualityPolicy.cs</code></td>
+<td><code>Improvement/QualityPolicySlice.cs</code></td>
+<td><code>QualityPolicyController.cs</code></td>
+<td><code>/quality-policy</code></td>
+</tr>
+<tr>
+<td><strong>M-06</strong></td>
+<td><code>AUD</code></td>
+<td>Audits</td>
+<td style="text-align: right;">7</td>
+<td><code>AuditManagement/Audit.cs</code></td>
+<td><code>AuditManagement/Commands/AuditCommands.cs; AuditManagement/Policies/FindingToNcPolicy.cs</code></td>
+<td><code>AuditsController.cs</code></td>
+<td><code>/audits</code></td>
+</tr>
+<tr>
+<td><strong>M-07</strong></td>
+<td><code>CHG</code></td>
+<td>Change control</td>
+<td style="text-align: right;">8</td>
+<td><code>RiskGovernance/ChangeAndReview.cs</code></td>
+<td><code>RiskGovernance/RiskGovernanceSlice.cs</code></td>
+<td><code>GovernanceControllers.cs</code></td>
+<td><code>/changes</code></td>
+</tr>
+<tr>
+<td><strong>M-08</strong></td>
+<td><code>MRV</code></td>
+<td>Management review</td>
+<td style="text-align: right;">5</td>
+<td><code>RiskGovernance/ChangeAndReview.cs</code></td>
+<td><code>RiskGovernance/RiskGovernanceSlice.cs</code></td>
+<td><code>GovernanceControllers.cs</code></td>
+<td><code>/management-reviews</code></td>
+</tr>
+<tr>
+<td><strong>M-09</strong></td>
+<td><code>DOC</code></td>
+<td>Document control</td>
+<td style="text-align: right;">17</td>
+<td><code>DocumentControl/ControlledDocument.cs; DocumentAcknowledgement.cs; DocumentControlledCopy.cs</code></td>
+<td><code>DocumentControl/Commands/DocumentCommands.cs; ControlledCopySlice.cs; DocumentAcknowledgementSlice.cs; DocumentReviewDuePolicy.cs</code></td>
+<td><code>DocumentsController.cs</code></td>
+<td><code>/documents</code></td>
+</tr>
+<tr>
+<td><strong>M-10</strong></td>
+<td><code>ARC</code></td>
+<td>Records &amp; archive</td>
+<td style="text-align: right;">7</td>
+<td><code>Records/ArchiveEntry.cs</code></td>
+<td><code>Records/RecordsSlice.cs</code></td>
+<td><code>OperationsControllers.cs</code></td>
+<td><code>/records</code></td>
+</tr>
+<tr>
+<td><strong>M-11</strong></td>
+<td><code>EQP</code></td>
+<td>Equipment</td>
+<td style="text-align: right;">7</td>
+<td><code>Equipment/EquipmentItem.cs</code></td>
+<td><code>Equipment/EquipmentSlice.cs; IntermediateCheckToNcPolicy.cs</code></td>
+<td><code>EquipmentController.cs</code></td>
+<td><code>/equipment</code></td>
+</tr>
+<tr>
+<td><strong>M-12</strong></td>
+<td><code>RS</code></td>
+<td>Reference standards</td>
+<td style="text-align: right;">6</td>
+<td><code>Equipment/ReferenceStandard.cs</code></td>
+<td><code>Equipment/ReferenceStandardsSlice.cs</code></td>
+<td><code>ReferenceStandardsController.cs</code></td>
+<td><code>/reference-standards</code></td>
+</tr>
+<tr>
+<td><strong>M-13</strong></td>
+<td><code>ENV</code></td>
+<td>Environmental monitoring</td>
+<td style="text-align: right;">8</td>
+<td><code>Facility/MonitoringPoint.cs</code></td>
+<td><code>Facility/MonitoringSlice.cs; ExcursionToNcPolicy.cs</code></td>
+<td><code>MonitoringPointsController.cs</code></td>
+<td><code>/monitoring</code></td>
+</tr>
+<tr>
+<td><strong>M-14</strong></td>
+<td><code>SUP</code></td>
+<td>Supplier quality</td>
+<td style="text-align: right;">8</td>
+<td><code>SupplierQuality/Supplier.cs</code></td>
+<td><code>SupplierQuality/SupplierSlice.cs</code></td>
+<td><code>GovernanceControllers.cs</code></td>
+<td><code>/suppliers</code></td>
+</tr>
+<tr>
+<td><strong>M-15</strong></td>
+<td><code>COMP</code></td>
+<td>Competency</td>
+<td style="text-align: right;">6</td>
+<td><code>Competency/CompetencyRecord.cs</code></td>
+<td><code>Competency/CompetencySlice.cs; CompetencyLapseAuthorizationPolicy.cs</code></td>
+<td><code>CompetenciesController.cs</code></td>
+<td><code>/competencies</code></td>
+</tr>
+<tr>
+<td><strong>M-16</strong></td>
+<td><code>TRN</code></td>
+<td>Training assignments</td>
+<td style="text-align: right;">3</td>
+<td><code>Competency/CompetencyRecord.cs</code></td>
+<td><code>Competency/CompetencySlice.cs</code></td>
+<td><code>CompetenciesController.cs</code></td>
+<td><code>/training</code></td>
+</tr>
+<tr>
+<td><strong>M-17</strong></td>
+<td><code>AUTHZ</code></td>
+<td>Test authorisations</td>
+<td style="text-align: right;">6</td>
+<td><code>Competency/TestAuthorization.cs</code></td>
+<td><code>Competency/AuthorizationSlice.cs</code></td>
+<td><code>TestAuthorizationsController.cs</code></td>
+<td><code>/authorizations</code></td>
+</tr>
+<tr>
+<td><strong>M-18</strong></td>
+<td><code>USER</code></td>
+<td>User administration</td>
+<td style="text-align: right;">10</td>
+<td><code>IdentityAccess/UserAccount.cs</code></td>
+<td><code>IdentityAccess/Commands/UserManagement.cs</code></td>
+<td><code>UsersController.cs; UserDirectoryController.cs</code></td>
+<td><code>/users</code></td>
+</tr>
+<tr>
+<td><strong>M-19</strong></td>
+<td><code>ROLE</code></td>
+<td>Roles &amp; privileges</td>
+<td style="text-align: right;">8</td>
+<td><code>Authorization/Role.cs; Authorization/PermissionCatalog.cs</code></td>
+<td><code>Authorization/RolesSlice.cs; SystemRoleCatalog.cs; SeededRoleDefault.cs</code></td>
+<td><code>RolesController.cs</code></td>
+<td><code>/roles</code></td>
+</tr>
+<tr>
+<td><strong>M-20</strong></td>
+<td><code>RSK</code></td>
+<td>Risk register</td>
+<td style="text-align: right;">7</td>
+<td><code>RiskGovernance/RiskItem.cs</code></td>
+<td><code>RiskGovernance/RiskGovernanceSlice.cs</code></td>
+<td><code>GovernanceControllers.cs</code></td>
+<td><code>/risks</code></td>
+</tr>
+<tr>
+<td><strong>M-21</strong></td>
+<td><code>COI</code></td>
+<td>Conflicts of interest</td>
+<td style="text-align: right;">5</td>
+<td><code>RiskGovernance/ConflictDeclaration.cs</code></td>
+<td><code>RiskGovernance/ConflictSlice.cs</code></td>
+<td><code>ConflictsController.cs</code></td>
+<td><code>/conflicts</code></td>
+</tr>
+<tr>
+<td><strong>M-22</strong></td>
+<td><code>CTX</code></td>
+<td>Organisational context</td>
+<td style="text-align: right;">9</td>
+<td><code>Organization/OrganizationContext.cs</code></td>
+<td><code>Organization/OrgContextSlice.cs</code></td>
+<td><code>OrgContextController.cs</code></td>
+<td><code>/org-context</code></td>
+</tr>
+<tr>
+<td><strong>M-23</strong></td>
+<td><code>UAR</code></td>
+<td>User access review</td>
+<td style="text-align: right;">3</td>
+<td><code>IdentityAccess/UserAccessReview.cs</code></td>
+<td><code>IdentityAccess/Commands/AccessReviewSlice.cs</code></td>
+<td><code>AccessReviewsController.cs</code></td>
+<td><code>/access-reviews</code></td>
+</tr>
+<tr>
+<td><strong>M-24</strong></td>
+<td><code>CLD</code></td>
+<td>Compliance ledger &amp; e-signatures</td>
+<td style="text-align: right;">8</td>
+<td><code>ComplianceLedger/AuditTrailReview.cs; ComplianceLedger/LedgerEntries.cs</code></td>
+<td><code>ComplianceLedger/AuditTrailReviewSlice.cs; ComplianceQueries.cs</code></td>
+<td><code>ComplianceController.cs</code></td>
+<td><code>/compliance</code></td>
+</tr>
+<tr>
+<td><strong>M-25</strong></td>
+<td><code>AQ.QC</code></td>
+<td>Westgard QC</td>
+<td style="text-align: right;">6</td>
+<td><code>AnalyticalQuality/QcProfile.cs; WestgardEvaluator.cs</code></td>
+<td><code>AnalyticalQuality/QcSlice.cs</code></td>
+<td><code>AnalyticalQualityControllers.cs</code></td>
+<td><code>/qc</code></td>
+</tr>
+<tr>
+<td><strong>M-26</strong></td>
+<td><code>AQ</code></td>
+<td>Analytical studies (12)</td>
+<td style="text-align: right;">—</td>
+<td><code>AnalyticalQuality/*Study.cs; OutlierScreening.cs; SigmaAssessment.cs; UncertaintyBudget.cs</code></td>
+<td><code>AnalyticalQuality/*Slice.cs</code></td>
+<td><code>AnalyticalQualityControllers.cs + 11 study controllers</code></td>
+<td><code>/validation-studies … /uncertainty</code></td>
+</tr>
+<tr>
+<td><strong>M-27</strong></td>
+<td><code>PT</code></td>
+<td>Proficiency testing</td>
+<td style="text-align: right;">11</td>
+<td><code>AnalyticalQuality/PtPlan.cs; PtEnrollment.cs</code></td>
+<td><code>AnalyticalQuality/PtPlanSlice.cs; PtToNcPolicy.cs; ValidationAndPtSlice.cs</code></td>
+<td><code>PtPlansController.cs; AnalyticalQualityControllers.cs</code></td>
+<td><code>/pt-plans, /proficiency-tests</code></td>
+</tr>
+<tr>
+<td><strong>M-28</strong></td>
+<td><code>TASK</code></td>
+<td>Tasks, SLA &amp; escalation</td>
+<td style="text-align: right;">5</td>
+<td><code>Sla/SlaAndTasks.cs</code></td>
+<td><code>Sla/SlaSlice.cs; EscalationTriggeredPolicy.cs</code></td>
+<td><code>OperationsControllers.cs</code></td>
+<td><code>/tasks</code></td>
+</tr>
+<tr>
+<td><strong>M-29</strong></td>
+<td><code>NTF</code></td>
+<td>Notifications</td>
+<td style="text-align: right;">5</td>
+<td><code>Notifications/NotificationAggregates.cs</code></td>
+<td><code>Notifications/NotificationSlice.cs; NotificationDispatcher.cs; NotificationPolicies.cs</code></td>
+<td><code>PlatformControllers.cs</code></td>
+<td><code>/notifications, /notification-rules</code></td>
+</tr>
+<tr>
+<td><strong>M-30</strong></td>
+<td><code>RPT</code></td>
+<td>Reporting &amp; KPIs</td>
+<td style="text-align: right;">4</td>
+<td><code>Reporting/KpiSnapshot.cs</code></td>
+<td><code>Reporting/ReportingQueries.cs</code></td>
+<td><code>ReportsController.cs</code></td>
+<td><code>/dashboard</code></td>
+</tr>
+<tr>
+<td><strong>M-31</strong></td>
+<td><code>ORG</code></td>
+<td>Organisation reference data</td>
+<td style="text-align: right;">3</td>
+<td><code>Organization/OrganizationAggregates.cs</code></td>
+<td><code>Organization/OrganizationSlice.cs; DefaultLovCatalog.cs</code></td>
+<td><code>PlatformControllers.cs</code></td>
+<td><code>/reference-data</code></td>
+</tr>
+<tr>
+<td><strong>M-32</strong></td>
+<td><code>TEN</code></td>
+<td>Tenant settings</td>
+<td style="text-align: right;">2</td>
+<td><code>Tenancy/TenantSettings.cs</code></td>
+<td><code>Tenancy/Commands/TenantMfaPolicy.cs</code></td>
+<td><code>TenantSettingsController.cs</code></td>
+<td><code>/settings/security</code></td>
+</tr>
+<tr>
+<td><strong>M-33</strong></td>
+<td><code>PLT</code></td>
+<td>Platform control plane</td>
+<td style="text-align: right;">2</td>
+<td><code>Tenancy/Tenant.cs; TenantSlug.cs; TenantStatus.cs; TenantEvents.cs</code></td>
+<td><code>Tenancy/Commands/ProvisionTenant.cs; Queries/GetTenants.cs; GetWorkspace.cs</code></td>
+<td><code>TenantsController.cs</code></td>
+<td><code>/platform/tenants</code></td>
+</tr>
+<tr>
+<td><strong>M-34</strong></td>
+<td><code>AUTH</code></td>
+<td>Authentication &amp; session</td>
+<td style="text-align: right;">10</td>
+<td><code>IdentityAccess/UserAccount.cs; RefreshSession.cs; PasswordHistoryEntry.cs</code></td>
+<td><code>IdentityAccess/Commands/Login.cs; MfaAndPin.cs; RefreshSessions.cs; PasswordRules.cs</code></td>
+<td><code>AuthController.cs</code></td>
+<td><code>/login, /t/:tenant, /security/mfa-setup</code></td>
+</tr>
+<tr>
+<td><strong>M-35</strong></td>
+<td><code>FILE</code></td>
+<td>File storage &amp; evidence</td>
+<td style="text-align: right;">2</td>
+<td><code>Files/FileReference.cs</code></td>
+<td><code>Abstractions/IFileStorage.cs</code></td>
+<td><code>FilesController.cs</code></td>
+<td><code>(embedded)</code></td>
+</tr>
+<tr>
+<td><strong>M-36</strong></td>
+<td><code>EXP</code></td>
+<td>Exports</td>
+<td style="text-align: right;">4</td>
+<td><code>—</code></td>
+<td><code>Abstractions/IExportService.cs</code></td>
+<td><code>ExportsController.cs</code></td>
+<td><code>(buttons on registers)</code></td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>12.3 Functional requirement traceability</h1>
+<p>One row per <strong>specified capability</strong>, not per endpoint. <code>FR-&lt;MOD&gt;-nn</code> identifiers are defined in
+<a href="02-1-Functional-Specification-Quality-and-Improvement.html">Document 02</a>.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Req ID</th>
+<th>Requirement</th>
+<th>Pri</th>
+<th>Source</th>
+<th>Impl.</th>
+<th>Code location</th>
+<th>UI location</th>
+<th>Config</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FR-NC-01</td>
+<td>Raise an NC with RPN = severity × likelihood</td>
+<td>M</td>
+<td>CODE, URS</td>
+<td>✅</td>
+<td><code>Domain/Improvement/Nonconformance.cs</code> <code>Raise</code></td>
+<td><code>/nonconformances</code> drawer</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-NC-02</td>
+<td>Guarded 9-state CAPA workflow with two loop-backs</td>
+<td>M</td>
+<td>CODE, URS</td>
+<td>✅ AUTO</td>
+<td>same, <code>Submit</code>…<code>ConfirmEffectiveness</code></td>
+<td><code>nc-detail</code> stepper</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-NC-03</td>
+<td>SoD on verify and close</td>
+<td>M</td>
+<td>21 CFR 11.10(g)</td>
+<td>✅ AUTO</td>
+<td><code>SOD-CAPA-001/002</code></td>
+<td>server-enforced</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-NC-04</td>
+<td>Verification blocked until all CAPA actions complete</td>
+<td>M</td>
+<td>CODE</td>
+<td>✅</td>
+<td><code>NC-019</code>, <code>NC-020</code></td>
+<td>button disabled</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-NC-05</td>
+<td>Four quality-event types on one workflow</td>
+<td>S</td>
+<td>CODE</td>
+<td>✅</td>
+<td><code>QualityEventType</code></td>
+<td>selector on raise form</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-NC-06</td>
+<td>Auto-raise from six upstream policies</td>
+<td>M</td>
+<td>CODE</td>
+<td>✅</td>
+<td>6 <code>*Policy.cs</code> in Application</td>
+<td>n/a (server)</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-NC-07</td>
+<td>Structured RCA (5-Whys / Fishbone editors)</td>
+<td>S</td>
+<td>SRS-v1</td>
+<td>❌ <strong>not built</strong> — enum + free text only</td>
+<td><code>RcaMethod</code></td>
+<td>plain textarea</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-CMP-01</td>
+<td>Complaint lifecycle with justified/unjustified gate</td>
+<td>M</td>
+<td>ISO 17025 §7.9</td>
+<td>✅</td>
+<td><code>Domain/Improvement/Complaint.cs</code></td>
+<td><code>/complaints</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-CMP-02</td>
+<td>Justified complaint auto-raises an NC</td>
+<td>M</td>
+<td>CODE</td>
+<td>✅</td>
+<td><code>ComplaintToNcPolicy</code></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-CMP-03</td>
+<td>Closure blocked while the linked NC is open</td>
+<td>M</td>
+<td>CODE</td>
+<td>⚠ <strong>defect</strong> — a <em>rejected</em> NC never reaches <code>Closed</code>, so the complaint becomes unclosable</td>
+<td><code>CMP-020</code></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-FBK-01</td>
+<td>Feedback lifecycle; only dissatisfaction escalates</td>
+<td>M</td>
+<td>CODE</td>
+<td>✅</td>
+<td><code>FBK-014</code></td>
+<td><code>/feedback</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-OBJ-01</td>
+<td>Objective cannot be declared achieved against contrary evidence</td>
+<td>M</td>
+<td>CODE</td>
+<td>✅</td>
+<td><code>OBJ-011</code></td>
+<td><code>/quality-objectives</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-QP-01</td>
+<td>Versioned policy, one in force, SoD approval</td>
+<td>M</td>
+<td>ISO 9001 §5.2</td>
+<td>✅ AUTO</td>
+<td><code>QualityPolicySlice</code></td>
+<td><code>/quality-policy</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-AUD-01</td>
+<td>Checklist audit with graded findings → NC</td>
+<td>M</td>
+<td>ISO 17025 §8.8</td>
+<td>✅</td>
+<td><code>Domain/AuditManagement/Audit.cs</code></td>
+<td><code>/audits</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-AUD-02</td>
+<td>Sign-off blocked on unanswered items / unlinked NC findings</td>
+<td>M</td>
+<td>CODE</td>
+<td>✅</td>
+<td><code>AUD-017</code>, <code>AUD-018</code></td>
+<td>button disabled</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-AUD-03</td>
+<td>ISO-clause checklist templates</td>
+<td>S</td>
+<td>SRS-v1</td>
+<td>❌ <strong>not built</strong> — checklist typed per audit</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-CHG-01</td>
+<td>Change approval requires a linked risk assessment</td>
+<td>M</td>
+<td>Annex 11 §4</td>
+<td>✅</td>
+<td><code>CHG-012</code></td>
+<td><code>/changes</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-CHG-02</td>
+<td>Post-implementation review, terminal</td>
+<td>S</td>
+<td>CODE</td>
+<td>✅ AUTO</td>
+<td><code>RecordPostImplementationReview</code></td>
+<td>PIR form</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-MRV-01</td>
+<td>Management review with immutable minutes</td>
+<td>M</td>
+<td>ISO 17025 §8.9</td>
+<td>✅</td>
+<td><code>MRV-004</code></td>
+<td><code>/management-reviews</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-MRV-02</td>
+<td>Review decisions become tasks</td>
+<td>S</td>
+<td>expectation</td>
+<td>❌ <strong>not built</strong> — decisions do not create <code>WorkTask</code> rows</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-MRV-03</td>
+<td>§8.9.2 standing input checklist</td>
+<td>S</td>
+<td>ISO 17025</td>
+<td>❌ not built</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-DOC-01</td>
+<td>Draft→Review→Approve→Publish→Obsolete with SoD at both gates</td>
+<td>M</td>
+<td>ISO 17025 §8.3</td>
+<td>✅ AUTO</td>
+<td><code>ControlledDocument</code></td>
+<td><code>/documents</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-DOC-02</td>
+<td>Version bump; publishing obsoletes the prior version</td>
+<td>M</td>
+<td>CODE</td>
+<td>✅</td>
+<td><code>DocumentVersionObsoleted</code></td>
+<td>detail</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-DOC-03</td>
+<td>Periodic review cycle (default 24 months) raised by the sweep</td>
+<td>M</td>
+<td>ISO 17025 §8.3</td>
+<td>✅</td>
+<td><code>MarkReviewDueIfReached</code></td>
+<td>banner</td>
+<td>per-document input</td>
+</tr>
+<tr>
+<td>FR-DOC-04</td>
+<td>Read-and-understand acknowledgement pinned to the version</td>
+<td>M</td>
+<td>CODE</td>
+<td>✅ AUTO</td>
+<td><code>DocumentAcknowledgement</code></td>
+<td>detail card</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-DOC-05</td>
+<td>Numbered controlled-copy register, one-shot closure</td>
+<td>S</td>
+<td>ISO 17025 §8.3</td>
+<td>✅</td>
+<td><code>DocumentControlledCopy</code></td>
+<td>detail card</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-DOC-06</td>
+<td>Obsolete-version PDF watermark</td>
+<td>S</td>
+<td>SRS-v1</td>
+<td>❌ <strong>not built</strong> — no PDF processing exists</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-DOC-07</td>
+<td>Acknowledgement enforcement (block work until acknowledged)</td>
+<td>C</td>
+<td>expectation</td>
+<td>❌ not built</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-ARC-01</td>
+<td>Archive requires an immutable snapshot</td>
+<td>M</td>
+<td>21 CFR 11.10(c)</td>
+<td>✅</td>
+<td><code>ARC-002</code></td>
+<td><code>/records</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-ARC-02</td>
+<td>Retention classes; permanent never disposable</td>
+<td>M</td>
+<td>ISO 17025 §8.4</td>
+<td>✅</td>
+<td><code>ARC-013</code>, <code>ARC-014</code></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-ARC-03</td>
+<td>Legal hold blocks disposal regardless of retention</td>
+<td>M</td>
+<td>CODE</td>
+<td>✅ AUTO</td>
+<td><code>ARC-015</code></td>
+<td>hold indicator</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-EQP-01</td>
+<td>Calibration interval + grace with automatic lock-out</td>
+<td>M</td>
+<td>ISO 17025 §6.4</td>
+<td>✅</td>
+<td><code>LockOutIfGraceExhausted</code></td>
+<td><code>/equipment</code></td>
+<td>per-item</td>
+</tr>
+<tr>
+<td>FR-EQP-02</td>
+<td>Lock-out <strong>blocks instrument selection</strong></td>
+<td>M</td>
+<td>SRS-v1, ISO 17025</td>
+<td>❌ <strong>status only</strong> — instrument references are free text, not FKs</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-EQP-03</td>
+<td>Failed intermediate check auto-raises an NC</td>
+<td>M</td>
+<td>CODE</td>
+<td>✅</td>
+<td><code>IntermediateCheckToNcPolicy</code></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-EQP-04</td>
+<td>Checks may only cite an active, in-date standard</td>
+<td>M</td>
+<td>CODE</td>
+<td>✅</td>
+<td><code>RS-020</code></td>
+<td>picker</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-RS-01</td>
+<td>Traceability chain mandatory; auto-expiry</td>
+<td>M</td>
+<td>ISO 17025 §6.5</td>
+<td>✅</td>
+<td><code>RS-002</code>, <code>MarkExpiredIfReached</code></td>
+<td><code>/reference-standards</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-ENV-01</td>
+<td>Limits mandatory; excursion auto-raises an NC</td>
+<td>M</td>
+<td>ISO 17025 §6.3</td>
+<td>✅</td>
+<td><code>ExcursionToNcPolicy</code></td>
+<td><code>/monitoring</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-ENV-02</td>
+<td>Excursion de-bounce / stabilisation window</td>
+<td>S</td>
+<td>expectation</td>
+<td>❌ <strong>not built</strong> — one NC per out-of-limit reading</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-SUP-01</td>
+<td>Supplier approval with SoD; certificate-expiry suspension</td>
+<td>M</td>
+<td>ISO 17025 §6.6</td>
+<td>✅</td>
+<td><code>SOD-SUP-001</code>, <code>SuspendIfCertificateExpired</code></td>
+<td><code>/suppliers</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-SUP-02</td>
+<td>Weighted periodic evaluation</td>
+<td>M</td>
+<td>ISO 17025 §6.6</td>
+<td>✅</td>
+<td><code>SupplierEvaluation.Record</code></td>
+<td>detail</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-SUP-03</td>
+<td>Reinstate a suspended supplier</td>
+<td>M</td>
+<td>expectation</td>
+<td>❌ <strong>not built</strong> — <code>Suspended</code> is terminal</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-COMP-01</td>
+<td>Pass mark 80; SoD on assess and authorise; validity expiry</td>
+<td>M</td>
+<td>ISO 17025 §6.2</td>
+<td>✅</td>
+<td><code>PassMark</code>, <code>SOD-COMP-001</code></td>
+<td><code>/competencies</code></td>
+<td>❌ <strong>hard-coded</strong></td>
+</tr>
+<tr>
+<td>FR-COMP-02</td>
+<td>Lapse cascades to suspend test authorisations and raise an NC</td>
+<td>M</td>
+<td>CODE</td>
+<td>✅</td>
+<td><code>CompetencyLapseAuthorizationPolicy</code></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-TRN-01</td>
+<td>Training queue with due dates</td>
+<td>S</td>
+<td>ISO 17025 §6.2.5</td>
+<td>✅</td>
+<td><code>TrainingAssignment</code></td>
+<td><code>/training</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-TRN-02</td>
+<td>Training completion feeds competency</td>
+<td>S</td>
+<td>expectation</td>
+<td>❌ <strong>not linked</strong></td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-AUTHZ-01</td>
+<td>Per-test authorisation evidenced by a current competency</td>
+<td>M</td>
+<td>ISO 17025 §6.2.6</td>
+<td>✅</td>
+<td><code>AUTHZ-003</code>, <code>AUTHZ-004</code></td>
+<td><code>/authorizations</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-AUTHZ-02</td>
+<td>Scope (Perform / ReviewAndRelease / Train) <strong>enforced</strong></td>
+<td>M</td>
+<td>ISO 17025 §6.2.6</td>
+<td>❌ <strong>recorded, never checked</strong> downstream</td>
+<td><code>AuthorizationScope</code></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-USER-01</td>
+<td>User lifecycle; platform/tenant identity classes disjoint</td>
+<td>M</td>
+<td>21 CFR 11.10(d)</td>
+<td>✅ AUTO</td>
+<td><code>USER-003/004/005</code></td>
+<td><code>/users</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-USER-02</td>
+<td>Password policy, history, expiry, lockout</td>
+<td>M</td>
+<td>21 CFR 11.300</td>
+<td>✅ AUTO</td>
+<td><code>PasswordRules</code>, <code>UserAccount</code></td>
+<td>—</td>
+<td>CFG-12, CFG-13</td>
+</tr>
+<tr>
+<td>FR-USER-03</td>
+<td>Branch/department scope restricts visibility</td>
+<td>S</td>
+<td>CODE</td>
+<td>✅</td>
+<td><code>OrgScopeGuardInterceptor</code></td>
+<td>allocation picker</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-USER-04</td>
+<td>Self-service password reset</td>
+<td>S</td>
+<td>expectation</td>
+<td>❌ not built</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-USER-05</td>
+<td>Active session monitor with per-session revoke</td>
+<td>S</td>
+<td>SRS-v1</td>
+<td>❌ <strong>not built</strong> — data exists in <code>qams.refresh_session</code>, no surface</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-ROLE-01</td>
+<td>171 code-defined permission keys; matrix UI from the catalogue</td>
+<td>M</td>
+<td>21 CFR 11.10(d)</td>
+<td>✅</td>
+<td><code>PermissionCatalog</code></td>
+<td><code>/roles</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-ROLE-02</td>
+<td>Administrative lock-out guard</td>
+<td>M</td>
+<td>CODE</td>
+<td>✅ AUTO</td>
+<td><code>ROLE-006</code></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-ROLE-03</td>
+<td>Every permission change carries a reason</td>
+<td>M</td>
+<td>21 CFR 11.10(e)</td>
+<td>✅</td>
+<td><code>RolePermissionsChanged</code></td>
+<td>reason field</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-RSK-01</td>
+<td>5×5 risk with mandatory residual assessment before closure</td>
+<td>M</td>
+<td>ISO 17025 §8.5</td>
+<td>✅</td>
+<td><code>RSK-005</code>, <code>RSK-006</code></td>
+<td><code>/risks</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-COI-01</td>
+<td>Impartiality declarations with SoD assessment</td>
+<td>M</td>
+<td>ISO 17025 §4.1</td>
+<td>✅</td>
+<td><code>SOD-COI-001</code></td>
+<td><code>/conflicts</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-CTX-01</td>
+<td>Interested parties + context issues with risk linkage</td>
+<td>M</td>
+<td>ISO 9001 §4.1/4.2</td>
+<td>✅</td>
+<td><code>OrganizationContext.cs</code></td>
+<td><code>/org-context</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-UAR-01</td>
+<td>Periodic access review with snapshotted account count</td>
+<td>M</td>
+<td>21 CFR 11.10(d)</td>
+<td>✅</td>
+<td><code>UserAccessReview</code></td>
+<td><code>/access-reviews</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-UAR-02</td>
+<td>Line-by-line account attestation</td>
+<td>S</td>
+<td>expectation</td>
+<td>❌ count only</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-CLD-01</td>
+<td>Per-field append-only ledger with actor, time and reason</td>
+<td>M</td>
+<td>21 CFR 11.10(e)</td>
+<td>✅ AUTO</td>
+<td><code>FieldChangeInterceptor</code></td>
+<td><code>/compliance</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-CLD-02</td>
+<td>Hash chain with verification identifying the first break</td>
+<td>M</td>
+<td>21 CFR 11.10(e)</td>
+<td>✅ AUTO</td>
+<td><code>VerifyChainAsync</code></td>
+<td>tab</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-CLD-03</td>
+<td>E-signature: password + PIN, logged, throttled</td>
+<td>M</td>
+<td>21 CFR 11.200</td>
+<td>✅ AUTO</td>
+<td><code>ESignatureService</code></td>
+<td>signing dialogs</td>
+<td>CFG-17</td>
+</tr>
+<tr>
+<td>FR-CLD-04</td>
+<td>Signed records immutable <strong>in the database</strong></td>
+<td>M</td>
+<td>21 CFR 11.10(c)</td>
+<td>✅ AUTO</td>
+<td><code>reject_frozen_mutation()</code></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-CLD-05</td>
+<td>Audit-trail review with mandatory conclusion</td>
+<td>M</td>
+<td>Annex 11 §9</td>
+<td>✅</td>
+<td><code>ATR-011</code></td>
+<td>tab</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-CLD-06</td>
+<td><code>audit.security_event</code> tenant-isolated</td>
+<td>M</td>
+<td>CODE</td>
+<td>❌ <strong>NOT MET</strong> — no RLS policy on that table</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-AQ-01</td>
+<td>12 study types on one DataEntry→Calculated→SignedOff lifecycle</td>
+<td>M</td>
+<td>ISO 15189 / CLSI</td>
+<td>✅</td>
+<td><code>Domain/AnalyticalQuality/*</code></td>
+<td>24 screens</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-AQ-02</td>
+<td>Westgard multi-rule with configurable limits, frozen verdict</td>
+<td>M</td>
+<td>ISO 17025 §7.7</td>
+<td>✅ AUTO</td>
+<td><code>WestgardEvaluator</code></td>
+<td><code>/qc</code></td>
+<td>CFG-18…21</td>
+</tr>
+<tr>
+<td>FR-AQ-03</td>
+<td>QC target change requires a reason and is forward-only</td>
+<td>M</td>
+<td>CODE</td>
+<td>✅</td>
+<td><code>QC-012</code>, <code>QC-013</code></td>
+<td>targets form</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-AQ-04</td>
+<td>Statistical charts (Levey-Jennings, Passing-Bablok, Bland-Altman)</td>
+<td>S</td>
+<td>SRS-v1</td>
+<td>❌ <strong>not built</strong> — numeric results only</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-AQ-05</td>
+<td>CSV import of study data</td>
+<td>S</td>
+<td>CODE</td>
+<td>⚠ <strong>2 of 12 studies only</strong> (method comparison, precision)</td>
+<td><code>qams-csv-import</code></td>
+<td>those two details</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-AQ-06</td>
+<td>LIS/instrument data ingestion</td>
+<td>C</td>
+<td>SRS-v1</td>
+<td>❌ not built</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-AQ-07</td>
+<td>QC profile deactivation</td>
+<td>S</td>
+<td>CODE</td>
+<td>🔒 <strong>unreachable</strong> — aggregate method exists, no command, no endpoint</td>
+<td><code>QcProfile.Deactivate</code></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-PT-01</td>
+<td>z-score grading; unsatisfactory auto-raises an NC</td>
+<td>M</td>
+<td>ISO 17025 §7.7.2</td>
+<td>✅</td>
+<td><code>PtEnrollment.RecordResult</code></td>
+<td><code>/proficiency-tests</code></td>
+<td>❌ hard-coded thresholds</td>
+</tr>
+<tr>
+<td>FR-PT-02</td>
+<td>Annual PT plan, one per year, fulfilment tracking</td>
+<td>M</td>
+<td>ISO 17025 §7.7.2</td>
+<td>✅</td>
+<td><code>PtPlan</code></td>
+<td><code>/pt-plans</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-PT-03</td>
+<td>En-number / zeta grading for calibration ILCs</td>
+<td>S</td>
+<td>ISO 17043</td>
+<td>❌ <strong>not built</strong> — z-score only</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-PT-04</td>
+<td>Questionable result triggers an investigation</td>
+<td>S</td>
+<td>expectation</td>
+<td>❌ nothing happens</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-TASK-01</td>
+<td>Task queue; assignment to a user or a role</td>
+<td>S</td>
+<td>CODE</td>
+<td>✅</td>
+<td><code>WorkTask</code></td>
+<td><code>/tasks</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-TASK-02</td>
+<td>Three-level escalation ladder at +24/+48/+72 h</td>
+<td>S</td>
+<td>ISO 17025 §8.7.1</td>
+<td>⚠ <strong>built, but level 2 escalates to Quality Manager, not Department Head</strong> as the previous SRS specified</td>
+<td><code>EscalationTimer</code></td>
+<td>—</td>
+<td>❌ hard-coded</td>
+</tr>
+<tr>
+<td>FR-TASK-03</td>
+<td>Escalation deadlines derived from <code>SlaDefinition</code></td>
+<td>S</td>
+<td>expectation</td>
+<td>❌ <strong>not wired</strong> — the two are independent</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-NTF-01</td>
+<td>11 event keys → configurable rules → in-app + e-mail</td>
+<td>S</td>
+<td>CODE</td>
+<td>✅</td>
+<td><code>NotificationPolicies</code></td>
+<td><code>/notification-rules</code></td>
+<td>CFG-24…29</td>
+</tr>
+<tr>
+<td>FR-NTF-02</td>
+<td>E-mail retry on transient failure</td>
+<td>S</td>
+<td>expectation</td>
+<td>❌ <strong>not built</strong> — one attempt, marked <code>Failed</code></td>
+<td>—</td>
+<td>monitor tab</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-NTF-03</td>
+<td>Operator warning when SMTP is unconfigured</td>
+<td>S</td>
+<td>expectation</td>
+<td>❌ silent degradation to log-only</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-RPT-01</td>
+<td>Dashboard KPIs with real population denominators</td>
+<td>S</td>
+<td>CODE</td>
+<td>✅ AUTO</td>
+<td><code>DashboardKpiTotalsDto</code></td>
+<td><code>/dashboard</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-RPT-02</td>
+<td>6-hourly KPI snapshot series, one row per tenant per day</td>
+<td>S</td>
+<td>CODE</td>
+<td>✅</td>
+<td><code>KpiSnapshotService</code></td>
+<td>history chart</td>
+<td>❌ hard-coded interval</td>
+</tr>
+<tr>
+<td>FR-ORG-01</td>
+<td>Branch → department hierarchy; test catalogue; LOVs</td>
+<td>M</td>
+<td>CODE</td>
+<td>✅</td>
+<td><code>OrganizationAggregates</code></td>
+<td><code>/reference-data</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-TEN-01</td>
+<td>Per-tenant MFA policy for privileged roles</td>
+<td>M</td>
+<td>21 CFR 11.300</td>
+<td>✅</td>
+<td><code>TenantSettings</code></td>
+<td><code>/settings/security</code></td>
+<td>CFG-09</td>
+</tr>
+<tr>
+<td>FR-PLT-01</td>
+<td>Tenant provisioning with the first administrator</td>
+<td>M</td>
+<td>CODE</td>
+<td>✅ AUTO</td>
+<td><code>ProvisionTenant</code></td>
+<td><code>/platform/tenants</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-PLT-02</td>
+<td>Tenant suspend / reactivate / terminate</td>
+<td>M</td>
+<td>CODE</td>
+<td>🔒 <strong>domain only — no endpoint, no UI</strong></td>
+<td><code>Tenant.Suspend/Reactivate/Terminate</code></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-AUTH-01</td>
+<td>Tenant sign-in with optional TOTP</td>
+<td>M</td>
+<td>21 CFR 11.300</td>
+<td>✅ AUTO</td>
+<td><code>LoginCommand</code></td>
+<td><code>/login</code></td>
+<td>CFG-04…09</td>
+</tr>
+<tr>
+<td>FR-AUTH-02</td>
+<td>Rotating refresh cookie with family-revoking reuse detection</td>
+<td>M</td>
+<td>ADR-0009</td>
+<td>✅ <strong>PROBE (live)</strong></td>
+<td><code>RefreshSession</code></td>
+<td>silent refresh</td>
+<td>CFG-08</td>
+</tr>
+<tr>
+<td>FR-AUTH-03</td>
+<td>Per-request account and role re-check</td>
+<td>M</td>
+<td>CODE</td>
+<td>✅ AUTO</td>
+<td><code>ActiveSessionMiddleware</code></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-AUTH-04</td>
+<td>Workspace lookup that cannot probe tenant existence</td>
+<td>M</td>
+<td>CODE</td>
+<td>✅ AUTO</td>
+<td><code>GetWorkspaceQuery</code></td>
+<td>login pill</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-FILE-01</td>
+<td>Allow-list + content sniffing; canonical type stored</td>
+<td>M</td>
+<td>CODE</td>
+<td>✅ AUTO</td>
+<td><code>FileContentPolicy</code></td>
+<td>upload controls</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-FILE-02</td>
+<td>Content-addressed dedup storage</td>
+<td>S</td>
+<td>CODE</td>
+<td>✅</td>
+<td><code>LocalFileStorage</code></td>
+<td>—</td>
+<td>CFG-23</td>
+</tr>
+<tr>
+<td>FR-FILE-03</td>
+<td>Maximum upload size</td>
+<td>M</td>
+<td>expectation</td>
+<td>❌ <strong>not enforced in application code</strong></td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>FR-EXP-01</td>
+<td>Four inspection exports, each logged as <code>RECORD_EXPORTED</code></td>
+<td>M</td>
+<td>21 CFR 11.10(b)</td>
+<td>✅</td>
+<td><code>ExportService</code></td>
+<td>export buttons</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="summary">Summary</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Impl.</th>
+<th style="text-align: right;">Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>✅ fully implemented</td>
+<td style="text-align: right;">62</td>
+</tr>
+<tr>
+<td>⚠ partial or defective</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr>
+<td>🔒 implemented but unreachable</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td>❌ not implemented</td>
+<td style="text-align: right;">25</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>All 25 "not implemented" rows are capabilities named by the previous SRS or by reasonable
+expectation — none is a regression.</strong> They are classified in
+<a href="13-Implementation-vs-SRS-Gap-Analysis.html">Document 13</a>.</p>
+<hr>
+<h1>12.4 Non-functional requirement traceability</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Req ID</th>
+<th>Requirement</th>
+<th>Pri</th>
+<th>Impl.</th>
+<th>Evidence</th>
+<th>Location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NFR-PERF-01</td>
+<td>Reads p95 &lt; 500 ms at 50 users</td>
+<td>M</td>
+<td>✅</td>
+<td>measured 85.8–104.7 ms, 0 % errors</td>
+<td><code>docs/reference/NT_QMS_Load_Test_Report.md</code></td>
+</tr>
+<tr>
+<td>NFR-PERF-04</td>
+<td>No unbounded list query</td>
+<td>M</td>
+<td>⚠</td>
+<td><code>pageSize</code> clamped to 200; <strong><code>take</code> and <code>days</code> not clamped</strong>; 15+ lists unpaged</td>
+<td><code>Application/Abstractions/Paging.cs</code></td>
+</tr>
+<tr>
+<td>NFR-PERF-05</td>
+<td>Rate limit sized per site</td>
+<td>M</td>
+<td>⚠</td>
+<td>default 300 is an abuse ceiling, not a concurrency ceiling</td>
+<td>CFG-14</td>
+</tr>
+<tr>
+<td>NFR-REL-01…04</td>
+<td>Retry, timeout, at-least-once outbox, backoff + dead-letter</td>
+<td>M</td>
+<td>✅</td>
+<td>drill executed</td>
+<td><code>OutboxProcessor</code></td>
+</tr>
+<tr>
+<td>NFR-REL-06</td>
+<td><code>xmin</code> concurrency → 409</td>
+<td>M</td>
+<td>✅ AUTO</td>
+<td>—</td>
+<td>ADR-0005</td>
+</tr>
+<tr>
+<td>NFR-REL-07</td>
+<td>Idempotency-Key replay protection</td>
+<td>S</td>
+<td>✅</td>
+<td>—</td>
+<td><code>IdempotencyBehavior</code></td>
+</tr>
+<tr>
+<td>NFR-REL-08</td>
+<td>Cold start survives an unreachable database</td>
+<td>M</td>
+<td>✅ <strong>OQ</strong></td>
+<td>OPS-010 fix + 6 regression tests</td>
+<td><code>DeferredStartupSeeder</code></td>
+</tr>
+<tr>
+<td>NFR-AVL-01…04</td>
+<td>Liveness DB-independent; readiness DB-backed; probes exempt</td>
+<td>M</td>
+<td>✅ OQ</td>
+<td>—</td>
+<td><code>Program.cs</code></td>
+</tr>
+<tr>
+<td>NFR-AVL-05</td>
+<td>Availability target</td>
+<td>—</td>
+<td>❌ <strong>none defined</strong></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>NFR-RCV-01…04</td>
+<td>RPO ≤ 5 min, RTO ≤ 4 h, WAL PITR, verified restore</td>
+<td>M</td>
+<td>⚠ <strong>documented, never drilled</strong></td>
+<td>—</td>
+<td><code>deploy/BACKUP-RESTORE-DR.md</code></td>
+</tr>
+<tr>
+<td>NFR-MNT-01…05</td>
+<td>Layering, command policy, API surface, module boundary, migration round-trip gates</td>
+<td>M</td>
+<td>✅ AUTO</td>
+<td>7 merge gates</td>
+<td><code>tests/NT.QAMS.Architecture.Tests</code>, CI</td>
+</tr>
+<tr>
+<td>NFR-MNT-06</td>
+<td>436 backend / 74 frontend / 6 e2e green, 0 skipped</td>
+<td>M</td>
+<td>✅</td>
+<td>last recorded run</td>
+<td>CI</td>
+</tr>
+<tr>
+<td>NFR-SCL-01</td>
+<td>Single replica</td>
+<td>M</td>
+<td>✅ by design</td>
+<td>sentinel</td>
+<td>ADR-0001</td>
+</tr>
+<tr>
+<td>NFR-SCL-02</td>
+<td>Partition-ready schema</td>
+<td>S</td>
+<td>✅</td>
+<td>88 composite PKs, no <code>UNIQUE(id)</code></td>
+<td>schema hardening Phase 5</td>
+</tr>
+<tr>
+<td>NFR-OBS-01…06</td>
+<td>JSON logs, correlation, end-to-end traces, Prometheus metrics</td>
+<td>M</td>
+<td>✅</td>
+<td>—</td>
+<td><code>Program.cs</code>, <code>QamsMetrics</code></td>
+</tr>
+<tr>
+<td>NFR-OBS-07</td>
+<td>Seven actionable alerts</td>
+<td>M</td>
+<td>⚠ <strong>defined, never deployed or observed firing</strong></td>
+<td>residual R-7</td>
+<td><code>deploy/OBSERVABILITY.md</code></td>
+</tr>
+<tr>
+<td>NFR-SEC-01…16</td>
+<td>See <a href="09-Security-Specification.html">Document 09 §9.13</a></td>
+<td>M</td>
+<td>✅ ×16</td>
+<td>probes, tests, OQ</td>
+<td>—</td>
+</tr>
+<tr>
+<td>NFR-SEC-17</td>
+<td><code>audit.security_event</code> tenant-isolated</td>
+<td>M</td>
+<td>❌ <strong>NOT MET</strong></td>
+<td>—</td>
+<td>T-01</td>
+</tr>
+<tr>
+<td>NFR-SEC-18</td>
+<td>Uploads size-bounded</td>
+<td>M</td>
+<td>❌ <strong>NOT MET</strong></td>
+<td>—</td>
+<td>T-10</td>
+</tr>
+<tr>
+<td>NFR-SEC-19</td>
+<td>Independent penetration test</td>
+<td>M</td>
+<td>❌ <strong>NOT PERFORMED</strong></td>
+<td>dev-instance self-assessment only</td>
+<td>T-22</td>
+</tr>
+<tr>
+<td>NFR-LOC-01…04</td>
+<td>en/ar/fr, RTL, three-step language resolution, localised LOVs</td>
+<td>M</td>
+<td>✅</td>
+<td>—</td>
+<td><code>core/i18n.service.ts</code></td>
+</tr>
+<tr>
+<td>NFR-A11Y-01…04</td>
+<td>axe always-on; violations fixed; accessible dialogs; no colour-only meaning</td>
+<td>S</td>
+<td>✅</td>
+<td>CI</td>
+<td>—</td>
+</tr>
+<tr>
+<td>NFR-A11Y-05</td>
+<td>Declared WCAG conformance level</td>
+<td>S</td>
+<td>❌ none claimed</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>NFR-RES-01</td>
+<td>Memory/CPU/disk budgets</td>
+<td>S</td>
+<td>❌ <strong>none defined</strong></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>NFR-RES-04</td>
+<td>Non-root container</td>
+<td>M</td>
+<td>✅ AUTO</td>
+<td>CI asserts the uid</td>
+<td><code>Dockerfile</code></td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>12.5 Architecture-constraint traceability</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Constraint</th>
+<th>Enforced by</th>
+<th>Automated?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AC-01…AC-06 layering</td>
+<td><code>LayerRulesTests</code></td>
+<td>✅ <strong>build gate</strong></td>
+</tr>
+<tr>
+<td>AC-07 one command policy</td>
+<td><code>CommandPolicyTests</code></td>
+<td>✅ <strong>build gate</strong></td>
+</tr>
+<tr>
+<td>AC-08 bounded <code>user_account</code> queries</td>
+<td><code>UserAccountTenantBoundTests</code> (self-proving)</td>
+<td>✅ <strong>build gate</strong></td>
+</tr>
+<tr>
+<td>AC-19/AC-20 RLS on every tenant table</td>
+<td>migration discipline</td>
+<td>❌ <strong>manual — no gate</strong></td>
+</tr>
+<tr>
+<td>AC-24 tenant-first composite PKs</td>
+<td>schema hardening</td>
+<td>❌ manual</td>
+</tr>
+<tr>
+<td>AC-29 <code>xmin</code> concurrency</td>
+<td>ADR + review</td>
+<td>❌ manual (scaffolded ops must be hand-removed)</td>
+</tr>
+<tr>
+<td>AC-31 column sizing ↔ validator</td>
+<td>review</td>
+<td>❌ manual</td>
+</tr>
+<tr>
+<td>AC-32 index naming ≤ 62 chars</td>
+<td>review + abbreviation map</td>
+<td>❌ manual</td>
+</tr>
+<tr>
+<td>AC-33 migration RLS bypass</td>
+<td>review</td>
+<td>❌ manual</td>
+</tr>
+<tr>
+<td>AC-36 MediatR 12.4 pin</td>
+<td><code>.csproj</code></td>
+<td>✅ compile</td>
+</tr>
+<tr>
+<td>AC-41 single replica</td>
+<td><code>SingleReplicaGuardService</code></td>
+<td>⚠ detects, does not prevent</td>
+</tr>
+<tr>
+<td>AC-45 dual routing</td>
+<td><code>VersionedRouteConvention</code> + surface gate</td>
+<td>✅ build gate</td>
+</tr>
+<tr>
+<td>AC-47 DB role guard</td>
+<td><code>DatabaseRoleGuard</code></td>
+<td>✅ <strong>runtime gate (Production)</strong></td>
+</tr>
+<tr>
+<td>AC-49 non-root container</td>
+<td>CI assertion</td>
+<td>✅ build gate</td>
+</tr>
+<tr>
+<td>AC-50 strict TS, no <code>any</code></td>
+<td>compiler</td>
+<td>✅ compile</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Nine of fifteen constraint families are automatically enforced.</strong> The six manual ones — all
+database-schema disciplines — are the highest-risk maintenance surface; see
+<a href="15-Recommendations.html">Document 15</a>.</p>
+<hr>
+<h1>12.6 Verification-method coverage</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Count</th>
+<th>What it covers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Domain unit tests</td>
+<td>37 files / 3,613 lines</td>
+<td>aggregate invariants and state machines</td>
+</tr>
+<tr>
+<td>Application unit tests</td>
+<td>17 files / 1,942 lines</td>
+<td>handlers, validators, policies</td>
+</tr>
+<tr>
+<td>Architecture tests</td>
+<td>4 files / 24 tests</td>
+<td>layering, command policy, module boundaries, tenant-bound queries</td>
+</tr>
+<tr>
+<td>Integration tests</td>
+<td>12 files / 1,229 lines</td>
+<td><strong>real PostgreSQL</strong>: RLS isolation, fail-closed, bypass, <code>WITH CHECK</code>, signed-record rejection</td>
+</tr>
+<tr>
+<td>Functional tests</td>
+<td>28 files / 3,290 lines</td>
+<td>HTTP contract, role matrix, envelope coverage, API surface, auth flows</td>
+</tr>
+<tr>
+<td>Playwright e2e</td>
+<td>6 specs</td>
+<td>login, regulated workflow, load-more journey, axe</td>
+</tr>
+<tr>
+<td>Load tests</td>
+<td>outside the solution</td>
+<td>read-mix latency (run with <code>dotnet run</code>)</td>
+</tr>
+<tr>
+<td>Security probes</td>
+<td>15 fast + 9 deep = 24</td>
+<td>IDOR, refresh reuse, CORS/XST, credential burst</td>
+</tr>
+<tr>
+<td>OQ execution records</td>
+<td>18 cases, 18 passed</td>
+<td>witnessed qualification</td>
+</tr>
+<tr>
+<td>Failure drills</td>
+<td>poison→dead-letter ✅ · PG-down ⚠ (needs elevation)</td>
+<td>recovery</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Total automated backend tests: 436, 0 skipped.</strong></p>
+<hr>
+<h1>12.7 Requirements with no verification</h1>
+<p>Named explicitly so they are not mistaken for verified behaviour.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Why unverified</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Backup / restore / DR</td>
+<td>no restore drill executed — <strong><code>[Not Executed]</code></strong></td>
+</tr>
+<tr>
+<td>Alert set</td>
+<td>observability stack never brought up (no Docker) — <strong>R-7</strong></td>
+</tr>
+<tr>
+<td>Load behaviour under a write mix</td>
+<td>the harness exists; the mix was never run against a shared database</td>
+</tr>
+<tr>
+<td>24-hour soak</td>
+<td>needs a staging host — <strong>R-5</strong></td>
+</tr>
+<tr>
+<td>Multi-node contention</td>
+<td>not applicable at one replica, and untested</td>
+</tr>
+<tr>
+<td>E-mail delivery</td>
+<td>SMTP never configured in any tested environment</td>
+</tr>
+<tr>
+<td>Container deployment</td>
+<td>authored, never executed here</td>
+</tr>
+<tr>
+<td>CSV re-validation</td>
+<td><strong>R-6</strong></td>
+</tr>
+<tr>
+<td>Independent penetration test</td>
+<td><strong>T-22</strong> — the largest assurance gap</td>
+</tr>
+<tr>
+<td>Browser compatibility matrix</td>
+<td>none declared</td>
+</tr>
+<tr>
+<td>Formal signed IQ/OQ/PQ</td>
+<td>execution and signature are events that have not happened</td>
+</tr>
+</tbody>
+</table></div>
+<div class="pager"><a href="11-Architecture-Constraints.html"><span>Previous</span>Architecture Constraints</a><a href="13-Implementation-vs-SRS-Gap-Analysis.html" style="text-align:right"><span>Next</span>Implementation vs SRS — Gap Analysis</a></div>
+</main></div>
+<script>
+(function(){
+ var r=document.documentElement, K='ntqms-srs-theme', s=localStorage.getItem(K);
+ if(s) r.setAttribute('data-theme',s);
+ var b=document.getElementById('th');
+ if(b) b.onclick=function(){
+   var cur=r.getAttribute('data-theme');
+   if(!cur) cur=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+   var nx=cur==='dark'?'light':'dark';
+   r.setAttribute('data-theme',nx); localStorage.setItem(K,nx);
+ };
+ var p=document.getElementById('pr'); if(p) p.onclick=function(){window.print();};
+ // scroll-spy on the in-page TOC
+ var links=[].slice.call(document.querySelectorAll('#toc a'));
+ if(!links.length) return;
+ var tgt=links.map(function(a){return document.getElementById(a.getAttribute('href').slice(1));});
+ function spy(){
+   var y=window.scrollY+90, i=0;
+   for(var k=0;k<tgt.length;k++){ if(tgt[k]&&tgt[k].offsetTop<=y) i=k; }
+   links.forEach(function(a,n){a.style.color=n===i?'var(--accent)':'';
+     a.style.borderLeftColor=n===i?'var(--accent)':'transparent';});
+ }
+ addEventListener('scroll',spy,{passive:true}); spy();
+})();
+</script>
+</body></html>

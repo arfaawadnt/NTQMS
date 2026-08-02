@@ -43,15 +43,48 @@ import { LovSelectComponent } from '../../shared/ui/lov-select.component';
       </div>
       @if (facade.error()) { <div class="error">{{ facade.error() }}</div> }
 
-      <div class="grid">
+      <!-- The three logs are tabs: each is a growing history, and stacking them
+           made the page scroll past one log to reach another. -->
+      <div class="tabs" role="tablist">
+        <button role="tab" [attr.aria-selected]="tab() === 'calibration'"
+                [class.on]="tab() === 'calibration'" (click)="tab.set('calibration')">
+          {{ i18n.t('equip.calibrations') }} <span class="cnt">{{ e.calibrations.length }}</span>
+        </button>
+        <button role="tab" [attr.aria-selected]="tab() === 'maintenance'"
+                [class.on]="tab() === 'maintenance'" (click)="tab.set('maintenance')">
+          {{ i18n.t('equip.maintenance') }} <span class="cnt">{{ e.maintenance.length }}</span>
+        </button>
+        <button role="tab" [attr.aria-selected]="tab() === 'checks'"
+                [class.on]="tab() === 'checks'" (click)="tab.set('checks')">
+          {{ i18n.t('equip.checks') }} <span class="cnt">{{ e.intermediateChecks.length }}</span>
+        </button>
+      </div>
+
+      @if (tab() === 'calibration') {
         <section class="card">
           <h3>{{ i18n.t('equip.calibrations') }}</h3>
           @if (e.calibrations.length === 0) { <p class="muted">—</p> }
-          @for (c of e.calibrations; track c.id) {
-            <div class="row-item">
-              <div>{{ c.performedAt | date:'mediumDate' }} — {{ c.provider }} — <b>{{ c.result }}</b></div>
-              @if (c.certificateFileId) { <a [href]="facade.downloadUrl(c.certificateFileId)" target="_blank" rel="noopener">{{ i18n.t('doc.download') }}</a> }
-            </div>
+          @else {
+            <table>
+              <thead><tr>
+                <th>{{ i18n.t('equip.performedAt') }}</th><th>{{ i18n.t('equip.provider') }}</th>
+                <th>{{ i18n.t('equip.result') }}</th><th>{{ i18n.t('equip.certificate') }}</th>
+              </tr></thead>
+              <tbody>
+                @for (c of e.calibrations; track c.id) {
+                  <tr>
+                    <td>{{ c.performedAt | date:'mediumDate' }}</td>
+                    <td>{{ c.provider || '—' }}</td>
+                    <td><b>{{ c.result }}</b></td>
+                    <td>
+                      @if (c.certificateFileId) {
+                        <button type="button" class="link" (click)="facade.downloadCertificate(c.certificateFileId!, e.code + '-calibration')">{{ i18n.t('doc.download') }}</button>
+                      } @else { <span class="muted">—</span> }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
           }
           @if (e.status !== 'Retired') {
             <form [formGroup]="calForm" (ngSubmit)="logCalibration(e.id)">
@@ -63,23 +96,45 @@ import { LovSelectComponent } from '../../shared/ui/lov-select.component';
             </form>
           }
         </section>
+      }
 
+      @if (tab() === 'maintenance') {
         <section class="card">
           <h3>{{ i18n.t('equip.maintenance') }}</h3>
           @if (e.maintenance.length === 0) { <p class="muted">—</p> }
-          @for (m of e.maintenance; track m.id) {
-            <div class="row-item">{{ m.performedAt | date:'mediumDate' }} — {{ m.workDescription }}</div>
+          @else {
+            <table>
+              <thead><tr>
+                <th>{{ i18n.t('equip.performedAt') }}</th><th>{{ i18n.t('equip.work') }}</th>
+                <th>{{ i18n.t('equip.certificate') }}</th>
+              </tr></thead>
+              <tbody>
+                @for (m of e.maintenance; track m.id) {
+                  <tr>
+                    <td>{{ m.performedAt | date:'mediumDate' }}</td>
+                    <td>{{ m.workDescription }}</td>
+                    <td>
+                      @if (m.certificateFileId) {
+                        <button type="button" class="link" (click)="facade.downloadCertificate(m.certificateFileId!, e.code + '-maintenance')">{{ i18n.t('doc.download') }}</button>
+                      } @else { <span class="muted">—</span> }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
           }
           @if (e.status !== 'Retired') {
             <form [formGroup]="maintForm" (ngSubmit)="logMaintenance(e.id)">
               <label>{{ i18n.t('equip.performedAt') }}</label><input type="date" formControlName="performedAt" />
               <label>{{ i18n.t('equip.work') }}</label><input formControlName="workDescription" />
+              <label>{{ i18n.t('equip.maintCertificate') }}</label><input type="file" (change)="onMaintCert($event)" />
               <button type="submit" [disabled]="maintForm.invalid">{{ i18n.t('equip.logMaint') }}</button>
             </form>
           }
         </section>
-      </div>
+      }
 
+      @if (tab() === 'checks') {
       <section class="card checks">
         <h3>{{ i18n.t('equip.checks') }} <span class="muted">(ISO 17025 §6.4.10)</span></h3>
         @if (e.intermediateChecks.length === 0) { <p class="muted">{{ i18n.t('equip.noChecks') }}</p> }
@@ -138,6 +193,7 @@ import { LovSelectComponent } from '../../shared/ui/lov-select.component';
           </form>
         }
       </section>
+      }
 
       <qams-audit-trail [subject]="e.id" />
     } @else {
@@ -149,7 +205,15 @@ import { LovSelectComponent } from '../../shared/ui/lov-select.component';
     .meta span.muted { display: block; font-size: .75rem; }
     .meta button { width: auto; margin-inline-start: auto; }
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
-    .checks { margin-top: 1rem; }
+    .checks { margin-top: 0; }
+    .tabs { display: flex; gap: 4px; margin-bottom: 1rem; border-bottom: 1px solid var(--nt-border); }
+    .tabs button { width: auto; background: none; color: var(--nt-grey-d); border: none;
+                   border-bottom: 3px solid transparent; border-radius: 0; padding: 9px 16px;
+                   font-weight: 700; font-size: 13px; }
+    .tabs button.on { color: var(--nt-blue); border-bottom-color: var(--nt-blue); }
+    .tabs .cnt { display: inline-block; min-width: 18px; padding: 0 5px; margin-inline-start: 4px;
+                 border-radius: 999px; background: var(--nt-filter-grey); color: var(--nt-slate);
+                 font-size: 11px; font-variant-numeric: tabular-nums; }
     .check-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
     .check-grid .wide { grid-column: 1 / -1; }
     @media (max-width: 900px) { .check-grid { grid-template-columns: 1fr 1fr; } }
@@ -175,7 +239,12 @@ export class EquipmentDetailComponent implements OnInit {
   readonly flowSteps = ['NeedsCalibration', 'Active', 'Retired'] as const;
 
   readonly item = this.facade.selected;
+
+  /** Active history tab; calibration first, matching the page's purpose. */
+  readonly tab = signal<'calibration' | 'maintenance' | 'checks'>('calibration');
+
   readonly certificate = signal<File | null>(null);
+  readonly maintCertificate = signal<File | null>(null);
 
   readonly calForm = this.fb.nonNullable.group({
     performedAt: ['', [Validators.required]],
@@ -227,6 +296,8 @@ export class EquipmentDetailComponent implements OnInit {
 
   onCert(event: Event): void { this.certificate.set((event.target as HTMLInputElement).files?.[0] ?? null); }
 
+  onMaintCert(event: Event): void { this.maintCertificate.set((event.target as HTMLInputElement).files?.[0] ?? null); }
+
   async logCalibration(id: string): Promise<void> {
     if (this.calForm.invalid) { return; }
     const { performedAt, provider, result } = this.calForm.getRawValue();
@@ -237,7 +308,9 @@ export class EquipmentDetailComponent implements OnInit {
 
   async logMaintenance(id: string): Promise<void> {
     if (this.maintForm.invalid) { return; }
-    await this.facade.logMaintenance(id, this.maintForm.getRawValue());
+    const { performedAt, workDescription } = this.maintForm.getRawValue();
+    await this.facade.logMaintenance(id, performedAt, workDescription, this.maintCertificate());
+    this.maintCertificate.set(null);
     this.maintForm.reset();
   }
 }

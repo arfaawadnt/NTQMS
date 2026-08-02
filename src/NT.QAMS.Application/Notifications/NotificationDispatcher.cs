@@ -101,6 +101,72 @@ public sealed partial class NotificationDispatcher(
         await db.SaveChangesAsync(ct);
     }
 
+    /// <summary>
+    /// Dispatches to a named set of users rather than to rule-matched roles —
+    /// for facts with an explicit audience, like a meeting invitation to its
+    /// participants. Goes through the same feed rows, idempotency guard and
+    /// best-effort email as the rule path, so explicit-audience messages appear
+    /// in the in-app feed and the delivery monitor like every other dispatch.
+    /// </summary>
+    public async Task DispatchToUsersAsync(
+        Guid sourceEventId, Guid tenantId, string eventKey,
+        IReadOnlyCollection<Guid> recipientUserIds, string subject, string body, CancellationToken ct)
+    {
+        tenantSetter.Set(tenantId);
+
+        if (await db.NotificationDispatches.AnyAsync(d => d.SourceEventId == sourceEventId, ct))
+        {
+            return; // Already dispatched — redelivery is a no-op.
+        }
+
+        if (recipientUserIds.Count == 0)
+        {
+            return;
+        }
+
+        // Tenant-filtered explicitly: UserAccount is optionally tenant-scoped, so
+        // the global filter does not apply. Inactive users are skipped — an
+        // invitation to a disabled mailbox is a delivery failure waiting to happen.
+        var recipients = await db.Users
+            .Where(u => u.TenantId == tenantId && u.IsActive && recipientUserIds.Contains(u.Id))
+            .Select(u => new { u.Id, u.Email })
+            .ToListAsync(ct);
+
+        var pending = recipients
+            .Select(r => NotificationDispatch.Create(
+                sourceEventId, eventKey, r.Id, r.Email, subject, body, emailRequested: true))
+            .ToList();
+
+        if (pending.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var dispatch in pending)
+        {
+            db.NotificationDispatches.Add(dispatch);
+        }
+
+        // Feed rows first, then best-effort email — same guarantee as the rule path.
+        await db.SaveChangesAsync(ct);
+
+        foreach (var dispatch in pending.Where(d => d.EmailStatus == DispatchStatus.Queued))
+        {
+            try
+            {
+                await emailSender.SendAsync(dispatch.RecipientEmail!, dispatch.Subject, dispatch.Body, ct);
+                dispatch.MarkEmailSent(clock.UtcNow);
+            }
+            catch (Exception ex)
+            {
+                dispatch.MarkEmailFailed(ex.Message);
+                LogEmailFailed(logger, ex, dispatch.RecipientEmail!, eventKey);
+            }
+        }
+
+        await db.SaveChangesAsync(ct);
+    }
+
     private static string Render(string template, IReadOnlyDictionary<string, string> context)
     {
         var result = template;

@@ -13,14 +13,17 @@ import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { UserSelectComponent } from '../../shared/ui/user-select.component';
 import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 
 /** Impartiality / conflict-of-interest register (ISO 17025 §4.1). */
 @Component({
     selector: 'qams-conflict-list',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, UserSelectComponent, ListStatsComponent],
+    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, UserSelectComponent, ListStatsComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('coi.title')" [subtitle]="i18n.t('coi.subtitle')">
+      <qams-export-menu [title]="i18n.t('coi.title')" [stats]="stats()" [columns]="exportColumns"
+                        [rows]="filtered()" [filtersSummary]="filtersSummary()" />
       <button (click)="showForm.set(!showForm())">{{ i18n.t('coi.new') }}</button>
     </qams-page-header>
 
@@ -120,6 +123,24 @@ export class ConflictListComponent implements OnInit {
     const q = this.search().trim().toLowerCase();
     return this.list().filter((c) =>
       !q || `${c.conflictRef} ${this.org.userName(c.declarantId)} ${c.relatedParty} ${c.status}`.toLowerCase().includes(q));
+  });
+
+  /** Export columns — the printed grid mirrors the on-screen table. */
+  readonly exportColumns: ExportColumn<ConflictListItem>[] = [
+    { header: this.i18n.t('mu.ref'), cell: (c) => c.conflictRef },
+    { header: this.i18n.t('coi.declarant'), cell: (c) => this.org.userName(c.declarantId) || '—' },
+    { header: this.i18n.t('coi.relatedParty'), cell: (c) => c.relatedParty },
+    { header: this.i18n.t('coi.declaredOn'), cell: (c) => c.declaredOn },
+    { header: this.i18n.t('coi.risk'), cell: (c) => c.riskLevel || '—' },
+    { header: this.i18n.t('nc.status'), cell: (c) => c.status },
+  ];
+
+  /** The filter line printed on the document, mirroring the filter bar. */
+  readonly filtersSummary = computed(() => {
+    const parts: string[] = [];
+    if (this.statusFilter()) { parts.push(this.statusFilter()); }
+    if (this.search().trim()) { parts.push(`"${this.search().trim()}"`); }
+    return parts.length ? parts.join(' · ') : this.i18n.t('exp.allRecords');
   });
 
   readonly stats = computed<ListStat[]>(() => {

@@ -320,18 +320,29 @@ public sealed class GetChangeByIdHandler(IAppDbContext db)
 
 // â”€â”€ Management review â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+/// <summary>
+/// Schedules a review for a named set of participant users. The display string
+/// recorded in the minutes is resolved server-side from those ids, so the names
+/// and the invitations can never disagree. Without a meeting link one is
+/// generated; the agenda and link are circulated to every participant by mail.
+/// </summary>
 [RequireInternalActor]
-public sealed record ScheduleReviewCommand(string Title, DateOnly ReviewDate, string Participants,
+public sealed record ScheduleReviewCommand(string Title, DateOnly ReviewDate,
+    IReadOnlyList<Guid> ParticipantUserIds,
+    string? Agenda = null, string? MeetingLink = null,
     Guid? BranchId = null, Guid? DepartmentId = null)
     : ICommand<Guid>;
 
-// The former varchar bound, kept at the API layer now the column is text (schema hardening 1.2/Q6).
+// Free-text bounds live at the API layer now the columns are text (schema hardening 1.2/Q6).
 public sealed class ScheduleReviewValidator : AbstractValidator<ScheduleReviewCommand>
 {
     public ScheduleReviewValidator()
     {
         RuleFor(x => x.Title).NotEmpty().MaximumLength(300);
-        RuleFor(x => x.Participants).NotEmpty().MaximumLength(2000);
+        RuleFor(x => x.ParticipantUserIds).NotEmpty()
+            .WithMessage("At least one participant is required.");
+        RuleFor(x => x.Agenda).MaximumLength(10000);
+        RuleFor(x => x.MeetingLink).MaximumLength(500);
     }
 }
 
@@ -341,14 +352,51 @@ public sealed class ScheduleReviewHandler(
 {
     public async Task<Guid> Handle(ScheduleReviewCommand c, CancellationToken ct)
     {
-        var reviewRef = await refs.NextAsync(GovernanceHelpers.RequireTenant(tenant), "MRV", ct);
-        var review = ManagementReview.Schedule(reviewRef, c.Title, c.ReviewDate, c.Participants);
+        var tenantId = GovernanceHelpers.RequireTenant(tenant);
+        var reviewRef = await refs.NextAsync(tenantId, "MRV", ct);
+
+        // Resolve the invited users to display names for the minutes record.
+        // Unknown or foreign ids simply resolve to nothing — the tenant filter
+        // makes another tenant's users unaddressable rather than an error oracle.
+        var invited = await db.Users
+            .Where(u => u.TenantId == tenantId && c.ParticipantUserIds.Contains(u.Id))
+            .Select(u => new { u.Id, u.DisplayName })
+            .ToListAsync(ct);
+        if (invited.Count == 0)
+        {
+            throw new DomainException("MRV-006", "No valid participants were supplied.");
+        }
+
+        // No link supplied → generate one on the configured meeting host. The
+        // room name carries an unguessable suffix: review refs are sequential,
+        // and a predictable room on a public host would let anyone lurk.
+        var roomSuffix = Guid.CreateVersion7().ToString("N")[..12];
+        var meetingLink = string.IsNullOrWhiteSpace(c.MeetingLink)
+            ? $"{MeetingLinkDefaults.BaseUrl}/{reviewRef}-{roomSuffix}"
+            : c.MeetingLink;
+
+        var review = ManagementReview.Schedule(
+            reviewRef, c.Title, c.ReviewDate,
+            string.Join(", ", invited.Select(u => u.DisplayName)),
+            c.Agenda, meetingLink,
+            [.. invited.Select(u => u.Id)]);
         review.BranchId = c.BranchId;
         review.DepartmentId = c.DepartmentId;
         db.ManagementReviews.Add(review);
         await db.SaveChangesAsync(ct);
         return review.Id;
     }
+}
+
+/// <summary>
+/// The host used when the organiser supplies no meeting link. Jitsi Meet is the
+/// default because it needs no account, no API and no outbound integration —
+/// this system deliberately has no external HTTP client, and a meeting-provider
+/// OAuth flow would be a new architectural capability, not a default.
+/// </summary>
+public static class MeetingLinkDefaults
+{
+    public const string BaseUrl = "https://meet.jit.si";
 }
 
 [RequireInternalActor]
@@ -422,6 +470,7 @@ public sealed class GetReviewByIdHandler(IAppDbContext db)
             r.Id, r.ReviewRef, r.Title, r.ReviewDate, r.Participants, r.Status.ToString(),
             r.Minutes, r.ClosedBy,
             r.Decisions.Select(d => new ReviewDecisionDto(d.Id, d.Description, d.OwnerId, d.DueDate))
-                .ToList());
+                .ToList(),
+            r.Agenda, r.MeetingLink);
     }
 }

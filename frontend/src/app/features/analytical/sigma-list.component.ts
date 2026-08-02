@@ -5,18 +5,22 @@ import { Router, RouterOutlet } from '@angular/router';
 import { SigmaFacade } from './sigma.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
+import { SigmaAssessmentListItem } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 
 /** Six-Sigma assessment register: analytical method capability and QC-design guidance. */
 @Component({
     selector: 'qams-sigma-list',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DecimalPipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent],
+    imports: [ReactiveFormsModule, DecimalPipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('sig.title')" [subtitle]="i18n.t('sig.subtitle')">
+      <qams-export-menu [title]="i18n.t('sig.title')" [stats]="stats()" [columns]="exportColumns"
+                        [rows]="filtered()" [filtersSummary]="filtersSummary()" />
       @if (perms.can('analytical-quality.create')) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('sig.new') }}</button>
       }
@@ -118,6 +122,26 @@ export class SigmaListComponent implements OnInit {
     const q = this.search().trim().toLowerCase();
     return this.facade.list().filter((s) =>
       !q || `${s.assessmentRef} ${s.analyte} ${s.grade} ${s.state}`.toLowerCase().includes(q));
+  });
+
+  /** Export columns — the printed grid mirrors the on-screen table. */
+  readonly exportColumns: ExportColumn<SigmaAssessmentListItem>[] = [
+    { header: this.i18n.t('mu.ref'), cell: (s) => s.assessmentRef },
+    { header: this.i18n.t('qc.analyte'), cell: (s) => s.analyte },
+    { header: 'TEa%', cell: (s) => `${s.allowableTotalErrorPct}` },
+    { header: this.i18n.t('sig.biasShort'), cell: (s) => `${s.biasPct}` },
+    { header: 'CV%', cell: (s) => `${s.cvPct}` },
+    { header: this.i18n.t('sig.sigma'), cell: (s) => `${s.sigmaValue}σ` },
+    { header: this.i18n.t('sig.grade'), cell: (s) => this.i18n.t('sig.grade' + s.grade) },
+    { header: this.i18n.t('nc.status'), cell: (s) => s.state },
+  ];
+
+  /** The filter line printed on the document, mirroring the filter bar. */
+  readonly filtersSummary = computed(() => {
+    const parts: string[] = [];
+    if (this.stateFilter()) { parts.push(this.stateFilter()); }
+    if (this.search().trim()) { parts.push(`"${this.search().trim()}"`); }
+    return parts.length ? parts.join(' · ') : this.i18n.t('exp.allRecords');
   });
 
   readonly stats = computed<ListStat[]>(() => {

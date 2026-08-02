@@ -1,0 +1,1124 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Implementation vs SRS — Gap Analysis — NT.QMS As-Built SRS</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>">
+<style>
+:root{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);
+ --mono:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace;
+ --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,ui-serif,serif;
+ --sans:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}}
+:root[data-theme="dark"]{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}
+:root[data-theme="light"]{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+ font-size:15.5px;line-height:1.62;-webkit-text-size-adjust:100%}
+.wrap{display:grid;grid-template-columns:288px minmax(0,1fr);gap:0;max-width:1560px;margin:0 auto}
+/* ---- sidebar ---- */
+aside{position:sticky;top:0;height:100vh;overflow-y:auto;padding:22px 16px 60px;
+ border-right:1px solid var(--line);background:var(--panel)}
+aside .brand{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:-.01em;
+ margin:0 0 2px}
+aside .sub{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;
+ margin:0 0 16px}
+aside nav a{display:block;padding:5px 9px;border-radius:7px;color:var(--ink);text-decoration:none;
+ font-size:13.2px;border-left:2px solid transparent}
+aside nav a:hover{background:var(--panel-2)}
+aside nav a.cur{background:var(--accent-soft);border-left-color:var(--accent);font-weight:600}
+aside nav a .n{color:var(--muted);font-variant-numeric:tabular-nums;margin-right:7px;font-size:11.5px}
+aside .sec{margin:16px 0 5px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+ color:var(--muted);font-weight:700}
+#toc{margin-top:6px;border-top:1px solid var(--line);padding-top:10px}
+#toc a{display:block;padding:2.5px 9px;font-size:12.4px;color:var(--muted);text-decoration:none;
+ border-left:2px solid transparent;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#toc a:hover{color:var(--ink)}
+#toc a.h3{padding-left:22px;font-size:11.8px}
+/* ---- main ---- */
+main{padding:34px 46px 120px;min-width:0;overflow-wrap:anywhere}
+.doc-head{border-bottom:2px solid var(--accent);padding-bottom:14px;margin-bottom:26px}
+.kicker{color:var(--accent);font-size:11.5px;font-weight:700;letter-spacing:.11em;
+ text-transform:uppercase;margin:0 0 4px}
+h1{font-family:var(--serif);font-size:31px;line-height:1.2;margin:0;letter-spacing:-.015em}
+h2{font-family:var(--serif);font-size:24px;margin:38px 0 12px;padding-bottom:6px;
+ border-bottom:1px solid var(--line);letter-spacing:-.01em;scroll-margin-top:14px}
+h3{font-size:18px;margin:26px 0 9px;letter-spacing:-.005em;scroll-margin-top:14px}
+h4{font-size:15px;margin:20px 0 7px;color:var(--accent)}
+h5,h6{font-size:13.5px;margin:16px 0 6px;color:var(--muted);text-transform:uppercase;
+ letter-spacing:.05em}
+p{margin:10px 0}
+a{color:var(--accent)}
+hr{border:0;border-top:1px solid var(--line);margin:30px 0}
+ul,ol{margin:9px 0;padding-left:24px}
+li{margin:3px 0}
+blockquote{margin:16px 0;padding:12px 18px;background:var(--accent-soft);
+ border-left:3px solid var(--accent);border-radius:0 8px 8px 0}
+blockquote p:first-child{margin-top:0}blockquote p:last-child{margin-bottom:0}
+code{font-family:var(--mono);font-size:.875em;background:var(--panel-2);
+ padding:1.5px 5px;border-radius:4px;border:1px solid var(--line)}
+pre{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;
+ padding:14px 16px;overflow-x:auto;margin:14px 0}
+pre code{background:none;border:0;padding:0;font-size:12.6px;line-height:1.5}
+/* ---- tables ---- */
+.tw{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:10px;
+ background:var(--panel);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;font-size:13.4px}
+th,td{padding:8px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:var(--panel-2);font-weight:700;font-size:12.2px;letter-spacing:.02em;
+ position:sticky;top:0;z-index:1}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--accent-soft)}
+td code,th code{font-size:.9em;white-space:nowrap}
+/* ---- diagrams ---- */
+figure.d{margin:18px 0;padding:18px;background:var(--panel);border:1px solid var(--line);
+ border-radius:12px;box-shadow:var(--shadow);overflow-x:auto;text-align:center}
+figure.d svg{max-width:100%;height:auto;display:inline-block}
+/* ---- misc ---- */
+.tools{position:fixed;top:12px;right:16px;display:flex;gap:6px;z-index:50}
+.tools button{font:inherit;font-size:12px;padding:5px 11px;border-radius:8px;cursor:pointer;
+ border:1px solid var(--line);background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+.tools button:hover{background:var(--panel-2)}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:52px;padding-top:18px;
+ border-top:1px solid var(--line)}
+.pager a{display:block;max-width:46%;padding:10px 14px;border:1px solid var(--line);
+ border-radius:10px;background:var(--panel);text-decoration:none;font-size:13px}
+.pager a span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;
+ letter-spacing:.08em}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:14px;margin:20px 0}
+.card{padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--panel);
+ box-shadow:var(--shadow);text-decoration:none;color:var(--ink);display:block}
+.card:hover{border-color:var(--accent)}
+.card .num{color:var(--accent);font-weight:700;font-size:11.5px;letter-spacing:.1em}
+.card .t{font-family:var(--serif);font-size:17px;margin:3px 0 5px}
+.card .d{color:var(--muted);font-size:12.7px;line-height:1.5}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin:20px 0}
+.stat{padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.stat b{display:block;font-size:23px;font-family:var(--serif);line-height:1.1}
+.stat span{color:var(--muted);font-size:11.4px}
+@media print{
+ aside,.tools,.pager{display:none!important}
+ .wrap{display:block;max-width:none}
+ main{padding:0}
+ .tw,figure.d{break-inside:avoid;box-shadow:none}
+ h2{break-after:avoid}
+ a{color:inherit;text-decoration:none}
+}
+@media (max-width:1080px){
+ .wrap{grid-template-columns:1fr}
+ aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+ main{padding:22px 18px 80px}
+ #toc{display:none}
+}
+</style>
+</head><body>
+<div class="tools"><button id="th">◐ Theme</button><button id="pr">⎙ Print</button></div>
+<div class="wrap">
+<aside><p class="brand">NT.QMS</p><p class="sub">As-Built SRS · v1.51.x</p><a class="card" style="padding:9px 12px;margin-bottom:10px;font-size:13px" href="index.html">◂ Document set</a><div class="sec">Documents</div><nav><a class="" href="00-SRS-Index-and-Conventions.html"><span class="n">00</span>Index, Conventions &amp; Glossary</a><a class="" href="01-Software-Requirements-Specification.html"><span class="n">01</span>Software Requirements Specification</a><a class="" href="02-1-Functional-Specification-Quality-and-Improvement.html"><span class="n">02-1</span>Functional Spec 1 — Quality &amp; Improvement</a><a class="" href="02-2-Functional-Specification-Resources-People-Governance.html"><span class="n">02-2</span>Functional Spec 2 — Resources, People &amp; Governance</a><a class="" href="02-3-Functional-Specification-Analytical-Quality.html"><span class="n">02-3</span>Functional Spec 3 — Analytical Quality</a><a class="" href="02-4-Functional-Specification-Operations-and-Platform.html"><span class="n">02-4</span>Functional Spec 4 — Operations &amp; Platform</a><a class="" href="03-Business-Rules.html"><span class="n">03</span>Business Rules &amp; Error Catalogue</a><a class="" href="04-Configuration-Reference.html"><span class="n">04</span>Configuration Reference</a><a class="" href="05-Screen-Specification.html"><span class="n">05</span>Screen Specification</a><a class="" href="06-Workflow-Specification.html"><span class="n">06</span>Workflow Specification</a><a class="" href="07-File-System-Specification.html"><span class="n">07</span>File System Specification</a><a class="" href="08-API-Specification.html"><span class="n">08</span>API Specification</a><a class="" href="09-Security-Specification.html"><span class="n">09</span>Security Specification</a><a class="" href="10-Deployment-Specification.html"><span class="n">10</span>Deployment Specification</a><a class="" href="11-Architecture-Constraints.html"><span class="n">11</span>Architecture Constraints</a><a class="" href="12-Requirements-Traceability-Matrix.html"><span class="n">12</span>Requirements Traceability Matrix</a><a class="cur" href="13-Implementation-vs-SRS-Gap-Analysis.html"><span class="n">13</span>Implementation vs SRS — Gap Analysis</a><a class="" href="14-Technical-Debt-Report.html"><span class="n">14</span>Technical Debt Report</a><a class="" href="15-Recommendations.html"><span class="n">15</span>Recommendations</a></nav><div class='sec'>On this page</div><div id='toc'><a class="h2" href="#classification">Classification</a><a class="h2" href="#the-headline">The headline</a><a class="h2" href="#the-four-decisions-that-need-a-business-owner">The four decisions that need a business owner</a></div></aside>
+<main>
+<div class="doc-head"><p class="kicker">Document 13 · NT.QMS Production SRS</p><h1>Implementation vs SRS — Gap Analysis</h1></div>
+<blockquote>
+<p><a href="00-SRS-Index-and-Conventions.html">Conventions</a> · Traceability:
+<a href="12-Requirements-Traceability-Matrix.html">Document 12</a> · Remediation:
+<a href="15-Recommendations.html">Document 15</a></p>
+</blockquote>
+<hr>
+<h1>13.1 Scope and method</h1>
+<p><strong>Compared:</strong> <code>NT_QMS_SRS.html</code> — <em>"Software Requirements Specification (SRS), NT.QMS Quality
+Management System (v1.0)"</em> — statement by statement against the source tree at <strong>v1.51.x</strong>.</p>
+<p><strong>Method:</strong> every assertion in the old SRS was located in the code or shown to be absent. Every
+substantial capability found in the code was checked for a corresponding statement in the old SRS.</p>
+<h2 id="classification">Classification</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Class</th>
+<th style="text-align: right;">Meaning</th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A · Missing from SRS</strong></td>
+<td style="text-align: right;">built, working, undocumented — the old SRS never mentions it</td>
+<td><strong>41</strong></td>
+</tr>
+<tr>
+<td><strong>B · Missing from Code</strong></td>
+<td style="text-align: right;">the SRS promises it; it does not exist</td>
+<td><strong>19</strong></td>
+</tr>
+<tr>
+<td><strong>C · Extra Behaviour</strong></td>
+<td style="text-align: right;">built and materially different from what the SRS describes</td>
+<td><strong>14</strong></td>
+</tr>
+<tr>
+<td><strong>D · Outdated Requirement</strong></td>
+<td style="text-align: right;">the SRS describes a real thing that has since changed</td>
+<td><strong>11</strong></td>
+</tr>
+<tr>
+<td><strong>E · Deprecated Feature</strong></td>
+<td style="text-align: right;">in the SRS, deliberately removed or never adopted</td>
+<td><strong>9</strong></td>
+</tr>
+<tr>
+<td></td>
+<td style="text-align: right;"><strong>Total findings</strong></td>
+<td><strong>94</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="the-headline">The headline</h2>
+<blockquote>
+<p>The old SRS describes a <strong>different, smaller and partly imaginary system</strong>.</p>
+<p>It documents roughly <strong>8 functional areas</strong>; the built system has <strong>34 modules and 329 endpoints</strong>.
+It specifies a technology stack — Redis, Hangfire, Dapper, Mapster, ngx-translate, Tailwind,
+SignalR, Seq/Serilog — of which <strong>none is present</strong>. It specifies a privilege model
+(<code>~70 OBJECT.ACTION</code> codes) that was never built, in place of the 171-key <code>module.action</code> catalogue
+that was. It specifies an error contract that is not the one in use.</p>
+<p><strong>It cannot be used as an engineering baseline and should be formally superseded by this set.</strong></p>
+</blockquote>
+<hr>
+<h1>13.2 Class A — Missing from the SRS (built, undocumented)</h1>
+<p>These are working, tested capabilities the old SRS is silent about. Each is now specified in this set.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Capability</th>
+<th>Scale</th>
+<th>Now in</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A-01</td>
+<td><strong>Analytical-quality subsystem</strong> — 12 statistical study types with full CLSI-style calculations</td>
+<td>24 screens, ~110 endpoints</td>
+<td><a href="02-3-Functional-Specification-Analytical-Quality.html">02-3</a></td>
+</tr>
+<tr>
+<td>A-02</td>
+<td>Measurement-uncertainty budgeting (GUM root-sum-square, coverage factor)</td>
+<td>1 module</td>
+<td>02-3 §26.13</td>
+</tr>
+<tr>
+<td>A-03</td>
+<td>Sigma-metric assessment with grade bands and QC recommendations</td>
+<td>1 module</td>
+<td>02-3 §26.12</td>
+</tr>
+<tr>
+<td>A-04</td>
+<td><strong>PT plans</strong> — annual plan, one per year, fulfilment tracking, closure summary</td>
+<td>1 module</td>
+<td>02-3 M-27</td>
+</tr>
+<tr>
+<td>A-05</td>
+<td>Customer feedback register with escalation to complaints</td>
+<td>1 module</td>
+<td>02-1 M-03</td>
+</tr>
+<tr>
+<td>A-06</td>
+<td>Quality-policy versioning with one-in-force enforcement</td>
+<td>1 module</td>
+<td>02-1 M-05</td>
+</tr>
+<tr>
+<td>A-07</td>
+<td>Quality objectives with evidence-checked closure</td>
+<td>1 module</td>
+<td>02-1 M-04</td>
+</tr>
+<tr>
+<td>A-08</td>
+<td>Change control with mandatory risk linkage and PIR</td>
+<td>1 module</td>
+<td>02-1 M-07</td>
+</tr>
+<tr>
+<td>A-09</td>
+<td>Management review with immutable minutes</td>
+<td>1 module</td>
+<td>02-1 M-08</td>
+</tr>
+<tr>
+<td>A-10</td>
+<td>Records archive with retention classes and <strong>legal hold</strong></td>
+<td>1 module</td>
+<td>02-1 M-10</td>
+</tr>
+<tr>
+<td>A-11</td>
+<td>Reference-standards register with traceability chain and auto-expiry</td>
+<td>1 module</td>
+<td>02-2 M-12</td>
+</tr>
+<tr>
+<td>A-12</td>
+<td>Environmental monitoring with excursion→NC automation</td>
+<td>1 module</td>
+<td>02-2 M-13</td>
+</tr>
+<tr>
+<td>A-13</td>
+<td>Supplier quality with weighted evaluations and certificate-expiry suspension</td>
+<td>1 module</td>
+<td>02-2 M-14</td>
+</tr>
+<tr>
+<td>A-14</td>
+<td>Per-test authorisations evidenced by competency</td>
+<td>1 module</td>
+<td>02-2 M-17</td>
+</tr>
+<tr>
+<td>A-15</td>
+<td>Conflict-of-interest / impartiality register</td>
+<td>1 module</td>
+<td>02-2 M-21</td>
+</tr>
+<tr>
+<td>A-16</td>
+<td>Organisational context (interested parties + context issues)</td>
+<td>1 module</td>
+<td>02-2 M-22</td>
+</tr>
+<tr>
+<td>A-17</td>
+<td><strong>Periodic user-access review</strong></td>
+<td>1 module</td>
+<td>02-2 M-23</td>
+</tr>
+<tr>
+<td>A-18</td>
+<td><strong>Audit-trail review</strong> process</td>
+<td>part of CLD</td>
+<td>02-2 M-24</td>
+</tr>
+<tr>
+<td>A-19</td>
+<td>Document <strong>read-and-understand acknowledgements</strong>, version-pinned</td>
+<td>part of DOC</td>
+<td>02-1 M-09</td>
+</tr>
+<tr>
+<td>A-20</td>
+<td><strong>Controlled printed-copy register</strong> with one-shot closure</td>
+<td>part of DOC</td>
+<td>02-1 M-09</td>
+</tr>
+<tr>
+<td>A-21</td>
+<td>Document periodic-review cycle with sweep-raised due events</td>
+<td>part of DOC</td>
+<td>02-1 M-09</td>
+</tr>
+<tr>
+<td>A-22</td>
+<td><strong>Six automatic event→NC bridges</strong></td>
+<td>6 policies</td>
+<td><a href="03-Business-Rules.html">03 §3.9</a></td>
+</tr>
+<tr>
+<td>A-23</td>
+<td><strong>Transactional outbox</strong> with SKIP LOCKED claim leases, jittered backoff, dead-lettering, retention purge</td>
+<td>infrastructure</td>
+<td><a href="06-Workflow-Specification.html">06 §6.4</a></td>
+</tr>
+<tr>
+<td>A-24</td>
+<td><strong>Hourly compliance sweep</strong> ageing eight aggregate types in one transaction</td>
+<td>infrastructure</td>
+<td>06 §6.4</td>
+</tr>
+<tr>
+<td>A-25</td>
+<td><strong>6-hourly KPI snapshot</strong> service with leader election</td>
+<td>infrastructure</td>
+<td>02-4 M-30</td>
+</tr>
+<tr>
+<td>A-26</td>
+<td><strong>Single-replica sentinel</strong> and per-job advisory-lock leader election</td>
+<td>infrastructure</td>
+<td>10 §10.1</td>
+</tr>
+<tr>
+<td>A-27</td>
+<td><strong>Deferred start-up seeding</strong> (OPS-010) — DB-down cold start does not crash</td>
+<td>infrastructure</td>
+<td>06 §6.5</td>
+</tr>
+<tr>
+<td>A-28</td>
+<td><code>DatabaseRoleGuard</code> — Production refuses to boot on an over-privileged role</td>
+<td>security</td>
+<td>09 §9.5</td>
+</tr>
+<tr>
+<td>A-29</td>
+<td><strong><code>xmin</code> optimistic concurrency</strong> → 409</td>
+<td>reliability</td>
+<td>ADR-0005</td>
+</tr>
+<tr>
+<td>A-30</td>
+<td><strong><code>Idempotency-Key</code></strong> replay protection</td>
+<td>reliability</td>
+<td>08 §8.7</td>
+</tr>
+<tr>
+<td>A-31</td>
+<td><strong>Reason-for-change enforcement</strong> on every DELETE, stamped into the ledger</td>
+<td>compliance</td>
+<td>03 §3.8</td>
+</tr>
+<tr>
+<td>A-32</td>
+<td><strong>Rotating refresh-token sessions</strong> with family-revoking reuse detection</td>
+<td>security</td>
+<td>09 §9.2</td>
+</tr>
+<tr>
+<td>A-33</td>
+<td><strong>Per-request session revocation</strong> (<code>AUTH-006</code>/<code>AUTH-007</code>)</td>
+<td>security</td>
+<td>09 §9.2</td>
+</tr>
+<tr>
+<td>A-34</td>
+<td><strong>Upload allow-list + content sniffing</strong> with canonical type storage</td>
+<td>security</td>
+<td>09 §9.9</td>
+</tr>
+<tr>
+<td>A-35</td>
+<td><strong>Four-partition rate limiting</strong> including per-actor e-signature throttling</td>
+<td>security</td>
+<td>09 §9.8</td>
+</tr>
+<tr>
+<td>A-36</td>
+<td><strong>Security headers</strong> (CSP, nosniff, DENY, no-referrer, HSTS)</td>
+<td>security</td>
+<td>09 §9.7</td>
+</tr>
+<tr>
+<td>A-37</td>
+<td><strong>Full observability stack</strong> — JSON logs, correlation ids, end-to-end traces incl. outbox, 7 Prometheus instruments, 7 alert definitions</td>
+<td>ops</td>
+<td>10 §10.7</td>
+</tr>
+<tr>
+<td>A-38</td>
+<td><strong>Health/readiness separation</strong> with DB-independent liveness</td>
+<td>ops</td>
+<td>10 §10.4</td>
+</tr>
+<tr>
+<td>A-39</td>
+<td><strong>Seven CI merge gates</strong> (API surface, command policy, module boundary, layering, migration round-trip, audit tamper, role matrix)</td>
+<td>quality</td>
+<td>10 §10.9</td>
+</tr>
+<tr>
+<td>A-40</td>
+<td><strong>Four XLSX/PDF exports</strong> with a live integrity attestation and <code>RECORD_EXPORTED</code> logging</td>
+<td>compliance</td>
+<td>02-4 M-36</td>
+</tr>
+<tr>
+<td>A-41</td>
+<td><strong>Branch/department organisational scoping</strong> (<code>IAllocatable</code> + scope guard)</td>
+<td>authorisation</td>
+<td>09 §9.4</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>13.3 Class B — Missing from the code (promised, absent)</h1>
+<p>The old SRS states these as requirements. <strong>None exists.</strong> Each is a decision the business must make:
+drop the requirement, or schedule the work.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>SRS statement</th>
+<th>Reality</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>B-01</strong></td>
+<td><em>"MFA via TOTP for </em><em>all active accounts</em><em>"</em> (FR-AUTH-01, "must")</td>
+<td>MFA is <strong>optional per tenant, default OFF</strong>; every tenant in the dev dataset has it off</td>
+<td><strong>Compliance-relevant.</strong> If the accreditation body was told MFA is mandatory, it is not.</td>
+</tr>
+<tr>
+<td><strong>B-02</strong></td>
+<td><em>"Diagonal 'OBSOLETE — UNCONTROLLED' watermark on PDFs of older versions"</em> (FR-DOC-03)</td>
+<td><strong>No PDF processing of any kind.</strong> Files are stored and served byte-for-byte; an obsolete version downloads unmarked</td>
+<td><strong>ISO 17025 §8.3.2 relevant</strong> — obsolete documents must be clearly identified</td>
+</tr>
+<tr>
+<td><strong>B-03</strong></td>
+<td><em>"Overdue equipment calibration … </em><em>block its selection</em><em>"</em> (FR-GOV-01, "must")</td>
+<td>Status changes to <code>OutOfService</code>, but <strong>nothing prevents the instrument being named</strong> anywhere — instrument fields are free text, not foreign keys</td>
+<td><strong>ISO 17025 §6.4.7 relevant</strong></td>
+</tr>
+<tr>
+<td><strong>B-04</strong></td>
+<td><em>"Interactive 5-Whys text flows and Fishbone (Ishikawa) diagram inputs"</em></td>
+<td><code>RcaMethod</code> enum + one free-text field</td>
+<td>UX/usability</td>
+</tr>
+<tr>
+<td><strong>B-05</strong></td>
+<td><em>"Renders questions based on selected ISO clauses (e.g. ISO 17025 Section 6.4)"</em> — checklist library</td>
+<td>Checklists are typed in per audit; <strong>no template store</strong></td>
+<td>Efficiency</td>
+</tr>
+<tr>
+<td><strong>B-06</strong></td>
+<td><em>"SOP Tree Directory: left sidebar pane rendering folder trees categorized by department"</em></td>
+<td><code>category</code> is a flat string; no tree</td>
+<td>UX</td>
+</tr>
+<tr>
+<td><strong>B-07</strong></td>
+<td><em>"Active Session Monitor: user handles, login timestamps, device OS, IP addresses, revoke buttons"</em></td>
+<td><strong>Not built.</strong> <code>qams.refresh_session</code> holds the data; nothing surfaces it</td>
+<td>Security operations</td>
+</tr>
+<tr>
+<td><strong>B-08</strong></td>
+<td><em>"Dynamic SVG line/bar chart displaying NCR trends over the last 12 months"</em></td>
+<td>KPI history data exists; <strong>no chart component</strong></td>
+<td>UX</td>
+</tr>
+<tr>
+<td><strong>B-09</strong></td>
+<td><em>"Levey-Jennings SVG plot"</em>, <em>"Passing-Bablok plots, Bland-Altman differences, histograms"</em></td>
+<td>Statistics are <strong>computed and stored</strong>; <strong>no chart renders them</strong></td>
+<td><strong>Significant</strong> — analytical review is much harder without plots</td>
+</tr>
+<tr>
+<td><strong>B-10</strong></td>
+<td><em>"LIS connection loopback fetches"</em> for data import</td>
+<td><strong>No instrument or LIS interface exists</strong></td>
+<td>Scope</td>
+</tr>
+<tr>
+<td><strong>B-11</strong></td>
+<td><em>"Data Entry Tabs supporting direct manual entry, CSV uploads, or LIS"</em></td>
+<td>CSV import exists on <strong>2 of 12</strong> studies</td>
+<td>Partial</td>
+</tr>
+<tr>
+<td><strong>B-12</strong></td>
+<td><em>"Redis distributed cache … cache hit ratio ≥ 85 %"</em> (NFR-PERF-02)</td>
+<td><strong>No Redis.</strong> No distributed cache at all</td>
+<td>The NFR is unmeasurable</td>
+</tr>
+<tr>
+<td><strong>B-13</strong></td>
+<td><em>"Hangfire background processing"</em>, <em>"daily Hangfire jobs"</em></td>
+<td><code>IHostedService</code> background services</td>
+<td>Different, not worse</td>
+</tr>
+<tr>
+<td><strong>B-14</strong></td>
+<td><em>"Dapper for fast report queries … &lt; 500 ms"</em></td>
+<td><strong>No Dapper.</strong> All reads are EF Core with <code>AsNoTracking</code></td>
+<td>The NFR is unmeasurable</td>
+</tr>
+<tr>
+<td><strong>B-15</strong></td>
+<td><em>"Mapster"</em></td>
+<td>Hand-written projections</td>
+<td>Different</td>
+</tr>
+<tr>
+<td><strong>B-16</strong></td>
+<td><em>"ngx-translate"</em>, <em>"Tailwind CSS"</em></td>
+<td>In-app typed i18n service; hand-written CSS with design tokens</td>
+<td>Different</td>
+</tr>
+<tr>
+<td><strong>B-17</strong></td>
+<td><em>"SignalR"</em> real-time</td>
+<td><strong>No push of any kind</strong></td>
+<td>Scope</td>
+</tr>
+<tr>
+<td><strong>B-18</strong></td>
+<td><em>"Seq/Serilog structured logging"</em></td>
+<td><code>Microsoft.Extensions.Logging</code> JSON console + OpenTelemetry</td>
+<td>Different</td>
+</tr>
+<tr>
+<td><strong>B-19</strong></td>
+<td><em>"Hash Routing"</em> in the Angular client</td>
+<td>Path routing</td>
+<td>Different</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>13.4 Class C — Extra behaviour (built differently)</h1>
+<p>The capability exists but <strong>materially differs</strong> from the SRS's description. These are the most
+dangerous entries: a reader of the old SRS would build the wrong thing.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>SRS says</th>
+<th>Code does</th>
+<th>Why it matters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>C-01</strong></td>
+<td><em>"~70 atomic privileges structured in an </em><em>OBJECT.ACTION</em><em> format"</em> — <code>NCR.CREATE</code>, <code>DOC.APPROVE</code>, <code>LAB.CONFIG</code>, <code>EQUIP.CALIB_SCHED</code></td>
+<td><strong>171 keys</strong> in <code>{module}.{action}</code> <strong>lower case</strong> — <code>nc.create</code>, <code>documents.approve</code>. None of the SRS's example codes exists</td>
+<td><strong>Every privilege identifier in the old SRS is wrong.</strong></td>
+</tr>
+<tr>
+<td><strong>C-02</strong></td>
+<td>Roles: <em>SysAdmin, QualityManager, LabDirector, TechManager, Analyst, EquipmentOwner</em></td>
+<td><strong>PlatformAdmin, TenantAdmin, QualityManager, DepartmentHead, Analyst, ExternalAuditor</strong></td>
+<td>Four of six role names differ; <code>ExternalAuditor</code> (read-only by construction) is absent from the SRS</td>
+</tr>
+<tr>
+<td><strong>C-03</strong></td>
+<td>Error model <code>{success, errorCode, message, errors[], timestamp}</code></td>
+<td><strong>RFC 7807 <code>application/problem+json</code></strong> <code>{type, title, status, code, traceId, correlationId}</code></td>
+<td>Any client written to the SRS breaks</td>
+</tr>
+<tr>
+<td><strong>C-04</strong></td>
+<td><em>"Overdue actions escalate: +24h Owner, </em><em>+48h Dept Head</em><em>, +72h Quality Manager"</em></td>
+<td>+24 h owner, <strong>+48 h Quality Manager</strong>, +72 h Quality Manager</td>
+<td><strong>The department head is never notified.</strong></td>
+</tr>
+<tr>
+<td><strong>C-05</strong></td>
+<td><em>"…and updates are locked"</em> at T+72 h</td>
+<td>The ladder <strong>stops</strong> at level 3; <strong>nothing is locked</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>C-06</strong></td>
+<td>NCR state model: <em>Draft → Raised → Assigned → RCA → Action Plan → Pending Verification → Effectiveness Check → Closed</em></td>
+<td><strong>Identical</strong> — plus <code>Rejected</code>, plus two loop-backs the SRS's table hints at but its diagram omits</td>
+<td>Rare accurate match</td>
+</tr>
+<tr>
+<td><strong>C-07</strong></td>
+<td><em>"Competency authorization requires score ≥ 80 % </em><em>and a 4-digit signature PIN</em><em>"</em></td>
+<td>Score ≥ 80 ✅; <strong>no PIN is required at that endpoint</strong></td>
+<td>Part 11 signing is not applied where the SRS says it is</td>
+</tr>
+<tr>
+<td><strong>C-08</strong></td>
+<td><em>"Manager … clicks 'Approve &amp; Sign'. Enters 4-digit signature PIN"</em> for documents</td>
+<td>Publish requires the <code>documents.sign</code> <strong>permission</strong>; the PIN ceremony is invoked by <code>ESignatureService</code> where wired, not universally at publish</td>
+<td><strong><code>[Needs Business Confirmation]</code></strong> — which gates must demand a full e-signature ceremony?</td>
+</tr>
+<tr>
+<td><strong>C-09</strong></td>
+<td><em>"TLS 1.3"</em> required</td>
+<td>TLS terminates at the proxy; the app is version-agnostic and emits HSTS</td>
+<td>Deployment concern, not app</td>
+</tr>
+<tr>
+<td><strong>C-10</strong></td>
+<td><em>"Data at rest must use AES-256 encryption"</em></td>
+<td><strong>No application-level encryption at rest.</strong> Relies on the database/volume</td>
+<td><strong><code>[Needs Business Confirmation]</code></strong> — is disk-level encryption in place?</td>
+</tr>
+<tr>
+<td><strong>C-11</strong></td>
+<td><em>"95 % of API requests &lt; 200 ms"</em></td>
+<td>Measured <strong>p95 86–105 ms</strong> — better than the target, but on a different definition and only for reads</td>
+<td>Target met, differently</td>
+</tr>
+<tr>
+<td><strong>C-12</strong></td>
+<td>RLS example <code>CREATE POLICY tenant_rls_policy ON "QamsEntities" FOR ALL USING ("TenantId" = current_setting(...))</code></td>
+<td>90 tables, <strong>snake_case</strong>, <code>ENABLE + FORCE</code>, with a bypass clause and <code>WITH CHECK</code></td>
+<td>The SRS shows a weaker policy without <code>FORCE</code> or <code>WITH CHECK</code></td>
+</tr>
+<tr>
+<td><strong>C-13</strong></td>
+<td><code>set_config('app.current_tenant', tenant_id, false)</code></td>
+<td>Correct — <strong>plus</strong> <code>app.bypass_rls</code>, plus fail-closed to nil, plus a controlled elevation path</td>
+<td>Understated</td>
+</tr>
+<tr>
+<td><strong>C-14</strong></td>
+<td><em>"Angular 18 Standalone"</em></td>
+<td><strong>Angular 22.0.8</strong>, TypeScript 6.0.3</td>
+<td>Version drift — and the <strong>repository's own docs still say 18</strong></td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>13.5 Class D — Outdated requirements (true once, changed since)</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Statement</th>
+<th>Change</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>D-01</strong></td>
+<td>Angular 18</td>
+<td>→ <strong>22.0.8</strong> (forced by 10 high-severity advisories fixable only by semver-major; upgraded one major at a time)</td>
+<td>01 §2.4</td>
+</tr>
+<tr>
+<td><strong>D-02</strong></td>
+<td><code>[Authorize(Roles = …)]</code> role gate</td>
+<td>→ <strong><code>[RequirePermission(module, action)]</code></strong>; exactly <strong>one</strong> role attribute remains (<code>PlatformAdmin</code>)</td>
+<td>08 §8.2</td>
+</tr>
+<tr>
+<td><strong>D-03</strong></td>
+<td><code>Roles.QmOrAdmin</code> / <code>QmDeptAdmin</code> / <code>QmAdminAuditor</code> / <code>TenantAdminOnly</code> groups</td>
+<td><strong>dead code</strong> — referenced only as <em>test labels</em></td>
+<td>08 §8.2</td>
+</tr>
+<tr>
+<td><strong>D-04</strong></td>
+<td>ADR-0003 token storage</td>
+<td><strong>superseded by ADR-0009</strong></td>
+<td>09 §9.2</td>
+</tr>
+<tr>
+<td><strong>D-05</strong></td>
+<td>60-minute access tokens (Phase 3)</td>
+<td>shipped <strong>120 minutes</strong>, while <strong>ADR-0009 specifies 15</strong></td>
+<td>CFG-07</td>
+</tr>
+<tr>
+<td><strong>D-06</strong></td>
+<td><em>"~270 backend tests"</em> (ONBOARDING/CLAUDE.md)</td>
+<td><strong>436</strong> backend, 74 frontend, 6 e2e</td>
+<td>10 §10.9</td>
+</tr>
+<tr>
+<td><strong>D-07</strong></td>
+<td><em>"93 tables / 49 migrations"</em></td>
+<td><strong>97 tables / 56 migrations / 90 FORCE-RLS</strong></td>
+<td>01 §0.5</td>
+</tr>
+<tr>
+<td><strong>D-08</strong></td>
+<td><code>deploy/migrations.sql</code> current</td>
+<td><strong>stale — covers migrations 1–10 of 56</strong> while DEPLOY.md says to re-run it</td>
+<td>10 §10.3</td>
+</tr>
+<tr>
+<td><strong>D-09</strong></td>
+<td>Repository docs describe the design-time architecture as "law"</td>
+<td>The as-built has moved on in the authorisation model and the SPA version</td>
+<td>11</td>
+</tr>
+<tr>
+<td><strong>D-10</strong></td>
+<td>CLAUDE.md §3 "code at tag v1.46.0"</td>
+<td>Code is at <strong>v1.51.x</strong></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>D-11</strong></td>
+<td>Enterprise-audit figures (~76 %, ~88 %, ≈98 %)</td>
+<td>Successive re-audits; the current figure is a moving target and none is a certification</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>13.6 Class E — Deprecated / never adopted</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Item</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>E-01</strong></td>
+<td>Redis distributed cache</td>
+<td><strong>Never adopted.</strong> No caching layer exists</td>
+</tr>
+<tr>
+<td><strong>E-02</strong></td>
+<td>Hangfire</td>
+<td>Never adopted — <code>IHostedService</code> instead</td>
+</tr>
+<tr>
+<td><strong>E-03</strong></td>
+<td>Dapper</td>
+<td>Never adopted</td>
+</tr>
+<tr>
+<td><strong>E-04</strong></td>
+<td>Mapster</td>
+<td>Never adopted</td>
+</tr>
+<tr>
+<td><strong>E-05</strong></td>
+<td>ngx-translate</td>
+<td>Never adopted</td>
+</tr>
+<tr>
+<td><strong>E-06</strong></td>
+<td>Tailwind CSS</td>
+<td>Never adopted</td>
+</tr>
+<tr>
+<td><strong>E-07</strong></td>
+<td>SignalR</td>
+<td>Never adopted</td>
+</tr>
+<tr>
+<td><strong>E-08</strong></td>
+<td>Parallel <strong>CSV export</strong> endpoints</td>
+<td><strong>Built and deliberately reverted</strong> — XLSX is the single tabular format. Do not reintroduce</td>
+</tr>
+<tr>
+<td><strong>E-09</strong></td>
+<td>ADR-0003 (access-token storage risk acceptance)</td>
+<td><strong>Formally superseded</strong> by ADR-0009</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>13.7 Findings that are defects, not documentation gaps</h1>
+<p>Separated out because they need engineering work, not a document update.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Defect</th>
+<th>Severity</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>G-01</strong></td>
+<td><strong><code>audit.security_event</code> has no RLS policy.</strong> Both RLS migrations iterate <code>pg_policies</code> and skipped a table that had none. Its store reads are not tenant-filtered</td>
+<td><strong>High</strong></td>
+<td><a href="09-Security-Specification.html">09 T-01</a></td>
+</tr>
+<tr>
+<td><strong>G-02</strong></td>
+<td><strong>Complaint closure interlock is unsatisfiable when the linked NC is <em>rejected</em>.</strong> <code>CMP-020</code> requires the NC to be <code>Closed</code>; a rejected NC is terminal but not closed ⇒ the complaint can never be closed</td>
+<td><strong>Medium</strong></td>
+<td><a href="02-1-Functional-Specification-Quality-and-Improvement.html">02-1 M-02</a></td>
+</tr>
+<tr>
+<td><strong>G-03</strong></td>
+<td><strong>Suspended suppliers cannot be reinstated.</strong> <code>Suspended</code> is terminal; a supplier auto-suspended for an expired certificate cannot be restored after renewal</td>
+<td><strong>Medium</strong></td>
+<td>02-2 M-14</td>
+</tr>
+<tr>
+<td><strong>G-04</strong></td>
+<td><strong>No maximum upload size</strong> in application code</td>
+<td><strong>Medium</strong></td>
+<td>09 T-10</td>
+</tr>
+<tr>
+<td><strong>G-05</strong></td>
+<td><strong><code>take</code> / <code>days</code> query parameters are unbounded</strong> (only <code>pageSize</code> is clamped)</td>
+<td><strong>Medium</strong></td>
+<td>08 LIM-API-03</td>
+</tr>
+<tr>
+<td><strong>G-06</strong></td>
+<td><strong>Tenant suspend/reactivate/terminate have no endpoint</strong> — lifecycle management is database-only</td>
+<td><strong>Medium</strong></td>
+<td>02-4 M-33</td>
+</tr>
+<tr>
+<td><strong>G-07</strong></td>
+<td><strong><code>QcProfile.Deactivate()</code> is unreachable</strong> — no command, no endpoint, no UI</td>
+<td><strong>Low</strong></td>
+<td>02-3 LIM-QC-01</td>
+</tr>
+<tr>
+<td><strong>G-08</strong></td>
+<td><strong>Test-authorisation scope is never enforced</strong> — a <code>Perform</code>-only holder is not prevented from reviewing and releasing</td>
+<td><strong>Medium</strong></td>
+<td>02-2 FR-AUTHZ-02</td>
+</tr>
+<tr>
+<td><strong>G-09</strong></td>
+<td><strong>Environmental excursions have no de-bounce</strong> — one NC and one e-mail per recipient per out-of-limit reading</td>
+<td><strong>Medium</strong></td>
+<td>02-2 M-13</td>
+</tr>
+<tr>
+<td><strong>G-10</strong></td>
+<td><strong>E-mail failures are never retried</strong> — a transient SMTP outage silently loses the channel</td>
+<td><strong>Medium</strong></td>
+<td>02-4 M-29</td>
+</tr>
+<tr>
+<td><strong>G-11</strong></td>
+<td><strong>Silent degradation to log-only e-mail</strong> when <code>Smtp:Host</code> is unset — no operator warning</td>
+<td><strong>Medium</strong></td>
+<td>02-4 BR-NTF-05</td>
+</tr>
+<tr>
+<td><strong>G-12</strong></td>
+<td><strong>Management-review decisions do not become tasks</strong> — owner and due date are recorded but never chased</td>
+<td><strong>Medium</strong></td>
+<td>02-1 M-08</td>
+</tr>
+<tr>
+<td><strong>G-13</strong></td>
+<td><strong><code>SlaDefinition</code> and <code>EscalationTimer</code> are not wired together</strong> — SLA targets are stored but do not drive escalation deadlines</td>
+<td><strong>Medium</strong></td>
+<td>02-4 M-28</td>
+</tr>
+<tr>
+<td><strong>G-14</strong></td>
+<td><strong><code>Jwt:ExpiryMinutes</code> = 120 contradicts ADR-0009's 15</strong></td>
+<td><strong>Low–Medium</strong></td>
+<td>CFG-07</td>
+</tr>
+<tr>
+<td><strong>G-15</strong></td>
+<td><strong><code>deploy/migrations.sql</code> is stale</strong> while the runbook instructs re-running it</td>
+<td><strong>Medium</strong></td>
+<td>10 §10.3</td>
+</tr>
+<tr>
+<td><strong>G-16</strong></td>
+<td><strong>No purge for expired <code>refresh_session</code> rows</strong>; no partitioning or archival for the two append-only ledgers</td>
+<td><strong>Low (growing)</strong></td>
+<td>07 §7.6</td>
+</tr>
+<tr>
+<td><strong>G-17</strong></td>
+<td><strong><code>ref</code> schema is granted in <code>harden-runtime-role.sql</code> and designed in the docs but was never created</strong></td>
+<td><strong>Low</strong></td>
+<td>07 §7.2</td>
+</tr>
+<tr>
+<td><strong>G-18</strong></td>
+<td><strong>Training completion does not feed competency</strong></td>
+<td><strong>Low</strong></td>
+<td>02-2 M-16</td>
+</tr>
+<tr>
+<td><strong>G-19</strong></td>
+<td><strong>PT "Questionable" results trigger nothing</strong></td>
+<td><strong>Low–Medium</strong></td>
+<td>02-3 M-27</td>
+</tr>
+<tr>
+<td><strong>G-20</strong></td>
+<td><strong>SoD is a no-op when <code>CreatedByUserId</code> is null</strong> (legacy and system-raised records) — accepted residual F-05b, but still a real bypass</td>
+<td><strong>Medium</strong></td>
+<td>03 §3.4</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>13.8 Where the old SRS was right</h1>
+<p>Recorded for fairness, and because these are the parts worth carrying forward.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Statement</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The NCR/CAPA state model (8 named states, loop-backs on failed verification and effectiveness)</td>
+<td>✅ <strong>accurate</strong></td>
+</tr>
+<tr>
+<td>The document lifecycle Draft → Review → Approve → Published → Obsolete</td>
+<td>✅ <strong>accurate</strong></td>
+</tr>
+<tr>
+<td>SoD rules: NCR closure, document review/approve, competency self-authorisation, supplier self-approval</td>
+<td>✅ <strong>all four implemented</strong> (plus five more the SRS does not list)</td>
+</tr>
+<tr>
+<td>Account lockout: 30 minutes after 5 failed attempts</td>
+<td>✅ <strong>exact match</strong></td>
+</tr>
+<tr>
+<td>Competency pass mark ≥ 80 %</td>
+<td>✅ <strong>exact match</strong></td>
+</tr>
+<tr>
+<td>PostgreSQL RLS keyed on <code>app.current_tenant</code> via <code>set_config</code></td>
+<td>✅ <strong>correct in principle</strong>, understated in strength</td>
+</tr>
+<tr>
+<td>Append-only tamper-evident audit trail, runner without write permission</td>
+<td>✅ <strong>implemented and exceeded</strong> (hash chain + immutability triggers + role guard)</td>
+</tr>
+<tr>
+<td>Three languages (en/ar/fr) with dynamic direction</td>
+<td>✅ <strong>accurate</strong></td>
+</tr>
+<tr>
+<td>Clean layered architecture with CQRS over MediatR and FluentValidation</td>
+<td>✅ <strong>accurate</strong></td>
+</tr>
+<tr>
+<td>.NET 9 + PostgreSQL 17 + EF Core 9 + Npgsql</td>
+<td>✅ <strong>accurate</strong></td>
+</tr>
+<tr>
+<td>ISO 17025 / 9001 / 21 CFR Part 11 / Annex 11 as the regulatory frame</td>
+<td>✅ <strong>accurate</strong></td>
+</tr>
+<tr>
+<td>UAT-SEC-01 multi-tenancy isolation acceptance test</td>
+<td>✅ <strong>implemented and verified</strong></td>
+</tr>
+<tr>
+<td>UAT-SOD-01 SoD acceptance test</td>
+<td>⚠ correct in intent; the actual status is <strong>422</strong>, not the 403 the SRS specifies</td>
+</tr>
+<tr>
+<td>UAT-DOC-01 obsolete watermark acceptance test</td>
+<td>❌ <strong>cannot pass — the feature does not exist</strong></td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>13.9 Disposition — what to do with each class</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Class</th>
+<th>Recommended disposition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A (41)</strong></td>
+<td><strong>No action beyond this document.</strong> These are now specified. Retire the old SRS.</td>
+</tr>
+<tr>
+<td><strong>B (19)</strong></td>
+<td><strong>Business decision required per item.</strong> B-01, B-02, B-03 and B-09 have compliance or operational weight and should be decided explicitly, not by default. B-12…B-19 are stack statements that should simply be deleted.</td>
+</tr>
+<tr>
+<td><strong>C (14)</strong></td>
+<td><strong>Delete the old statements.</strong> C-01, C-02, C-03, C-04 and C-07 are actively misleading and would cause a rebuild to implement the wrong thing.</td>
+</tr>
+<tr>
+<td><strong>D (11)</strong></td>
+<td><strong>Update in place.</strong> D-05 (token lifetime vs ADR-0009) and D-08 (stale migration script) are also defects — see G-14, G-15.</td>
+</tr>
+<tr>
+<td><strong>E (9)</strong></td>
+<td><strong>Delete.</strong> Record E-08 (the reverted CSV export) as a <em>decision</em>, so nobody rebuilds it.</td>
+</tr>
+<tr>
+<td><strong>G (20)</strong></td>
+<td><strong>Engineering backlog</strong> — prioritised in <a href="15-Recommendations.html">Document 15</a>.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="the-four-decisions-that-need-a-business-owner">The four decisions that need a business owner</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Decision</th>
+<th>Question</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>D1 — MFA</strong></td>
+<td>The SRS says MFA is mandatory for all accounts; the system makes it optional and defaults it off. <strong>Which is the requirement?</strong> If an accreditation body has been told "MFA enforced", the system does not currently support that claim.</td>
+</tr>
+<tr>
+<td><strong>D2 — Obsolete-document marking</strong></td>
+<td>ISO 17025 §8.3.2 requires obsolete documents to be clearly identified. The system marks the <em>record</em> obsolete but the <em>file</em> downloads unmarked. <strong>Is the record-level marking sufficient for your assessor?</strong></td>
+</tr>
+<tr>
+<td><strong>D3 — Equipment lock-out</strong></td>
+<td>Out-of-service equipment is flagged but not blocked from being named in any record, because instrument references are free text. <strong>Is a procedural control acceptable, or must this be enforced by the software?</strong></td>
+</tr>
+<tr>
+<td><strong>D4 — Analytical charts</strong></td>
+<td>Twelve study types compute their statistics but render no plots. Reviewers must interpret numbers. <strong>Is that acceptable for method-validation review and QC sign-off?</strong></td>
+</tr>
+</tbody>
+</table></div>
+<div class="pager"><a href="12-Requirements-Traceability-Matrix.html"><span>Previous</span>Requirements Traceability Matrix</a><a href="14-Technical-Debt-Report.html" style="text-align:right"><span>Next</span>Technical Debt Report</a></div>
+</main></div>
+<script>
+(function(){
+ var r=document.documentElement, K='ntqms-srs-theme', s=localStorage.getItem(K);
+ if(s) r.setAttribute('data-theme',s);
+ var b=document.getElementById('th');
+ if(b) b.onclick=function(){
+   var cur=r.getAttribute('data-theme');
+   if(!cur) cur=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+   var nx=cur==='dark'?'light':'dark';
+   r.setAttribute('data-theme',nx); localStorage.setItem(K,nx);
+ };
+ var p=document.getElementById('pr'); if(p) p.onclick=function(){window.print();};
+ // scroll-spy on the in-page TOC
+ var links=[].slice.call(document.querySelectorAll('#toc a'));
+ if(!links.length) return;
+ var tgt=links.map(function(a){return document.getElementById(a.getAttribute('href').slice(1));});
+ function spy(){
+   var y=window.scrollY+90, i=0;
+   for(var k=0;k<tgt.length;k++){ if(tgt[k]&&tgt[k].offsetTop<=y) i=k; }
+   links.forEach(function(a,n){a.style.color=n===i?'var(--accent)':'';
+     a.style.borderLeftColor=n===i?'var(--accent)':'transparent';});
+ }
+ addEventListener('scroll',spy,{passive:true}); spy();
+})();
+</script>
+</body></html>

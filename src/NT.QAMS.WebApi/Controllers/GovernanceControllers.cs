@@ -147,7 +147,8 @@ public sealed class ManagementReviewsController(ISender sender) : ControllerBase
     public async Task<IActionResult> Schedule(ScheduleReviewRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new ScheduleReviewCommand(
-            request.Title, request.ReviewDate, request.Participants,
+            request.Title, request.ReviewDate, request.ParticipantUserIds,
+            request.Agenda, request.MeetingLink,
             request.BranchId, request.DepartmentId), ct);
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }

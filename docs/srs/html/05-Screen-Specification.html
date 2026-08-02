@@ -1,0 +1,2852 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Screen Specification — NT.QMS As-Built SRS</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖥️</text></svg>">
+<style>
+:root{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);
+ --mono:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace;
+ --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,ui-serif,serif;
+ --sans:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}}
+:root[data-theme="dark"]{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}
+:root[data-theme="light"]{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+ font-size:15.5px;line-height:1.62;-webkit-text-size-adjust:100%}
+.wrap{display:grid;grid-template-columns:288px minmax(0,1fr);gap:0;max-width:1560px;margin:0 auto}
+/* ---- sidebar ---- */
+aside{position:sticky;top:0;height:100vh;overflow-y:auto;padding:22px 16px 60px;
+ border-right:1px solid var(--line);background:var(--panel)}
+aside .brand{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:-.01em;
+ margin:0 0 2px}
+aside .sub{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;
+ margin:0 0 16px}
+aside nav a{display:block;padding:5px 9px;border-radius:7px;color:var(--ink);text-decoration:none;
+ font-size:13.2px;border-left:2px solid transparent}
+aside nav a:hover{background:var(--panel-2)}
+aside nav a.cur{background:var(--accent-soft);border-left-color:var(--accent);font-weight:600}
+aside nav a .n{color:var(--muted);font-variant-numeric:tabular-nums;margin-right:7px;font-size:11.5px}
+aside .sec{margin:16px 0 5px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+ color:var(--muted);font-weight:700}
+#toc{margin-top:6px;border-top:1px solid var(--line);padding-top:10px}
+#toc a{display:block;padding:2.5px 9px;font-size:12.4px;color:var(--muted);text-decoration:none;
+ border-left:2px solid transparent;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#toc a:hover{color:var(--ink)}
+#toc a.h3{padding-left:22px;font-size:11.8px}
+/* ---- main ---- */
+main{padding:34px 46px 120px;min-width:0;overflow-wrap:anywhere}
+.doc-head{border-bottom:2px solid var(--accent);padding-bottom:14px;margin-bottom:26px}
+.kicker{color:var(--accent);font-size:11.5px;font-weight:700;letter-spacing:.11em;
+ text-transform:uppercase;margin:0 0 4px}
+h1{font-family:var(--serif);font-size:31px;line-height:1.2;margin:0;letter-spacing:-.015em}
+h2{font-family:var(--serif);font-size:24px;margin:38px 0 12px;padding-bottom:6px;
+ border-bottom:1px solid var(--line);letter-spacing:-.01em;scroll-margin-top:14px}
+h3{font-size:18px;margin:26px 0 9px;letter-spacing:-.005em;scroll-margin-top:14px}
+h4{font-size:15px;margin:20px 0 7px;color:var(--accent)}
+h5,h6{font-size:13.5px;margin:16px 0 6px;color:var(--muted);text-transform:uppercase;
+ letter-spacing:.05em}
+p{margin:10px 0}
+a{color:var(--accent)}
+hr{border:0;border-top:1px solid var(--line);margin:30px 0}
+ul,ol{margin:9px 0;padding-left:24px}
+li{margin:3px 0}
+blockquote{margin:16px 0;padding:12px 18px;background:var(--accent-soft);
+ border-left:3px solid var(--accent);border-radius:0 8px 8px 0}
+blockquote p:first-child{margin-top:0}blockquote p:last-child{margin-bottom:0}
+code{font-family:var(--mono);font-size:.875em;background:var(--panel-2);
+ padding:1.5px 5px;border-radius:4px;border:1px solid var(--line)}
+pre{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;
+ padding:14px 16px;overflow-x:auto;margin:14px 0}
+pre code{background:none;border:0;padding:0;font-size:12.6px;line-height:1.5}
+/* ---- tables ---- */
+.tw{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:10px;
+ background:var(--panel);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;font-size:13.4px}
+th,td{padding:8px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:var(--panel-2);font-weight:700;font-size:12.2px;letter-spacing:.02em;
+ position:sticky;top:0;z-index:1}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--accent-soft)}
+td code,th code{font-size:.9em;white-space:nowrap}
+/* ---- diagrams ---- */
+figure.d{margin:18px 0;padding:18px;background:var(--panel);border:1px solid var(--line);
+ border-radius:12px;box-shadow:var(--shadow);overflow-x:auto;text-align:center}
+figure.d svg{max-width:100%;height:auto;display:inline-block}
+/* ---- misc ---- */
+.tools{position:fixed;top:12px;right:16px;display:flex;gap:6px;z-index:50}
+.tools button{font:inherit;font-size:12px;padding:5px 11px;border-radius:8px;cursor:pointer;
+ border:1px solid var(--line);background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+.tools button:hover{background:var(--panel-2)}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:52px;padding-top:18px;
+ border-top:1px solid var(--line)}
+.pager a{display:block;max-width:46%;padding:10px 14px;border:1px solid var(--line);
+ border-radius:10px;background:var(--panel);text-decoration:none;font-size:13px}
+.pager a span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;
+ letter-spacing:.08em}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:14px;margin:20px 0}
+.card{padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--panel);
+ box-shadow:var(--shadow);text-decoration:none;color:var(--ink);display:block}
+.card:hover{border-color:var(--accent)}
+.card .num{color:var(--accent);font-weight:700;font-size:11.5px;letter-spacing:.1em}
+.card .t{font-family:var(--serif);font-size:17px;margin:3px 0 5px}
+.card .d{color:var(--muted);font-size:12.7px;line-height:1.5}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin:20px 0}
+.stat{padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.stat b{display:block;font-size:23px;font-family:var(--serif);line-height:1.1}
+.stat span{color:var(--muted);font-size:11.4px}
+@media print{
+ aside,.tools,.pager{display:none!important}
+ .wrap{display:block;max-width:none}
+ main{padding:0}
+ .tw,figure.d{break-inside:avoid;box-shadow:none}
+ h2{break-after:avoid}
+ a{color:inherit;text-decoration:none}
+}
+@media (max-width:1080px){
+ .wrap{grid-template-columns:1fr}
+ aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+ main{padding:22px 18px 80px}
+ #toc{display:none}
+}
+</style>
+</head><body>
+<div class="tools"><button id="th">◐ Theme</button><button id="pr">⎙ Print</button></div>
+<div class="wrap">
+<aside><p class="brand">NT.QMS</p><p class="sub">As-Built SRS · v1.51.x</p><a class="card" style="padding:9px 12px;margin-bottom:10px;font-size:13px" href="index.html">◂ Document set</a><div class="sec">Documents</div><nav><a class="" href="00-SRS-Index-and-Conventions.html"><span class="n">00</span>Index, Conventions &amp; Glossary</a><a class="" href="01-Software-Requirements-Specification.html"><span class="n">01</span>Software Requirements Specification</a><a class="" href="02-1-Functional-Specification-Quality-and-Improvement.html"><span class="n">02-1</span>Functional Spec 1 — Quality &amp; Improvement</a><a class="" href="02-2-Functional-Specification-Resources-People-Governance.html"><span class="n">02-2</span>Functional Spec 2 — Resources, People &amp; Governance</a><a class="" href="02-3-Functional-Specification-Analytical-Quality.html"><span class="n">02-3</span>Functional Spec 3 — Analytical Quality</a><a class="" href="02-4-Functional-Specification-Operations-and-Platform.html"><span class="n">02-4</span>Functional Spec 4 — Operations &amp; Platform</a><a class="" href="03-Business-Rules.html"><span class="n">03</span>Business Rules &amp; Error Catalogue</a><a class="" href="04-Configuration-Reference.html"><span class="n">04</span>Configuration Reference</a><a class="cur" href="05-Screen-Specification.html"><span class="n">05</span>Screen Specification</a><a class="" href="06-Workflow-Specification.html"><span class="n">06</span>Workflow Specification</a><a class="" href="07-File-System-Specification.html"><span class="n">07</span>File System Specification</a><a class="" href="08-API-Specification.html"><span class="n">08</span>API Specification</a><a class="" href="09-Security-Specification.html"><span class="n">09</span>Security Specification</a><a class="" href="10-Deployment-Specification.html"><span class="n">10</span>Deployment Specification</a><a class="" href="11-Architecture-Constraints.html"><span class="n">11</span>Architecture Constraints</a><a class="" href="12-Requirements-Traceability-Matrix.html"><span class="n">12</span>Requirements Traceability Matrix</a><a class="" href="13-Implementation-vs-SRS-Gap-Analysis.html"><span class="n">13</span>Implementation vs SRS — Gap Analysis</a><a class="" href="14-Technical-Debt-Report.html"><span class="n">14</span>Technical Debt Report</a><a class="" href="15-Recommendations.html"><span class="n">15</span>Recommendations</a></nav><div class='sec'>On this page</div><div id='toc'><a class="h2" href="#layout">Layout</a><a class="h2" href="#controls">Controls</a><a class="h2" href="#navigation-model">Navigation model</a><a class="h2" href="#shell-states">Shell states</a><a class="h2" href="#archetype-a-register-list-page-28-screens">Archetype A — Register (list) page — 28 screens</a><a class="h3" href="#states-all-archetype-a-screens">States (all archetype-A screens)</a><a class="h3" href="#statistic-tiles-qams-list-stats-the-rules">Statistic tiles (qams-list-stats) — the rules</a><a class="h3" href="#the-paged-registers-13">The paged registers (13)</a><a class="h2" href="#archetype-b-detail-page-child-route-id-26-screens">Archetype B — Detail page (child route :id) — 26 screens</a><a class="h2" href="#archetype-c-analytical-study-pair-list-detail-24-screens-12-modules-2">Archetype C — Analytical study pair (list + detail) — 24 screens (12 modules × 2)</a><a class="h2" href="#scr-01-tenant-entry-ttenant">SCR-01 · Tenant entry — /t/:tenant</a><a class="h2" href="#scr-02-sign-in-login">SCR-02 · Sign-in — /login</a><a class="h2" href="#scr-03-mfa-setup-securitymfa-setup">SCR-03 · MFA setup — /security/mfa-setup</a><a class="h2" href="#scr-04-dashboard-dashboard">SCR-04 · Dashboard — /dashboard</a><a class="h2" href="#scr-05-platform-tenants-platformtenants">SCR-05 · Platform tenants — /platform/tenants</a><a class="h2" href="#scr-06-compliance-compliance">SCR-06 · Compliance — /compliance</a><a class="h2" href="#scr-07-roles-amp-privileges-roles">SCR-07 · Roles &amp;amp; privileges — /roles</a><a class="h2" href="#scr-08-users-users">SCR-08 · Users — /users</a><a class="h2" href="#scr-09-authorization-matrix-authorizations">SCR-09 · Authorization matrix — /authorizations</a><a class="h2" href="#scr-10-security-settings-settingssecurity">SCR-10 · Security settings — /settings/security</a><a class="h2" href="#scr-11-reference-data-reference-data">SCR-11 · Reference data — /reference-data</a><a class="h2" href="#scr-12-manual-manual">SCR-12 · Manual — /manual</a><a class="h2" href="#scr-13-notification-rules-monitor-notification-rules">SCR-13 · Notification rules / monitor — /notification-rules</a><a class="h2" href="#accessibility-posture">Accessibility posture</a><a class="h2" href="#per-screen-control-detail">Per-screen control detail</a></div></aside>
+<main>
+<div class="doc-head"><p class="kicker">Document 05 · NT.QMS Production SRS</p><h1>Screen Specification</h1></div>
+<blockquote>
+<p><a href="00-SRS-Index-and-Conventions.html">Conventions</a> · Backing endpoints:
+<a href="08-API-Specification.html">Document 08</a> · Workflows the screens drive:
+<a href="06-Workflow-Specification.html">Document 06</a></p>
+</blockquote>
+<p>The SPA is <strong>105 standalone Angular components</strong> across <strong>87 route entries</strong>. Rather than repeating an
+identical description 28 times, this document specifies the <strong>screen archetypes</strong> first (they cover
+~90 % of the surface), then the screens that deviate, then a complete machine-extracted control
+inventory for every component.</p>
+<hr>
+<h1>5.1 Application shell (<code>SCR-00</code>)</h1>
+<p><strong>File:</strong> <code>shell/shell.component.ts</code> · <strong>Route:</strong> <code>''</code> (wraps every authenticated route)
+<strong>Guard:</strong> <code>authGuard</code>, then <code>platformOnlyGuard</code> / <code>tenantOnlyGuard</code> on the two child trees.</p>
+<h2 id="layout">Layout</h2>
+<pre><code>┌───────────────────────────────────────────────────────────────────────┐
+│ [☰] NT.QMS  [workspace pill]      [dash][tasks][bell] [EN|AR|FR] [AV] │  header
+├──────────────┬────────────────────────────────────────────────────────┤
+│ nav (grouped)│                                                        │
+│  ▸ Overview  │                  &lt;router-outlet&gt;                       │
+│  ▸ Improve…  │                                                        │
+│  …           │                                                        │
+└──────────────┴────────────────────────────────────────────────────────┘
+</code></pre>
+<h2 id="controls">Controls</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Behaviour</th>
+<th>Persistence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Burger</strong> (<code>toggleSidebar</code>)</td>
+<td>collapses the sidebar to a 56 px icon rail (<code>.nav.rail</code>)</td>
+<td><code>localStorage</code> key <code>SIDEBAR_COLLAPSED_KEY</code> (<code>'1'</code>/<code>'0'</code>)</td>
+</tr>
+<tr>
+<td><strong>Workspace pill</strong></td>
+<td>shows the laboratory <strong>name</strong> (from <code>GET /api/auth/workspace/{slug}</code>), not the slug — hidden for platform admins</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>Quick icons</strong></td>
+<td><code>/dashboard</code>, <code>/tasks</code>, <code>/notifications</code> — hidden for platform admins</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>Language switcher</strong></td>
+<td>three buttons <code>EN | AR | FR</code>; the active one carries <code>.active</code>; switching sets document direction (<code>ar</code> ⇒ RTL)</td>
+<td><code>PUT /api/auth/me/language</code></td>
+</tr>
+<tr>
+<td><strong>Avatar</strong></td>
+<td>up to <strong>two uppercase initials</strong> derived from the display name</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>Sign out</strong></td>
+<td>clears the in-memory access token and calls <code>POST /api/auth/logout</code></td>
+<td>server revokes the refresh family</td>
+</tr>
+<tr>
+<td><strong>Group headers</strong></td>
+<td>collapsible; a collapsed rail always shows items</td>
+<td><code>localStorage</code> <code>GROUPS_STATE_KEY</code> (JSON array of open group keys)</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="navigation-model">Navigation model</h2>
+<figure class="d"><svg width="714" height="1215" preserveAspectRatio="xMidYMid meet" id="mmd-218be4ce45f4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="flowchart" style="max-width:714px;height:auto" viewBox="0.5 0 713.828125 1215" role="graphics-document document" aria-roledescription="flowchart-v2"><style>#mmd-218be4ce45f4{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;fill:#000000;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#mmd-218be4ce45f4 .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#mmd-218be4ce45f4 .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#mmd-218be4ce45f4 .error-icon{fill:#552222;}#mmd-218be4ce45f4 .error-text{fill:#552222;stroke:#552222;}#mmd-218be4ce45f4 .edge-thickness-normal{stroke-width:1px;}#mmd-218be4ce45f4 .edge-thickness-thick{stroke-width:3.5px;}#mmd-218be4ce45f4 .edge-pattern-solid{stroke-dasharray:0;}#mmd-218be4ce45f4 .edge-thickness-invisible{stroke-width:0;fill:none;}#mmd-218be4ce45f4 .edge-pattern-dashed{stroke-dasharray:3;}#mmd-218be4ce45f4 .edge-pattern-dotted{stroke-dasharray:2;}#mmd-218be4ce45f4 .marker{fill:#666;stroke:#666;}#mmd-218be4ce45f4 .marker.cross{stroke:#666;}#mmd-218be4ce45f4 svg{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:14px;}#mmd-218be4ce45f4 p{margin:0;}#mmd-218be4ce45f4 .label{font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#000000;}#mmd-218be4ce45f4 .cluster-label text{fill:#333;}#mmd-218be4ce45f4 .cluster-label span{color:#333;}#mmd-218be4ce45f4 .cluster-label span p{background-color:transparent;}#mmd-218be4ce45f4 .label text,#mmd-218be4ce45f4 span{fill:#000000;color:#000000;}#mmd-218be4ce45f4 .node rect,#mmd-218be4ce45f4 .node circle,#mmd-218be4ce45f4 .node ellipse,#mmd-218be4ce45f4 .node polygon,#mmd-218be4ce45f4 .node path{fill:#eee;stroke:#999;stroke-width:1px;}#mmd-218be4ce45f4 .rough-node .label text,#mmd-218be4ce45f4 .node .label text,#mmd-218be4ce45f4 .image-shape .label,#mmd-218be4ce45f4 .icon-shape .label{text-anchor:middle;}#mmd-218be4ce45f4 .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#mmd-218be4ce45f4 .rough-node .label,#mmd-218be4ce45f4 .node .label,#mmd-218be4ce45f4 .image-shape .label,#mmd-218be4ce45f4 .icon-shape .label{text-align:center;}#mmd-218be4ce45f4 .node.clickable{cursor:pointer;}#mmd-218be4ce45f4 .root .anchor path{fill:#666!important;stroke-width:0;stroke:#666;}#mmd-218be4ce45f4 .arrowheadPath{fill:#333333;}#mmd-218be4ce45f4 .edgePath .path{stroke:#666;stroke-width:1px;}#mmd-218be4ce45f4 .flowchart-link{stroke:#666;fill:none;}#mmd-218be4ce45f4 .edgeLabel{background-color:white;text-align:center;}#mmd-218be4ce45f4 .edgeLabel p{background-color:white;}#mmd-218be4ce45f4 .edgeLabel rect{opacity:0.5;background-color:white;fill:white;}#mmd-218be4ce45f4 .labelBkg{background-color:rgba(255, 255, 255, 0.5);}#mmd-218be4ce45f4 .cluster rect{fill:hsl(0, 0%, 98.9215686275%);stroke:#707070;stroke-width:1px;}#mmd-218be4ce45f4 .cluster text{fill:#333;}#mmd-218be4ce45f4 .cluster span{color:#333;}#mmd-218be4ce45f4 div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:12px;background:hsl(-160, 0%, 93.3333333333%);border:1px solid #707070;border-radius:2px;pointer-events:none;z-index:100;}#mmd-218be4ce45f4 .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#000000;}#mmd-218be4ce45f4 rect.text{fill:none;stroke-width:0;}#mmd-218be4ce45f4 .icon-shape,#mmd-218be4ce45f4 .image-shape{background-color:white;text-align:center;}#mmd-218be4ce45f4 .icon-shape p,#mmd-218be4ce45f4 .image-shape p{background-color:white;padding:2px;}#mmd-218be4ce45f4 .icon-shape .label rect,#mmd-218be4ce45f4 .image-shape .label rect{opacity:0.5;background-color:white;fill:white;}#mmd-218be4ce45f4 .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#mmd-218be4ce45f4 .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#mmd-218be4ce45f4 .node .neo-node{stroke:#999;}#mmd-218be4ce45f4 [data-look="neo"].node rect,#mmd-218be4ce45f4 [data-look="neo"].cluster rect,#mmd-218be4ce45f4 [data-look="neo"].node polygon{stroke:url(#mmd-218be4ce45f4-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-218be4ce45f4 [data-look="neo"].swimlane.cluster rect{filter:none;}#mmd-218be4ce45f4 [data-look="neo"].node path{stroke:url(#mmd-218be4ce45f4-gradient);stroke-width:1px;}#mmd-218be4ce45f4 [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-218be4ce45f4 [data-look="neo"].node .neo-line path{stroke:#999;filter:none;}#mmd-218be4ce45f4 [data-look="neo"].node circle{stroke:url(#mmd-218be4ce45f4-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-218be4ce45f4 [data-look="neo"].node circle .state-start{fill:#000000;}#mmd-218be4ce45f4 [data-look="neo"].icon-shape .icon{fill:url(#mmd-218be4ce45f4-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-218be4ce45f4 [data-look="neo"].icon-shape .icon-neo path{stroke:url(#mmd-218be4ce45f4-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mmd-218be4ce45f4 :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><g><marker id="my-svg_flowchart-v2-pointEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="4.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 5 L 10 10 L 10 0 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointEnd-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="11.5" refY="7" markerUnits="userSpaceOnUse" markerWidth="10.5" markerHeight="14" orient="auto"><path d="M 0 0 L 11.5 7 L 0 14 z" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="1" refY="7" markerUnits="userSpaceOnUse" markerWidth="11.5" markerHeight="14" orient="auto"><polygon points="0,7 11.5,14 11.5,0" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="11" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-1" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refY="5" refX="12.25" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-2" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="12" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossStart" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="-1" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="17.7" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5;"/></marker><marker id="my-svg_flowchart-v2-crossStart-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="-3.5" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5; stroke-dasharray: 1, 0;"/></marker><g class="root"><g class="clusters"/><g class="edgePaths"><path d="M141.769,478.394L151.958,473.454C162.146,468.513,182.522,458.631,201.376,453.691C220.229,448.75,237.56,448.75,246.225,448.75L254.891,448.75" id="my-svg-L_P_PL_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_P_PL_0" data-points="W3sieCI6MTQxLjc2OTM3NTU0MzQ1MzM4LCJ5Ijo0NzguMzk0Mzc1NTQzNDUzNH0seyJ4IjoyMDIuODk4NDM3NSwieSI6NDQ4Ljc1fSx7IngiOjI1OC44OTA2MjUsInkiOjQ0OC43NX1d" data-look="classic" marker-end="url(#mmd-218be4ce45f4_flowchart-v2-pointEnd)"/><path d="M141.769,530.606L151.958,535.546C162.146,540.487,182.522,550.369,197.881,555.309C213.24,560.25,223.581,560.25,228.751,560.25L233.922,560.25" id="my-svg-L_P_T_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_P_T_0" data-points="W3sieCI6MTQxLjc2OTM3NTU0MzQ1MzM4LCJ5Ijo1MzAuNjA1NjI0NDU2NTQ2Nn0seyJ4IjoyMDIuODk4NDM3NSwieSI6NTYwLjI1fSx7IngiOjIzNy45MjE4NzUsInkiOjU2MC4yNX1d" data-look="classic" marker-end="url(#mmd-218be4ce45f4_flowchart-v2-pointEnd)"/><path d="M322.379,534.75L338.87,454.708C355.362,374.667,388.345,214.583,408.337,134.542C428.328,54.5,435.328,54.5,438.828,54.5L442.328,54.5" id="my-svg-L_T_G1_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_T_G1_0" data-points="W3sieCI6MzIyLjM3ODkzOTA3NTYzMDIsInkiOjUzNC43NX0seyJ4Ijo0MjEuMzI4MTI1LCJ5Ijo1NC41fSx7IngiOjQ0Ni4zMjgxMjUsInkiOjU0LjV9XQ==" data-look="classic" marker-end="url(#mmd-218be4ce45f4_flowchart-v2-pointEnd)"/><path d="M324.668,534.75L340.778,480.292C356.888,425.833,389.108,316.917,408.718,262.458C428.328,208,435.328,208,438.828,208L442.328,208" id="my-svg-L_T_G2_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_T_G2_0" data-points="W3sieCI6MzI0LjY2ODQ0ODM2NzYzNjY0LCJ5Ijo1MzQuNzV9LHsieCI6NDIxLjMyODEyNSwieSI6MjA4fSx7IngiOjQ0Ni4zMjgxMjUsInkiOjIwOH1d" data-look="classic" marker-end="url(#mmd-218be4ce45f4_flowchart-v2-pointEnd)"/><path d="M330.494,534.75L345.633,505.875C360.772,477,391.05,419.25,409.689,390.375C428.328,361.5,435.328,361.5,438.828,361.5L442.328,361.5" id="my-svg-L_T_G3_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_T_G3_0" data-points="W3sieCI6MzMwLjQ5NDQ1NzU0NzE2OTgsInkiOjUzNC43NX0seyJ4Ijo0MjEuMzI4MTI1LCJ5IjozNjEuNX0seyJ4Ijo0NDYuMzI4MTI1LCJ5IjozNjEuNX1d" data-look="classic" marker-end="url(#mmd-218be4ce45f4_flowchart-v2-pointEnd)"/><path d="M357.233,534.75L367.916,527.958C378.598,521.167,399.963,507.583,415.758,500.792C431.552,494,441.776,494,446.888,494L452,494" id="my-svg-L_T_G4_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_T_G4_0" data-points="W3sieCI6MzU3LjIzMzM3MjY0MTUwOTQ1LCJ5Ijo1MzQuNzV9LHsieCI6NDIxLjMyODEyNSwieSI6NDk0fSx7IngiOjQ1NiwieSI6NDk0fV0=" data-look="classic" marker-end="url(#mmd-218be4ce45f4_flowchart-v2-pointEnd)"/><path d="M357.233,585.75L367.916,592.542C378.598,599.333,399.963,612.917,414.146,619.708C428.328,626.5,435.328,626.5,438.828,626.5L442.328,626.5" id="my-svg-L_T_G5_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_T_G5_0" data-points="W3sieCI6MzU3LjIzMzM3MjY0MTUwOTQ1LCJ5Ijo1ODUuNzV9LHsieCI6NDIxLjMyODEyNSwieSI6NjI2LjV9LHsieCI6NDQ2LjMyODEyNSwieSI6NjI2LjV9XQ==" data-look="classic" marker-end="url(#mmd-218be4ce45f4_flowchart-v2-pointEnd)"/><path d="M329.824,585.75L345.074,616.375C360.325,647,390.827,708.25,409.577,738.875C428.328,769.5,435.328,769.5,438.828,769.5L442.328,769.5" id="my-svg-L_T_G6_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_T_G6_0" data-points="W3sieCI6MzI5LjgyMzU4ODcwOTY3NzQ0LCJ5Ijo1ODUuNzV9LHsieCI6NDIxLjMyODEyNSwieSI6NzY5LjV9LHsieCI6NDQ2LjMyODEyNSwieSI6NzY5LjV9XQ==" data-look="classic" marker-end="url(#mmd-218be4ce45f4_flowchart-v2-pointEnd)"/><path d="M324.049,585.75L340.262,645.458C356.476,705.167,388.902,824.583,408.615,884.292C428.328,944,435.328,944,438.828,944L442.328,944" id="my-svg-L_T_G7_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_T_G7_0" data-points="W3sieCI6MzI0LjA0OTI0Njc0MjY3MSwieSI6NTg1Ljc1fSx7IngiOjQyMS4zMjgxMjUsInkiOjk0NH0seyJ4Ijo0NDYuMzI4MTI1LCJ5Ijo5NDR9XQ==" data-look="classic" marker-end="url(#mmd-218be4ce45f4_flowchart-v2-pointEnd)"/><path d="M321.712,585.75L338.315,678.042C354.918,770.333,388.123,954.917,408.225,1047.208C428.328,1139.5,435.328,1139.5,438.828,1139.5L442.328,1139.5" id="my-svg-L_T_G8_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_T_G8_0" data-points="W3sieCI6MzIxLjcxMjI3NjExMTM1MDksInkiOjU4NS43NX0seyJ4Ijo0MjEuMzI4MTI1LCJ5IjoxMTM5LjV9LHsieCI6NDQ2LjMyODEyNSwieSI6MTEzOS41fV0=" data-look="classic" marker-end="url(#mmd-218be4ce45f4_flowchart-v2-pointEnd)"/></g><g class="edgeLabels"><g class="edgeLabel" transform="translate(202.8984375, 448.75)"><g class="label" data-id="L_P_PL_0" transform="translate(-10.0234375, -10.5)"><foreignObject width="20.046875" height="21"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"><p>yes</p></span></div></foreignObject></g></g><g class="edgeLabel" transform="translate(202.8984375, 560.25)"><g class="label" data-id="L_P_T_0" transform="translate(-8.0703125, -10.5)"><foreignObject width="16.140625" height="21"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"><p>no</p></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_T_G1_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_T_G2_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_T_G3_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_T_G4_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_T_G5_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_T_G6_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_T_G7_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_T_G8_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g></g><g class="nodes"><g class="node default" id="my-svg-flowchart-P-0" data-look="classic" transform="translate(87.9375, 504.5)"><polygon points="79.9375,0 159.875,-79.9375 79.9375,-159.875 0,-79.9375" class="label-container" transform="translate(-79.4375, 79.9375)"/><g class="label" style="" transform="translate(-54.4375, -10.5)"><rect/><foreignObject width="108.875" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>isPlatformAdmin?</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-PL-1" data-look="classic" transform="translate(317.125, 448.75)"><rect class="basic label-container" style="" x="-58.234375" y="-36" width="116.46875" height="72"/><g class="label" style="" transform="translate(-28.234375, -21)"><rect/><foreignObject width="56.46875" height="42"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>Platform<br />• Tenants</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-T-3" data-look="classic" transform="translate(317.125, 560.25)"><rect class="basic label-container" style="" x="-79.203125" y="-25.5" width="158.40625" height="51"/><g class="label" style="" transform="translate(-49.203125, -10.5)"><rect/><foreignObject width="98.40625" height="21"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>8 tenant groups</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-G1-5" data-look="classic" transform="translate(576.328125, 54.5)"><rect class="basic label-container" style="" x="-130" y="-46.5" width="260" height="93"/><g class="label" style="" transform="translate(-100, -31.5)"><rect/><foreignObject width="200" height="63"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>Overview<br />Dashboard · Tasks · Notifications · Manual</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-G2-7" data-look="classic" transform="translate(576.328125, 208)"><rect class="basic label-container" style="" x="-130" y="-57" width="260" height="114"/><g class="label" style="" transform="translate(-100, -42)"><rect/><foreignObject width="200" height="84"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>Improvement<br />NC · Complaints · Feedback · Audits · Objectives · Changes · Reviews</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-G3-9" data-look="classic" transform="translate(576.328125, 361.5)"><rect class="basic label-container" style="" x="-130" y="-46.5" width="260" height="93"/><g class="label" style="" transform="translate(-100, -31.5)"><rect/><foreignObject width="200" height="63"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>Documents<br />Quality Policy · Documents · Records</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-G4-11" data-look="classic" transform="translate(576.328125, 494)"><rect class="basic label-container" style="" x="-120.328125" y="-36" width="240.65625" height="72"/><g class="label" style="" transform="translate(-90.328125, -21)"><rect/><foreignObject width="180.65625" height="42"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>Risk<br />Risks · Conflicts · Org Context</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-G5-13" data-look="classic" transform="translate(576.328125, 626.5)"><rect class="basic label-container" style="" x="-130" y="-46.5" width="260" height="93"/><g class="label" style="" transform="translate(-100, -31.5)"><rect/><foreignObject width="200" height="63"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>Resources<br />Equipment · Standards · Monitoring · Suppliers</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-G6-15" data-look="classic" transform="translate(576.328125, 769.5)"><rect class="basic label-container" style="" x="-130" y="-46.5" width="260" height="93"/><g class="label" style="" transform="translate(-100, -31.5)"><rect/><foreignObject width="200" height="63"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>People<br />Competencies · Authorizations · Training</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-G7-17" data-look="classic" transform="translate(576.328125, 944)"><rect class="basic label-container" style="" x="-130" y="-78" width="260" height="156"/><g class="label" style="" transform="translate(-100, -63)"><rect/><foreignObject width="200" height="126"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>Analytical (15 items)<br />QC · Validation · MC · Precision · Linearity · DL · RI ·<br />Sigma · Outlier · Carryover · Lot · Interference · ICP · MU · PT Plans · PT</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-G8-19" data-look="classic" transform="translate(576.328125, 1139.5)"><rect class="basic label-container" style="" x="-130" y="-67.5" width="260" height="135"/><g class="label" style="" transform="translate(-100, -52.5)"><rect/><foreignObject width="200" height="105"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>Admin<br />Security · Reference data · Notification rules* · Compliance* · Users* · Roles* · Access reviews*</p></span></div></foreignObject></g></g></g></g></g><defs><filter id="my-svg-drop-shadow" height="130%" width="130%"><feDropShadow dx="4" dy="4" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs><defs><filter id="my-svg-drop-shadow-small" height="150%" width="150%"><feDropShadow dx="2" dy="2" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs><linearGradient id="my-svg-gradient" gradientUnits="objectBoundingBox" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="hsl(0, 0%, 83.3333333333%)" stop-opacity="1"/><stop offset="100%" stop-color="hsl(0, 0%, 88.9215686275%)" stop-opacity="1"/></linearGradient></svg></figure>
+
+<p><strong>Permission-driven visibility.</strong> Only five nav items carry a <code>visible()</code> predicate — all in the Admin
+group:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Shown when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Notification rules</td>
+<td><code>perms.can('notifications.manage')</code></td>
+</tr>
+<tr>
+<td>Compliance</td>
+<td><code>perms.can('compliance.view')</code></td>
+</tr>
+<tr>
+<td>Users</td>
+<td><code>perms.can('users.view')</code></td>
+</tr>
+<tr>
+<td>Roles</td>
+<td><code>perms.can('roles.view')</code></td>
+</tr>
+<tr>
+<td>Access reviews</td>
+<td><code>perms.can('access-reviews.view')</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>A group with no visible items is removed entirely.</p>
+<blockquote>
+<p><strong>Specification note — this is a real gap.</strong> The other <strong>39</strong> nav items have <strong>no</strong> visibility
+predicate: every tenant user sees every operational module in the sidebar regardless of privilege.
+Clicking through lands on a page whose data call returns 403, so nothing leaks — but the navigation
+advertises modules the user cannot use. See <a href="14-Technical-Debt-Report.html">Document 14</a> TD.</p>
+</blockquote>
+<h2 id="shell-states">Shell states</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>State</th>
+<th>Rendering</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Platform admin</td>
+<td>single <strong>Platform</strong> group; workspace pill and quick icons suppressed</td>
+</tr>
+<tr>
+<td>Tenant user</td>
+<td>eight groups, filtered as above</td>
+</tr>
+<tr>
+<td>Sidebar collapsed</td>
+<td>icon rail, labels hidden, all group items always visible</td>
+</tr>
+<tr>
+<td>RTL (<code>ar</code>)</td>
+<td>document direction flips; layout mirrors</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>5.2 Screen archetypes</h1>
+<h2 id="archetype-a-register-list-page-28-screens">Archetype A — <strong>Register (list) page</strong> — 28 screens</h2>
+<p>Used by every module register. Composition:</p>
+<pre><code>qams-page-header      ← title, subtitle, contextual help toggle
+qams-list-stats       ← statistic tiles (+ optional proportion meters)
+[filter row]          ← status/type selects + free-text search
+[primary action]      ← &quot;New …&quot; opens a slide-over drawer
+qams-drawer           ← creation form
+[table]               ← rows, click → child route (detail)
+qams-load-more        ← paged footer (13 of the 28 lists)
+</code></pre>
+<h3 id="states-all-archetype-a-screens">States (all archetype-A screens)</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>State</th>
+<th>Trigger</th>
+<th>Rendering</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Loading</strong></td>
+<td><code>facade.loading()</code></td>
+<td>in-place loading affordance; the table is not rendered</td>
+</tr>
+<tr>
+<td><strong>Error</strong></td>
+<td><code>facade.error()</code></td>
+<td>error block with the server's problem+json <code>title</code>/<code>detail</code></td>
+</tr>
+<tr>
+<td><strong>Empty</strong></td>
+<td>filtered result length 0</td>
+<td><code>@empty</code> block on the <code>@for</code> loop</td>
+</tr>
+<tr>
+<td><strong>Populated</strong></td>
+<td>rows present</td>
+<td>table</td>
+</tr>
+<tr>
+<td><strong>Drawer open</strong></td>
+<td><code>showForm()</code> true</td>
+<td>slide-over creation form overlays</td>
+</tr>
+<tr>
+<td><strong>Submitting</strong></td>
+<td><code>facade.loading()</code></td>
+<td>the drawer's submit button is disabled</td>
+</tr>
+<tr>
+<td><strong>More available</strong></td>
+<td>server <code>total &gt; loaded</code></td>
+<td><code>qams-load-more</code> footer visible</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="statistic-tiles-qams-list-stats-the-rules">Statistic tiles (<code>qams-list-stats</code>) — the rules</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Colour never carries meaning alone</strong></td>
+<td>the seven tone tokens failed as a categorical palette (gold 1.80:1, teal 2.58:1, red↔orange ΔE 8.9 for normal vision). Tone is carried by <strong>meter fills and rails</strong>; values wear AA-contrast <code>--nt-ink-*</code> steps.</td>
+</tr>
+<tr>
+<td><strong>Proportions only with a real denominator</strong></td>
+<td><code>ratioFromFirst</code> is <strong>opt-in per page</strong> — used by <strong>24 of 28</strong> registers</td>
+</tr>
+<tr>
+<td><strong>Deliberately meter-less</strong></td>
+<td><code>/org-context</code>, <code>/pt-plans</code>, <code>/feedback</code>, <code>/authorizations</code> — no valid whole</td>
+</tr>
+<tr>
+<td><strong>Component refuses to meter</strong></td>
+<td>non-numeric values, zero wholes, or parts greater than the whole</td>
+</tr>
+<tr>
+<td><strong>Same component on the dashboard</strong></td>
+<td>so the dashboard and the registers cannot drift</td>
+</tr>
+<tr>
+<td><strong>Optional link</strong></td>
+<td>a tile may become an anchor to a filtered view</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="the-paged-registers-13">The paged registers (13)</h3>
+<p>NC, documents, audits, risks, changes, management reviews, suppliers, equipment, competencies,
+training assignments, archives, tasks, notifications — all share the <code>qams-load-more</code> footer with
+facade <code>page</code>/<code>append</code>/<code>reset</code> semantics.</p>
+<h2 id="archetype-b-detail-page-child-route-id-26-screens">Archetype B — <strong>Detail page (child route <code>:id</code>)</strong> — 26 screens</h2>
+<pre><code>qams-page-header
+qams-workflow-stepper   ← current state highlighted in the module's state machine
+[summary card]          ← identifying fields
+[state-specific action panel]  ← only the transitions legal from the current state
+[child collections]     ← measurements / actions / findings / versions …
+qams-audit-trail        ← per-record change history
+</code></pre>
+<p><strong>Key behaviour:</strong> the action panel renders <strong>only the transitions legal from the current state</strong>.
+The stepper is derived from the aggregate's state enum, so the UI and the domain state machine agree
+by construction.</p>
+<p><strong>Deletion of a child row</strong> (a measurement, a reading, a pair) triggers the global
+<code>changeReasonInterceptor</code>: an accessible dialog collects the reason, the request carries
+<code>X-Change-Reason</code>, and cancelling or leaving it blank aborts the request client-side.</p>
+<h2 id="archetype-c-analytical-study-pair-list-detail-24-screens-12-modules-2">Archetype C — <strong>Analytical study pair</strong> (list + detail) — 24 screens (12 modules × 2)</h2>
+<p>Archetype A + B specialised:
+- <strong>List:</strong> configure-study drawer with the module's acceptance parameters.
+- <strong>Detail:</strong> three-step stepper <code>Data entry → Calculated → Signed off</code>; a data-entry grid; a
+  <strong>Calculate</strong> button; a <strong>Sign off</strong> button; results panel; audit trail.
+- Two of them (<code>method-comparison-detail</code>, <code>precision-detail</code>) additionally embed <code>qams-csv-import</code>.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Disabled when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Add data point</td>
+<td>state is <code>SignedOff</code></td>
+</tr>
+<tr>
+<td>Remove data point</td>
+<td>state is <code>SignedOff</code> (and always prompts for a change reason)</td>
+</tr>
+<tr>
+<td>Calculate</td>
+<td>state is <code>SignedOff</code>, or the module's minimum data is not met (the server refuses with the module's <code>-010</code>/<code>-011</code> code)</td>
+</tr>
+<tr>
+<td>Sign off</td>
+<td>state is not <code>Calculated</code></td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>5.3 Screens that deviate from the archetypes</h1>
+<h2 id="scr-01-tenant-entry-ttenant"><code>SCR-01</code> · Tenant entry — <code>/t/:tenant</code></h2>
+<p><strong>File:</strong> <code>features/login/tenant-entry.component.ts</code> · <strong>Anonymous</strong></p>
+<p>Pins the laboratory for this browser. Reads <code>GET /api/auth/workspace/{slug}</code> and stores the slug in
+<code>localStorage</code> under <code>qams.tenant.slug</code>, then routes to <code>/login</code>.
+<strong>States:</strong> resolving · resolved (shows the laboratory <strong>name</strong>) · <strong>404</strong> (unknown, malformed <em>and</em>
+non-active slugs all render identically — tenant existence cannot be probed).</p>
+<h2 id="scr-02-sign-in-login"><code>SCR-02</code> · Sign-in — <code>/login</code></h2>
+<p><strong>File:</strong> <code>features/login/login.component.ts</code> · <strong>Anonymous</strong></p>
+<p>Rebuilt to a supplied design. Measured geometry at <strong>both 1280 and 1600 px</strong>: at 1280 the layout wraps,
+so the header is a single row with controls right-aligned; <code>.cols</code> is a <strong>fixed 946 px centred block</strong>.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Workspace pill</td>
+<td>the laboratory <strong>name</strong> resolved from the slug (e.g. slug <code>arfa</code> → "Arfa Lab")</td>
+</tr>
+<tr>
+<td>E-mail, Password</td>
+<td>required</td>
+</tr>
+<tr>
+<td><strong>MFA code</strong></td>
+<td>shown only when the server issues an MFA challenge</td>
+</tr>
+<tr>
+<td><strong>"Sign in as platform administrator"</strong> switch</td>
+<td>clears the pinned tenant, switches to platform login, and on success routes to <code>/platform/tenants</code>. The admin portal is a <strong>distinct identity</strong>: shield pill, its own hero and copy.</td>
+</tr>
+<tr>
+<td>Language switcher</td>
+<td>available pre-authentication</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>States:</strong> idle · submitting · <strong>invalid credentials</strong> (<code>AUTH-001</code>, deliberately non-specific) ·
+<strong>locked out</strong> · <strong>MFA challenge</strong> · <strong>MFA enrolment required</strong> (routes to <code>/security/mfa-setup</code>) ·
+<strong>password expired</strong> (routes to change-password).
+<strong>Accessibility:</strong> the axe CI gate found and fixed a <strong>missing form label</strong> and a <strong>serious contrast
+violation</strong> on this screen.</p>
+<h2 id="scr-03-mfa-setup-securitymfa-setup"><code>SCR-03</code> · MFA setup — <code>/security/mfa-setup</code></h2>
+<p><strong>Outside the shell</strong>, because an enrolment-scoped session (<code>scope=mfa_enrollment</code>) is barred from
+every other endpoint. Shows the TOTP secret and <code>otpauth://</code> URI, then confirms with a code.</p>
+<h2 id="scr-04-dashboard-dashboard"><code>SCR-04</code> · Dashboard — <code>/dashboard</code></h2>
+<p>KPI tiles rendered with the <strong>same</strong> <code>qams-list-stats</code> component as the registers, plus <strong>11 real
+population counts</strong> (<code>DashboardKpiTotalsDto</code>) as denominators — the pinned invariant is <em>no KPI exceeds
+its population</em>. Tiles may link to a filtered register.</p>
+<h2 id="scr-05-platform-tenants-platformtenants"><code>SCR-05</code> · Platform tenants — <code>/platform/tenants</code></h2>
+<p>Platform administrators only. Lists tenants and provisions a new one (slug, name, first administrator
++ strong password). <strong>No suspend/reactivate/terminate controls exist</strong> — those domain operations have
+no endpoint.</p>
+<h2 id="scr-06-compliance-compliance"><code>SCR-06</code> · Compliance — <code>/compliance</code></h2>
+<p>Tabbed reader over the ledgers: audit trail · field changes · signatures · security events ·
+chain verification · audit-trail reviews. Carries the <strong>XLSX export</strong> buttons for audit trail and
+signatures. Visible only with <code>compliance.view</code>; <code>ExternalAuditor</code> reaches it read-only.</p>
+<h2 id="scr-07-roles-amp-privileges-roles"><code>SCR-07</code> · Roles &amp; privileges — <code>/roles</code></h2>
+<p>The <strong>privilege matrix</strong>: modules × actions rendered from <code>GET /api/roles/catalog</code> (never hard-coded in
+the UI). Saving requires a <strong>reason</strong> (≤500). System roles render rename/deactivate as disabled.
+A save that would remove the last <code>roles.manage</code> holder is refused server-side with <code>ROLE-006</code>.</p>
+<h2 id="scr-08-users-users"><code>SCR-08</code> · Users — <code>/users</code></h2>
+<p>Register, change built-in role, assign custom role, set organisational scope
+(<code>qams-allocation-picker</code>), set language, deactivate/reactivate, reset password.
+<strong>Password reset</strong> uses the accessible <strong>masked text-prompt dialog</strong> (<code>text-prompt-dialog.component</code>),
+which replaced a <code>window.prompt</code> (finding R-4).</p>
+<h2 id="scr-09-authorization-matrix-authorizations"><code>SCR-09</code> · Authorization matrix — <code>/authorizations</code></h2>
+<p>A person × test grid rather than a flat register. <strong>Deliberately has no proportion meter.</strong></p>
+<h2 id="scr-10-security-settings-settingssecurity"><code>SCR-10</code> · Security settings — <code>/settings/security</code></h2>
+<p>Self-service MFA enrolment for any user <strong>plus</strong> the tenant MFA policy toggle for <code>TenantAdmin</code>.</p>
+<h2 id="scr-11-reference-data-reference-data"><code>SCR-11</code> · Reference data — <code>/reference-data</code></h2>
+<p>Branches, departments, test catalogue and LOV maintenance in one screen.</p>
+<h2 id="scr-12-manual-manual"><code>SCR-12</code> · Manual — <code>/manual</code></h2>
+<p>In-app user manual. Static content, no data calls.</p>
+<h2 id="scr-13-notification-rules-monitor-notification-rules"><code>SCR-13</code> · Notification rules / monitor — <code>/notification-rules</code></h2>
+<p>Rule editor (event key, recipient roles, e-mail toggle, subject/body templates) and the dispatch
+monitor (queued/sent/failed with error text).</p>
+<hr>
+<h1>5.4 Shared UI components (17)</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Purpose</th>
+<th>Notable behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>qams-page-header</code></td>
+<td>title, subtitle, help toggle</td>
+<td>consistent across all pages</td>
+</tr>
+<tr>
+<td><code>qams-page-help</code> / <code>qams-help-body</code></td>
+<td>contextual help panel</td>
+<td>content from <code>core/help/help-content.ts</code></td>
+</tr>
+<tr>
+<td><code>qams-drawer</code></td>
+<td>slide-over form container</td>
+<td>used by every creation form</td>
+</tr>
+<tr>
+<td><code>qams-list-stats</code></td>
+<td>statistic tiles + optional meters</td>
+<td>refuses to meter invalid ratios; optional link per tile</td>
+</tr>
+<tr>
+<td><code>qams-load-more</code></td>
+<td>paged list footer</td>
+<td>shared across all 13 paged lists (R-3)</td>
+</tr>
+<tr>
+<td><code>qams-workflow-stepper</code></td>
+<td>state-machine progress</td>
+<td>derived from the record's state</td>
+</tr>
+<tr>
+<td><code>qams-status-pill</code></td>
+<td>state badge</td>
+<td>tone + text, never colour alone</td>
+</tr>
+<tr>
+<td><code>qams-audit-trail</code></td>
+<td>per-record change history</td>
+<td>reads the field-change ledger</td>
+</tr>
+<tr>
+<td><code>qams-lov-select</code></td>
+<td>list-of-values dropdown</td>
+<td>localised names from <code>GET /api/lovs</code></td>
+</tr>
+<tr>
+<td><code>qams-user-select</code></td>
+<td>person picker</td>
+<td>from <code>GET /api/users/directory</code></td>
+</tr>
+<tr>
+<td><code>qams-allocation-picker</code></td>
+<td>branch/department scope picker</td>
+<td>drives <code>PUT /api/users/{id}/scope</code></td>
+</tr>
+<tr>
+<td><code>qams-csv-import</code></td>
+<td>CSV batch upload</td>
+<td>only method-comparison and precision</td>
+</tr>
+<tr>
+<td><code>change-reason-dialog</code></td>
+<td>accessible reason prompt</td>
+<td>replaced <code>window.prompt</code>; blank/cancel aborts</td>
+</tr>
+<tr>
+<td><code>text-prompt-dialog</code></td>
+<td>accessible masked prompt</td>
+<td>replaced the reset-password <code>window.prompt</code></td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>5.5 Cross-cutting client behaviour</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Behaviour</th>
+<th>Implementation</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Auth interceptor</strong></td>
+<td><code>core/auth.interceptor.ts</code></td>
+<td>attaches the in-memory bearer token; on 401 triggers a <strong>single-flight silent refresh</strong> and retries once</td>
+</tr>
+<tr>
+<td><strong>Bootstrap refresh</strong></td>
+<td><code>APP_INITIALIZER</code></td>
+<td>attempts a silent refresh before the first render, so a returning user with a live refresh cookie is signed in without a login screen</td>
+</tr>
+<tr>
+<td><strong>Change-reason interceptor</strong></td>
+<td><code>core/change-reason.interceptor.ts</code></td>
+<td>on any <code>DELETE</code>, prompts and attaches <code>X-Change-Reason</code>; cancel/blank aborts via <code>EMPTY</code>. Registered <strong>after</strong> <code>authInterceptor</code></td>
+</tr>
+<tr>
+<td><strong>Idle timeout</strong></td>
+<td><code>core/auth.service.ts</code></td>
+<td><strong>30 minutes</strong> of inactivity ends the session client-side</td>
+</tr>
+<tr>
+<td><strong>Permissions service</strong></td>
+<td><code>core/permissions.service.ts</code></td>
+<td>caches <code>GET /api/auth/me/privileges</code>; drives <code>can(key)</code> and <code>isPlatformAdmin()</code></td>
+</tr>
+<tr>
+<td><strong>i18n service</strong></td>
+<td><code>core/i18n.service.ts</code></td>
+<td>typed dictionaries for <code>en</code>/<code>ar</code>/<code>fr</code>; <code>t(key)</code>; sets document direction. <strong>Not</strong> ngx-translate, not JSON assets</td>
+</tr>
+<tr>
+<td><strong>Guards</strong></td>
+<td><code>authGuard</code>, <code>platformOnlyGuard</code>, <code>tenantOnlyGuard</code></td>
+<td>route-level identity-class separation</td>
+</tr>
+<tr>
+<td><strong>Wildcard route</strong></td>
+<td><code>{ path: '**', redirectTo: '' }</code></td>
+<td>unknown URLs land on the dashboard, <strong>not</strong> a 404 page — there is no not-found screen</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>5.6 Known UI limitations, dead and incomplete controls</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Finding</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LIM-UI-01</strong></td>
+<td><strong>39 of 44 nav items have no permission predicate</strong> — the sidebar advertises modules a user cannot use. Data calls still 403.</td>
+<td><code>shell.component.ts</code> <code>groups</code></td>
+</tr>
+<tr>
+<td><strong>LIM-UI-02</strong></td>
+<td><strong>No 404/not-found screen</strong> — every unknown route silently redirects to the dashboard.</td>
+<td><code>app.routes.ts</code></td>
+</tr>
+<tr>
+<td><strong>LIM-UI-03</strong></td>
+<td><strong>No tenant lifecycle controls</strong> on the platform screen (suspend/reactivate/terminate exist in the domain, not in the API or UI).</td>
+<td><code>SCR-05</code></td>
+</tr>
+<tr>
+<td><strong>LIM-UI-04</strong></td>
+<td><strong>No QC profile deactivation control</strong> — <code>QcProfile.Deactivate()</code> is unreachable from the UI <em>and</em> the API.</td>
+<td><code>QcProfile.cs</code></td>
+</tr>
+<tr>
+<td><strong>LIM-UI-05</strong></td>
+<td><strong>No session monitor.</strong> The previous SRS specified an "Active Session Monitor" with IP, device, timestamp and per-session revoke. Not built; <code>qams.refresh_session</code> holds the data but nothing surfaces it.</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>LIM-UI-06</strong></td>
+<td><strong>No SOP tree explorer.</strong> Document categorisation is a flat string.</td>
+<td><code>SCR</code> documents</td>
+</tr>
+<tr>
+<td><strong>LIM-UI-07</strong></td>
+<td><strong>No PDF viewer/watermarking.</strong> Files download as stored.</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>LIM-UI-08</strong></td>
+<td><strong>No RCA structured editor</strong> — the previous SRS's 5-Whys flow and Fishbone diagram inputs do not exist; RCA is a method enum plus one free-text area.</td>
+<td><code>nc-detail</code></td>
+</tr>
+<tr>
+<td><strong>LIM-UI-09</strong></td>
+<td><strong>No chart components for Levey-Jennings, Passing-Bablok or Bland-Altman.</strong> Studies present numeric results; the previous SRS's "dynamic SVG plots" are not built. <strong><code>[Assumption]</code></strong> — verified by the absence of any chart/SVG-plot component in the 100-component inventory.</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>LIM-UI-10</strong></td>
+<td><strong>Unpaged registers.</strong> 15 of 28 registers load the whole filtered set (complaints, feedback, conflicts, monitoring points, reference standards, test authorisations, quality objectives, quality policy, org-context, SLA definitions, roles, users, access reviews, PT, PT plans).</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>LIM-UI-11</strong></td>
+<td><strong>No bulk actions anywhere</strong> — every operation is single-record.</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>LIM-UI-12</strong></td>
+<td><strong>No print stylesheet or print view.</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>LIM-UI-13</strong></td>
+<td><strong>No offline handling</strong> — a lost connection surfaces as a generic error per request.</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>LIM-UI-14</strong></td>
+<td><strong>No client-side field-level validation mirroring</strong> for most forms: buttons disable on <code>form.invalid</code>, but length/pattern feedback largely comes from the server's 400.</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="accessibility-posture">Accessibility posture</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>axe checks in CI</td>
+<td><strong>always-on</strong>, every build</td>
+</tr>
+<tr>
+<td>Violations found and fixed</td>
+<td>missing label + serious contrast on login</td>
+</tr>
+<tr>
+<td><code>window.prompt</code> removal</td>
+<td>change-reason and password-reset dialogs replaced</td>
+</tr>
+<tr>
+<td>Colour-only meaning</td>
+<td>eliminated in statistic tiles (meters + AA ink steps)</td>
+</tr>
+<tr>
+<td>RTL</td>
+<td>supported (Arabic)</td>
+</tr>
+<tr>
+<td>Formal WCAG level claimed</td>
+<td><strong>none</strong> — <code>[Needs Business Confirmation]</code></td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>5.7 Screen acceptance criteria</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Given</th>
+<th>When</th>
+<th>Then</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AT-SCR-01</strong></td>
+<td>any register</td>
+<td>the filtered result is empty</td>
+<td>the <code>@empty</code> block renders, not an empty table</td>
+</tr>
+<tr>
+<td><strong>AT-SCR-02</strong></td>
+<td>a study in <code>SignedOff</code></td>
+<td>the detail page loads</td>
+<td>Add / Remove / Calculate / Sign-off controls are all unavailable</td>
+</tr>
+<tr>
+<td><strong>AT-SCR-03</strong></td>
+<td>any child-row delete</td>
+<td>the user cancels the reason dialog</td>
+<td><strong>no HTTP request is sent</strong></td>
+</tr>
+<tr>
+<td><strong>AT-SCR-04</strong></td>
+<td>a user without <code>users.view</code></td>
+<td>the shell renders</td>
+<td>the <strong>Users</strong> nav item is absent</td>
+</tr>
+<tr>
+<td><strong>AT-SCR-05</strong></td>
+<td>a user without <code>nc.view</code></td>
+<td>the shell renders</td>
+<td>the <strong>Nonconformances</strong> nav item is <strong>still present</strong> <em>(current behaviour — LIM-UI-01)</em></td>
+</tr>
+<tr>
+<td><strong>AT-SCR-06</strong></td>
+<td>language set to <code>ar</code></td>
+<td>any page renders</td>
+<td>document direction is RTL and the layout mirrors</td>
+</tr>
+<tr>
+<td><strong>AT-SCR-07</strong></td>
+<td>a live refresh cookie, expired access token</td>
+<td>the SPA is reloaded</td>
+<td>the user lands signed-in without a login screen (APP_INITIALIZER silent refresh)</td>
+</tr>
+<tr>
+<td><strong>AT-SCR-08</strong></td>
+<td>a feedback register</td>
+<td>the stats row renders</td>
+<td>the "Avg. Satisfaction" tile has <strong>no</strong> proportion meter</td>
+</tr>
+<tr>
+<td><strong>AT-SCR-09</strong></td>
+<td>the dashboard</td>
+<td>KPI tiles render</td>
+<td>no tile's value exceeds its stated population</td>
+</tr>
+<tr>
+<td><strong>AT-SCR-10</strong></td>
+<td>an unknown URL</td>
+<td>it is navigated to</td>
+<td>the user is redirected to the dashboard <em>(current behaviour — LIM-UI-02)</em></td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>5.8 Complete component inventory</h1>
+<p>Machine-extracted from all 105 <code>*.component.ts</code> files. <strong>Buttons</strong> counts rendered <code>&lt;button&gt;</code> elements;
+<strong>Fields</strong> counts <code>&lt;input&gt;</code>/<code>&lt;select&gt;</code>/<code>&lt;textarea&gt;</code>; <strong>i18n keys</strong> counts distinct <code>t('…')</code> calls.
+A <code>*</code> on a field name means the element carries <code>required</code>.</p>
+<!-- 100 components -->
+
+<div class="tw"><table>
+<thead>
+<tr>
+<th style="text-align: right;">#</th>
+<th>Component</th>
+<th>Route</th>
+<th style="text-align: right;">LOC</th>
+<th style="text-align: right;">Buttons</th>
+<th style="text-align: right;">Fields</th>
+<th style="text-align: right;">i18n keys</th>
+<th>Shared UI / states</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1</td>
+<td><code>app.component.ts</code><br><code>AppComponent</code></td>
+<td>—</td>
+<td style="text-align: right;">22</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td>—</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td><code>core/change-reason-dialog.component.ts</code><br><code>ChangeReasonDialogComponent</code></td>
+<td>—</td>
+<td style="text-align: right;">91</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">5</td>
+<td>—</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td><code>core/text-prompt-dialog.component.ts</code><br><code>TextPromptDialogComponent</code></td>
+<td>—</td>
+<td style="text-align: right;">90</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td>—</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td><code>features/analytical/carryover-detail.component.ts</code><br><code>CarryoverDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">164</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">23</td>
+<td>error,stepper,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td><code>features/analytical/carryover-list.component.ts</code><br><code>CarryoverListComponent</code></td>
+<td><code>/carryover-studies</code></td>
+<td style="text-align: right;">146</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">21</td>
+<td>loading,error,stats,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">6</td>
+<td><code>features/analytical/detection-limit-detail.component.ts</code><br><code>DetectionLimitDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">275</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">31</td>
+<td>error,stepper,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">7</td>
+<td><code>features/analytical/detection-limit-list.component.ts</code><br><code>DetectionLimitListComponent</code></td>
+<td><code>/detection-limits</code></td>
+<td style="text-align: right;">159</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">23</td>
+<td>loading,error,stats,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">8</td>
+<td><code>features/analytical/instrument-comparability-detail.component.ts</code><br><code>InstrumentComparabilityDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">172</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">24</td>
+<td>error,stepper,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">9</td>
+<td><code>features/analytical/instrument-comparability-list.component.ts</code><br><code>InstrumentComparabilityListComponent</code></td>
+<td><code>/instrument-comparabilities</code></td>
+<td style="text-align: right;">152</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">21</td>
+<td>loading,error,stats,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">10</td>
+<td><code>features/analytical/interference-detail.component.ts</code><br><code>InterferenceDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">177</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">27</td>
+<td>error,stepper,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">11</td>
+<td><code>features/analytical/interference-list.component.ts</code><br><code>InterferenceListComponent</code></td>
+<td><code>/interference-studies</code></td>
+<td style="text-align: right;">148</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">20</td>
+<td>loading,error,stats,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">12</td>
+<td><code>features/analytical/levey-jennings-chart.component.ts</code><br><code>LeveyJenningsChartComponent</code></td>
+<td>—</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td>—</td>
+</tr>
+<tr>
+<td style="text-align: right;">13</td>
+<td><code>features/analytical/linearity-detail.component.ts</code><br><code>LinearityDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">277</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">32</td>
+<td>error,stepper,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">14</td>
+<td><code>features/analytical/linearity-list.component.ts</code><br><code>LinearityListComponent</code></td>
+<td><code>/linearity-studies</code></td>
+<td style="text-align: right;">161</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">24</td>
+<td>loading,error,stats,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">15</td>
+<td><code>features/analytical/lot-comparison-detail.component.ts</code><br><code>LotComparisonDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">149</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">20</td>
+<td>error,stepper,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">16</td>
+<td><code>features/analytical/lot-comparison-list.component.ts</code><br><code>LotComparisonListComponent</code></td>
+<td><code>/lot-comparisons</code></td>
+<td style="text-align: right;">157</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">23</td>
+<td>loading,error,stats,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">17</td>
+<td><code>features/analytical/method-comparison-detail.component.ts</code><br><code>MethodComparisonDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">289</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">26</td>
+<td>loading,error,stepper,audit-trail,csv-import</td>
+</tr>
+<tr>
+<td style="text-align: right;">18</td>
+<td><code>features/analytical/method-comparison-list.component.ts</code><br><code>MethodComparisonListComponent</code></td>
+<td><code>/method-comparisons</code></td>
+<td style="text-align: right;">159</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">24</td>
+<td>loading,error,stats,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">19</td>
+<td><code>features/analytical/outlier-detail.component.ts</code><br><code>OutlierDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">152</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">22</td>
+<td>error,stepper,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">20</td>
+<td><code>features/analytical/outlier-list.component.ts</code><br><code>OutlierListComponent</code></td>
+<td><code>/outlier-screenings</code></td>
+<td style="text-align: right;">142</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">20</td>
+<td>loading,error,stats,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">21</td>
+<td><code>features/analytical/precision-detail.component.ts</code><br><code>PrecisionDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">240</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">30</td>
+<td>loading,error,stepper,audit-trail,csv-import</td>
+</tr>
+<tr>
+<td style="text-align: right;">22</td>
+<td><code>features/analytical/precision-list.component.ts</code><br><code>PrecisionListComponent</code></td>
+<td><code>/precision-studies</code></td>
+<td style="text-align: right;">161</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">26</td>
+<td>loading,error,stats,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">23</td>
+<td><code>features/analytical/pt-list.component.ts</code><br><code>PtListComponent</code></td>
+<td><code>/proficiency-tests</code></td>
+<td style="text-align: right;">143</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">20</td>
+<td>loading,error,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">24</td>
+<td><code>features/analytical/pt-plan-detail.component.ts</code><br><code>PtPlanDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">219</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">25</td>
+<td>error,stepper,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">25</td>
+<td><code>features/analytical/pt-plan-list.component.ts</code><br><code>PtPlanListComponent</code></td>
+<td><code>/pt-plans</code></td>
+<td style="text-align: right;">132</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">17</td>
+<td>loading,error,stats,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">26</td>
+<td><code>features/analytical/qc-profile-detail.component.ts</code><br><code>QcProfileDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">151</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">17</td>
+<td>loading,error,stepper,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">27</td>
+<td><code>features/analytical/qc-profiles.component.ts</code><br><code>QcProfilesComponent</code></td>
+<td><code>/qc</code></td>
+<td style="text-align: right;">114</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">13</td>
+<td>loading,error,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">28</td>
+<td><code>features/analytical/reference-interval-detail.component.ts</code><br><code>ReferenceIntervalDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">226</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">25</td>
+<td>error,stepper,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">29</td>
+<td><code>features/analytical/reference-interval-list.component.ts</code><br><code>ReferenceIntervalListComponent</code></td>
+<td><code>/reference-intervals</code></td>
+<td style="text-align: right;">169</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">27</td>
+<td>loading,error,stats,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">30</td>
+<td><code>features/analytical/sigma-detail.component.ts</code><br><code>SigmaDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">172</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">12</td>
+<td>error,stepper,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">31</td>
+<td><code>features/analytical/sigma-list.component.ts</code><br><code>SigmaListComponent</code></td>
+<td><code>/sigma-metrics</code></td>
+<td style="text-align: right;">168</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">25</td>
+<td>loading,error,stats,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">32</td>
+<td><code>features/analytical/study-detail.component.ts</code><br><code>StudyDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">135</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">18</td>
+<td>error,stepper,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">33</td>
+<td><code>features/analytical/study-list.component.ts</code><br><code>StudyListComponent</code></td>
+<td><code>/validation-studies</code></td>
+<td style="text-align: right;">124</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">14</td>
+<td>loading,error,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">34</td>
+<td><code>features/analytical/uncertainty-detail.component.ts</code><br><code>UncertaintyDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">161</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">17</td>
+<td>error,stepper,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">35</td>
+<td><code>features/analytical/uncertainty-list.component.ts</code><br><code>UncertaintyListComponent</code></td>
+<td><code>/uncertainty</code></td>
+<td style="text-align: right;">164</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">27</td>
+<td>loading,error,stats,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">36</td>
+<td><code>features/audits/audit-detail.component.ts</code><br><code>AuditDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">160</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">18</td>
+<td>error,stepper,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">37</td>
+<td><code>features/audits/audit-list.component.ts</code><br><code>AuditListComponent</code></td>
+<td><code>/audits</code></td>
+<td style="text-align: right;">206</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">23</td>
+<td>loading,error,load-more,stats,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">38</td>
+<td><code>features/change/change-detail.component.ts</code><br><code>ChangeDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">194</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">30</td>
+<td>error,stepper,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">39</td>
+<td><code>features/change/change-list.component.ts</code><br><code>ChangeListComponent</code></td>
+<td><code>/changes</code></td>
+<td style="text-align: right;">169</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">23</td>
+<td>loading,error,load-more,stats,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">40</td>
+<td><code>features/competency/authorization-detail.component.ts</code><br><code>AuthorizationDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">128</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">19</td>
+<td>error,stepper,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">41</td>
+<td><code>features/competency/authorization-matrix.component.ts</code><br><code>AuthorizationMatrixComponent</code></td>
+<td><code>/authorizations</code></td>
+<td style="text-align: right;">243</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">23</td>
+<td>loading,error,stats,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">42</td>
+<td><code>features/competency/competency-detail.component.ts</code><br><code>CompetencyDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">143</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">20</td>
+<td>error,stepper,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">43</td>
+<td><code>features/competency/competency-list.component.ts</code><br><code>CompetencyListComponent</code></td>
+<td><code>/competencies</code></td>
+<td style="text-align: right;">135</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">14</td>
+<td>loading,error,load-more,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">44</td>
+<td><code>features/competency/training-queue.component.ts</code><br><code>TrainingQueueComponent</code></td>
+<td><code>/training</code></td>
+<td style="text-align: right;">132</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">16</td>
+<td>loading,error,load-more,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">45</td>
+<td><code>features/complaints/complaint-detail.component.ts</code><br><code>ComplaintDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">176</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">25</td>
+<td>error,stepper,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">46</td>
+<td><code>features/complaints/complaint-list.component.ts</code><br><code>ComplaintListComponent</code></td>
+<td><code>/complaints</code></td>
+<td style="text-align: right;">191</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">27</td>
+<td>loading,error,stats,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">47</td>
+<td><code>features/compliance/compliance.component.ts</code><br><code>ComplianceComponent</code></td>
+<td><code>/compliance</code></td>
+<td style="text-align: right;">332</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">48</td>
+<td>loading,error</td>
+</tr>
+<tr>
+<td style="text-align: right;">48</td>
+<td><code>features/dashboard/dashboard.component.ts</code><br><code>DashboardComponent</code></td>
+<td><code>/dashboard</code></td>
+<td style="text-align: right;">175</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">25</td>
+<td>loading,stats</td>
+</tr>
+<tr>
+<td style="text-align: right;">49</td>
+<td><code>features/documents/document-detail.component.ts</code><br><code>DocumentDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">350</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">48</td>
+<td>error,stepper,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">50</td>
+<td><code>features/documents/document-list.component.ts</code><br><code>DocumentListComponent</code></td>
+<td><code>/documents</code></td>
+<td style="text-align: right;">145</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">15</td>
+<td>loading,error,load-more,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">51</td>
+<td><code>features/equipment/equipment-detail.component.ts</code><br><code>EquipmentDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">243</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">31</td>
+<td>error,stepper,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">52</td>
+<td><code>features/equipment/equipment-list.component.ts</code><br><code>EquipmentListComponent</code></td>
+<td><code>/equipment</code></td>
+<td style="text-align: right;">185</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">21</td>
+<td>loading,error,load-more,stats,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">53</td>
+<td><code>features/equipment/standards-detail.component.ts</code><br><code>StandardsDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">116</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">21</td>
+<td>error,stepper,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">54</td>
+<td><code>features/equipment/standards-list.component.ts</code><br><code>StandardsListComponent</code></td>
+<td><code>/reference-standards</code></td>
+<td style="text-align: right;">189</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">29</td>
+<td>loading,error,stats,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">55</td>
+<td><code>features/facility/monitoring-detail.component.ts</code><br><code>MonitoringDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">177</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">24</td>
+<td>error,stepper,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">56</td>
+<td><code>features/facility/monitoring-list.component.ts</code><br><code>MonitoringListComponent</code></td>
+<td><code>/monitoring</code></td>
+<td style="text-align: right;">190</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">28</td>
+<td>loading,error,stats,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">57</td>
+<td><code>features/feedback/feedback-detail.component.ts</code><br><code>FeedbackDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">153</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">20</td>
+<td>error,stepper,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">58</td>
+<td><code>features/feedback/feedback-list.component.ts</code><br><code>FeedbackListComponent</code></td>
+<td><code>/feedback</code></td>
+<td style="text-align: right;">197</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">26</td>
+<td>loading,error,stats,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">59</td>
+<td><code>features/governance/quality-policy.component.ts</code><br><code>QualityPolicyComponent</code></td>
+<td><code>/quality-policy</code></td>
+<td style="text-align: right;">176</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">17</td>
+<td>loading,error</td>
+</tr>
+<tr>
+<td style="text-align: right;">60</td>
+<td><code>features/login/login.component.ts</code><br><code>LoginComponent</code></td>
+<td><code>/login</code></td>
+<td style="text-align: right;">488</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">19</td>
+<td>error</td>
+</tr>
+<tr>
+<td style="text-align: right;">61</td>
+<td><code>features/login/tenant-entry.component.ts</code><br><code>TenantEntryComponent</code></td>
+<td><code>/t/:tenant</code></td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td>—</td>
+</tr>
+<tr>
+<td style="text-align: right;">62</td>
+<td><code>features/manual/manual.component.ts</code><br><code>ManualComponent</code></td>
+<td><code>/manual</code></td>
+<td style="text-align: right;">140</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">5</td>
+<td>help</td>
+</tr>
+<tr>
+<td style="text-align: right;">63</td>
+<td><code>features/nc/nc-detail.component.ts</code><br><code>NcDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">205</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">35</td>
+<td>error,stepper,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">64</td>
+<td><code>features/nc/nc-list.component.ts</code><br><code>NcListComponent</code></td>
+<td><code>/nonconformances</code></td>
+<td style="text-align: right;">217</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">25</td>
+<td>loading,error,load-more,stats,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">65</td>
+<td><code>features/notifications/notification-admin.component.ts</code><br><code>NotificationAdminComponent</code></td>
+<td><code>/notification-rules</code></td>
+<td style="text-align: right;">225</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">25</td>
+<td>loading,error,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">66</td>
+<td><code>features/notifications/notifications.component.ts</code><br><code>NotificationsComponent</code></td>
+<td><code>/notifications</code></td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4</td>
+<td>loading,load-more</td>
+</tr>
+<tr>
+<td style="text-align: right;">67</td>
+<td><code>features/objectives/objective-detail.component.ts</code><br><code>ObjectiveDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">164</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">23</td>
+<td>error,stepper,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">68</td>
+<td><code>features/objectives/objective-list.component.ts</code><br><code>ObjectiveListComponent</code></td>
+<td><code>/quality-objectives</code></td>
+<td style="text-align: right;">198</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">30</td>
+<td>loading,error,stats,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">69</td>
+<td><code>features/organization/org-context.component.ts</code><br><code>OrgContextComponent</code></td>
+<td><code>/org-context</code></td>
+<td style="text-align: right;">341</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">38</td>
+<td>error,stats,drawer,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">70</td>
+<td><code>features/platform/tenants.component.ts</code><br><code>TenantsComponent</code></td>
+<td><code>/platform/tenants</code></td>
+<td style="text-align: right;">166</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">18</td>
+<td>loading,error,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">71</td>
+<td><code>features/records/records.component.ts</code><br><code>RecordsComponent</code></td>
+<td><code>/records</code></td>
+<td style="text-align: right;">163</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">25</td>
+<td>loading,error,load-more,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">72</td>
+<td><code>features/reference/reference-data.component.ts</code><br><code>ReferenceDataComponent</code></td>
+<td><code>/reference-data</code></td>
+<td style="text-align: right;">395</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">34</td>
+<td>loading,error,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">73</td>
+<td><code>features/review/review-detail.component.ts</code><br><code>ReviewDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">136</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">16</td>
+<td>error,stepper,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">74</td>
+<td><code>features/review/review-list.component.ts</code><br><code>ReviewListComponent</code></td>
+<td><code>/management-reviews</code></td>
+<td style="text-align: right;">172</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">19</td>
+<td>loading,error,load-more,stats,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">75</td>
+<td><code>features/risk/conflict-detail.component.ts</code><br><code>ConflictDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">170</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">14</td>
+<td>error,stepper,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">76</td>
+<td><code>features/risk/conflict-list.component.ts</code><br><code>ConflictListComponent</code></td>
+<td><code>/conflicts</code></td>
+<td style="text-align: right;">193</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">22</td>
+<td>loading,error,stats,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">77</td>
+<td><code>features/risk/risk-detail.component.ts</code><br><code>RiskDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">172</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">22</td>
+<td>error,stepper,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">78</td>
+<td><code>features/risk/risk-list.component.ts</code><br><code>RiskListComponent</code></td>
+<td><code>/risks</code></td>
+<td style="text-align: right;">191</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">23</td>
+<td>loading,error,load-more,stats,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">79</td>
+<td><code>features/roles/roles.component.ts</code><br><code>RolesComponent</code></td>
+<td><code>/roles</code></td>
+<td style="text-align: right;">338</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">24</td>
+<td>loading,error,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">80</td>
+<td><code>features/security/access-reviews.component.ts</code><br><code>AccessReviewsComponent</code></td>
+<td><code>/access-reviews</code></td>
+<td style="text-align: right;">131</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">17</td>
+<td>loading,error</td>
+</tr>
+<tr>
+<td style="text-align: right;">81</td>
+<td><code>features/security/mfa-setup.component.ts</code><br><code>MfaSetupComponent</code></td>
+<td><code>/security/mfa-setup</code></td>
+<td style="text-align: right;">127</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">13</td>
+<td>error</td>
+</tr>
+<tr>
+<td style="text-align: right;">82</td>
+<td><code>features/security/security-settings.component.ts</code><br><code>SecuritySettingsComponent</code></td>
+<td><code>/settings/security</code></td>
+<td style="text-align: right;">90</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">10</td>
+<td>error</td>
+</tr>
+<tr>
+<td style="text-align: right;">83</td>
+<td><code>features/supplier/supplier-detail.component.ts</code><br><code>SupplierDetailComponent</code></td>
+<td><code>/:id</code></td>
+<td style="text-align: right;">220</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">30</td>
+<td>error,stepper,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">84</td>
+<td><code>features/supplier/supplier-list.component.ts</code><br><code>SupplierListComponent</code></td>
+<td><code>/suppliers</code></td>
+<td style="text-align: right;">173</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">18</td>
+<td>loading,error,load-more,stats,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">85</td>
+<td><code>features/tasks/tasks.component.ts</code><br><code>TasksComponent</code></td>
+<td><code>/tasks</code></td>
+<td style="text-align: right;">191</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">29</td>
+<td>loading,error,load-more,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">86</td>
+<td><code>features/users/users.component.ts</code><br><code>UsersComponent</code></td>
+<td><code>/users</code></td>
+<td style="text-align: right;">301</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">25</td>
+<td>loading,error,drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">87</td>
+<td><code>shared/ui/allocation-picker.component.ts</code><br><code>AllocationPickerComponent</code></td>
+<td>—</td>
+<td style="text-align: right;">65</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">3</td>
+<td>—</td>
+</tr>
+<tr>
+<td style="text-align: right;">88</td>
+<td><code>shared/ui/audit-trail.component.ts</code><br><code>AuditTrailComponent</code></td>
+<td>—</td>
+<td style="text-align: right;">152</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">17</td>
+<td>loading,error,audit-trail</td>
+</tr>
+<tr>
+<td style="text-align: right;">89</td>
+<td><code>shared/ui/csv-import.component.ts</code><br><code>CsvImportComponent</code></td>
+<td>—</td>
+<td style="text-align: right;">163</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">13</td>
+<td>csv-import</td>
+</tr>
+<tr>
+<td style="text-align: right;">90</td>
+<td><code>shared/ui/drawer.component.ts</code><br><code>DrawerComponent</code></td>
+<td>—</td>
+<td style="text-align: right;">70</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td>drawer</td>
+</tr>
+<tr>
+<td style="text-align: right;">91</td>
+<td><code>shared/ui/help-body.component.ts</code><br><code>HelpBodyComponent</code></td>
+<td>—</td>
+<td style="text-align: right;">106</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td>help</td>
+</tr>
+<tr>
+<td style="text-align: right;">92</td>
+<td><code>shared/ui/list-stats.component.ts</code><br><code>ListStatsComponent</code></td>
+<td>—</td>
+<td style="text-align: right;">147</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td>stats</td>
+</tr>
+<tr>
+<td style="text-align: right;">93</td>
+<td><code>shared/ui/load-more.component.ts</code><br><code>LoadMoreComponent</code></td>
+<td>—</td>
+<td style="text-align: right;">48</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td>loading,load-more</td>
+</tr>
+<tr>
+<td style="text-align: right;">94</td>
+<td><code>shared/ui/lov-select.component.ts</code><br><code>LovSelectComponent</code></td>
+<td>—</td>
+<td style="text-align: right;">74</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">1</td>
+<td>—</td>
+</tr>
+<tr>
+<td style="text-align: right;">95</td>
+<td><code>shared/ui/page-header.component.ts</code><br><code>PageHeaderComponent</code></td>
+<td>—</td>
+<td style="text-align: right;">78</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td>—</td>
+</tr>
+<tr>
+<td style="text-align: right;">96</td>
+<td><code>shared/ui/page-help.component.ts</code><br><code>PageHelpComponent</code></td>
+<td>—</td>
+<td style="text-align: right;">45</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td>drawer,help</td>
+</tr>
+<tr>
+<td style="text-align: right;">97</td>
+<td><code>shared/ui/status-pill.component.ts</code><br><code>StatusPillComponent</code></td>
+<td>—</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td>—</td>
+</tr>
+<tr>
+<td style="text-align: right;">98</td>
+<td><code>shared/ui/user-select.component.ts</code><br><code>UserSelectComponent</code></td>
+<td>—</td>
+<td style="text-align: right;">234</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">5</td>
+<td>empty</td>
+</tr>
+<tr>
+<td style="text-align: right;">99</td>
+<td><code>shared/ui/workflow-stepper.component.ts</code><br><code>WorkflowStepperComponent</code></td>
+<td>—</td>
+<td style="text-align: right;">75</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td>stepper</td>
+</tr>
+<tr>
+<td style="text-align: right;">100</td>
+<td><code>shell/shell.component.ts</code><br><code>ShellComponent</code></td>
+<td>—</td>
+<td style="text-align: right;">412</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">6</td>
+<td>help</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h2 id="per-screen-control-detail">Per-screen control detail</h2>
+<h4 id="appcomponentts-appcomponent"><code>app.component.ts</code> — AppComponent</h4>
+<h4 id="corechange-reason-dialogcomponentts-changereasondialogcomponent"><code>core/change-reason-dialog.component.ts</code> — ChangeReasonDialogComponent</h4>
+<ul>
+<li><strong>state signals:</strong> reason</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('changeReason.confirm') }}</code> — disabled when <code>reason().trim() === ''</code></li>
+<li><code>{{ i18n.t('changeReason.cancel') }}</code></li>
+<li><strong>fields:</strong> reasonBox:textarea</li>
+</ul>
+<h4 id="coretext-prompt-dialogcomponentts-textpromptdialogcomponent"><code>core/text-prompt-dialog.component.ts</code> — TextPromptDialogComponent</h4>
+<ul>
+<li><strong>state signals:</strong> value</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('common.confirm') }}</code> — disabled when <code>value().trim() === ''</code></li>
+<li><code>{{ i18n.t('common.cancel') }}</code></li>
+<li><strong>fields:</strong> valueBox:input</li>
+</ul>
+<h4 id="featuresanalyticalcarryover-detailcomponentts-carryoverdetailcomponent"><code>features/analytical/carryover-detail.component.ts</code> — CarryoverDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>state signals:</strong> canCalculate</li>
+<li><strong>api calls:</strong> facade.addReading, facade.calculate, facade.error, facade.loadDetail, facade.removeReading, facade.signOff</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('car.addReading') }}</code> — disabled when <code>entryForm.invalid</code></li>
+<li><code>✕</code></li>
+<li><code>{{ i18n.t('car.calculate') }}</code> — disabled when <code>!canCalculate()</code></li>
+<li><code>{{ i18n.t('mc.signOff') }}</code></li>
+<li><strong>fields:</strong> kind:select, sequence:number, value:number</li>
+</ul>
+<h4 id="featuresanalyticalcarryover-listcomponentts-carryoverlistcomponent-rou"><code>features/analytical/carryover-list.component.ts</code> — CarryoverListComponent — route <code>/carryover-studies</code></h4>
+<ul>
+<li><strong>state signals:</strong> detailOpen, filtered, search, showForm, stateFilter, stats</li>
+<li><strong>api calls:</strong> facade.create, facade.error, facade.list, facade.loadList, facade.loading</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('car.new') }}</code></li>
+<li><code>{{ i18n.t('qc.create') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> ?:input, ?:select, analyte:input, unit:input, allowableCarryoverPct:number</li>
+</ul>
+<h4 id="featuresanalyticaldetection-limit-detailcomponentts-detectionlimitdeta"><code>features/analytical/detection-limit-detail.component.ts</code> — DetectionLimitDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>state signals:</strong> blankCount, concentrations, lowCount, maxCv</li>
+<li><strong>api calls:</strong> facade.addMeasurement, facade.calculate, facade.error, facade.loadDetail, facade.removeMeasurement, facade.signOff</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('dl.addMeasurement') }}</code> — disabled when <code>entryForm.invalid</code></li>
+<li><code>✕</code></li>
+<li><code>{{ i18n.t('dl.calculate') }}</code> — disabled when <code>blankCount() &lt; 10 || lowCount() &lt; 10</code></li>
+<li><code>{{ i18n.t('mc.signOff') }}</code></li>
+<li><strong>fields:</strong> kind:select, assignedValue:number, measuredValue:number</li>
+</ul>
+<h4 id="featuresanalyticaldetection-limit-listcomponentts-detectionlimitlistco"><code>features/analytical/detection-limit-list.component.ts</code> — DetectionLimitListComponent — route <code>/detection-limits</code></h4>
+<ul>
+<li><strong>state signals:</strong> detailOpen, filtered, search, showForm, stateFilter, stats</li>
+<li><strong>api calls:</strong> facade.create, facade.error, facade.list, facade.loadList, facade.loading</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('dl.new') }}</code></li>
+<li><code>{{ i18n.t('qc.create') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> ?:input, ?:select, analyte:input, unit:input, method:input, loqCvTargetPct:number</li>
+</ul>
+<h4 id="featuresanalyticalinstrument-comparability-detailcomponentts-instrumen"><code>features/analytical/instrument-comparability-detail.component.ts</code> — InstrumentComparabilityDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>state signals:</strong> canCalculate</li>
+<li><strong>api calls:</strong> facade.addReading, facade.calculate, facade.error, facade.loadDetail, facade.removeReading, facade.signOff</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('icp.addReading') }}</code> — disabled when <code>entryForm.invalid</code></li>
+<li><code>✕</code></li>
+<li><code>{{ i18n.t('icp.calculate') }}</code> — disabled when <code>!canCalculate()</code></li>
+<li><code>{{ i18n.t('mc.signOff') }}</code></li>
+<li><strong>fields:</strong> instrument:input, sampleId:input, value:number</li>
+</ul>
+<h4 id="featuresanalyticalinstrument-comparability-listcomponentts-instrumentc"><code>features/analytical/instrument-comparability-list.component.ts</code> — InstrumentComparabilityListComponent — route <code>/instrument-comparabilities</code></h4>
+<ul>
+<li><strong>state signals:</strong> detailOpen, filtered, search, showForm, stateFilter, stats</li>
+<li><strong>api calls:</strong> facade.create, facade.error, facade.list, facade.loadList, facade.loading</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('icp.new') }}</code></li>
+<li><code>{{ i18n.t('qc.create') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> ?:input, ?:select, analyte:input, unit:input, referenceInstrument:input, allowableBiasPct:number</li>
+</ul>
+<h4 id="featuresanalyticalinterference-detailcomponentts-interferencedetailcom"><code>features/analytical/interference-detail.component.ts</code> — InterferenceDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>state signals:</strong> canCalculate</li>
+<li><strong>api calls:</strong> facade.addMeasurement, facade.calculate, facade.error, facade.loadDetail, facade.removeMeasurement, facade.signOff</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('inf.addMeasurement') }}</code> — disabled when <code>entryForm.invalid</code></li>
+<li><code>✕</code></li>
+<li><code>{{ i18n.t('inf.calculate') }}</code> — disabled when <code>!canCalculate()</code></li>
+<li><code>{{ i18n.t('mc.signOff') }}</code></li>
+<li><strong>fields:</strong> kind:select, interferent:input, value:number</li>
+</ul>
+<h4 id="featuresanalyticalinterference-listcomponentts-interferencelistcompone"><code>features/analytical/interference-list.component.ts</code> — InterferenceListComponent — route <code>/interference-studies</code></h4>
+<ul>
+<li><strong>state signals:</strong> detailOpen, filtered, search, showForm, stateFilter, stats</li>
+<li><strong>api calls:</strong> facade.create, facade.error, facade.list, facade.loadList, facade.loading</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('inf.new') }}</code></li>
+<li><code>{{ i18n.t('qc.create') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> ?:input, ?:select, analyte:input, unit:input, allowableBiasPct:number</li>
+</ul>
+<h4 id="featuresanalyticallevey-jennings-chartcomponentts-leveyjenningschartco"><code>features/analytical/levey-jennings-chart.component.ts</code> — LeveyJenningsChartComponent</h4>
+<ul>
+<li><strong>state signals:</strong> points, polyline</li>
+</ul>
+<h4 id="featuresanalyticallinearity-detailcomponentts-linearitydetailcomponent"><code>features/analytical/linearity-detail.component.ts</code> — LinearityDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>state signals:</strong> distinctLevels, maxAssigned, maxMeasured, minAssigned, minMeasured</li>
+<li><strong>api calls:</strong> facade.addMeasurement, facade.calculate, facade.error, facade.loadDetail, facade.removeMeasurement, facade.signOff</li>
+<li><strong>controls:</strong></li>
+<li><code>✕</code></li>
+<li><code>{{ i18n.t('lin.addMeasurement') }}</code> — disabled when <code>measurementForm.invalid</code></li>
+<li><code>{{ i18n.t('lin.calculate') }}</code> — disabled when <code>distinctLevels() &lt; 4</code></li>
+<li><code>{{ i18n.t('mc.signOff') }}</code></li>
+<li><strong>fields:</strong> assignedValue:number, measuredValue:number</li>
+</ul>
+<h4 id="featuresanalyticallinearity-listcomponentts-linearitylistcomponent-rou"><code>features/analytical/linearity-list.component.ts</code> — LinearityListComponent — route <code>/linearity-studies</code></h4>
+<ul>
+<li><strong>state signals:</strong> detailOpen, filtered, search, showForm, stateFilter, stats</li>
+<li><strong>api calls:</strong> facade.create, facade.error, facade.list, facade.loadList, facade.loading</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('lin.new') }}</code></li>
+<li><code>{{ i18n.t('qc.create') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> ?:input, ?:select, analyte:input, unit:input, method:input, allowableDeviationPct:number</li>
+</ul>
+<h4 id="featuresanalyticallot-comparison-detailcomponentts-lotcomparisondetail"><code>features/analytical/lot-comparison-detail.component.ts</code> — LotComparisonDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>api calls:</strong> facade.addPair, facade.calculate, facade.error, facade.loadDetail, facade.removePair, facade.signOff</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('lot.addPair') }}</code> — disabled when <code>entryForm.invalid</code></li>
+<li><code>✕</code></li>
+<li><code>{{ i18n.t('lot.calculate') }}</code> — disabled when <code>s.pairs.length &lt; 3</code></li>
+<li><code>{{ i18n.t('mc.signOff') }}</code></li>
+<li><strong>fields:</strong> currentLotValue:number, newLotValue:number, sampleId:input</li>
+</ul>
+<h4 id="featuresanalyticallot-comparison-listcomponentts-lotcomparisonlistcomp"><code>features/analytical/lot-comparison-list.component.ts</code> — LotComparisonListComponent — route <code>/lot-comparisons</code></h4>
+<ul>
+<li><strong>state signals:</strong> detailOpen, filtered, search, showForm, stateFilter, stats</li>
+<li><strong>api calls:</strong> facade.create, facade.error, facade.list, facade.loadList, facade.loading</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('lot.new') }}</code></li>
+<li><code>{{ i18n.t('qc.create') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> ?:input, ?:select, analyte:input, unit:input, currentLot:input, newLot:input, allowableBiasPct:number</li>
+</ul>
+<h4 id="featuresanalyticalmethod-comparison-detailcomponentts-methodcomparison"><code>features/analytical/method-comparison-detail.component.ts</code> — MethodComparisonDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>state signals:</strong> baDiffs, baMeans, importResult, scatterMax, scatterMin, showImport</li>
+<li><strong>api calls:</strong> facade.addPair, facade.calculate, facade.error, facade.importPairs, facade.loadDetail, facade.loading, facade.removePair, facade.signOff</li>
+<li><strong>controls:</strong></li>
+<li><code>✕</code></li>
+<li><code>{{ i18n.t('mc.addPair') }}</code> — disabled when <code>pairForm.invalid</code></li>
+<li><code>{{ showImport() ? i18n.t('csv.hide') : i18n.t('c</code></li>
+<li><code>{{ i18n.t('mc.calculate') }}</code> — disabled when <code>s.pairs.length &lt; 2</code></li>
+<li><code>{{ i18n.t('mc.signOff') }}</code></li>
+<li><strong>fields:</strong> sampleId:input, referenceValue:number, testValue:number</li>
+</ul>
+<h4 id="featuresanalyticalmethod-comparison-listcomponentts-methodcomparisonli"><code>features/analytical/method-comparison-list.component.ts</code> — MethodComparisonListComponent — route <code>/method-comparisons</code></h4>
+<ul>
+<li><strong>state signals:</strong> detailOpen, filtered, search, showForm, stateFilter, stats</li>
+<li><strong>api calls:</strong> facade.create, facade.error, facade.list, facade.loadList, facade.loading</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('mc.new') }}</code></li>
+<li><code>{{ i18n.t('qc.create') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> ?:input, ?:select, analyte:input, unit:input, referenceMethod:input, testMethod:input</li>
+</ul>
+<h4 id="featuresanalyticaloutlier-detailcomponentts-outlierdetailcomponent-rou"><code>features/analytical/outlier-detail.component.ts</code> — OutlierDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>api calls:</strong> facade.addPoint, facade.calculate, facade.error, facade.loadDetail, facade.removePoint, facade.signOff</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('out.addPoint') }}</code> — disabled when <code>entryForm.invalid</code></li>
+<li><code>✕</code></li>
+<li><code>{{ i18n.t('out.calculate') }}</code> — disabled when <code>s.points.length &lt; 4</code></li>
+<li><code>{{ i18n.t('mc.signOff') }}</code></li>
+<li><strong>fields:</strong> value:number, label:input</li>
+</ul>
+<h4 id="featuresanalyticaloutlier-listcomponentts-outlierlistcomponent-route-o"><code>features/analytical/outlier-list.component.ts</code> — OutlierListComponent — route <code>/outlier-screenings</code></h4>
+<ul>
+<li><strong>state signals:</strong> detailOpen, filtered, search, showForm, stateFilter, stats</li>
+<li><strong>api calls:</strong> facade.create, facade.error, facade.list, facade.loadList, facade.loading</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('out.new') }}</code></li>
+<li><code>{{ i18n.t('qc.create') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> ?:input, ?:select, dataset:input, unit:input</li>
+</ul>
+<h4 id="featuresanalyticalprecision-detailcomponentts-precisiondetailcomponent"><code>features/analytical/precision-detail.component.ts</code> — PrecisionDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>state signals:</strong> btwShare, importResult, repShare, runCount, showImport</li>
+<li><strong>api calls:</strong> facade.addMeasurement, facade.calculate, facade.error, facade.importMeasurements, facade.loadDetail, facade.loading, facade.removeMeasurement, facade.signOff</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('prc.addReplicate') }}</code> — disabled when <code>entryForm.invalid</code></li>
+<li><code>{{ showImport() ? i18n.t('csv.hide') : i18n.t('c</code></li>
+<li><code>✕</code></li>
+<li><code>{{ i18n.t('prc.calculate') }}</code> — disabled when <code>runCount() &lt; 2</code></li>
+<li><code>{{ i18n.t('mc.signOff') }}</code></li>
+<li><strong>fields:</strong> runLabel:input, value:number</li>
+</ul>
+<h4 id="featuresanalyticalprecision-listcomponentts-precisionlistcomponent-rou"><code>features/analytical/precision-list.component.ts</code> — PrecisionListComponent — route <code>/precision-studies</code></h4>
+<ul>
+<li><strong>state signals:</strong> detailOpen, filtered, search, showForm, stateFilter, stats</li>
+<li><strong>api calls:</strong> facade.create, facade.error, facade.list, facade.loadList, facade.loading</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('prc.new') }}</code></li>
+<li><code>{{ i18n.t('qc.create') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> ?:input, ?:select, analyte:input, unit:input, level:input, claimedRepeatabilityCvPct:number, claimedWithinLabCvPct:number</li>
+</ul>
+<h4 id="featuresanalyticalpt-listcomponentts-ptlistcomponent-route-proficiency"><code>features/analytical/pt-list.component.ts</code> — PtListComponent — route <code>/proficiency-tests</code></h4>
+<ul>
+<li><strong>state signals:</strong> performanceFilter, resultId, showForm</li>
+<li><strong>api calls:</strong> facade.enroll, facade.error, facade.list, facade.loadList, facade.loading, facade.recordResult</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('pt.new') }}</code></li>
+<li><code>{{ i18n.t('pt.enroll') }}</code> — disabled when <code>enrollForm.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><code>{{ i18n.t('pt.recordResult') }}</code></li>
+<li><code>{{ i18n.t('pt.save') }}</code> — disabled when <code>resultForm.invalid</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> ?:select, analyte:input, cycle:input, submitted:number, assigned:number, standardDeviation:number</li>
+</ul>
+<h4 id="featuresanalyticalpt-plan-detailcomponentts-ptplandetailcomponent-rout"><code>features/analytical/pt-plan-detail.component.ts</code> — PtPlanDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>state signals:</strong> enrollments, resulted</li>
+<li><strong>api calls:</strong> analyticalApi.ptEnrollments, facade.addItem, facade.approve, facade.close, facade.error, facade.loadDetail, facade.recordFulfilment, facade.removeItem</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('ptp.approve') }}</code> — disabled when <code>p.items.length === 0</code></li>
+<li><code>✕</code></li>
+<li><code>{{ i18n.t('ptp.addLine') }}</code> — disabled when <code>itemForm.invalid</code></li>
+<li><code>{{ i18n.t('ptp.count') }}</code> — disabled when <code>fulfilForm.invalid</code></li>
+<li><code>{{ i18n.t('ptp.closeBtn') }}</code> — disabled when <code>closeForm.invalid</code></li>
+<li><strong>fields:</strong> scheme:input, analyte:input, provider:input, plannedCycles:number, notes:input, itemId:select, enrollmentId:select, closureSummary:input</li>
+</ul>
+<h4 id="featuresanalyticalpt-plan-listcomponentts-ptplanlistcomponent-route-pt"><code>features/analytical/pt-plan-list.component.ts</code> — PtPlanListComponent — route <code>/pt-plans</code></h4>
+<ul>
+<li><strong>state signals:</strong> detailOpen, showForm, stats</li>
+<li><strong>api calls:</strong> facade.create, facade.error, facade.list, facade.loadList, facade.loading</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('ptp.new') }}</code></li>
+<li><code>{{ i18n.t('qc.create') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> year:number</li>
+</ul>
+<h4 id="featuresanalyticalqc-profile-detailcomponentts-qcprofiledetailcomponen"><code>features/analytical/qc-profile-detail.component.ts</code> — QcProfileDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>state signals:</strong> troubleshootId</li>
+<li><strong>api calls:</strong> facade.chartRuns, facade.error, facade.loading, facade.openProfile, facade.recordRun, facade.runs, facade.selected, facade.troubleshoot</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('qc.record') }}</code> — disabled when <code>runForm.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('qc.troubleshoot') }}</code></li>
+<li><code>{{ i18n.t('qc.saveNote') }}</code> — disabled when <code>tsForm.invalid</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> value:number, operator:input, note:input</li>
+</ul>
+<h4 id="featuresanalyticalqc-profilescomponentts-qcprofilescomponent-route-qc"><code>features/analytical/qc-profiles.component.ts</code> — QcProfilesComponent — route <code>/qc</code></h4>
+<ul>
+<li><strong>state signals:</strong> detailOpen, showForm</li>
+<li><strong>api calls:</strong> facade.createProfile, facade.error, facade.loadProfiles, facade.loading, facade.profiles</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('qc.new') }}</code></li>
+<li><code>{{ i18n.t('qc.create') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> analyte:input, instrument:input, controlLot:input, targetMean:number, targetSd:number</li>
+</ul>
+<h4 id="featuresanalyticalreference-interval-detailcomponentts-referenceinterv"><code>features/analytical/reference-interval-detail.component.ts</code> — ReferenceIntervalDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>state signals:</strong> jittered, range</li>
+<li><strong>api calls:</strong> facade.addSample, facade.calculate, facade.error, facade.loadDetail, facade.removeSample, facade.signOff</li>
+<li><strong>controls:</strong></li>
+<li><code>✕</code></li>
+<li><code>{{ i18n.t('ri.addSample') }}</code> — disabled when <code>sampleForm.invalid</code></li>
+<li><code>{{ i18n.t('ri.calculate') }}</code> — disabled when <code>s.samples.length &lt; 20</code></li>
+<li><code>{{ i18n.t('mc.signOff') }}</code></li>
+<li><strong>fields:</strong> subjectRef:input, value:number</li>
+</ul>
+<h4 id="featuresanalyticalreference-interval-listcomponentts-referenceinterval"><code>features/analytical/reference-interval-list.component.ts</code> — ReferenceIntervalListComponent — route <code>/reference-intervals</code></h4>
+<ul>
+<li><strong>state signals:</strong> detailOpen, filtered, search, showForm, stateFilter, stats</li>
+<li><strong>api calls:</strong> facade.create, facade.error, facade.list, facade.loadList, facade.loading</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('ri.new') }}</code></li>
+<li><code>{{ i18n.t('qc.create') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> ?:input, ?:select, analyte:input, unit:input, population:input, source:input, claimedLower:number, claimedUpper:number</li>
+</ul>
+<h4 id="featuresanalyticalsigma-detailcomponentts-sigmadetailcomponent-route-i"><code>features/analytical/sigma-detail.component.ts</code> — SigmaDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>state signals:</strong> markerPoints</li>
+<li><strong>api calls:</strong> facade.error, facade.loadDetail, facade.signOff, facade.updateInputs</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('sig.recalculate') }}</code> — disabled when <code>form.invalid</code></li>
+<li><code>{{ i18n.t('mc.signOff') }}</code></li>
+<li><strong>fields:</strong> allowableTotalErrorPct:number, biasPct:number, cvPct:number</li>
+</ul>
+<h4 id="featuresanalyticalsigma-listcomponentts-sigmalistcomponent-route-sigma"><code>features/analytical/sigma-list.component.ts</code> — SigmaListComponent — route <code>/sigma-metrics</code></h4>
+<ul>
+<li><strong>state signals:</strong> detailOpen, filtered, search, showForm, stateFilter, stats</li>
+<li><strong>api calls:</strong> facade.create, facade.error, facade.list, facade.loadList, facade.loading</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('sig.new') }}</code></li>
+<li><code>{{ i18n.t('qc.create') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> ?:input, ?:select, analyte:input, unit:input, allowableTotalErrorPct:number, biasPct:number, cvPct:number</li>
+</ul>
+<h4 id="featuresanalyticalstudy-detailcomponentts-studydetailcomponent-route-i"><code>features/analytical/study-detail.component.ts</code> — StudyDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>state signals:</strong> editable</li>
+<li><strong>api calls:</strong> facade.calculate, facade.enterReplicate, facade.error, facade.loadDetail, facade.signOff</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('val.addReplicate') }}</code> — disabled when <code>repForm.invalid</code></li>
+<li><code>{{ i18n.t('val.calculate') }}</code> — disabled when <code>s.replicates.length &lt; 2</code></li>
+<li><code>{{ i18n.t('val.signOffAction') }}</code></li>
+<li><strong>fields:</strong> level:input, measured:number, reference:number</li>
+</ul>
+<h4 id="featuresanalyticalstudy-listcomponentts-studylistcomponent-route-valid"><code>features/analytical/study-list.component.ts</code> — StudyListComponent — route <code>/validation-studies</code></h4>
+<ul>
+<li><strong>state signals:</strong> detailOpen, showForm, stateFilter</li>
+<li><strong>api calls:</strong> facade.configure, facade.error, facade.list, facade.loadList, facade.loading</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('val.new') }}</code></li>
+<li><code>{{ i18n.t('val.configure') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> ?:select, analyte:input, protocol:input, totalAllowableError:number</li>
+</ul>
+<h4 id="featuresanalyticaluncertainty-detailcomponentts-uncertaintydetailcompo"><code>features/analytical/uncertainty-detail.component.ts</code> — UncertaintyDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>state signals:</strong> editable</li>
+<li><strong>api calls:</strong> facade.addComponent, facade.approve, facade.calculate, facade.error, facade.loadDetail, facade.removeComponent</li>
+<li><strong>controls:</strong></li>
+<li><code>✕</code></li>
+<li><code>{{ i18n.t('mu.addComponent') }}</code> — disabled when <code>componentForm.invalid</code></li>
+<li><code>{{ i18n.t('mu.calculate') }}</code> — disabled when <code>b.components.length === 0</code></li>
+<li><code>{{ i18n.t('mu.approve') }}</code></li>
+<li><strong>fields:</strong> name:input, type:select, relativeStandardUncertainty:number, source:input</li>
+</ul>
+<h4 id="featuresanalyticaluncertainty-listcomponentts-uncertaintylistcomponent"><code>features/analytical/uncertainty-list.component.ts</code> — UncertaintyListComponent — route <code>/uncertainty</code></h4>
+<ul>
+<li><strong>state signals:</strong> detailOpen, filtered, search, showForm, stats, statusFilter</li>
+<li><strong>api calls:</strong> facade.create, facade.error, facade.list, facade.loadList, facade.loading</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('mu.new') }}</code></li>
+<li><code>{{ i18n.t('qc.create') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> ?:input, ?:select, analyte:input, method:input, unit:input, level:input, coverageFactor:number, targetExpandedUncertainty:number</li>
+</ul>
+<h4 id="featuresauditsaudit-detailcomponentts-auditdetailcomponent-route-id"><code>features/audits/audit-detail.component.ts</code> — AuditDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>state signals:</strong> canSignOff</li>
+<li><strong>api calls:</strong> facade.answer, facade.error, facade.loadDetail, facade.raiseFinding, facade.signOff, facade.start</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('audit.start') }}</code></li>
+<li><code>{{ i18n.t('audit.signOff') }}</code> — disabled when <code>!canSignOff()</code></li>
+<li><code>{{ i18n.t('audit.raiseFinding') }}</code> — disabled when <code>findingForm.invalid</code></li>
+<li><strong>fields:</strong> ?:select, grade:select, description:textarea</li>
+</ul>
+<h4 id="featuresauditsaudit-listcomponentts-auditlistcomponent-route-audits"><code>features/audits/audit-list.component.ts</code> — AuditListComponent — route <code>/audits</code></h4>
+<ul>
+<li><strong>state signals:</strong> branchFilter, detailOpen, filtered, search, showForm, stats</li>
+<li><strong>api calls:</strong> facade.error, facade.hasMore, facade.list, facade.loadList, facade.loadMore, facade.loading, facade.schedule, facade.total, org.branchName, org.branches, org.ensureOrg</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('audit.new') }}</code></li>
+<li><code>＋ {{ i18n.t('audit.addItem') }}</code></li>
+<li><code>✕</code> — disabled when <code>checklist.length === 1</code></li>
+<li><code>{{ i18n.t('audit.schedule') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> ?:input, ?:select, title:input, type:select, plannedDate:date, isoClause:input, question:input</li>
+</ul>
+<h4 id="featureschangechange-detailcomponentts-changedetailcomponent-route-id"><code>features/change/change-detail.component.ts</code> — ChangeDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>api calls:</strong> facade.approve, facade.close, facade.error, facade.linkRisk, facade.loadDetail, facade.loadRiskOptions, facade.reject, facade.review, facade.riskOptions</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('chg.link') }}</code> — disabled when <code>linkForm.invalid</code></li>
+<li><code>{{ i18n.t('chg.approve') }}</code> — disabled when <code>!c.riskItemId</code></li>
+<li><code>{{ i18n.t('chg.reject') }}</code> — disabled when <code>rejectForm.invalid</code></li>
+<li><code>{{ i18n.t('chg.close') }}</code> — disabled when <code>closeForm.invalid</code></li>
+<li><code>{{ i18n.t('chg.recordPir') }}</code> — disabled when <code>reviewForm.invalid</code></li>
+<li><strong>fields:</strong> riskItemId:select, reason:input, implementationNotes:textarea, effective:select, notes:textarea</li>
+</ul>
+<h4 id="featureschangechange-listcomponentts-changelistcomponent-route-changes"><code>features/change/change-list.component.ts</code> — ChangeListComponent — route <code>/changes</code></h4>
+<ul>
+<li><strong>state signals:</strong> branchFilter, detailOpen, filtered, search, showForm, stats, statusFilter</li>
+<li><strong>api calls:</strong> facade.error, facade.hasMore, facade.list, facade.loadList, facade.loadMore, facade.loading, facade.propose, facade.total, org.branchName, org.branches, org.ensureOrg</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('chg.new') }}</code></li>
+<li><code>{{ i18n.t('chg.propose') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> ?:input, ?:select, ?:select, title:input, impactAnalysis:textarea</li>
+</ul>
+<h4 id="featurescompetencyauthorization-detailcomponentts-authorizationdetailc"><code>features/competency/authorization-detail.component.ts</code> — AuthorizationDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>api calls:</strong> facade.error, facade.loadDetail, facade.reinstate, facade.revoke, facade.suspend, org.ensureDirectory, org.userName</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('authz.suspend') }}</code> — disabled when <code>reasonForm.invalid</code></li>
+<li><code>{{ i18n.t('authz.reinstate') }}</code></li>
+<li><code>{{ i18n.t('authz.revoke') }}</code> — disabled when <code>revokeForm.invalid</code></li>
+<li><strong>fields:</strong> reason:input, reason:input</li>
+</ul>
+<h4 id="featurescompetencyauthorization-matrixcomponentts-authorizationmatrixc"><code>features/competency/authorization-matrix.component.ts</code> — AuthorizationMatrixComponent — route <code>/authorizations</code></h4>
+<ul>
+<li><strong>state signals:</strong> activeTests, detailOpen, evidence, filtered, matrixTests, matrixUsers, search, showForm, stats, statusFilter, tests</li>
+<li><strong>api calls:</strong> competencyApi.listCompetencies, facade.error, facade.grant, facade.list, facade.loadList, facade.loading, org.ensureDirectory, org.userName, referenceApi.testCatalog</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('authz.new') }}</code></li>
+<li><code>{{ i18n.t('authz.grant') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><code>{{ scopeInitial(a.scope) }}</code></li>
+<li><strong>fields:</strong> ?:input, ?:select, testCatalogItemId:select, scope:select, competencyRecordId:select</li>
+</ul>
+<h4 id="featurescompetencycompetency-detailcomponentts-competencydetailcompone"><code>features/competency/competency-detail.component.ts</code> — CompetencyDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>state signals:</strong> canScore</li>
+<li><strong>api calls:</strong> facade.authorize, facade.error, facade.loadDetail, facade.revoke, facade.scoreAssessment</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('comp.submitScore') }}</code> — disabled when <code>scoreForm.invalid</code></li>
+<li><code>{{ i18n.t('comp.authorize') }}</code></li>
+<li><code>{{ i18n.t('comp.revoke') }}</code> — disabled when <code>revokeForm.invalid</code></li>
+<li><strong>fields:</strong> score:number, reason:input</li>
+</ul>
+<h4 id="featurescompetencycompetency-listcomponentts-competencylistcomponent-r"><code>features/competency/competency-list.component.ts</code> — CompetencyListComponent — route <code>/competencies</code></h4>
+<ul>
+<li><strong>state signals:</strong> detailOpen, showForm, statusFilter</li>
+<li><strong>api calls:</strong> facade.assignCompetency, facade.error, facade.hasMore, facade.list, facade.loadList, facade.loadMore, facade.loading, facade.total</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('comp.new') }}</code></li>
+<li><code>{{ i18n.t('comp.assign') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> ?:select, subject:input, validityMonths:number, documentId:input</li>
+</ul>
+<h4 id="featurescompetencytraining-queuecomponentts-trainingqueuecomponent-rou"><code>features/competency/training-queue.component.ts</code> — TrainingQueueComponent — route <code>/training</code></h4>
+<ul>
+<li><strong>state signals:</strong> includeCompleted, showForm</li>
+<li><strong>api calls:</strong> facade.assignTraining, facade.completeTraining, facade.error, facade.loadMoreTraining, facade.loadTraining, facade.loading, facade.training, facade.trainingHasMore, facade.trainingTotal</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('train.new') }}</code></li>
+<li><code>{{ i18n.t('comp.assign') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><code>{{ i18n.t('train.markComplete') }}</code></li>
+<li><strong>fields:</strong> ?:checkbox, subject:input, dueDate:date, documentId:input</li>
+</ul>
+<h4 id="featurescomplaintscomplaint-detailcomponentts-complaintdetailcomponent"><code>features/complaints/complaint-detail.component.ts</code> — ComplaintDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>api calls:</strong> facade.acknowledge, facade.close, facade.error, facade.loadDetail, facade.logOutcome, facade.resolve, facade.startInvestigation, facade.validate</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('cmpl.acknowledge') }}</code></li>
+<li><code>{{ i18n.t('cmpl.justified') }}</code> — disabled when <code>validateForm.invalid</code></li>
+<li><code>{{ i18n.t('cmpl.unjustified') }}</code> — disabled when <code>validateForm.invalid</code></li>
+<li><code>{{ i18n.t('cmpl.startInvestigation') }}</code></li>
+<li><code>{{ i18n.t('cmpl.logOutcome') }}</code> — disabled when <code>outcomeForm.invalid</code></li>
+<li><code>{{ i18n.t('cmpl.resolve') }}</code> — disabled when <code>resolveForm.invalid</code></li>
+<li><code>{{ i18n.t('cmpl.close') }}</code></li>
+<li><strong>fields:</strong> reason:textarea, outcome:textarea, resolution:textarea</li>
+</ul>
+<h4 id="featurescomplaintscomplaint-listcomponentts-complaintlistcomponent-rou"><code>features/complaints/complaint-list.component.ts</code> — ComplaintListComponent — route <code>/complaints</code></h4>
+<ul>
+<li><strong>state signals:</strong> branchFilter, detailOpen, filtered, search, showForm, stats, statusFilter</li>
+<li><strong>api calls:</strong> facade.error, facade.list, facade.loadList, facade.loading, facade.log, org.branchName, org.branches, org.ensureOrg</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('cmpl.new') }}</code></li>
+<li><code>{{ i18n.t('cmpl.log') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> ?:input, ?:select, ?:select, subject:input, description:textarea, channel:select, complainantName:input, complainantContact:input, confidential:checkbox</li>
+</ul>
+<h4 id="featurescompliancecompliancecomponentts-compliancecomponent-route-comp"><code>features/compliance/compliance.component.ts</code> — ComplianceComponent — route <code>/compliance</code></h4>
+<ul>
+<li><strong>state signals:</strong> chain, error, expanded, loading, reviews, security, signatures, tab, trail, verifying</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('exp.xlsx') }}</code></li>
+<li><code>{{ i18n.t('cmp.verifyChain') }}</code> — disabled when <code>verifying()</code></li>
+<li><code>{{ i18n.t('trail.title') }}</code></li>
+<li><code>{{ i18n.t('cmp.signatures') }}</code></li>
+<li><code>{{ i18n.t('cmp.security') }}</code></li>
+<li><code>{{ i18n.t('atr.tab') }}</code></li>
+<li><code>{{ i18n.t('cmp.search') }}</code></li>
+<li><code>{{ i18n.t('exp.xlsx') }}</code></li>
+<li><code>{{ i18n.t('atr.openBtn') }}</code> — disabled when <code>!periodStart || !periodEnd</code></li>
+<li><code>{{ i18n.t('atr.complete') }}</code> — disabled when <code>!conclusion.trim()</code></li>
+<li><strong>fields:</strong> subject:input, periodStart:date, periodEnd:date, anomalies:checkbox, conclusion:input</li>
+</ul>
+<h4 id="featuresdashboarddashboardcomponentts-dashboardcomponent-route-dashboa"><code>features/dashboard/dashboard.component.ts</code> — DashboardComponent — route <code>/dashboard</code></h4>
+<ul>
+<li><strong>state signals:</strong> history, kpis, loading, pareto, paretoMax, sla</li>
+</ul>
+<h4 id="featuresdocumentsdocument-detailcomponentts-documentdetailcomponent-ro"><code>features/documents/document-detail.component.ts</code> — DocumentDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>state signals:</strong> acks, copies, file, inFlightState, myAck, signatures</li>
+<li><strong>api calls:</strong> docsApi.acknowledge, docsApi.acknowledgements, docsApi.closeControlledCopy, docsApi.controlledCopies, docsApi.issueControlledCopy, docsApi.myAcknowledgement, docsApi.signatures, facade.confirmReview, facade.downloadUrl, facade.draftNewVersion, facade.error, facade.loadDetail, facade.publish, facade.recommend, facade.reject, facade.retire, facade.submit</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('doc.submit') }}</code></li>
+<li><code>{{ i18n.t('doc.recommend') }}</code></li>
+<li><code>{{ i18n.t('nc.reject') }}</code> — disabled when <code>rejectForm.invalid</code></li>
+<li><code>{{ i18n.t('doc.publish') }}</code> — disabled when <code>publishForm.invalid</code></li>
+<li><code>{{ i18n.t('doc.addVersion') }}</code> — disabled when <code>versionForm.invalid || !file()</code></li>
+<li><code>{{ i18n.t('doc.retire') }}</code></li>
+<li><code>{{ i18n.t('doc.confirmReview') }}</code></li>
+<li><code>{{ i18n.t('doc.ackButton') }}</code></li>
+<li><code>{{ i18n.t('doc.issueCopy') }}</code> — disabled when <code>!copyHolder.trim()</code></li>
+<li><code>{{ i18n.t('doc.copyReturned') }}</code></li>
+<li><code>{{ i18n.t('doc.copyDestroyed') }}</code></li>
+<li><strong>fields:</strong> reason:input, password:password, pin:input, bump:select, changeSummary:input, ?:file, copyHolder:input</li>
+</ul>
+<h4 id="featuresdocumentsdocument-listcomponentts-documentlistcomponent-route-"><code>features/documents/document-list.component.ts</code> — DocumentListComponent — route <code>/documents</code></h4>
+<ul>
+<li><strong>state signals:</strong> detailOpen, file, showForm</li>
+<li><strong>api calls:</strong> facade.create, facade.error, facade.hasMore, facade.list, facade.loadList, facade.loadMore, facade.loading, facade.total</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('doc.new') }}</code></li>
+<li><code>{{ i18n.t('doc.create') }}</code> — disabled when <code>form.invalid || !file() || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> code:input, title:input, reviewCycleMonths:number, changeSummary:input, ?:file</li>
+</ul>
+<h4 id="featuresequipmentequipment-detailcomponentts-equipmentdetailcomponent-"><code>features/equipment/equipment-detail.component.ts</code> — EquipmentDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>state signals:</strong> activeStandards, certificate, standards</li>
+<li><strong>api calls:</strong> facade.downloadUrl, facade.error, facade.loadDetail, facade.logCalibration, facade.logMaintenance, facade.recordCheck, facade.retire, org.ensureDirectory, org.userName, standardsApi.list</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('equip.retire') }}</code></li>
+<li><code>{{ i18n.t('equip.logCal') }}</code> — disabled when <code>calForm.invalid</code></li>
+<li><code>{{ i18n.t('equip.logMaint') }}</code> — disabled when <code>maintForm.invalid</code></li>
+<li><code>{{ i18n.t('equip.recordCheck') }}</code> — disabled when <code>checkForm.invalid</code></li>
+<li><strong>fields:</strong> performedAt:date, provider:input, result:input, ?:file, performedAt:date, workDescription:input, performedOn:date, referenceStandardId:select, passed:select, remarks:input</li>
+</ul>
+<h4 id="featuresequipmentequipment-listcomponentts-equipmentlistcomponent-rout"><code>features/equipment/equipment-list.component.ts</code> — EquipmentListComponent — route <code>/equipment</code></h4>
+<ul>
+<li><strong>state signals:</strong> branchFilter, detailOpen, filtered, search, showForm, stats, statusFilter</li>
+<li><strong>api calls:</strong> facade.error, facade.hasMore, facade.list, facade.loadList, facade.loadMore, facade.loading, facade.register, facade.total, org.branchName, org.branches, org.ensureOrg</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('equip.new') }}</code></li>
+<li><code>{{ i18n.t('equip.register') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> ?:input, ?:select, ?:select, name:input, serialNumber:input, calibrationIntervalDays:number, gracePeriodDays:number</li>
+</ul>
+<h4 id="featuresequipmentstandards-detailcomponentts-standardsdetailcomponent-"><code>features/equipment/standards-detail.component.ts</code> — StandardsDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>api calls:</strong> facade.error, facade.loadDetail, facade.quarantine, facade.reactivate, facade.retire</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('std.retire') }}</code></li>
+<li><code>{{ i18n.t('std.reactivate') }}</code></li>
+<li><code>{{ i18n.t('std.quarantine') }}</code> — disabled when <code>quarantineForm.invalid</code></li>
+<li><strong>fields:</strong> reason:input</li>
+</ul>
+<h4 id="featuresequipmentstandards-listcomponentts-standardslistcomponent-rout"><code>features/equipment/standards-list.component.ts</code> — StandardsListComponent — route <code>/reference-standards</code></h4>
+<ul>
+<li><strong>state signals:</strong> detailOpen, filtered, search, showForm, stats, statusFilter</li>
+<li><strong>api calls:</strong> facade.error, facade.list, facade.loadList, facade.loading, facade.register</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('std.new') }}</code></li>
+<li><code>{{ i18n.t('qc.create') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> ?:input, ?:select, name:input, type:select, traceableTo:input, manufacturer:input, lotNumber:input, certificateNumber:input, certifiedValue:input, uncertaintyStatement:input, receivedOn:date, expiresOn:date</li>
+</ul>
+<h4 id="featuresfacilitymonitoring-detailcomponentts-monitoringdetailcomponent"><code>features/facility/monitoring-detail.component.ts</code> — MonitoringDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>state signals:</strong> latest</li>
+<li><strong>api calls:</strong> facade.error, facade.loadDetail, facade.recordReading, facade.resume, facade.retire, facade.setLimits, facade.suspend, org.ensureDirectory, org.userName</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('env.suspendPoint') }}</code></li>
+<li><code>{{ i18n.t('env.resumePoint') }}</code></li>
+<li><code>{{ i18n.t('std.retire') }}</code></li>
+<li><code>{{ i18n.t('env.record') }}</code> — disabled when <code>readingForm.invalid</code></li>
+<li><code>{{ i18n.t('env.applyLimits') }}</code></li>
+<li><strong>fields:</strong> value:number, remark:input, lowLimit:number, highLimit:number</li>
+</ul>
+<h4 id="featuresfacilitymonitoring-listcomponentts-monitoringlistcomponent-rou"><code>features/facility/monitoring-list.component.ts</code> — MonitoringListComponent — route <code>/monitoring</code></h4>
+<ul>
+<li><strong>state signals:</strong> detailOpen, filtered, search, showForm, stats, statusFilter</li>
+<li><strong>api calls:</strong> facade.error, facade.list, facade.loadList, facade.loading, facade.register</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('env.new') }}</code></li>
+<li><code>{{ i18n.t('qc.create') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> ?:input, ?:select, name:input, location:input, unit:input, lowLimit:number, highLimit:number</li>
+</ul>
+<h4 id="featuresfeedbackfeedback-detailcomponentts-feedbackdetailcomponent-rou"><code>features/feedback/feedback-detail.component.ts</code> — FeedbackDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>api calls:</strong> facade.close, facade.error, facade.escalate, facade.loadDetail, facade.review, org.ensureDirectory, org.userName</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('fbk.review') }}</code> — disabled when <code>reviewForm.invalid</code></li>
+<li><code>{{ i18n.t('fbk.close') }}</code> — disabled when <code>closeForm.invalid</code></li>
+<li><code>{{ i18n.t('fbk.escalate') }}</code> — disabled when <code>escalateForm.invalid</code></li>
+<li><strong>fields:</strong> reviewNotes:input, actionSummary:input, complainantName:input, complainantContact:input</li>
+</ul>
+<h4 id="featuresfeedbackfeedback-listcomponentts-feedbacklistcomponent-route-f"><code>features/feedback/feedback-list.component.ts</code> — FeedbackListComponent — route <code>/feedback</code></h4>
+<ul>
+<li><strong>state signals:</strong> detailOpen, filtered, search, showForm, stats, statusFilter, typeFilter</li>
+<li><strong>api calls:</strong> facade.error, facade.list, facade.loadList, facade.loading, facade.log</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('fbk.new') }}</code></li>
+<li><code>{{ i18n.t('fbk.log') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> ?:input, ?:select, ?:select, type:select, subject:input, details:textarea, satisfactionScore:select, receivedOn:date</li>
+</ul>
+<h4 id="featuresgovernancequality-policycomponentts-qualitypolicycomponent-rou"><code>features/governance/quality-policy.component.ts</code> — QualityPolicyComponent — route <code>/quality-policy</code></h4>
+<ul>
+<li><strong>state signals:</strong> active, error, history, loading, showDraft</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('qp.newVersion') }}</code></li>
+<li><code>{{ i18n.t('qp.saveDraft') }}</code> — disabled when <code>!draftText.trim()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><code>{{ i18n.t('qp.approve') }}</code> — disabled when <code>!effectiveDates[p.id]</code></li>
+<li><strong>fields:</strong> draftText:textarea, effectiveDates[p.id]:date</li>
+</ul>
+<h4 id="featuresloginlogincomponentts-logincomponent-route-login"><code>features/login/login.component.ts</code> — LoginComponent — route <code>/login</code></h4>
+<ul>
+<li><strong>state signals:</strong> busy, dark, error, features, mfaRequired, passwordExpired, resolvedName, slugLabel, tenantSlug, workspaceInitials, workspaceName</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('login.platformSwitch') }} &amp;rarr;</code></li>
+<li><code>{{ l.label }}</code></li>
+<li><code>(icon)</code></li>
+<li><code>{{ busy() ? i18n.t('common.loading') : i18n.t('l</code> — disabled when <code>busy()</code></li>
+<li><strong>fields:</strong> email:email<em>, password:password</em>, newPassword:password, mfaCode:input</li>
+</ul>
+<h4 id="featureslogintenant-entrycomponentts-tenantentrycomponent-route-ttenan"><code>features/login/tenant-entry.component.ts</code> — TenantEntryComponent — route <code>/t/:tenant</code></h4>
+<h4 id="featuresmanualmanualcomponentts-manualcomponent-route-manual"><code>features/manual/manual.component.ts</code> — ManualComponent — route <code>/manual</code></h4>
+<ul>
+<li><strong>state signals:</strong> expanded, matchCount, matches, search, sections</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t(t.titleKey) }} {{ text(t.summary) }} ⌄</code></li>
+<li><strong>fields:</strong> ?:input</li>
+</ul>
+<h4 id="featuresncnc-detailcomponentts-ncdetailcomponent-route-id"><code>features/nc/nc-detail.component.ts</code> — NcDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>state signals:</strong> allActionsComplete, canWork</li>
+<li><strong>api calls:</strong> facade.completeAction, facade.confirmEffectiveness, facade.error, facade.loadDetail, facade.planAction, facade.recordRca, facade.reject, facade.submit, facade.submitForVerification, facade.triage, facade.verify</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('nc.complete') }}</code></li>
+<li><code>{{ i18n.t('nc.submitForTriage') }}</code></li>
+<li><code>{{ i18n.t('nc.triage') }}</code> — disabled when <code>triageForm.invalid</code></li>
+<li><code>{{ i18n.t('nc.reject') }}</code> — disabled when <code>rejectForm.invalid</code></li>
+<li><code>{{ i18n.t('nc.submitVerification') }}</code> — disabled when <code>!allActionsComplete()</code></li>
+<li><code>{{ i18n.t('nc.verifyPass') }}</code></li>
+<li><code>{{ i18n.t('nc.verifyFail') }}</code></li>
+<li><code>{{ i18n.t('nc.effectiveClose') }}</code></li>
+<li><code>{{ i18n.t('nc.notEffective') }}</code></li>
+<li><code>{{ i18n.t('nc.recordRca') }}</code> — disabled when <code>rcaForm.invalid</code></li>
+<li><code>{{ i18n.t('nc.addAction') }}</code> — disabled when <code>actionForm.invalid</code></li>
+<li><strong>fields:</strong> reason:input, method:select, analysis:textarea, type:select, details:input, dueDate:date</li>
+</ul>
+<h4 id="featuresncnc-listcomponentts-nclistcomponent-route-nonconformances"><code>features/nc/nc-list.component.ts</code> — NcListComponent — route <code>/nonconformances</code></h4>
+<ul>
+<li><strong>state signals:</strong> branchFilter, detailOpen, filtered, search, showForm, stats, statusFilter</li>
+<li><strong>api calls:</strong> facade.error, facade.hasMore, facade.list, facade.loadList, facade.loadMore, facade.loading, facade.raise, facade.total, org.branchName, org.branches, org.ensureOrg</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('exp.xlsx') }}</code></li>
+<li><code>{{ i18n.t('nc.new') }}</code></li>
+<li><code>{{ i18n.t('nc.create') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> ?:input, ?:select, ?:select, title:input, sourceType:select, eventType:select, severity:number, likelihood:number, description:textarea</li>
+</ul>
+<h4 id="featuresnotificationsnotification-admincomponentts-notificationadminco"><code>features/notifications/notification-admin.component.ts</code> — NotificationAdminComponent — route <code>/notification-rules</code></h4>
+<ul>
+<li><strong>state signals:</strong> error, loading, monitor, rules, selectedRoles, showForm, statusFilter</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('nrule.new') }}</code></li>
+<li><code>{{ i18n.t('nrule.save') }}</code> — disabled when <code>form.invalid || selectedRoles().length === 0 || load</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> eventKey:select, ?:checkbox, emailEnabled:checkbox, subjectTemplate:input, bodyTemplate:textarea, ?:select</li>
+</ul>
+<h4 id="featuresnotificationsnotificationscomponentts-notificationscomponent-r"><code>features/notifications/notifications.component.ts</code> — NotificationsComponent — route <code>/notifications</code></h4>
+<ul>
+<li><strong>state signals:</strong> hasMore, items, loading, page, total</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('notif.markRead') }}</code></li>
+</ul>
+<h4 id="featuresobjectivesobjective-detailcomponentts-objectivedetailcomponent"><code>features/objectives/objective-detail.component.ts</code> — ObjectiveDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>api calls:</strong> facade.close, facade.error, facade.loadDetail, facade.recordProgress, org.ensureDirectory, org.userName</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('obj.recordProgress') }}</code> — disabled when <code>progressForm.invalid</code></li>
+<li><code>{{ i18n.t('obj.closeBtn') }}</code> — disabled when <code>closeForm.invalid</code></li>
+<li><strong>fields:</strong> measuredOn:date, value:number, comment:input, outcome:select, note:input</li>
+</ul>
+<h4 id="featuresobjectivesobjective-listcomponentts-objectivelistcomponent-rou"><code>features/objectives/objective-list.component.ts</code> — ObjectiveListComponent — route <code>/quality-objectives</code></h4>
+<ul>
+<li><strong>state signals:</strong> detailOpen, filtered, search, showForm, stats, statusFilter</li>
+<li><strong>api calls:</strong> facade.define, facade.error, facade.list, facade.loadList, facade.loading, org.ensureDirectory, org.userName</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('obj.new') }}</code></li>
+<li><code>{{ i18n.t('qc.create') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> ?:input, ?:select, title:input, metric:input, unit:input, targetValue:number, direction:select, periodStart:date, periodEnd:date, description:input</li>
+</ul>
+<h4 id="featuresorganizationorg-contextcomponentts-orgcontextcomponent-route-o"><code>features/organization/org-context.component.ts</code> — OrgContextComponent — route <code>/org-context</code></h4>
+<ul>
+<li><strong>state signals:</strong> editingIssue, editingParty, error, issueOpen, issues, parties, partyOpen, resolution, riskToLink, risks, stats, tab</li>
+<li><strong>api calls:</strong> riskApi.list</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ tab() === 'parties' ? i18n.t('ctx.newParty')</code></li>
+<li><code>{{ i18n.t('ctx.parties') }}</code></li>
+<li><code>{{ i18n.t('ctx.issues') }}</code></li>
+<li><code>{{ editingParty() ? i18n.t('ctx.saveRevision') :</code> — disabled when <code>partyForm.invalid</code></li>
+<li><code>{{ i18n.t('ctx.archive') }}</code></li>
+<li><code>{{ editingIssue() ? i18n.t('ctx.saveRevision') :</code> — disabled when <code>issueForm.invalid</code></li>
+<li><code>{{ i18n.t('ctx.link') }}</code> — disabled when <code>!riskToLink()</code></li>
+<li><code>{{ i18n.t('ctx.closeIssue') }}</code> — disabled when <code>!resolution().trim()</code></li>
+<li><strong>fields:</strong> name:input, needsAndExpectations:textarea, relevantRequirements:textarea, reviewedOn:date, type:select, description:textarea, impact:textarea, ?:select, ?:input</li>
+</ul>
+<h4 id="featuresplatformtenantscomponentts-tenantscomponent-route-platformtena"><code>features/platform/tenants.component.ts</code> — TenantsComponent — route <code>/platform/tenants</code></h4>
+<ul>
+<li><strong>state signals:</strong> error, loading, provisioned, showForm, tenants</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('tenants.new') }}</code></li>
+<li><code>{{ i18n.t('tenants.provision') }}</code> — disabled when <code>form.invalid || loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> identifier:input, name:input, adminEmail:email, adminDisplayName:input, adminPassword:text</li>
+</ul>
+<h4 id="featuresrecordsrecordscomponentts-recordscomponent-route-records"><code>features/records/records.component.ts</code> — RecordsComponent — route <code>/records</code></h4>
+<ul>
+<li><strong>state signals:</strong> showForm, snapshot, stateFilter</li>
+<li><strong>api calls:</strong> facade.archive, facade.dispose, facade.error, facade.hasMore, facade.list, facade.loadList, facade.loadMore, facade.loading, facade.placeLegalHold, facade.releaseLegalHold, facade.retrieve, facade.return, facade.total</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('arc.new') }}</code></li>
+<li><code>{{ i18n.t('arc.archive') }}</code> — disabled when <code>form.invalid || !snapshot() || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><code>{{ i18n.t('arc.retrieve') }}</code></li>
+<li><code>{{ i18n.t('arc.dispose') }}</code></li>
+<li><code>{{ i18n.t('arc.return') }}</code></li>
+<li><code>{{ i18n.t('arc.releaseHold') }}</code></li>
+<li><code>{{ i18n.t('arc.placeHold') }}</code></li>
+<li><strong>fields:</strong> ?:select, sourceModule:select, sourceRef:input, retentionClass:select, ?:file*</li>
+</ul>
+<h4 id="featuresreferencereference-datacomponentts-referencedatacomponent-rout"><code>features/reference/reference-data.component.ts</code> — ReferenceDataComponent — route <code>/reference-data</code></h4>
+<ul>
+<li><strong>state signals:</strong> branchFilter, branches, departments, error, loading, lovs, showForm, tab, tests</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ addLabel() }}</code></li>
+<li><code>{{ i18n.t('ref.branches') }}</code></li>
+<li><code>{{ i18n.t('ref.departments') }}</code></li>
+<li><code>{{ i18n.t('ref.tests') }}</code></li>
+<li><code>{{ i18n.t('ref.lovs') }}</code></li>
+<li><code>{{ i18n.t('ref.deactivate') }}</code></li>
+<li><code>{{ i18n.t('ref.deactivate') }}</code></li>
+<li><code>{{ i18n.t('cmp.search') }}</code></li>
+<li><code>{{ i18n.t('qc.create') }}</code> — disabled when <code>branchForm.invalid || loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><code>{{ i18n.t('qc.create') }}</code> — disabled when <code>deptForm.invalid || loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><code>{{ i18n.t('qc.create') }}</code> — disabled when <code>testForm.invalid || loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><code>{{ i18n.t('ref.save') }}</code> — disabled when <code>lovForm.invalid || loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> ?:select, lovCategory:input, code:input, name:input, city:input, branchId:select, code:input, name:input, testCode:input, testName:input, methodology:input, turnaroundHours:number, category:input, code:input, nameEn:input, nameAr:input, nameFr:input, sortOrder:number</li>
+</ul>
+<h4 id="featuresreviewreview-detailcomponentts-reviewdetailcomponent-route-id"><code>features/review/review-detail.component.ts</code> — ReviewDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>state signals:</strong> open</li>
+<li><strong>api calls:</strong> facade.addDecision, facade.close, facade.error, facade.loadDetail</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('exp.reviewPack') }}</code></li>
+<li><code>{{ i18n.t('mrv.addDecision') }}</code> — disabled when <code>decisionForm.invalid</code></li>
+<li><code>{{ i18n.t('mrv.close') }}</code> — disabled when <code>closeForm.invalid</code></li>
+<li><strong>fields:</strong> description:input, dueDate:date, minutes:textarea</li>
+</ul>
+<h4 id="featuresreviewreview-listcomponentts-reviewlistcomponent-route-managem"><code>features/review/review-list.component.ts</code> — ReviewListComponent — route <code>/management-reviews</code></h4>
+<ul>
+<li><strong>state signals:</strong> branchFilter, detailOpen, filtered, search, showForm, stats</li>
+<li><strong>api calls:</strong> facade.error, facade.hasMore, facade.list, facade.loadList, facade.loadMore, facade.loading, facade.schedule, facade.total, org.branchName, org.branches, org.ensureOrg, org.userName</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('mrv.new') }}</code></li>
+<li><code>{{ i18n.t('mrv.schedule') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> ?:input, ?:select, title:input, reviewDate:date</li>
+</ul>
+<h4 id="featuresriskconflict-detailcomponentts-conflictdetailcomponent-route-i"><code>features/risk/conflict-detail.component.ts</code> — ConflictDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>state signals:</strong> error, item</li>
+<li><strong>api calls:</strong> org.ensureDirectory, org.userName</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('coi.assess') }}</code> — disabled when <code>assessForm.invalid</code></li>
+<li><code>{{ i18n.t('coi.close') }}</code> — disabled when <code>closeForm.invalid</code></li>
+<li><strong>fields:</strong> riskLevel:select, mitigation:input, outcome:select, closureNote:input</li>
+</ul>
+<h4 id="featuresriskconflict-listcomponentts-conflictlistcomponent-route-confl"><code>features/risk/conflict-list.component.ts</code> — ConflictListComponent — route <code>/conflicts</code></h4>
+<ul>
+<li><strong>state signals:</strong> detailOpen, error, filtered, list, loading, search, showForm, stats, statusFilter</li>
+<li><strong>api calls:</strong> org.ensureDirectory, org.userName</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('coi.new') }}</code></li>
+<li><code>{{ i18n.t('coi.declare') }}</code> — disabled when <code>form.invalid || loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> ?:input, ?:select, relatedParty:input, description:textarea, declaredOn:date</li>
+</ul>
+<h4 id="featuresriskrisk-detailcomponentts-riskdetailcomponent-route-id"><code>features/risk/risk-detail.component.ts</code> — RiskDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>state signals:</strong> canClose, open</li>
+<li><strong>api calls:</strong> facade.addMitigation, facade.close, facade.completeMitigation, facade.error, facade.loadDetail, facade.recordResidual</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('risk.complete') }}</code></li>
+<li><code>{{ i18n.t('risk.addAction') }}</code> — disabled when <code>mitForm.invalid</code></li>
+<li><code>{{ i18n.t('risk.recordResidual') }}</code> — disabled when <code>residualForm.invalid</code></li>
+<li><code>{{ i18n.t('risk.close') }}</code> — disabled when <code>!canClose()</code></li>
+<li><strong>fields:</strong> description:input, dueDate:date, likelihood:number, impact:number</li>
+</ul>
+<h4 id="featuresriskrisk-listcomponentts-risklistcomponent-route-risks"><code>features/risk/risk-list.component.ts</code> — RiskListComponent — route <code>/risks</code></h4>
+<ul>
+<li><strong>state signals:</strong> branchFilter, detailOpen, filtered, search, showForm, stats, statusFilter</li>
+<li><strong>api calls:</strong> facade.assess, facade.error, facade.hasMore, facade.list, facade.loadList, facade.loadMore, facade.loading, facade.total, org.branchName, org.branches, org.ensureOrg</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('risk.new') }}</code></li>
+<li><code>{{ i18n.t('risk.assess') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> ?:input, ?:select, ?:select, title:input, likelihood:number, impact:number</li>
+</ul>
+<h4 id="featuresrolesrolescomponentts-rolescomponent-route-roles"><code>features/roles/roles.component.ts</code> — RolesComponent — route <code>/roles</code></h4>
+<ul>
+<li><strong>state signals:</strong> actions, catalog, editing, editorError, editorOpen, editorTitle, error, grantedKeys, groupedModules, loading, roles, saving</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('roles.new') }}</code></li>
+<li><code>{{ perms.can('roles.manage') ? i18n.t('perm.acti</code></li>
+<li><code>{{ i18n.t('users.deactivate') }}</code></li>
+<li><code>{{ i18n.t('users.reactivate') }}</code></li>
+<li><code>{{ i18n.t('roles.save') }}</code> — disabled when <code>form.invalid || saving()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> name:input, description:input, defaultLanguage:select, ?:checkbox</li>
+</ul>
+<h4 id="featuressecurityaccess-reviewscomponentts-accessreviewscomponent-route"><code>features/security/access-reviews.component.ts</code> — AccessReviewsComponent — route <code>/access-reviews</code></h4>
+<ul>
+<li><strong>state signals:</strong> error, loading, reviews</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('uar.open') }}</code> — disabled when <code>loading()</code></li>
+<li><code>{{ i18n.t('uar.complete') }}</code> — disabled when <code>!conclusion.trim()</code></li>
+<li><strong>fields:</strong> changesRequired:checkbox, conclusion:input</li>
+</ul>
+<h4 id="featuressecuritymfa-setupcomponentts-mfasetupcomponent-route-securitym"><code>features/security/mfa-setup.component.ts</code> — MfaSetupComponent — route <code>/security/mfa-setup</code></h4>
+<ul>
+<li><strong>state signals:</strong> busy, done, enrollError, error, otpUri, secret</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('mfa.backToLogin') }}</code></li>
+<li><code>{{ i18n.t('mfa.copy') }}</code></li>
+<li><code>{{ busy() ? i18n.t('common.loading') : i18n.t('m</code> — disabled when <code>busy() || code.trim().length &lt; 6</code></li>
+<li><code>{{ i18n.t('mfa.cancel') }}</code></li>
+<li><strong>fields:</strong> code:input</li>
+</ul>
+<h4 id="featuressecuritysecurity-settingscomponentts-securitysettingscomponent"><code>features/security/security-settings.component.ts</code> — SecuritySettingsComponent — route <code>/settings/security</code></h4>
+<ul>
+<li><strong>state signals:</strong> busy, error, loaded, required, saved</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('sec.setUpMfa') }}</code></li>
+<li><strong>fields:</strong> ?:checkbox*</li>
+</ul>
+<h4 id="featuressuppliersupplier-detailcomponentts-supplierdetailcomponent-rou"><code>features/supplier/supplier-detail.component.ts</code> — SupplierDetailComponent — route <code>/:id</code></h4>
+<ul>
+<li><strong>state signals:</strong> certFile</li>
+<li><strong>api calls:</strong> facade.addCertificate, facade.approve, facade.downloadUrl, facade.error, facade.evaluations, facade.loadDetail, facade.recordEvaluation, facade.suspend</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('sup.approve') }}</code></li>
+<li><code>{{ i18n.t('sup.addCert') }}</code> — disabled when <code>certForm.invalid</code></li>
+<li><code>{{ i18n.t('sup.suspend') }}</code> — disabled when <code>suspendForm.invalid</code></li>
+<li><code>✕</code> — disabled when <code>criteria.length === 1</code></li>
+<li><code>{{ i18n.t('sup.addCriterion') }}</code></li>
+<li><code>{{ i18n.t('sup.recordEvaluation') }}</code> — disabled when <code>evalForm.invalid</code></li>
+<li><strong>fields:</strong> expiresAt:date, ?:file, reason:input, periodStart:date, periodEnd:date, criterion:input, weight:number, score:number</li>
+</ul>
+<h4 id="featuressuppliersupplier-listcomponentts-supplierlistcomponent-route-s"><code>features/supplier/supplier-list.component.ts</code> — SupplierListComponent — route <code>/suppliers</code></h4>
+<ul>
+<li><strong>state signals:</strong> branchFilter, detailOpen, filtered, search, showForm, stats, statusFilter</li>
+<li><strong>api calls:</strong> facade.error, facade.hasMore, facade.list, facade.loadList, facade.loadMore, facade.loading, facade.register, facade.total, org.branchName, org.branches, org.ensureOrg</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('sup.new') }}</code></li>
+<li><code>{{ i18n.t('sup.register') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><strong>fields:</strong> ?:input, ?:select, ?:select, name:input</li>
+</ul>
+<h4 id="featurestaskstaskscomponentts-taskscomponent-route-tasks"><code>features/tasks/tasks.component.ts</code> — TasksComponent — route <code>/tasks</code></h4>
+<ul>
+<li><strong>state signals:</strong> showForm</li>
+<li><strong>api calls:</strong> facade.completeTask, facade.createTask, facade.error, facade.hasMore, facade.loadMore, facade.loadSla, facade.loadTasks, facade.loading, facade.sla, facade.tasks, facade.total, facade.upsertSla</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('task.new') }}</code></li>
+<li><code>{{ i18n.t('task.create') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><code>{{ i18n.t('task.complete') }}</code></li>
+<li><code>{{ i18n.t('sla.upsert') }}</code> — disabled when <code>slaForm.invalid || facade.loading()</code></li>
+<li><strong>fields:</strong> subject:input, subjectRef:input, assigneeRole:select, dueDate:date, module:input, severity:input, targetHours:number</li>
+</ul>
+<h4 id="featuresusersuserscomponentts-userscomponent-route-users"><code>features/users/users.component.ts</code> — UsersComponent — route <code>/users</code></h4>
+<ul>
+<li><strong>state signals:</strong> assignableRoles, branches, departments, roles, scopeBranchIds, scopeDepartmentIds, scopeFor, scopeLanguage, showForm</li>
+<li><strong>api calls:</strong> facade.assignRole, facade.deactivate, facade.error, facade.load, facade.loading, facade.reactivate, facade.register, facade.resetPassword, facade.setLanguage, facade.setScope, facade.users, referenceApi.branches, referenceApi.departments, rolesApi.list</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('users.new') }}</code></li>
+<li><code>{{ i18n.t('users.create') }}</code> — disabled when <code>form.invalid || facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><code>{{ i18n.t('roles.save') }}</code> — disabled when <code>facade.loading()</code></li>
+<li><code>{{ i18n.t('nc.cancel') }}</code></li>
+<li><code>{{ i18n.t('users.scope') }}</code></li>
+<li><code>{{ i18n.t('users.deactivate') }}</code></li>
+<li><code>{{ i18n.t('users.reactivate') }}</code></li>
+<li><code>{{ i18n.t('users.resetPassword') }}</code></li>
+<li><strong>fields:</strong> email:email, displayName:input, roleId:select, initialPassword:text, ?:checkbox, ?:checkbox, ?:select, ?:select</li>
+</ul>
+<h4 id="shareduiallocation-pickercomponentts-allocationpickercomponent"><code>shared/ui/allocation-picker.component.ts</code> — AllocationPickerComponent</h4>
+<ul>
+<li><strong>api calls:</strong> org.branches, org.departments, org.ensureOrg</li>
+<li><strong>fields:</strong> ?:select, ?:select</li>
+</ul>
+<h4 id="shareduiaudit-trailcomponentts-audittrailcomponent"><code>shared/ui/audit-trail.component.ts</code> — AuditTrailComponent</h4>
+<ul>
+<li><strong>state signals:</strong> changes, entries, error, expanded, loading</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ expanded() === e.id ? i18n.t('trail.hidePaylo</code></li>
+</ul>
+<h4 id="shareduicsv-importcomponentts-csvimportcomponent"><code>shared/ui/csv-import.component.ts</code> — CsvImportComponent</h4>
+<ul>
+<li><strong>state signals:</strong> columnHint, invalidCount, raw, rows, skipHeader, validCount</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('csv.clear') }}</code> — disabled when <code>!raw()</code></li>
+<li><code>{{ i18n.t('csv.import') }} ({{ validCount() }})</code> — disabled when <code>validCount() === 0 || busy()</code></li>
+<li><strong>fields:</strong> ?:file, ?:textarea, ?:checkbox</li>
+</ul>
+<h4 id="shareduidrawercomponentts-drawercomponent"><code>shared/ui/drawer.component.ts</code> — DrawerComponent</h4>
+<ul>
+<li><strong>controls:</strong></li>
+<li><code>✕</code></li>
+</ul>
+<h4 id="shareduihelp-bodycomponentts-helpbodycomponent"><code>shared/ui/help-body.component.ts</code> — HelpBodyComponent</h4>
+<ul>
+<li><strong>state signals:</strong> segWidth</li>
+</ul>
+<h4 id="shareduilist-statscomponentts-liststatscomponent"><code>shared/ui/list-stats.component.ts</code> — ListStatsComponent</h4>
+<ul>
+<li><strong>state signals:</strong> rendered</li>
+</ul>
+<h4 id="shareduiload-morecomponentts-loadmorecomponent"><code>shared/ui/load-more.component.ts</code> — LoadMoreComponent</h4>
+<ul>
+<li><strong>state signals:</strong> countText</li>
+<li><strong>controls:</strong></li>
+<li><code>{{ i18n.t('common.loadMore') }}</code> — disabled when <code>loading()</code></li>
+</ul>
+<h4 id="shareduilov-selectcomponentts-lovselectcomponent"><code>shared/ui/lov-select.component.ts</code> — LovSelectComponent</h4>
+<ul>
+<li><strong>state signals:</strong> disabled, entries, value</li>
+<li><strong>api calls:</strong> org.lovEntries, org.lovName</li>
+<li><strong>fields:</strong> ?:select, ?:input</li>
+</ul>
+<h4 id="shareduipage-headercomponentts-pageheadercomponent"><code>shared/ui/page-header.component.ts</code> — PageHeaderComponent</h4>
+<ul>
+<li><strong>state signals:</strong> topic</li>
+<li><strong>controls:</strong></li>
+<li><code>(icon)</code></li>
+</ul>
+<h4 id="shareduipage-helpcomponentts-pagehelpcomponent"><code>shared/ui/page-help.component.ts</code> — PageHelpComponent</h4>
+<h4 id="shareduistatus-pillcomponentts-statuspillcomponent"><code>shared/ui/status-pill.component.ts</code> — StatusPillComponent</h4>
+<ul>
+<li><strong>state signals:</strong> tone</li>
+</ul>
+<h4 id="shareduiuser-selectcomponentts-userselectcomponent"><code>shared/ui/user-select.component.ts</code> — UserSelectComponent</h4>
+<ul>
+<li><strong>state signals:</strong> disabled, filtered, open, query, selected, single, visibleTags</li>
+<li><strong>api calls:</strong> org.directory, org.ensureDirectory, org.userName</li>
+<li><strong>controls:</strong></li>
+<li><code>@if (multiple()) { @if (selected().length === 0)</code> — disabled when <code>disabled()</code></li>
+<li><code>{{ i18n.t('usel.clear') }}</code></li>
+<li><strong>fields:</strong> ?:text</li>
+</ul>
+<h4 id="shareduiworkflow-steppercomponentts-workflowsteppercomponent"><code>shared/ui/workflow-stepper.component.ts</code> — WorkflowStepperComponent</h4>
+<ul>
+<li><strong>state signals:</strong> activeIndex, offPath</li>
+</ul>
+<h4 id="shellshellcomponentts-shellcomponent"><code>shell/shell.component.ts</code> — ShellComponent</h4>
+<ul>
+<li><strong>state signals:</strong> groups, initials, openGroups, sidebarCollapsed</li>
+<li><strong>controls:</strong></li>
+<li><code>(icon)</code></li>
+<li><code>{{ l.label }}</code></li>
+<li><code>{{ i18n.t('nav.signout') }}</code></li>
+<li><code>{{ i18n.t(group.label) }}</code></li>
+</ul>
+<div class="pager"><a href="04-Configuration-Reference.html"><span>Previous</span>Configuration Reference</a><a href="06-Workflow-Specification.html" style="text-align:right"><span>Next</span>Workflow Specification</a></div>
+</main></div>
+<script>
+(function(){
+ var r=document.documentElement, K='ntqms-srs-theme', s=localStorage.getItem(K);
+ if(s) r.setAttribute('data-theme',s);
+ var b=document.getElementById('th');
+ if(b) b.onclick=function(){
+   var cur=r.getAttribute('data-theme');
+   if(!cur) cur=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+   var nx=cur==='dark'?'light':'dark';
+   r.setAttribute('data-theme',nx); localStorage.setItem(K,nx);
+ };
+ var p=document.getElementById('pr'); if(p) p.onclick=function(){window.print();};
+ // scroll-spy on the in-page TOC
+ var links=[].slice.call(document.querySelectorAll('#toc a'));
+ if(!links.length) return;
+ var tgt=links.map(function(a){return document.getElementById(a.getAttribute('href').slice(1));});
+ function spy(){
+   var y=window.scrollY+90, i=0;
+   for(var k=0;k<tgt.length;k++){ if(tgt[k]&&tgt[k].offsetTop<=y) i=k; }
+   links.forEach(function(a,n){a.style.color=n===i?'var(--accent)':'';
+     a.style.borderLeftColor=n===i?'var(--accent)':'transparent';});
+ }
+ addEventListener('scroll',spy,{passive:true}); spy();
+})();
+</script>
+</body></html>

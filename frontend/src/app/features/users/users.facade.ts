@@ -41,6 +41,8 @@ export class UsersFacade {
   async reactivate(id: string): Promise<void> { await this.mutate(() => this.api.reactivate(id)); }
   async resetPassword(id: string, request: ResetUserPasswordRequest): Promise<void> { await this.mutate(() => this.api.resetPassword(id, request)); }
 
+  async setPin(id: string, pin: string): Promise<void> { await this.mutate(() => this.api.setPin(id, { pin })); }
+
   private async mutate(call: () => Observable<void>): Promise<void> {
     await this.run(async () => {
       await firstValueFrom(call());

@@ -1,3 +1,4 @@
+using System.Text;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
@@ -30,7 +31,8 @@ public sealed class NotificationEventPolicies(IAppDbContext db, NotificationDisp
     INotificationHandler<DomainEventNotification<SupplierSuspended>>,
     INotificationHandler<DomainEventNotification<EscalationTriggered>>,
     INotificationHandler<DomainEventNotification<ReferenceStandardExpired>>,
-    INotificationHandler<DomainEventNotification<HighImpartialityRiskDeclared>>
+    INotificationHandler<DomainEventNotification<HighImpartialityRiskDeclared>>,
+    INotificationHandler<DomainEventNotification<ManagementReviewScheduled>>
 {
     public const string NcRaisedKey = "NC_RAISED";
     public const string DocumentPublishedKey = "DOC_PUBLISHED";
@@ -43,6 +45,7 @@ public sealed class NotificationEventPolicies(IAppDbContext db, NotificationDisp
     public const string DocumentReviewDueKey = "DOC_REVIEW_DUE";
     public const string ReferenceStandardExpiredKey = "STD_EXPIRED";
     public const string HighImpartialityRiskKey = "COI_HIGH";
+    public const string ReviewScheduledKey = "MRV_SCHEDULED";
 
     public async Task Handle(DomainEventNotification<NcRaised> n, CancellationToken ct)
     {
@@ -74,6 +77,43 @@ public sealed class NotificationEventPolicies(IAppDbContext db, NotificationDisp
                 ["ref"] = n.Event.Code, ["title"] = n.Event.Name,
                 ["due"] = n.Event.DueDate.ToString("yyyy-MM-dd"),
             }, ct);
+
+    /// <summary>
+    /// A scheduled management review is announced to its named participants, not
+    /// to a role: the audience is the explicit invitation list on the record, so
+    /// this uses the direct-dispatch path rather than a notification rule.
+    /// </summary>
+    public async Task Handle(DomainEventNotification<ManagementReviewScheduled> n, CancellationToken ct)
+    {
+        var e = n.Event;
+        if (e.ParticipantUserIds.Length == 0)
+        {
+            return;
+        }
+
+        var tenantId = await db.ManagementReviews.IgnoreQueryFilters()
+            .Where(x => x.Id == e.ReviewId).Select(x => x.TenantId).SingleAsync(ct);
+
+        var subject = $"Management review scheduled: {e.Title} ({e.ReviewRef}) on {e.ReviewDate:yyyy-MM-dd}";
+        var body = new StringBuilder()
+            .AppendLine($"You are invited to the management review \"{e.Title}\" ({e.ReviewRef}).")
+            .AppendLine()
+            .AppendLine($"Date: {e.ReviewDate:yyyy-MM-dd}");
+        if (!string.IsNullOrWhiteSpace(e.MeetingLink))
+        {
+            body.AppendLine($"Meeting link: {e.MeetingLink}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(e.Agenda))
+        {
+            body.AppendLine().AppendLine("Agenda:").AppendLine(e.Agenda);
+        }
+
+        body.AppendLine().Append("This invitation was sent by NT.QAMS on behalf of the review organiser.");
+
+        await dispatcher.DispatchToUsersAsync(
+            e.EventId, tenantId, ReviewScheduledKey, e.ParticipantUserIds, subject, body.ToString(), ct);
+    }
 
     public Task Handle(DomainEventNotification<EquipmentLockedOut> n, CancellationToken ct) =>
         dispatcher.DispatchAsync(n.Event.EventId, n.Event.TenantId, EquipmentLockedOutKey,

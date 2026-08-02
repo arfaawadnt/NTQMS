@@ -4,18 +4,22 @@ import { Router, RouterOutlet } from '@angular/router';
 import { PtPlansFacade } from './pt-plans.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
+import { PtPlanListItem } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 
 /** Annual PT/EQA plan register: one plan per year, coverage = fulfilled vs planned cycles (§7.7.2). */
 @Component({
     selector: 'qams-pt-plan-list',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent],
+    imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('ptp.title')" [subtitle]="i18n.t('ptp.subtitle')">
+      <qams-export-menu [title]="i18n.t('ptp.title')" [stats]="stats()" [columns]="exportColumns"
+                        [rows]="facade.list()" [filtersSummary]="i18n.t('exp.allRecords')" />
       @if (perms.can('proficiency-testing.create')) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('ptp.new') }}</button>
       }
@@ -103,6 +107,15 @@ export class PtPlanListComponent implements OnInit {
       { label: this.i18n.t('ptp.fulfilledCycles'), value: fulfilled, tone: 'teal' },
     ];
   });
+
+  /** Export columns — the printed grid mirrors the on-screen table. */
+  readonly exportColumns: ExportColumn<PtPlanListItem>[] = [
+    { header: this.i18n.t('mu.ref'), cell: (p) => p.planRef },
+    { header: this.i18n.t('ptp.year'), cell: (p) => `${p.year}` },
+    { header: this.i18n.t('ptp.lines'), cell: (p) => `${p.itemCount}` },
+    { header: this.i18n.t('ptp.coverage'), cell: (p) => `${p.fulfilledCycles}/${p.plannedCycles}` },
+    { header: this.i18n.t('nc.status'), cell: (p) => p.status },
+  ];
 
   readonly form = this.fb.nonNullable.group({
     year: [new Date().getFullYear(), [Validators.required, Validators.min(2000), Validators.max(2100)]],

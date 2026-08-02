@@ -31,7 +31,8 @@ internal static class TenantRole
 
 [RequirePermissionPolicy(PermissionCatalog.Users, PermissionAction.Manage)]
 public sealed record RegisterUserCommand(
-    string Email, string DisplayName, string Role, string InitialPassword, Guid? RoleId = null)
+    string Email, string DisplayName, string Role, string InitialPassword, Guid? RoleId = null,
+    string? InitialPin = null)
     : ICommand<Guid>;
 
 public sealed class RegisterUserValidator : AbstractValidator<RegisterUserCommand>
@@ -42,10 +43,13 @@ public sealed class RegisterUserValidator : AbstractValidator<RegisterUserComman
         RuleFor(x => x.DisplayName).NotEmpty().MaximumLength(150);
         RuleFor(x => x.Role).NotEmpty();
         RuleFor(x => x.InitialPassword).StrongPassword();
+        RuleFor(x => x.InitialPin).Matches("^[0-9]{4}$")
+            .When(x => !string.IsNullOrEmpty(x.InitialPin))
+            .WithMessage("The e-signature PIN must be exactly 4 digits.");
     }
 }
 
-public sealed class RegisterUserHandler(IAppDbContext db, ICurrentTenant tenant, IPasswordHasher hasher)
+public sealed class RegisterUserHandler(IAppDbContext db, ICurrentTenant tenant, IPasswordHasher hasher, ISecurityEventLog security)
     : ICommandHandler<RegisterUserCommand, Guid>
 {
     public async Task<Guid> Handle(RegisterUserCommand c, CancellationToken ct)
@@ -81,6 +85,15 @@ public sealed class RegisterUserHandler(IAppDbContext db, ICurrentTenant tenant,
             await Authorization.SeededRoleDefault.AssignAsync(db, user, tier, ct);
         }
 
+        if (!string.IsNullOrEmpty(c.InitialPin))
+        {
+            // Admin-issued, so ledgered under its own event type: an auditor must
+            // always be able to tell an issued signing credential from a self-set
+            // one, because until the user rotates it two people know it.
+            user.SetPin(hasher.Hash(c.InitialPin));
+            await security.WriteAsync("PIN_ADMIN_SET", tenantId, email, "at-registration", ct);
+        }
+
         db.Users.Add(user);
         await db.SaveChangesAsync(ct);
         return user.Id;
@@ -95,6 +108,35 @@ public sealed record ChangeUserRoleCommand(Guid UserId, string Role) : ICommand;
 public sealed record SetUserActiveCommand(Guid UserId, bool Active) : ICommand;
 [RequirePermissionPolicy(PermissionCatalog.Users, PermissionAction.Manage)]
 public sealed record ResetUserPasswordCommand(Guid UserId, string NewPassword) : ICommand;
+
+/// <summary>
+/// Admin set/reset of a user's e-signature PIN — the recovery path when a user
+/// cannot sign. Ledgered as PIN_ADMIN_SET, distinct from self-service PIN_SET,
+/// so issued credentials are always distinguishable in the trail; the holder
+/// should rotate it from their account menu.
+/// </summary>
+[RequirePermissionPolicy(PermissionCatalog.Users, PermissionAction.Manage)]
+public sealed record SetUserPinCommand(Guid UserId, string Pin) : ICommand;
+
+public sealed class SetUserPinValidator : AbstractValidator<SetUserPinCommand>
+{
+    public SetUserPinValidator() =>
+        RuleFor(x => x.Pin).NotEmpty().Matches("^[0-9]{4}$")
+            .WithMessage("The e-signature PIN must be exactly 4 digits.");
+}
+
+public sealed class SetUserPinHandler(
+    IAppDbContext db, ICurrentTenant tenant, IPasswordHasher hasher, ISecurityEventLog security)
+    : ICommandHandler<SetUserPinCommand>
+{
+    public async Task Handle(SetUserPinCommand c, CancellationToken ct)
+    {
+        var user = await TenantUserLoader.LoadAsync(db, tenant, c.UserId, ct);
+        user.SetPin(hasher.Hash(c.Pin));
+        await security.WriteAsync("PIN_ADMIN_SET", tenant.TenantId, user.Email, "by-administrator", ct);
+        await db.SaveChangesAsync(ct);
+    }
+}
 
 public sealed class ResetUserPasswordValidator : AbstractValidator<ResetUserPasswordCommand>
 {
@@ -168,7 +210,8 @@ public sealed class GetUsersHandler(IAppDbContext db, ICurrentTenant tenant)
                 db.Roles.Where(r => r.Id == u.RoleId).Select(r => r.Name).FirstOrDefault(),
                 u.BranchAccess.Select(b => b.BranchId).ToList(),
                 u.DepartmentAccess.Select(d => d.DepartmentId).ToList(),
-                u.PreferredLanguage))
+                u.PreferredLanguage,
+                u.PinHash != null))
             .ToListAsync(ct);
     }
 }

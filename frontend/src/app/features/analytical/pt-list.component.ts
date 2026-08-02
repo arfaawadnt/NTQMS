@@ -1,12 +1,14 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
 import { PtFacade } from './pt.facade';
 import { I18nService } from '../../core/i18n.service';
+import { PtEnrollment } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { LovSelectComponent } from '../../shared/ui/lov-select.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 
 /**
  * Proficiency-testing register: enrollments with per-row result entry. The
@@ -16,9 +18,10 @@ import { LovSelectComponent } from '../../shared/ui/lov-select.component';
 @Component({
     selector: 'qams-pt-list',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DecimalPipe, PageHeaderComponent, DrawerComponent, StatusPillComponent, LovSelectComponent],
+    imports: [ReactiveFormsModule, DecimalPipe, PageHeaderComponent, DrawerComponent, StatusPillComponent, LovSelectComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('pt.title')" [subtitle]="i18n.t('pt.sagaNote')">
+      <qams-export-menu [title]="i18n.t('pt.title')" [columns]="exportColumns" [rows]="facade.list()" [filtersSummary]="filtersSummary()" />
       <select [value]="performanceFilter()" (change)="onFilter($event)" aria-label="Performance filter">
         <option value="">{{ i18n.t('nc.allStatuses') }}</option>
         @for (p of performances; track p) { <option [value]="p">{{ p }}</option> }
@@ -104,6 +107,24 @@ export class PtListComponent implements OnInit {
   readonly performanceFilter = signal('');
   /** Enrollment id whose result form is open ('' = none). */
   readonly resultId = signal('');
+
+  /** Export columns — the printed grid mirrors the on-screen table. */
+  readonly exportColumns: ExportColumn<PtEnrollment>[] = [
+    { header: this.i18n.t('pt.ref'), cell: (e) => e.ptRef },
+    { header: this.i18n.t('pt.scheme'), cell: (e) => e.scheme },
+    { header: this.i18n.t('qc.analyte'), cell: (e) => e.analyte },
+    { header: this.i18n.t('pt.cycle'), cell: (e) => e.cycle },
+    { header: this.i18n.t('pt.submitted'), cell: (e) => e.submittedValue !== null ? `${e.submittedValue}` : '—' },
+    { header: 'z', cell: (e) => e.zScore !== null ? `${e.zScore}` : '—' },
+    { header: this.i18n.t('pt.performance'), cell: (e) => e.performance },
+  ];
+
+  /** The filter line printed on the document, mirroring the filter bar. */
+  readonly filtersSummary = computed(() => {
+    const parts: string[] = [];
+    if (this.performanceFilter()) { parts.push(this.performanceFilter()); }
+    return parts.length ? parts.join(' · ') : this.i18n.t('exp.allRecords');
+  });
 
   readonly enrollForm = this.fb.nonNullable.group({
     scheme: ['', [Validators.required, Validators.maxLength(200)]],

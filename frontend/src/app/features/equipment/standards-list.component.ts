@@ -5,20 +5,23 @@ import { Router, RouterOutlet } from '@angular/router';
 import { StandardsFacade } from './standards.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
-import { REFERENCE_STANDARD_TYPES } from '../../core/models';
+import { REFERENCE_STANDARD_TYPES, ReferenceStandardListItem } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { AllocationPickerComponent } from '../../shared/ui/allocation-picker.component';
 import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 
 /** Reference standard / CRM register: statistics, filtration, and registration (§6.5). */
 @Component({
     selector: 'qams-standards-list',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent],
+    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, AllocationPickerComponent, ListStatsComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('std.title')" [subtitle]="i18n.t('std.subtitle')">
+      <qams-export-menu [title]="i18n.t('std.title')" [stats]="stats()" [columns]="exportColumns"
+                        [rows]="filtered()" [filtersSummary]="filtersSummary()" />
       @if (perms.can('reference-standards.create')) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('std.new') }}</button>
       }
@@ -126,6 +129,24 @@ export class StandardsListComponent implements OnInit {
     const q = this.search().trim().toLowerCase();
     return this.facade.list().filter((s) =>
       !q || `${s.standardRef} ${s.name} ${s.type} ${s.traceableTo} ${s.status}`.toLowerCase().includes(q));
+  });
+
+  /** Export columns — the printed grid mirrors the on-screen table. */
+  readonly exportColumns: ExportColumn<ReferenceStandardListItem>[] = [
+    { header: this.i18n.t('mu.ref'), cell: (s) => s.standardRef },
+    { header: this.i18n.t('std.name'), cell: (s) => s.name },
+    { header: this.i18n.t('std.type'), cell: (s) => this.i18n.t('std.type' + s.type) },
+    { header: this.i18n.t('std.traceableTo'), cell: (s) => s.traceableTo },
+    { header: this.i18n.t('std.expiresOn'), cell: (s) => s.expiresOn ?? '—' },
+    { header: this.i18n.t('nc.status'), cell: (s) => s.status },
+  ];
+
+  /** The filter line printed on the document, mirroring the filter bar. */
+  readonly filtersSummary = computed(() => {
+    const parts: string[] = [];
+    if (this.statusFilter()) { parts.push(this.statusFilter()); }
+    if (this.search().trim()) { parts.push(`"${this.search().trim()}"`); }
+    return parts.length ? parts.join(' · ') : this.i18n.t('exp.allRecords');
   });
 
   readonly stats = computed<ListStat[]>(() => {

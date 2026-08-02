@@ -1,15 +1,16 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { RecordsFacade } from './records.facade';
 import { ChangeReasonService } from '../../core/change-reason.service';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
-import { ARCHIVE_SOURCE_MODULES, RETENTION_CLASSES, RetentionClass } from '../../core/models';
+import { ARCHIVE_SOURCE_MODULES, ArchiveListItem, RETENTION_CLASSES, RetentionClass } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { LoadMoreComponent } from '../../shared/ui/load-more.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 
 /**
  * Records & Retention register: archived record snapshots with per-row

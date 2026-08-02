@@ -148,6 +148,54 @@ public class ManagementReviewTests
         var lateDecision = () => review.AddDecision("Late", Chair, new DateOnly(2026, 10, 1));
         lateDecision.Should().Throw<InvalidStateTransitionException>().Which.Code.Should().Be("MRV-004");
     }
+
+    [Fact]
+    public void Scheduling_records_agenda_link_and_participants_and_announces_the_fact()
+    {
+        var invitees = new[] { Guid.CreateVersion7(), Guid.CreateVersion7() };
+
+        var review = ManagementReview.Schedule(
+            "MRV-2026-02", "Q3 review", new DateOnly(2026, 9, 15), "Admin, QM",
+            agenda: "1. KPIs\n2. CAPA status",
+            meetingLink: "https://meet.jit.si/MRV-2026-02-abc123",
+            participantUserIds: invitees);
+
+        review.Agenda.Should().Be("1. KPIs\n2. CAPA status");
+        review.MeetingLink.Should().Be("https://meet.jit.si/MRV-2026-02-abc123");
+        review.ParticipantUsers.Select(p => p.UserId).Should().BeEquivalentTo(invitees);
+
+        // The invitation policy delivers off this event — a scheduled review that
+        // announced nothing would be a meeting nobody was told about.
+        var scheduled = review.DomainEvents.OfType<ManagementReviewScheduled>().Single();
+        scheduled.ParticipantUserIds.Should().BeEquivalentTo(invitees);
+        scheduled.MeetingLink.Should().Be(review.MeetingLink);
+    }
+
+    [Fact]
+    public void A_duplicate_invitee_is_recorded_once()
+    {
+        var invitee = Guid.CreateVersion7();
+
+        var review = ManagementReview.Schedule(
+            "MRV-2026-03", "Q4 review", new DateOnly(2026, 12, 1), "QM",
+            participantUserIds: [invitee, invitee]);
+
+        review.ParticipantUsers.Should().ContainSingle();
+    }
+
+    [Theory]
+    [InlineData("not-a-url")]
+    [InlineData("ftp://files.example.com/meet")]
+    [InlineData("javascript:alert(1)")]
+    public void A_meeting_link_that_is_not_an_absolute_http_url_is_refused(string link)
+    {
+        var schedule = () => ManagementReview.Schedule(
+            "MRV-2026-04", "Q4 review", new DateOnly(2026, 12, 1), "QM", meetingLink: link);
+
+        // The link is mailed to every participant; circulating a non-http URI
+        // (or a script) as "the meeting" is exactly what MRV-005 exists to stop.
+        schedule.Should().Throw<DomainException>().Which.Code.Should().Be("MRV-005");
+    }
 }
 
 public class SupplierTests

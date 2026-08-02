@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { FileUploaded } from '../models';
 
@@ -20,5 +20,23 @@ export class FilesApiService {
   /** Absolute URL for downloading a stored file by reference id. */
   downloadUrl(fileId: string): string {
     return `${this.base}/${fileId}`;
+  }
+
+  /**
+   * Downloads through HttpClient so the bearer token applies — a plain anchor
+   * to the [Authorize] endpoint gets a 401 — then hands the blob to the
+   * browser, taking the filename from Content-Disposition (same pattern as the
+   * register exports).
+   */
+  async download(fileId: string, fallbackName: string): Promise<void> {
+    const response = await firstValueFrom(
+      this.http.get(`${this.base}/${fileId}`, { responseType: 'blob', observe: 'response' }));
+    const name = /filename="?([^";]+)"?/.exec(response.headers.get('content-disposition') ?? '')?.[1] ?? fallbackName;
+    const url = URL.createObjectURL(response.body ?? new Blob());
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = name;
+    link.click();
+    URL.revokeObjectURL(url);
   }
 }

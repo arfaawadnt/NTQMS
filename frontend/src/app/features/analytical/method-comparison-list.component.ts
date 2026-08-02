@@ -1,22 +1,26 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, LOCALE_ID, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { DecimalPipe } from '@angular/common';
+import { DecimalPipe, formatNumber } from '@angular/common';
 import { Router, RouterOutlet } from '@angular/router';
 import { MethodComparisonFacade } from './method-comparison.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
+import { MethodComparisonListItem } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 
 /** Method-comparison register (CLSI EP09): Deming/Passing–Bablok + Bland–Altman studies. */
 @Component({
     selector: 'qams-method-comparison-list',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DecimalPipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent],
+    imports: [ReactiveFormsModule, DecimalPipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('mc.title')" [subtitle]="i18n.t('mc.subtitle')">
+      <qams-export-menu [title]="i18n.t('mc.title')" [stats]="stats()" [columns]="exportColumns"
+                        [rows]="filtered()" [filtersSummary]="filtersSummary()" />
       @if (perms.can('analytical-quality.create')) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('mc.new') }}</button>
       }
@@ -101,6 +105,7 @@ export class MethodComparisonListComponent implements OnInit {
   readonly perms = inject(PermissionsService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
+  private readonly locale = inject(LOCALE_ID);
 
   readonly states = ['DataEntry', 'Calculated', 'SignedOff'];
   readonly showForm = signal(false);
@@ -113,6 +118,30 @@ export class MethodComparisonListComponent implements OnInit {
     const q = this.search().trim().toLowerCase();
     return this.facade.list().filter((s) =>
       !q || `${s.studyRef} ${s.analyte} ${s.referenceMethod} ${s.testMethod} ${s.state}`.toLowerCase().includes(q));
+  });
+
+  /** Export columns — the printed grid mirrors the on-screen table. */
+  readonly exportColumns: ExportColumn<MethodComparisonListItem>[] = [
+    { header: this.i18n.t('mu.ref'), cell: (s) => s.studyRef },
+    { header: this.i18n.t('qc.analyte'), cell: (s) => s.analyte },
+    { header: this.i18n.t('mc.methods'), cell: (s) => `${s.testMethod} vs ${s.referenceMethod}` },
+    { header: 'n', cell: (s) => s.pairCount !== null ? `${s.pairCount}` : '—' },
+    {
+      header: this.i18n.t('mc.deming'),
+      cell: (s) => s.demingSlope !== null
+        ? `y = ${formatNumber(s.demingSlope, this.locale, '1.2-3')}x ${(s.demingIntercept ?? 0) >= 0 ? '+' : '−'} ${formatNumber(this.absVal(s.demingIntercept), this.locale, '1.2-3')}`
+        : '—',
+    },
+    { header: 'r', cell: (s) => s.pearsonR !== null ? formatNumber(s.pearsonR, this.locale, '1.3-4') : '—' },
+    { header: this.i18n.t('nc.status'), cell: (s) => s.state },
+  ];
+
+  /** The filter line printed on the document, mirroring the filter bar. */
+  readonly filtersSummary = computed(() => {
+    const parts: string[] = [];
+    if (this.stateFilter()) { parts.push(this.stateFilter()); }
+    if (this.search().trim()) { parts.push(`"${this.search().trim()}"`); }
+    return parts.length ? parts.join(' · ') : this.i18n.t('exp.allRecords');
   });
 
   readonly stats = computed<ListStat[]>(() => {

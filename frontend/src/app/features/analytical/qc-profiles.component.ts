@@ -5,17 +5,21 @@ import { Router, RouterOutlet } from '@angular/router';
 import { QcFacade } from './qc.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
+import { QcProfile } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 
 /** QC control profiles register + a create form (QM-gated). */
 @Component({
     selector: 'qams-qc-profiles',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DecimalPipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent],
+    imports: [ReactiveFormsModule, DecimalPipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ExportMenuComponent],
     template: `
     <qams-page-header [title]="i18n.t('qc.title')" [subtitle]="i18n.t('qc.subtitle')">
+      <qams-export-menu [title]="i18n.t('qc.title')" [columns]="exportColumns"
+                        [rows]="facade.profiles()" [filtersSummary]="i18n.t('exp.allRecords')" />
       @if (perms.can('analytical-quality.manage')) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('qc.new') }}</button>
       }
@@ -85,6 +89,16 @@ export class QcProfilesComponent implements OnInit {
   readonly showForm = signal(false);
   /** Whether the record-workspace drawer (child route) is active. */
   readonly detailOpen = signal(false);
+
+  /** Export columns — the printed grid mirrors the on-screen table. */
+  readonly exportColumns: ExportColumn<QcProfile>[] = [
+    { header: this.i18n.t('qc.analyte'), cell: (p) => p.analyte },
+    { header: this.i18n.t('qc.instrument'), cell: (p) => p.instrument },
+    { header: this.i18n.t('qc.lot'), cell: (p) => p.controlLot },
+    { header: this.i18n.t('qc.mean'), cell: (p) => `${p.targetMean}` },
+    { header: this.i18n.t('qc.sd'), cell: (p) => `${p.targetSd}` },
+    { header: this.i18n.t('nc.status'), cell: (p) => p.isActive ? 'Active' : 'Retired' },
+  ];
 
   readonly form = this.fb.nonNullable.group({
     analyte: ['', [Validators.required, Validators.maxLength(200)]],

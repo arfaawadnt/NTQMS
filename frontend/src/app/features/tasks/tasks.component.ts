@@ -1,15 +1,19 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
+import { firstValueFrom } from 'rxjs';
 import { TasksFacade } from './tasks.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
-import { TENANT_ROLES } from '../../core/models';
+import { RolesApiService } from '../../core/api/roles-api.service';
+import { TasksApiService } from '../../core/api/tasks-api.service';
+import { TENANT_ROLES, WorkTask } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { UserSelectComponent } from '../../shared/ui/user-select.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { LoadMoreComponent } from '../../shared/ui/load-more.component';
+import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 
 /** Group-level validator: a task must name a user or a role (mirrors TASK-002). */
 function assigneeRequired(group: AbstractControl): ValidationErrors | null {
@@ -45,7 +49,7 @@ function assigneeRequired(group: AbstractControl): ValidationErrors | null {
         <label>{{ i18n.t('task.assigneeRole') }}</label>
         <select formControlName="assigneeRole">
           <option value="">—</option>
-          @for (r of roles; track r) { <option [value]="r">{{ r }}</option> }
+          @for (r of roles(); track r) { <option [value]="r">{{ r }}</option> }
         </select>
         <div class="hint">{{ i18n.t('task.assigneeHint') }}</div>
         <label>{{ i18n.t('train.dueDate') }}</label>
@@ -142,7 +146,15 @@ export class TasksComponent implements OnInit {
   readonly perms = inject(PermissionsService);
   private readonly fb = inject(FormBuilder);
 
-  readonly roles = TENANT_ROLES;
+  private readonly rolesApi = inject(RolesApiService);
+
+  /**
+   * Role options for assignment. The tenant's real, active role names when the
+   * caller may list them — a task addressed to "Quality Manager" must use the
+   * name users actually hold since v1.51 — falling back to the legacy tier
+   * names for callers without roles.view (both vocabularies match server-side).
+   */
+  readonly roles = signal<readonly string[]>(TENANT_ROLES);
   readonly showForm = signal(false);
 
   readonly form = this.fb.nonNullable.group({
@@ -162,6 +174,16 @@ export class TasksComponent implements OnInit {
   ngOnInit(): void {
     void this.facade.loadTasks();
     if (this.perms.can('tasks.manage')) { void this.facade.loadSla(); }
+    if (this.perms.can('roles.view')) {
+      this.rolesApi.list().subscribe({
+        next: (all) => {
+          const names = all.filter((r) => r.isActive).map((r) => r.name);
+          if (names.length > 0) { this.roles.set(names); }
+        },
+        // Fall back silently to the tier list; assignment still works.
+        error: () => undefined,
+      });
+    }
   }
 
   async create(): Promise<void> {

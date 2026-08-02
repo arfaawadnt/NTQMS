@@ -92,11 +92,10 @@ public sealed class WorkTasksController(ISender sender) : ControllerBase
     [HttpGet("mine")]
     public async Task<IActionResult> Mine(
         [FromQuery] int page = 1, [FromQuery] int pageSize = 50,
-        CancellationToken ct = default)
-    {
-        var role = User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
-        return Ok(await sender.Send(new GetMyTasksQuery(role, page, pageSize), ct));
-    }
+        CancellationToken ct = default) =>
+        // The handler resolves the caller's roles from the database; the token's
+        // tier claim is not passed in because it goes stale on role reassignment.
+        Ok(await sender.Send(new GetMyTasksQuery(page, pageSize), ct));
 
     [HttpPost]
     [RequirePermission(PermissionCatalog.Tasks, PermissionAction.Create)]

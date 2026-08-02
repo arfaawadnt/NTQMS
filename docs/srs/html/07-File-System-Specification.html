@@ -1,0 +1,1001 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>File System Specification — NT.QMS As-Built SRS</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗄️</text></svg>">
+<style>
+:root{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);
+ --mono:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace;
+ --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,ui-serif,serif;
+ --sans:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}}
+:root[data-theme="dark"]{
+ --bg:#0b0e13;--panel:#141922;--panel-2:#1b212c;--ink:#e7edf5;--muted:#93a1b8;
+ --line:#263041;--accent:#4fd1c5;--accent-soft:#4fd1c51e;--pass:#4ade80;--pass-soft:#4ade8016;
+ --warn:#fbbf24;--warn-soft:#fbbf2416;--crit:#f87171;--crit-soft:#f8717114;
+ --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);}
+:root[data-theme="light"]{
+ --bg:#f5f7fa;--panel:#fff;--panel-2:#eef1f6;--ink:#10151d;--muted:#55627a;
+ --line:#dbe1ea;--accent:#0f766e;--accent-soft:#0f766e18;--pass:#15803d;--pass-soft:#15803d16;
+ --warn:#b54708;--warn-soft:#b5470814;--crit:#b42318;--crit-soft:#b4231812;
+ --shadow:0 1px 2px rgba(16,21,29,.06),0 8px 24px rgba(16,21,29,.05);}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+ font-size:15.5px;line-height:1.62;-webkit-text-size-adjust:100%}
+.wrap{display:grid;grid-template-columns:288px minmax(0,1fr);gap:0;max-width:1560px;margin:0 auto}
+/* ---- sidebar ---- */
+aside{position:sticky;top:0;height:100vh;overflow-y:auto;padding:22px 16px 60px;
+ border-right:1px solid var(--line);background:var(--panel)}
+aside .brand{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:-.01em;
+ margin:0 0 2px}
+aside .sub{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;
+ margin:0 0 16px}
+aside nav a{display:block;padding:5px 9px;border-radius:7px;color:var(--ink);text-decoration:none;
+ font-size:13.2px;border-left:2px solid transparent}
+aside nav a:hover{background:var(--panel-2)}
+aside nav a.cur{background:var(--accent-soft);border-left-color:var(--accent);font-weight:600}
+aside nav a .n{color:var(--muted);font-variant-numeric:tabular-nums;margin-right:7px;font-size:11.5px}
+aside .sec{margin:16px 0 5px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+ color:var(--muted);font-weight:700}
+#toc{margin-top:6px;border-top:1px solid var(--line);padding-top:10px}
+#toc a{display:block;padding:2.5px 9px;font-size:12.4px;color:var(--muted);text-decoration:none;
+ border-left:2px solid transparent;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#toc a:hover{color:var(--ink)}
+#toc a.h3{padding-left:22px;font-size:11.8px}
+/* ---- main ---- */
+main{padding:34px 46px 120px;min-width:0;overflow-wrap:anywhere}
+.doc-head{border-bottom:2px solid var(--accent);padding-bottom:14px;margin-bottom:26px}
+.kicker{color:var(--accent);font-size:11.5px;font-weight:700;letter-spacing:.11em;
+ text-transform:uppercase;margin:0 0 4px}
+h1{font-family:var(--serif);font-size:31px;line-height:1.2;margin:0;letter-spacing:-.015em}
+h2{font-family:var(--serif);font-size:24px;margin:38px 0 12px;padding-bottom:6px;
+ border-bottom:1px solid var(--line);letter-spacing:-.01em;scroll-margin-top:14px}
+h3{font-size:18px;margin:26px 0 9px;letter-spacing:-.005em;scroll-margin-top:14px}
+h4{font-size:15px;margin:20px 0 7px;color:var(--accent)}
+h5,h6{font-size:13.5px;margin:16px 0 6px;color:var(--muted);text-transform:uppercase;
+ letter-spacing:.05em}
+p{margin:10px 0}
+a{color:var(--accent)}
+hr{border:0;border-top:1px solid var(--line);margin:30px 0}
+ul,ol{margin:9px 0;padding-left:24px}
+li{margin:3px 0}
+blockquote{margin:16px 0;padding:12px 18px;background:var(--accent-soft);
+ border-left:3px solid var(--accent);border-radius:0 8px 8px 0}
+blockquote p:first-child{margin-top:0}blockquote p:last-child{margin-bottom:0}
+code{font-family:var(--mono);font-size:.875em;background:var(--panel-2);
+ padding:1.5px 5px;border-radius:4px;border:1px solid var(--line)}
+pre{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;
+ padding:14px 16px;overflow-x:auto;margin:14px 0}
+pre code{background:none;border:0;padding:0;font-size:12.6px;line-height:1.5}
+/* ---- tables ---- */
+.tw{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:10px;
+ background:var(--panel);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;font-size:13.4px}
+th,td{padding:8px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:var(--panel-2);font-weight:700;font-size:12.2px;letter-spacing:.02em;
+ position:sticky;top:0;z-index:1}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--accent-soft)}
+td code,th code{font-size:.9em;white-space:nowrap}
+/* ---- diagrams ---- */
+figure.d{margin:18px 0;padding:18px;background:var(--panel);border:1px solid var(--line);
+ border-radius:12px;box-shadow:var(--shadow);overflow-x:auto;text-align:center}
+figure.d svg{max-width:100%;height:auto;display:inline-block}
+/* ---- misc ---- */
+.tools{position:fixed;top:12px;right:16px;display:flex;gap:6px;z-index:50}
+.tools button{font:inherit;font-size:12px;padding:5px 11px;border-radius:8px;cursor:pointer;
+ border:1px solid var(--line);background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+.tools button:hover{background:var(--panel-2)}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:52px;padding-top:18px;
+ border-top:1px solid var(--line)}
+.pager a{display:block;max-width:46%;padding:10px 14px;border:1px solid var(--line);
+ border-radius:10px;background:var(--panel);text-decoration:none;font-size:13px}
+.pager a span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;
+ letter-spacing:.08em}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:14px;margin:20px 0}
+.card{padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--panel);
+ box-shadow:var(--shadow);text-decoration:none;color:var(--ink);display:block}
+.card:hover{border-color:var(--accent)}
+.card .num{color:var(--accent);font-weight:700;font-size:11.5px;letter-spacing:.1em}
+.card .t{font-family:var(--serif);font-size:17px;margin:3px 0 5px}
+.card .d{color:var(--muted);font-size:12.7px;line-height:1.5}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin:20px 0}
+.stat{padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.stat b{display:block;font-size:23px;font-family:var(--serif);line-height:1.1}
+.stat span{color:var(--muted);font-size:11.4px}
+@media print{
+ aside,.tools,.pager{display:none!important}
+ .wrap{display:block;max-width:none}
+ main{padding:0}
+ .tw,figure.d{break-inside:avoid;box-shadow:none}
+ h2{break-after:avoid}
+ a{color:inherit;text-decoration:none}
+}
+@media (max-width:1080px){
+ .wrap{grid-template-columns:1fr}
+ aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+ main{padding:22px 18px 80px}
+ #toc{display:none}
+}
+</style>
+</head><body>
+<div class="tools"><button id="th">◐ Theme</button><button id="pr">⎙ Print</button></div>
+<div class="wrap">
+<aside><p class="brand">NT.QMS</p><p class="sub">As-Built SRS · v1.51.x</p><a class="card" style="padding:9px 12px;margin-bottom:10px;font-size:13px" href="index.html">◂ Document set</a><div class="sec">Documents</div><nav><a class="" href="00-SRS-Index-and-Conventions.html"><span class="n">00</span>Index, Conventions &amp; Glossary</a><a class="" href="01-Software-Requirements-Specification.html"><span class="n">01</span>Software Requirements Specification</a><a class="" href="02-1-Functional-Specification-Quality-and-Improvement.html"><span class="n">02-1</span>Functional Spec 1 — Quality &amp; Improvement</a><a class="" href="02-2-Functional-Specification-Resources-People-Governance.html"><span class="n">02-2</span>Functional Spec 2 — Resources, People &amp; Governance</a><a class="" href="02-3-Functional-Specification-Analytical-Quality.html"><span class="n">02-3</span>Functional Spec 3 — Analytical Quality</a><a class="" href="02-4-Functional-Specification-Operations-and-Platform.html"><span class="n">02-4</span>Functional Spec 4 — Operations &amp; Platform</a><a class="" href="03-Business-Rules.html"><span class="n">03</span>Business Rules &amp; Error Catalogue</a><a class="" href="04-Configuration-Reference.html"><span class="n">04</span>Configuration Reference</a><a class="" href="05-Screen-Specification.html"><span class="n">05</span>Screen Specification</a><a class="" href="06-Workflow-Specification.html"><span class="n">06</span>Workflow Specification</a><a class="cur" href="07-File-System-Specification.html"><span class="n">07</span>File System Specification</a><a class="" href="08-API-Specification.html"><span class="n">08</span>API Specification</a><a class="" href="09-Security-Specification.html"><span class="n">09</span>Security Specification</a><a class="" href="10-Deployment-Specification.html"><span class="n">10</span>Deployment Specification</a><a class="" href="11-Architecture-Constraints.html"><span class="n">11</span>Architecture Constraints</a><a class="" href="12-Requirements-Traceability-Matrix.html"><span class="n">12</span>Requirements Traceability Matrix</a><a class="" href="13-Implementation-vs-SRS-Gap-Analysis.html"><span class="n">13</span>Implementation vs SRS — Gap Analysis</a><a class="" href="14-Technical-Debt-Report.html"><span class="n">14</span>Technical Debt Report</a><a class="" href="15-Recommendations.html"><span class="n">15</span>Recommendations</a></nav><div class='sec'>On this page</div><div id='toc'><a class="h2" href="#naming-and-layout-conventions-normative">Naming and layout conventions (normative)</a><a class="h3" href="#index-name-abbreviation-map-mandatory">Index-name abbreviation map (mandatory)</a><a class="h2" href="#fs-01-evidence-storage-the-only-application-managed-data-directory">FS-01 · Evidence storage (the only application-managed data directory)</a><a class="h3" href="#risks">Risks</a><a class="h2" href="#fs-02-logs">FS-02 · Logs</a><a class="h2" href="#fs-03-temporary-files">FS-03 · Temporary files</a><a class="h2" href="#fs-04-backup-artefacts-deploybackupsh">FS-04 · Backup artefacts (deploy/backup.sh)</a><a class="h2" href="#fs-05-database-on-disk-layout-informational">FS-05 · Database on-disk layout (informational)</a><a class="h2" href="#container-image-layout">Container image layout</a><a class="h3" href="#three-structural-causes-of-the-app-randomly-stops-and-their-fixes">Three structural causes of &quot;the app randomly stops&quot; — and their fixes</a><a class="h2" href="#the-archive-strategy-in-one-paragraph">The archive strategy in one paragraph</a><a class="h2" href="#cleanup-gaps-worth-naming">Cleanup gaps worth naming</a></div></aside>
+<main>
+<div class="doc-head"><p class="kicker">Document 07 · NT.QMS Production SRS</p><h1>File System Specification</h1></div>
+<blockquote>
+<p><a href="00-SRS-Index-and-Conventions.html">Conventions</a> · Configuration:
+<a href="04-Configuration-Reference.html">Document 04</a> · Deployment:
+<a href="10-Deployment-Specification.html">Document 10</a></p>
+</blockquote>
+<p>Every folder and file the system reads, writes, generates or depends on — at build time, at run time
+and during operations.</p>
+<hr>
+<h1>7.1 Repository layout</h1>
+<pre><code>NT.QAMS/
+├── CLAUDE.md                       operating guide (auto-loaded, standing rules)
+├── ONBOARDING.md                   quick orientation for a new session/account
+├── README.md
+├── IMPLEMENTATION_LOG.md           chronological progress log (~52 KB)
+├── SCHEMA-HARDENING-PLAN.md        6-phase schema-hardening programme
+├── SCHEMA-HARDENING-REPORT.md      its execution record
+├── NT.QAMS.sln
+├── docker-compose.yml              development compose (unused on the Windows host)
+├── .gitattributes / .gitignore
+├── .config/dotnet-tools.json       dotnet-ef as a LOCAL tool
+├── .github/workflows/ci.yml        the single CI pipeline
+├── .claude/skills/ntqms-architecture/   in-repo architecture skill
+│
+├── src/
+│   ├── NT.QAMS.SharedKernel/       11 files · 248 lines — primitives only
+│   │   ├── Abstractions/IClock.cs
+│   │   ├── Localization/LocalizedText.cs
+│   │   ├── MultiTenancy/{ITenantScoped, IOptionallyTenantScoped, IAllocatable}.cs
+│   │   └── Primitives/{AggregateRoot, Entity, ValueObject, DomainException,
+│   │                   IAuditable, IDomainEvent}.cs
+│   │
+│   ├── NT.QAMS.Domain/             55 files · 8,694 lines — 20 bounded contexts
+│   │   ├── AnalyticalQuality/      17 files (12 studies + QC + PT + uncertainty + Westgard)
+│   │   ├── AuditManagement/ Authorization/ Competency/ ComplianceLedger/
+│   │   ├── DocumentControl/ Equipment/ Facility/ Files/ IdentityAccess/
+│   │   ├── Improvement/ Notifications/ Organization/ Records/ Reporting/
+│   │   └── RiskGovernance/ Sla/ SupplierQuality/ Tenancy/
+│   │
+│   ├── NT.QAMS.Application/        87 files · 10,275 lines
+│   │   ├── Abstractions/           ports: IAppDbContext, ICurrentUser, ICurrentTenant,
+│   │   │                           ICurrentChangeReason, IFileStorage, IExportService,
+│   │   │                           IUserPrivileges, Idempotency, Messaging, Paging
+│   │   ├── Behaviors/              5 MediatR behaviours
+│   │   └── &lt;Context&gt;/              vertical slices: *Slice.cs, Commands/, Queries/, *Policy.cs
+│   │
+│   ├── NT.QAMS.Contracts/          20 files · 1,036 lines — request/response DTOs only
+│   │
+│   ├── NT.QAMS.Infrastructure/     159 files
+│   │   ├── (non-migration code)    46 files · 4,703 lines
+│   │   ├── Persistence/
+│   │   │   ├── AppDbContext.cs · AdvisoryLock.cs · AdvisoryLockKeys.cs · RefCounter.cs
+│   │   │   ├── Configurations/     EF entity type configurations
+│   │   │   ├── Interceptors/       6 interceptors (order is load-bearing)
+│   │   │   ├── Idempotency/        EfIdempotencyStore, NullIdempotencyKeyAccessor
+│   │   │   ├── Outbox/             OutboxProcessor, OutboxInterceptor, OutboxEvent
+│   │   │   └── Migrations/         113 files · ≈295,000 generated lines · 56 migrations
+│   │   ├── Authorization/ Compliance/ Configuration/ Email/ Exports/
+│   │   ├── Health/ Jobs/ Observability/ Security/ Services/ Storage/
+│   │
+│   └── NT.QAMS.WebApi/             58 files · 4,707 lines
+│       ├── Program.cs              the composition root
+│       ├── Controllers/            42 files → 54 controller classes → 329 actions
+│       ├── Middleware/             7 components
+│       ├── Authorization/          Roles.cs, RequirePermissionAttribute.cs
+│       ├── Security/               RateLimiting.cs, FileContentPolicy.cs
+│       ├── Startup/                StartupSeeding, DeferredStartupSeeder, StartupSeedingState
+│       ├── Versioning/             VersionedRouteConvention.cs
+│       ├── Dockerfile
+│       ├── appsettings.json                 shipped defaults, secrets EMPTY
+│       └── appsettings.Development.json     shape only, secrets EMPTY + pointer comment
+│
+├── tests/
+│   ├── NT.QAMS.Domain.UnitTests/         37 files · 3,613 lines
+│   ├── NT.QAMS.Application.UnitTests/    17 files · 1,942 lines
+│   ├── NT.QAMS.Architecture.Tests/        4 files ·   349 lines — layering law
+│   ├── NT.QAMS.IntegrationTests/         12 files · 1,229 lines — real PostgreSQL
+│   ├── NT.QAMS.WebApi.FunctionalTests/   28 files · 3,290 lines
+│   │   └── ApiSurface.approved.txt       ← 658-line merge gate
+│   └── NT.QAMS.LoadTests/                 1 file ·   144 lines
+│                                          ⚠ OUTSIDE the solution — run via `dotnet run`,
+│                                            NOT `dotnet test`
+│
+├── frontend/                       Angular 22.0.8 · 215 TS files · 29,110 lines
+│   ├── src/app/
+│   │   ├── app.routes.ts · app.config.ts · app.component.ts
+│   │   ├── core/                   auth, guards, interceptors, i18n, permissions,
+│   │   │   ├── api/                44 API service files
+│   │   │   └── help/               help-content.ts, help.service.ts
+│   │   ├── shell/shell.component.ts
+│   │   ├── shared/ui/              17 shared components
+│   │   └── features/               31 feature folders · 105 components
+│   ├── src/environments/environment.ts   ← ONE file, not the usual dev/prod pair
+│   ├── e2e/                        Playwright specs + README
+│   └── playwright.config.ts
+│
+├── scripts/                        12 operational PowerShell/SQL scripts
+├── deploy/                         see §7.3
+└── docs/
+    ├── adr/            ADR-0001 … ADR-0009
+    ├── reference/      architecture (law), audits, plans, as-built, load/security reports
+    ├── validation/     GAMP 5 CSV set — 14 documents + verification log
+    ├── testing/        6 module test-design documents
+    └── srs/            ← THIS specification set
+</code></pre>
+<h2 id="naming-and-layout-conventions-normative">Naming and layout conventions (normative)</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Convention</th>
+<th>Rule</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Vertical slice</td>
+<td>one <code>*Slice.cs</code> per feature area holding its commands, validators, handlers and queries together</td>
+</tr>
+<tr>
+<td>Larger contexts</td>
+<td>split into <code>Commands/</code>, <code>Queries/</code>, <code>Policies/</code> folders</td>
+</tr>
+<tr>
+<td>Policies</td>
+<td><code>*Policy.cs</code> — a domain-event handler that produces a downstream consequence</td>
+</tr>
+<tr>
+<td>Controllers</td>
+<td>one file may hold several controller classes when they are one cohesive surface (<code>GovernanceControllers.cs</code> → 3, <code>PlatformControllers.cs</code> → 5, <code>AnalyticalQualityControllers.cs</code> → 2, <code>OperationsControllers.cs</code> → 3)</td>
+</tr>
+<tr>
+<td>Angular</td>
+<td><code>*.component.ts</code>, <code>*-api.service.ts</code>, <code>*.facade.ts</code>, specs alongside as <code>*.spec.ts</code></td>
+</tr>
+<tr>
+<td>Index names</td>
+<td>PostgreSQL truncates at 63 bytes and <strong>EF truncates client-side at 62 — silently, mid-word</strong>. Any index whose EF-default name would exceed 62 chars <strong>must</strong> be pinned with <code>HasDatabaseName()</code> using the abbreviation map below. Unique indexes use the <code>ux_</code> prefix.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="index-name-abbreviation-map-mandatory">Index-name abbreviation map (mandatory)</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Full table</th>
+<th>Abbreviation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>document_acknowledgement</code></td>
+<td><code>doc_ack</code></td>
+</tr>
+<tr>
+<td><code>document_controlled_copy</code></td>
+<td><code>doc_copy</code></td>
+</tr>
+<tr>
+<td><code>notification_dispatch</code></td>
+<td><code>notif_dispatch</code></td>
+</tr>
+<tr>
+<td><code>document_version</code></td>
+<td><code>doc_ver</code></td>
+</tr>
+<tr>
+<td><code>supplier_evaluation</code></td>
+<td><code>sup_eval</code></td>
+</tr>
+<tr>
+<td><code>instrument_comparability_study</code></td>
+<td><code>icp_study</code></td>
+</tr>
+<tr>
+<td><code>user_department_access</code></td>
+<td><code>user_dept_access</code></td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>7.2 Runtime file system</h1>
+<h2 id="fs-01-evidence-storage-the-only-application-managed-data-directory">FS-01 · Evidence storage (the only application-managed data directory)</h2>
+<pre><code>{FileStorage:RootPath}/
+└── {tenantId:N}/                       32-hex tenant id, no hyphens
+    ├── {sha256}                        the stored object — NO extension
+    ├── {sha256}
+    └── .upload-{guid:N}.tmp            transient, during a single upload
+</code></pre>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Default root</strong></td>
+<td><code>{AppContext.BaseDirectory}/data/files</code> — <strong>inside the deployment folder</strong></td>
+</tr>
+<tr>
+<td><strong>Created</strong></td>
+<td>at start-up (<code>Directory.CreateDirectory(_root)</code>) and per tenant on first upload</td>
+</tr>
+<tr>
+<td><strong>Object name</strong></td>
+<td>the content's lower-case hex SHA-256; <strong>no extension, no original filename</strong></td>
+</tr>
+<tr>
+<td><strong>Original filename</strong></td>
+<td>stored in the database (<code>FileReference.FileName</code>), never on disk</td>
+</tr>
+<tr>
+<td><strong>Content type</strong></td>
+<td>the <strong>canonical</strong> type for the extension, stored in the database; the client's declared type is discarded</td>
+</tr>
+<tr>
+<td><strong>Deduplication</strong></td>
+<td>identical content in the same tenant maps to the same path; the second upload's temp file is simply deleted</td>
+</tr>
+<tr>
+<td><strong>Atomicity</strong></td>
+<td>stream → temp file (hashing as it goes) → <code>File.Move</code> into place. A crash never leaves a partial object at a final key</td>
+</tr>
+<tr>
+<td><strong>Temp cleanup</strong></td>
+<td>the temp file is deleted on success <strong>and</strong> in the <code>catch</code> on failure</td>
+</tr>
+<tr>
+<td><strong>Orphaned temp files</strong></td>
+<td>possible only if the process is killed mid-upload. <strong>Nothing sweeps <code>.upload-*.tmp</code></strong></td>
+</tr>
+<tr>
+<td><strong>Deletion</strong></td>
+<td><strong>none</strong> — there is no delete path, no retention, no cleanup, no orphan collection</td>
+</tr>
+<tr>
+<td><strong>Reference counting</strong></td>
+<td><strong>none</strong> — two records may share one blob with no counter</td>
+</tr>
+<tr>
+<td><strong>Size limit</strong></td>
+<td><strong>none in application code</strong> — only the host body limit</td>
+</tr>
+<tr>
+<td><strong>Growth</strong></td>
+<td>monotonic</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="risks">Risks</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Risk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>FS-R1</strong></td>
+<td><strong>The default root is inside the deployment directory.</strong> A clean redeploy (delete-and-copy) destroys every uploaded document, calibration certificate and archive snapshot. <code>FileStorage:RootPath</code> <strong>must</strong> point at a durable volume in any real deployment.</td>
+</tr>
+<tr>
+<td><strong>FS-R2</strong></td>
+<td>Files are never deleted, so storage grows without bound and disposed archive records keep their snapshot blobs forever.</td>
+</tr>
+<tr>
+<td><strong>FS-R3</strong></td>
+<td>No orphan sweep for <code>.upload-*.tmp</code>.</td>
+</tr>
+<tr>
+<td><strong>FS-R4</strong></td>
+<td>No maximum upload size.</td>
+</tr>
+<tr>
+<td><strong>FS-R5</strong></td>
+<td>Files are <strong>not</strong> in the PostgreSQL dump — they need their own backup leg (<code>deploy/backup.sh</code> handles this, but only when told the correct path).</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="fs-02-logs">FS-02 · Logs</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Environment</th>
+<th>Destination</th>
+<th>Format</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Production</td>
+<td><strong>stdout</strong></td>
+<td>JSON console, scopes included, UTC, ISO-8601 <code>"O"</code></td>
+</tr>
+<tr>
+<td>Non-production</td>
+<td>stdout</td>
+<td>default console</td>
+</tr>
+<tr>
+<td>Development scripts</td>
+<td><code>%TEMP%\ntqms-dev\</code></td>
+<td>plain text, written by <code>scripts/dev-up.ps1</code></td>
+</tr>
+<tr>
+<td>Optional</td>
+<td>OTLP collector</td>
+<td>when <code>Otlp:Endpoint</code> is set</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>The application writes no log files of its own.</strong> Log retention is entirely the host's concern
+(container runtime, IIS, systemd, or the collector). No rotation, size cap or retention is configured
+anywhere in the repository.</p>
+<h2 id="fs-03-temporary-files">FS-03 · Temporary files</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Producer</th>
+<th>Path</th>
+<th>Lifetime</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Upload staging</td>
+<td><code>{root}/{tenant}/.upload-{guid}.tmp</code></td>
+<td>one request; deleted on success and on failure</td>
+</tr>
+<tr>
+<td>XLSX / PDF exports</td>
+<td><strong>in memory</strong>, streamed to the response</td>
+<td>never touch disk</td>
+</tr>
+<tr>
+<td>.NET runtime</td>
+<td>OS temp</td>
+<td>framework-managed</td>
+</tr>
+</tbody>
+</table></div>
+<p>There is <strong>no application-managed temp directory</strong> beyond upload staging.</p>
+<h2 id="fs-04-backup-artefacts-deploybackupsh">FS-04 · Backup artefacts (<code>deploy/backup.sh</code>)</h2>
+<pre><code>$OUT_DIR/
+├── ntqms-{timestamp}.dump            pg_dump --format=custom --compress=9
+├── filestore-{timestamp}.tar         tar of $FILESTORE_DIR  (default /var/lib/ntqms/files)
+└── manifest-{timestamp}.sha256       checksums of both
+</code></pre>
+<p><strong>Two legs, both required.</strong> If the file-store directory is absent the script emits
+<code>WARNING: file store '…' not found — DB-only backup.</code> and continues — a DB-only backup <strong>is not a
+complete backup</strong>: every controlled-document version, calibration certificate and archive snapshot
+would be unrecoverable.</p>
+<p>Targets: <strong>RPO ≤ 5 minutes</strong> (continuous WAL archiving with PITR) and <strong>RTO ≤ 4 hours</strong>.
+<strong>Post-restore verification is mandatory and includes audit-trail hash-chain verification.</strong>
+<code>deploy/restore.sh</code> is the counterpart. <strong><code>[Not Executed]</code></strong> — no restore drill has been performed in
+this environment.</p>
+<h2 id="fs-05-database-on-disk-layout-informational">FS-05 · Database on-disk layout (informational)</h2>
+<p>97 tables across five schemas — <code>qams</code> (~85), <code>audit</code> (4), <code>saas</code> (2), <code>read</code> (1), <code>public</code> (1).
+90 tables carry FORCE row-level security. <code>ref</code> is granted in <code>harden-runtime-role.sql</code> and appears in
+the design documents but <strong>was never created</strong> — a known gap.</p>
+<p>Two tables grow monotonically and are the disk-growth drivers:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Growth</th>
+<th>Retention</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>audit.field_change</code></td>
+<td>one row <strong>per changed column per mutation</strong> (already 19,296 null-tenant rows in the dev dataset alone)</td>
+<td><strong>none — append-only, never purged</strong></td>
+</tr>
+<tr>
+<td><code>audit.security_event</code></td>
+<td>one row per auth/signature/export/authorisation event</td>
+<td><strong>none</strong></td>
+</tr>
+<tr>
+<td><code>qams.outbox_event</code></td>
+<td>one row per domain event</td>
+<td>processed rows purged after <code>Outbox:RetentionDays</code> (30); <strong>dead-lettered rows are never purged</strong></td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>7.3 Deployment artefacts (<code>deploy/</code>)</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DEPLOY.md</code></td>
+<td>runbook</td>
+<td>the deployment procedure</td>
+</tr>
+<tr>
+<td><code>DEV-SECRETS.md</code></td>
+<td>runbook</td>
+<td>provisioning user-secrets on a fresh clone (id <code>nt-qams-webapi</code>)</td>
+</tr>
+<tr>
+<td><code>BACKUP-RESTORE-DR.md</code></td>
+<td>runbook</td>
+<td>RPO/RTO, WAL PITR, nightly dump, DR failover, mandatory post-restore verification</td>
+</tr>
+<tr>
+<td><code>OBSERVABILITY.md</code></td>
+<td>runbook</td>
+<td>logs/traces/metrics and the <strong>seven</strong> actionable alert definitions</td>
+</tr>
+<tr>
+<td><code>bring-up-staging.md</code></td>
+<td>runbook</td>
+<td>staging bring-up for the external test track</td>
+</tr>
+<tr>
+<td><code>backup.sh</code> / <code>restore.sh</code></td>
+<td>script</td>
+<td>the two backup legs and their restore</td>
+</tr>
+<tr>
+<td><code>db-init.sql</code></td>
+<td>SQL</td>
+<td>database/role bootstrap</td>
+</tr>
+<tr>
+<td><code>harden-runtime-role.sql</code></td>
+<td>SQL</td>
+<td><strong>least-privilege non-owner runtime role</strong> — the thing <code>DatabaseRoleGuard</code> checks for</td>
+</tr>
+<tr>
+<td><code>migrations.sql</code></td>
+<td>SQL</td>
+<td>idempotent migration script. <strong>⚠ STALE — it covers only migrations 1–10 of 56, while <code>DEPLOY.md</code> says to re-run it on each upgrade.</strong> Regenerate with <code>dotnet ef migrations script --idempotent</code>.</td>
+</tr>
+<tr>
+<td><code>compose.production.yml</code></td>
+<td>compose</td>
+<td>hardened production compose (non-root container)</td>
+</tr>
+<tr>
+<td><code>observability/</code></td>
+<td>compose + config</td>
+<td><code>otel-collector.yaml</code>, <code>prometheus.yml</code>, <code>alert.rules.yml</code>, <code>grafana/</code>. <strong>Authored, never brought up (no Docker on the build host) — residual R-7.</strong></td>
+</tr>
+<tr>
+<td><code>iis/Install-NTQMS-IIS.ps1</code></td>
+<td>script</td>
+<td>Windows/IIS installation</td>
+</tr>
+<tr>
+<td><code>iis/Verify-NTQMS-IIS.ps1</code></td>
+<td>script</td>
+<td>post-install verification</td>
+</tr>
+<tr>
+<td><code>web.config</code></td>
+<td>config</td>
+<td>IIS ASP.NET Core module configuration</td>
+</tr>
+<tr>
+<td><code>publish-win-x64/</code></td>
+<td><strong>build output committed to the repository</strong></td>
+<td>a full <code>win-x64</code> publish — framework DLLs and all</td>
+</tr>
+<tr>
+<td><code>NT.QAMS-webapi-v1.0-win-x64.zip</code></td>
+<td><strong>binary committed to the repository</strong></td>
+<td>packaged API</td>
+</tr>
+<tr>
+<td><code>NT.QAMS-frontend-v1-dist.zip</code></td>
+<td><strong>binary committed to the repository</strong></td>
+<td>packaged SPA</td>
+</tr>
+<tr>
+<td><code>ANTIGRAVITY_DEPLOY_PROMPT.md</code>, <code>ANTIGRAVITY_FULLSTACK_DEPLOY_PROMPT.md</code></td>
+<td>prompt text</td>
+<td>tooling prompts, not part of the product</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong>FS-R6 — build output in version control.</strong> <code>deploy/publish-win-x64/</code> plus two ZIPs are committed
+binaries. They bloat the repository, go stale silently, and can be deployed by mistake in place of a
+current build. See <a href="14-Technical-Debt-Report.html">Document 14</a>.</p>
+</blockquote>
+<h2 id="container-image-layout">Container image layout</h2>
+<pre><code class="language-dockerfile">FROM mcr.microsoft.com/dotnet/sdk:9.0     AS build     # WORKDIR /src
+FROM mcr.microsoft.com/dotnet/aspnet:9.0  AS runtime   # WORKDIR /app
+EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=5s --retries=3   → /health/ready
+USER $APP_UID                                          # NON-ROOT
+ENTRYPOINT [&quot;dotnet&quot;, &quot;NT.QAMS.WebApi.dll&quot;]
+</code></pre>
+<p>CI asserts the non-root uid <strong>and</strong> volume writability, and runs a Trivy image scan.
+<strong><code>[Not Executed]</code></strong> locally — no Docker on the build host.</p>
+<hr>
+<h1>7.4 Operational scripts (<code>scripts/</code>)</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Script</th>
+<th>Purpose</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dev-status.ps1</code></td>
+<td><strong>run this FIRST when "the app is not working"</strong></td>
+<td>separates the three look-alike failures: port DOWN (ERR_CONNECTION_REFUSED) · API up but readiness <strong>503</strong> (PostgreSQL unreachable) · both healthy (so it is credentials or tenant, not the stack)</td>
+</tr>
+<tr>
+<td><code>dev-up.ps1</code></td>
+<td>start API + SPA <strong>detached</strong></td>
+<td>idempotent; detached so they survive the launching shell</td>
+</tr>
+<tr>
+<td><code>dev-rebuild.ps1</code></td>
+<td>stop → build → <strong>always restart</strong></td>
+<td><code>-Test</code>, <code>-Migrate</code> switches; always restarts even if the build fails</td>
+</tr>
+<tr>
+<td><code>dev-down.ps1</code></td>
+<td>stop <strong>only the process owning the port</strong></td>
+<td><code>-ApiOnly</code>; never a blanket <code>taskkill /IM dotnet.exe</code></td>
+</tr>
+<tr>
+<td><code>perf-smoke.ps1</code></td>
+<td>latency smoke test</td>
+<td>dev-box p95: ready 20.6 ms, login 69.6 ms, list 6.3 ms</td>
+</tr>
+<tr>
+<td><code>failure-drills.ps1</code></td>
+<td>poison→dead-letter and PG-down drills</td>
+<td>dead-letter drill runs live; the PG-down drill needs elevation and skips gracefully</td>
+</tr>
+<tr>
+<td><code>security-probe.ps1</code></td>
+<td>15 fast security probes</td>
+<td>15/15 pass</td>
+</tr>
+<tr>
+<td><code>security-probe-deep.ps1</code></td>
+<td>9 deep probes</td>
+<td>cross-tenant IDOR, refresh reuse-detection proven <strong>live</strong>, CORS/XST — 9/9 pass</td>
+</tr>
+<tr>
+<td><code>staging-smoke.ps1</code></td>
+<td>staging smoke test</td>
+<td>for the external track</td>
+</tr>
+<tr>
+<td><code>verify-e2e.ps1</code></td>
+<td>e2e verification wrapper</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>preflight-data-checks.sql</code></td>
+<td>SQL</td>
+<td>pre-migration data validation</td>
+</tr>
+<tr>
+<td><code>preflight-enum-domains.sql</code></td>
+<td>SQL</td>
+<td>enum-domain validation</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="three-structural-causes-of-the-app-randomly-stops-and-their-fixes">Three structural causes of "the app randomly stops" — and their fixes</h3>
+<ol>
+<li>Dev servers were started as children of whatever shell launched them, so they died with the
+   session → <strong>the scripts start them detached</strong>.</li>
+<li>The running WebApi <strong>locks its own DLLs</strong>, so every <code>dotnet build</code>/<code>test</code>/<code>ef</code> needs the API stopped
+   first — and it stayed down when someone forgot to restart → <strong><code>dev-rebuild.ps1</code> always restarts</strong>.</li>
+<li>A blanket <code>taskkill /IM dotnet.exe</code> killed unrelated tooling → <strong><code>dev-down.ps1</code> stops only the port
+   owner</strong>.</li>
+</ol>
+<blockquote>
+<p><strong>Script constraint:</strong> Windows PowerShell 5.1 misreads non-ASCII (em-dash, arrows, box-drawing) in a
+UTF-8-no-BOM <code>.ps1</code>, producing phantom "missing terminator" parse errors. <strong>Keep scripts ASCII-only.</strong></p>
+</blockquote>
+<hr>
+<h1>7.5 Build outputs (not in version control)</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Producer</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>src/**/bin/</code>, <code>src/**/obj/</code></td>
+<td><code>dotnet build</code></td>
+<td><code>.gitignore</code>d</td>
+</tr>
+<tr>
+<td><code>frontend/dist/</code></td>
+<td><code>ng build --configuration production</code></td>
+<td>the deployable SPA</td>
+</tr>
+<tr>
+<td><code>frontend/node_modules/</code></td>
+<td><code>npm ci</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>frontend/.angular/</code></td>
+<td>Angular CLI cache</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>TestResults/</code></td>
+<td><code>dotnet test</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>frontend/playwright-report/</code>, <code>test-results/</code></td>
+<td>Playwright</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong>Build gotcha:</strong> <code>ng build</code> does <strong>not</strong> refresh a running <code>ng serve</code>. After editing component
+styles the SPA must be restarted, or a stale bundle is served.</p>
+</blockquote>
+<hr>
+<h1>7.6 Retention, cleanup and archive strategy — consolidated</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Artefact</th>
+<th>Retention</th>
+<th>Cleanup mechanism</th>
+<th>Automated?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Uploaded evidence files</td>
+<td><strong>forever</strong></td>
+<td>none</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>audit.field_change</code></td>
+<td><strong>forever</strong> (append-only)</td>
+<td>none</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>audit.security_event</code></td>
+<td><strong>forever</strong> (append-only)</td>
+<td>none</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>qams.outbox_event</code> — processed</td>
+<td><code>Outbox:RetentionDays</code> (30)</td>
+<td>hourly purge inside the processor</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>qams.outbox_event</code> — dead-lettered</td>
+<td><strong>forever</strong> until an operator clears it</td>
+<td>manual SQL</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>qams.outbox_event</code> — pending</td>
+<td>until processed or dead-lettered</td>
+<td>—</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>qams.refresh_session</code></td>
+<td><code>Auth:RefreshTokenDays</code> (14) logically</td>
+<td><strong>no purge job</strong> — expired rows accumulate</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>qams.idempotency</code> records</td>
+<td><strong><code>[Assumption]</code></strong> no purge observed</td>
+<td>—</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>KpiSnapshot</code> rows</td>
+<td>forever, one per tenant per day</td>
+<td>none</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Application logs</td>
+<td>host's concern</td>
+<td>none configured</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Upload temp files</td>
+<td>per request</td>
+<td>in-code delete on success and failure</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Backups</td>
+<td>operator policy</td>
+<td>not scripted</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><strong>Business records</strong> (the archive module)</td>
+<td>5 years / 10 years / Permanent, with legal hold</td>
+<td><code>AuthorizeDisposal</code> — <strong>a manual, authorised act</strong>, never automatic</td>
+<td>✅ (by design)</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="the-archive-strategy-in-one-paragraph">The archive strategy in one paragraph</h2>
+<p>Business-record retention is <strong>deliberately manual</strong>. A record is archived with an immutable content
+snapshot; its retention expiry is computed from its class; disposal is refused before expiry
+(<code>ARC-014</code>), refused forever for <code>Permanent</code> (<code>ARC-013</code>), and refused while a legal hold is in place
+(<code>ARC-015</code>) regardless of expiry. Nothing in the system deletes a business record automatically —
+disposal is always an authorised human act by a holder of <code>records.void</code>, and it emits <code>RecordDisposed</code>
+into the tamper-evident ledger. <strong>Archiving does not remove or lock the source record</strong>; the archive is
+a parallel retention register, not a move operation.</p>
+<h2 id="cleanup-gaps-worth-naming">Cleanup gaps worth naming</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Gap</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>FS-G1</strong></td>
+<td>No purge of expired <code>refresh_session</code> rows.</td>
+</tr>
+<tr>
+<td><strong>FS-G2</strong></td>
+<td>No purge or partitioning of <code>audit.field_change</code> / <code>audit.security_event</code>. These are the fastest-growing tables and have no archival strategy.</td>
+</tr>
+<tr>
+<td><strong>FS-G3</strong></td>
+<td>No file-blob lifecycle: disposed archive records keep their snapshot forever.</td>
+</tr>
+<tr>
+<td><strong>FS-G4</strong></td>
+<td>No orphan sweep for <code>.upload-*.tmp</code>.</td>
+</tr>
+<tr>
+<td><strong>FS-G5</strong></td>
+<td>Dead-lettered outbox rows accumulate silently once triaged.</td>
+</tr>
+<tr>
+<td><strong>FS-G6</strong></td>
+<td>No log retention configuration anywhere in the repository.</td>
+</tr>
+</tbody>
+</table></div>
+<hr>
+<h1>7.7 File-system acceptance criteria</h1>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Given</th>
+<th>When</th>
+<th>Then</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AT-FS-01</strong></td>
+<td>a fresh deployment</td>
+<td>the API starts</td>
+<td><code>{FileStorage:RootPath}</code> exists (created if absent)</td>
+</tr>
+<tr>
+<td><strong>AT-FS-02</strong></td>
+<td>the same content uploaded twice in one tenant</td>
+<td>the second upload completes</td>
+<td>exactly <strong>one</strong> blob exists and both <code>FileReference</code> rows share the storage key</td>
+</tr>
+<tr>
+<td><strong>AT-FS-03</strong></td>
+<td>an upload that fails mid-stream</td>
+<td>the request ends</td>
+<td>no <code>.upload-*.tmp</code> remains and no partial object exists at a final key</td>
+</tr>
+<tr>
+<td><strong>AT-FS-04</strong></td>
+<td>two tenants upload identical content</td>
+<td>both complete</td>
+<td><strong>two</strong> blobs exist, one per tenant directory</td>
+</tr>
+<tr>
+<td><strong>AT-FS-05</strong></td>
+<td><code>backup.sh</code> run with a valid file-store path</td>
+<td>it completes</td>
+<td>three artefacts exist: <code>.dump</code>, <code>.tar</code>, <code>.sha256</code> manifest</td>
+</tr>
+<tr>
+<td><strong>AT-FS-06</strong></td>
+<td><code>backup.sh</code> run with a missing file-store path</td>
+<td>it completes</td>
+<td>a WARNING is emitted and the backup is <strong>DB-only</strong></td>
+</tr>
+<tr>
+<td><strong>AT-FS-07</strong></td>
+<td>a restore</td>
+<td>it completes</td>
+<td>verification includes an audit-trail <strong>hash-chain</strong> check</td>
+</tr>
+<tr>
+<td><strong>AT-FS-08</strong></td>
+<td>processed outbox rows older than the retention window</td>
+<td>the hourly purge runs</td>
+<td>they are deleted; dead-lettered rows are <strong>not</strong></td>
+</tr>
+</tbody>
+</table></div>
+<div class="pager"><a href="06-Workflow-Specification.html"><span>Previous</span>Workflow Specification</a><a href="08-API-Specification.html" style="text-align:right"><span>Next</span>API Specification</a></div>
+</main></div>
+<script>
+(function(){
+ var r=document.documentElement, K='ntqms-srs-theme', s=localStorage.getItem(K);
+ if(s) r.setAttribute('data-theme',s);
+ var b=document.getElementById('th');
+ if(b) b.onclick=function(){
+   var cur=r.getAttribute('data-theme');
+   if(!cur) cur=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+   var nx=cur==='dark'?'light':'dark';
+   r.setAttribute('data-theme',nx); localStorage.setItem(K,nx);
+ };
+ var p=document.getElementById('pr'); if(p) p.onclick=function(){window.print();};
+ // scroll-spy on the in-page TOC
+ var links=[].slice.call(document.querySelectorAll('#toc a'));
+ if(!links.length) return;
+ var tgt=links.map(function(a){return document.getElementById(a.getAttribute('href').slice(1));});
+ function spy(){
+   var y=window.scrollY+90, i=0;
+   for(var k=0;k<tgt.length;k++){ if(tgt[k]&&tgt[k].offsetTop<=y) i=k; }
+   links.forEach(function(a,n){a.style.color=n===i?'var(--accent)':'';
+     a.style.borderLeftColor=n===i?'var(--accent)':'transparent';});
+ }
+ addEventListener('scroll',spy,{passive:true}); spy();
+})();
+</script>
+</body></html>

@@ -15,6 +15,48 @@ export class I18nService {
 
   private readonly dict: Dict = {
 
+    // ── Page export ──
+    'exp.pdf': { en: 'Export PDF', ar: 'تصدير PDF', fr: 'Exporter PDF' },
+    'exp.excel': { en: 'Export Excel', ar: 'تصدير Excel', fr: 'Exporter Excel' },
+    'exp.working': { en: 'Exporting…', ar: 'جارٍ التصدير…', fr: 'Export en cours…' },
+    'exp.allRecords': { en: 'All records', ar: 'كل السجلات', fr: 'Tous les enregistrements' },
+
+    'equip.maintCertificate': { en: 'Maintenance certificate (optional)', ar: 'شهادة الصيانة (اختياري)', fr: 'Certificat de maintenance (facultatif)' },
+
+    // ── Admin-issued e-signature PIN (users page) ──
+    'users.initialPin': { en: 'E-signature PIN (optional)', ar: 'رمز PIN للتوقيع (اختياري)', fr: 'Code PIN de signature (facultatif)' },
+    'users.initialPinHint': { en: '4 digits — the user can change it later', ar: '4 أرقام — يمكن للمستخدم تغييره لاحقاً', fr: '4 chiffres — modifiable ensuite par l’utilisateur' },
+    'users.setPin': { en: 'Set PIN', ar: 'تعيين رمز PIN', fr: 'Définir le PIN' },
+    'users.setPinPrompt': { en: 'New 4-digit e-signature PIN', ar: 'رمز PIN جديد من 4 أرقام للتوقيع', fr: 'Nouveau code PIN de signature à 4 chiffres' },
+
+    // ── Management review scheduling (agenda + meeting link) ──
+    'mrv.agenda': { en: 'Meeting agenda', ar: 'جدول أعمال الاجتماع', fr: 'Ordre du jour' },
+    'mrv.agendaHint': { en: 'Circulated to every participant with the invitation.', ar: 'يُعمم على كل المشاركين مع الدعوة.', fr: 'Diffusé à chaque participant avec l’invitation.' },
+    'mrv.meetingLink': { en: 'Meeting link', ar: 'رابط الاجتماع', fr: 'Lien de réunion' },
+    'mrv.meetingLinkHint': { en: 'Leave empty to generate a free meeting link automatically.', ar: 'اتركه فارغاً لإنشاء رابط اجتماع مجاني تلقائياً.', fr: 'Laissez vide pour générer automatiquement un lien de réunion gratuit.' },
+    'mrv.meeting': { en: 'Meeting', ar: 'الاجتماع', fr: 'Réunion' },
+    'mrv.participantsMail': { en: 'Each participant receives the invitation, agenda and meeting link by email.', ar: 'يتلقى كل مشارك الدعوة وجدول الأعمال ورابط الاجتماع عبر البريد.', fr: 'Chaque participant reçoit l’invitation, l’ordre du jour et le lien par e-mail.' },
+
+    // ── My account (header user menu) ──
+    'acct.title': { en: 'My Account', ar: 'حسابي', fr: 'Mon compte' },
+    'acct.password': { en: 'Change password', ar: 'تغيير كلمة المرور', fr: 'Changer le mot de passe' },
+    'acct.currentPassword': { en: 'Current password', ar: 'كلمة المرور الحالية', fr: 'Mot de passe actuel' },
+    'acct.newPassword': { en: 'New password', ar: 'كلمة المرور الجديدة', fr: 'Nouveau mot de passe' },
+    'acct.confirmPassword': { en: 'Confirm new password', ar: 'تأكيد كلمة المرور الجديدة', fr: 'Confirmer le nouveau mot de passe' },
+    'acct.passwordRules': { en: 'At least 12 characters with upper and lower case, a digit and a symbol; the last 6 passwords cannot be reused.', ar: '12 حرفاً على الأقل بأحرف كبيرة وصغيرة ورقم ورمز؛ ولا يجوز إعادة استخدام آخر 6 كلمات مرور.', fr: 'Au moins 12 caractères avec majuscules, minuscules, un chiffre et un symbole ; les 6 derniers mots de passe ne peuvent être réutilisés.' },
+    'acct.passwordChanged': { en: 'Password changed.', ar: 'تم تغيير كلمة المرور.', fr: 'Mot de passe modifié.' },
+    'acct.changePassword': { en: 'Change password', ar: 'تغيير كلمة المرور', fr: 'Changer le mot de passe' },
+    'acct.pin': { en: 'E-signature PIN', ar: 'رمز PIN للتوقيع الإلكتروني', fr: 'Code PIN de signature électronique' },
+    'acct.pinSet': { en: 'A signing PIN is configured for your account.', ar: 'رمز التوقيع مُعد لحسابك.', fr: 'Un code PIN de signature est configuré pour votre compte.' },
+    'acct.pinUnset': { en: 'No signing PIN yet — you will need one to approve or sign records.', ar: 'لا يوجد رمز توقيع بعد — ستحتاجه لاعتماد السجلات أو توقيعها.', fr: 'Aucun code PIN — il vous en faudra un pour approuver ou signer des enregistrements.' },
+    'acct.newPin': { en: 'New PIN (4 digits)', ar: 'رمز PIN جديد (4 أرقام)', fr: 'Nouveau PIN (4 chiffres)' },
+    'acct.confirmPin': { en: 'Confirm PIN', ar: 'تأكيد الرمز', fr: 'Confirmer le PIN' },
+    'acct.pinHint': { en: '4 digits', ar: '4 أرقام', fr: '4 chiffres' },
+    'acct.pinChanged': { en: 'E-signature PIN saved.', ar: 'تم حفظ رمز التوقيع.', fr: 'Code PIN enregistré.' },
+    'acct.setPin': { en: 'Set PIN', ar: 'تعيين الرمز', fr: 'Définir le PIN' },
+    'acct.changePin': { en: 'Change PIN', ar: 'تغيير الرمز', fr: 'Changer le PIN' },
+    'acct.mismatch': { en: 'The confirmation does not match.', ar: 'التأكيد غير مطابق.', fr: 'La confirmation ne correspond pas.' },
+
     // ── Quality Analytics (statistics + ISO 17025 8.9.2 review pack) ──
     'nav.qualityAnalytics': { en: 'Quality Analytics', ar: 'تحليلات الجودة', fr: 'Analytique qualité' },
     'common.save': { en: 'Save', ar: 'حفظ', fr: 'Enregistrer' },

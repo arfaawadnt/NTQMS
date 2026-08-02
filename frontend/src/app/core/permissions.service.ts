@@ -40,6 +40,9 @@ export class PermissionsService {
    */
   readonly isPlatformAdmin = computed(() => this.auth.role() === 'PlatformAdmin');
 
+  /** Whether an e-signature PIN is on file, so signing can be offered honestly. */
+  readonly pinConfigured = computed(() => this.privileges()?.pinConfigured ?? false);
+
   constructor() {
     effect(() => {
       if (!this.auth.isAuthenticated()) {
@@ -62,6 +65,15 @@ export class PermissionsService {
           }
         });
     });
+  }
+
+  /** Re-pulls the privilege snapshot — call after a credential change (e.g. PIN set). */
+  refresh(): void {
+    if (!this.auth.isAuthenticated() || this.isPlatformAdmin()) { return; }
+    this.http
+      .get<MyPrivileges>(`${environment.apiBaseUrl}/auth/me/privileges`)
+      .pipe(catchError(() => of(null)))
+      .subscribe((p) => { if (p) { this.privileges.set(p); } });
   }
 
   /** True when the user's role grants this permission key (e.g. "nc.approve"). */

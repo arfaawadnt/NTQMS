@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   AssignUserRoleRequest, ChangeUserRoleRequest, CreatedResource, RegisterUserRequest,
-  ResetUserPasswordRequest, SetUserLanguageRequest, SetUserScopeRequest,
+  ResetUserPasswordRequest, SetUserPinRequest, SetUserLanguageRequest, SetUserScopeRequest,
   UserAccount, UserDirectoryEntry,
 } from '../models';
 
@@ -43,6 +43,11 @@ export class UsersApiService {
 
   deactivate(id: string): Observable<void> { return this.http.post<void>(`${this.base}/${id}/deactivate`, {}); }
   reactivate(id: string): Observable<void> { return this.http.post<void>(`${this.base}/${id}/reactivate`, {}); }
+
+  /** Admin set/reset of a user's e-signature PIN (ledgered as PIN_ADMIN_SET). */
+  setPin(id: string, body: SetUserPinRequest): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/signature-pin`, body);
+  }
 
   resetPassword(id: string, body: ResetUserPasswordRequest): Observable<void> {
     return this.http.post<void>(`${this.base}/${id}/reset-password`, body);
