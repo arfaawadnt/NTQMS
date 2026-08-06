@@ -1,0 +1,92 @@
+name: Release
+
+# Customer-delivery release for NT.QAMS (Windows Server / IIS + Kestrel target).
+#
+# WHEN IT RUNS: on push of a version tag `vX.Y.Z`. Tagging an approved commit on
+# `master` is the manual release gate (see CLAUDE.md rule 8 — work on dev, review,
+# merge to master, then tag to release). This workflow does NOT run on ordinary
+# dev/master pushes — only on a version tag you create deliberately.
+#
+# WHAT IT PRODUCES (attached to a GitHub Release the customer downloads):
+#   - NT.QAMS-webapi-<tag>-win-x64.zip   self-contained API (no .NET runtime needed on target)
+#   - NT.QAMS-frontend-<tag>-dist.zip    AOT production Angular bundle
+#   - SHA256SUMS.txt                     integrity manifest
+#
+# SAFETY: the release is created as a DRAFT. A human reviews the assets and clicks
+# "Publish" to make it visible to the customer (production-safety gate). To make it
+# auto-publish instead, remove `--draft` in the final step.
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write            # required to create the release
+
+jobs:
+  release:
+    name: Build & package customer release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Publish WebApi (win-x64, self-contained)
+        run: >
+          dotnet publish src/NT.QAMS.WebApi/NT.QAMS.WebApi.csproj
+          -c Release -r win-x64 --self-contained true
+          -o artifacts/webapi
+
+      - name: Build frontend (AOT production)
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Package artifacts
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+          mkdir -p out
+          (cd artifacts/webapi && zip -qr "../../out/NT.QAMS-webapi-${TAG}-win-x64.zip" .)
+          (cd frontend/dist/nt-qams-frontend && zip -qr "../../../out/NT.QAMS-frontend-${TAG}-dist.zip" .)
+          (cd out && sha256sum *.zip > SHA256SUMS.txt)
+          ls -la out
+
+      - name: Create draft GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+          cat > out/RELEASE_NOTES.md <<EOF
+          Windows Server (IIS/Kestrel) delivery package for NT.QAMS $TAG.
+
+          **Contents**
+          - \`NT.QAMS-webapi-$TAG-win-x64.zip\` — self-contained API (no .NET runtime required on the target)
+          - \`NT.QAMS-frontend-$TAG-dist.zip\` — AOT production Angular bundle
+          - \`SHA256SUMS.txt\` — verify integrity before deploying
+
+          **Install:** follow \`deploy/DEPLOY.md\` and \`deploy/Deploy-FullStack.ps1\` (IIS TLS + Kestrel loopback service). Run \`deploy/db-init.sql\` + \`deploy/harden-runtime-role.sql\` once per server; apply migrations per the runbook.
+
+          **Changelog:** see the README increment history and \`IMPLEMENTATION_LOG.md\`.
+          EOF
+          gh release create "$TAG" \
+            "out/NT.QAMS-webapi-${TAG}-win-x64.zip" \
+            "out/NT.QAMS-frontend-${TAG}-dist.zip" \
+            "out/SHA256SUMS.txt" \
+            --draft \
+            --title "NT.QAMS $TAG" \
+            --notes-file out/RELEASE_NOTES.md
