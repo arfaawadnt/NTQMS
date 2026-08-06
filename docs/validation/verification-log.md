@@ -43,6 +43,7 @@ exactly how two wrong totals reached the commit record (see the note below the t
 
 | Date | Commit | Env | Domain | App | Arch | Integ | Func | Backend | FE unit | E2E | Result |
 | ---- | ------ | --- | -----: | --: | ---: | ----: | ---: | ------: | ------: | --: | ------ |
+| 2026-08-06 | (pending commit) | dev + real PG | 242 | 88 | 33 | 31 (+1 skip) | 82 | **476** | 95 | — (not run) | All green (RISK-03 AQ manifest endpoints: 13 GET /api/<study>/{id}/signatures added; ApiSurface snapshot regenerated +26 routes, reviewed) |
 | 2026-08-06 | (pending commit) | dev + real PG | 242 | 88 | 33 | 31 (+1 skip) | 82 | **476** | 95 | — (not run) | All green (RISK-03 borderline gates frontend: supplier/competency/conflict/test-auth UIs wired to the e-sign dialog; prod build + karma green) |
 | 2026-08-06 | (pending commit) | dev + real PG | 242 | 88 | 33 | 31 (+1 skip) | 82 | **476** | 95 | — (not run) | All green (RISK-03 borderline gates backend: supplier/conflict/competency/test-auth signing ceremonies + suppliers.sign & conflicts.sign catalogue keys; role/catalog tests green) |
 | 2026-08-06 | (pending commit) | dev + real PG | 242 | 88 | 33 | 31 (+1 skip) | 82 | **476** | 95 | — (not run) | All green (RISK-03 review-close gate: ManagementReview.Close signing ceremony, backend+frontend; live positive-mint proof MRV:{id} on real PG) |

@@ -22,6 +22,11 @@ public sealed class MethodComparisonsController(ISender sender) : ControllerBase
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct) =>
         Ok(await sender.Send(new GetMethodComparisonByIdQuery(id), ct));
 
+    /// <summary>Part 11 §11.50 signature manifest for this study, visible to any viewer of the record.</summary>
+    [HttpGet("{id:guid}/signatures")]
+    public async Task<IActionResult> Signatures(Guid id, CancellationToken ct) =>
+        Ok(await sender.Send(new NT.QAMS.Application.ComplianceLedger.GetSignaturesForSubjectQuery($"MC:{id:N}"), ct));
+
     [HttpPost]
     [RequirePermission(PermissionCatalog.AnalyticalQuality, PermissionAction.Create)]
     public async Task<IActionResult> Create(CreateMethodComparisonRequest request, CancellationToken ct)
