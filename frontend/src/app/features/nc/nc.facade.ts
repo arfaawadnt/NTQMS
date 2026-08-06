@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { NcApiService } from '../../core/api/nc-api.service';
 import {
   ConfirmEffectivenessRequest, NcDetail, NcListItem, PlanCapaActionRequest,
-  RaiseNcRequest, RecordRcaRequest, RejectNcRequest, TriageNcRequest, VerifyNcRequest,
+  RaiseNcRequest, RecordRcaRequest, RejectNcRequest, SignatureRecord, TriageNcRequest, VerifyNcRequest,
 } from '../../core/models';
 
 /**
@@ -20,6 +20,7 @@ export class NcFacade {
   private readonly _total = signal(0);
   private readonly _hasMore = signal(false);
   private readonly _selected = signal<NcDetail | null>(null);
+  private readonly _signatures = signal<SignatureRecord[]>([]);
   private readonly _loading = signal(false);
   private readonly _error = signal('');
   /** 1-based page of the last fetched slice (R-3 load-more pager). */
@@ -36,6 +37,8 @@ export class NcFacade {
   readonly hasMore = this._hasMore.asReadonly();
   /** Currently loaded detail, or null. */
   readonly selected = this._selected.asReadonly();
+  /** Part 11 §11.50 signature manifest for the loaded nonconformance. */
+  readonly signatures = this._signatures.asReadonly();
   /** True while any request is in flight. */
   readonly loading = this._loading.asReadonly();
   /** Last user-facing error message, or empty. */
@@ -73,9 +76,12 @@ export class NcFacade {
     });
   }
 
-  /** Loads a single nonconformance into `selected`. */
+  /** Loads a single nonconformance into `selected`, with its Part 11 signature manifest. */
   async loadDetail(id: string): Promise<void> {
-    await this.run(async () => this._selected.set(await firstValueFrom(this.api.getById(id))));
+    await this.run(async () => {
+      this._selected.set(await firstValueFrom(this.api.getById(id)));
+      this._signatures.set(await firstValueFrom(this.api.signatures(id)));
+    });
   }
 
   /** Raises a new draft nonconformance; returns its id on success or null on failure. */
@@ -90,7 +96,17 @@ export class NcFacade {
   async planAction(id: string, r: PlanCapaActionRequest): Promise<void> { await this.mutate(id, () => this.api.planAction(id, r)); }
   async completeAction(id: string, actionId: string): Promise<void> { await this.mutate(id, () => this.api.completeAction(id, actionId)); }
   async submitForVerification(id: string): Promise<void> { await this.mutate(id, () => this.api.submitForVerification(id)); }
-  async verify(id: string, r: VerifyNcRequest): Promise<void> { await this.mutate(id, () => this.api.verify(id, r)); }
+  async verify(id: string, r: VerifyNcRequest): Promise<void> {
+    await this.mutate(id, () => this.api.verify(id, r));
+    // A successful verification mints a §11.50 signature; refresh the manifest.
+    if (this._error() === '') { await this.loadSignatures(id); }
+  }
+
+  /** Refreshes just the signature manifest for the loaded nonconformance. */
+  private async loadSignatures(id: string): Promise<void> {
+    const sigs = await this.run(() => firstValueFrom(this.api.signatures(id)));
+    if (sigs) { this._signatures.set(sigs); }
+  }
   async confirmEffectiveness(id: string, r: ConfirmEffectivenessRequest): Promise<void> {
     await this.mutate(id, () => this.api.confirmEffectiveness(id, r));
   }

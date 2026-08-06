@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   ConfirmEffectivenessRequest, CreatedResource, DEFAULT_PAGE_SIZE, NcDetail, NcListItem, Paged,
-  PlanCapaActionRequest, RaiseNcRequest, RecordRcaRequest, RejectNcRequest,
+  PlanCapaActionRequest, RaiseNcRequest, RecordRcaRequest, RejectNcRequest, SignatureRecord,
   TriageNcRequest, VerifyNcRequest,
 } from '../models';
 
@@ -29,6 +29,11 @@ export class NcApiService {
 
   getById(id: string): Observable<NcDetail> {
     return this.http.get<NcDetail>(`${this.base}/${id}`);
+  }
+
+  /** Part 11 §11.50 signature manifest for this nonconformance (oldest-first). */
+  signatures(id: string): Observable<SignatureRecord[]> {
+    return this.http.get<SignatureRecord[]>(`${this.base}/${id}/signatures`);
   }
 
   raise(body: RaiseNcRequest): Observable<CreatedResource> {

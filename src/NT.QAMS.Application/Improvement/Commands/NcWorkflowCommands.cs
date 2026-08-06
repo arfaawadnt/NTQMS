@@ -1,6 +1,8 @@
-﻿using FluentValidation;
+﻿using System.Globalization;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
+using NT.QAMS.Application.Compliance;
 using NT.QAMS.Domain.Improvement;
 using NT.QAMS.SharedKernel.Abstractions;
 using NT.QAMS.SharedKernel.Primitives;
@@ -70,8 +72,10 @@ public sealed record PlanCapaActionCommand(
 public sealed record CompleteCapaActionCommand(Guid NcId, Guid ActionId) : ICommand;
 [RequireInternalActor]
 public sealed record SubmitNcForVerificationCommand(Guid NcId) : ICommand;
-[RequireInternalActor]
-public sealed record VerifyNcCommand(Guid NcId, bool Passed) : ICommand;
+/// <summary>Verifying corrective-action effectiveness is a Part 11 signing ceremony: it requires the verifier's e-signature (account password + PIN).</summary>
+[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.Nonconformances,
+    NT.QAMS.Domain.Authorization.PermissionAction.Sign)]
+public sealed record VerifyNcCommand(Guid NcId, bool Passed, string Password, string Pin) : ICommand;
 [RequireInternalActor]
 public sealed record ConfirmNcEffectivenessCommand(Guid NcId, bool Effective) : ICommand;
 
@@ -175,12 +179,48 @@ public sealed class SubmitNcForVerificationHandler(IAppDbContext db)
     }
 }
 
-public sealed class VerifyNcHandler(IAppDbContext db, ICurrentUser user) : ICommandHandler<VerifyNcCommand>
+public sealed class VerifyNcHandler(IAppDbContext db, ICurrentUser user, IESignatureService signatures)
+    : ICommandHandler<VerifyNcCommand>
 {
     public async Task Handle(VerifyNcCommand c, CancellationToken ct)
     {
         var actor = user.UserId ?? throw new DomainException("AUTH-003", "An authenticated user is required.");
-        (await NcLoader.LoadAsync(db, c.NcId, ct)).Verify(c.Passed, actor);
+        var nc = await NcLoader.LoadAsync(db, c.NcId, ct);
+
+        // Pre-validate every verification precondition BEFORE minting the signature —
+        // the signature ledger is append-only, so a signature must never exist for a
+        // verification that then fails its state or SoD gates (mirrors the publish
+        // ceremony in DocumentCommands.cs). The aggregate re-checks both invariants.
+        if (nc.Status != NcStatus.PendingVerification)
+        {
+            throw new InvalidStateTransitionException(
+                "NC-021", $"Cannot verify a nonconformance in state {nc.Status}.");
+        }
+
+        if (actor == nc.RaisedBy)
+        {
+            throw new DomainException(
+                "SOD-CAPA-002", "Segregation of duties: the raiser cannot verify their own nonconformance.");
+        }
+
+        // Bind the signature to the exact determination being attested (§11.70): the
+        // nonconformance identity, its risk, the outcome, and the CAPA set that was verified.
+        var contentHash = SignatureContentHash.Compute(
+            ("nc", nc.NcRef),
+            ("title", nc.Title),
+            ("rpn", nc.Rpn.ToString(CultureInfo.InvariantCulture)),
+            ("outcome", c.Passed ? "passed" : "not-passed"),
+            ("capaActions", string.Join(",",
+                nc.CapaActions.OrderBy(a => a.Id).Select(a => $"{a.Id:N}:{a.Status}"))));
+
+        // Verify both signature components and mint the immutable signature, then apply
+        // the (already pre-validated) verification.
+        await signatures.SignAsync(
+            actor, c.Password, c.Pin,
+            $"Verified corrective-action effectiveness on {nc.NcRef}: {(c.Passed ? "passed" : "not passed")}",
+            $"NC:{nc.Id:N}", contentHash, ct);
+
+        nc.Verify(c.Passed, actor);
         await db.SaveChangesAsync(ct);
     }
 }

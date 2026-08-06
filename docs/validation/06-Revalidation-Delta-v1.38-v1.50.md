@@ -254,6 +254,29 @@ build time by `UserAccountTenantBoundTests`. Full record: `SCHEMA-HARDENING-REPO
 the ledgers are append-only and hash-chained, and a ledger that can be corrected is not a ledger.
 Both remain readable under elevation. Forward behaviour is fixed and proven.
 
+### A.13 Part 11 electronic-signature ceremony — NC verification (RISK-03 pilot)
+
+Closes the first gate of RISK-03 (as-built review Doc 12 / NB-03-02): before this change the
+21 CFR Part 11 signature ceremony (`IESignatureService`, password + PIN, §11.200(a)(1)) was wired
+only to document publish, so ~19 other regulated sign-offs recorded signer fields but minted no
+`signature_record`. This delta converts the **nonconformance verification** gate to a full signing
+ceremony as the reusable pattern for the remaining gates. No schema change (no new table/column);
+a new reusable content-hash helper binds the signature to non-file records (§11.70), and two
+reusable Angular components (`qams-esign-dialog`, `qams-signature-manifest`) carry the ceremony and
+the §11.50 manifest for reuse across the remaining gates.
+
+| URS | Requirement (delta) | Design element(s) | Verification | Status |
+| --- | ------------------- | ----------------- | ------------ | ------ |
+| URS-123 | Confirming corrective-action effectiveness (NC verification) shall require the verifier's electronic signature — account password **and** signature PIN (§11.200(a)(1)) — recorded as an immutable signature manifest bound to the verified record and its outcome (§11.50/§11.70); the segregation-of-duties and state gates shall be checked **before** any signature is minted, so a refused verification never leaves a signature behind. | `VerifyNcCommand(NcId, Passed, Password, Pin)` gated `[RequirePermissionPolicy(nc, Sign)]`; `VerifyNcHandler` pre-validates state + SoD, computes `SignatureContentHash.Compute(...)` (`src/NT.QAMS.Application/Compliance/SignatureContentHash.cs`), calls `IESignatureService.SignAsync`, then `Nonconformance.Verify`; controller `POST /api/nonconformances/{id}/verify` → `[RequirePermission(nc, Sign)]`; new read `GET /api/nonconformances/{id}/signatures`; frontend `EsignDialogComponent` + `SignatureManifestComponent`, `nc.facade` manifest load | AUTO — `VerifyNcSigningTests` (4: valid signature mints exactly one manifest entry against the **real** `ESignatureService`; wrong PIN → SIG-001 + zero signatures + NC still pending; raiser → SOD-CAPA-002 + zero signatures; wrong state → NC-021 + zero signatures) and `SignatureContentHashTests` (5) green; `EsignDialogComponent`/`SignatureManifestComponent` specs (8) green; full backend suite 242/81/33/31+1/82. INSP live (dev, real PostgreSQL, 2026-08-06) — NC walked to PendingVerification; verify as raiser with correct password+PIN → **422 SOD-CAPA-002** (endpoint required `nc.sign`, accepted the credential body, refused before minting) and the manifest returned `[]`; PIN set → 204. See `docs/validation/14-OQ-Execution-Record-ESignature-NCVerify-v1.52.md` | Template — engineering complete; automated + partial live evidence recorded; witnessed positive-mint OQ pending (needs a second operator account so verifier ≠ raiser) |
+
+**Authorization upgrade note (act before release).** The verify endpoint's required permission moved
+from `nc.approve` to **`nc.sign`**. `nc.sign` is not a new catalogue key — the `nc` module already
+carried the signed-record lifecycle — so system roles that hold the full lifecycle (Tenant
+Administrator, Quality Manager) are unaffected. But **any tenant-defined role that was granted
+`nc.approve` in order to verify NCs, without `nc.sign`, will lose the ability to verify** until an
+administrator grants it `nc.sign`. Seeding is additive per role name and will not backfill this;
+name it in the release note or ship a deliberate data migration.
+
 ---
 
 ## Part B — Installation Qualification (IQ) delta

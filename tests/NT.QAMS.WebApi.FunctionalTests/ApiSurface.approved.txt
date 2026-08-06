@@ -82,6 +82,7 @@ GET /api/monitoring-points
 GET /api/monitoring-points/{id}
 GET /api/nonconformances
 GET /api/nonconformances/{id}
+GET /api/nonconformances/{id}/signatures
 GET /api/notifications/mine
 GET /api/notifications/monitor
 GET /api/notifications/rules
@@ -192,6 +193,7 @@ GET /api/v{version}/monitoring-points
 GET /api/v{version}/monitoring-points/{id}
 GET /api/v{version}/nonconformances
 GET /api/v{version}/nonconformances/{id}
+GET /api/v{version}/nonconformances/{id}/signatures
 GET /api/v{version}/notifications/mine
 GET /api/v{version}/notifications/monitor
 GET /api/v{version}/notifications/rules

@@ -43,6 +43,7 @@ exactly how two wrong totals reached the commit record (see the note below the t
 
 | Date | Commit | Env | Domain | App | Arch | Integ | Func | Backend | FE unit | E2E | Result |
 | ---- | ------ | --- | -----: | --: | ---: | ----: | ---: | ------: | ------: | --: | ------ |
+| 2026-08-06 | (pending commit) | dev + real PG | 242 | 81 | 33 | 31 (+1 skip) | 82 | **469** | 95 | — (not run) | All green (RISK-03 pilot: NC-verify e-signature ceremony + reusable e-sign components) |
 | 2026-08-01 | (pending commit) | dev + real PG | 242 | 72 | 33 | 31 (+1 skip) | 82 | **460** | 87 | 6 | All green (six-item set + admin-issued PIN + equipment tabs/certificate) |
 | 2026-08-01 | `b3f0cea` | dev + real PG | 237 | 72 | 33 | 31 (+1 skip) | 82 | **455** | 81 | — | All green (Quality Analytics) |
 | 2026-08-01 | `063f98f` | dev + real PG | 228 | 72 | 33 | 31 (+1 skip) | 82 | **446** | 76 | 6 | **All green** |

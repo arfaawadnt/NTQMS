@@ -98,7 +98,7 @@ export interface TriageNcRequest { assigneeId: string; }
 export interface RejectNcRequest { reason: string; }
 export interface RecordRcaRequest { method: RcaMethod; analysis: string; }
 export interface PlanCapaActionRequest { type: CapaActionType; details: string; ownerId: string; dueDate: string; }
-export interface VerifyNcRequest { passed: boolean; }
+export interface VerifyNcRequest { passed: boolean; password: string; pin: string; }
 export interface ConfirmEffectivenessRequest { effective: boolean; }
 
 // ── Reporting (read models — real data only) ─────────────────────────────────

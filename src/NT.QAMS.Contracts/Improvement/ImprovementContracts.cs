@@ -12,7 +12,7 @@ public sealed record RecordRcaRequest(string Method, string Analysis);
 
 public sealed record PlanCapaActionRequest(string Type, string Details, Guid OwnerId, DateOnly DueDate);
 
-public sealed record VerifyNcRequest(bool Passed);
+public sealed record VerifyNcRequest(bool Passed, string Password, string Pin);
 
 public sealed record ConfirmEffectivenessRequest(bool Effective);
 

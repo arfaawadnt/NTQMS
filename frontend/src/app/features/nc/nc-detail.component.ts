@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -11,6 +11,8 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { UserSelectComponent } from '../../shared/ui/user-select.component';
 import { WorkflowStepperComponent } from '../../shared/ui/workflow-stepper.component';
 import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
+import { EsignCredentials, EsignDialogComponent } from '../../shared/ui/esign-dialog.component';
+import { SignatureManifestComponent } from '../../shared/ui/signature-manifest.component';
 
 /**
  * Full nonconformance workspace: header + details, and the context-appropriate
@@ -21,7 +23,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 @Component({
     selector: 'qams-nc-detail',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DatePipe, NgTemplateOutlet, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, UserSelectComponent],
+    imports: [ReactiveFormsModule, DatePipe, NgTemplateOutlet, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, UserSelectComponent, EsignDialogComponent, SignatureManifestComponent],
     template: `
     @if (nc(); as n) {
       <qams-page-header [title]="n.ncRef + ' — ' + n.title">
@@ -97,9 +99,10 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
               @if (!allActionsComplete()) { <p class="muted">{{ i18n.t('nc.completeAllFirst') }}</p> }
             }
             @case ('PendingVerification') {
-              @if (perms.can('nc.approve')) {
-                <button (click)="facade.verify(n.id, { passed: true })">{{ i18n.t('nc.verifyPass') }}</button>
-                <button class="secondary" (click)="facade.verify(n.id, { passed: false })">{{ i18n.t('nc.verifyFail') }}</button>
+              @if (perms.can('nc.sign')) {
+                <p class="muted">{{ i18n.t('nc.verifySignHint') }}</p>
+                <button (click)="openVerify(true)">{{ i18n.t('nc.verifyPass') }}</button>
+                <button class="secondary" (click)="openVerify(false)">{{ i18n.t('nc.verifyFail') }}</button>
               } @else { <p class="muted">{{ i18n.t('nc.awaitVerify') }}</p> }
             }
             @case ('EffectivenessCheck') {
@@ -137,7 +140,17 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
         </section>
       </div>
     
+      <qams-signature-manifest [signatures]="facade.signatures()" />
+
       <qams-audit-trail [subject]="n.id" />
+
+      <qams-esign-dialog
+        [open]="esignOpen()"
+        [meaning]="esignMeaning()"
+        [busy]="facade.loading()"
+        [error]="facade.error()"
+        (confirm)="signVerify(n.id, $event)"
+        (cancel)="esignOpen.set(false)" />
     } @else {
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
@@ -180,6 +193,18 @@ export class NcDetailComponent implements OnInit {
   /** True when the current user can record RCA / work CAPA (any authenticated user). */
   readonly canWork = computed(() => true);
 
+  /** Whether the Part 11 e-signature dialog is open for the verification decision. */
+  readonly esignOpen = signal(false);
+  /** The verification outcome being signed (true = passed), captured when the dialog opens. */
+  private readonly pendingOutcome = signal(true);
+  /** The statement the verifier is attesting to, shown in the signing dialog. */
+  readonly esignMeaning = computed(() => {
+    const n = this.nc();
+    const ref = n ? n.ncRef : '';
+    return this.i18n.t(this.pendingOutcome() ? 'nc.signVerifyPass' : 'nc.signVerifyFail')
+      .replace('{ref}', ref);
+  });
+
   readonly triageForm = this.fb.nonNullable.group({ assigneeId: ['', [Validators.required]] });
   readonly rejectForm = this.fb.nonNullable.group({ reason: ['', [Validators.required, Validators.maxLength(1000)]] });
   readonly rcaForm = this.fb.nonNullable.group({
@@ -201,5 +226,21 @@ export class NcDetailComponent implements OnInit {
     if (this.actionForm.invalid) { return; }
     await this.facade.planAction(this.id(), this.actionForm.getRawValue());
     this.actionForm.reset({ type: 'Corrective', details: '', ownerId: '', dueDate: '' });
+  }
+
+  /** Opens the Part 11 signing dialog for a pass/fail verification decision. */
+  openVerify(passed: boolean): void {
+    this.pendingOutcome.set(passed);
+    this.esignOpen.set(true);
+  }
+
+  /** Signs and submits the verification; keeps the dialog open on failure so the error shows. */
+  async signVerify(id: string, credentials: EsignCredentials): Promise<void> {
+    await this.facade.verify(id, {
+      passed: this.pendingOutcome(),
+      password: credentials.password,
+      pin: credentials.pin,
+    });
+    if (this.facade.error() === '') { this.esignOpen.set(false); }
   }
 }

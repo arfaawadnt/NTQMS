@@ -1448,6 +1448,33 @@ export class I18nService {
     'nc.verifyPass': { en: 'Verify — passed', ar: 'تحقق — ناجح', fr: 'Vérifier — réussi' },
     'nc.verifyFail': { en: 'Verify — failed', ar: 'تحقق — فاشل', fr: 'Vérifier — échoué' },
     'nc.awaitVerify': { en: 'Awaiting verification.', ar: 'بانتظار التحقق.', fr: 'En attente de vérification.' },
+    'nc.verifySignHint': {
+      en: 'Verifying requires your electronic signature (account password + PIN).',
+      ar: 'يتطلب التحقق توقيعك الإلكتروني (كلمة مرور الحساب + رقم التعريف).',
+      fr: 'La vérification requiert votre signature électronique (mot de passe du compte + code PIN).',
+    },
+    'nc.signVerifyPass': {
+      en: 'I verify that the corrective action on {ref} is effective (passed).',
+      ar: 'أُقرّ بأن الإجراء التصحيحي على {ref} فعّال (ناجح).',
+      fr: "J'atteste que l'action corrective sur {ref} est efficace (réussie).",
+    },
+    'nc.signVerifyFail': {
+      en: 'I verify that the corrective action on {ref} is not effective (failed).',
+      ar: 'أُقرّ بأن الإجراء التصحيحي على {ref} غير فعّال (فاشل).',
+      fr: "J'atteste que l'action corrective sur {ref} n'est pas efficace (échouée).",
+    },
+
+    // ── Electronic signature (21 CFR Part 11) — shared e-sign dialog + manifest ──
+    'esign.title': { en: 'Electronic Signature', ar: 'التوقيع الإلكتروني', fr: 'Signature Électronique' },
+    'esign.password': { en: 'Account password', ar: 'كلمة مرور الحساب', fr: 'Mot de passe du compte' },
+    'esign.pin': { en: 'Signature PIN', ar: 'رقم تعريف التوقيع', fr: 'Code PIN de signature' },
+    'esign.pinHint': { en: '4-digit PIN', ar: 'رقم تعريف من 4 أرقام', fr: 'Code PIN à 4 chiffres' },
+    'esign.sign': { en: 'Sign', ar: 'توقيع', fr: 'Signer' },
+    'esign.signing': { en: 'Signing…', ar: 'جارٍ التوقيع…', fr: 'Signature…' },
+    'esign.manifest': { en: 'Electronic Signatures', ar: 'التواقيع الإلكترونية', fr: 'Signatures Électroniques' },
+    'esign.signer': { en: 'Signer', ar: 'الموقّع', fr: 'Signataire' },
+    'esign.meaning': { en: 'Meaning', ar: 'المعنى', fr: 'Signification' },
+    'esign.when': { en: 'Signed', ar: 'وقت التوقيع', fr: 'Signé le' },
     'nc.effectiveClose': { en: 'Effective — close', ar: 'فعّال — إغلاق', fr: 'Efficace — clôturer' },
     'nc.notEffective': { en: 'Not effective', ar: 'غير فعّال', fr: 'Non efficace' },
     'nc.awaitEffectiveness': { en: 'Awaiting effectiveness review.', ar: 'بانتظار مراجعة الفعالية.', fr: "En attente de la revue d'efficacité." },

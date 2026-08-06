@@ -31,6 +31,11 @@ public sealed class NonconformancesController(ISender sender) : ControllerBase
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct) =>
         Ok(await sender.Send(new GetNcByIdQuery(id), ct));
 
+    /// <summary>Part 11 §11.50 signature manifest for this nonconformance, visible to any viewer of the record.</summary>
+    [HttpGet("{id:guid}/signatures")]
+    public async Task<IActionResult> Signatures(Guid id, CancellationToken ct) =>
+        Ok(await sender.Send(new NT.QAMS.Application.ComplianceLedger.GetSignaturesForSubjectQuery($"NC:{id:N}"), ct));
+
     [HttpPost]
     public async Task<IActionResult> Raise(RaiseNcRequest request, CancellationToken ct)
     {
@@ -97,10 +102,10 @@ public sealed class NonconformancesController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/verify")]
-    [RequirePermission(PermissionCatalog.Nonconformances, PermissionAction.Approve)]
+    [RequirePermission(PermissionCatalog.Nonconformances, PermissionAction.Sign)]
     public async Task<IActionResult> Verify(Guid id, VerifyNcRequest request, CancellationToken ct)
     {
-        await sender.Send(new VerifyNcCommand(id, request.Passed), ct);
+        await sender.Send(new VerifyNcCommand(id, request.Passed, request.Password, request.Pin), ct);
         return NoContent();
     }
 
