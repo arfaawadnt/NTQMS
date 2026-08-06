@@ -12,12 +12,12 @@
 param()
 
 function Show-Port([int]$Port, [string]$Label) {
-    $c = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue
+    $c = Get-NetTCPConnection -LocalPort $Port -ErrorAction SilentlyContinue | Where-Object { $_.State -eq 'Listen' } | Select-Object -First 1
     if (-not $c) {
         Write-Host ("  {0,-6} :{1,-5} DOWN" -f $Label, $Port) -ForegroundColor Red
         return $false
     }
-    $procId = $c[0].OwningProcess
+    $procId = $c.OwningProcess
     $p      = Get-Process -Id $procId -ErrorAction SilentlyContinue
     $parent = (Get-CimInstance Win32_Process -Filter "ProcessId=$procId" -ErrorAction SilentlyContinue)
     $pname  = if ($parent) { (Get-CimInstance Win32_Process -Filter "ProcessId=$($parent.ParentProcessId)" -ErrorAction SilentlyContinue).Name } else { 'unknown' }

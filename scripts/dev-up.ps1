@@ -41,7 +41,7 @@ $logDir  = Join-Path $env:TEMP 'ntqms-dev'
 if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir -Force | Out-Null }
 
 function Test-Port([int]$Port) {
-    [bool](Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue)
+    [bool](Get-NetTCPConnection -LocalPort $Port -ErrorAction SilentlyContinue | Where-Object { $_.State -eq 'Listen' })
 }
 
 function Wait-Http([string]$Url, [int]$Seconds, [string]$LogPath) {
@@ -83,7 +83,7 @@ if (Test-Port 5080) {
     # Env vars are set on this shell only; Start-Process inherits them, and the
     # child keeps running after this script (and its shell) exits.
     $env:ASPNETCORE_ENVIRONMENT     = 'Development'
-    $env:ASPNETCORE_URLS            = 'http://localhost:5080'
+    $env:ASPNETCORE_URLS            = 'http://0.0.0.0:5080'
     $env:Database__MigrateOnStartup = 'true'
     if (-not $env:ConnectionStrings__Postgres) {
         $env:ConnectionStrings__Postgres = 'Host=localhost;Database=ntqams;Username=qams_app;Password=dev-only-local'
@@ -102,8 +102,8 @@ if (Test-Port 5080) {
     $psi.FileName = $dotnet
     $psi.Arguments = "exec `"$apiDll`""
     $psi.WorkingDirectory = $repo
-    $psi.UseShellExecute = $true
-    $psi.WindowStyle = [System.Diagnostics.ProcessWindowStyle]::Hidden
+    $psi.UseShellExecute = $false
+    $psi.CreateNoWindow = $true
     [System.Diagnostics.Process]::Start($psi) | Out-Null
 
     if (Wait-Http 'http://localhost:5080/health/ready' $TimeoutSeconds $apiLog) {
@@ -125,7 +125,7 @@ if ($ApiOnly) {
     Write-Host "SPA    :4200  starting..." -NoNewline
 
     Start-Process -FilePath $npm `
-        -ArgumentList @('start','--prefix','frontend','--','--proxy-config','proxy.conf.json') `
+        -ArgumentList @('start','--prefix','frontend','--','--host','0.0.0.0','--disable-host-check','--proxy-config','proxy.conf.json') `
         -WorkingDirectory $repo -WindowStyle Hidden `
         -RedirectStandardOutput $feLog -RedirectStandardError (Join-Path $logDir 'frontend.err.log') | Out-Null
 
