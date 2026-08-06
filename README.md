@@ -110,8 +110,11 @@ is included for container hosts.
 
 ## Increment history
 
-Ten verified increments, each building on the last (full detail in
-[`IMPLEMENTATION_LOG.md`](IMPLEMENTATION_LOG.md)):
+Current version: **v1.52.0** (full detail in [`IMPLEMENTATION_LOG.md`](IMPLEMENTATION_LOG.md);
+per-run test history in [`docs/validation/verification-log.md`](docs/validation/verification-log.md)).
+
+### Stage 1 — Initial vertical-slice build (v0.1 → v1.0, 2026-07-22)
+Every increment a complete UI→API→domain→DB→tests slice:
 
 | Ver | Delivered |
 |---|---|
@@ -125,9 +128,52 @@ Ten verified increments, each building on the last (full detail in
 | v0.8 | Analytical Quality (Validation + QC/Westgard + PT) |
 | v0.9 | Records & Retention + SLA/Escalation + Task Queue |
 | v1.0 | Compliance & security hardening (MFA, lockout, audit ledger, e-signatures) |
+| Frontend v1 | Angular SPA foundation — auth/shell + first feature slices |
 
-## Remaining
+### Stage 2 — Frontend build-out & regulatory remediation (v1.1 → v1.37)
+| Ver | Delivered |
+|---|---|
+| v1.1 → v1.24 | Full Angular SPA build-out across all modules; **frontend upgraded to Angular 22**; Playwright e2e + axe a11y |
+| v1.25 → v1.37 | **CSV / 21 CFR Part 11 audit remediation — all 18 findings CLOSED** (tenant RLS, signed-record immutability, MFA, SoD, reason-for-change, session revocation, e-sig logging, integration tests, backup/DR, exports, password policy, config externalization, secrets, GAMP 5 CSV doc set) |
 
-Fine-grained ~70-privilege matrix (role gates suffice today) · e-signature
-ceremonies on the signing points beyond document-publish (pattern established) ·
-SignalR real-time push · the **Angular 18 frontend** (largest remaining workstream).
+### Stage 3 — Enterprise-Architecture remediation train (v1.38 → v1.44)
+| Ver | Delivered |
+|---|---|
+| v1.38 | Phase 0 — deployment safety gates (DB-role guard, health live/ready, single-replica ADR-0001) |
+| v1.39 | Phase 1 — `xmin` concurrency (409), outbox dead-letter/backoff + `SKIP LOCKED` lease, sweep leader election |
+| v1.40 | Phase 2 — observability baseline (JSON logs, OTel HTTP→MediatR→EF→Outbox traces, `/metrics` + alerts) |
+| v1.41 | Phase 3 — rate limiting (429), security headers + locked CSP, TLS-at-proxy + HSTS |
+| v1.42 | Phase 4 — problem+json everywhere, pagination envelope, file allow-list/sniffing, deny-by-default command authz + CI gate, Idempotency-Key, `api/v1` versioning |
+| v1.43 | Phase 5 — CHECK constraints, fail-fast config guard, Npgsql retry/timeout, non-root container |
+| v1.44 | Phase 6 — module-boundary + API-surface snapshot merge gates, migration round-trip + audit-tamper tests, perf smoke |
+
+### Stage 4 — Road-to-100 & validation evidence (v1.45 → v1.50)
+| Ver | Delivered |
+|---|---|
+| v1.45 | Post-remediation backlog #1 |
+| v1.46 | Road-to-100 Phase 7 — session-security completion (retires ADR-0003) |
+| v1.47 | Road-to-100 Phase 8 — evidence at scale (load harness, perf/security probes) |
+| v1.48 | Road-to-100 Phase 9 — assurance depth |
+| v1.49 / v1.49.1 | GAMP 5 validation: engineering dry-run, OQ execution records, system-owner release decision |
+| v1.50 | Compliance status milestone (EA posture 88%, 0 critical) |
+
+### Stage 5 — Product build-out (v1.51.0 → v1.52.0)
+| Ver | Delivered |
+|---|---|
+| v1.51.0 | **Role Privilege module** — dynamic tenant-defined roles over a **170-key permission catalogue**; branch/department as a hard data filter |
+| v1.51.1 | Role Privilege OQ execution + defect RP-D1 fix |
+| v1.51.2 | **Schema hardening** — six `Hardening*` migrations (composite PKs, RLS parity, CHECK domains, deferrable tenant FKs); OQ-DB-01..08 executed |
+| **v1.52.0** | **Quality Analytics** (one computation serving a Quality Statistics dashboard + ISO 17025 §8.9.2 Management-Review pack; 9 sub-systems; tenant-configurable weighted Quality Health Score; URS-108…114) + **usability / self-service set** (My-Tasks role resolution, route↔help parity, management-review agenda/link/participants + dispatch, self-service & admin-issued e-signature PINs, self-service password change, tabbed equipment workspace with maintenance certificates; URS-115…122) |
+
+> **Note:** v1.52.0 is committed on `master` but not yet git-tagged (newest tag is `v1.51.2`).
+
+## Remaining / open items
+
+Product-backlog and release-gate items (see
+[`docs/as-built-review/`](docs/as-built-review/) for the full as-built assessment):
+
+- **e-signature ceremonies** on signing points beyond document-publish (audit sign-off, NC verify/close, quality-policy/change approve, review close, analytical study sign-offs — the ceremony pattern is established, not yet propagated).
+- **SignalR real-time push** (reserved but not built).
+- **SEC-001** — independent penetration test (in-house probes only to date).
+- **DOC-001** — validation signed on a qualified environment (OQ transcripts 12 & 13 await witness signatures; executed on a dev workstation).
+- **OPS-001** — staging observability + load/soak validation.
