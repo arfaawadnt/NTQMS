@@ -66,7 +66,7 @@ export class AuditsFacade {
   async start(id: string): Promise<void> { await this.mutate(id, () => this.api.start(id)); }
   async answer(id: string, itemId: string, r: AnswerChecklistItemRequest): Promise<void> { await this.mutate(id, () => this.api.answer(id, itemId, r)); }
   async raiseFinding(id: string, r: RaiseFindingRequest): Promise<void> { await this.mutate(id, () => this.api.raiseFinding(id, r)); }
-  async signOff(id: string): Promise<void> { await this.mutate(id, () => this.api.signOff(id)); }
+  async signOff(id: string, credentials: { password: string; pin: string }): Promise<void> { await this.mutate(id, () => this.api.signOff(id, credentials)); }
 
   private async mutate<T>(id: string, call: () => Observable<T>): Promise<void> {
     await this.run(async () => {

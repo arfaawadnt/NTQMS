@@ -31,7 +31,7 @@ export class ChangeApiService {
     return this.http.post<void>(`${this.base}/${id}/risk`, body);
   }
 
-  approve(id: string): Observable<void> { return this.http.post<void>(`${this.base}/${id}/approve`, {}); }
+  approve(id: string, body: { password: string; pin: string }): Observable<void> { return this.http.post<void>(`${this.base}/${id}/approve`, body); }
 
   reject(id: string, body: RejectChangeRequest): Observable<void> {
     return this.http.post<void>(`${this.base}/${id}/reject`, body);

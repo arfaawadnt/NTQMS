@@ -327,6 +327,14 @@ The **NC confirm-effectiveness**, **quality-policy approve**, and **change appro
 from their module's `approve` to `sign`: any tenant-defined role holding the old `approve` without
 `sign` on `nc` / `quality-policy` / `changes` loses that action until granted `.sign`.
 
+**Frontend (this increment).** The four gate actions now open the shared `qams-esign-dialog` to
+capture the account password + PIN: NC-detail's effectiveness (close) decision (a second dialog
+alongside the verify pilot's, gated on `nc.sign`), audit-detail sign-off, change-detail approve, and
+the quality-policy page's approve (a single-page component with no facade — the credentials go
+straight to its API service). Credentials thread through each facade/API. The NC signature manifest
+(added for verify in §A.13) now also shows the close signature. Per-study AQ manifests remain the
+only deferred display item.
+
 **Not yet in scope.** "Review close" (the as-built list's fifth non-AQ item) is **ambiguous** —
 several review aggregates exist (`AuditTrailReview.Complete`, `ManagementReview`, `UserAccessReview`,
 `DocumentReviewCycle`); which one(s) constitute a Part 11 signed determination is a scope decision,

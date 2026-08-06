@@ -1463,6 +1463,21 @@ export class I18nService {
       ar: 'أُقرّ بأن الإجراء التصحيحي على {ref} غير فعّال (فاشل).',
       fr: "J'atteste que l'action corrective sur {ref} n'est pas efficace (échouée).",
     },
+    'nc.effectivenessSignHint': {
+      en: 'Confirming effectiveness (closing) requires your electronic signature (account password + PIN).',
+      ar: 'يتطلب تأكيد الفعالية (الإغلاق) توقيعك الإلكتروني (كلمة مرور الحساب + رقم التعريف).',
+      fr: "La confirmation d'efficacité (clôture) requiert votre signature électronique (mot de passe + code PIN).",
+    },
+    'nc.signEffectivePass': {
+      en: 'I confirm the corrective action on {ref} is effective and close the nonconformance.',
+      ar: 'أؤكّد أن الإجراء التصحيحي على {ref} فعّال وأُغلق حالة عدم المطابقة.',
+      fr: "Je confirme que l'action corrective sur {ref} est efficace et je clôture la non-conformité.",
+    },
+    'nc.signEffectiveFail': {
+      en: 'I record that the corrective action on {ref} is not yet effective.',
+      ar: 'أُسجّل أن الإجراء التصحيحي على {ref} لم يصبح فعّالاً بعد.',
+      fr: "Je consigne que l'action corrective sur {ref} n'est pas encore efficace.",
+    },
 
     // ── Electronic signature (21 CFR Part 11) — shared e-sign dialog + manifest ──
     'esign.title': { en: 'Electronic Signature', ar: 'التوقيع الإلكتروني', fr: 'Signature Électronique' },
@@ -1479,6 +1494,11 @@ export class I18nService {
       en: 'I sign off this analytical record as reviewed and approved.',
       ar: 'أُوقّع على هذا السجل التحليلي بوصفه مُراجَعاً ومعتمَداً.',
       fr: 'Je signe cet enregistrement analytique comme revu et approuvé.',
+    },
+    'esign.signMeaning': {
+      en: 'I apply my electronic signature to this record as reviewed and approved.',
+      ar: 'أُذيّل هذا السجل بتوقيعي الإلكتروني بوصفه مُراجَعاً ومعتمَداً.',
+      fr: "J'appose ma signature électronique sur cet enregistrement comme revu et approuvé.",
     },
     'nc.effectiveClose': { en: 'Effective — close', ar: 'فعّال — إغلاق', fr: 'Efficace — clôturer' },
     'nc.notEffective': { en: 'Not effective', ar: 'غير فعّال', fr: 'Non efficace' },

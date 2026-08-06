@@ -27,7 +27,7 @@ export class QualityPolicyApiService {
     return this.http.put<void>(`${this.base}/${id}`, { statement });
   }
 
-  approve(id: string, effectiveDate: string): Observable<void> {
-    return this.http.post<void>(`${this.base}/${id}/approve`, { effectiveDate });
+  approve(id: string, effectiveDate: string, credentials: { password: string; pin: string }): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/approve`, { effectiveDate, ...credentials });
   }
 }

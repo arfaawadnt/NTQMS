@@ -37,5 +37,5 @@ export class AuditsApiService {
     return this.http.post<{ findingId: string }>(`${this.base}/${id}/findings`, body);
   }
 
-  signOff(id: string): Observable<void> { return this.http.post<void>(`${this.base}/${id}/sign-off`, {}); }
+  signOff(id: string, body: { password: string; pin: string }): Observable<void> { return this.http.post<void>(`${this.base}/${id}/sign-off`, body); }
 }

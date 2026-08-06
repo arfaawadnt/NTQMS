@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, input, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -9,6 +9,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { WorkflowStepperComponent } from '../../shared/ui/workflow-stepper.component';
 import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
+import { EsignCredentials, EsignDialogComponent } from '../../shared/ui/esign-dialog.component';
 
 /**
  * Change Control workspace. Enforces (client-side, matching the domain) the core
@@ -19,7 +20,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 @Component({
     selector: 'qams-change-detail',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+    imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, EsignDialogComponent],
     template: `
     @if (item(); as c) {
       <qams-page-header [title]="c.changeRef + ' — ' + c.title" [subtitle]="i18n.t('chg.proposedBy') + ': ' + c.proposedBy">
@@ -76,7 +77,8 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 
           @if (perms.canAny('changes.approve', 'changes.void')) {
             <div class="decision">
-              <button (click)="facade.approve(c.id)" [disabled]="!c.riskItemId">{{ i18n.t('chg.approve') }}</button>
+              <button (click)="esignOpen.set(true)" [disabled]="!c.riskItemId">{{ i18n.t('chg.approve') }}</button>
+              <qams-esign-dialog [open]="esignOpen()" [meaning]="i18n.t('esign.signMeaning')" [busy]="facade.loading()" [error]="facade.error()" (confirm)="doApprove(c.id, $event)" (cancel)="esignOpen.set(false)" />
               @if (!c.riskItemId) { <p class="muted small">{{ i18n.t('chg.approveHint') }}</p> }
             </div>
             <form [formGroup]="rejectForm" (ngSubmit)="reject(c.id)">
@@ -142,6 +144,15 @@ export class ChangeDetailComponent implements OnInit {
 
   /** Route-bound change id. */
   readonly id = input.required<string>();
+
+  /** Whether the Part 11 e-signature dialog is open for the approval. */
+  readonly esignOpen = signal(false);
+
+  /** Approves through the ceremony dialog; closes on success, stays open (showing the error) on failure. */
+  async doApprove(id: string, credentials: EsignCredentials): Promise<void> {
+    await this.facade.approve(id, credentials);
+    if (this.facade.error() === '') { this.esignOpen.set(false); }
+  }
 
   /** Canonical workflow path for the stepper (off-path states render as terminal). */
   readonly flowSteps = ['Proposed', 'Approved', 'Closed', 'Reviewed'] as const;

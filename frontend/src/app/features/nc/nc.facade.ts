@@ -109,6 +109,8 @@ export class NcFacade {
   }
   async confirmEffectiveness(id: string, r: ConfirmEffectivenessRequest): Promise<void> {
     await this.mutate(id, () => this.api.confirmEffectiveness(id, r));
+    // A successful (effective) close mints a §11.50 signature; refresh the manifest.
+    if (this._error() === '') { await this.loadSignatures(id); }
   }
 
   /** Runs a state-changing call then reloads the detail so the UI reflects the new state. */

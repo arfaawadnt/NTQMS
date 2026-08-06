@@ -78,8 +78,8 @@ export class ChangeFacade {
     await this.mutate(id, () => this.api.linkRisk(id, { riskItemId }));
   }
 
-  async approve(id: string): Promise<void> {
-    await this.mutate(id, () => this.api.approve(id));
+  async approve(id: string, credentials: { password: string; pin: string }): Promise<void> {
+    await this.mutate(id, () => this.api.approve(id, credentials));
   }
 
   async reject(id: string, reason: string): Promise<void> {

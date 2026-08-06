@@ -106,9 +106,10 @@ import { SignatureManifestComponent } from '../../shared/ui/signature-manifest.c
               } @else { <p class="muted">{{ i18n.t('nc.awaitVerify') }}</p> }
             }
             @case ('EffectivenessCheck') {
-              @if (perms.can('nc.approve')) {
-                <button (click)="facade.confirmEffectiveness(n.id, { effective: true })">{{ i18n.t('nc.effectiveClose') }}</button>
-                <button class="secondary" (click)="facade.confirmEffectiveness(n.id, { effective: false })">{{ i18n.t('nc.notEffective') }}</button>
+              @if (perms.can('nc.sign')) {
+                <p class="muted">{{ i18n.t('nc.effectivenessSignHint') }}</p>
+                <button (click)="openEffectiveness(true)">{{ i18n.t('nc.effectiveClose') }}</button>
+                <button class="secondary" (click)="openEffectiveness(false)">{{ i18n.t('nc.notEffective') }}</button>
               } @else { <p class="muted">{{ i18n.t('nc.awaitEffectiveness') }}</p> }
             }
             @default { <p class="muted">{{ i18n.t('nc.terminal') }}</p> }
@@ -151,6 +152,14 @@ import { SignatureManifestComponent } from '../../shared/ui/signature-manifest.c
         [error]="facade.error()"
         (confirm)="signVerify(n.id, $event)"
         (cancel)="esignOpen.set(false)" />
+
+      <qams-esign-dialog
+        [open]="effOpen()"
+        [meaning]="effMeaning()"
+        [busy]="facade.loading()"
+        [error]="facade.error()"
+        (confirm)="signEffectiveness(n.id, $event)"
+        (cancel)="effOpen.set(false)" />
     } @else {
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
@@ -242,5 +251,30 @@ export class NcDetailComponent implements OnInit {
       pin: credentials.pin,
     });
     if (this.facade.error() === '') { this.esignOpen.set(false); }
+  }
+
+  /** Effectiveness-confirmation (close) signing dialog state. */
+  readonly effOpen = signal(false);
+  private readonly pendingEffective = signal(true);
+  readonly effMeaning = computed(() => {
+    const n = this.nc();
+    return this.i18n.t(this.pendingEffective() ? 'nc.signEffectivePass' : 'nc.signEffectiveFail')
+      .replace('{ref}', n ? n.ncRef : '');
+  });
+
+  /** Opens the signing dialog for an effectiveness (close) decision. */
+  openEffectiveness(effective: boolean): void {
+    this.pendingEffective.set(effective);
+    this.effOpen.set(true);
+  }
+
+  /** Signs and submits the effectiveness decision; closes the dialog on success. */
+  async signEffectiveness(id: string, credentials: EsignCredentials): Promise<void> {
+    await this.facade.confirmEffectiveness(id, {
+      effective: this.pendingEffective(),
+      password: credentials.password,
+      pin: credentials.pin,
+    });
+    if (this.facade.error() === '') { this.effOpen.set(false); }
   }
 }

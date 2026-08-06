@@ -8,6 +8,7 @@ import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
 import { QualityPolicy } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
+import { EsignCredentials, EsignDialogComponent } from '../../shared/ui/esign-dialog.component';
 
 /**
  * The controlled quality policy (ISO 9001 §5.2 / ISO 17025 §8.2). Everyone sees the
@@ -19,7 +20,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 @Component({
     selector: 'qams-quality-policy',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [FormsModule, DatePipe, PageHeaderComponent],
+    imports: [FormsModule, DatePipe, PageHeaderComponent, EsignDialogComponent],
     template: `
     <qams-page-header [title]="i18n.t('qp.title')" [subtitle]="i18n.t('qp.subtitle')">
       @if (perms.can('quality-policy.create')) {
@@ -28,6 +29,8 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
     </qams-page-header>
 
     @if (error()) { <div class="error">{{ error() }}</div> }
+
+    <qams-esign-dialog [open]="esignOpen()" [meaning]="i18n.t('esign.signMeaning')" [busy]="loading()" [error]="error()" (confirm)="signApprove($event)" (cancel)="esignOpen.set(false)" />
     @if (loading()) { <p class="muted">{{ i18n.t('common.loading') }}</p> }
 
     @if (!loading()) {
@@ -76,7 +79,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
                     <td class="actions">
                       @if (p.status === 'Draft') {
                         <input type="date" [(ngModel)]="effectiveDates[p.id]" [attr.aria-label]="i18n.t('qp.effective')" />
-                        <button class="link" type="button" (click)="approve(p.id)" [disabled]="!effectiveDates[p.id]">{{ i18n.t('qp.approve') }}</button>
+                        <button class="link" type="button" (click)="openApprove(p.id)" [disabled]="!effectiveDates[p.id]">{{ i18n.t('qp.approve') }}</button>
                       }
                     </td>
                   </tr>
@@ -116,6 +119,10 @@ export class QualityPolicyComponent implements OnInit {
   /** Per-draft effective date entered before approval (keyed by policy id). */
   effectiveDates: Record<string, string> = {};
 
+  /** Part 11 e-signature dialog state for policy approval. */
+  readonly esignOpen = signal(false);
+  private readonly pendingPolicyId = signal('');
+
   ngOnInit(): void { void this.load(); }
 
   async load(): Promise<void> {
@@ -136,13 +143,23 @@ export class QualityPolicyComponent implements OnInit {
     });
   }
 
-  async approve(id: string): Promise<void> {
+  /** Opens the Part 11 signing dialog for a policy approval (the effective date must be set first). */
+  openApprove(id: string): void {
+    if (!this.effectiveDates[id]) { return; }
+    this.pendingPolicyId.set(id);
+    this.esignOpen.set(true);
+  }
+
+  /** Signs and submits the approval; closes the dialog on success, keeps it open (showing the error) on failure. */
+  async signApprove(credentials: EsignCredentials): Promise<void> {
+    const id = this.pendingPolicyId();
     const effectiveDate = this.effectiveDates[id];
-    if (!effectiveDate) { return; }
+    if (!id || !effectiveDate) { return; }
     await this.run(async () => {
-      await firstValueFrom(this.api.approve(id, effectiveDate));
+      await firstValueFrom(this.api.approve(id, effectiveDate, credentials));
       await this.reload();
     });
+    if (this.error() === '') { this.esignOpen.set(false); }
   }
 
   cancelDraft(): void {
