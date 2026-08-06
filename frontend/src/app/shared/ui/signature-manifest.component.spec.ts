@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient, withXhr } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { SignatureManifestComponent } from './signature-manifest.component';
 import { SignatureRecord } from '../../core/models';
 
@@ -6,7 +8,10 @@ describe('SignatureManifestComponent', () => {
   let fixture: ComponentFixture<SignatureManifestComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [SignatureManifestComponent] }).compileComponents();
+    await TestBed.configureTestingModule({
+      imports: [SignatureManifestComponent],
+      providers: [provideHttpClient(withXhr()), provideHttpClientTesting()],
+    }).compileComponents();
     fixture = TestBed.createComponent(SignatureManifestComponent);
   });
 

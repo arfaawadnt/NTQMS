@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { EsignCredentials, EsignDialogComponent } from '../../shared/ui/esign-dialog.component';
+import { SignatureManifestComponent } from '../../shared/ui/signature-manifest.component';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -24,7 +25,7 @@ interface Pt { x: number; y: number; }
 @Component({
     selector: 'qams-method-comparison-detail',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, CsvImportComponent, EsignDialogComponent],
+    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, CsvImportComponent, EsignDialogComponent, SignatureManifestComponent],
     template: `
     @if (item(); as s) {
       <qams-page-header [title]="s.studyRef + ' — ' + s.analyte" [subtitle]="s.testMethod + ' vs ' + s.referenceMethod">
@@ -158,6 +159,8 @@ interface Pt { x: number; y: number; }
           @if (s.state === 'SignedOff') { <p class="muted">{{ i18n.t('mc.signedOffNote') }}</p> }
         </div>
       </section>
+
+      <qams-signature-manifest [subjectUrl]="'/api/method-comparisons/' + s.id + '/signatures'" />
 
       <qams-audit-trail [subject]="s.id" />
     } @else {

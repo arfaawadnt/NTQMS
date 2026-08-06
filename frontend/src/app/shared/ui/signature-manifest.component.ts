@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { I18nService } from '../../core/i18n.service';
 import { SignatureRecord } from '../../core/models';
@@ -6,17 +7,19 @@ import { SignatureRecord } from '../../core/models';
 /**
  * Renders the 21 CFR Part 11 §11.50 signature manifest for a single record — who
  * signed, what the signing meant, and when — directly on the signed record, as the
- * regulation requires. Presentational: the parent fetches the signatures (a record
- * viewer may read them) and passes them in. Emits nothing and holds no state; when
- * there are no signatures it renders nothing, so a parent can place it
- * unconditionally.
+ * regulation requires. Two modes:
+ *  - presentational: the parent fetches and passes `[signatures]` (e.g. the NC facade);
+ *  - self-fetching: the parent passes `[subjectUrl]` (a record viewer may read them) and
+ *    the component GETs the manifest itself — used by the analytical study pages, which
+ *    have no signatures signal on their facade.
+ * When there are no signatures it renders nothing, so a parent can place it unconditionally.
  */
 @Component({
   selector: 'qams-signature-manifest',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [DatePipe],
   template: `
-    @if (signatures().length > 0) {
+    @if (rows().length > 0) {
       <section class="card">
         <h3>{{ i18n.t('esign.manifest') }}</h3>
         <table>
@@ -28,7 +31,7 @@ import { SignatureRecord } from '../../core/models';
             </tr>
           </thead>
           <tbody>
-            @for (s of signatures(); track s.id) {
+            @for (s of rows(); track s.id) {
               <tr>
                 <td><b>{{ s.signerDisplay }}</b></td>
                 <td>{{ s.meaning }}</td>
@@ -47,7 +50,24 @@ import { SignatureRecord } from '../../core/models';
 })
 export class SignatureManifestComponent {
   readonly i18n = inject(I18nService);
+  private readonly http = inject(HttpClient);
 
-  /** The record's signatures (Part 11 §11.50), oldest-first as returned by the server. */
-  readonly signatures = input.required<SignatureRecord[]>();
+  /** Presentational mode: signatures passed in by the parent (oldest-first). */
+  readonly signatures = input<SignatureRecord[]>([]);
+  /** Self-fetching mode: a URL to GET the record's Part 11 §11.50 signatures from. */
+  readonly subjectUrl = input<string>('');
+
+  private readonly _fetched = signal<SignatureRecord[] | null>(null);
+
+  /** Rows to render: the self-fetched manifest when a URL is given, else the passed-in input. */
+  readonly rows = computed(() => this._fetched() ?? this.signatures());
+
+  constructor() {
+    effect(() => {
+      const url = this.subjectUrl();
+      if (url) {
+        this.http.get<SignatureRecord[]>(url).subscribe((s) => this._fetched.set(s));
+      }
+    });
+  }
 }

@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { EsignCredentials, EsignDialogComponent } from '../../shared/ui/esign-dialog.component';
+import { SignatureManifestComponent } from '../../shared/ui/signature-manifest.component';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -20,7 +21,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 @Component({
     selector: 'qams-uncertainty-detail',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, EsignDialogComponent],
+    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, EsignDialogComponent, SignatureManifestComponent],
     template: `
     @if (item(); as b) {
       <qams-page-header [title]="b.budgetRef + ' — ' + b.analyte" [subtitle]="b.method + ' · ' + b.level">
@@ -105,6 +106,8 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
           }
         </div>
       </section>
+
+      <qams-signature-manifest [subjectUrl]="'/api/uncertainty-budgets/' + b.id + '/signatures'" />
 
       <qams-audit-trail [subject]="b.id" />
     } @else {

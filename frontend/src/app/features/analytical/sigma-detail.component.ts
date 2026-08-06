@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { EsignCredentials, EsignDialogComponent } from '../../shared/ui/esign-dialog.component';
+import { SignatureManifestComponent } from '../../shared/ui/signature-manifest.component';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -20,7 +21,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 @Component({
     selector: 'qams-sigma-detail',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, EsignDialogComponent],
+    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, EsignDialogComponent, SignatureManifestComponent],
     template: `
     @if (item(); as s) {
       <qams-page-header [title]="s.assessmentRef + ' — ' + s.analyte" [subtitle]="i18n.t('sig.subtitle')">
@@ -88,6 +89,8 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
           }
         </div>
       </section>
+
+      <qams-signature-manifest [subjectUrl]="'/api/sigma-assessments/' + s.id + '/signatures'" />
 
       <qams-audit-trail [subject]="s.id" />
     } @else {

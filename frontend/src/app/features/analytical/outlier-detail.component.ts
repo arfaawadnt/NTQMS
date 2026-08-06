@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { EsignCredentials, EsignDialogComponent } from '../../shared/ui/esign-dialog.component';
+import { SignatureManifestComponent } from '../../shared/ui/signature-manifest.component';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -20,7 +21,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 @Component({
     selector: 'qams-outlier-detail',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, EsignDialogComponent],
+    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, EsignDialogComponent, SignatureManifestComponent],
     template: `
     @if (item(); as s) {
       <qams-page-header [title]="s.screeningRef + ' — ' + s.dataset" [subtitle]="s.unit">
@@ -100,6 +101,8 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
           @if (s.state === 'SignedOff') { <p class="muted">{{ i18n.t('mc.signedOffNote') }}</p> }
         </div>
       </section>
+
+      <qams-signature-manifest [subjectUrl]="'/api/outlier-screenings/' + s.id + '/signatures'" />
 
       <qams-audit-trail [subject]="s.id" />
     } @else {
