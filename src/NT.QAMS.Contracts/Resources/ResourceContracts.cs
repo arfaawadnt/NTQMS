@@ -64,6 +64,8 @@ public sealed record AssignCompetencyRequest(
 public sealed record ScoreAssessmentRequest(int Score);
 
 public sealed record RevokeCompetencyRequest(string Reason);
+/// <summary>The two 21 CFR Part 11 identification components (§11.200(a)(1)) to authorize a competency.</summary>
+public sealed record AuthorizeCompetencyRequest(string Password, string Pin);
 
 public sealed record AssessmentResultDto(Guid Id, int Score, Guid AssessorId, DateTimeOffset AssessedAtUtc);
 
@@ -78,7 +80,7 @@ public sealed record CompetencyDetailDto(
 // ── Personnel Authorization Matrix (ISO 17025 §6.2.6) ───────────────────────
 
 public sealed record GrantTestAuthorizationRequest(
-    Guid UserId, Guid TestCatalogItemId, Guid CompetencyRecordId, string Scope);
+    Guid UserId, Guid TestCatalogItemId, Guid CompetencyRecordId, string Scope, string Password, string Pin);
 
 public sealed record SuspendTestAuthorizationRequest(string Reason);
 

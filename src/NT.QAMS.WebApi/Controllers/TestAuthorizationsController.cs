@@ -24,11 +24,12 @@ public sealed class TestAuthorizationsController(ISender sender) : ControllerBas
         Ok(await sender.Send(new GetTestAuthorizationByIdQuery(id), ct));
 
     [HttpPost]
-    [RequirePermission(PermissionCatalog.TestAuthorizations, PermissionAction.Create)]
+    [RequirePermission(PermissionCatalog.TestAuthorizations, PermissionAction.Sign)]
     public async Task<IActionResult> Grant(GrantTestAuthorizationRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new GrantTestAuthorizationCommand(
-            request.UserId, request.TestCatalogItemId, request.CompetencyRecordId, request.Scope), ct);
+            request.UserId, request.TestCatalogItemId, request.CompetencyRecordId, request.Scope,
+            request.Password, request.Pin), ct);
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }
 

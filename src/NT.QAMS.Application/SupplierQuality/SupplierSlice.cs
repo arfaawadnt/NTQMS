@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
+using NT.QAMS.Application.Compliance;
 using NT.QAMS.Application.RiskGovernance;
 using NT.QAMS.Contracts.Governance;
 using NT.QAMS.Domain.SupplierQuality;
@@ -37,8 +38,10 @@ public sealed class RegisterSupplierHandler(
 [RequireInternalActor]
 public sealed record AddCertificateCommand(
     Guid SupplierId, string CertificateType, DateOnly ExpiresAt, Guid? FileId) : ICommand<Guid>;
-[RequireInternalActor]
-public sealed record ApproveSupplierCommand(Guid SupplierId) : ICommand;
+/// <summary>Approving a supplier is a Part 11 signing ceremony: it requires the approver's e-signature (account password + PIN).</summary>
+[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.Suppliers,
+    NT.QAMS.Domain.Authorization.PermissionAction.Sign)]
+public sealed record ApproveSupplierCommand(Guid SupplierId, string Password, string Pin) : ICommand;
 [RequireInternalActor]
 public sealed record SuspendSupplierCommand(Guid SupplierId, string Reason) : ICommand;
 [RequireInternalActor]
@@ -84,13 +87,32 @@ public sealed class AddCertificateHandler(IAppDbContext db) : ICommandHandler<Ad
     }
 }
 
-public sealed class ApproveSupplierHandler(IAppDbContext db, ICurrentUser user)
+public sealed class ApproveSupplierHandler(IAppDbContext db, ICurrentUser user, IESignatureService signatures)
     : ICommandHandler<ApproveSupplierCommand>
 {
     public async Task Handle(ApproveSupplierCommand c, CancellationToken ct)
     {
-        (await SupplierLoader.LoadAsync(db, c.SupplierId, ct))
-            .Approve(GovernanceHelpers.RequireActor(user));
+        var actor = GovernanceHelpers.RequireActor(user);
+        var supplier = await SupplierLoader.LoadAsync(db, c.SupplierId, ct);
+
+        // Pre-validate before minting (append-only ledger; mirrors the pilot). The aggregate re-checks both.
+        if (supplier.Status == SupplierStatus.Approved)
+        {
+            throw new InvalidStateTransitionException("SUP-010", "Supplier is already approved.");
+        }
+
+        if (actor == supplier.RegisteredBy)
+        {
+            throw new DomainException(
+                "SOD-SUP-001", "Segregation of duties: the registrant cannot approve their own supplier.");
+        }
+
+        var subjectRef = $"SUP:{supplier.Id:N}";
+        await signatures.SignAsync(
+            actor, c.Password, c.Pin, $"Approved supplier {supplier.SupplierRef}", subjectRef,
+            SignatureContentHash.Compute(("supplier", supplier.SupplierRef), ("outcome", "approved")), ct);
+
+        supplier.Approve(actor);
         await db.SaveChangesAsync(ct);
     }
 }

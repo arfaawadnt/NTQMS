@@ -67,6 +67,8 @@ public sealed record ReviewDetailDto(
 public sealed record RegisterSupplierRequest(string Name, string SupplierType, Guid? BranchId = null, Guid? DepartmentId = null);
 public sealed record AddCertificateRequest(string CertificateType, DateOnly ExpiresAt, Guid? FileId);
 public sealed record SuspendSupplierRequest(string Reason);
+/// <summary>The two 21 CFR Part 11 identification components (§11.200(a)(1)) to approve a supplier.</summary>
+public sealed record ApproveSupplierRequest(string Password, string Pin);
 public sealed record EvaluationCriterionRequest(string Criterion, decimal Weight, decimal Score);
 public sealed record RecordEvaluationRequest(
     DateOnly PeriodStart, DateOnly PeriodEnd, IReadOnlyList<EvaluationCriterionRequest> Criteria);
@@ -90,7 +92,7 @@ public sealed record SupplierEvaluationDto(
 public sealed record DeclareConflictRequest(
     Guid DeclarantId, string Description, string RelatedParty, DateOnly DeclaredOn);
 
-public sealed record AssessConflictRequest(string RiskLevel, string Mitigation);
+public sealed record AssessConflictRequest(string RiskLevel, string Mitigation, string Password, string Pin);
 
 public sealed record CloseConflictRequest(string Outcome, string ClosureNote);
 

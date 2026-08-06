@@ -198,10 +198,10 @@ public sealed class SuppliersController(ISender sender) : ControllerBase
             id, request.CertificateType, request.ExpiresAt, request.FileId), ct) });
 
     [HttpPost("{id:guid}/approve")]
-    [RequirePermission(PermissionCatalog.Suppliers, PermissionAction.Approve)]
-    public async Task<IActionResult> Approve(Guid id, CancellationToken ct)
+    [RequirePermission(PermissionCatalog.Suppliers, PermissionAction.Sign)]
+    public async Task<IActionResult> Approve(Guid id, ApproveSupplierRequest request, CancellationToken ct)
     {
-        await sender.Send(new ApproveSupplierCommand(id), ct);
+        await sender.Send(new ApproveSupplierCommand(id, request.Password, request.Pin), ct);
         return NoContent();
     }
 

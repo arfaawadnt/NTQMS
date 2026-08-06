@@ -150,7 +150,7 @@ public static class PermissionCatalog
         new(Risks, GroupRisk, "perm.mod.risks", FullRecordLifecycle),
         new(Compliance, GroupRisk, "perm.mod.compliance",
             [PermissionAction.View, PermissionAction.Create, PermissionAction.Approve, PermissionAction.Export]),
-        new(Conflicts, GroupRisk, "perm.mod.conflicts", FullRecordLifecycle),
+        new(Conflicts, GroupRisk, "perm.mod.conflicts", SignedRecordLifecycle),
         new(OrgContext, GroupRisk, "perm.mod.orgContext",
             [PermissionAction.View, PermissionAction.Create, PermissionAction.Edit, PermissionAction.Void, PermissionAction.Export]),
         new(AccessReviews, GroupRisk, "perm.mod.accessReviews", SignedRecordLifecycle),
@@ -159,7 +159,7 @@ public static class PermissionCatalog
         new(Equipment, GroupResources, "perm.mod.equipment", FullRecordLifecycle),
         new(ReferenceStandards, GroupResources, "perm.mod.referenceStandards", FullRecordLifecycle),
         new(MonitoringPoints, GroupResources, "perm.mod.monitoringPoints", FullRecordLifecycle),
-        new(Suppliers, GroupResources, "perm.mod.suppliers", FullRecordLifecycle),
+        new(Suppliers, GroupResources, "perm.mod.suppliers", SignedRecordLifecycle),
 
         // ── People & competence ──────────────────────────────────────────────
         new(Competencies, GroupPeople, "perm.mod.competencies", SignedRecordLifecycle),

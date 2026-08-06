@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
+using NT.QAMS.Application.Compliance;
 using NT.QAMS.Contracts.Resources;
 using NT.QAMS.Domain.Competency;
 using NT.QAMS.SharedKernel.Abstractions;
@@ -38,8 +39,10 @@ public sealed class AssignCompetencyHandler(IAppDbContext db)
 
 [RequireInternalActor]
 public sealed record ScoreAssessmentCommand(Guid CompetencyId, int Score) : ICommand;
-[RequireInternalActor]
-public sealed record AuthorizeCompetencyCommand(Guid CompetencyId) : ICommand;
+/// <summary>Authorizing a competency is a Part 11 signing ceremony: it requires the authoriser's e-signature (account password + PIN).</summary>
+[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.Competencies,
+    NT.QAMS.Domain.Authorization.PermissionAction.Sign)]
+public sealed record AuthorizeCompetencyCommand(Guid CompetencyId, string Password, string Pin) : ICommand;
 [RequireInternalActor]
 public sealed record RevokeCompetencyCommand(Guid CompetencyId, string Reason) : ICommand;
 
@@ -75,13 +78,34 @@ public sealed class ScoreAssessmentHandler(IAppDbContext db, ICurrentUser user, 
     }
 }
 
-public sealed class AuthorizeCompetencyHandler(IAppDbContext db, ICurrentUser user, IClock clock)
+public sealed class AuthorizeCompetencyHandler(
+    IAppDbContext db, ICurrentUser user, IClock clock, IESignatureService signatures)
     : ICommandHandler<AuthorizeCompetencyCommand>
 {
     public async Task Handle(AuthorizeCompetencyCommand c, CancellationToken ct)
     {
-        (await CompetencyLoader.LoadAsync(db, c.CompetencyId, ct))
-            .Authorize(CompetencyLoader.RequireActor(user), DateOnly.FromDateTime(clock.UtcNow.UtcDateTime));
+        var actor = CompetencyLoader.RequireActor(user);
+        var competency = await CompetencyLoader.LoadAsync(db, c.CompetencyId, ct);
+
+        // Pre-validate before minting (append-only ledger; mirrors the pilot). The aggregate re-checks both.
+        if (competency.Status != CompetencyStatus.Evaluated)
+        {
+            throw new InvalidStateTransitionException(
+                "COMP-012", "Only an Evaluated competency can be authorized.");
+        }
+
+        if (actor == competency.TraineeId)
+        {
+            throw new DomainException(
+                "SOD-COMP-001", "Segregation of duties: a trainee cannot authorize their own competency.");
+        }
+
+        var subjectRef = $"COMP:{competency.Id:N}";
+        await signatures.SignAsync(
+            actor, c.Password, c.Pin, $"Authorized competency for {competency.Subject}", subjectRef,
+            SignatureContentHash.Compute(("competency", subjectRef), ("subject", competency.Subject)), ct);
+
+        competency.Authorize(actor, DateOnly.FromDateTime(clock.UtcNow.UtcDateTime));
         await db.SaveChangesAsync(ct);
     }
 }

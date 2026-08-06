@@ -31,10 +31,11 @@ public sealed class ConflictsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/assess")]
-    [RequirePermission(PermissionCatalog.Conflicts, PermissionAction.Approve)]
+    [RequirePermission(PermissionCatalog.Conflicts, PermissionAction.Sign)]
     public async Task<IActionResult> Assess(Guid id, AssessConflictRequest request, CancellationToken ct)
     {
-        await sender.Send(new AssessConflictCommand(id, request.RiskLevel, request.Mitigation), ct);
+        await sender.Send(
+            new AssessConflictCommand(id, request.RiskLevel, request.Mitigation, request.Password, request.Pin), ct);
         return NoContent();
     }
 

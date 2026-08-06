@@ -373,6 +373,28 @@ Scheduled-only); minutes are already enforced by the command validator before th
 `reviews.sign` (both already exist in the `reviews` module). A tenant-defined role that closed
 reviews via `reviews.void` without `reviews.sign` loses that action until granted `.sign`.
 
+### A.17 Part 11 electronic-signature ceremony — four remaining SoD gates (RISK-03 scope decision)
+
+Brings the four previously-borderline SoD gates into Part 11 scope (System Owner decision,
+2026-08-06): **supplier approval** (SOD-SUP-001), **conflict-of-interest assessment** (SOD-COI-001),
+**competency authorization** (SOD-COMP-001), and **test-authorization grant** (SOD-AUTHZ-001). Each
+enforced SoD in-domain but minted no `signature_record`; each now runs the full ceremony. No
+schema/domain change. Two of the four modules had no `Sign` action, so **two new catalogue keys**
+were minted — `suppliers.sign` and `conflicts.sign` (`Suppliers`/`Conflicts` →
+`SignedRecordLifecycle`); `competencies.sign` and `test-authorizations.sign` already existed. All
+four keys auto-grant to Tenant Administrator (`AllKeys`) and Quality Manager (predicate), and stay
+excluded from the explicit Department Head / Analyst grants.
+
+| URS | Requirement (delta) | Design element(s) | Verification | Status |
+| --- | ------------------- | ----------------- | ------------ | ------ |
+| URS-127 | Approving a supplier, assessing a conflict of interest, authorizing a competency, and granting a test authorization shall each require the actor's electronic signature (account password + PIN, §11.200(a)(1)), recorded as an immutable signature bound to the record (§11.50/§11.70); the SoD and state gates shall be checked before any signature is minted. Test-authorization grant is a create: every precondition is validated and the aggregate constructed (in-memory, untracked) before the signature is minted, so a failed signing leaves no authorization. | `ApproveSupplierCommand` / `AssessConflictCommand` / `AuthorizeCompetencyCommand` / `GrantTestAuthorizationCommand` gain `Password`+`Pin` and `[RequirePermissionPolicy(<module>, Sign)]`; handlers pre-validate SoD + state then `SignAsync` then the aggregate method (subjects `SUP:`/`COI:`/`COMP:`/`TAUTH:{id}`); per-gate request DTOs (`ApproveSupplierRequest`, `AuthorizeCompetencyRequest` new; `AssessConflictRequest`, `GrantTestAuthorizationRequest` extended); `PermissionCatalog` adds `suppliers.sign` + `conflicts.sign`; controllers moved to `Sign` (supplier/conflict/competency from `approve`; test-auth grant from `create`) | AUTO — full backend suite 242/88/33/31+1/82 (role/catalog tests green with the two new keys); `CommandPolicyTests` accepts the four policies. The signing mechanism is proven live on real PostgreSQL by the prior gates (incl. the review-close positive mint); the two new keys follow the verified PtPlan precedent | Template — engineering complete; automated evidence recorded; witnessed OQ pending |
+
+**Authorization upgrade note (act before release).** `suppliers.sign` and `conflicts.sign` are
+**new keys** — existing tenants' seeded roles lack them and additive seeding will not backfill;
+grant them (or migrate). The supplier/conflict/competency endpoints also moved from their module's
+`approve` to `sign`, and test-authorization grant from `create` to `sign`: any tenant role holding
+the old action without `sign` loses it until granted.
+
 ---
 
 ## Part B — Installation Qualification (IQ) delta

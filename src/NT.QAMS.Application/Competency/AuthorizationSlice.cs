@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
+using NT.QAMS.Application.Compliance;
 using NT.QAMS.Contracts.Resources;
 using NT.QAMS.Domain.Competency;
 using NT.QAMS.SharedKernel.Abstractions;
@@ -10,9 +11,11 @@ namespace NT.QAMS.Application.Competency;
 
 // â”€â”€ Commands â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-[RequireInternalActor]
+/// <summary>Granting a test authorization is a Part 11 signing ceremony: it requires the grantor's e-signature (account password + PIN).</summary>
+[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.TestAuthorizations,
+    NT.QAMS.Domain.Authorization.PermissionAction.Sign)]
 public sealed record GrantTestAuthorizationCommand(
-    Guid UserId, Guid TestCatalogItemId, Guid CompetencyRecordId, string Scope) : ICommand<Guid>;
+    Guid UserId, Guid TestCatalogItemId, Guid CompetencyRecordId, string Scope, string Password, string Pin) : ICommand<Guid>;
 
 public sealed class GrantTestAuthorizationValidator : AbstractValidator<GrantTestAuthorizationCommand>
 {
@@ -25,7 +28,8 @@ public sealed class GrantTestAuthorizationValidator : AbstractValidator<GrantTes
     }
 }
 
-public sealed class GrantTestAuthorizationHandler(IAppDbContext db, ICurrentUser user, IClock clock)
+public sealed class GrantTestAuthorizationHandler(
+    IAppDbContext db, ICurrentUser user, IClock clock, IESignatureService signatures)
     : ICommandHandler<GrantTestAuthorizationCommand, Guid>
 {
     public async Task<Guid> Handle(GrantTestAuthorizationCommand c, CancellationToken ct)
@@ -66,6 +70,14 @@ public sealed class GrantTestAuthorizationHandler(IAppDbContext db, ICurrentUser
         var authorization = TestAuthorization.Grant(
             c.UserId, c.TestCatalogItemId, c.CompetencyRecordId, scope, actor,
             DateOnly.FromDateTime(clock.UtcNow.UtcDateTime), competency.ExpiresAt.Value);
+
+        // Every grant precondition has passed and the aggregate is validated (incl. SOD-AUTHZ-001) but
+        // NOT yet tracked; mint the signature before Add so a failed signing leaves no authorization (§11.70).
+        var subjectRef = $"TAUTH:{authorization.Id:N}";
+        await signatures.SignAsync(
+            actor, c.Password, c.Pin, $"Granted {scope} test authorization", subjectRef,
+            SignatureContentHash.Compute(("subject", subjectRef), ("outcome", "granted")), ct);
+
         db.TestAuthorizations.Add(authorization);
         await db.SaveChangesAsync(ct);
         return authorization.Id;

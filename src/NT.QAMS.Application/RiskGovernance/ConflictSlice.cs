@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
+using NT.QAMS.Application.Compliance;
 using NT.QAMS.Contracts.Governance;
 using NT.QAMS.Domain.RiskGovernance;
 using NT.QAMS.SharedKernel.Abstractions;
@@ -13,8 +14,10 @@ namespace NT.QAMS.Application.RiskGovernance;
 [RequireInternalActor]
 public sealed record DeclareConflictCommand(
     Guid DeclarantId, string Description, string RelatedParty, DateOnly DeclaredOn) : ICommand<Guid>;
-[RequireInternalActor]
-public sealed record AssessConflictCommand(Guid ConflictId, string RiskLevel, string Mitigation) : ICommand;
+/// <summary>Assessing a conflict of interest is a Part 11 signing ceremony: it requires the assessor's e-signature (account password + PIN).</summary>
+[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.Conflicts,
+    NT.QAMS.Domain.Authorization.PermissionAction.Sign)]
+public sealed record AssessConflictCommand(Guid ConflictId, string RiskLevel, string Mitigation, string Password, string Pin) : ICommand;
 [RequireInternalActor]
 public sealed record CloseConflictCommand(Guid ConflictId, string Outcome, string ClosureNote) : ICommand;
 
@@ -63,7 +66,7 @@ public sealed class DeclareConflictHandler(
     }
 }
 
-public sealed class ConflictWorkflowHandlers(IAppDbContext db, ICurrentUser user) :
+public sealed class ConflictWorkflowHandlers(IAppDbContext db, ICurrentUser user, IESignatureService signatures) :
     ICommandHandler<AssessConflictCommand>,
     ICommandHandler<CloseConflictCommand>
 {
@@ -72,6 +75,25 @@ public sealed class ConflictWorkflowHandlers(IAppDbContext db, ICurrentUser user
         var actor = user.UserId
             ?? throw new DomainException("AUTH-003", "An authenticated user is required.");
         var conflict = await LoadAsync(c.ConflictId, ct);
+
+        // Pre-validate before minting (append-only ledger; mirrors the pilot). The aggregate re-checks both.
+        if (conflict.Status != ConflictStatus.Declared)
+        {
+            throw new InvalidStateTransitionException(
+                "COI-010", $"Only a declared conflict can be assessed (current: {conflict.Status}).");
+        }
+
+        if (actor == conflict.DeclarantId)
+        {
+            throw new DomainException(
+                "SOD-COI-001", "Segregation of duties: declarants cannot assess their own conflict.");
+        }
+
+        var subjectRef = $"COI:{conflict.Id:N}";
+        await signatures.SignAsync(
+            actor, c.Password, c.Pin, $"Assessed conflict of interest {conflict.ConflictRef}", subjectRef,
+            SignatureContentHash.Compute(("conflict", conflict.ConflictRef), ("outcome", "assessed")), ct);
+
         conflict.Assess(actor, Enum.Parse<ConflictRiskLevel>(c.RiskLevel, ignoreCase: true), c.Mitigation);
         await db.SaveChangesAsync(ct);
     }

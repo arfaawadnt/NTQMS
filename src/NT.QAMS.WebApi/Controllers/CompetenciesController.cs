@@ -42,10 +42,10 @@ public sealed class CompetenciesController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/authorize")]
-    [RequirePermission(PermissionCatalog.Competencies, PermissionAction.Approve)]
-    public async Task<IActionResult> AuthorizeCompetency(Guid id, CancellationToken ct)
+    [RequirePermission(PermissionCatalog.Competencies, PermissionAction.Sign)]
+    public async Task<IActionResult> AuthorizeCompetency(Guid id, AuthorizeCompetencyRequest request, CancellationToken ct)
     {
-        await sender.Send(new AuthorizeCompetencyCommand(id), ct);
+        await sender.Send(new AuthorizeCompetencyCommand(id, request.Password, request.Pin), ct);
         return NoContent();
     }
 
