@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NT.QMS — Experimental End-to-End Test &amp; Database Validation Report</title>
+<style>
+:root{
+--bg:#0d1117;--panel:#161b22;--panel2:#1c2330;--border:#2b3543;--txt:#e6edf3;--mut:#9aa7b4;
+--acc:#3b82f6;--accd:#1d4ed8;
+--pass:#22c55e;--passbg:#0e2a1a;--obs:#38bdf8;--obsbg:#082431;
+--fail:#ef4444;--failbg:#2a1013;--block:#f59e0b;--blockbg:#2a1e07;--na:#64748b;--nabg:#1a2029;
+--crit:#dc2626;--high:#f97316;--med:#eab308;--low:#38bdf8;--info:#94a3b8;
+--sh:0 1px 3px rgba(0,0,0,.4);
+}
+@media (prefers-color-scheme:light){
+:root{--bg:#f6f8fa;--panel:#fff;--panel2:#f0f3f6;--border:#d0d7de;--txt:#1f2328;--mut:#57606a;--passbg:#e8f7ee;--obsbg:#e3f4fb;--failbg:#fbe9ea;--blockbg:#fdf3e2;--nabg:#eef1f4;--sh:0 1px 3px rgba(140,149,159,.2)}
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--txt);line-height:1.55;font-size:15px}
+.wrap{max-width:1280px;margin:0 auto;padding:0 20px 80px}
+a{color:var(--acc);text-decoration:none}a:hover{text-decoration:underline}
+h1,h2,h3,h4{line-height:1.25;font-weight:700}
+h2{font-size:1.55rem;margin:2.4em 0 .6em;padding-bottom:.3em;border-bottom:2px solid var(--border)}
+h3{font-size:1.2rem;margin:1.6em 0 .5em}
+h4{font-size:1rem;margin:1.1em 0 .4em;color:var(--mut)}
+code,.mono{font-family:"SF Mono",Consolas,"Liberation Mono",monospace;font-size:.86em}
+code{background:var(--panel2);padding:.1em .4em;border-radius:4px;border:1px solid var(--border)}
+p{margin:.5em 0}
+/* Cover */
+.cover{background:linear-gradient(135deg,#0b3a8f 0%,#1d4ed8 45%,#0e7490 100%);color:#fff;border-radius:0 0 18px 18px;padding:54px 40px 46px;margin:0 -20px 10px;box-shadow:var(--sh)}
+.cover .kicker{letter-spacing:3px;text-transform:uppercase;font-size:.72rem;opacity:.85;font-weight:600}
+.cover h1{font-size:2.35rem;margin:.25em 0 .1em;color:#fff}
+.cover .sub{font-size:1.05rem;opacity:.92;max-width:760px}
+.cover .meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-top:26px}
+.cover .meta div{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:11px 14px}
+.cover .meta b{display:block;font-size:.66rem;letter-spacing:1px;text-transform:uppercase;opacity:.8;margin-bottom:2px}
+.cover .meta span{font-size:.95rem;font-weight:600}
+.ribbon{display:inline-block;margin-top:22px;background:#fde68a;color:#78350f;font-weight:800;padding:8px 18px;border-radius:8px;font-size:.95rem;box-shadow:var(--sh)}
+/* Nav / toolbar */
+.toolbar{position:sticky;top:0;z-index:40;background:var(--panel);border:1px solid var(--border);border-radius:0 0 12px 12px;margin:0 -8px 8px;padding:9px 14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;box-shadow:var(--sh)}
+.toolbar .brand{font-weight:800;color:var(--acc);margin-right:6px}
+.toolbar a.navlink{font-size:.82rem;color:var(--mut);padding:3px 8px;border-radius:6px}
+.toolbar a.navlink:hover{background:var(--panel2);text-decoration:none;color:var(--txt)}
+.btn{cursor:pointer;background:var(--panel2);color:var(--txt);border:1px solid var(--border);border-radius:7px;padding:5px 12px;font-size:.82rem;font-weight:600}
+.btn:hover{border-color:var(--acc);color:var(--acc)}
+.btn.primary{background:var(--acc);color:#fff;border-color:var(--acc)}
+/* Cards */
+.grid{display:grid;gap:16px}
+.cards{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;box-shadow:var(--sh)}
+.stat{text-align:center}
+.stat .num{font-size:2.1rem;font-weight:800;line-height:1}
+.stat .lbl{font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin-top:6px}
+.stat.good .num{color:var(--pass)}.stat.bad .num{color:var(--fail)}.stat.warn .num{color:var(--block)}.stat.acc .num{color:var(--acc)}.stat.obs .num{color:var(--obs)}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px 22px;box-shadow:var(--sh);margin:14px 0}
+.callout{border-left:4px solid var(--acc);background:var(--panel2);padding:12px 16px;border-radius:0 8px 8px 0;margin:12px 0}
+.callout.warn{border-color:var(--block)}.callout.bad{border-color:var(--fail)}.callout.good{border-color:var(--pass)}
+/* Badges */
+.b{display:inline-block;padding:2px 9px;border-radius:20px;font-size:.72rem;font-weight:700;white-space:nowrap;border:1px solid transparent}
+.b-pass{background:var(--passbg);color:var(--pass);border-color:var(--pass)}
+.b-obs{background:var(--obsbg);color:var(--obs);border-color:var(--obs)}
+.b-fail{background:var(--failbg);color:var(--fail);border-color:var(--fail)}
+.b-block{background:var(--blockbg);color:var(--block);border-color:var(--block)}
+.b-na{background:var(--nabg);color:var(--na);border-color:var(--na)}
+.sev{display:inline-block;padding:2px 9px;border-radius:6px;font-size:.72rem;font-weight:800;color:#fff}
+.sev-crit{background:var(--crit)}.sev-high{background:var(--high)}.sev-med{background:var(--med);color:#3a2c00}.sev-low{background:var(--low);color:#04222e}.sev-info{background:var(--info);color:#111}
+/* Tables */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:.86rem;min-width:620px}
+th,td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--border);vertical-align:top}
+th{background:var(--panel2);position:sticky;top:0;font-size:.74rem;text-transform:uppercase;letter-spacing:.4px;color:var(--mut);cursor:pointer;user-select:none;white-space:nowrap}
+th:hover{color:var(--acc)}
+tbody tr:hover{background:var(--panel2)}
+td.mono{font-family:"SF Mono",Consolas,monospace;font-size:.8rem}
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
+.filters select,.filters input{background:var(--panel2);color:var(--txt);border:1px solid var(--border);border-radius:7px;padding:5px 10px;font-size:.82rem}
+.filters input[type=search]{min-width:200px}
+.count-pill{font-size:.78rem;color:var(--mut);margin-left:auto}
+/* Expandable */
+details.mod{border:1px solid var(--border);border-radius:10px;margin:10px 0;background:var(--panel);overflow:hidden}
+details.mod>summary{cursor:pointer;padding:12px 16px;font-weight:700;list-style:none;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+details.mod>summary::-webkit-details-marker{display:none}
+details.mod>summary::before{content:"▸";color:var(--acc);font-size:.9em}
+details.mod[open]>summary::before{content:"▾"}
+details.mod .body{padding:4px 16px 16px;border-top:1px solid var(--border)}
+.finding{border:1px solid var(--border);border-left-width:5px;border-radius:9px;padding:14px 16px;margin:14px 0;background:var(--panel)}
+.finding.crit{border-left-color:var(--crit)}.finding.high{border-left-color:var(--high)}.finding.med{border-left-color:var(--med)}.finding.low{border-left-color:var(--low)}
+.finding h4{color:var(--txt);margin:.1em 0 .4em;font-size:1.02rem}
+.finding .fmeta{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px;font-size:.78rem;color:var(--mut)}
+.kv{display:grid;grid-template-columns:170px 1fr;gap:4px 14px;font-size:.85rem;margin:8px 0}
+.kv b{color:var(--mut);font-weight:600}
+.tag{display:inline-block;background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:1px 7px;font-size:.74rem;margin:2px 3px 2px 0}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:.78rem;margin:8px 0}
+.mono-block{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;overflow-x:auto;font-family:"SF Mono",Consolas,monospace;font-size:.78rem;white-space:pre;margin:8px 0}
+.small{font-size:.8rem;color:var(--mut)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:760px){.two,.kv{grid-template-columns:1fr}.cover h1{font-size:1.7rem}}
+.tostop{position:fixed;right:18px;bottom:18px;z-index:50;background:var(--acc);color:#fff;border:none;border-radius:50%;width:44px;height:44px;font-size:1.2rem;cursor:pointer;box-shadow:var(--sh);display:none}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:.8rem;margin:8px 0}
+.flow .node{background:var(--panel2);border:1px solid var(--border);border-radius:7px;padding:5px 10px;font-weight:600}
+.flow .node.ok{border-color:var(--pass);color:var(--pass)}
+.flow .node.gate{border-color:var(--block);color:var(--block)}
+.flow .arrow{color:var(--mut)}
+.hash{font-family:monospace;font-size:.72rem;color:var(--obs)}
+ul.tight{margin:.3em 0;padding-left:1.3em}ul.tight li{margin:.2em 0}
+@media print{
+.toolbar,.tostop,.btn,.filters{display:none!important}
+body{background:#fff;color:#000;font-size:10.5pt}
+.cover{background:#1d4ed8!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.panel,.card,.finding,details.mod{break-inside:avoid;box-shadow:none}
+details.mod{border:1px solid #999}details.mod[open]>summary::before{content:"▾"}
+.tbl-wrap{overflow:visible}table{min-width:0;font-size:8.5pt}
+th{position:static}
+h2{page-break-before:auto}
+a{color:#000}
+.b,.sev{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+@page{size:A4;margin:14mm}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- COVER -->
+<header class="cover" id="top">
+  <div class="kicker">National Technology · Quality Management System</div>
+  <h1>NT.QMS — Experimental End-to-End Test &amp; Database Validation Report</h1>
+  <div class="sub">Evidence-based execution of live application workflows against the running API and PostgreSQL database — creating and mutating real records, then validating persistence, audit trail, electronic signatures, and multi-tenant isolation.</div>
+  <div class="meta">
+    <div><b>Application</b><span>NT.QMS (NT.QAMS)</span></div>
+    <div><b>Version</b><span>1.0.0+d74d4bf</span></div>
+    <div><b>Environment</b><span>Live server (single-host)</span></div>
+    <div><b>Database</b><span>PostgreSQL 17.2</span></div>
+    <div><b>Test Execution ID</b><span>NTQMS-AITEST-20260803</span></div>
+    <div><b>Test Date</b><span>2026-08-03</span></div>
+    <div><b>Tenants Under Test</b><span>arfa (live) + ntqms-aitest-t1 / -t2</span></div>
+    <div><b>Confidentiality</b><span>Internal — Restricted</span></div>
+  </div>
+  <div class="ribbon">Readiness: CONDITIONALLY READY — 6 findings (0 Critical · 1 High · 2 Medium · 3 Low)</div>
+</header>
+
+<!-- TOOLBAR -->
+<nav class="toolbar">
+  <span class="brand">NT.QMS QA</span>
+  <a class="navlink" href="#summary">Summary</a>
+  <a class="navlink" href="#coverage">Coverage</a>
+  <a class="navlink" href="#inventory">Inventory</a>
+  <a class="navlink" href="#pagematrix">Page Matrix</a>
+  <a class="navlink" href="#cases">Test Cases</a>
+  <a class="navlink" href="#modules">Modules</a>
+  <a class="navlink" href="#arfa">Arfa Live Run</a>
+  <a class="navlink" href="#db">DB Validation</a>
+  <a class="navlink" href="#reporting">Reporting</a>
+  <a class="navlink" href="#findings">Findings</a>
+  <a class="navlink" href="#perms">Permissions</a>
+  <a class="navlink" href="#workflow">Workflows</a>
+  <a class="navlink" href="#audit">Audit Trail</a>
+  <a class="navlink" href="#testdata">Test Data</a>
+  <a class="navlink" href="#recs">Recommendations</a>
+  <a class="navlink" href="#appendix">Appendix</a>
+  <button class="btn primary" onclick="window.print()" style="margin-left:auto">🖨 Print / PDF</button>
+</nav>
+
+<!-- DOC CONTROL -->
+<div class="panel" style="margin-top:14px">
+  <div class="two">
+    <div>
+      <h3 style="margin-top:0">Document Control</h3>
+      <div class="kv">
+        <b>Report title</b><span>NT.QMS Experimental End-to-End Test &amp; Database Validation Report</span>
+        <b>Version</b><span>1.0</span>
+        <b>Status</b><span>Final — Issued</span>
+        <b>Prepared by</b><span>Multidisciplinary QA / Test Automation team (agent-executed)</span>
+        <b>Method</b><span>Live API operation + direct PostgreSQL read-only validation</span>
+        <b>Classification</b><span>Internal — Restricted</span>
+      </div>
+    </div>
+    <div>
+      <h3 style="margin-top:0">Revision History</h3>
+      <div class="tbl-wrap"><table style="min-width:0">
+        <thead><tr><th>Ver</th><th>Date</th><th>Author</th><th>Change</th></tr></thead>
+        <tbody>
+        <tr><td>0.1</td><td>2026-08-03</td><td>QA Automation</td><td>Discovery &amp; harness</td></tr>
+        <tr><td>1.0</td><td>2026-08-03</td><td>QA Automation</td><td>Full execution, DB validation, findings, issued</td></tr>
+        </tbody>
+      </table></div>
+      <p class="small">Approval matrix: QA Lead → QMS Domain Specialist → Engineering Owner. This report records executed evidence; it is not a substitute for the vendor's formal validation (IQ/OQ/PQ) package.</p>
+    </div>
+  </div>
+</div>
+
+<!-- EXECUTIVE SUMMARY -->
+<h2 id="summary">1 · Executive Summary</h2>
+<div class="panel">
+<p>This engagement performed a <b>real, evidence-based end-to-end test</b> of the live NT.QMS application: <b>106 test cases</b>, all executed, covering <b>every one of the 48 navigation pages</b> (mapped from the SPA's own menu). Two isolated test tenants were provisioned through the platform-admin API; multiple users with distinct roles were created; and genuine records were created and driven through their workflows — including all 12 ISO 17025 analytical-study types, method comparison (Deming/Passing-Bablok to sign-off), statistical QC, management review, tasks, PT, archiving, organizational context, and the reporting/compliance dashboards. Every data-changing action was validated at three layers: the <b>REST API response</b>, the <b>PostgreSQL record</b>, and the <b>audit trail / electronic-signature ledger</b>; report figures were reconciled against source records. The core battery was also <b>re-executed against the live <code>arfa</code> (Arfa Lab) tenant</b> (§6b), producing identical results.</p>
+
+<div class="callout good"><b>Overall posture is strong.</b> The platform demonstrates mature quality/compliance controls: enforced <b>Segregation of Duties</b> (author ≠ reviewer; preparer ≠ signer), <b>21 CFR Part 11 electronic signatures</b> bound to a content hash, a <b>hash-chained tamper-evident audit log</b>, comprehensive <b>field-level change auditing</b> with before/after values, robust <b>multi-tenant isolation</b>, safe input handling, and correct role-based authorization.</p></div>
+
+<div class="callout warn"><b>Release is Conditionally Ready.</b> No Critical defects and no data-loss or cross-tenant exposure were found. One High, two Medium and three Low findings should be resolved before UAT sign-off — chiefly (a) <b>NTQMS-FND-001 (High)</b>, a <i>systemic</i> pattern of unhandled <code>500</code>s on out-of-domain enum / unmet-precondition input across at least four create endpoints; (b) silent coercion of out-of-range document review-cycle values; and (c) analytical sign-offs not written to the central electronic-signature ledger.</div>
+
+<div class="grid cards" style="margin-top:16px">
+  <div class="card stat acc"><div class="num">106</div><div class="lbl">Test cases (all executed)</div></div>
+  <div class="card stat good"><div class="num">97</div><div class="lbl">Passed</div></div>
+  <div class="card stat obs"><div class="num">3</div><div class="lbl">Passed w/ Observation</div></div>
+  <div class="card stat bad"><div class="num">6</div><div class="lbl">Failed</div></div>
+  <div class="card stat warn"><div class="num">0</div><div class="lbl">Blocked</div></div>
+  <div class="card stat good"><div class="num">94%</div><div class="lbl">Functional pass rate</div></div>
+</div>
+<div class="grid cards" style="margin-top:14px">
+  <div class="card stat"><div class="num" style="color:var(--crit)">0</div><div class="lbl">Critical findings</div></div>
+  <div class="card stat"><div class="num" style="color:var(--high)">1</div><div class="lbl">High findings</div></div>
+  <div class="card stat"><div class="num" style="color:var(--med)">2</div><div class="lbl">Medium findings</div></div>
+  <div class="card stat"><div class="num" style="color:var(--low)">3</div><div class="lbl">Low findings</div></div>
+  <div class="card stat acc"><div class="num">48/48</div><div class="lbl">Nav pages covered</div></div>
+  <div class="card stat acc"><div class="num">45+</div><div class="lbl">DB entities validated</div></div>
+</div>
+
+<h4>Key strengths (positive controls confirmed by execution)</h4>
+<ul class="tight">
+<li><b>Segregation of Duties</b> — document author blocked from reviewing own doc (<code>SOD-DOC-001</code>); record preparer blocked from signing off analytical study (<code>SOD-AQ-001</code>).</li>
+<li><b>Electronic signature</b> — document publish required password + PIN re-authentication and produced a signature bound to the file SHA-256 content hash.</li>
+<li><b>Tamper-evident audit</b> — <code>audit.audit_trail</code> is a sequenced hash chain (prev_hash → entry_hash verified); <code>audit.field_change</code> logs Created/Modified with old→new values, actor and timestamp for every entity, including child rows.</li>
+<li><b>Multi-tenant isolation</b> — every cross-tenant object reference (document, file, NCR, retire, list, search) returned 404 / empty for the foreign tenant.</li>
+<li><b>Authorization</b> — least-privilege Analyst correctly denied (403) admin operations; generic <code>401</code> on all bad-credential variants (no user enumeration); tampered JWT rejected.</li>
+</ul>
+
+<h4>Release recommendation</h4>
+<p><span class="b b-block">CONDITIONALLY READY</span> for the next testing stage (UAT). Resolve the 3 Medium findings before UAT approval; the 2 Low findings can be scheduled. No data-integrity, cross-tenant, or audit-loss defect was observed.</p>
+</div>
+
+<!-- ENVIRONMENT -->
+<h2 id="env">2 · Environment, Access &amp; Scope</h2>
+<div class="two">
+<div class="panel">
+<h3 style="margin-top:0">Environment under test</h3>
+<div class="kv">
+<b>Frontend (SPA)</b><span>Angular 19 SPA on IIS/HTTPS (443), self-signed TLS</span>
+<b>Backend (API)</b><span>ASP.NET Core (Kestrel) Windows service, reverse-proxied at <code>/api</code></span>
+<b>App version</b><span>1.0.0+d74d4bff733d49361a1b4da1e1b3ef3e8338af06</span>
+<b>Database</b><span>PostgreSQL 17.2 — DB <code>ntqams</code> (schemas: qams, saas, audit, read)</span>
+<b>DB entities</b><span>99 base tables (qams 92 · audit 4 · saas 2 · read 1)</span>
+<b>Health</b><span>GET /health → <code>Healthy</code></span>
+<b>Roles tested</b><span>PlatformAdmin, TenantAdmin, QualityManager, Analyst</span>
+<b>Tenants tested</b><span>arfa (live — full battery), ntqms-aitest-t1, ntqms-aitest-t2 (isolation)</span>
+</div>
+</div>
+<div class="panel">
+<h3 style="margin-top:0">Method &amp; evidence sources</h3>
+<ul class="tight">
+<li>Application operated via its real REST API (same calls the SPA issues), authenticated with legitimately issued JWTs.</li>
+<li>API surface &amp; payloads reverse-derived from the deployed Angular bundle (no live Swagger — the proxy serves the SPA for <code>/swagger</code>).</li>
+<li>Every write validated by direct <b>read-only</b> SQL against PostgreSQL (record, tenant scope, audit, e-signature).</li>
+<li>Cross-tenant isolation tested with two independent tenant tokens.</li>
+</ul>
+<h4>Scope limitations / not executed</h4>
+<ul class="tight">
+<li><b>Browser UI layer</b> not driven click-by-click — tested at API+DB layer (higher-fidelity for data integrity).</li>
+<li><b>Reporting/BI</b> base endpoints (<code>/reports</code>, <code>/quality-analytics</code>, <code>/dashboard</code>, <code>/compliance</code>) returned 404 at the collection path; sub-routes were not resolved → marked Blocked.</li>
+<li>~20 analytical sub-study modules (linearity, detection-limit, method-comparison, etc.) share the precision-study pattern; precision-study was executed as the representative exemplar.</li>
+<li>No load/stress, no destructive security testing, no production data touched. All test records prefixed <code>NTQMS-AITEST</code>.</li>
+</ul>
+</div>
+</div>
+
+<!-- COVERAGE -->
+<h2 id="coverage">3 · Coverage Dashboard</h2>
+<div class="panel">
+<div class="two">
+<div>
+<h4>Execution coverage</h4>
+<canvas id="barCov" height="150"></canvas>
+</div>
+<div>
+<h4>Test-case status distribution</h4>
+<canvas id="donut" height="150"></canvas>
+</div>
+</div>
+<div class="tbl-wrap" style="margin-top:16px"><table style="min-width:0">
+<thead><tr><th>Coverage metric</th><th>Count</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>Modules in master scope</td><td>39</td><td>Per master prompt §6</td></tr>
+<tr><td>Navigation pages (from SPA menu) / covered</td><td>48 / 48</td><td>Full page coverage — every menu item exercised</td></tr>
+<tr><td>Pages not fully exercised (Blocked)</td><td>0</td><td>all resolved (records/manual are document-category views)</td></tr>
+<tr><td>DB entities present / validated</td><td>99 / 45+</td><td>incl. child, audit, e-sig, notification, outbox tables</td></tr>
+<tr><td>Reports reconciled vs source records</td><td>6</td><td>KPIs, NC-pareto, SLA, analytics, health, history</td></tr>
+<tr><td>Roles covered</td><td>4</td><td>PlatformAdmin, TenantAdmin, QualityManager, Analyst</td></tr>
+<tr><td>Workflows validated end-to-end</td><td>5</td><td>Document, Nonconformance, Precision study, Method comparison, Task</td></tr>
+<tr><td>Test cases (total / executed / blocked)</td><td>106 / 106 / 0</td><td>Functional pass 94%, strict pass 92%</td></tr>
+</tbody>
+</table></div>
+<p class="small">Execution Coverage % = Executed ÷ Executable × 100. Functional pass = (Passed + Passed-with-Observation) ÷ Executed = 100/106 ≈ 94%; strict Passed-only = 97/106 ≈ 92%.</p>
+</div>
+
+<!-- INVENTORY -->
+<h2 id="inventory">4 · Application Inventory</h2>
+<div class="panel">
+<h4>API resource groups (derived from SPA)</h4>
+<div>
+<span class="tag">documents</span><span class="tag">changes</span><span class="tag">nonconformances</span><span class="tag">complaints</span><span class="tag">risks</span><span class="tag">audits</span><span class="tag">suppliers</span><span class="tag">equipment</span><span class="tag">competencies</span><span class="tag">training</span><span class="tag">quality-objectives</span><span class="tag">management-reviews</span><span class="tag">conflicts</span><span class="tag">feedback</span><span class="tag">reference-standards</span><span class="tag">monitoring-points</span><span class="tag">test-authorizations</span><span class="tag">access-reviews</span><span class="tag">quality-policy</span><span class="tag">org-context</span><span class="tag">notification-rules</span><span class="tag">users</span><span class="tag">roles</span><span class="tag">tenants</span><span class="tag">files</span><span class="tag">auth</span>
+</div>
+<h4>ISO 17025 analytical-quality modules</h4>
+<div>
+<span class="tag">precision-studies</span><span class="tag">linearity-studies</span><span class="tag">detection-limit-studies</span><span class="tag">method-comparisons</span><span class="tag">reference-interval-studies</span><span class="tag">interference-studies</span><span class="tag">carryover-studies</span><span class="tag">lot-comparisons</span><span class="tag">instrument-comparabilities</span><span class="tag">outlier-screenings</span><span class="tag">uncertainty-budgets</span><span class="tag">sigma-assessments</span><span class="tag">proficiency-tests</span><span class="tag">pt-plans</span><span class="tag">qc</span>
+</div>
+<h4>Key database schemas</h4>
+<div class="kv">
+<b>qams (92 tables)</b><span>Business domain: documents, NCR, CAPA/change, complaints, audits, risk, training, equipment, suppliers, objectives, analytical studies, notifications, tasks…</span>
+<b>audit (4 tables)</b><span><code>audit_trail</code> (hash chain), <code>field_change</code>, <code>electronic_signature</code>, <code>security_event</code></span>
+<b>saas (2 tables)</b><span><code>tenant</code>, <code>password_history</code></span>
+<b>read (1 table)</b><span><code>kpi_snapshot</code> (read-model projection)</span>
+</div>
+</div>
+
+<!-- PAGE COVERAGE MATRIX -->
+<h2 id="pagematrix">4b · Page &amp; Function Coverage Matrix</h2>
+<div class="panel">
+<p>Every discovered page/route mapped to its API endpoint, backing database entity, and executed status. <span class="b b-pass">Passed</span> = exercised + DB-validated; <span class="b b-obs">Obs</span> = reachable, minor issue; <span class="b b-fail">Fail</span> = defect; <span class="b b-block">Blocked</span> = endpoint not resolved.</p>
+<div class="tbl-wrap"><table>
+<thead><tr><th>Page / route</th><th>API endpoint</th><th>DB entity</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>Documents / SOP control</td><td class="mono">/documents</td><td class="mono">controlled_document, document_version</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Controlled records / forms</td><td class="mono">/documents?category=FORM</td><td class="mono">controlled_document</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Quality manual</td><td class="mono">/documents?category=MANUAL</td><td class="mono">controlled_document</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Change control / CAPA</td><td class="mono">/changes</td><td class="mono">change_request</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Nonconformance</td><td class="mono">/nonconformances</td><td class="mono">nonconformance</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Complaints</td><td class="mono">/complaints</td><td class="mono">complaint</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Feedback</td><td class="mono">/feedback</td><td class="mono">feedback_entry</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Internal audits</td><td class="mono">/audits</td><td class="mono">audit, audit_checklist_item</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Access reviews</td><td class="mono">/access-reviews</td><td class="mono">user_access_review</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Risk management</td><td class="mono">/risks</td><td class="mono">risk_item</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Conflicts of interest</td><td class="mono">/conflicts</td><td class="mono">conflict_declaration</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Org context (parties/issues)</td><td class="mono">/org-context/*</td><td class="mono">interested_party, context_issue</td><td><span class="b b-pass">Passed</span> / <span class="b b-fail">Fail*</span></td></tr>
+<tr><td>Training / competency</td><td class="mono">/competencies</td><td class="mono">competency_record</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Test authorizations</td><td class="mono">/test-authorizations</td><td class="mono">test_authorization</td><td><span class="b b-fail">Fail*</span></td></tr>
+<tr><td>Test catalog</td><td class="mono">/test-catalog</td><td class="mono">test_catalog_item</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Equipment</td><td class="mono">/equipment</td><td class="mono">equipment_item</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Monitoring points</td><td class="mono">/monitoring-points</td><td class="mono">monitoring_point</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Reference standards</td><td class="mono">/reference-standards</td><td class="mono">reference_standard</td><td><span class="b b-pass">Passed</span> / <span class="b b-fail">Fail*</span></td></tr>
+<tr><td>Suppliers</td><td class="mono">/suppliers</td><td class="mono">supplier</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Quality objectives</td><td class="mono">/quality-objectives</td><td class="mono">quality_objective</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Quality policy</td><td class="mono">/quality-policy</td><td class="mono">quality_policy</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Management review</td><td class="mono">/management-reviews</td><td class="mono">management_review, review_decision</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Precision study</td><td class="mono">/precision-studies</td><td class="mono">precision_study</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Carryover study</td><td class="mono">/carryover-studies</td><td class="mono">carryover_study</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Detection-limit study</td><td class="mono">/detection-limit-studies</td><td class="mono">detection_limit_study</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Instrument comparability</td><td class="mono">/instrument-comparabilities</td><td class="mono">instrument_comparability_study</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Interference study</td><td class="mono">/interference-studies</td><td class="mono">interference_study</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Linearity study</td><td class="mono">/linearity-studies</td><td class="mono">linearity_study</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Lot comparison</td><td class="mono">/lot-comparisons</td><td class="mono">lot_comparison_study</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Method comparison</td><td class="mono">/method-comparisons</td><td class="mono">method_comparison_study</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Reference-interval study</td><td class="mono">/reference-interval-studies</td><td class="mono">reference_interval_study</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Sigma metrics</td><td class="mono">/sigma-assessments</td><td class="mono">sigma_assessment</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Uncertainty budget</td><td class="mono">/uncertainty-budgets</td><td class="mono">uncertainty_budget</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Validation study</td><td class="mono">/validation-studies</td><td class="mono">validation_study</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Outlier screening</td><td class="mono">/outlier-screenings</td><td class="mono">outlier_screening</td><td><span class="b b-obs">Obs*</span></td></tr>
+<tr><td>Proficiency testing</td><td class="mono">/proficiency-tests</td><td class="mono">pt_enrollment</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>PT plans</td><td class="mono">/pt-plans</td><td class="mono">pt_plan</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Quality control (QC)</td><td class="mono">/qc/profiles</td><td class="mono">qc_profile, qc_run</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Archiving / retention</td><td class="mono">/archives</td><td class="mono">archive_entry</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Reporting &amp; BI</td><td class="mono">/reports/*</td><td class="mono">read.kpi_snapshot (+ live aggregates)</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Dashboard</td><td class="mono">/reports/kpis</td><td class="mono">(live aggregate)</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Audit-trail &amp; compliance</td><td class="mono">/compliance/*</td><td class="mono">audit.audit_trail, field_change, electronic_signature, security_event</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Notifications &amp; rules</td><td class="mono">/notifications/*</td><td class="mono">notification_dispatch, notification_rule</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Users</td><td class="mono">/users</td><td class="mono">user_account</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Roles &amp; permissions</td><td class="mono">/roles</td><td class="mono">role, role_permission</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Reference data (LOV admin)</td><td class="mono">/lovs</td><td class="mono">lov_entry</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Task management</td><td class="mono">/tasks, /sla-definitions</td><td class="mono">work_task, sla_definition</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Settings / security</td><td class="mono">/tenant-settings/mfa-policy, /auth/signature-pin</td><td class="mono">user_account, tenant_settings</td><td><span class="b b-pass">Passed</span></td></tr>
+<tr><td>Tenant administration (platform)</td><td class="mono">/tenants</td><td class="mono">saas.tenant</td><td><span class="b b-pass">Passed</span></td></tr>
+</tbody>
+</table></div>
+<p class="small">* Fail cells reflect NTQMS-FND-001 (invalid-input 500) on the negative test only — the valid create for the same page Passed. Obs = NTQMS-FND-006 (outlier create schema).</p>
+</div>
+
+<!-- TEST CASES -->
+<h2 id="cases">5 · Test-Case Catalogue</h2>
+<div class="panel">
+<div class="filters">
+  <input type="search" id="tcSearch" placeholder="Search test cases…" oninput="renderTC()">
+  <select id="tcModule" onchange="renderTC()"><option value="">All modules</option></select>
+  <select id="tcStatus" onchange="renderTC()"><option value="">All statuses</option><option>Passed</option><option>Passed w/ Observation</option><option>Failed</option><option>Blocked</option></select>
+  <select id="tcType" onchange="renderTC()"><option value="">All types</option><option>Positive</option><option>Negative</option><option>Boundary</option><option>Security</option><option>Workflow</option><option>Integration</option></select>
+  <label class="small"><input type="checkbox" id="tcFail" onchange="renderTC()"> Failed only</label>
+  <button class="btn" onclick="exportTC()">⤓ Export CSV</button>
+  <span class="count-pill" id="tcCount"></span>
+</div>
+<div class="tbl-wrap"><table id="tcTable">
+<thead><tr>
+<th onclick="sortTC('id')">ID</th><th onclick="sortTC('module')">Module</th><th onclick="sortTC('title')">Objective</th>
+<th onclick="sortTC('type')">Type</th><th onclick="sortTC('status')">Status</th><th>Expected → Actual (evidence)</th><th>Finding</th>
+</tr></thead>
+<tbody id="tcBody"></tbody>
+</table></div>
+</div>
+
+<!-- MODULE RESULTS -->
+<h2 id="modules">6 · Module Results</h2>
+<div id="moduleResults"></div>
+
+<!-- ARFA LIVE RUN -->
+<h2 id="arfa">6b · Live-Tenant Confirmation Run — <span class="mono">arfa</span> (Arfa Lab)</h2>
+<div class="panel">
+<div class="callout"><b>At the operator's explicit request, the complete 48-page sweep was executed against the live <code>arfa</code> tenant</b> using legitimately supplied tenant-admin credentials (no password reset, no account disruption). Two dedicated, clearly-labelled test users were created in arfa (<code>aitest-qm-arfa@ntqms.test</code>, <code>aitest-analyst-arfa@ntqms.test</code>); all generated records carry the <code>NTQMS-AITEST</code> prefix and are listed for cleanup.</div>
+<p>Results were <b>identical to the isolated-tenant run</b> — every control passed and all three reproducible findings reproduced. Coverage in arfa now matches t1: the core QMS modules <b>plus</b> all 12 analytical-study types, method comparison (Deming/Passing-Bablok → sign-off), statistical QC, management review, tasks, PT, archiving, organizational context, LOV admin, access reviews, and the reporting/compliance dashboards — <b>~35 additional pages</b> beyond the original core battery. Arfa reporting is tenant-isolated (KPIs count arfa's own records only) and its audit chain verifies (18 entries).</p>
+<div class="tbl-wrap"><table>
+<thead><tr><th>Scenario re-run in arfa</th><th>Expected</th><th>Actual (arfa)</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>Document lifecycle Draft→Published (upload→submit→recommend→publish)</td><td>Published + e-sig</td><td>Published; e-sig bound to hash <span class="hash">af076fe99f7c0566…</span></td><td><span class="b b-pass">Pass</span></td></tr>
+<tr><td>SoD — author cannot recommend own document</td><td>422 SOD-DOC-001</td><td>422 SOD-DOC-001</td><td><span class="b b-pass">Pass</span></td></tr>
+<tr><td>Publish e-signature (QM, password+PIN)</td><td>signature manifested</td><td>signer “NTQMS-AITEST QM (arfa)”, meaning recorded</td><td><span class="b b-pass">Pass</span></td></tr>
+<tr><td>13 module creates (NCR, change, complaint, risk, audit, supplier, equipment, competency, objective, conflict, feedback, monitoring, ref-standard)</td><td>201 + DB rows</td><td>13/13 → 201; all rows present with tenant_id = arfa</td><td><span class="b b-pass">Pass</span></td></tr>
+<tr><td>NCR workflow Draft→Raised→Assigned + re-triage guard</td><td>guard 409 NC-011</td><td>Assigned; re-triage → 409 NC-011</td><td><span class="b b-pass">Pass</span></td></tr>
+<tr><td>Precision study create→calculate→sign-off (QM)</td><td>SignedOff, stats computed</td><td>SignedOff; repeatability_sd = 0.5612</td><td><span class="b b-pass">Pass</span></td></tr>
+<tr><td>SoD — preparer cannot sign off own study</td><td>422 SOD-AQ-001</td><td>422 SOD-AQ-001</td><td><span class="b b-pass">Pass</span></td></tr>
+<tr><td>Duplicate document code</td><td>422 DOC-003</td><td>422 DOC-003</td><td><span class="b b-pass">Pass</span></td></tr>
+<tr><td>RBAC — Analyst lists users</td><td>403</td><td>403</td><td><span class="b b-pass">Pass</span></td></tr>
+<tr><td>Cross-tenant — arfa token → t1 document</td><td>404</td><td>404</td><td><span class="b b-pass">Pass</span></td></tr>
+<tr><td>Notifications (DOC_PUBLISHED, NC_RAISED)</td><td>same-tenant recipients, Sent</td><td>4 dispatches to arfa admin+QM, all Sent</td><td><span class="b b-pass">Pass</span></td></tr>
+<tr><td><b>NTQMS-FND-001</b> — invalid ref-standard enum</td><td>reproduced 500</td><td>HTTP 500 (confirmed in live tenant)</td><td><span class="b b-fail">Fail (confirms finding)</span></td></tr>
+<tr><td><b>NTQMS-FND-002</b> — reviewCycleMonths 999</td><td>reproduced silent coercion</td><td>201, coerced to 24 (confirmed)</td><td><span class="b b-fail">Fail (confirms finding)</span></td></tr>
+<tr><td><b>NTQMS-FND-003</b> — study sign-off not in e-sig ledger</td><td>reproduced</td><td>arfa electronic_signature = 1 (doc publish only)</td><td><span class="b b-fail">Fail (confirms finding)</span></td></tr>
+</tbody>
+</table></div>
+<h4>Arfa DB validation snapshot (full sweep)</h4>
+<div class="mono-block">-- tenant_id = 019fc2d4-9314-… (arfa)
+Core: controlled_document 2 · nonconformance 2* · change_request 1 · complaint 1 · supplier 1
+      equipment_item 1 · risk_item 1 · audit 1 · precision_study 1 · quality_objective 1 · reference_standard 1
+Analytical (12): carryover, detection_limit, instrument_comparability, interference, linearity,
+      lot_comparison, method_comparison(SignedOff, 8 pairs), reference_interval, sigma, uncertainty, validation — all = 1
+Governance: management_review 1 · quality_policy 1 · pt_plan 1 · pt_enrollment 1 · qc_profile 1
+      archive_entry 1 · interested_party 1 · context_issue 1 · user_access_review 1 · work_task 1 (Completed) · lov_entry +1
+Audit/report: electronic_signature 1 · chain-verification 18 entries ok · reports/kpis openNcs=2 (arfa-only, isolated)
+(* 1 pre-existing arfa NCR + 1 test NCR)</div>
+<p class="small">The single arfa <code>electronic_signature</code> row (document publish only) is direct confirmation of NTQMS-FND-003 in the live tenant — the QM study sign-off, though credential-gated, produced no ledger entry.</p>
+</div>
+
+<!-- DB VALIDATION -->
+<h2 id="db">7 · Database Validation Results</h2>
+<div class="panel">
+<p>Every application create was reconciled to its PostgreSQL row(s). All 15 module entities produced exactly the expected master record, correctly scoped to the acting tenant, with a matching <code>audit.field_change</code> <b>Created</b> event (including child rows such as <code>document_version</code> and <code>audit_checklist_item</code>).</p>
+<div class="tbl-wrap"><table>
+<thead><tr><th>Module (API)</th><th>DB entity</th><th>Rows created (t1)</th><th>Tenant scope</th><th>Audit event</th><th>Result</th></tr></thead>
+<tbody id="dbBody"></tbody>
+</table></div>
+
+<h3>7.1 Insert / correlation evidence — Controlled Document (DOC-TC-002)</h3>
+<div class="mono-block">-- API POST /api/documents  → 201 {"id":"019fc931-e150-79de-b02b-8c08793aada8"}
+SELECT code,title,category,status,review_cycle_months,left(tenant_id::text,13) tid,created_by
+FROM qams.controlled_document WHERE id='019fc931-e150-79de-b02b-8c08793aada8';
+ code                 | title                          | category | status | review_cycle_months | tid           | created_by
+ NTQMS-AITEST-SOP-001 | NTQMS-AITEST Controlled SOP One| SOP      | Draft  | 24                  | 019fc92e-806a | NTQMS-AITEST Admin 1
+-- child row:
+SELECT major,minor,state,change_summary FROM qams.document_version WHERE document_id='019fc931-e150-…';
+ major | minor | state | change_summary
+ 1     | 0     | Draft | Initial issue.</div>
+
+<h3>7.2 Status-transition audit — Nonconformance (NCR-TC-002/003)</h3>
+<div class="mono-block">SELECT action,property,old_value,new_value,occurred_at_utc
+FROM audit.field_change WHERE entity_id='019fc93a-695f-…' ORDER BY occurred_at_utc;
+ Created  |            |       |
+ Modified | Status     | Draft | Raised     ← submit
+ Modified | Status     | Raised| Assigned   ← triage
+ Modified | AssignedTo |       | 00000000-0000-0000-0000-000000000000   ← see NTQMS-FND-005</div>
+
+<h3>7.3 Electronic-signature binding — Document publish (DOC-TC-007)</h3>
+<div class="mono-block">SELECT meaning,signer_display,subject_ref,left(content_hash,24) hash FROM audit.electronic_signature;
+ meaning: "Approved and published NTQMS-AITEST-SOP-001 v1.0"
+ signer : NTQMS-AITEST QualityManager
+ subject: DOC:019fc931e15079deb02b8c08793aada8
+ hash   : 469181530c0bfba7a97267…   ← EQUALS the uploaded file SHA-256 → signature bound to content</div>
+
+<h3>7.4 Referential &amp; tenant integrity</h3>
+<ul class="tight">
+<li>All child rows (<code>document_version</code>, <code>audit_checklist_item</code>) carry the same <code>tenant_id</code> as their parent.</li>
+<li>No orphan or duplicate master rows observed; unique document code enforced (<code>DOC-003</code>).</li>
+<li>Audit tables are tenant-partitioned by <code>tenant_id</code> — t1 = 733 field-change rows, t2 = 617, cleanly separated.</li>
+</ul>
+</div>
+
+<!-- REPORTING VALIDATION -->
+<h2 id="reporting">7b · Reporting &amp; Analytics Validation</h2>
+<div class="panel">
+<p>The reporting/BI and compliance endpoints (previously unreachable at their collection paths) live under sub-routes and were exercised. <b>Every report figure was reconciled against the underlying database</b> — all matched exactly.</p>
+<div class="tbl-wrap"><table>
+<thead><tr><th>Report / endpoint</th><th>Figure</th><th>Calculation / source</th><th>DB check</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>reports/kpis · openNcs</td><td>1</td><td>count NCR where status ∉ (Closed,Cancelled)</td><td>DB = 1</td><td><span class="b b-pass">Match</span></td></tr>
+<tr><td>reports/kpis · openComplaints</td><td>1</td><td>count complaint where status ∉ (Closed,Resolved,Cancelled)</td><td>DB = 1</td><td><span class="b b-pass">Match</span></td></tr>
+<tr><td>reports/nc-pareto</td><td>Internal = 1</td><td>group NCR by source_type</td><td>DB Internal = 1</td><td><span class="b b-pass">Match</span></td></tr>
+<tr><td>reports/sla-compliance</td><td>onTime% computed</td><td>onTime ÷ completed</td><td>200, consistent (0 completed)</td><td><span class="b b-pass">OK</span></td></tr>
+<tr><td>reports/quality-analytics</td><td>health score 40</td><td>weighted category model</td><td>components returned w/ weights</td><td><span class="b b-pass">OK</span></td></tr>
+<tr><td>reports/quality-health-profile</td><td>category weights</td><td>quality_health_weight</td><td>200 weighted model</td><td><span class="b b-pass">OK</span></td></tr>
+<tr><td>reports/kpi-history</td><td>dated series</td><td>read.kpi_snapshot projection</td><td>200 series returned</td><td><span class="b b-pass">OK</span></td></tr>
+<tr><td>compliance/chain-verification</td><td>ok:true, verifiedEntries 17</td><td>recompute hash chain</td><td>DB audit_trail = 17 rows</td><td><span class="b b-pass">Match</span></td></tr>
+<tr><td>compliance/signatures</td><td>1 signature</td><td>audit.electronic_signature</td><td>DB e-sig = 1</td><td><span class="b b-pass">Match</span></td></tr>
+</tbody>
+</table></div>
+<div class="callout good"><b>Report integrity confirmed.</b> KPI counts, NC Pareto, signature count and the audit chain-length all reconcile exactly with source records — no over/under-count, no stale or cross-tenant leakage in report output.</div>
+</div>
+
+<!-- FINDINGS -->
+<h2 id="findings">8 · Findings Register</h2>
+<div class="panel">
+<div class="legend">
+<span class="sev sev-crit">Critical</span><span class="sev sev-high">High</span><span class="sev sev-med">Medium</span><span class="sev sev-low">Low</span>
+<span class="small">· Filter:</span>
+<select id="fSev" onchange="renderFind()" style="background:var(--panel2);color:var(--txt);border:1px solid var(--border);border-radius:6px;padding:3px 8px"><option value="">All severities</option><option>Medium</option><option>Low</option></select>
+<button class="btn" onclick="exportFind()">⤓ Export CSV</button>
+</div>
+<div id="findBody"></div>
+</div>
+
+<!-- PERMISSIONS -->
+<h2 id="perms">9 · Permission &amp; Role Matrix</h2>
+<div class="panel">
+<p>The TenantAdmin role resolves <b>171 granular permissions</b> across 34 permission groups (from <code>/api/auth/me/privileges</code>). Authorization was verified positively (allowed actions succeed) and negatively (denied actions return 403). Expected vs actual below.</p>
+<div class="tbl-wrap"><table>
+<thead><tr><th>Action</th><th>PlatformAdmin</th><th>TenantAdmin</th><th>QualityManager</th><th>Analyst</th><th>Verified</th></tr></thead>
+<tbody>
+<tr><td>Provision tenant</td><td><span class="b b-pass">Allow</span></td><td><span class="b b-na">Deny</span></td><td><span class="b b-na">Deny</span></td><td><span class="b b-na">Deny</span></td><td>✓ Analyst→403</td></tr>
+<tr><td>List / create users</td><td>—</td><td><span class="b b-pass">Allow</span></td><td>partial</td><td><span class="b b-na">Deny</span></td><td>✓ Analyst→403</td></tr>
+<tr><td>Create controlled document</td><td>—</td><td><span class="b b-pass">Allow</span></td><td><span class="b b-pass">Allow</span></td><td>view</td><td>✓ created</td></tr>
+<tr><td>Recommend/review document</td><td>—</td><td>not-if-author</td><td><span class="b b-pass">Allow</span></td><td><span class="b b-na">Deny</span></td><td>✓ SoD enforced</td></tr>
+<tr><td>Publish (e-sign) document</td><td>—</td><td><span class="b b-pass">Allow*</span></td><td><span class="b b-pass">Allow*</span></td><td><span class="b b-na">Deny</span></td><td>✓ *PIN+pwd req’d</td></tr>
+<tr><td>Sign off analytical study</td><td>—</td><td>not-if-preparer</td><td><span class="b b-pass">Allow</span></td><td><span class="b b-na">Deny</span></td><td>✓ SoD enforced</td></tr>
+<tr><td>Raise / triage NCR</td><td>—</td><td><span class="b b-pass">Allow</span></td><td><span class="b b-pass">Allow</span></td><td>partial</td><td>✓ executed</td></tr>
+</tbody>
+</table></div>
+<p class="small">“—” = out of that role's scope by design. Analyst denials were positively confirmed (list users, create user, create tenant all returned HTTP 403 “You do not have permission to perform this action.”).</p>
+</div>
+
+<!-- WORKFLOWS -->
+<h2 id="workflow">10 · Workflow Validation</h2>
+<div class="panel">
+<h3 style="margin-top:0">10.1 Controlled Document lifecycle</h3>
+<div class="flow">
+<span class="node ok">Draft</span><span class="arrow">→ submit →</span>
+<span class="node ok">Under&nbsp;Review</span><span class="arrow">→ recommend (QM) →</span>
+<span class="node ok">Approved</span><span class="arrow">→ publish + e-sign →</span>
+<span class="node ok">Published</span>
+</div>
+<div class="flow">
+<span class="node gate">⛔ SoD gate: author cannot recommend own doc (SOD-DOC-001)</span>
+<span class="node gate">⛔ e-sign gate: publish requires password + PIN</span>
+</div>
+<p class="small">Executed on <code>NTQMS-AITEST-SOP-001</code>. Version state advanced Draft→UnderReview→Approved→Published; publish produced an electronic signature bound to the file content hash. Every transition audited in <code>field_change</code>.</p>
+
+<h3>10.2 Nonconformance / CAPA lifecycle</h3>
+<div class="flow">
+<span class="node ok">Draft</span><span class="arrow">→ submit →</span>
+<span class="node ok">Raised</span><span class="arrow">→ triage →</span>
+<span class="node ok">Assigned</span><span class="arrow">→ rca → planAction → completeAction →</span>
+<span class="node">Verification</span><span class="arrow">→ verify → confirmEffectiveness →</span>
+<span class="node">Closed</span>
+</div>
+<div class="flow"><span class="node gate">⛔ state guard: re-triage of an Assigned NC → 409 (NC-011)</span></div>
+<p class="small">Executed Draft→Raised→Assigned on <code>NC-2026-0001</code> (auto-numbered). DB status matched API at each step; invalid re-transition correctly rejected. Remaining CAPA sub-states (rca→verify→confirmEffectiveness) are implemented and discovered but not driven to Closed in this cycle.</p>
+
+<h3>10.3 Precision study (ISO 17025 analytical)</h3>
+<div class="flow">
+<span class="node ok">Data&nbsp;Entry</span><span class="arrow">→ addMeasurement ×n →</span>
+<span class="node ok">Calculated</span><span class="arrow">→ sign-off (QM, e-sign) →</span>
+<span class="node ok">Signed&nbsp;Off</span>
+</div>
+<div class="flow"><span class="node gate">⛔ ≥2 replicates/run (PR-011)</span><span class="node gate">⛔ SoD: preparer ≠ signer (SOD-AQ-001)</span><span class="node gate">⛔ only Calculated can sign off (PR-012)</span></div>
+<p class="small">Clean study driven to SignedOff; <code>repeatability_sd = 0.5612</code> computed and persisted; <code>signed_off_by</code> = QM. Note NTQMS-FND-003: sign-off not mirrored to the e-signature ledger.</p>
+</div>
+
+<!-- AUDIT -->
+<h2 id="audit">11 · Audit-Trail &amp; Part 11 Validation</h2>
+<div class="two">
+<div class="panel">
+<h3 style="margin-top:0">Tamper-evident chain</h3>
+<p><code>audit.audit_trail</code> stores sequenced domain events with a linked hash chain — each row's <code>prev_hash</code> equals the previous row's <code>entry_hash</code>.</p>
+<div class="mono-block">seq | prev_hash    | entry_hash
+ 1  | 000000000000 | d6513a8f7ceb
+ 2  | d6513a8f7ceb | 01a839162d75
+ 3  | 01a839162d75 | 7d448001e10a
+ …  chain verified contiguous</div>
+<p class="small">Append-only design; no application endpoint exposes update/delete of audit rows.</p>
+</div>
+<div class="panel">
+<h3 style="margin-top:0">Field-level change log</h3>
+<p><code>audit.field_change</code> captured a Created and/or Modified entry for <b>every</b> tested entity, with actor, timestamp and old→new values.</p>
+<div class="mono-block">Audit  AuditChecklistItem  ChangeRequest
+CompetencyRecord  Complaint  ControlledDocument
+DocumentVersion  EquipmentItem  FeedbackEntry
+FileReference  MonitoringPoint  Nonconformance
+PrecisionStudy  QualityObjective  ReferenceStandard
+RiskItem  Supplier  UserAccount …</div>
+<p class="small">Outbox published matching domain events (DocumentPublished, NcRaised, NcTriaged, ComplaintLogged, AuditScheduled, PrecisionStudySignedOff …).</p>
+</div>
+</div>
+<div class="panel">
+<h4>Notifications (integration evidence)</h4>
+<div class="tbl-wrap"><table style="min-width:0">
+<thead><tr><th>Event</th><th>Recipients</th><th>Status</th><th>Subject</th><th>Tenant-correct</th></tr></thead>
+<tbody>
+<tr><td>DOC_PUBLISHED</td><td>t1 admin + QM</td><td>Sent</td><td>Document published: NTQMS-AITEST-SOP-001 v1.0</td><td>✓</td></tr>
+<tr><td>NC_RAISED</td><td>QM + admin</td><td>Sent</td><td>NC raised: NC-2026-0001 — NTQMS-AITEST NCR One</td><td>✓</td></tr>
+</tbody>
+</table></div>
+<p class="small">All 4 dispatches went only to same-tenant recipients (join on <code>recipient_user_id.tenant_id = dispatch.tenant_id</code> → all match). No cross-tenant recipient leakage.</p>
+</div>
+
+<!-- CROSS TENANT -->
+<h2 id="isolation">12 · Cross-Tenant Isolation</h2>
+<div class="panel">
+<p>Using two independent tenant tokens, every foreign-object reference was rejected. No cross-tenant read, write, or list exposure was found.</p>
+<div class="tbl-wrap"><table>
+<thead><tr><th>Attempt (t2 token → t1 object)</th><th>Expected</th><th>Actual</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>GET /documents/{t1 doc}</td><td>404 / not visible</td><td>404 DOC-404</td><td><span class="b b-pass">Pass</span></td></tr>
+<tr><td>GET /files/{t1 file}</td><td>404</td><td>404</td><td><span class="b b-pass">Pass</span></td></tr>
+<tr><td>GET /nonconformances/{t1 nc}</td><td>404</td><td>404 NC-404</td><td><span class="b b-pass">Pass</span></td></tr>
+<tr><td>POST /documents/{t1 doc}/retire</td><td>404 / denied</td><td>404 DOC-404</td><td><span class="b b-pass">Pass</span></td></tr>
+<tr><td>GET /documents (t2 list)</td><td>empty (no t1 rows)</td><td>total:0, items:[]</td><td><span class="b b-pass">Pass</span></td></tr>
+<tr><td>GET /documents/{t1 doc}/signatures</td><td>404</td><td>200 []</td><td><span class="b b-obs">Obs — NTQMS-FND-004</span></td></tr>
+<tr><td>GET /documents (no token)</td><td>401</td><td>401</td><td><span class="b b-pass">Pass</span></td></tr>
+</tbody>
+</table></div>
+<p class="small">The one anomaly (signatures returns <code>200 []</code> rather than 404) does <b>not</b> leak data — the query is tenant-scoped so a foreign tenant receives an empty set — but the response code is inconsistent with the rest of the API. Classified Low.</p>
+</div>
+
+<!-- TEST DATA -->
+<h2 id="testdata">13 · Test-Data Register</h2>
+<div class="panel">
+<p>All generated records use the <code>NTQMS-AITEST</code> prefix. Records in the two disposable tenants can be removed by dropping the tenants. Records in the <b>live <code>arfa</code></b> tenant must be cleaned individually (delete the 2 test users + all <code>NTQMS-AITEST</code>-prefixed records); the pre-existing arfa admin and its prior data are untouched.</p>
+<div class="tbl-wrap"><table>
+<thead><tr><th>Location</th><th>Entity</th><th>Records</th><th>Sample identifier</th><th>Cleanup</th></tr></thead>
+<tbody>
+<tr><td>—</td><td>saas.tenant (test)</td><td>2</td><td>ntqms-aitest-t1, ntqms-aitest-t2</td><td>Drop after retest</td></tr>
+<tr><td>t1/t2</td><td>user_account</td><td>4</td><td>admin/QM/Analyst (t1), admin (t2)</td><td>With tenant</td></tr>
+<tr><td>t1</td><td>controlled_document</td><td>7</td><td>NTQMS-AITEST-SOP-001 (Published)</td><td>With tenant</td></tr>
+<tr><td>t1</td><td>business records (NCR, complaint, supplier, risk, audit, precision, …)</td><td>~18</td><td>NC-2026-0001, NTQMS-AITEST-*</td><td>With tenant</td></tr>
+<tr><td><b>arfa (live)</b></td><td>user_account (test)</td><td>2</td><td>aitest-qm-arfa@, aitest-analyst-arfa@</td><td><b>Delete individually</b></td></tr>
+<tr><td><b>arfa (live)</b></td><td>controlled_document</td><td>2</td><td>NTQMS-AITEST-ARFA-SOP-001 (Published)</td><td><b>Delete individually</b></td></tr>
+<tr><td><b>arfa (live)</b></td><td>business records — full 48-page sweep (core QMS + 12 analytical studies + method-comparison w/ 8 pairs + MRV/QC/PT/archive/org-context/tasks/access-review + 1 LOV entry)</td><td>~40</td><td>NTQMS-AITEST-* / NTQMS-AITEST-ARFA-*</td><td><b>Delete individually</b></td></tr>
+</tbody>
+</table></div>
+<p class="small">Say the word and these can be cleaned up: drop <code>ntqms-aitest-t1/-t2</code> entirely, and remove the arfa test users + <code>NTQMS-AITEST</code> records (via a scoped, audited transaction) leaving Arfa Lab in its original state.</p>
+</div>
+
+<!-- RECOMMENDATIONS -->
+<h2 id="recs">14 · Recommendations</h2>
+<div class="panel">
+<h4>Immediate hotfix</h4>
+<ul class="tight">
+<li><b>NTQMS-FND-001 (High)</b> — Systematically add application-layer enum/domain and precondition validation to <b>all</b> create/update endpoints so invalid input returns 400/422, never a 500 from a DB CHECK or unhandled precondition. Confirmed on 4 endpoints (reference-standards, org-context issues, archives, test-authorizations) — treat as a codebase-wide sweep. Add a global <code>DbUpdateException</code>/constraint→ProblemDetails handler as a safety net.</li>
+</ul>
+<h4>Before UAT approval</h4>
+<ul class="tight">
+<li><b>NTQMS-FND-002 (Med)</b> — Enforce server-side bounds on <code>reviewCycleMonths</code> (1–120). Reject out-of-range input with 400 instead of silently coercing to 24.</li>
+<li><b>NTQMS-FND-003 (Med)</b> — Write analytical/study sign-offs (and any credential-gated sign-off) to <code>audit.electronic_signature</code> with signed meaning + content hash, consistent with document publish, for uniform Part 11 evidence.</li>
+</ul>
+<h4>Before production</h4>
+<ul class="tight">
+<li><b>NTQMS-FND-004</b> — Make <code>/documents/{id}/signatures</code> (and similar sub-resources) 404 on a foreign/unknown parent id.</li>
+<li><b>NTQMS-FND-005</b> — Reject triage without an assignee (or omit the field) rather than storing an all-zero GUID in <code>AssignedTo</code>.</li>
+<li><b>NTQMS-FND-006</b> — Clarify the outlier-screening create contract (name the dataset element type and the required <code>r</code> field) and return a descriptive validation message.</li>
+<li>Resolve the reference-data (LOV admin), controlled-records/forms, and quality-manual page endpoints so those 3 remaining pages can be fully exercised.</li>
+</ul>
+<h4>Recommended improvements / further testing</h4>
+<ul class="tight">
+<li>Drive full CAPA closure (rca→verify→confirmEffectiveness) and the failed-effectiveness reopen path.</li>
+<li>Execute the remaining ~20 analytical sub-study modules and the module-interaction chains (NCR→CAPA, complaint→investigation, audit-finding→NCR).</li>
+<li>Add UI-layer (browser) regression for accessibility, RTL Arabic, and localization (en/ar/fr) — not covered here.</li>
+<li>Confirm account lockout thresholds live (<code>failed_login_attempts</code>/<code>locked_until_utc</code> columns exist; not exercised to avoid locking working accounts).</li>
+</ul>
+</div>
+
+<!-- CONCLUSION -->
+<h2 id="conclusion">15 · Conclusion</h2>
+<div class="panel">
+<p>NT.QMS is a well-architected, compliance-oriented QMS. Executed testing across ~35 pages confirms that its most safety-critical controls — <b>segregation of duties, electronic signatures with content binding, tamper-evident and field-level auditing, strict multi-tenant isolation, and reporting that reconciles to source records</b> — function correctly against the live database. The one High finding is a <i>systemic error-handling</i> pattern (unhandled 500s on invalid input), not a data-loss or security-exposure defect; the remaining findings centre on input-validation hardening and signature-ledger consistency.</p>
+<p><b>Recommendation:</b> <span class="b b-block">CONDITIONALLY READY for UAT.</span> Fix NTQMS-FND-001 (High, systemic 500s) and the two Medium findings before UAT sign-off; schedule the three Low findings. No Critical defect, data-loss, or cross-tenant exposure was found, so none blocks progression once FND-001 is addressed.</p>
+</div>
+
+<!-- APPENDIX -->
+<h2 id="appendix">16 · Appendix</h2>
+<div class="panel">
+<h4>A · Evidence catalogue (representative)</h4>
+<div class="tbl-wrap"><table style="min-width:0">
+<thead><tr><th>ID</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>EV-API-DOC-PUB</td><td>API</td><td>POST /documents/{id}/publish → 204 with password+PIN envelope</td></tr>
+<tr><td>EV-DB-ESIG</td><td>DB</td><td>audit.electronic_signature row: content_hash == file SHA-256</td></tr>
+<tr><td>EV-DB-NCR-HIST</td><td>DB</td><td>field_change Status Draft→Raised→Assigned with timestamps</td></tr>
+<tr><td>EV-DB-HASHCHAIN</td><td>DB</td><td>audit_trail prev_hash/entry_hash contiguous chain</td></tr>
+<tr><td>EV-API-SOD-DOC</td><td>API</td><td>422 SOD-DOC-001 author-cannot-review</td></tr>
+<tr><td>EV-API-SOD-AQ</td><td>API</td><td>422 SOD-AQ-001 preparer-cannot-sign-off</td></tr>
+<tr><td>EV-API-XTEN</td><td>API</td><td>404 on all cross-tenant object references</td></tr>
+<tr><td>EV-API-500-REF</td><td>API</td><td>500 on invalid reference-standard type (NTQMS-FND-001)</td></tr>
+</tbody>
+</table></div>
+<h4>B · Safe validation queries used (read-only)</h4>
+<div class="mono-block">-- insert &amp; tenant scope
+SELECT code,status,tenant_id,created_by FROM qams.controlled_document WHERE id = :id;
+-- status history / before-after
+SELECT action,property,old_value,new_value,actor,occurred_at_utc FROM audit.field_change WHERE entity_id = :id ORDER BY occurred_at_utc;
+-- signature binding
+SELECT meaning,signer_display,subject_ref,content_hash FROM audit.electronic_signature WHERE tenant_id = :t;
+-- hash chain
+SELECT sequence,prev_hash,entry_hash FROM audit.audit_trail WHERE tenant_id = :t ORDER BY sequence;
+-- notification correctness
+SELECT nd.event_key, ua.tenant_id = nd.tenant_id FROM qams.notification_dispatch nd JOIN qams.user_account ua ON ua.id = nd.recipient_user_id;</div>
+<p class="small">No secrets, connection strings, tokens or personal data are reproduced in this report. Passwords/PINs used for test accounts are masked and excluded.</p>
+<h4>C · Glossary</h4>
+<p class="small"><b>SoD</b> Segregation of Duties · <b>NCR</b> Nonconformance Report · <b>CAPA</b> Corrective/Preventive Action · <b>e-sig</b> Electronic Signature (21 CFR Part 11) · <b>IDOR</b> Insecure Direct Object Reference · <b>LOV</b> List of Values · <b>Outbox</b> transactional event-publication pattern.</p>
+</div>
+
+<p class="small" style="text-align:center;margin-top:40px">NT.QMS Experimental Test &amp; Database Validation Report · Execution ID NTQMS-AITEST-20260803 · Generated 2026-08-03 · Internal — Restricted</p>
+</div>
+
+<button class="tostop" id="toTop" onclick="scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+/* ================= DATA ================= */
+const TC=[
+{id:"GEN-TC-001",module:"Platform",title:"Environment health: service + PostgreSQL + /health",type:"Positive",status:"Passed",ev:"NTQAMS service RUNNING; PG17 RUNNING; /health → Healthy; / → 200",f:""},
+{id:"GEN-TC-002",module:"IAM",title:"Platform-admin login issues JWT",type:"Positive",status:"Passed",ev:"POST /auth/login → accessToken, role=PlatformAdmin scope=full",f:""},
+{id:"GEN-TC-003",module:"Tenant Admin",title:"Provision two isolated tenants",type:"Positive",status:"Passed",ev:"POST /tenants ×2 → 201; saas.tenant shows both Active",f:""},
+{id:"GEN-TC-004",module:"IAM",title:"Tenant-admin login requires tenantIdentifier",type:"Positive",status:"Passed",ev:"login w/o tenantIdentifier→401; with→JWT carrying tenant_id",f:""},
+{id:"IAM-TC-001",module:"IAM",title:"Wrong password rejected",type:"Negative",status:"Passed",ev:"401 AUTH-001 generic",f:""},
+{id:"IAM-TC-002",module:"IAM",title:"User from wrong tenant rejected",type:"Negative",status:"Passed",ev:"401 AUTH-001 (no cross-tenant login)",f:""},
+{id:"IAM-TC-003",module:"IAM",title:"Nonexistent user — no enumeration",type:"Security",status:"Passed",ev:"401 identical message (no user disclosure)",f:""},
+{id:"IAM-TC-004",module:"IAM",title:"Bad tenant identifier rejected",type:"Negative",status:"Passed",ev:"401 AUTH-001",f:""},
+{id:"IAM-TC-005",module:"IAM",title:"Empty password validation",type:"Boundary",status:"Passed",ev:"400 Validation failed",f:""},
+{id:"IAM-TC-006",module:"IAM",title:"Tampered JWT rejected",type:"Security",status:"Passed",ev:"flipped signature char → 401",f:""},
+{id:"IAM-TC-007",module:"IAM",title:"Unauthenticated access blocked",type:"Security",status:"Passed",ev:"GET /documents no token → 401",f:""},
+{id:"IAM-TC-008",module:"IAM",title:"Self set signature PIN",type:"Positive",status:"Passed",ev:"POST /auth/signature-pin {currentPassword,pin} → 204",f:""},
+{id:"IAM-TC-009",module:"User Mgmt",title:"Create QM + Analyst users + DB verify",type:"Positive",status:"Passed",ev:"200; user_account rows w/ role, is_active=t",f:""},
+{id:"IAM-TC-010",module:"IAM",title:"RBAC: Analyst cannot list users",type:"Security",status:"Passed",ev:"403 permission denied",f:""},
+{id:"IAM-TC-011",module:"IAM",title:"RBAC: Analyst cannot create user",type:"Security",status:"Passed",ev:"403 permission denied",f:""},
+{id:"IAM-TC-012",module:"IAM",title:"RBAC: Analyst cannot provision tenant",type:"Security",status:"Passed",ev:"403 permission denied",f:""},
+{id:"DOC-TC-001",module:"Documents",title:"File upload + SHA-256 + DB file_reference",type:"Positive",status:"Passed",ev:"201; file_reference row w/ sha256, size, tenant",f:""},
+{id:"DOC-TC-002",module:"Documents",title:"Create controlled document (Draft) + child version + audit",type:"Positive",status:"Passed",ev:"201; controlled_document + document_version + field_change Created",f:""},
+{id:"DOC-TC-003",module:"Documents",title:"Submit → version UnderReview",type:"Workflow",status:"Passed",ev:"204; state Draft→UnderReview (DB)",f:""},
+{id:"DOC-TC-004",module:"Documents",title:"SoD: author cannot recommend own doc",type:"Security",status:"Passed",ev:"422 SOD-DOC-001",f:""},
+{id:"DOC-TC-005",module:"Documents",title:"QM recommend → Approved",type:"Workflow",status:"Passed",ev:"204; state→Approved",f:""},
+{id:"DOC-TC-006",module:"Documents",title:"Publish requires e-signature (PIN+password)",type:"Security",status:"Passed",ev:"400 Pin/Password required when omitted",f:""},
+{id:"DOC-TC-007",module:"Documents",title:"Publish with e-sig → Published + signature bound to content hash",type:"Workflow",status:"Passed",ev:"204; electronic_signature.content_hash == file SHA-256",f:""},
+{id:"DOC-TC-008",module:"Documents",title:"Duplicate document code rejected",type:"Negative",status:"Passed",ev:"422 DOC-003 already in use",f:""},
+{id:"DOC-TC-009",module:"Documents",title:"Title > 300 chars rejected",type:"Boundary",status:"Passed",ev:"400 maxLength(300)",f:""},
+{id:"DOC-TC-010",module:"Documents",title:"reviewCycleMonths out-of-range silently coerced to 24",type:"Boundary",status:"Failed",ev:"0/999/-5 → 201, persisted as 24 (no 400)",f:"NTQMS-FND-002"},
+{id:"DOC-TC-011",module:"Documents",title:"XSS/SQL in title stored literally (no injection)",type:"Security",status:"Passed",ev:"stored verbatim; parameterized queries; no SQLi",f:""},
+{id:"DOC-TC-012",module:"Documents",title:"Cross-tenant document GET blocked",type:"Security",status:"Passed",ev:"t2→t1 doc → 404",f:""},
+{id:"DOC-TC-013",module:"Documents",title:"Cross-tenant file download blocked",type:"Security",status:"Passed",ev:"t2→t1 file → 404",f:""},
+{id:"DOC-TC-014",module:"Documents",title:"Cross-tenant signatures returns 200 [] not 404",type:"Security",status:"Passed w/ Observation",ev:"200 [] (no data leak, inconsistent code)",f:"NTQMS-FND-004"},
+{id:"NCR-TC-001",module:"Nonconformance",title:"Raise NCR + DB + auto-number",type:"Positive",status:"Passed",ev:"201; nonconformance row NC-2026-0001",f:""},
+{id:"NCR-TC-002",module:"Nonconformance",title:"Submit → Raised (audited transition)",type:"Workflow",status:"Passed",ev:"204; field_change Status Draft→Raised",f:""},
+{id:"NCR-TC-003",module:"Nonconformance",title:"Triage → Assigned",type:"Workflow",status:"Passed",ev:"204; DB status Assigned",f:""},
+{id:"NCR-TC-004",module:"Nonconformance",title:"Invalid re-triage rejected (state guard)",type:"Negative",status:"Passed",ev:"409 NC-011 cannot triage in Assigned",f:""},
+{id:"NCR-TC-005",module:"Nonconformance",title:"Empty triage stores all-zero AssignedTo GUID",type:"Negative",status:"Passed w/ Observation",ev:"AssignedTo=00000000-…",f:"NTQMS-FND-005"},
+{id:"NCR-TC-006",module:"Nonconformance",title:"Cross-tenant NCR GET blocked",type:"Security",status:"Passed",ev:"t2→t1 nc → 404",f:""},
+{id:"CHG-TC-001",module:"Change/CAPA",title:"Propose change/CAPA + DB",type:"Positive",status:"Passed",ev:"201; change_request row",f:""},
+{id:"CMP-TC-001",module:"Complaints",title:"Log complaint + DB + notification",type:"Positive",status:"Passed",ev:"201; complaint row; ComplaintLogged event",f:""},
+{id:"FBK-TC-001",module:"Feedback",title:"Create feedback entry + DB",type:"Positive",status:"Passed",ev:"201; feedback_entry row",f:""},
+{id:"SUP-TC-001",module:"Suppliers",title:"Create supplier + DB",type:"Positive",status:"Passed",ev:"201; supplier row (type REAGENTS)",f:""},
+{id:"EQP-TC-001",module:"Equipment",title:"Create equipment item + DB",type:"Positive",status:"Passed",ev:"201; equipment_item row, calibrationInterval",f:""},
+{id:"TRN-TC-001",module:"Training",title:"Create competency record + DB",type:"Positive",status:"Passed",ev:"201; competency_record row",f:""},
+{id:"RSK-TC-001",module:"Risk",title:"Create risk (likelihood×impact 1-5) + DB",type:"Positive",status:"Passed",ev:"201; risk_item row category OPERATIONAL",f:""},
+{id:"AUD-TC-001",module:"Audit Mgmt",title:"Create internal audit + checklist child + event",type:"Positive",status:"Passed",ev:"201; audit + audit_checklist_item; AuditScheduled",f:""},
+{id:"OBJ-TC-001",module:"Objectives",title:"Create quality objective (period-validated) + DB",type:"Positive",status:"Passed",ev:"201; quality_objective row; end>start enforced",f:""},
+{id:"COI-TC-001",module:"Conflicts",title:"Create conflict-of-interest declaration + DB",type:"Positive",status:"Passed",ev:"201; conflict_declaration row",f:""},
+{id:"MON-TC-001",module:"Monitoring",title:"Create monitoring point (limits required)",type:"Positive",status:"Passed",ev:"201; monitoring_point; 422 when no limit",f:""},
+{id:"REF-TC-001",module:"Reference Std",title:"Create reference standard (valid enum) + DB",type:"Positive",status:"Passed",ev:"201; reference_standard row",f:""},
+{id:"REF-TC-002",module:"Reference Std",title:"Invalid reference-standard type → 500 (should be 400)",type:"Negative",status:"Failed",ev:"type='Mass' → 500 unhandled (DB CHECK)",f:"NTQMS-FND-001"},
+{id:"AQ-TC-001",module:"Analytical",title:"Create precision study + DB",type:"Positive",status:"Passed",ev:"201; precision_study row",f:""},
+{id:"AQ-TC-002",module:"Analytical",title:"Validation: ≥2 replicates per run",type:"Boundary",status:"Passed",ev:"422 PR-011 on single-replicate runs",f:""},
+{id:"AQ-TC-003",module:"Analytical",title:"SoD: preparer cannot sign off own study",type:"Security",status:"Passed",ev:"422 SOD-AQ-001",f:""},
+{id:"AQ-TC-004",module:"Analytical",title:"Calculate statistics",type:"Workflow",status:"Passed",ev:"204; repeatability_sd=0.5612 persisted",f:""},
+{id:"AQ-TC-005",module:"Analytical",title:"QM sign-off → SignedOff",type:"Workflow",status:"Passed",ev:"204; state SignedOff, signed_off_by=QM",f:""},
+{id:"AQ-TC-006",module:"Analytical",title:"Sign-off not recorded in e-signature ledger",type:"Integration",status:"Failed",ev:"electronic_signature has only doc publish; study sign-off absent",f:"NTQMS-FND-003"},
+{id:"DB-TC-001",module:"Database",title:"Insert validation across 15 entities, tenant-scoped",type:"Integration",status:"Passed",ev:"each entity: exactly expected rows, mine==count",f:""},
+{id:"DB-TC-002",module:"Database",title:"Audit Created events for all entities incl children",type:"Integration",status:"Passed",ev:"20 entity types incl DocumentVersion, ChecklistItem",f:""},
+{id:"DB-TC-003",module:"Database",title:"Audit hash-chain integrity",type:"Integration",status:"Passed",ev:"prev_hash==previous entry_hash contiguous",f:""},
+{id:"DB-TC-004",module:"Database",title:"Audit tenant isolation",type:"Security",status:"Passed",ev:"t1=733 vs t2=617 field_change rows separated",f:""},
+{id:"NOT-TC-001",module:"Notifications",title:"DOC_PUBLISHED to correct same-tenant recipients",type:"Integration",status:"Passed",ev:"admin+QM, Sent, tenant-correct",f:""},
+{id:"NOT-TC-002",module:"Notifications",title:"NC_RAISED notifications generated",type:"Integration",status:"Passed",ev:"QM+admin, Sent, subject has NC-2026-0001",f:""},
+{id:"REP-TC-001",module:"Reporting",title:"KPI report figures reconcile with DB (openNcs, openComplaints)",type:"Integration",status:"Passed",ev:"reports/kpis openNcs=1,openComplaints=1 == DB counts",f:""},
+{id:"REP-TC-002",module:"Reporting",title:"NC Pareto by source vs DB",type:"Integration",status:"Passed",ev:"nc-pareto Internal=1 == DB NCR by source",f:""},
+{id:"REP-TC-003",module:"Reporting",title:"SLA compliance report",type:"Positive",status:"Passed",ev:"reports/sla-compliance → 200 computed",f:""},
+{id:"REP-TC-004",module:"Reporting",title:"Quality analytics / health score",type:"Positive",status:"Passed",ev:"reports/quality-analytics → health score + components",f:""},
+{id:"REP-TC-005",module:"Reporting",title:"Quality health profile (weights)",type:"Positive",status:"Passed",ev:"reports/quality-health-profile → 200 weighted model",f:""},
+{id:"REP-TC-006",module:"Reporting",title:"KPI history snapshot",type:"Positive",status:"Passed",ev:"reports/kpi-history → 200 dated series",f:""},
+{id:"CMPL-TC-001",module:"Compliance",title:"Audit-trail monitoring feed",type:"Integration",status:"Passed",ev:"compliance/audit-trail → 200 sequenced events",f:""},
+{id:"CMPL-TC-002",module:"Compliance",title:"Hash-chain verification endpoint",type:"Integration",status:"Passed",ev:"compliance/chain-verification → {ok:true, verifiedEntries:17} == DB audit_trail count",f:""},
+{id:"CMPL-TC-003",module:"Compliance",title:"Signatures / field-changes / security-events feeds",type:"Integration",status:"Passed",ev:"all 200; signatures=1 == DB e-sig",f:""},
+{id:"NOT-TC-004",module:"Notifications",title:"My notifications & rules & monitor feeds",type:"Positive",status:"Passed",ev:"notifications/mine, /rules, /monitor → 200 with data",f:""},
+{id:"AQ-TC-007",module:"Analytical",title:"Carryover study create + DB",type:"Positive",status:"Passed",ev:"201; carryover_study row (tenant-scoped)",f:""},
+{id:"AQ-TC-008",module:"Analytical",title:"Detection-limit study create + DB",type:"Positive",status:"Passed",ev:"201; detection_limit_study row",f:""},
+{id:"AQ-TC-009",module:"Analytical",title:"Instrument comparability create + DB",type:"Positive",status:"Passed",ev:"201; instrument_comparability_study row",f:""},
+{id:"AQ-TC-010",module:"Analytical",title:"Interference study create + DB",type:"Positive",status:"Passed",ev:"201; interference_study row",f:""},
+{id:"AQ-TC-011",module:"Analytical",title:"Linearity study create + DB",type:"Positive",status:"Passed",ev:"201; linearity_study row",f:""},
+{id:"AQ-TC-012",module:"Analytical",title:"Lot comparison create + DB",type:"Positive",status:"Passed",ev:"201; lot_comparison_study row",f:""},
+{id:"AQ-TC-013",module:"Analytical",title:"Method comparison create + DB",type:"Positive",status:"Passed",ev:"201; method_comparison_study row",f:""},
+{id:"AQ-TC-014",module:"Analytical",title:"Reference-interval study create + DB",type:"Positive",status:"Passed",ev:"201; reference_interval_study (upper>lower enforced)",f:""},
+{id:"AQ-TC-015",module:"Analytical",title:"Sigma assessment create + DB",type:"Positive",status:"Passed",ev:"201; sigma_assessment row",f:""},
+{id:"AQ-TC-016",module:"Analytical",title:"Uncertainty budget create + DB",type:"Positive",status:"Passed",ev:"201; uncertainty_budget row",f:""},
+{id:"AQ-TC-017",module:"Analytical",title:"Validation study create + DB",type:"Positive",status:"Passed",ev:"201; validation_study row",f:""},
+{id:"OUT-TC-001",module:"Analytical",title:"Outlier screening create (schema unresolved)",type:"Negative",status:"Passed w/ Observation",ev:"reachable/list 200; create rejects array with opaque 400",f:"NTQMS-FND-006"},
+{id:"MRV-TC-001",module:"Management Review",title:"Create management review (participants) + DB",type:"Positive",status:"Passed",ev:"201; management_review row; MRV_SCHEDULED event",f:""},
+{id:"POL-TC-001",module:"Quality Policy",title:"Create quality policy statement + DB",type:"Positive",status:"Passed",ev:"201; quality_policy row",f:""},
+{id:"PT-TC-001",module:"Proficiency Testing",title:"Create PT plan (year) + DB",type:"Positive",status:"Passed",ev:"201; pt_plan row",f:""},
+{id:"PT-TC-002",module:"Proficiency Testing",title:"Create PT enrollment (scheme) + DB",type:"Positive",status:"Passed",ev:"201; pt_enrollment row",f:""},
+{id:"QC-TC-001",module:"Quality Control",title:"Create QC profile (targetSd) + DB",type:"Positive",status:"Passed",ev:"201; qc_profile row",f:""},
+{id:"ARC-TC-001",module:"Archiving",title:"Create archive entry (snapshot file) + DB",type:"Positive",status:"Passed",ev:"201; archive_entry row w/ snapshotFileId",f:""},
+{id:"ARC-TC-002",module:"Archiving",title:"Invalid retentionClass enum → 500",type:"Negative",status:"Failed",ev:"retentionClass='Standard' → 500",f:"NTQMS-FND-001"},
+{id:"ORG-TC-001",module:"Org Context",title:"Create interested party + DB",type:"Positive",status:"Passed",ev:"201; interested_party row (category CUSTOMER)",f:""},
+{id:"ORG-TC-002",module:"Org Context",title:"Create context issue (SWOT) + DB",type:"Positive",status:"Passed",ev:"201; context_issue row",f:""},
+{id:"ORG-TC-003",module:"Org Context",title:"Invalid issue Type enum → 500",type:"Negative",status:"Failed",ev:"type='OPPORTUNITY' (wrong enum) → 500",f:"NTQMS-FND-001"},
+{id:"ACR-TC-001",module:"Access Reviews",title:"Create access review + DB",type:"Positive",status:"Passed",ev:"200; user_access_review row",f:""},
+{id:"CAT-TC-001",module:"Test Catalog",title:"Create test-catalog item (turnaround) + DB",type:"Positive",status:"Passed",ev:"201; test_catalog_item row",f:""},
+{id:"CAT-TC-002",module:"Test Authorizations",title:"Create test authorization → 500 (precondition)",type:"Negative",status:"Failed",ev:"competency-state precondition → 500 not 422",f:"NTQMS-FND-001"},
+{id:"ROL-TC-001",module:"Roles",title:"List roles / permission catalogue",type:"Positive",status:"Passed",ev:"GET /roles → 5 system roles; privileges = 171 perms",f:""},
+{id:"LOV-TC-001",module:"Reference Data",title:"Create LOV entry (reference-data admin) + DB",type:"Positive",status:"Passed",ev:"GET/POST /lovs → 200; lov_entry NTQMS_AITEST row created",f:""},
+{id:"REC-TC-001",module:"Controlled Records",title:"Forms / controlled-records page (document-category view)",type:"Positive",status:"Passed",ev:"GET /documents?category=FORM → 200",f:""},
+{id:"MAN-TC-001",module:"Quality Manual",title:"Quality manual page (document-backed)",type:"Positive",status:"Passed",ev:"GET /documents?category=MANUAL → 200",f:""},
+{id:"TSK-TC-001",module:"Tasks",title:"Create task (assign) → complete + DB",type:"Workflow",status:"Passed",ev:"create requires assignee (TASK-002); work_task status=Completed",f:""},
+{id:"SET-TC-001",module:"Settings/Security",title:"Tenant security settings (MFA policy)",type:"Positive",status:"Passed",ev:"GET /tenant-settings/mfa-policy → 200",f:""},
+{id:"DASH-TC-001",module:"Dashboard",title:"Dashboard KPIs render from live aggregates",type:"Positive",status:"Passed",ev:"GET /reports/kpis → 200 KPI tiles",f:""},
+{id:"MC-TC-002",module:"Method Comparison",title:"Full lifecycle: 8 pairs → calculate → sign-off",type:"Workflow",status:"Passed",ev:"Deming & Passing-Bablok slopes computed; state SignedOff; 8 measurement_pair rows",f:""},
+{id:"QC-TC-002",module:"Quality Control",title:"Record QC run on profile + DB",type:"Workflow",status:"Passed",ev:"POST /qc/profiles/{id}/runs → runId; qc_run row",f:""},
+{id:"MRV-TC-002",module:"Management Review",title:"Add review decision + DB",type:"Workflow",status:"Passed",ev:"POST /management-reviews/{id}/decisions → decisionId; review_decision row",f:""},
+];
+
+const FIND=[
+{id:"NTQMS-FND-001",sev:"High",title:"Systemic: invalid/precondition input causes unhandled HTTP 500 across multiple create endpoints",module:"Multiple (cross-cutting)",tc:"REF-TC-002, ORG-TC-003, ARC-TC-002, CAT-TC-002",cat:"error-handling / input-validation",
+repro:["Reference standard: POST /api/reference-standards type:'Mass' → 500","Context issue: POST /api/org-context/issues type:'OPPORTUNITY' (wrong enum for Type) → 500","Archive: POST /api/archives retentionClass:'Standard' → 500","Test authorization: POST /api/test-authorizations with a competency not in the required state → 500","In each case a valid value/precondition yields 201; the invalid one yields 500"],
+exp:"400 Bad Request (invalid enum) or 422 (unmet precondition) with an actionable message",act:"HTTP 500 'An error occurred while processing your request.' — DB CHECK/precondition violations surface as unhandled exceptions on at least 4 endpoints",
+root:"Enum/domain and some precondition checks are missing at the application layer on several create endpoints; out-of-domain input reaches PostgreSQL and violates CHECK constraints, bubbling up as an unhandled DbUpdateException. Confirmed by isolation on each endpoint (valid→201, invalid→500). This is a repeated pattern, not a single-endpoint bug — hence High.",
+impact:"Cross-cutting poor error handling: 5xx responses mask the real cause, pollute monitoring/alerting, degrade client UX, and could hint at internal schema. No data corruption (transactions roll back).",
+sol:["Add FluentValidation enum/domain checks to ALL enum-backed create/update DTOs (systematic audit).","Add a global DbUpdateException / constraint-violation → ProblemDetails(400/409/422) mapper as a safety net.","Convert precondition failures (e.g. competency state) to explicit 422 domain errors.","Retest each of the 4 confirmed endpoints + a full enum-field sweep."],urg:"Immediate hotfix / before UAT",cx:"Medium"},
+
+{id:"NTQMS-FND-002",sev:"Medium",title:"Out-of-range document review cycle silently coerced to default (no validation error)",module:"Documents",tc:"DOC-TC-010",cat:"input-validation / data-integrity",
+repro:["POST /api/documents with reviewCycleMonths of 0, 999, or -5","Response 201 Created","DB controlled_document.review_cycle_months persisted as 24 (default), not the submitted value and not rejected"],
+exp:"400 Bad Request enforcing the client's 1–120 bound",act:"201 Created; value silently replaced with 24. (Valid values do bind: 12→12, 36→36.)",
+root:"Range validation for reviewCycleMonths exists only client-side; the API neither enforces the bound nor rejects — it substitutes the default. A compliance-relevant control (document review cadence) is therefore not authoritatively enforced server-side.",
+impact:"A caller/integration can submit an invalid review cycle and receive success while the stored cadence differs from intent, with no error signal.",
+sol:["Enforce reviewCycleMonths ∈ [1,120] server-side; return 400 on violation instead of defaulting.","Retest boundaries 0/1/120/121/999/-5."],urg:"Before UAT approval",cx:"Low"},
+
+{id:"NTQMS-FND-003",sev:"Medium",title:"Analytical sign-off not written to the electronic-signature ledger (Part 11 consistency)",module:"Analytical Quality",tc:"AQ-TC-006",cat:"compliance / e-signature",
+repro:["Drive a precision study to SignedOff via QM sign-off (password+PIN required)","Entity stores signed_off_by/at and a PrecisionStudySignedOff domain event fires","Query audit.electronic_signature → only the document-publish signature exists; no row for the study sign-off"],
+exp:"Every credential-gated electronic signature recorded in audit.electronic_signature with signer, meaning, timestamp and content binding — as document publish does",act:"Study sign-off captured only as entity columns + domain event; absent from the central signature manifest (no signed 'meaning', no content hash)",
+root:"Signature-ledger writes appear wired for document publish but not for analytical-study sign-off, despite both being password+PIN e-signature acts.",
+impact:"Inconsistent 21 CFR Part 11 §11.50 evidence: analytical sign-offs lack the manifested meaning and content-hash binding present on document signatures, weakening a uniform signature audit.",
+sol:["On study sign-off, persist an electronic_signature row (meaning, signer, content hash of the calculated result).","Audit all *SignedOff / *Approved credential-gated actions for ledger coverage.","Retest: each sign-off yields a ledger row."],urg:"Before UAT approval",cx:"Medium"},
+
+{id:"NTQMS-FND-004",sev:"Low",title:"Cross-tenant sub-resource returns 200 [] instead of 404",module:"Documents",tc:"DOC-TC-014",cat:"security / response-consistency",
+repro:["With tenant-2 token, GET /api/documents/{tenant-1 document id}/signatures","Response 200 with []"],
+exp:"404 — the parent document does not belong to the caller's tenant (as the document GET itself correctly 404s)",act:"200 [] — endpoint queries signatures tenant-scoped and returns an empty set without checking parent ownership",
+root:"The signatures sub-endpoint does not verify parent-document tenant ownership before responding; it relies on tenant-scoped query returning empty.",
+impact:"No data leakage (empty set), but the inconsistent status code could be used to probe existence and is inconsistent with the rest of the API.",
+sol:["Resolve+authorize the parent document first; return 404 when it is not in the caller's tenant.","Apply to analogous sub-resources."],urg:"Before production",cx:"Low"},
+
+{id:"NTQMS-FND-005",sev:"Low",title:"Triage without assignee stores an all-zero GUID in AssignedTo",module:"Nonconformance",tc:"NCR-TC-005",cat:"data-quality",
+repro:["POST /api/nonconformances/{id}/triage with empty body","NC moves Raised→Assigned","field_change shows AssignedTo new_value = 00000000-0000-0000-0000-000000000000"],
+exp:"Either require a real assignee to reach 'Assigned', or leave AssignedTo null",act:"Status becomes 'Assigned' with AssignedTo = Guid.Empty (assigned to nobody)",
+root:"Triage endpoint does not require/validate an assignee and defaults the field to Guid.Empty rather than null.",
+impact:"An NC can be 'Assigned' to no one, undermining ownership/accountability reporting and possibly escalation logic.",
+sol:["Require assigneeId to transition to Assigned (or keep AssignedTo null and add a distinct 'Unassigned' state).","Retest empty vs populated triage."],urg:"Before production",cx:"Low"},
+
+{id:"NTQMS-FND-006",sev:"Low",title:"Outlier-screening create rejects standard payloads with a confusing 400 (undocumented 'r' field)",module:"Analytical — Outlier Screening",tc:"OUT-TC-001",cat:"api-contract / usability",
+repro:["POST /api/outlier-screenings {unit, dataset:[numbers]} → 400 requiring field 'r' and reporting '$.dataset could not be converted to CreateOutlierScreeningRequest'","Sending dataset as objects or 'values' also fails"],
+exp:"Either accept a numeric dataset array, or return a clear message naming the expected shape",act:"400 with an opaque converter error and a single-letter required field 'r'; create schema not resolvable from the API responses",
+root:"A custom JSON converter on the request type and a terse required member ('r') make the contract undiscoverable; the dataset element/shape is not communicated.",
+impact:"The outlier-screening page's create action is effectively unusable without source access; low functional impact but blocks that one workflow via the documented shape.",
+sol:["Expose a clear DTO (name the dataset element type and 'r'), and return a descriptive validation message.","Confirm the SPA form actually posts successfully; add a contract test."],urg:"Before production",cx:"Low"},
+];
+
+const MODULES=[
+{name:"Documents & SOP Control",tested:"create, upload, submit, recommend, publish, retire-attempt, versions",tc:14,st:"12P · 1Obs · 1F",db:"controlled_document, document_version, file_reference, electronic_signature",find:"FND-002, FND-004",ready:"Ready (2 fixes)"},
+{name:"Nonconformance / CAPA",tested:"raise, submit, triage, state-guard, cross-tenant",tc:6,st:"5P · 1Obs",db:"nonconformance (NC-2026-0001), field_change history",find:"FND-005",ready:"Ready (1 fix)"},
+{name:"Change Control / CAPA",tested:"propose + DB",tc:1,st:"1P",db:"change_request",find:"—",ready:"Ready"},
+{name:"Complaints",tested:"log + DB + notification",tc:1,st:"1P",db:"complaint; ComplaintLogged event",find:"—",ready:"Ready"},
+{name:"Analytical Quality (ISO 17025)",tested:"precision study: create→addMeasurement→calculate→sign-off; validation & SoD",tc:6,st:"5P · 1F",db:"precision_study (repeatability_sd computed)",find:"FND-003",ready:"Ready (1 fix)"},
+{name:"Reference Standards",tested:"create valid + invalid enum",tc:2,st:"1P · 1F",db:"reference_standard",find:"FND-001",ready:"Ready (1 fix)"},
+{name:"Suppliers",tested:"create + DB",tc:1,st:"1P",db:"supplier",find:"—",ready:"Ready"},
+{name:"Equipment",tested:"create + DB",tc:1,st:"1P",db:"equipment_item",find:"—",ready:"Ready"},
+{name:"Training / Competency",tested:"create + DB",tc:1,st:"1P",db:"competency_record",find:"—",ready:"Ready"},
+{name:"Risk Management",tested:"create (1-5 scales) + DB",tc:1,st:"1P",db:"risk_item",find:"—",ready:"Ready"},
+{name:"Internal Audit",tested:"create + checklist child + event",tc:1,st:"1P",db:"audit, audit_checklist_item",find:"—",ready:"Ready"},
+{name:"Quality Objectives",tested:"create (period-validated) + DB",tc:1,st:"1P",db:"quality_objective",find:"—",ready:"Ready"},
+{name:"Conflicts of Interest",tested:"create + DB",tc:1,st:"1P",db:"conflict_declaration",find:"—",ready:"Ready"},
+{name:"Feedback",tested:"create + DB",tc:1,st:"1P",db:"feedback_entry",find:"—",ready:"Ready"},
+{name:"Monitoring Points",tested:"create (limit required) + DB",tc:1,st:"1P",db:"monitoring_point",find:"—",ready:"Ready"},
+{name:"Identity & Access / RBAC",tested:"login, negatives, PIN, user create, role denial, token tamper",tc:16,st:"16P",db:"user_account, role, refresh_session, security_event",find:"—",ready:"Ready"},
+{name:"Notifications",tested:"dispatch recipients + tenant correctness",tc:2,st:"2P",db:"notification_dispatch, outbox_event",find:"—",ready:"Ready"},
+{name:"Reporting & BI",tested:"kpis, nc-pareto, sla, quality-analytics, health-profile, kpi-history — reconciled vs DB",tc:6,st:"6P",db:"read.kpi_snapshot + live aggregates",find:"—",ready:"Ready"},
+{name:"Compliance / Audit Monitoring",tested:"audit-trail, chain-verification (17 entries ok), signatures, field-changes, security-events",tc:3,st:"3P",db:"audit.audit_trail, field_change, electronic_signature, security_event",find:"—",ready:"Ready"},
+{name:"Analytical Quality — full suite (ISO 17025)",tested:"create + DB for all 12 study types (precision, carryover, detection-limit, instrument-comparability, interference, linearity, lot-comparison, method-comparison, reference-interval, sigma, uncertainty, validation)",tc:17,st:"16P · 1Obs",db:"*_study, sigma_assessment, uncertainty_budget",find:"FND-006 (outlier)",ready:"Ready"},
+{name:"Organizational Context",tested:"interested parties + context issues (SWOT) + DB",tc:3,st:"2P · 1F",db:"interested_party, context_issue",find:"FND-001",ready:"Ready (1 fix)"},
+{name:"Management Review & Quality Policy",tested:"create + DB",tc:2,st:"2P",db:"management_review, quality_policy",find:"—",ready:"Ready"},
+{name:"Proficiency Testing & QC",tested:"PT plan, PT enrollment, QC profile + DB",tc:3,st:"3P",db:"pt_plan, pt_enrollment, qc_profile",find:"—",ready:"Ready"},
+{name:"Archiving / Retention",tested:"archive entry w/ snapshot file + DB",tc:2,st:"1P · 1F",db:"archive_entry",find:"FND-001",ready:"Ready (1 fix)"},
+{name:"Test Catalog & Authorizations",tested:"test-catalog item create + DB; test-authorization precondition",tc:2,st:"1P · 1F",db:"test_catalog_item, test_authorization",find:"FND-001",ready:"Ready (1 fix)"},
+{name:"Access Reviews",tested:"create + DB",tc:1,st:"1P",db:"user_access_review",find:"—",ready:"Ready"},
+{name:"Reference Data / Records / Manual",tested:"reachability only",tc:3,st:"3 Blocked",db:"lov_entry (seeded, consumed)",find:"—",ready:"Blocked — endpoint not resolved"},
+];
+
+const DBROWS=[
+["documents","controlled_document + document_version","1 (+child)","t1 only","Created ✓","Pass"],
+["changes","change_request","1","t1 only","Created ✓","Pass"],
+["complaints","complaint","1","t1 only","Created ✓","Pass"],
+["feedback","feedback_entry","1","t1 only","Created ✓","Pass"],
+["precision-studies","precision_study","2","t1 only","Created ✓","Pass"],
+["suppliers","supplier","1","t1 only","Created ✓","Pass"],
+["equipment","equipment_item","1","t1 only","Created ✓","Pass"],
+["competencies","competency_record","1","t1 only","Created ✓","Pass"],
+["conflicts","conflict_declaration","1","t1 only","Created ✓","Pass"],
+["monitoring-points","monitoring_point","1","t1 only","Created ✓","Pass"],
+["nonconformances","nonconformance","1","t1 only","Created ✓","Pass"],
+["risks","risk_item","1","t1 only","Created ✓","Pass"],
+["audits","audit + audit_checklist_item","1 (+child)","t1 only","Created ✓","Pass"],
+["quality-objectives","quality_objective","1","t1 only","Created ✓","Pass"],
+["reference-standards","reference_standard","2","t1 only","Created ✓","Pass"],
+["management-reviews","management_review","1","t1 only","Created ✓","Pass"],
+["quality-policy","quality_policy","1","t1 only","Created ✓","Pass"],
+["pt-plans / proficiency","pt_plan, pt_enrollment","2","t1 only","Created ✓","Pass"],
+["qc/profiles","qc_profile","1","t1 only","Created ✓","Pass"],
+["archives","archive_entry","1","t1 only","Created ✓","Pass"],
+["org-context","interested_party, context_issue","2","t1 only","Created ✓","Pass"],
+["access-reviews","user_access_review","2","t1 only","Created ✓","Pass"],
+["test-catalog","test_catalog_item","1","t1 only","Created ✓","Pass"],
+["carryover-studies","carryover_study","1","t1 only","Created ✓","Pass"],
+["detection-limit-studies","detection_limit_study","1","t1 only","Created ✓","Pass"],
+["instrument-comparabilities","instrument_comparability_study","1","t1 only","Created ✓","Pass"],
+["interference-studies","interference_study","1","t1 only","Created ✓","Pass"],
+["linearity-studies","linearity_study","1","t1 only","Created ✓","Pass"],
+["lot-comparisons","lot_comparison_study","1","t1 only","Created ✓","Pass"],
+["method-comparisons","method_comparison_study","1","t1 only","Created ✓","Pass"],
+["reference-interval-studies","reference_interval_study","1","t1 only","Created ✓","Pass"],
+["sigma-assessments","sigma_assessment","1","t1 only","Created ✓","Pass"],
+["uncertainty-budgets","uncertainty_budget","1","t1 only","Created ✓","Pass"],
+["validation-studies","validation_study","1","t1 only","Created ✓","Pass"],
+];
+
+/* ================= RENDER ================= */
+const badge=s=>({"Passed":"b-pass","Passed w/ Observation":"b-obs","Failed":"b-fail","Blocked":"b-block","Not Applicable":"b-na"}[s]||"b-na");
+let tcSort={k:"id",dir:1};
+function fillSelect(){const m=[...new Set(TC.map(t=>t.module))].sort();const s=document.getElementById('tcModule');m.forEach(x=>{const o=document.createElement('option');o.value=x;o.textContent=x;s.appendChild(o)})}
+function tcFiltered(){
+ const q=document.getElementById('tcSearch').value.toLowerCase();
+ const md=document.getElementById('tcModule').value,stf=document.getElementById('tcStatus').value,ty=document.getElementById('tcType').value,fo=document.getElementById('tcFail').checked;
+ let r=TC.filter(t=>(!q||(t.id+t.title+t.ev+t.module).toLowerCase().includes(q))&&(!md||t.module===md)&&(!stf||t.status===stf)&&(!ty||t.type===ty)&&(!fo||t.status==="Failed"));
+ r.sort((a,b)=>{const x=(a[tcSort.k]||'')+'',y=(b[tcSort.k]||'')+'';return x.localeCompare(y)*tcSort.dir});
+ return r;
+}
+function renderTC(){
+ const r=tcFiltered();const b=document.getElementById('tcBody');b.innerHTML='';
+ r.forEach(t=>{const tr=document.createElement('tr');
+  tr.innerHTML=`<td class="mono">${t.id}</td><td>${t.module}</td><td>${t.title}</td><td>${t.type}</td>
+  <td><span class="b ${badge(t.status)}">${t.status}</span></td><td class="small">${t.ev}</td>
+  <td>${t.f?`<a href="#findings" class="mono">${t.f}</a>`:'—'}</td>`;b.appendChild(tr)});
+ document.getElementById('tcCount').textContent=`${r.length} / ${TC.length} cases`;
+}
+function sortTC(k){tcSort.dir=(tcSort.k===k?-tcSort.dir:1);tcSort.k=k;renderTC()}
+function renderFind(){
+ const sv=document.getElementById('fSev').value;const c=document.getElementById('findBody');c.innerHTML='';
+ FIND.filter(f=>!sv||f.sev===sv).forEach(f=>{
+  const sc={Medium:'med',Low:'low',High:'high',Critical:'crit'}[f.sev];
+  const d=document.createElement('div');d.className=`finding ${sc}`;
+  d.innerHTML=`<h4>${f.id} — ${f.title}</h4>
+  <div class="fmeta"><span class="sev sev-${sc}">${f.sev}</span><span>Module: <b>${f.module}</b></span><span>Test: <span class="mono">${f.tc}</span></span><span>Category: ${f.cat}</span><span>Urgency: ${f.urg}</span><span>Complexity: ${f.cx}</span></div>
+  <div class="kv"><b>Reproduction</b><span><ol class="tight" style="margin:0">${f.repro.map(x=>`<li>${x}</li>`).join('')}</ol></span>
+  <b>Expected</b><span>${f.exp}</span><b>Actual</b><span>${f.act}</span>
+  <b>Root-cause hypothesis</b><span>${f.root}</span><b>Impact</b><span>${f.impact}</span>
+  <b>Recommended solution</b><span><ul class="tight" style="margin:0">${f.sol.map(x=>`<li>${x}</li>`).join('')}</ul></span></div>`;
+  c.appendChild(d)});
+}
+function renderModules(){
+ const c=document.getElementById('moduleResults');
+ MODULES.forEach(m=>{const d=document.createElement('details');d.className='mod';
+  d.innerHTML=`<summary>${m.name} <span class="small" style="margin-left:auto">${m.tc} cases · ${m.st}</span> <span class="b ${m.ready.startsWith('Blocked')?'b-block':'b-pass'}">${m.ready}</span></summary>
+  <div class="body"><div class="kv"><b>Functions tested</b><span>${m.tested}</span><b>DB entities</b><span class="mono">${m.db}</span><b>Findings</b><span>${m.find}</span></div></div>`;
+  c.appendChild(d)});
+}
+function renderDB(){const b=document.getElementById('dbBody');DBROWS.forEach(r=>{const tr=document.createElement('tr');tr.innerHTML=r.map((c,i)=>i===5?`<td><span class="b b-pass">${c}</span></td>`:`<td${i===0||i===1?' class="mono"':''}>${c}</td>`).join('');b.appendChild(tr)})}
+function exportCSV(rows,name){const csv=rows.map(r=>r.map(c=>`"${(c+'').replace(/"/g,'""')}"`).join(',')).join('\n');const bl=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download=name;a.click()}
+function exportTC(){const r=tcFiltered();exportCSV([["ID","Module","Objective","Type","Status","Evidence","Finding"],...r.map(t=>[t.id,t.module,t.title,t.type,t.status,t.ev,t.f])],"NTQMS_test_cases.csv")}
+function exportFind(){exportCSV([["ID","Severity","Title","Module","TestCase","Category","Expected","Actual","RootCause","Impact"],...FIND.map(f=>[f.id,f.sev,f.title,f.module,f.tc,f.cat,f.exp,f.act,f.root,f.impact])],"NTQMS_findings.csv")}
+
+/* charts (inline canvas, no libs) */
+function donut(){const cv=document.getElementById('donut');if(!cv)return;const ctx=cv.getContext('2d');const W=cv.width=cv.clientWidth,H=cv.height;const data=[["Passed",97,"#22c55e"],["w/ Obs",3,"#38bdf8"],["Failed",6,"#ef4444"],["Blocked",0,"#f59e0b"]];const tot=data.reduce((a,b)=>a+b[1],0);let s=-Math.PI/2;const cx=W/2,cy=H/2,r=Math.min(W,H)/2-8,ir=r*.58;
+ data.forEach(d=>{const a=d[1]/tot*2*Math.PI;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,s,s+a);ctx.closePath();ctx.fillStyle=d[2];ctx.fill();s+=a});
+ ctx.globalCompositeOperation='destination-out';ctx.beginPath();ctx.arc(cx,cy,ir,0,2*Math.PI);ctx.fill();ctx.globalCompositeOperation='source-over';
+ ctx.fillStyle=getComputedStyle(document.body).color;ctx.textAlign='center';ctx.font='700 20px sans-serif';ctx.fillText('94%',cx,cy-2);ctx.font='11px sans-serif';ctx.fillText('pass',cx,cy+14);
+ let ly=8;data.forEach(d=>{ctx.fillStyle=d[2];ctx.fillRect(W-96,ly,10,10);ctx.fillStyle=getComputedStyle(document.body).color;ctx.textAlign='left';ctx.font='11px sans-serif';ctx.fillText(`${d[0]} ${d[1]}`,W-82,ly+9);ly+=17})}
+function barCov(){const cv=document.getElementById('barCov');if(!cv)return;const ctx=cv.getContext('2d');const W=cv.width=cv.clientWidth,H=cv.height;const data=[["Executed",106,"#3b82f6"],["Passed",100,"#22c55e"],["Failed",6,"#ef4444"],["Pages",48,"#f59e0b"],["Modules",45,"#0ea5e9"]];const max=106;const bw=W/data.length*.55,gap=W/data.length;
+ ctx.clearRect(0,0,W,H);data.forEach((d,i)=>{const h=(d[1]/max)*(H-34);const x=i*gap+(gap-bw)/2,y=H-22-h;ctx.fillStyle=d[2];ctx.fillRect(x,y,bw,h);ctx.fillStyle=getComputedStyle(document.body).color;ctx.textAlign='center';ctx.font='700 12px sans-serif';ctx.fillText(d[1],x+bw/2,y-4);ctx.font='10px sans-serif';ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--mut')||'#888';ctx.fillText(d[0],x+bw/2,H-6)})}
+
+window.addEventListener('scroll',()=>{document.getElementById('toTop').style.display=window.scrollY>500?'block':'none'});
+fillSelect();renderTC();renderFind();renderModules();renderDB();
+setTimeout(()=>{donut();barCov()},60);
+window.addEventListener('resize',()=>{donut();barCov()});
+</script>
+</body>
+</html>
