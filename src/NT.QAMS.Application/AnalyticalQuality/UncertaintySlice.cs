@@ -51,8 +51,10 @@ public sealed record AddUncertaintyComponentCommand(
 public sealed record RemoveUncertaintyComponentCommand(Guid BudgetId, Guid ComponentId) : ICommand;
 [RequireInternalActor]
 public sealed record CalculateUncertaintyBudgetCommand(Guid BudgetId) : ICommand;
-[RequireInternalActor]
-public sealed record ApproveUncertaintyBudgetCommand(Guid BudgetId) : ICommand;
+/// <summary>Approval is a Part 11 signing ceremony (§11.200(a)(1)): it requires the approver's account password + e-signature PIN.</summary>
+[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.AnalyticalQuality,
+    NT.QAMS.Domain.Authorization.PermissionAction.Sign)]
+public sealed record ApproveUncertaintyBudgetCommand(Guid BudgetId, string Password, string Pin) : ICommand;
 
 public sealed class AddUncertaintyComponentValidator : AbstractValidator<AddUncertaintyComponentCommand>
 {
@@ -64,7 +66,8 @@ public sealed class AddUncertaintyComponentValidator : AbstractValidator<AddUnce
     }
 }
 
-public sealed class UncertaintyWorkflowHandlers(IAppDbContext db, ICurrentUser user, IClock clock) :
+public sealed class UncertaintyWorkflowHandlers(
+    IAppDbContext db, ICurrentUser user, IClock clock, IESignatureService signatures) :
     ICommandHandler<AddUncertaintyComponentCommand, Guid>,
     ICommandHandler<RemoveUncertaintyComponentCommand>,
     ICommandHandler<CalculateUncertaintyBudgetCommand>,
@@ -99,6 +102,26 @@ public sealed class UncertaintyWorkflowHandlers(IAppDbContext db, ICurrentUser u
         var actor = user.UserId
             ?? throw new DomainException("AUTH-003", "An authenticated user is required.");
         var budget = await LoadAsync(c.BudgetId, ct);
+
+        // Pre-validate SoD + state BEFORE minting (append-only ledger; mirrors the NC verify pilot).
+        if (budget.CreatedByUserId is { } preparer && preparer == actor)
+        {
+            throw new DomainException(
+                "SOD-AQ-001", "Segregation of duties: the preparer cannot approve their own analytical record.");
+        }
+
+        if (budget.Status != UncertaintyBudgetStatus.Calculated)
+        {
+            throw new InvalidStateTransitionException(
+                "MU-010", $"Only a calculated budget can be approved (current: {budget.Status}).");
+        }
+
+        var subjectRef = $"MU:{budget.Id:N}";
+        await signatures.SignAsync(
+            actor, c.Password, c.Pin, "Approved uncertainty budget", subjectRef,
+            NT.QAMS.Application.Compliance.SignatureContentHash.Compute(
+                ("subject", subjectRef), ("outcome", "approved")), ct);
+
         budget.Approve(actor, clock.UtcNow);
         await db.SaveChangesAsync(ct);
     }

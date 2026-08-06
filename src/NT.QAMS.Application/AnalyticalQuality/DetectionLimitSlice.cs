@@ -48,10 +48,13 @@ public sealed record AddDetectionMeasurementCommand(
 public sealed record RemoveDetectionMeasurementCommand(Guid StudyId, Guid MeasurementId) : ICommand;
 [RequireInternalActor]
 public sealed record CalculateDetectionLimitCommand(Guid StudyId) : ICommand;
-[RequireInternalActor]
-public sealed record SignOffDetectionLimitCommand(Guid StudyId) : ICommand;
+/// <summary>Signing off is a Part 11 signing ceremony (§11.200(a)(1)): it requires the signer's account password + e-signature PIN.</summary>
+[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.AnalyticalQuality,
+    NT.QAMS.Domain.Authorization.PermissionAction.Sign)]
+public sealed record SignOffDetectionLimitCommand(Guid StudyId, string Password, string Pin) : ICommand;
 
-public sealed class DetectionLimitWorkflowHandlers(IAppDbContext db, ICurrentUser user, IClock clock) :
+public sealed class DetectionLimitWorkflowHandlers(
+    IAppDbContext db, ICurrentUser user, IClock clock, IESignatureService signatures) :
     ICommandHandler<AddDetectionMeasurementCommand, Guid>,
     ICommandHandler<RemoveDetectionMeasurementCommand>,
     ICommandHandler<CalculateDetectionLimitCommand>,
@@ -85,6 +88,26 @@ public sealed class DetectionLimitWorkflowHandlers(IAppDbContext db, ICurrentUse
         var actor = user.UserId
             ?? throw new DomainException("AUTH-003", "An authenticated user is required.");
         var study = await LoadAsync(c.StudyId, ct);
+
+        // Pre-validate SoD + state BEFORE minting (append-only ledger; mirrors the NC verify pilot).
+        if (study.CreatedByUserId is { } preparer && preparer == actor)
+        {
+            throw new DomainException(
+                "SOD-AQ-001", "Segregation of duties: the preparer cannot sign off their own analytical record.");
+        }
+
+        if (study.State != DetectionLimitState.Calculated)
+        {
+            throw new InvalidStateTransitionException(
+                "DL-013", $"Only a calculated study can be signed off (current: {study.State}).");
+        }
+
+        var subjectRef = $"DL:{study.Id:N}";
+        await signatures.SignAsync(
+            actor, c.Password, c.Pin, "Signed off detection limit study", subjectRef,
+            NT.QAMS.Application.Compliance.SignatureContentHash.Compute(
+                ("subject", subjectRef), ("outcome", "signed-off")), ct);
+
         study.SignOff(actor, clock.UtcNow);
         await db.SaveChangesAsync(ct);
     }

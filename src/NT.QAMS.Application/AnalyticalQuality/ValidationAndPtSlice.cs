@@ -45,8 +45,10 @@ public sealed record EnterReplicateCommand(Guid StudyId, string Level, decimal M
     : ICommand;
 [RequireInternalActor]
 public sealed record CalculateStudyCommand(Guid StudyId) : ICommand;
-[RequireInternalActor]
-public sealed record SignOffStudyCommand(Guid StudyId) : ICommand;
+/// <summary>Signing off is a Part 11 signing ceremony (§11.200(a)(1)): it requires the signer's account password + e-signature PIN.</summary>
+[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.AnalyticalQuality,
+    NT.QAMS.Domain.Authorization.PermissionAction.Sign)]
+public sealed record SignOffStudyCommand(Guid StudyId, string Password, string Pin) : ICommand;
 
 internal static class StudyLoader
 {
@@ -73,13 +75,34 @@ public sealed class CalculateStudyHandler(IAppDbContext db) : ICommandHandler<Ca
     }
 }
 
-public sealed class SignOffStudyHandler(IAppDbContext db, ICurrentUser user, IClock clock)
+public sealed class SignOffStudyHandler(
+    IAppDbContext db, ICurrentUser user, IClock clock, IESignatureService signatures)
     : ICommandHandler<SignOffStudyCommand>
 {
     public async Task Handle(SignOffStudyCommand c, CancellationToken ct)
     {
         var actor = user.UserId ?? throw new DomainException("AUTH-003", "An authenticated user is required.");
-        (await StudyLoader.LoadAsync(db, c.StudyId, ct)).SignOff(actor, clock.UtcNow);
+        var study = await StudyLoader.LoadAsync(db, c.StudyId, ct);
+
+        // Pre-validate SoD + state BEFORE minting (append-only ledger; mirrors the NC verify pilot).
+        if (study.CreatedByUserId is { } preparer && preparer == actor)
+        {
+            throw new DomainException(
+                "SOD-AQ-001", "Segregation of duties: the preparer cannot sign off their own analytical record.");
+        }
+
+        if (study.State != ValidationState.StatsCalculated)
+        {
+            throw new InvalidStateTransitionException("MV-015", "Statistics must be calculated before sign-off.");
+        }
+
+        var subjectRef = $"MV:{study.Id:N}";
+        await signatures.SignAsync(
+            actor, c.Password, c.Pin, "Signed off validation study", subjectRef,
+            NT.QAMS.Application.Compliance.SignatureContentHash.Compute(
+                ("subject", subjectRef), ("outcome", "signed-off")), ct);
+
+        study.SignOff(actor, clock.UtcNow);
         await db.SaveChangesAsync(ct);
     }
 }

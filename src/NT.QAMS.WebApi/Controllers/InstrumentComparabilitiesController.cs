@@ -50,9 +50,9 @@ public sealed class InstrumentComparabilitiesController(ISender sender) : Contro
 
     [HttpPost("{id:guid}/sign-off")]
     [RequirePermission(PermissionCatalog.AnalyticalQuality, PermissionAction.Sign)]
-    public async Task<IActionResult> SignOff(Guid id, CancellationToken ct)
+    public async Task<IActionResult> SignOff(Guid id, AnalyticalSignOffRequest request, CancellationToken ct)
     {
-        await sender.Send(new SignOffInstrumentComparabilityCommand(id), ct);
+        await sender.Send(new SignOffInstrumentComparabilityCommand(id, request.Password, request.Pin), ct);
         return NoContent();
     }
 }

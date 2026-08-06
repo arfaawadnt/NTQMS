@@ -55,10 +55,10 @@ public sealed class UncertaintyController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/approve")]
-    [RequirePermission(PermissionCatalog.AnalyticalQuality, PermissionAction.Approve)]
-    public async Task<IActionResult> Approve(Guid id, CancellationToken ct)
+    [RequirePermission(PermissionCatalog.AnalyticalQuality, PermissionAction.Sign)]
+    public async Task<IActionResult> Approve(Guid id, AnalyticalSignOffRequest request, CancellationToken ct)
     {
-        await sender.Send(new ApproveUncertaintyBudgetCommand(id), ct);
+        await sender.Send(new ApproveUncertaintyBudgetCommand(id, request.Password, request.Pin), ct);
         return NoContent();
     }
 }

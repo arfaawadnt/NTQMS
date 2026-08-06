@@ -42,9 +42,9 @@ public sealed class SigmaAssessmentsController(ISender sender) : ControllerBase
 
     [HttpPost("{id:guid}/sign-off")]
     [RequirePermission(PermissionCatalog.AnalyticalQuality, PermissionAction.Sign)]
-    public async Task<IActionResult> SignOff(Guid id, CancellationToken ct)
+    public async Task<IActionResult> SignOff(Guid id, AnalyticalSignOffRequest request, CancellationToken ct)
     {
-        await sender.Send(new SignOffSigmaAssessmentCommand(id), ct);
+        await sender.Send(new SignOffSigmaAssessmentCommand(id, request.Password, request.Pin), ct);
         return NoContent();
     }
 }

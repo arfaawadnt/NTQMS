@@ -277,6 +277,29 @@ Administrator, Quality Manager) are unaffected. But **any tenant-defined role th
 administrator grants it `nc.sign`. Seeding is additive per role name and will not backfill this;
 name it in the release note or ship a deliberate data migration.
 
+### A.14 Part 11 electronic-signature ceremony — analytical sign-offs (RISK-03 batch)
+
+Extends RISK-03 (Doc 12 / NB-03-02) from the NC-verify pilot (§A.13) to the analytical-quality
+sign-off family: 13 analytical study/assessment sign-off (and budget approval) gates that enforced
+segregation of duties in-domain but minted **no `signature_record`** now run the full signing
+ceremony, reusing the same `IESignatureService.SignAsync` and `SignatureContentHash` foundation. No
+schema change; the domain aggregates are unchanged (each already carried its SoD + state
+invariants). Each handler pre-validates SoD + state **before** minting, so a refused sign-off never
+leaves a signature (append-only ledger). *(PtPlan approval — the 14th SOD-AQ-001 gate — is deferred
+to a small follow-up: it lives under the `proficiency-testing` module, which needs a new
+`proficiency-testing.sign` catalogue key.)*
+
+| URS | Requirement (delta) | Design element(s) | Verification | Status |
+| --- | ------------------- | ----------------- | ------------ | ------ |
+| URS-124 | Signing off / approving an analytical study, assessment or uncertainty budget shall require the signer's electronic signature (account password **and** PIN, §11.200(a)(1)), recorded as an immutable signature bound to the record and outcome (§11.50/§11.70); the segregation-of-duties and state gates shall be checked **before** any signature is minted. Applies to: linearity, instrument comparability, carryover, method comparison, precision, interference, lot comparison, detection limit, outlier screening, reference interval, validation study, sigma assessment (sign-off) and uncertainty budget (approval). | Each `SignOff*Command`/`ApproveUncertaintyBudgetCommand` gains `Password`+`Pin` and `[RequirePermissionPolicy(analytical-quality, Sign)]`; each workflow handler pre-validates SoD (`CreatedByUserId`) + the study's state, then `IESignatureService.SignAsync`, then the aggregate's `SignOff`/`Approve` (slices under `src/NT.QAMS.Application/AnalyticalQuality/`); shared `AnalyticalSignOffRequest(Password, Pin)` contract; 12 sign-off endpoints already gated `analytical-quality.sign`, uncertainty `/approve` tightened from `Approve` to `Sign` | AUTO — `AnalyticalSignOffSigningTests` (4: Sigma valid sign-off mints exactly one manifest entry against the **real** `ESignatureService`; wrong PIN → SIG-001 + zero signatures + still Draft; preparer → SOD-AQ-001 + zero signatures; wrong state → LIN-012 + zero signatures); full backend suite 242/85/33/31+1/82. INSP live (dev, real PostgreSQL, 2026-08-06) — linearity sign-off as the preparer with correct password+PIN → **422 SOD-AQ-001** (fenced before minting); sign-off with no credential body → **400** (endpoint now requires the e-signature body) | Template — engineering complete; automated + partial live evidence recorded; witnessed positive-mint OQ pending (needs a second operator account so signer ≠ preparer) |
+
+**Authorization upgrade note (act before release).** Twelve analytical sign-off endpoints already
+required `analytical-quality.sign`, so they are unaffected. The **uncertainty-budget `/approve`**
+endpoint moved from `analytical-quality.approve` to `analytical-quality.sign`: any tenant-defined
+role that approved uncertainty budgets via `analytical-quality.approve` without
+`analytical-quality.sign` will lose that ability until an administrator grants `.sign`. Seeding is
+additive per role name and will not backfill this.
+
 ---
 
 ## Part B — Installation Qualification (IQ) delta

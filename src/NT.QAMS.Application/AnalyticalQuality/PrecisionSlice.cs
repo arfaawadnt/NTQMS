@@ -48,10 +48,13 @@ public sealed record AddPrecisionMeasurementCommand(Guid StudyId, string RunLabe
 public sealed record RemovePrecisionMeasurementCommand(Guid StudyId, Guid MeasurementId) : ICommand;
 [RequireInternalActor]
 public sealed record CalculatePrecisionCommand(Guid StudyId) : ICommand;
-[RequireInternalActor]
-public sealed record SignOffPrecisionCommand(Guid StudyId) : ICommand;
+/// <summary>Signing off is a Part 11 signing ceremony (§11.200(a)(1)): it requires the signer's account password + e-signature PIN.</summary>
+[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.AnalyticalQuality,
+    NT.QAMS.Domain.Authorization.PermissionAction.Sign)]
+public sealed record SignOffPrecisionCommand(Guid StudyId, string Password, string Pin) : ICommand;
 
-public sealed class PrecisionWorkflowHandlers(IAppDbContext db, ICurrentUser user, IClock clock) :
+public sealed class PrecisionWorkflowHandlers(
+    IAppDbContext db, ICurrentUser user, IClock clock, IESignatureService signatures) :
     ICommandHandler<AddPrecisionMeasurementCommand, Guid>,
     ICommandHandler<RemovePrecisionMeasurementCommand>,
     ICommandHandler<CalculatePrecisionCommand>,
@@ -84,6 +87,26 @@ public sealed class PrecisionWorkflowHandlers(IAppDbContext db, ICurrentUser use
         var actor = user.UserId
             ?? throw new DomainException("AUTH-003", "An authenticated user is required.");
         var study = await LoadAsync(c.StudyId, ct);
+
+        // Pre-validate SoD + state BEFORE minting (append-only ledger; mirrors the NC verify pilot).
+        if (study.CreatedByUserId is { } preparer && preparer == actor)
+        {
+            throw new DomainException(
+                "SOD-AQ-001", "Segregation of duties: the preparer cannot sign off their own analytical record.");
+        }
+
+        if (study.State != PrecisionState.Calculated)
+        {
+            throw new InvalidStateTransitionException(
+                "PR-012", $"Only a calculated study can be signed off (current: {study.State}).");
+        }
+
+        var subjectRef = $"PR:{study.Id:N}";
+        await signatures.SignAsync(
+            actor, c.Password, c.Pin, "Signed off precision study", subjectRef,
+            NT.QAMS.Application.Compliance.SignatureContentHash.Compute(
+                ("subject", subjectRef), ("outcome", "signed-off")), ct);
+
         study.SignOff(actor, clock.UtcNow);
         await db.SaveChangesAsync(ct);
     }

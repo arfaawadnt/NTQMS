@@ -41,10 +41,13 @@ public sealed record AddCarryoverReadingCommand(Guid StudyId, string Kind, int S
 public sealed record RemoveCarryoverReadingCommand(Guid StudyId, Guid ReadingId) : ICommand;
 [RequireInternalActor]
 public sealed record CalculateCarryoverCommand(Guid StudyId) : ICommand;
-[RequireInternalActor]
-public sealed record SignOffCarryoverCommand(Guid StudyId) : ICommand;
+/// <summary>Signing off is a Part 11 signing ceremony (§11.200(a)(1)): it requires the signer's account password + e-signature PIN.</summary>
+[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.AnalyticalQuality,
+    NT.QAMS.Domain.Authorization.PermissionAction.Sign)]
+public sealed record SignOffCarryoverCommand(Guid StudyId, string Password, string Pin) : ICommand;
 
-public sealed class CarryoverWorkflowHandlers(IAppDbContext db, ICurrentUser user, IClock clock) :
+public sealed class CarryoverWorkflowHandlers(
+    IAppDbContext db, ICurrentUser user, IClock clock, IESignatureService signatures) :
     ICommandHandler<AddCarryoverReadingCommand, Guid>,
     ICommandHandler<RemoveCarryoverReadingCommand>,
     ICommandHandler<CalculateCarryoverCommand>,
@@ -76,6 +79,26 @@ public sealed class CarryoverWorkflowHandlers(IAppDbContext db, ICurrentUser use
     {
         var actor = user.UserId ?? throw new DomainException("AUTH-003", "An authenticated user is required.");
         var s = await Load(c.StudyId, ct);
+
+        // Pre-validate SoD + state BEFORE minting (append-only ledger; mirrors the NC verify pilot).
+        if (s.CreatedByUserId is { } preparer && preparer == actor)
+        {
+            throw new DomainException(
+                "SOD-AQ-001", "Segregation of duties: the preparer cannot sign off their own analytical record.");
+        }
+
+        if (s.State != CarryoverState.Calculated)
+        {
+            throw new InvalidStateTransitionException(
+                "CAR-013", $"Only a calculated study can be signed off (current: {s.State}).");
+        }
+
+        var subjectRef = $"CAR:{s.Id:N}";
+        await signatures.SignAsync(
+            actor, c.Password, c.Pin, "Signed off carryover study", subjectRef,
+            NT.QAMS.Application.Compliance.SignatureContentHash.Compute(
+                ("subject", subjectRef), ("outcome", "signed-off")), ct);
+
         s.SignOff(actor, clock.UtcNow);
         await db.SaveChangesAsync(ct);
     }

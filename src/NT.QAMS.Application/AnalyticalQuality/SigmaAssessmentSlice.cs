@@ -45,10 +45,13 @@ public sealed class CreateSigmaAssessmentHandler(
 [RequireInternalActor]
 public sealed record UpdateSigmaInputsCommand(
     Guid AssessmentId, decimal AllowableTotalErrorPct, decimal BiasPct, decimal CvPct) : ICommand;
-[RequireInternalActor]
-public sealed record SignOffSigmaAssessmentCommand(Guid AssessmentId) : ICommand;
+/// <summary>Signing off is a Part 11 signing ceremony (§11.200(a)(1)): it requires the signer's account password + e-signature PIN.</summary>
+[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.AnalyticalQuality,
+    NT.QAMS.Domain.Authorization.PermissionAction.Sign)]
+public sealed record SignOffSigmaAssessmentCommand(Guid AssessmentId, string Password, string Pin) : ICommand;
 
-public sealed class SigmaAssessmentWorkflowHandlers(IAppDbContext db, ICurrentUser user, IClock clock) :
+public sealed class SigmaAssessmentWorkflowHandlers(
+    IAppDbContext db, ICurrentUser user, IClock clock, IESignatureService signatures) :
     ICommandHandler<UpdateSigmaInputsCommand>,
     ICommandHandler<SignOffSigmaAssessmentCommand>
 {
@@ -64,6 +67,25 @@ public sealed class SigmaAssessmentWorkflowHandlers(IAppDbContext db, ICurrentUs
         var actor = user.UserId
             ?? throw new DomainException("AUTH-003", "An authenticated user is required.");
         var assessment = await LoadAsync(c.AssessmentId, ct);
+
+        // Pre-validate SoD + state BEFORE minting (append-only ledger; mirrors the NC verify pilot).
+        if (assessment.CreatedByUserId is { } preparer && preparer == actor)
+        {
+            throw new DomainException(
+                "SOD-AQ-001", "Segregation of duties: the preparer cannot sign off their own analytical record.");
+        }
+
+        if (assessment.State != SigmaAssessmentState.Draft)
+        {
+            throw new InvalidStateTransitionException("SIG-011", "The assessment is already signed off.");
+        }
+
+        var subjectRef = $"SGA:{assessment.Id:N}";
+        await signatures.SignAsync(
+            actor, c.Password, c.Pin, "Signed off sigma assessment", subjectRef,
+            NT.QAMS.Application.Compliance.SignatureContentHash.Compute(
+                ("subject", subjectRef), ("outcome", "signed-off")), ct);
+
         assessment.SignOff(actor, clock.UtcNow);
         await db.SaveChangesAsync(ct);
     }

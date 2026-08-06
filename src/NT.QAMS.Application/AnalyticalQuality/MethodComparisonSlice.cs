@@ -48,10 +48,13 @@ public sealed record AddMeasurementPairCommand(
 public sealed record RemoveMeasurementPairCommand(Guid StudyId, Guid PairId) : ICommand;
 [RequireInternalActor]
 public sealed record CalculateMethodComparisonCommand(Guid StudyId) : ICommand;
-[RequireInternalActor]
-public sealed record SignOffMethodComparisonCommand(Guid StudyId) : ICommand;
+/// <summary>Signing off is a Part 11 signing ceremony (§11.200(a)(1)): it requires the signer's account password + e-signature PIN.</summary>
+[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.AnalyticalQuality,
+    NT.QAMS.Domain.Authorization.PermissionAction.Sign)]
+public sealed record SignOffMethodComparisonCommand(Guid StudyId, string Password, string Pin) : ICommand;
 
-public sealed class MethodComparisonWorkflowHandlers(IAppDbContext db, ICurrentUser user, IClock clock) :
+public sealed class MethodComparisonWorkflowHandlers(
+    IAppDbContext db, ICurrentUser user, IClock clock, IESignatureService signatures) :
     ICommandHandler<AddMeasurementPairCommand, Guid>,
     ICommandHandler<RemoveMeasurementPairCommand>,
     ICommandHandler<CalculateMethodComparisonCommand>,
@@ -84,6 +87,26 @@ public sealed class MethodComparisonWorkflowHandlers(IAppDbContext db, ICurrentU
         var actor = user.UserId
             ?? throw new DomainException("AUTH-003", "An authenticated user is required.");
         var study = await LoadAsync(c.StudyId, ct);
+
+        // Pre-validate SoD + state BEFORE minting (append-only ledger; mirrors the NC verify pilot).
+        if (study.CreatedByUserId is { } preparer && preparer == actor)
+        {
+            throw new DomainException(
+                "SOD-AQ-001", "Segregation of duties: the preparer cannot sign off their own analytical record.");
+        }
+
+        if (study.State != MethodComparisonState.Calculated)
+        {
+            throw new InvalidStateTransitionException(
+                "MC-012", $"Only a calculated study can be signed off (current: {study.State}).");
+        }
+
+        var subjectRef = $"MC:{study.Id:N}";
+        await signatures.SignAsync(
+            actor, c.Password, c.Pin, "Signed off method comparison study", subjectRef,
+            NT.QAMS.Application.Compliance.SignatureContentHash.Compute(
+                ("subject", subjectRef), ("outcome", "signed-off")), ct);
+
         study.SignOff(actor, clock.UtcNow);
         await db.SaveChangesAsync(ct);
     }

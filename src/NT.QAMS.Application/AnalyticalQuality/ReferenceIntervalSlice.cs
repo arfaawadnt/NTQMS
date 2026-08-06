@@ -49,10 +49,13 @@ public sealed record AddReferenceSampleCommand(Guid StudyId, decimal Value, stri
 public sealed record RemoveReferenceSampleCommand(Guid StudyId, Guid SampleId) : ICommand;
 [RequireInternalActor]
 public sealed record CalculateReferenceIntervalCommand(Guid StudyId) : ICommand;
-[RequireInternalActor]
-public sealed record SignOffReferenceIntervalCommand(Guid StudyId) : ICommand;
+/// <summary>Signing off is a Part 11 signing ceremony (§11.200(a)(1)): it requires the signer's account password + e-signature PIN.</summary>
+[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.AnalyticalQuality,
+    NT.QAMS.Domain.Authorization.PermissionAction.Sign)]
+public sealed record SignOffReferenceIntervalCommand(Guid StudyId, string Password, string Pin) : ICommand;
 
-public sealed class ReferenceIntervalWorkflowHandlers(IAppDbContext db, ICurrentUser user, IClock clock) :
+public sealed class ReferenceIntervalWorkflowHandlers(
+    IAppDbContext db, ICurrentUser user, IClock clock, IESignatureService signatures) :
     ICommandHandler<AddReferenceSampleCommand, Guid>,
     ICommandHandler<RemoveReferenceSampleCommand>,
     ICommandHandler<CalculateReferenceIntervalCommand>,
@@ -85,6 +88,26 @@ public sealed class ReferenceIntervalWorkflowHandlers(IAppDbContext db, ICurrent
         var actor = user.UserId
             ?? throw new DomainException("AUTH-003", "An authenticated user is required.");
         var study = await LoadAsync(c.StudyId, ct);
+
+        // Pre-validate SoD + state BEFORE minting (append-only ledger; mirrors the NC verify pilot).
+        if (study.CreatedByUserId is { } preparer && preparer == actor)
+        {
+            throw new DomainException(
+                "SOD-AQ-001", "Segregation of duties: the preparer cannot sign off their own analytical record.");
+        }
+
+        if (study.State != ReferenceIntervalState.Calculated)
+        {
+            throw new InvalidStateTransitionException(
+                "RI-011", $"Only a calculated study can be signed off (current: {study.State}).");
+        }
+
+        var subjectRef = $"RI:{study.Id:N}";
+        await signatures.SignAsync(
+            actor, c.Password, c.Pin, "Signed off reference interval study", subjectRef,
+            NT.QAMS.Application.Compliance.SignatureContentHash.Compute(
+                ("subject", subjectRef), ("outcome", "signed-off")), ct);
+
         study.SignOff(actor, clock.UtcNow);
         await db.SaveChangesAsync(ct);
     }

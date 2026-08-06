@@ -1,5 +1,12 @@
 namespace NT.QAMS.Contracts.AnalyticalQuality;
 
+/// <summary>
+/// The two 21 CFR Part 11 identification components (§11.200(a)(1)) an analyst supplies
+/// to sign off / approve an analytical study: the account password and the e-signature PIN.
+/// Shared by every analytical sign-off endpoint.
+/// </summary>
+public sealed record AnalyticalSignOffRequest(string Password, string Pin);
+
 // ── QC ───────────────────────────────────────────────────────────────────────
 
 public sealed record CreateQcProfileRequest(
