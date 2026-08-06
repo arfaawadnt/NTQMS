@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
+using NT.QAMS.Application.Compliance;
 using NT.QAMS.Domain.AuditManagement;
 using NT.QAMS.SharedKernel.Abstractions;
 using NT.QAMS.SharedKernel.Primitives;
@@ -70,8 +71,10 @@ public sealed class AnswerChecklistItemValidator : AbstractValidator<AnswerCheck
 [RequireInternalActor]
 public sealed record RaiseFindingCommand(Guid AuditId, FindingGrade Grade, string Description)
     : ICommand<Guid>;
-[RequireInternalActor]
-public sealed record SignOffAuditCommand(Guid AuditId) : ICommand;
+/// <summary>Signing off an audit is a Part 11 signing ceremony: it requires the signer's e-signature (account password + PIN).</summary>
+[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.Audits,
+    NT.QAMS.Domain.Authorization.PermissionAction.Sign)]
+public sealed record SignOffAuditCommand(Guid AuditId, string Password, string Pin) : ICommand;
 
 public sealed class RaiseFindingValidator : AbstractValidator<RaiseFindingCommand>
 {
@@ -121,13 +124,39 @@ public sealed class RaiseFindingHandler(IAppDbContext db, ICurrentUser user)
     }
 }
 
-public sealed class SignOffAuditHandler(IAppDbContext db, ICurrentUser user, IClock clock)
+public sealed class SignOffAuditHandler(
+    IAppDbContext db, ICurrentUser user, IClock clock, IESignatureService signatures)
     : ICommandHandler<SignOffAuditCommand>
 {
     public async Task Handle(SignOffAuditCommand c, CancellationToken ct)
     {
         var actor = user.UserId ?? throw new DomainException("AUTH-003", "An authenticated user is required.");
-        (await AuditLoader.LoadAsync(db, c.AuditId, ct)).SignOff(actor, clock.UtcNow);
+        var audit = await AuditLoader.LoadAsync(db, c.AuditId, ct);
+
+        // Pre-validate every sign-off precondition before minting (append-only ledger; mirrors the pilot).
+        if (audit.Status != AuditStatus.InProgress)
+        {
+            throw new InvalidStateTransitionException("AUD-019", $"Cannot sign off: audit is {audit.Status}.");
+        }
+
+        if (audit.Checklist.Any(i => i.Verdict == ChecklistVerdict.Unanswered))
+        {
+            throw new DomainException("AUD-017", "All checklist items must be answered before sign-off.");
+        }
+
+        var unacknowledged = audit.Findings.Count(f => f.Grade != FindingGrade.Ofi && f.NcId is null);
+        if (unacknowledged > 0)
+        {
+            throw new DomainException(
+                "AUD-018", $"{unacknowledged} NC-graded finding(s) await their nonconformance before sign-off.");
+        }
+
+        var subjectRef = $"AUD:{audit.Id:N}";
+        await signatures.SignAsync(
+            actor, c.Password, c.Pin, $"Signed off internal audit {audit.AuditRef}", subjectRef,
+            SignatureContentHash.Compute(("audit", audit.AuditRef), ("outcome", "signed-off")), ct);
+
+        audit.SignOff(actor, clock.UtcNow);
         await db.SaveChangesAsync(ct);
     }
 }

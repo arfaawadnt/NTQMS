@@ -14,7 +14,7 @@ public sealed record PlanCapaActionRequest(string Type, string Details, Guid Own
 
 public sealed record VerifyNcRequest(bool Passed, string Password, string Pin);
 
-public sealed record ConfirmEffectivenessRequest(bool Effective);
+public sealed record ConfirmEffectivenessRequest(bool Effective, string Password, string Pin);
 
 public sealed record CapaActionDto(
     Guid Id, string Type, string Details, Guid OwnerId, DateOnly DueDate,

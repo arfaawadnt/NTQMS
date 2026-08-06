@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
+using NT.QAMS.Application.Compliance;
 using NT.QAMS.Contracts.Governance;
 using NT.QAMS.Domain.RiskGovernance;
 using NT.QAMS.SharedKernel.Abstractions;
@@ -182,8 +183,10 @@ public sealed class ProposeChangeHandler(
 
 [RequireInternalActor]
 public sealed record LinkRiskCommand(Guid ChangeId, Guid RiskItemId) : ICommand;
-[RequireInternalActor]
-public sealed record ApproveChangeCommand(Guid ChangeId) : ICommand;
+/// <summary>Approving a change is a Part 11 signing ceremony: it requires the approver's e-signature (account password + PIN).</summary>
+[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.ChangeControl,
+    NT.QAMS.Domain.Authorization.PermissionAction.Sign)]
+public sealed record ApproveChangeCommand(Guid ChangeId, string Password, string Pin) : ICommand;
 [RequireInternalActor]
 public sealed record RejectChangeCommand(Guid ChangeId, string Reason) : ICommand;
 
@@ -236,13 +239,34 @@ public sealed class LinkRiskHandler(IAppDbContext db) : ICommandHandler<LinkRisk
     }
 }
 
-public sealed class ApproveChangeHandler(IAppDbContext db, ICurrentUser user, IClock clock)
+public sealed class ApproveChangeHandler(
+    IAppDbContext db, ICurrentUser user, IClock clock, IESignatureService signatures)
     : ICommandHandler<ApproveChangeCommand>
 {
     public async Task Handle(ApproveChangeCommand c, CancellationToken ct)
     {
-        (await ChangeLoader.LoadAsync(db, c.ChangeId, ct))
-            .Approve(GovernanceHelpers.RequireActor(user), clock.UtcNow);
+        var actor = GovernanceHelpers.RequireActor(user);
+        var change = await ChangeLoader.LoadAsync(db, c.ChangeId, ct);
+
+        // Pre-validate before minting (append-only ledger; mirrors the pilot). The aggregate re-checks both.
+        if (change.Status != ChangeStatus.Proposed)
+        {
+            throw new InvalidStateTransitionException(
+                "CHG-011", $"Cannot approve a change in state {change.Status}.");
+        }
+
+        if (change.RiskItemId is null)
+        {
+            throw new DomainException(
+                "CHG-012", "A change cannot be approved without a linked risk assessment.");
+        }
+
+        var subjectRef = $"CHG:{change.Id:N}";
+        await signatures.SignAsync(
+            actor, c.Password, c.Pin, $"Approved change {change.ChangeRef}", subjectRef,
+            SignatureContentHash.Compute(("change", change.ChangeRef), ("outcome", "approved")), ct);
+
+        change.Approve(actor, clock.UtcNow);
         await db.SaveChangesAsync(ct);
     }
 }

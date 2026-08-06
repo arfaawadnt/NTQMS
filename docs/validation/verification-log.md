@@ -43,6 +43,7 @@ exactly how two wrong totals reached the commit record (see the note below the t
 
 | Date | Commit | Env | Domain | App | Arch | Integ | Func | Backend | FE unit | E2E | Result |
 | ---- | ------ | --- | -----: | --: | ---: | ----: | ---: | ------: | ------: | --: | ------ |
+| 2026-08-06 | (pending commit) | dev + real PG | 242 | 88 | 33 | 31 (+1 skip) | 82 | **476** | 95 | — (not run) | All green (RISK-03 non-AQ backend: NC-close, audit sign-off, QP approve, change approve e-signature ceremonies) |
 | 2026-08-06 | (pending commit) | dev + real PG | 242 | 85 | 33 | 31 (+1 skip) | 82 | **473** | 95 | — (not run) | All green (RISK-03 AQ frontend: 13 sign-off UIs wired to the e-sign dialog; prod build + karma green) |
 | 2026-08-06 | (pending commit) | dev + real PG | 242 | 85 | 33 | 31 (+1 skip) | 82 | **473** | 95 | — (not run) | All green (RISK-03 AQ batch backend: 13 analytical sign-off e-signature ceremonies) |
 | 2026-08-06 | (pending commit) | dev + real PG | 242 | 81 | 33 | 31 (+1 skip) | 82 | **469** | 95 | — (not run) | All green (RISK-03 pilot: NC-verify e-signature ceremony + reusable e-sign components) |

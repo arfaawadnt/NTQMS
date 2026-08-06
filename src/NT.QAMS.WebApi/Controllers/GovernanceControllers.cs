@@ -95,10 +95,10 @@ public sealed class ChangeRequestsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/approve")]
-    [RequirePermission(PermissionCatalog.ChangeControl, PermissionAction.Approve)]
-    public async Task<IActionResult> Approve(Guid id, CancellationToken ct)
+    [RequirePermission(PermissionCatalog.ChangeControl, PermissionAction.Sign)]
+    public async Task<IActionResult> Approve(Guid id, ApproveChangeRequest request, CancellationToken ct)
     {
-        await sender.Send(new ApproveChangeCommand(id), ct);
+        await sender.Send(new ApproveChangeCommand(id, request.Password, request.Pin), ct);
         return NoContent();
     }
 

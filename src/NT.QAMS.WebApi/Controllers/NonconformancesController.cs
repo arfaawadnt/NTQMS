@@ -110,11 +110,12 @@ public sealed class NonconformancesController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/confirm-effectiveness")]
-    [RequirePermission(PermissionCatalog.Nonconformances, PermissionAction.Approve)]
+    [RequirePermission(PermissionCatalog.Nonconformances, PermissionAction.Sign)]
     public async Task<IActionResult> ConfirmEffectiveness(
         Guid id, ConfirmEffectivenessRequest request, CancellationToken ct)
     {
-        await sender.Send(new ConfirmNcEffectivenessCommand(id, request.Effective), ct);
+        await sender.Send(
+            new ConfirmNcEffectivenessCommand(id, request.Effective, request.Password, request.Pin), ct);
         return NoContent();
     }
 }

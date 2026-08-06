@@ -76,8 +76,10 @@ public sealed record SubmitNcForVerificationCommand(Guid NcId) : ICommand;
 [RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.Nonconformances,
     NT.QAMS.Domain.Authorization.PermissionAction.Sign)]
 public sealed record VerifyNcCommand(Guid NcId, bool Passed, string Password, string Pin) : ICommand;
-[RequireInternalActor]
-public sealed record ConfirmNcEffectivenessCommand(Guid NcId, bool Effective) : ICommand;
+/// <summary>Confirming effectiveness (closing) is a Part 11 signing ceremony: it requires the actor's e-signature (account password + PIN).</summary>
+[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.Nonconformances,
+    NT.QAMS.Domain.Authorization.PermissionAction.Sign)]
+public sealed record ConfirmNcEffectivenessCommand(Guid NcId, bool Effective, string Password, string Pin) : ICommand;
 
 public sealed class RejectNcValidator : AbstractValidator<RejectNcCommand>
 {
@@ -225,13 +227,38 @@ public sealed class VerifyNcHandler(IAppDbContext db, ICurrentUser user, IESigna
     }
 }
 
-public sealed class ConfirmNcEffectivenessHandler(IAppDbContext db, ICurrentUser user)
+public sealed class ConfirmNcEffectivenessHandler(
+    IAppDbContext db, ICurrentUser user, IESignatureService signatures)
     : ICommandHandler<ConfirmNcEffectivenessCommand>
 {
     public async Task Handle(ConfirmNcEffectivenessCommand c, CancellationToken ct)
     {
         var actor = user.UserId ?? throw new DomainException("AUTH-003", "An authenticated user is required.");
-        (await NcLoader.LoadAsync(db, c.NcId, ct)).ConfirmEffectiveness(c.Effective, actor);
+        var nc = await NcLoader.LoadAsync(db, c.NcId, ct);
+
+        // Pre-validate before minting (append-only ledger; mirrors the verify pilot / DocumentCommands).
+        if (nc.Status != NcStatus.EffectivenessCheck)
+        {
+            throw new InvalidStateTransitionException(
+                "NC-022", $"Cannot confirm effectiveness a nonconformance in state {nc.Status}.");
+        }
+
+        // SoD applies only to a closing (effective) determination (SOD-CAPA-001).
+        if (c.Effective && actor == nc.RaisedBy)
+        {
+            throw new DomainException(
+                "SOD-CAPA-001", "Segregation of duties: the raiser cannot close their own nonconformance.");
+        }
+
+        var subjectRef = $"NC:{nc.Id:N}";
+        await signatures.SignAsync(
+            actor, c.Password, c.Pin,
+            $"Confirmed corrective-action effectiveness on {nc.NcRef}: {(c.Effective ? "effective (closed)" : "not effective")}",
+            subjectRef,
+            SignatureContentHash.Compute(
+                ("nc", nc.NcRef), ("outcome", c.Effective ? "effective" : "not-effective")), ct);
+
+        nc.ConfirmEffectiveness(c.Effective, actor);
         await db.SaveChangesAsync(ct);
     }
 }

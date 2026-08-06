@@ -47,10 +47,11 @@ public sealed class QualityPolicyController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/approve")]
-    [RequirePermission(PermissionCatalog.QualityPolicy, PermissionAction.Approve)]
+    [RequirePermission(PermissionCatalog.QualityPolicy, PermissionAction.Sign)]
     public async Task<IActionResult> Approve(Guid id, ApproveQualityPolicyRequest request, CancellationToken ct)
     {
-        await sender.Send(new ApproveQualityPolicyCommand(id, request.EffectiveDate), ct);
+        await sender.Send(
+            new ApproveQualityPolicyCommand(id, request.EffectiveDate, request.Password, request.Pin), ct);
         return NoContent();
     }
 }

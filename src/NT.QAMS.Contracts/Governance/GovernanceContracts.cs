@@ -23,6 +23,8 @@ public sealed record RiskDetailDto(
 public sealed record ProposeChangeRequest(string Title, string ImpactAnalysis, Guid? BranchId = null, Guid? DepartmentId = null);
 public sealed record LinkRiskRequest(Guid RiskItemId);
 public sealed record RejectChangeRequest(string Reason);
+/// <summary>The two 21 CFR Part 11 identification components (§11.200(a)(1)) to approve a change.</summary>
+public sealed record ApproveChangeRequest(string Password, string Pin);
 public sealed record CloseChangeRequest(string ImplementationNotes);
 public sealed record ReviewChangeRequest(bool Effective, string Notes);
 

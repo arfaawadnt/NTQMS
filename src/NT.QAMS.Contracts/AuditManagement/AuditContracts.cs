@@ -1,5 +1,8 @@
 namespace NT.QAMS.Contracts.AuditManagement;
 
+/// <summary>The two 21 CFR Part 11 identification components (§11.200(a)(1)) to sign off an audit.</summary>
+public sealed record SignOffAuditRequest(string Password, string Pin);
+
 public sealed record ScheduleAuditRequest(
     string Title, string Type, Guid LeadAuditorId, DateOnly PlannedDate,
     IReadOnlyList<ChecklistItemRequest> Checklist, Guid? BranchId = null, Guid? DepartmentId = null);

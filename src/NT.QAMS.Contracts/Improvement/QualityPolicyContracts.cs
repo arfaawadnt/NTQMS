@@ -6,7 +6,7 @@ public sealed record DraftQualityPolicyRequest(string Statement);
 
 public sealed record ReviseQualityPolicyRequest(string Statement);
 
-public sealed record ApproveQualityPolicyRequest(DateOnly EffectiveDate);
+public sealed record ApproveQualityPolicyRequest(DateOnly EffectiveDate, string Password, string Pin);
 
 public sealed record QualityPolicyDto(
     Guid Id, string PolicyRef, int Version, string Statement, string Status,

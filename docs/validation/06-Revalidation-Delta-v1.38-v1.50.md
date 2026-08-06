@@ -308,6 +308,31 @@ needs a `GET …/signatures` read endpoint per study, as added for NC in §A.13)
 meanwhile visible in the compliance signature log. PtPlan remains excluded (needs
 `proficiency-testing.sign`).
 
+### A.15 Part 11 electronic-signature ceremony — non-analytical gates (RISK-03)
+
+Extends the ceremony to the remaining confirmed non-analytical signed-record gates named in the
+as-built review (Doc 03/07): **NC close** (effectiveness confirmation), **internal-audit sign-off**,
+**quality-policy approval**, and **change-control approval**. Each enforced its invariants in-domain
+but minted **no `signature_record`**; each now runs the full ceremony (same `SignatureContentHash` +
+`IESignatureService` foundation). No schema change; domain aggregates unchanged. Handlers
+pre-validate SoD + state (audit sign-off pre-checks all three of its guards: state, all-checklist
+answered, findings acknowledged) **before** minting, so a refused sign-off leaves no signature.
+
+| URS | Requirement (delta) | Design element(s) | Verification | Status |
+| --- | ------------------- | ----------------- | ------------ | ------ |
+| URS-125 | Confirming NC effectiveness (closing), signing off an internal audit, approving the quality policy, and approving a change control shall each require the actor's electronic signature (account password + PIN, §11.200(a)(1)), recorded as an immutable signature bound to the record and outcome (§11.50/§11.70); the SoD and state gates shall be checked **before** any signature is minted. | `ConfirmNcEffectivenessCommand` / `SignOffAuditCommand` / `ApproveQualityPolicyCommand` / `ApproveChangeCommand` each gain `Password`+`Pin` and `[RequirePermissionPolicy(<module>, Sign)]`; handlers pre-validate then `SignAsync` then the aggregate method; shared per-module request DTOs (`SignOffAuditRequest`, `ApproveChangeRequest`; `ConfirmEffectivenessRequest` / `ApproveQualityPolicyRequest` extended); controllers pass credentials. Audit sign-off already gated `audits.sign`; NC-close, QP-approve and change-approve tightened from `approve` to `sign` | AUTO — `QualityPolicySigningTests` (3: valid approval mints exactly one manifest entry against the **real** `ESignatureService`; wrong PIN → SIG-001 + zero signatures + still Draft; author → SOD-QP-001 + zero signatures); full backend suite 242/88/33/31+1/82. INSP live (dev, real PostgreSQL, 2026-08-06) — quality-policy approve as the author with correct password+PIN → **422 SOD-QP-001** (fenced before minting); approve with no credential body → **400** | Template — engineering complete; automated + partial live evidence; witnessed positive-mint OQ pending (signer ≠ preparer) |
+
+**Authorization upgrade note (act before release).** Audit sign-off already required `audits.sign`.
+The **NC confirm-effectiveness**, **quality-policy approve**, and **change approve** endpoints moved
+from their module's `approve` to `sign`: any tenant-defined role holding the old `approve` without
+`sign` on `nc` / `quality-policy` / `changes` loses that action until granted `.sign`.
+
+**Not yet in scope.** "Review close" (the as-built list's fifth non-AQ item) is **ambiguous** —
+several review aggregates exist (`AuditTrailReview.Complete`, `ManagementReview`, `UserAccessReview`,
+`DocumentReviewCycle`); which one(s) constitute a Part 11 signed determination is a scope decision,
+deferred. The four borderline SoD gates (supplier approve, competency authorize, test-authorization
+grant, conflict-of-interest assessment) also remain a pending scope-boundary decision.
+
 ---
 
 ## Part B — Installation Qualification (IQ) delta

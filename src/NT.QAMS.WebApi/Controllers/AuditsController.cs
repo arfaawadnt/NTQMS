@@ -68,9 +68,9 @@ public sealed class AuditsController(ISender sender) : ControllerBase
 
     [HttpPost("{id:guid}/sign-off")]
     [RequirePermission(PermissionCatalog.Audits, PermissionAction.Sign)]
-    public async Task<IActionResult> SignOff(Guid id, CancellationToken ct)
+    public async Task<IActionResult> SignOff(Guid id, SignOffAuditRequest request, CancellationToken ct)
     {
-        await sender.Send(new SignOffAuditCommand(id), ct);
+        await sender.Send(new SignOffAuditCommand(id, request.Password, request.Pin), ct);
         return NoContent();
     }
 }

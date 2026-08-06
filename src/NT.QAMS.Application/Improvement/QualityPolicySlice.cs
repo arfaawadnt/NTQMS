@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
+using NT.QAMS.Application.Compliance;
 using NT.QAMS.Contracts.Improvement;
 using NT.QAMS.Domain.Improvement;
 using NT.QAMS.SharedKernel.Abstractions;
@@ -14,8 +15,10 @@ namespace NT.QAMS.Application.Improvement;
 public sealed record DraftQualityPolicyCommand(string Statement) : ICommand<Guid>;
 [RequireInternalActor]
 public sealed record ReviseQualityPolicyCommand(Guid PolicyId, string Statement) : ICommand;
-[RequireInternalActor]
-public sealed record ApproveQualityPolicyCommand(Guid PolicyId, DateOnly EffectiveDate) : ICommand;
+/// <summary>Approving the quality policy is a Part 11 signing ceremony: it requires the approver's e-signature (account password + PIN).</summary>
+[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.QualityPolicy,
+    NT.QAMS.Domain.Authorization.PermissionAction.Sign)]
+public sealed record ApproveQualityPolicyCommand(Guid PolicyId, DateOnly EffectiveDate, string Password, string Pin) : ICommand;
 
 public sealed class DraftQualityPolicyValidator : AbstractValidator<DraftQualityPolicyCommand>
 {
@@ -53,7 +56,8 @@ public sealed class DraftQualityPolicyHandler(
     }
 }
 
-public sealed class QualityPolicyWorkflowHandlers(IAppDbContext db, ICurrentUser user, IClock clock) :
+public sealed class QualityPolicyWorkflowHandlers(
+    IAppDbContext db, ICurrentUser user, IClock clock, IESignatureService signatures) :
     ICommandHandler<ReviseQualityPolicyCommand>,
     ICommandHandler<ApproveQualityPolicyCommand>
 {
@@ -70,6 +74,24 @@ public sealed class QualityPolicyWorkflowHandlers(IAppDbContext db, ICurrentUser
             ?? throw new DomainException("AUTH-003", "An authenticated user is required.");
 
         var policy = await LoadAsync(c.PolicyId, ct);
+
+        // Pre-validate before minting (append-only ledger; mirrors the pilot). The aggregate re-checks both.
+        if (policy.CreatedByUserId is { } preparer && preparer == approver)
+        {
+            throw new DomainException(
+                "SOD-QP-001", "Segregation of duties: the author cannot approve their own quality policy.");
+        }
+
+        if (policy.Status != QualityPolicyStatus.Draft)
+        {
+            throw new InvalidStateTransitionException(
+                "QP-010", $"Only a draft policy can be approved (current: {policy.Status}).");
+        }
+
+        var subjectRef = $"QP:{policy.Id:N}";
+        await signatures.SignAsync(
+            approver, c.Password, c.Pin, "Approved the quality policy", subjectRef,
+            SignatureContentHash.Compute(("policy", subjectRef), ("effectiveDate", c.EffectiveDate.ToString("O"))), ct);
 
         // Only one policy is ever in force: retire the current active version first.
         var active = await db.QualityPolicies
