@@ -55,7 +55,7 @@ border-radius:8px;padding:14px 18px;margin:18px 0;color:#a7f3d0;font-size:.9rem;
   <nav class="toc">
     <h2>AS-BUILT Review</h2>
     <p class="sub">NT.QAMS · baseline d74d4bf · Pre-production</p>
-    <ol><li><a href="#doc-00"><span class="toc-num">00</span>Review Manifest &amp; Audit Contract</a></li><li><a href="#doc-01"><span class="toc-num">01</span>NT.QAMS — AS-BUILT Review · Document 01 · Executive Product and Maturity Assessment</a></li><li><a href="#doc-02"><span class="toc-num">02</span>NT.QAMS — AS-BUILT Review · Document 02 · Repository, Solution, and Dependency Map</a></li><li><a href="#doc-03"><span class="toc-num">03</span>NT.QAMS — AS-BUILT Review · Document 03 · Backend and API Inventory</a></li><li><a href="#doc-04"><span class="toc-num">04</span>NT.QAMS — AS-BUILT Review · Document 04 · Database &amp; Persistence Deep Audit</a></li><li><a href="#doc-05"><span class="toc-num">05</span>NT.QAMS — AS-BUILT Review · Document 05 · Frontend As-Built Deep Audit</a></li><li><a href="#doc-06"><span class="toc-num">06</span>NT.QAMS — AS-BUILT Review · Document 06 · Business Module Coverage</a></li><li><a href="#doc-07"><span class="toc-num">07</span>NT.QAMS — AS-BUILT Review · Document 07 · Workflows, User Journeys &amp; Business Rules</a></li><li><a href="#doc-08"><span class="toc-num">08</span>NT.QAMS — AS-BUILT Review · Document 08 · Security &amp; Compliance Deep Audit</a></li><li><a href="#doc-09"><span class="toc-num">09</span>NT.QAMS — AS-BUILT Review · Document 09 · Testing, Quality Gates &amp; CI/CD Audit</a></li><li><a href="#doc-10"><span class="toc-num">10</span>NT.QAMS — AS-BUILT Review · Document 10 · Integrations, Operations &amp; Observability</a></li><li><a href="#doc-11"><span class="toc-num">11</span>NT.QAMS — AS-BUILT Review · Document 11 · Requirements Traceability</a></li><li><a href="#doc-12"><span class="toc-num">12</span>NT.QAMS — AS-BUILT Review · Document 12 · Technical Debt &amp; Risk Register</a></li><li><a href="#doc-13"><span class="toc-num">13</span>NT.QAMS — AS-BUILT Review · Document 13 · As-Built vs Target Architecture Conformance</a></li><li><a href="#doc-14"><span class="toc-num">14</span>NT.QAMS — AS-BUILT Review · Document 14 · Reviewer Onboarding Guide</a></li><li><a href="#doc-15"><span class="toc-num">15</span>NT.QAMS — AS-BUILT Review · Document 15 · Final Evidence Reconciliation &amp; Documentation QA</a></li></ol>
+    <ol><li><a href="#doc-00"><span class="toc-num">00</span>Review Manifest &amp; Audit Contract</a></li><li><a href="#doc-01"><span class="toc-num">01</span>AS-BUILT Review · Document 01 · Executive Product and Maturity Assessment</a></li><li><a href="#doc-02"><span class="toc-num">02</span>AS-BUILT Review · Document 02 · Repository, Solution, and Dependency Map</a></li><li><a href="#doc-03"><span class="toc-num">03</span>AS-BUILT Review · Document 03 · Backend and API Inventory</a></li><li><a href="#doc-04"><span class="toc-num">04</span>AS-BUILT Review · Document 04 · Database &amp; Persistence Deep Audit</a></li><li><a href="#doc-05"><span class="toc-num">05</span>AS-BUILT Review · Document 05 · Frontend As-Built Deep Audit</a></li><li><a href="#doc-06"><span class="toc-num">06</span>AS-BUILT Review · Document 06 · Business Module Coverage</a></li><li><a href="#doc-07"><span class="toc-num">07</span>AS-BUILT Review · Document 07 · Workflows, User Journeys &amp; Business Rules</a></li><li><a href="#doc-08"><span class="toc-num">08</span>AS-BUILT Review · Document 08 · Security &amp; Compliance Deep Audit</a></li><li><a href="#doc-09"><span class="toc-num">09</span>AS-BUILT Review · Document 09 · Testing, Quality Gates &amp; CI/CD Audit</a></li><li><a href="#doc-10"><span class="toc-num">10</span>AS-BUILT Review · Document 10 · Integrations, Operations &amp; Observability</a></li><li><a href="#doc-11"><span class="toc-num">11</span>AS-BUILT Review · Document 11 · Requirements Traceability</a></li><li><a href="#doc-12"><span class="toc-num">12</span>AS-BUILT Review · Document 12 · Technical Debt &amp; Risk Register</a></li><li><a href="#doc-13"><span class="toc-num">13</span>AS-BUILT Review · Document 13 · As-Built vs Target Architecture Conformance</a></li><li><a href="#doc-14"><span class="toc-num">14</span>AS-BUILT Review · Document 14 · Reviewer Onboarding Guide</a></li><li><a href="#doc-15"><span class="toc-num">15</span>AS-BUILT Review · Document 15 · Final Evidence Reconciliation &amp; Documentation QA</a></li><li><a href="#doc-APX"><span class="toc-num">APX</span>Complete Structural Breakdown (Scale &amp; Scope Map)</a></li></ol>
   </nav>
   <main class="content">
     <div class="masthead">
@@ -9028,7 +9028,549 @@ node node_modules/@playwright/test/cli.js test                                  
 <li>[x] This review <strong>documents</strong> the system as-built; it <strong>does not certify</strong> regulatory compliance, security, or release-readiness — those require the signed validation (DOC-001), independent pentest (SEC-001), and operational assurance (OPS-001) that remain open.</li>
 </ul>
 <hr />
-<p><em>End of Document 15 and of the NT.QAMS AS-BUILT Review series (Documents 00–15). Reviewed at manifest baseline <code>d74d4bf</code> (no drift). Verdict: </em><em>Pre-production</em><em> — engineering-complete and high-conformance, gated for a regulated launch by validation, independent security testing, operational assurance, and the Part 11 e-signature-ceremony scope.</em></p><div class="doc-end"><a href="#top">↑ back to top</a> · <span class="src">15_FINAL_RECONCILIATION_AND_QA.md</span></div></section>
+<p><em>End of Document 15 and of the NT.QAMS AS-BUILT Review series (Documents 00–15). Reviewed at manifest baseline <code>d74d4bf</code> (no drift). Verdict: </em><em>Pre-production</em><em> — engineering-complete and high-conformance, gated for a regulated launch by validation, independent security testing, operational assurance, and the Part 11 e-signature-ceremony scope.</em></p><div class="doc-end"><a href="#top">↑ back to top</a> · <span class="src">15_FINAL_RECONCILIATION_AND_QA.md</span></div></section><section id="doc-APX" class="doc"><div class="doc-anchor"></div><h1>NT.QAMS — Complete Structural Breakdown (Scale &amp; Scope Map)</h1>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Companion to</td>
+<td>AS-BUILT Review <a href="00_REVIEW_MANIFEST.md"><code>00_REVIEW_MANIFEST.md</code></a></td>
+</tr>
+<tr>
+<td>Commit</td>
+<td><code>d74d4bf</code> (<code>master</code>)</td>
+</tr>
+<tr>
+<td>Generated</td>
+<td>2026-08-02, from fresh read-only enumeration of source (no execution)</td>
+</tr>
+<tr>
+<td>Purpose</td>
+<td>Exhaustive structural inventory — every layer, module, entity, class, command, query, and the total scale</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>All figures are counted from source at the reviewed commit. Where a count differs from <code>CLAUDE.md</code> it is flagged. Nothing was executed; nothing was modified.</p>
+</blockquote>
+<hr />
+<h2>0. Scale at a glance (the headline numbers)</h2>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Solution projects</strong></td>
+<td>12 (6 <code>src</code> + 5 test in <code>.sln</code>, + <code>LoadTests</code> outside)</td>
+</tr>
+<tr>
+<td><strong>Backend source files</strong> (<code>.cs</code>, excl. bin/obj)</td>
+<td><strong>401</strong> (SharedKernel 11 · Domain 56 · Contracts 22 · Application 89 · Infrastructure 165 · WebApi 58) + 100 test</td>
+</tr>
+<tr>
+<td><strong>Frontend source files</strong> (<code>.ts</code>, excl. specs)</td>
+<td><strong>204</strong> (221 incl. 17 specs)</td>
+</tr>
+<tr>
+<td><strong>C# classes</strong></td>
+<td>~749</td>
+</tr>
+<tr>
+<td><strong>C# records</strong> (DTOs + commands + queries + events + VOs)</td>
+<td>~730</td>
+</tr>
+<tr>
+<td><strong>C# interfaces</strong></td>
+<td>31 (≈19 application ports + others)</td>
+</tr>
+<tr>
+<td><strong>C# enums</strong></td>
+<td>72</td>
+</tr>
+<tr>
+<td><strong>Aggregate roots</strong></td>
+<td><strong>57</strong></td>
+</tr>
+<tr>
+<td><strong>Domain entities / owned children</strong></td>
+<td>29 (+4 plain owned, +6 persistence/read types)</td>
+</tr>
+<tr>
+<td><strong>Value objects</strong></td>
+<td>11</td>
+</tr>
+<tr>
+<td><strong>Domain events</strong></td>
+<td><strong>82</strong></td>
+</tr>
+<tr>
+<td><strong>Domain services</strong></td>
+<td>1 (<code>WestgardEvaluator</code>)</td>
+</tr>
+<tr>
+<td><strong>Database tables</strong></td>
+<td><strong>99</strong> across 4 schemas (qams 92 · audit 4 · saas 2 · read 1)</td>
+</tr>
+<tr>
+<td><strong>EF migrations</strong></td>
+<td>59 (CLAUDE.md) / 58 non-designer on disk</td>
+</tr>
+<tr>
+<td><strong>EF entity configurations</strong></td>
+<td>67</td>
+</tr>
+<tr>
+<td><strong>CQRS commands</strong></td>
+<td><strong>217</strong></td>
+</tr>
+<tr>
+<td><strong>CQRS queries</strong></td>
+<td><strong>105</strong></td>
+</tr>
+<tr>
+<td><strong>MediatR handlers</strong></td>
+<td>~322 (in 238 handler classes)</td>
+</tr>
+<tr>
+<td><strong>FluentValidation validators</strong></td>
+<td>90</td>
+</tr>
+<tr>
+<td><strong>MediatR pipeline behaviors</strong></td>
+<td>5</td>
+</tr>
+<tr>
+<td><strong>Sagas / event policies</strong></td>
+<td>11 (+1 dispatcher engine)</td>
+</tr>
+<tr>
+<td><strong>Application ports (interfaces)</strong></td>
+<td>~19</td>
+</tr>
+<tr>
+<td><strong>Wire DTOs (Contracts)</strong></td>
+<td>298 records</td>
+</tr>
+<tr>
+<td><strong>HTTP controllers</strong></td>
+<td><strong>54</strong> (in 42 files)</td>
+</tr>
+<tr>
+<td><strong>HTTP routes</strong></td>
+<td><strong>333</strong> (666 counting the <code>api/v1/…</code> mirror)</td>
+</tr>
+<tr>
+<td><strong>Custom middleware</strong></td>
+<td>6 (+2 handlers, +3 helpers)</td>
+</tr>
+<tr>
+<td><strong>Permission catalogue keys</strong></td>
+<td>170</td>
+</tr>
+<tr>
+<td><strong>Frontend components</strong></td>
+<td>107 (84 feature + 18 shared-ui + shell/core)</td>
+</tr>
+<tr>
+<td><strong>Frontend signal facades</strong></td>
+<td>35</td>
+</tr>
+<tr>
+<td><strong>Frontend API client services</strong></td>
+<td>44</td>
+</tr>
+<tr>
+<td><strong>Frontend guards / interceptors</strong></td>
+<td>2 / 2</td>
+</tr>
+<tr>
+<td><strong>Frontend lazy routes</strong></td>
+<td>84 (48 tenant feature routes)</td>
+</tr>
+<tr>
+<td><strong>i18n dictionary keys</strong></td>
+<td>~1,571 (EN/AR/FR)</td>
+</tr>
+<tr>
+<td><strong>Automated tests</strong></td>
+<td>395 backend (static) + 87 frontend unit + 6 Playwright e2e</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>1. Architecture &amp; Layers</h2>
+<p><strong>Pattern:</strong> Clean Architecture <strong>modular monolith</strong> + <strong>CQRS over MediatR</strong> + <strong>DDD</strong> (rich aggregates) + <strong>multi-tenant PostgreSQL FORCE RLS</strong> + <strong>transactional outbox</strong> for domain events. One deployable ASP.NET Core app; bounded contexts are enforced module <em>folders</em>, not separate services. Dependencies point inward; enforced as CI merge gates by <code>NT.QAMS.Architecture.Tests</code>.</p>
+<pre><code>┌─────────────────────────────────────────────────────────────────────┐
+│  frontend/  Angular 22 SPA  (standalone components · signal facades)  │
+│    components → facades → core/api services ──HTTP /api──┐            │
+└──────────────────────────────────────────────────────────┼──────────┘
+                                                            ▼
+┌───────────────────────────────────────────────────────────────────────┐
+│  NT.QAMS.WebApi        host · 54 controllers · 6 middleware · authz     │  ← depends on Application, Contracts, Infrastructure (DI only)
+├───────────────────────────────────────────────────────────────────────┤
+│  NT.QAMS.Infrastructure  EF Core · interceptors · outbox · security ·   │  ← implements Application ports
+│                          jobs · compliance ledger · storage · email     │
+├───────────────────────────────────────────────────────────────────────┤
+│  NT.QAMS.Application    CQRS handlers · validators · 5 behaviors ·       │  ← depends on Domain, Contracts
+│                         sagas · ~19 ports (interfaces)                   │
+├───────────────────────────────────────────────────────────────────────┤
+│  NT.QAMS.Domain (57 aggregates)     NT.QAMS.Contracts (298 DTOs)         │  ← Domain depends only on SharedKernel
+├───────────────────────────────────────────────────────────────────────┤
+│  NT.QAMS.SharedKernel   TenantId · UserRef · LocalizedText · AggregateRoot · Entity · ValueObject · IClock · IDomainEvent │
+└───────────────────────────────────────────────────────────────────────┘
+                                                            ▼
+                             PostgreSQL 17 (99 tables · FORCE RLS) + local file store
+</code></pre>
+<p><strong>Request pipeline (both layers):</strong> Angular interceptors (auth bearer, change-reason) → WebApi middleware (ForwardedHeaders → Observability → SecurityHeaders → ExceptionHandler → AuthN → RateLimiter → TenantResolution → ActiveSession → MfaGate → ChangeReason → AuthZ) → controller <code>[RequirePermission]</code> → <code>ISender.Send</code> → MediatR pipeline (<strong>Tracing → Logging → Authorization → Idempotency → Validation</strong>) → handler → domain aggregate → <code>SaveChanges</code> (6 interceptors) → outbox → sagas + hash-chained audit trail.</p>
+<p><strong>19 bounded-context modules</strong> (Domain folders): AnalyticalQuality · AuditManagement · Authorization · Competency · ComplianceLedger · DocumentControl · Equipment · Facility · Files · IdentityAccess · Improvement · Notifications · Organization · Records · Reporting · RiskGovernance · Sla · SupplierQuality · Tenancy.</p>
+<hr />
+<h2>2. Domain Models &amp; Entities (57 aggregates · 99 tables)</h2>
+<p>Tree of aggregate roots → owned entities, per module. Every tenant-scoped table has a composite <code>(tenant_id, id)</code> PK and FORCE RLS (2 accepted exceptions: <code>user_account</code>, <code>outbox_event</code>).</p>
+<pre><code>AnalyticalQuality/ (17 aggregates)
+├─ QcProfile ─┬─ (target mean/SD, effective-dated)          [qams.qc_profile]
+│             └─ QcRun (stored Westgard verdict)             [qams.qc_run]
+├─ PtEnrollment (z-score, performance banding)              [qams.pt_enrollment]
+├─ PtPlan ── PtPlanItem                                     [qams.pt_plan / pt_plan_item]
+├─ ValidationStudy ── ValidationReplicate                  [qams.validation_study / validation_replicate]
+├─ MethodComparisonStudy ── MeasurementPair                (Deming/Passing-Bablok/Bland-Altman)
+├─ LinearityStudy ── LinearityMeasurement
+├─ DetectionLimitStudy ── DetectionMeasurement             (LoB/LoD/LoQ)
+├─ ReferenceIntervalStudy ── ReferenceSample
+├─ PrecisionStudy ── PrecisionMeasurement                  (ANOVA)
+├─ CarryoverStudy ── CarryoverReading
+├─ LotComparisonStudy ── LotSamplePair
+├─ InterferenceStudy ── InterferenceMeasurement
+├─ InstrumentComparabilityStudy ── InstrumentReading
+├─ OutlierScreening ── OutlierDataPoint                    (Tukey + MAD)
+├─ SigmaAssessment (σ metric + QC recommendation)
+└─ UncertaintyBudget ── UncertaintyComponent               (GUM)
+    → 13 study aggregates share state DataEntry→Calculated→SignedOff + SOD-AQ-001
+
+Improvement/ (5 aggregates)
+├─ Nonconformance ─┬─ CapaAction ─┬─ RcaRecord             [qams.nonconformance / capa_action / rca_record]
+│                   (9-state NC/CAPA machine; SoD raiser≠verifier≠closer)
+├─ Complaint (ISO §7.9 lifecycle; auto-NC on justified)    [qams.complaint]
+├─ QualityObjective ── ObjectiveProgressUpdate
+├─ FeedbackEntry (escalatable → Complaint)
+└─ QualityPolicy (versioned Draft→Active→Superseded, SoD)
+
+RiskGovernance/ (4 aggregates)
+├─ RiskItem ── MitigationAction (residual RPN alert)
+├─ ChangeRequest (propose→approve→close→PIR)
+├─ ManagementReview ─┬─ ReviewDecision └─ ReviewParticipant (ISO §8.9)
+└─ ConflictDeclaration (impartiality/COI)
+
+Equipment/ (2)  ├─ EquipmentItem ─┬─ CalibrationRecord ├─ MaintenanceRecord └─ IntermediateCheck (auto-lockout)
+                └─ ReferenceStandard (CRM traceability)
+DocumentControl/ (3) ├─ ControlledDocument ── DocumentVersion (SOP lifecycle + Part-11 publish e-sig)
+                     ├─ DocumentAcknowledgement  └─ DocumentControlledCopy
+Competency/ (3) ├─ CompetencyRecord ── AssessmentResult  ├─ TrainingAssignment  └─ TestAuthorization (matrix)
+SupplierQuality/ (2) ├─ Supplier ── CertificateRecord   └─ SupplierEvaluation (weighted)
+AuditManagement/ (1) └─ Audit ─┬─ AuditChecklistItem └─ AuditFinding (finding→NC saga)
+Facility/ (1) └─ MonitoringPoint ── EnvironmentalReading (excursion→NC saga)
+Records/ (1) └─ ArchiveEntry (retention class · legal hold · disposal gate)
+IdentityAccess/ (2) ├─ UserAccount ─┬─ RefreshSession ├─ UserBranchAccess └─ UserDepartmentAccess (MFA/lockout/PIN/scope)
+                    └─ UserAccessReview
+Authorization/ (1) └─ Role ── RolePermission (dynamic tenant roles over 170-key catalogue)
+Organization/ (6) ├─ Branch ├─ Department ├─ TestCatalogItem ├─ LovEntry ├─ InterestedParty └─ ContextIssue
+Sla/ (3) ├─ SlaDefinition ├─ WorkTask └─ EscalationTimer
+Notifications/ (2) ├─ NotificationRule └─ NotificationDispatch
+ComplianceLedger/ (1 AR + 4 append-only ledger types)
+   └─ AuditTrailReview ; ledgers: AuditTrailEntry(hash-chained) · SignatureRecord · SecurityEvent · FieldChangeRecord   [audit.*]
+Reporting/ (1 AR + 1 read model)  └─ QualityHealthProfile ── QualityHealthWeight ; KpiSnapshot  [read.kpi_snapshot]
+Tenancy/ (1)  └─ Tenant + TenantSettings + TenantSlug(VO)   [saas.tenant]  (control plane)
+Files/ (1)  └─ FileReference (content-addressed SHA-256)   [qams.file_reference]
+</code></pre>
+<p><strong>Relationship rules:</strong> cross-aggregate FKs are <strong>tenant-composite</strong> <code>(fk, tenant_id)→(id, tenant_id)</code> (cross-tenant parentage structurally impossible); ~60 FKs, 56 intra-aggregate cascades only; authorship/file references (<code>created_by_user_id</code>, <code>file_id</code>, <code>signer_id</code>) are <strong>bare Guids with no FK</strong> by design (append-audit). 6 cross-module sagas connect modules (see §4). Full ERD in Document 04.</p>
+<p><strong>Enum domains (69 in Domain):</strong> every status/type enum is stored as a string with a mirroring DB CHECK constraint (87 total). Representative state machines in Document 07.</p>
+<hr />
+<h2>3. Classes, Interfaces &amp; DTOs</h2>
+<h3>3.1 Application ports (interfaces — the Infrastructure contracts, ~19)</h3>
+<p><code>IAppDbContext</code> (persistence, ~60 DbSets) · <code>IFileStorage</code> · <code>IExportService</code> · <code>ICurrentTenant</code>/<code>ICurrentTenantSetter</code> · <code>ICurrentUser</code> · <code>ICurrentChangeReason</code>/<code>Setter</code> · <code>IUserPrivileges</code>/<code>Setter</code> + <code>IPrivilegeResolver</code> · <code>IIdempotencyStore</code> + <code>IIdempotencyKeyAccessor</code> · <code>ITotpService</code> · <code>ISecurityEventLog</code> · <code>IESignatureService</code> · <code>IComplianceLedgerStore</code> · <code>IPasswordHasher</code> · <code>IJwtTokenService</code> · <code>IReferenceNumberGenerator</code> · <code>IEmailSender</code> · (<code>IClock</code>, <code>IDomainEvent</code> from SharedKernel).</p>
+<h3>3.2 Infrastructure implementations (adapters)</h3>
+<table>
+<thead>
+<tr>
+<th>Port</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Persistence</td>
+<td><code>AppDbContext</code> + <strong>6 interceptors</strong> (AuditStamp, TenantStamp, TenantConnection[GUC], OrgScopeGuard, Outbox, FieldChange) + <strong>67 EF configurations</strong></td>
+</tr>
+<tr>
+<td>Reliability</td>
+<td><code>OutboxProcessor</code> (SKIP LOCKED lease, backoff, dead-letter) · <code>PostgresReferenceNumberGenerator</code> · <code>AdvisoryLock</code> · <code>EfIdempotencyStore</code></td>
+</tr>
+<tr>
+<td>Security</td>
+<td><code>IdentityPasswordHasher</code> (PBKDF2) · <code>JwtTokenService</code> (HS256) · <code>TotpService</code> (RFC 6238) · <code>DatabaseRoleGuard</code></td>
+</tr>
+<tr>
+<td>Compliance</td>
+<td><code>LedgerHash</code> · <code>AuditTrailAppender</code> (hash chain) · <code>ESignatureService</code> · <code>ComplianceLedgerStore</code> (+VerifyChain) · <code>SecurityEventLog</code></td>
+</tr>
+<tr>
+<td>Authorization</td>
+<td><code>PrivilegeResolver</code> (DB-read per request) · <code>RequestPrivileges</code></td>
+</tr>
+<tr>
+<td>Adapters</td>
+<td><code>SmtpEmailSender</code>/logging fallback · <code>LocalFileStorage</code> · <code>ExportService</code> (ClosedXML/QuestPDF)</td>
+</tr>
+<tr>
+<td>Jobs (<code>BackgroundService</code>)</td>
+<td><code>OutboxProcessor</code> · <code>KpiSnapshotService</code> (6h) · <code>ScheduledSweepService</code> (1h) · <code>SingleReplicaGuardService</code></td>
+</tr>
+<tr>
+<td>Ops</td>
+<td><code>PostgresReadinessHealthCheck</code> · <code>QamsDiagnostics</code>/<code>QamsMetrics</code> (OTel) · <code>ConfigGuard</code> · <code>SystemClock</code> · <code>CurrentTenant</code>/<code>CurrentChangeReason</code></td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 WebApi (54 controllers, 6 middleware)</h3>
+<ul>
+<li><strong>Controllers</strong> — 37 single-controller files + 5 multi-controller files (<code>PlatformControllers</code>×5, <code>GovernanceControllers</code>×4, <code>AnalyticalQualityControllers</code>×3, <code>OperationsControllers</code>×3, <code>CompetenciesController</code>×2). All <code>ISender</code>-based except <code>FilesController</code> (streams via <code>IAppDbContext</code>+<code>IFileStorage</code>).</li>
+<li><strong>Middleware (6)</strong> — Observability · SecurityHeaders · TenantResolution · ActiveSession · ChangeReason · MfaEnrollmentGate. Plus <code>DomainExceptionHandler</code> (→ problem+json), <code>ProblemAuthorizationResultHandler</code>, <code>HttpCurrentUser</code>, <code>HeaderIdempotencyKeyAccessor</code>.</li>
+<li><strong>Authorization</strong> — <code>RequirePermissionAttribute</code> (<code>[RequirePermission(module, action)]</code>, 152 uses) + <code>Roles</code> constants (platform tier only).</li>
+<li><strong>Security</strong> — <code>FileContentPolicy</code> (allow-list + magic-byte) · <code>RateLimiting</code> (global/auth/e-sign/refresh partitions).</li>
+<li><strong>Startup</strong> — <code>StartupSeeding</code> · <code>DeferredStartupSeeder</code> · <code>StartupSeedingState</code>. <strong>Versioning</strong> — <code>VersionedRouteConvention</code> (dual <code>api/…</code> + <code>api/v1/…</code>).</li>
+</ul>
+<h3>3.4 Contracts — 298 wire DTOs (records) across 13 module folders</h3>
+<p>AnalyticalQuality 89 · Governance 33 · Improvement 33 · IdentityAccess 27 · Resources 26 · Reporting 24 · Platform 21 · DocumentControl 13 · AuditManagement 8 · Operations 7 · Facility 6 · Tenancy 5 · Compliance 3 · Common 3. All <code>public sealed record</code>; requests + response DTOs, never domain entities on the wire.</p>
+<h3>3.5 Frontend classes</h3>
+<p>107 standalone components (all inline template+styles, 103 OnPush) · 35 signal facades (<code>providedIn:'root'</code>, <code>_list/_loading/_error/_selected</code> state) · <strong>44 <code>core/api</code> typed services</strong> (one per resource, over the <code>Paged&lt;T&gt;</code> envelope) · 2 guards (<code>authGuard</code>, <code>role.guard</code>→platform/tenant) · 2 interceptors (auth bearer, change-reason) · 18 shared-ui components (page-header, drawer, load-more, status-pill, list-stats, workflow-stepper, risk-matrix, gauge/donut/bar charts hand-rolled SVG/CSS, audit-trail, csv-import, user/lov/allocation pickers, export-menu, page-help) · <code>i18n.service</code> (~1,571 EN/AR/FR keys) · <code>auth.service</code> · <code>permissions.service</code> · <code>models.ts</code> (2,237-line shared type contract).</p>
+<hr />
+<h2>4. Functions, Commands &amp; Queries (217 commands · 105 queries · 11 sagas)</h2>
+<h3>4.1 MediatR pipeline behaviors (5, outermost→innermost)</h3>
+<ol>
+<li><strong>TracingBehavior</strong> — one OTel span per request. 2. <strong>LoggingBehavior</strong> — structured request log (names only). 3. <strong>AuthorizationBehavior</strong> — deny-by-default command authz (AUTHZ-000 fail-closed); commands only. 4. <strong>IdempotencyBehavior</strong> — replay stored response per Idempotency-Key. 5. <strong>ValidationBehavior</strong> — runs FluentValidation before the handler.</li>
+</ol>
+<h3>4.2 Command / query catalog by module (responsibility per command)</h3>
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th>Cmd / Qry</th>
+<th>Representative commands (responsibility)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AnalyticalQuality</strong></td>
+<td>76 / 31</td>
+<td>Per study family: <code>Create*</code>(val) → <code>Add*</code>/<code>Remove*</code> child → <code>Calculate*</code> (server-side stats) → <code>SignOff*</code> (SOD-AQ-001); QC: <code>RecordQcRunCommand</code> (Westgard eval), <code>UpdateQcTargetsCommand</code> (re-target + reason); PT: <code>RecordPtResultCommand</code> (z-score → auto-NC); <code>Import*</code> (bulk pairs/measurements)</td>
+</tr>
+<tr>
+<td><strong>Improvement</strong></td>
+<td>27 / 10</td>
+<td>NC: <code>RaiseNc</code>→<code>Submit</code>→<code>Triage</code>→<code>Reject</code>/<code>RecordRca</code>→<code>PlanCapaAction</code>→<code>CompleteCapaAction</code>→<code>SubmitForVerification</code>→<code>Verify</code>→<code>ConfirmEffectiveness</code>; Complaint: <code>Log</code>→<code>Acknowledge</code>→<code>Validate</code>(→NC)→<code>Investigate</code>→<code>Outcome</code>→<code>Resolve</code>→<code>Close</code>; Feedback (<code>Escalate</code>→complaint); Objective; QualityPolicy (<code>Draft</code>→<code>Revise</code>→<code>Approve</code>)</td>
+</tr>
+<tr>
+<td><strong>IdentityAccess</strong></td>
+<td>19 / 3</td>
+<td><code>LoginCommand</code>(Anon+MFA), <code>RefreshToken</code>/<code>Logout</code>(Anon), <code>Enroll/ConfirmMfa</code>, <code>SetPin</code>, <code>RegisterUser</code>, <code>AssignUserRole</code>, <code>SetUserScope</code>(branch/dept), <code>ResetUserPassword</code>, <code>ChangeMyPassword</code>, <code>Open/CompleteAccessReview</code></td>
+</tr>
+<tr>
+<td><strong>RiskGovernance</strong></td>
+<td>17 / 8</td>
+<td>Risk (<code>Assess</code>→<code>AddMitigation</code>→<code>RecordResidual</code>→<code>Close</code>), Change (<code>Propose</code>→<code>LinkRisk</code>→<code>Approve</code>→<code>Close</code>→<code>Review</code>/PIR), Review (<code>Schedule</code>→<code>AddDecision</code>→<code>Close</code>), Conflict (<code>Declare</code>→<code>Assess</code>→<code>Close</code>)</td>
+</tr>
+<tr>
+<td><strong>Organization</strong></td>
+<td>12 / 6</td>
+<td>Branch/Department/Test/Lov CRUD; InterestedParty &amp; ContextIssue register (<code>Register</code>/<code>Revise</code>/<code>Close</code>/<code>LinkRisk</code>)</td>
+</tr>
+<tr>
+<td><strong>DocumentControl</strong></td>
+<td>11 / 5</td>
+<td><code>CreateDocument</code>→<code>Submit</code>→<code>Recommend</code>→<code>RejectVersion</code>→<strong><code>PublishDocument</code>(Perm Documents.Sign, e-signature)</strong>→<code>DraftNewVersion</code>→<code>Retire</code>; <code>ConfirmReview</code>; controlled copies; <code>AcknowledgeDocument</code></td>
+</tr>
+<tr>
+<td><strong>Competency</strong></td>
+<td>10 / 5</td>
+<td><code>AssignCompetency</code>→<code>ScoreAssessment</code>→<code>Authorize</code>→<code>Revoke</code>; training assign/complete; TestAuthorization <code>Grant</code>/<code>Suspend</code>/<code>Reinstate</code>/<code>Revoke</code></td>
+</tr>
+<tr>
+<td><strong>Equipment</strong></td>
+<td>9 / 4</td>
+<td><code>RegisterEquipment</code>, <code>LogCalibration</code>, <code>LogMaintenance</code>, <code>RecordIntermediateCheck</code>(→NC), <code>Retire</code>; reference standard <code>Register</code>/<code>Quarantine</code>/<code>Reactivate</code>/<code>Retire</code></td>
+</tr>
+<tr>
+<td><strong>Facility</strong></td>
+<td>6 / 2</td>
+<td><code>RegisterMonitoringPoint</code>, <code>SetMonitoringLimits</code>, <code>RecordReading</code>(→excursion→NC), <code>Suspend</code>/<code>Resume</code>/<code>Retire</code></td>
+</tr>
+<tr>
+<td><strong>Records</strong></td>
+<td>6 / 1</td>
+<td><code>ArchiveRecord</code>, <code>Retrieve</code>, <code>Return</code>, <code>Dispose</code>, <code>PlaceLegalHold</code>, <code>ReleaseLegalHold</code></td>
+</tr>
+<tr>
+<td><strong>AuditManagement</strong></td>
+<td>5 / 2</td>
+<td><code>ScheduleAudit</code>→<code>Start</code>→<code>AnswerChecklistItem</code>→<code>RaiseFinding</code>(→NC)→<code>SignOff</code></td>
+</tr>
+<tr>
+<td><strong>SupplierQuality</strong></td>
+<td>5 / 3</td>
+<td><code>RegisterSupplier</code>, <code>AddCertificate</code>, <code>Approve</code>(SoD), <code>Suspend</code>, <code>RecordEvaluation</code>(weighted)</td>
+</tr>
+<tr>
+<td><strong>Authorization</strong></td>
+<td>4 / 4</td>
+<td><code>CreateRole</code>, <code>UpdateRole</code>, <code>SetRolePermissions</code>(reason), <code>SetRoleActive</code>; queries: catalogue, roles, my-privileges</td>
+</tr>
+<tr>
+<td><strong>Sla</strong></td>
+<td>3 / 2</td>
+<td><code>UpsertSla</code>, <code>CreateTask</code>, <code>CompleteTask</code></td>
+</tr>
+<tr>
+<td><strong>Notifications</strong></td>
+<td>2 / 3</td>
+<td><code>UpsertNotificationRule</code>, <code>MarkNotificationRead</code>; feed + dispatch-monitor queries</td>
+</tr>
+<tr>
+<td><strong>Tenancy</strong></td>
+<td>2 / 3</td>
+<td><code>ProvisionTenant</code>(Role PlatformAdmin — seeds roles+LOVs), <code>SetTenantMfaPolicy</code>; workspace/tenant queries</td>
+</tr>
+<tr>
+<td><strong>ComplianceLedger</strong></td>
+<td>2 / 7</td>
+<td><code>Open</code>/<code>CompleteAuditTrailReview</code>; queries: audit-trail, signatures, security-events, <strong>VerifyChain</strong>, field-changes</td>
+</tr>
+<tr>
+<td><strong>Reporting</strong></td>
+<td>1 / 6</td>
+<td><code>UpdateQualityHealthWeights</code>(Perm Reports.Manage); queries: dashboard KPIs, KPI history, NC Pareto, SLA compliance, <strong>quality-analytics</strong>, health profile</td>
+</tr>
+<tr>
+<td><strong>TOTAL</strong></td>
+<td><strong>217 / 105</strong></td>
+<td>322 handlers · 90 validators</td>
+</tr>
+</tbody>
+</table>
+<h3>4.3 Sagas / process managers (11 event policies + dispatcher)</h3>
+<p><code>FindingToNcPolicy</code> (audit finding→NC) · <code>ComplaintToNcPolicy</code> (justified complaint→NC) · <code>PtToNcPolicy</code> (unsatisfactory PT→NC) · <code>IntermediateCheckToNcPolicy</code> (failed check→NC) · <code>ExcursionToNcPolicy</code> (env excursion→NC) · <code>CompetencyLapseAuthorizationPolicy</code> (expiry→suspend authorizations) · <code>DocumentReviewDuePolicy</code> (→notification + task) · <code>EscalationToTaskPolicy</code> (SLA breach→task) · <code>NotificationEventPolicies</code> (routes 11 events→dispatcher) · <code>SeedDefaultNotificationRulesPolicy</code> (tenant provision→8 rules) · <code>NotificationDispatcher</code> (rule-matching engine). All idempotent (at-least-once outbox).</p>
+<h3>4.4 The 333 HTTP routes</h3>
+<p>Every command/query is exposed via the 54 controllers as <strong>333 routes</strong> (666 with the <code>api/v1/…</code> mirror), the authoritative list living in <code>tests/NT.QAMS.WebApi.FunctionalTests/ApiSurface.approved.txt</code> (a CI merge gate). Full endpoint inventory with auth/status/side-effects is Document 03.</p>
+<hr />
+<h2>5. Scale &amp; Metrics (reconciled totals)</h2>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Files</th>
+<th>Key units</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SharedKernel</strong></td>
+<td>11 <code>.cs</code></td>
+<td>AggregateRoot, Entity, ValueObject, TenantId, UserRef, LocalizedText, IClock, IDomainEvent</td>
+</tr>
+<tr>
+<td><strong>Domain</strong></td>
+<td>56 <code>.cs</code></td>
+<td>57 aggregates · 29 entities · 11 VOs · 69 enums · 82 events · 1 service</td>
+</tr>
+<tr>
+<td><strong>Contracts</strong></td>
+<td>22 <code>.cs</code></td>
+<td>298 DTO records</td>
+</tr>
+<tr>
+<td><strong>Application</strong></td>
+<td>89 <code>.cs</code></td>
+<td>217 commands · 105 queries · ~322 handlers · 90 validators · 5 behaviors · 11 sagas · ~19 ports</td>
+</tr>
+<tr>
+<td><strong>Infrastructure</strong></td>
+<td>165 <code>.cs</code></td>
+<td>AppDbContext · 6 interceptors · 67 EF configs · 59 migrations · outbox · 3 jobs · security/compliance/export/email/storage adapters</td>
+</tr>
+<tr>
+<td><strong>WebApi</strong></td>
+<td>58 <code>.cs</code></td>
+<td>54 controllers · 333 routes · 6 middleware · rate limiting · versioning · startup</td>
+</tr>
+<tr>
+<td><strong>Tests</strong></td>
+<td>100 <code>.cs</code></td>
+<td>395 backend tests (5 projects) + LoadTests harness</td>
+</tr>
+<tr>
+<td><strong>Frontend</strong></td>
+<td>204 <code>.ts</code></td>
+<td>107 components · 35 facades · 44 API services · 2 guards · 2 interceptors · 18 shared-ui · ~1,571 i18n keys · 87 unit + 6 e2e specs</td>
+</tr>
+<tr>
+<td><strong>Database</strong></td>
+<td>59 migrations</td>
+<td>99 tables · 4 schemas · 93 FORCE-RLS · 91 composite PKs · 87 CHECKs · ~60 FKs · 148 indexes</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Totals:</strong> ~<strong>501 backend <code>.cs</code> files</strong> (401 src + 100 test), ~<strong>221 frontend <code>.ts</code> files</strong>, <strong>~749 classes / ~730 records / 31 interfaces / 72 enums</strong>, <strong>322 CQRS handlers</strong>, <strong>333 HTTP endpoints</strong>, <strong>99 database tables</strong>, <strong>488 automated tests</strong> (395 + 87 + 6).</p>
+<h3>Count reconciliation notes</h3>
+<ul>
+<li>Commands <strong>217</strong> (type declarations) = <strong>219</strong> <code>ICommandHandler&lt;&gt;</code> implementations (1:1, +2 minor). An earlier review draft's "146" was a colon-anchored grep that missed handlers implementing the interface after a comma — <strong>217/105 is authoritative.</strong></li>
+<li>Aggregate roots <strong>57</strong> (precise count this pass) vs the review's earlier "~55" approximation.</li>
+<li>Migrations: <strong>59</strong> per <code>CLAUDE.md</code> (v1.52.0); <strong>58</strong> non-designer files on disk — a 1-file discrepancy flagged in Doc 00 (OBS-02), resolved to 59 (the <code>ReportingKpiSnapshots</code> filename false-negative).</li>
+<li>Contracts records <strong>298</strong>; total <code>record</code> declarations across <code>src/</code> <strong>~730</strong> (298 DTOs + 322 commands/queries + 82 events + VOs + options).</li>
+</ul>
+<hr />
+<h2>6. One-page system tree</h2>
+<pre><code>NT.QAMS  (multi-tenant SaaS lab QMS · .NET 9 + Angular 22 + PostgreSQL 17)
+│
+├─ FRONTEND (Angular 22 SPA)
+│  ├─ 28 feature areas → 84 components → 35 signal facades → 44 API services
+│  ├─ core: auth · permissions · i18n(EN/AR/FR ~1571) · 2 guards · 2 interceptors
+│  ├─ shared/ui: 18 components (charts hand-rolled)
+│  └─ 84 lazy routes (dual-plane: platform control / tenant)
+│
+├─ WEBAPI (.NET 9 host)
+│  ├─ 54 controllers → 333 routes (api/ + api/v1/)
+│  ├─ 6 middleware · deny-by-default authz (170-key catalogue) · rate limiting
+│  └─ OpenTelemetry · health/ready · /metrics
+│
+├─ APPLICATION (CQRS)
+│  ├─ 217 commands + 105 queries → 322 handlers
+│  ├─ 5 pipeline behaviors · 90 validators · 11 sagas · ~19 ports
+│  └─ modules: 19 (AnalyticalQuality is the largest: 76 cmd / 31 qry)
+│
+├─ DOMAIN (DDD)
+│  └─ 57 aggregates · 29 entities · 82 events · 69 enums · WestgardEvaluator
+│     (guarded state machines · 10 SoD rules · Part-11 ledger)
+│
+├─ INFRASTRUCTURE
+│  ├─ EF Core: AppDbContext · 6 interceptors · 67 configs · 59 migrations
+│  ├─ Reliability: transactional outbox (SKIP LOCKED · dead-letter) · idempotency · xmin concurrency
+│  ├─ Security: JWT · TOTP MFA · PBKDF2 · DatabaseRoleGuard
+│  ├─ Compliance: hash-chained audit trail · e-signature · field-change ledger
+│  ├─ Jobs: outbox · KPI snapshot · compliance sweep · single-replica guard
+│  └─ Adapters: SMTP · local file store · ClosedXML/QuestPDF exports
+│
+└─ DATABASE (PostgreSQL 17)
+   └─ 99 tables / 4 schemas (qams·audit·saas·read) · 93 FORCE-RLS · 91 composite PKs · 87 CHECKs
+</code></pre>
+<hr />
+<p><em>Structural map generated from source at commit <code>d74d4bf</code>; read-only, nothing executed or modified. For behavioral detail see Documents 01–15; this appendix is the scale-and-scope index.</em></p><div class="doc-end"><a href="#top">↑ back to top</a> · <span class="src">APPENDIX_STRUCTURAL_MAP.md</span></div></section>
     <p style="color:#64748b;font-size:.8rem;margin-top:30px">Generated from the 16 committed review documents in <code>docs/as-built-review/</code>. This edition documents the system as-built; it does not certify regulatory compliance.</p>
   </main>
 </div>
