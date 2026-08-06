@@ -68,8 +68,8 @@ export class AnalyticalApiService {
     return this.http.post<void>(`${this.studies}/${id}/calculate`, {});
   }
 
-  signOffStudy(id: string): Observable<void> {
-    return this.http.post<void>(`${this.studies}/${id}/sign-off`, {});
+  signOffStudy(id: string, body: { password: string; pin: string }): Observable<void> {
+    return this.http.post<void>(`${this.studies}/${id}/sign-off`, body);
   }
 
   // ── Proficiency testing ────────────────────────────────────────────────────

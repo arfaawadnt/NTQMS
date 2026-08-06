@@ -1475,6 +1475,11 @@ export class I18nService {
     'esign.signer': { en: 'Signer', ar: 'الموقّع', fr: 'Signataire' },
     'esign.meaning': { en: 'Meaning', ar: 'المعنى', fr: 'Signification' },
     'esign.when': { en: 'Signed', ar: 'وقت التوقيع', fr: 'Signé le' },
+    'esign.aqMeaning': {
+      en: 'I sign off this analytical record as reviewed and approved.',
+      ar: 'أُوقّع على هذا السجل التحليلي بوصفه مُراجَعاً ومعتمَداً.',
+      fr: 'Je signe cet enregistrement analytique comme revu et approuvé.',
+    },
     'nc.effectiveClose': { en: 'Effective — close', ar: 'فعّال — إغلاق', fr: 'Efficace — clôturer' },
     'nc.notEffective': { en: 'Not effective', ar: 'غير فعّال', fr: 'Non efficace' },
     'nc.awaitEffectiveness': { en: 'Awaiting effectiveness review.', ar: 'بانتظار مراجعة الفعالية.', fr: "En attente de la revue d'efficacité." },

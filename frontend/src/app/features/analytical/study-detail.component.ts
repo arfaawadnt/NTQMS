@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
+import { EsignCredentials, EsignDialogComponent } from '../../shared/ui/esign-dialog.component';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -18,7 +19,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 @Component({
     selector: 'qams-study-detail',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, EsignDialogComponent],
     template: `
     @if (item(); as s) {
       <qams-page-header [title]="s.studyRef + ' — ' + s.analyte" [subtitle]="s.protocol + ' · TEa ' + s.totalAllowableError + '%'">
@@ -73,7 +74,8 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
             @if (s.replicates.length < 2) { <span class="muted">{{ i18n.t('val.needReplicates') }}</span> }
           }
           @if (s.state === 'StatsCalculated' && perms.can('analytical-quality.sign')) {
-            <button (click)="facade.signOff(s.id)">{{ i18n.t('val.signOffAction') }}</button>
+            <button (click)="esignOpen.set(true)">{{ i18n.t('val.signOffAction') }}</button>
+            <qams-esign-dialog [open]="esignOpen()" [meaning]="i18n.t('esign.aqMeaning')" [busy]="facade.loading()" [error]="facade.error()" (confirm)="doSignOff(s.id, $event)" (cancel)="esignOpen.set(false)" />
           }
           @if (s.state === 'SignedOff') {
             <p class="muted">{{ i18n.t('val.signedOffNote') }}</p>
@@ -106,6 +108,15 @@ export class StudyDetailComponent implements OnInit {
 
   /** Route-bound study id. */
   readonly id = input.required<string>();
+
+  /** Whether the Part 11 e-signature dialog is open for the sign-off. */
+  readonly esignOpen = signal(false);
+
+  /** Signs off through the ceremony dialog; closes on success, stays open (showing the error) on failure. */
+  async doSignOff(id: string, credentials: EsignCredentials): Promise<void> {
+    await this.facade.signOff(id, credentials);
+    if (this.facade.error() === '') { this.esignOpen.set(false); }
+  }
 
   /** Canonical workflow path for the stepper (off-path states render as terminal). */
   readonly flowSteps = ['ProtocolConfigured', 'DataEntered', 'StatsCalculated', 'SignedOff'] as const;

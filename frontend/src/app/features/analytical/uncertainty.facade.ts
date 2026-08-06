@@ -49,8 +49,8 @@ export class UncertaintyFacade {
     await this.mutate(id, () => this.api.calculate(id));
   }
 
-  async approve(id: string): Promise<void> {
-    await this.mutate(id, () => this.api.approve(id));
+  async approve(id: string, credentials: { password: string; pin: string }): Promise<void> {
+    await this.mutate(id, () => this.api.approve(id, credentials));
   }
 
   private async mutate(id: string, call: () => Observable<unknown>): Promise<void> {

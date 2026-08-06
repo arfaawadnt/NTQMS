@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
+import { EsignCredentials, EsignDialogComponent } from '../../shared/ui/esign-dialog.component';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -19,7 +20,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 @Component({
     selector: 'qams-uncertainty-detail',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, EsignDialogComponent],
     template: `
     @if (item(); as b) {
       <qams-page-header [title]="b.budgetRef + ' — ' + b.analyte" [subtitle]="b.method + ' · ' + b.level">
@@ -96,7 +97,8 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
             @if (b.components.length === 0) { <span class="muted">{{ i18n.t('mu.noComponents') }}</span> }
           }
           @if (b.status === 'Calculated' && perms.can('analytical-quality.approve')) {
-            <button (click)="facade.approve(b.id)">{{ i18n.t('mu.approve') }}</button>
+            <button (click)="esignOpen.set(true)">{{ i18n.t('mu.approve') }}</button>
+            <qams-esign-dialog [open]="esignOpen()" [meaning]="i18n.t('esign.aqMeaning')" [busy]="facade.loading()" [error]="facade.error()" (confirm)="doApprove(b.id, $event)" (cancel)="esignOpen.set(false)" />
           }
           @if (b.status === 'Approved') {
             <p class="muted">{{ i18n.t('mu.approvedNote') }}</p>
@@ -133,6 +135,15 @@ export class UncertaintyDetailComponent implements OnInit {
 
   /** Route-bound budget id. */
   readonly id = input.required<string>();
+
+  /** Whether the Part 11 e-signature dialog is open for the approval. */
+  readonly esignOpen = signal(false);
+
+  /** Approves through the ceremony dialog; closes on success, stays open (showing the error) on failure. */
+  async doApprove(id: string, credentials: EsignCredentials): Promise<void> {
+    await this.facade.approve(id, credentials);
+    if (this.facade.error() === '') { this.esignOpen.set(false); }
+  }
 
   /** Canonical workflow path for the stepper. */
   readonly flowSteps = ['Draft', 'Calculated', 'Approved'] as const;

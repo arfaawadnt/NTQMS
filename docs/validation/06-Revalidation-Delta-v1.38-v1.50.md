@@ -300,6 +300,14 @@ role that approved uncertainty budgets via `analytical-quality.approve` without
 `analytical-quality.sign` will lose that ability until an administrator grants `.sign`. Seeding is
 additive per role name and will not backfill this.
 
+**Frontend (this increment).** The 13 analytical study/assessment sign-off (and uncertainty
+approval) actions now open the shared `qams-esign-dialog` to capture the account password + PIN
+before submitting; the credentials thread through each per-study API service and facade. The
+per-study §11.50 signature-**manifest** display on each study page is deferred to a follow-up (it
+needs a `GET …/signatures` read endpoint per study, as added for NC in §A.13); signatures are
+meanwhile visible in the compliance signature log. PtPlan remains excluded (needs
+`proficiency-testing.sign`).
+
 ---
 
 ## Part B — Installation Qualification (IQ) delta

@@ -52,7 +52,7 @@ export class PrecisionFacade {
 
   async calculate(id: string): Promise<void> { await this.mutate(id, () => this.api.calculate(id)); }
 
-  async signOff(id: string): Promise<void> { await this.mutate(id, () => this.api.signOff(id)); }
+  async signOff(id: string, credentials: { password: string; pin: string }): Promise<void> { await this.mutate(id, () => this.api.signOff(id, credentials)); }
 
   private async mutate(id: string, call: () => Observable<void>): Promise<void> {
     await this.run(async () => {

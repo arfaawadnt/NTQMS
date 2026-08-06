@@ -45,8 +45,8 @@ export class ValidationFacade {
     await this.mutate(id, () => this.api.calculateStudy(id));
   }
 
-  async signOff(id: string): Promise<void> {
-    await this.mutate(id, () => this.api.signOffStudy(id));
+  async signOff(id: string, credentials: { password: string; pin: string }): Promise<void> {
+    await this.mutate(id, () => this.api.signOffStudy(id, credentials));
   }
 
   private async mutate(id: string, call: () => Observable<void>): Promise<void> {

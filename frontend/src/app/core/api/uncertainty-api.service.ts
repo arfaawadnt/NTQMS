@@ -37,5 +37,5 @@ export class UncertaintyApiService {
 
   calculate(id: string): Observable<void> { return this.http.post<void>(`${this.base}/${id}/calculate`, {}); }
 
-  approve(id: string): Observable<void> { return this.http.post<void>(`${this.base}/${id}/approve`, {}); }
+  approve(id: string, body: { password: string; pin: string }): Observable<void> { return this.http.post<void>(`${this.base}/${id}/approve`, body); }
 }

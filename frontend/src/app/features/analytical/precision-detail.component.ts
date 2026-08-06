@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
+import { EsignCredentials, EsignDialogComponent } from '../../shared/ui/esign-dialog.component';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -21,7 +22,7 @@ import { CsvColumn, CsvImportComponent } from '../../shared/ui/csv-import.compon
 @Component({
     selector: 'qams-precision-detail',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, CsvImportComponent],
+    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, CsvImportComponent, EsignDialogComponent],
     template: `
     @if (item(); as s) {
       <qams-page-header [title]="s.studyRef + ' — ' + s.analyte" [subtitle]="s.level">
@@ -143,7 +144,8 @@ import { CsvColumn, CsvImportComponent } from '../../shared/ui/csv-import.compon
             @if (runCount() < 2) { <span class="muted">{{ i18n.t('prc.minRuns') }}</span> }
           }
           @if (s.state === 'Calculated' && perms.can('analytical-quality.sign')) {
-            <button (click)="facade.signOff(s.id)">{{ i18n.t('mc.signOff') }}</button>
+            <button (click)="esignOpen.set(true)">{{ i18n.t('mc.signOff') }}</button>
+            <qams-esign-dialog [open]="esignOpen()" [meaning]="i18n.t('esign.aqMeaning')" [busy]="facade.loading()" [error]="facade.error()" (confirm)="doSignOff(s.id, $event)" (cancel)="esignOpen.set(false)" />
           }
           @if (s.state === 'SignedOff') { <p class="muted">{{ i18n.t('mc.signedOffNote') }}</p> }
         </div>
@@ -190,6 +192,15 @@ export class PrecisionDetailComponent implements OnInit {
 
   /** Route-bound study id. */
   readonly id = input.required<string>();
+
+  /** Whether the Part 11 e-signature dialog is open for the sign-off. */
+  readonly esignOpen = signal(false);
+
+  /** Signs off through the ceremony dialog; closes on success, stays open (showing the error) on failure. */
+  async doSignOff(id: string, credentials: EsignCredentials): Promise<void> {
+    await this.facade.signOff(id, credentials);
+    if (this.facade.error() === '') { this.esignOpen.set(false); }
+  }
 
   readonly flowSteps = ['DataEntry', 'Calculated', 'SignedOff'] as const;
   readonly item = this.facade.selected;
