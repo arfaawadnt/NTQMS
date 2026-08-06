@@ -28,7 +28,7 @@ export class PtPlansApiService {
     return this.http.delete<void>(`${this.base}/${id}/items/${itemId}`);
   }
 
-  approve(id: string): Observable<void> { return this.http.post<void>(`${this.base}/${id}/approve`, {}); }
+  approve(id: string, body: { password: string; pin: string }): Observable<void> { return this.http.post<void>(`${this.base}/${id}/approve`, body); }
 
   recordFulfilment(id: string, itemId: string, enrollmentId: string): Observable<void> {
     return this.http.post<void>(`${this.base}/${id}/fulfilments`, { itemId, enrollmentId });

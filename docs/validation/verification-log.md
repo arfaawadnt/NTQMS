@@ -43,6 +43,7 @@ exactly how two wrong totals reached the commit record (see the note below the t
 
 | Date | Commit | Env | Domain | App | Arch | Integ | Func | Backend | FE unit | E2E | Result |
 | ---- | ------ | --- | -----: | --: | ---: | ----: | ---: | ------: | ------: | --: | ------ |
+| 2026-08-06 | (pending commit) | dev + real PG | 242 | 88 | 33 | 31 (+1 skip) | 82 | **476** | 95 | — (not run) | All green (RISK-03 PtPlan gate: new proficiency-testing.sign catalogue key + approve signing ceremony, backend+frontend; role/catalog tests green) |
 | 2026-08-06 | (pending commit) | dev + real PG | 242 | 88 | 33 | 31 (+1 skip) | 82 | **476** | 95 | — (not run) | All green (RISK-03 non-AQ frontend: NC-close, audit, QP, change UIs wired to the e-sign dialog; prod build + karma green) |
 | 2026-08-06 | (pending commit) | dev + real PG | 242 | 88 | 33 | 31 (+1 skip) | 82 | **476** | 95 | — (not run) | All green (RISK-03 non-AQ backend: NC-close, audit sign-off, QP approve, change approve e-signature ceremonies) |
 | 2026-08-06 | (pending commit) | dev + real PG | 242 | 85 | 33 | 31 (+1 skip) | 82 | **473** | 95 | — (not run) | All green (RISK-03 AQ frontend: 13 sign-off UIs wired to the e-sign dialog; prod build + karma green) |

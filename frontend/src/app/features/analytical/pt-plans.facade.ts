@@ -43,7 +43,7 @@ export class PtPlansFacade {
     await this.mutate(id, () => this.api.removeItem(id, itemId));
   }
 
-  async approve(id: string): Promise<void> { await this.mutate(id, () => this.api.approve(id)); }
+  async approve(id: string, credentials: { password: string; pin: string }): Promise<void> { await this.mutate(id, () => this.api.approve(id, credentials)); }
 
   async recordFulfilment(id: string, itemId: string, enrollmentId: string): Promise<void> {
     await this.mutate(id, () => this.api.recordFulfilment(id, itemId, enrollmentId));

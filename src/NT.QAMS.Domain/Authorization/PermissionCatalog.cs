@@ -171,7 +171,7 @@ public static class PermissionCatalog
         new(AnalyticalQuality, GroupAnalytical, "perm.mod.analyticalQuality",
             [PermissionAction.View, PermissionAction.Create, PermissionAction.Edit, PermissionAction.Approve,
              PermissionAction.Void, PermissionAction.Sign, PermissionAction.Export, PermissionAction.Manage]),
-        new(ProficiencyTesting, GroupAnalytical, "perm.mod.proficiencyTesting", FullRecordLifecycle),
+        new(ProficiencyTesting, GroupAnalytical, "perm.mod.proficiencyTesting", SignedRecordLifecycle),
 
         // ── Operations ───────────────────────────────────────────────────────
         new(Tasks, GroupOperations, "perm.mod.tasks", [PermissionAction.View, PermissionAction.Create, PermissionAction.Edit, PermissionAction.Manage]),

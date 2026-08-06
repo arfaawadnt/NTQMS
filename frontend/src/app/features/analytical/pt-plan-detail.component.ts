@@ -12,6 +12,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { WorkflowStepperComponent } from '../../shared/ui/workflow-stepper.component';
 import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
+import { EsignCredentials, EsignDialogComponent } from '../../shared/ui/esign-dialog.component';
 
 /**
  * PT plan workspace: the committed scheme/analyte lines (editable in Draft,
@@ -21,7 +22,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 @Component({
     selector: 'qams-pt-plan-detail',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+    imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, EsignDialogComponent],
     template: `
     @if (item(); as p) {
       <qams-page-header [title]="p.planRef + ' — ' + p.year" [subtitle]="i18n.t('ptp.subtitle')">
@@ -33,8 +34,9 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
       <div class="meta card">
         <div><span class="muted">{{ i18n.t('nc.status') }}</span><qams-status-pill [status]="p.status" /></div>
         @if (p.approvedAtUtc) { <div><span class="muted">{{ i18n.t('val.signedOff') }}</span> {{ p.approvedAtUtc | date:'medium' }}</div> }
-        @if (p.status === 'Draft' && perms.can('proficiency-testing.approve')) {
-          <button (click)="facade.approve(p.id)" [disabled]="p.items.length === 0">{{ i18n.t('ptp.approve') }}</button>
+        @if (p.status === 'Draft' && perms.can('proficiency-testing.sign')) {
+          <button (click)="esignOpen.set(true)" [disabled]="p.items.length === 0">{{ i18n.t('ptp.approve') }}</button>
+          <qams-esign-dialog [open]="esignOpen()" [meaning]="i18n.t('esign.signMeaning')" [busy]="facade.loading()" [error]="facade.error()" (confirm)="doApprove(p.id, $event)" (cancel)="esignOpen.set(false)" />
         }
       </div>
       @if (facade.error()) { <div class="error">{{ facade.error() }}</div> }
@@ -162,6 +164,15 @@ export class PtPlanDetailComponent implements OnInit {
 
   /** Route-bound plan id. */
   readonly id = input.required<string>();
+
+  /** Whether the Part 11 e-signature dialog is open for the plan approval. */
+  readonly esignOpen = signal(false);
+
+  /** Approves through the ceremony dialog; closes on success, stays open (showing the error) on failure. */
+  async doApprove(id: string, credentials: EsignCredentials): Promise<void> {
+    await this.facade.approve(id, credentials);
+    if (this.facade.error() === '') { this.esignOpen.set(false); }
+  }
 
   /** Canonical workflow path for the stepper. */
   readonly flowSteps = ['Draft', 'Approved', 'Closed'] as const;

@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
+using NT.QAMS.Application.Compliance;
 using NT.QAMS.Contracts.AnalyticalQuality;
 using NT.QAMS.Domain.AnalyticalQuality;
 using NT.QAMS.SharedKernel.Abstractions;
@@ -17,8 +18,10 @@ public sealed record AddPtPlanItemCommand(
     Guid PlanId, string Scheme, string Analyte, string? Provider, int PlannedCycles, string? Notes) : ICommand<Guid>;
 [RequireInternalActor]
 public sealed record RemovePtPlanItemCommand(Guid PlanId, Guid ItemId) : ICommand;
-[RequireInternalActor]
-public sealed record ApprovePtPlanCommand(Guid PlanId) : ICommand;
+/// <summary>Approving a PT/EQA plan is a Part 11 signing ceremony: it requires the approver's e-signature (account password + PIN).</summary>
+[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.ProficiencyTesting,
+    NT.QAMS.Domain.Authorization.PermissionAction.Sign)]
+public sealed record ApprovePtPlanCommand(Guid PlanId, string Password, string Pin) : ICommand;
 [RequireInternalActor]
 public sealed record RecordPtPlanFulfilmentCommand(Guid PlanId, Guid ItemId, Guid EnrollmentId) : ICommand;
 [RequireInternalActor]
@@ -65,7 +68,8 @@ public sealed class CreatePtPlanHandler(IAppDbContext db, ICurrentTenant tenant,
     }
 }
 
-public sealed class PtPlanWorkflowHandlers(IAppDbContext db, ICurrentUser user, IClock clock) :
+public sealed class PtPlanWorkflowHandlers(
+    IAppDbContext db, ICurrentUser user, IClock clock, IESignatureService signatures) :
     ICommandHandler<AddPtPlanItemCommand, Guid>,
     ICommandHandler<RemovePtPlanItemCommand>,
     ICommandHandler<ApprovePtPlanCommand>,
@@ -92,6 +96,31 @@ public sealed class PtPlanWorkflowHandlers(IAppDbContext db, ICurrentUser user, 
         var actor = user.UserId
             ?? throw new DomainException("AUTH-003", "An authenticated user is required.");
         var plan = await LoadAsync(c.PlanId, ct);
+
+        // Pre-validate all three guards before minting (append-only ledger; mirrors the pilot).
+        if (plan.CreatedByUserId is { } preparer && preparer == actor)
+        {
+            throw new DomainException(
+                "SOD-AQ-001", "Segregation of duties: the preparer cannot approve their own PT plan.");
+        }
+
+        if (plan.Status != PtPlanStatus.Draft)
+        {
+            throw new InvalidStateTransitionException(
+                "PTP-010", $"Only a draft plan can be approved (current: {plan.Status}).");
+        }
+
+        if (plan.Items.Count == 0)
+        {
+            throw new DomainException(
+                "PTP-011", "An empty plan cannot be approved — add at least one scheme/analyte line.");
+        }
+
+        var subjectRef = $"PTP:{plan.Id:N}";
+        await signatures.SignAsync(
+            actor, c.Password, c.Pin, $"Approved PT/EQA plan {plan.PlanRef}", subjectRef,
+            SignatureContentHash.Compute(("plan", plan.PlanRef), ("outcome", "approved")), ct);
+
         plan.Approve(actor, clock.UtcNow);
         await db.SaveChangesAsync(ct);
     }

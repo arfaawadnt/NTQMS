@@ -48,10 +48,10 @@ public sealed class PtPlansController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/approve")]
-    [RequirePermission(PermissionCatalog.ProficiencyTesting, PermissionAction.Approve)]
-    public async Task<IActionResult> Approve(Guid id, CancellationToken ct)
+    [RequirePermission(PermissionCatalog.ProficiencyTesting, PermissionAction.Sign)]
+    public async Task<IActionResult> Approve(Guid id, AnalyticalSignOffRequest request, CancellationToken ct)
     {
-        await sender.Send(new ApprovePtPlanCommand(id), ct);
+        await sender.Send(new ApprovePtPlanCommand(id, request.Password, request.Pin), ct);
         return NoContent();
     }
 

@@ -285,9 +285,21 @@ segregation of duties in-domain but minted **no `signature_record`** now run the
 ceremony, reusing the same `IESignatureService.SignAsync` and `SignatureContentHash` foundation. No
 schema change; the domain aggregates are unchanged (each already carried its SoD + state
 invariants). Each handler pre-validates SoD + state **before** minting, so a refused sign-off never
-leaves a signature (append-only ledger). *(PtPlan approval — the 14th SOD-AQ-001 gate — is deferred
-to a small follow-up: it lives under the `proficiency-testing` module, which needs a new
-`proficiency-testing.sign` catalogue key.)*
+leaves a signature (append-only ledger).
+
+**PtPlan (the 14th SOD-AQ-001 gate) — now included (2026-08-06).** PT/EQA-plan approval lives under the
+`proficiency-testing` module, which had no `Sign` action, so a **new `proficiency-testing.sign` catalogue
+key** was minted (`ProficiencyTesting` → `SignedRecordLifecycle`). It is auto-granted to **Tenant
+Administrator** (via `AllKeys`) and **Quality Manager** (via its predicate default), and explicitly
+excluded from Department Head / Analyst / External Auditor (their seeded grants are unchanged). The
+approve handler pre-checks all three guards (SoD `SOD-AQ-001`, `PTP-010` draft-state, `PTP-011`
+non-empty) before minting; reuses `AnalyticalSignOffRequest`; subject `PTP:{id}`. **Upgrade gap
+(new key):** because `proficiency-testing.sign` is genuinely new, **existing tenants' already-seeded
+roles do not have it** and additive seeding will not backfill it — an administrator must grant it, or a
+data migration must. Verified live (dev, real PostgreSQL): the demo tenant's admin role — seeded before
+this key — is correctly denied **403 AUTHZ-403** on approve (not AUTHZ-008), confirming the key is wired
+and enforced and demonstrating the upgrade gap; the ceremony fence/mint itself is proven by the
+analytical + quality-policy signing unit tests (identical mechanism).
 
 | URS | Requirement (delta) | Design element(s) | Verification | Status |
 | --- | ------------------- | ----------------- | ------------ | ------ |
