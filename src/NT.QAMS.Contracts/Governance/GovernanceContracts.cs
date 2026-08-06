@@ -50,7 +50,7 @@ public sealed record ScheduleReviewRequest(string Title, DateOnly ReviewDate,
     string? Agenda = null, string? MeetingLink = null,
     Guid? BranchId = null, Guid? DepartmentId = null);
 public sealed record AddDecisionRequest(string Description, Guid OwnerId, DateOnly DueDate);
-public sealed record CloseReviewRequest(string Minutes);
+public sealed record CloseReviewRequest(string Minutes, string Password, string Pin);
 
 public sealed record ReviewDecisionDto(Guid Id, string Description, Guid OwnerId, DateOnly DueDate);
 

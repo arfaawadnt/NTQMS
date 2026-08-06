@@ -347,11 +347,31 @@ straight to its API service). Credentials thread through each facade/API. The NC
 (added for verify in §A.13) now also shows the close signature. Per-study AQ manifests remain the
 only deferred display item.
 
-**Not yet in scope.** "Review close" (the as-built list's fifth non-AQ item) is **ambiguous** —
-several review aggregates exist (`AuditTrailReview.Complete`, `ManagementReview`, `UserAccessReview`,
-`DocumentReviewCycle`); which one(s) constitute a Part 11 signed determination is a scope decision,
-deferred. The four borderline SoD gates (supplier approve, competency authorize, test-authorization
-grant, conflict-of-interest assessment) also remain a pending scope-boundary decision.
+**Scope boundary.** "Review close" (the as-built list's fifth non-AQ item) is resolved to
+**`ManagementReview.Close`** — see §A.16 (it is the only review aggregate with a *Close* action, and
+lives in the same governance file as change-approve, where the review grouped it). The two other
+periodic-review *completions* (`AuditTrailReview.Complete` under the `compliance` module — which
+would need a new `compliance.sign` key; `UserAccessReview.Complete` under `access-reviews`, which
+already has `sign`) are recertification determinations, not the "review close" the review meant, and
+are **not** signed here pending a decision. The four borderline SoD gates (supplier approve,
+competency authorize, test-authorization grant, conflict-of-interest assessment) also remain a
+pending scope-boundary decision.
+
+### A.16 Part 11 electronic-signature ceremony — management-review close (RISK-03)
+
+Closes the "review close" gate. Concluding a management review (ISO 9001 §9.3 / ISO 17025 §8.9)
+records the chair's minutes and freezes the record; it now also requires the chair's electronic
+signature. Same ceremony; no schema/domain change; no SoD (the chair signs their own close, as the
+domain models it — like change approval). The one post-credential guard is state (MRV-004,
+Scheduled-only); minutes are already enforced by the command validator before the handler runs.
+
+| URS | Requirement (delta) | Design element(s) | Verification | Status |
+| --- | ------------------- | ----------------- | ------------ | ------ |
+| URS-126 | Closing a management review shall require the chair's electronic signature (account password + PIN, §11.200(a)(1)), recorded as an immutable signature bound to the review (§11.50/§11.70); the state gate shall be checked before any signature is minted. | `CloseReviewCommand` gains `Password`+`Pin` and `[RequirePermissionPolicy(reviews, Sign)]`; `CloseReviewHandler` pre-validates state (MRV-004) + minutes (MRV-003) then `SignAsync` then `ManagementReview.Close`; subject `MRV:{id}`; `CloseReviewRequest` extended; controller `POST /api/management-reviews/{id}/close` moved from `Void` to `Sign`; frontend review-detail close form opens the shared `qams-esign-dialog` (gated `reviews.sign`) | AUTO — full backend suite 242/88/33/31+1/82; frontend prod build + 95 Karma. **INSP live (dev, real PostgreSQL, 2026-08-06) — a POSITIVE mint end-to-end** (this gate has no SoD, so the chair could complete it): close with a wrong PIN → **422 SIG-001**; close with correct credentials → **204**; the compliance signature log then shows `subjectRef = MRV:{id}` — the immutable signature persisted | Template — engineering complete; automated + live positive-mint evidence recorded; QA execution/sign-off pending |
+
+**Authorization upgrade note (act before release).** The close endpoint moved from `reviews.void` to
+`reviews.sign` (both already exist in the `reviews` module). A tenant-defined role that closed
+reviews via `reviews.void` without `reviews.sign` loses that action until granted `.sign`.
 
 ---
 

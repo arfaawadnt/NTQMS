@@ -426,8 +426,10 @@ public static class MeetingLinkDefaults
 [RequireInternalActor]
 public sealed record AddDecisionCommand(Guid ReviewId, string Description, Guid OwnerId, DateOnly DueDate)
     : ICommand<Guid>;
-[RequireInternalActor]
-public sealed record CloseReviewCommand(Guid ReviewId, string Minutes) : ICommand;
+/// <summary>Closing a management review is a Part 11 signing ceremony: it requires the chair's e-signature (account password + PIN).</summary>
+[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.ManagementReviews,
+    NT.QAMS.Domain.Authorization.PermissionAction.Sign)]
+public sealed record CloseReviewCommand(Guid ReviewId, string Minutes, string Password, string Pin) : ICommand;
 
 // The former varchar bound, kept at the API layer now the column is text (schema hardening 1.2/Q6).
 public sealed class CloseReviewValidator : AbstractValidator<CloseReviewCommand>
@@ -451,15 +453,34 @@ public sealed class AddDecisionHandler(IAppDbContext db) : ICommandHandler<AddDe
     }
 }
 
-public sealed class CloseReviewHandler(IAppDbContext db, ICurrentUser user)
+public sealed class CloseReviewHandler(IAppDbContext db, ICurrentUser user, IESignatureService signatures)
     : ICommandHandler<CloseReviewCommand>
 {
     public async Task Handle(CloseReviewCommand c, CancellationToken ct)
     {
+        var actor = GovernanceHelpers.RequireActor(user);
         var review = await db.ManagementReviews.Include(r => r.Decisions)
             .SingleOrDefaultAsync(r => r.Id == c.ReviewId, ct)
             ?? throw new DomainException("MRV-404", "Management review not found.");
-        review.Close(GovernanceHelpers.RequireActor(user), c.Minutes);
+
+        // Pre-validate before minting (append-only ledger; mirrors the pilot). The aggregate re-checks both.
+        if (review.Status != ReviewStatus.Scheduled)
+        {
+            throw new InvalidStateTransitionException(
+                "MRV-004", $"Cannot close a review in state {review.Status} — closed minutes are immutable.");
+        }
+
+        if (string.IsNullOrWhiteSpace(c.Minutes))
+        {
+            throw new DomainException("MRV-003", "Minutes are required to close a management review.");
+        }
+
+        var subjectRef = $"MRV:{review.Id:N}";
+        await signatures.SignAsync(
+            actor, c.Password, c.Pin, $"Closed management review {review.ReviewRef}", subjectRef,
+            SignatureContentHash.Compute(("review", review.ReviewRef), ("outcome", "closed")), ct);
+
+        review.Close(actor, c.Minutes);
         await db.SaveChangesAsync(ct);
     }
 }

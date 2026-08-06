@@ -1835,7 +1835,7 @@ export interface ScheduleReviewRequest {
   departmentId: string | null;
 }
 export interface AddDecisionRequest { description: string; ownerId: string; dueDate: string; }
-export interface CloseReviewRequest { minutes: string; }
+export interface CloseReviewRequest { minutes: string; password: string; pin: string; }
 
 // ── Supplier Quality ─────────────────────────────────────────────────────────
 

@@ -66,8 +66,8 @@ export class ReviewFacade {
     await this.mutate(id, () => this.api.addDecision(id, request));
   }
 
-  async close(id: string, minutes: string): Promise<void> {
-    await this.mutate(id, () => this.api.close(id, { minutes }));
+  async close(id: string, minutes: string, credentials: { password: string; pin: string }): Promise<void> {
+    await this.mutate(id, () => this.api.close(id, { minutes, ...credentials }));
   }
 
   private async mutate(id: string, call: () => Observable<unknown>): Promise<void> {

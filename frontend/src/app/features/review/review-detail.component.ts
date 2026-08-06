@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -11,6 +11,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { UserSelectComponent } from '../../shared/ui/user-select.component';
 import { WorkflowStepperComponent } from '../../shared/ui/workflow-stepper.component';
 import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
+import { EsignCredentials, EsignDialogComponent } from '../../shared/ui/esign-dialog.component';
 
 /**
  * Management review workspace. Decisions accumulate while the review is
@@ -21,7 +22,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 @Component({
     selector: 'qams-review-detail',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, UserSelectComponent],
+    imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, UserSelectComponent, EsignDialogComponent],
     template: `
     @if (item(); as r) {
       <qams-page-header [title]="r.reviewRef + ' — ' + r.title" [subtitle]="(r.reviewDate | date:'fullDate') ?? ''">
@@ -77,10 +78,10 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 
       @if (r.minutes) {
         <section class="card"><h3>{{ i18n.t('mrv.minutes') }}</h3><p class="pre">{{ r.minutes }}</p></section>
-      } @else if (open() && perms.can('reviews.void')) {
+      } @else if (open() && perms.can('reviews.sign')) {
         <section class="card">
           <h3>{{ i18n.t('mrv.closeOut') }}</h3>
-          <form [formGroup]="closeForm" (ngSubmit)="close(r.id)">
+          <form [formGroup]="closeForm" (ngSubmit)="openClose(r.id)">
             <label>{{ i18n.t('mrv.minutes') }}</label>
             <textarea formControlName="minutes" rows="4" [placeholder]="i18n.t('mrv.minutesHint')"></textarea>
             <button type="submit" [disabled]="closeForm.invalid">{{ i18n.t('mrv.close') }}</button>
@@ -90,6 +91,8 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 
       @if (!open() && !perms.can('reviews.edit')) { <p class="muted">{{ i18n.t('mrv.closedNote') }}</p> }
     
+      <qams-esign-dialog [open]="esignOpen()" [meaning]="i18n.t('esign.signMeaning')" [busy]="facade.loading()" [error]="facade.error()" (confirm)="signClose($event)" (cancel)="esignOpen.set(false)" />
+
       <qams-audit-trail [subject]="r.id" />
     } @else {
       <p class="muted">{{ i18n.t('common.loading') }}</p>
@@ -143,9 +146,25 @@ export class ReviewDetailComponent implements OnInit {
     this.decisionForm.reset();
   }
 
-  async close(id: string): Promise<void> {
+  /** Part 11 e-signature dialog state for closing the review. */
+  readonly esignOpen = signal(false);
+  private readonly pendingReviewId = signal('');
+
+  /** Validates the minutes then opens the signing dialog to close the review. */
+  openClose(id: string): void {
     if (this.closeForm.invalid) { return; }
-    await this.facade.close(id, this.closeForm.getRawValue().minutes);
-    this.closeForm.reset();
+    this.pendingReviewId.set(id);
+    this.esignOpen.set(true);
+  }
+
+  /** Signs and submits the close; resets the form and closes the dialog on success. */
+  async signClose(credentials: EsignCredentials): Promise<void> {
+    const id = this.pendingReviewId();
+    if (!id || this.closeForm.invalid) { return; }
+    await this.facade.close(id, this.closeForm.getRawValue().minutes, credentials);
+    if (this.facade.error() === '') {
+      this.closeForm.reset();
+      this.esignOpen.set(false);
+    }
   }
 }

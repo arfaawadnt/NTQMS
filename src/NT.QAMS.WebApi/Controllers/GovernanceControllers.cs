@@ -160,10 +160,10 @@ public sealed class ManagementReviewsController(ISender sender) : ControllerBase
             id, request.Description, request.OwnerId, request.DueDate), ct) });
 
     [HttpPost("{id:guid}/close")]
-    [RequirePermission(PermissionCatalog.ManagementReviews, PermissionAction.Void)]
+    [RequirePermission(PermissionCatalog.ManagementReviews, PermissionAction.Sign)]
     public async Task<IActionResult> Close(Guid id, CloseReviewRequest request, CancellationToken ct)
     {
-        await sender.Send(new CloseReviewCommand(id, request.Minutes), ct);
+        await sender.Send(new CloseReviewCommand(id, request.Minutes, request.Password, request.Pin), ct);
         return NoContent();
     }
 }
