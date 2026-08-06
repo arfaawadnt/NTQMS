@@ -88,8 +88,8 @@ export class SupplierFacade {
     });
   }
 
-  async approve(id: string): Promise<void> {
-    await this.mutate(id, () => this.api.approve(id));
+  async approve(id: string, credentials: { password: string; pin: string }): Promise<void> {
+    await this.mutate(id, () => this.api.approve(id, credentials));
   }
 
   async suspend(id: string, reason: string): Promise<void> {

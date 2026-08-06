@@ -28,8 +28,8 @@ export class GovernanceApiService {
     return this.http.post<CreatedResource>(this.conflicts, body);
   }
 
-  assessConflict(id: string, riskLevel: string, mitigation: string): Observable<void> {
-    return this.http.post<void>(`${this.conflicts}/${id}/assess`, { riskLevel, mitigation });
+  assessConflict(id: string, riskLevel: string, mitigation: string, credentials: { password: string; pin: string }): Observable<void> {
+    return this.http.post<void>(`${this.conflicts}/${id}/assess`, { riskLevel, mitigation, ...credentials });
   }
 
   closeConflict(id: string, outcome: string, closureNote: string): Observable<void> {

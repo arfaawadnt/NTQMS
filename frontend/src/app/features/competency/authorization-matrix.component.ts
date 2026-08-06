@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { EsignCredentials, EsignDialogComponent } from '../../shared/ui/esign-dialog.component';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterOutlet } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -25,12 +26,12 @@ import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.c
 @Component({
     selector: 'qams-authorization-matrix',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, ListStatsComponent, UserSelectComponent, ExportMenuComponent],
+    imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, ListStatsComponent, UserSelectComponent, ExportMenuComponent, EsignDialogComponent],
     template: `
     <qams-page-header [title]="i18n.t('authz.title')" [subtitle]="i18n.t('authz.subtitle')">
       <qams-export-menu [title]="i18n.t('authz.title')" [stats]="stats()" [columns]="exportColumns"
                         [rows]="filtered()" [filtersSummary]="filtersSummary()" />
-      @if (perms.can('test-authorizations.create')) {
+      @if (perms.can('test-authorizations.sign')) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('authz.new') }}</button>
       }
     </qams-page-header>
@@ -46,7 +47,7 @@ import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.c
     </div>
 
     <qams-drawer [open]="showForm()" [title]="i18n.t('authz.new')" (closed)="cancel()">
-      <form class="drawer-form" [formGroup]="form" (ngSubmit)="grant()">
+      <form class="drawer-form" [formGroup]="form" (ngSubmit)="openGrant()">
         <label>{{ i18n.t('authz.person') }}</label>
         <qams-user-select formControlName="userId" />
         <label>{{ i18n.t('authz.test') }}</label>
@@ -68,6 +69,7 @@ import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.c
         <div class="hint">{{ i18n.t('authz.evidenceHint') }}</div>
         <div class="row">
           <button type="submit" [disabled]="form.invalid || facade.loading()">{{ i18n.t('authz.grant') }}</button>
+          <qams-esign-dialog [open]="esignOpen()" [meaning]="i18n.t('esign.signMeaning')" [busy]="facade.loading()" [error]="facade.error()" (confirm)="signGrant($event)" (cancel)="esignOpen.set(false)" />
           <button type="button" class="secondary" (click)="cancel()">{{ i18n.t('nc.cancel') }}</button>
         </div>
         @if (facade.error()) { <div class="error">{{ facade.error() }}</div> }
@@ -248,10 +250,24 @@ export class AuthorizationMatrixComponent implements OnInit {
     return scope === 'ReviewAndRelease' ? 'R' : scope === 'Train' ? 'T' : 'P';
   }
 
-  async grant(): Promise<void> {
+  /** Whether the Part 11 e-signature dialog is open for the grant. */
+  readonly esignOpen = signal(false);
+
+  /** Validates the form then opens the signing dialog. */
+  openGrant(): void {
     if (this.form.invalid) { return; }
-    const id = await this.facade.grant(this.form.getRawValue());
-    if (id) { this.cancel(); void this.router.navigate(['/authorizations', id]); }
+    this.esignOpen.set(true);
+  }
+
+  /** Signs and submits the grant; navigates to the new authorization on success. */
+  async signGrant(credentials: EsignCredentials): Promise<void> {
+    if (this.form.invalid) { return; }
+    const id = await this.facade.grant({ ...this.form.getRawValue(), ...credentials });
+    if (id) {
+      this.esignOpen.set(false);
+      this.cancel();
+      void this.router.navigate(['/authorizations', id]);
+    }
   }
 
   cancel(): void {

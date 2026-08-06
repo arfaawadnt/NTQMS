@@ -31,7 +31,7 @@ export class SuppliersApiService {
     return this.http.post<{ certificateId: string }>(`${this.base}/${id}/certificates`, body);
   }
 
-  approve(id: string): Observable<void> { return this.http.post<void>(`${this.base}/${id}/approve`, {}); }
+  approve(id: string, body: { password: string; pin: string }): Observable<void> { return this.http.post<void>(`${this.base}/${id}/approve`, body); }
 
   suspend(id: string, body: SuspendSupplierRequest): Observable<void> {
     return this.http.post<void>(`${this.base}/${id}/suspend`, body);

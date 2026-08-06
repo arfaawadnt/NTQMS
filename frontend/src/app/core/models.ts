@@ -1600,6 +1600,8 @@ export interface GrantTestAuthorizationRequest {
   testCatalogItemId: string;
   competencyRecordId: string;
   scope: AuthorizationScope;
+  password: string;
+  pin: string;
 }
 
 // ── Metrological Traceability (ISO 17025 §6.5) ──────────────────────────────

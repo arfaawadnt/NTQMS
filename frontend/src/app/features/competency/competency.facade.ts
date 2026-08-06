@@ -83,8 +83,8 @@ export class CompetencyFacade {
     await this.mutate(id, () => this.api.scoreAssessment(id, { score }));
   }
 
-  async authorize(id: string): Promise<void> {
-    await this.mutate(id, () => this.api.authorizeCompetency(id));
+  async authorize(id: string, credentials: { password: string; pin: string }): Promise<void> {
+    await this.mutate(id, () => this.api.authorizeCompetency(id, credentials));
   }
 
   async revoke(id: string, reason: string): Promise<void> {

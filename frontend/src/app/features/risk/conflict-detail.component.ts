@@ -13,6 +13,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { WorkflowStepperComponent } from '../../shared/ui/workflow-stepper.component';
 import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
+import { EsignCredentials, EsignDialogComponent } from '../../shared/ui/esign-dialog.component';
 
 /**
  * Conflict workspace: the declaration, the QM impartiality-risk assessment
@@ -22,7 +23,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 @Component({
     selector: 'qams-conflict-detail',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+    imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, EsignDialogComponent],
     template: `
     @if (item(); as c) {
       <qams-page-header [title]="c.conflictRef + ' — ' + c.relatedParty" [subtitle]="(org.userName(c.declarantId) || '') + ' · ' + (c.declaredOn | date:'mediumDate')">
@@ -48,8 +49,8 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
       @if (perms.canAny('conflicts.approve', 'conflicts.void')) {
         <section class="card">
           <h3>{{ i18n.t('val.workflow') }}</h3>
-          @if (c.status === 'Declared') {
-            <form [formGroup]="assessForm" (ngSubmit)="assess(c.id)">
+          @if (c.status === 'Declared' && perms.can('conflicts.sign')) {
+            <form [formGroup]="assessForm" (ngSubmit)="openAssess(c.id)">
               <div class="pair">
                 <div>
                   <label>{{ i18n.t('coi.risk') }}</label>
@@ -79,6 +80,8 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
           }
         </section>
       }
+
+      <qams-esign-dialog [open]="esignOpen()" [meaning]="i18n.t('esign.signMeaning')" [busy]="false" [error]="error()" (confirm)="signAssess($event)" (cancel)="esignOpen.set(false)" />
 
       <qams-audit-trail [subject]="c.id" />
     } @else {
@@ -139,10 +142,24 @@ export class ConflictDetailComponent implements OnInit {
     }
   }
 
-  async assess(id: string): Promise<void> {
+  /** Whether the Part 11 e-signature dialog is open for the assessment. */
+  readonly esignOpen = signal(false);
+  private readonly pendingConflictId = signal('');
+
+  /** Validates the assessment then opens the signing dialog. */
+  openAssess(id: string): void {
     if (this.assessForm.invalid) { return; }
+    this.pendingConflictId.set(id);
+    this.esignOpen.set(true);
+  }
+
+  /** Signs and submits the assessment; closes the dialog on success. */
+  async signAssess(credentials: EsignCredentials): Promise<void> {
+    const id = this.pendingConflictId();
+    if (!id || this.assessForm.invalid) { return; }
     const raw = this.assessForm.getRawValue();
-    await this.call(() => firstValueFrom(this.api.assessConflict(id, raw.riskLevel, raw.mitigation)));
+    await this.call(() => firstValueFrom(this.api.assessConflict(id, raw.riskLevel, raw.mitigation, credentials)));
+    if (this.error() === '') { this.esignOpen.set(false); }
   }
 
   async close(id: string): Promise<void> {

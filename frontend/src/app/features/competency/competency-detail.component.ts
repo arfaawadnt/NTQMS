@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -9,6 +9,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { WorkflowStepperComponent } from '../../shared/ui/workflow-stepper.component';
 import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
+import { EsignCredentials, EsignDialogComponent } from '../../shared/ui/esign-dialog.component';
 
 /**
  * Competency workspace: profile, assessment history, and the authorize/revoke
@@ -19,7 +20,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 @Component({
     selector: 'qams-competency-detail',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+    imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, EsignDialogComponent],
     template: `
     @if (item(); as c) {
       <qams-page-header [title]="c.subject" [subtitle]="i18n.t('comp.trainee') + ': ' + c.traineeId">
@@ -63,8 +64,9 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
         <section class="card">
           <h3>{{ i18n.t('comp.actions') }}</h3>
           @if (perms.can('competencies.approve')) {
-            @if (c.status === 'Evaluated') {
-              <button (click)="facade.authorize(c.id)">{{ i18n.t('comp.authorize') }}</button>
+            @if (c.status === 'Evaluated' && perms.can('competencies.sign')) {
+              <button (click)="esignOpen.set(true)">{{ i18n.t('comp.authorize') }}</button>
+              <qams-esign-dialog [open]="esignOpen()" [meaning]="i18n.t('esign.signMeaning')" [busy]="facade.loading()" [error]="facade.error()" (confirm)="doAuthorize(c.id, $event)" (cancel)="esignOpen.set(false)" />
             }
             @if (c.status === 'Authorized') {
               <form [formGroup]="revokeForm" (ngSubmit)="revoke(c.id)">
@@ -108,6 +110,15 @@ export class CompetencyDetailComponent implements OnInit {
 
   /** Route-bound competency id. */
   readonly id = input.required<string>();
+
+  /** Whether the Part 11 e-signature dialog is open for the authorization. */
+  readonly esignOpen = signal(false);
+
+  /** Authorizes through the ceremony dialog; closes on success, stays open (showing the error) on failure. */
+  async doAuthorize(id: string, credentials: EsignCredentials): Promise<void> {
+    await this.facade.authorize(id, credentials);
+    if (this.facade.error() === '') { this.esignOpen.set(false); }
+  }
 
   /** Canonical workflow path for the stepper (off-path states render as terminal). */
   readonly flowSteps = ['PendingTraining', 'Evaluated', 'Authorized'] as const;

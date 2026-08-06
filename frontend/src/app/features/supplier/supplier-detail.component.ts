@@ -10,6 +10,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { LovSelectComponent } from '../../shared/ui/lov-select.component';
 import { WorkflowStepperComponent } from '../../shared/ui/workflow-stepper.component';
 import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
+import { EsignCredentials, EsignDialogComponent } from '../../shared/ui/esign-dialog.component';
 
 /** Typed shape of one evaluation-criterion row in the form array. */
 interface CriterionForm {
@@ -28,7 +29,7 @@ interface CriterionForm {
 @Component({
     selector: 'qams-supplier-detail',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, LovSelectComponent],
+    imports: [ReactiveFormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, LovSelectComponent, EsignDialogComponent],
     template: `
     @if (item(); as s) {
       <qams-page-header [title]="s.supplierRef + ' — ' + s.name" [subtitle]="s.supplierType">
@@ -40,8 +41,9 @@ interface CriterionForm {
       <div class="meta card">
         <div><span class="muted">{{ i18n.t('nc.status') }}</span><qams-status-pill [status]="s.status" /></div>
         @if (s.approvedBy) { <div><span class="muted">{{ i18n.t('sup.approvedBy') }}</span> {{ s.approvedBy }}</div> }
-        @if (perms.can('suppliers.approve') && s.status === 'PendingEvaluation') {
-          <button (click)="facade.approve(s.id)">{{ i18n.t('sup.approve') }}</button>
+        @if (perms.can('suppliers.sign') && s.status === 'PendingEvaluation') {
+          <button (click)="esignOpen.set(true)">{{ i18n.t('sup.approve') }}</button>
+          <qams-esign-dialog [open]="esignOpen()" [meaning]="i18n.t('esign.signMeaning')" [busy]="facade.loading()" [error]="facade.error()" (confirm)="doApprove(s.id, $event)" (cancel)="esignOpen.set(false)" />
         }
       </div>
       @if (s.suspensionReason) { <div class="error">{{ i18n.t('sup.suspended') }}: {{ s.suspensionReason }}</div> }
@@ -153,6 +155,15 @@ export class SupplierDetailComponent implements OnInit {
 
   /** Route-bound supplier id. */
   readonly id = input.required<string>();
+
+  /** Whether the Part 11 e-signature dialog is open for the approval. */
+  readonly esignOpen = signal(false);
+
+  /** Approves through the ceremony dialog; closes on success, stays open (showing the error) on failure. */
+  async doApprove(id: string, credentials: EsignCredentials): Promise<void> {
+    await this.facade.approve(id, credentials);
+    if (this.facade.error() === '') { this.esignOpen.set(false); }
+  }
 
   /** Canonical workflow path for the stepper (off-path states render as terminal). */
   readonly flowSteps = ['PendingEvaluation', 'Approved'] as const;

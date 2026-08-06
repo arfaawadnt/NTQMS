@@ -38,8 +38,8 @@ export class CompetencyApiService {
     return this.http.post<void>(`${this.competencies}/${id}/assessments`, body);
   }
 
-  authorizeCompetency(id: string): Observable<void> {
-    return this.http.post<void>(`${this.competencies}/${id}/authorize`, {});
+  authorizeCompetency(id: string, body: { password: string; pin: string }): Observable<void> {
+    return this.http.post<void>(`${this.competencies}/${id}/authorize`, body);
   }
 
   revokeCompetency(id: string, body: RevokeCompetencyRequest): Observable<void> {

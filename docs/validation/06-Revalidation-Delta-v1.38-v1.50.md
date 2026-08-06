@@ -395,6 +395,14 @@ grant them (or migrate). The supplier/conflict/competency endpoints also moved f
 `approve` to `sign`, and test-authorization grant from `create` to `sign`: any tenant role holding
 the old action without `sign` loses it until granted.
 
+**Frontend (this increment).** The four gate actions now open the shared `qams-esign-dialog` to
+capture the account password + PIN: supplier-detail approve (gated `suppliers.sign`), competency-detail
+authorize (`competencies.sign`), conflict-detail assess (`conflicts.sign` — the component calls its
+API directly, so credentials go straight through), and the test-authorization **create** form on the
+authorization-matrix page (`test-authorizations.sign` — the form is validated, then the dialog is
+opened, then the grant is submitted with the credentials). Frontend production build clean; 95 Karma
+unit tests green.
+
 ---
 
 ## Part B — Installation Qualification (IQ) delta
