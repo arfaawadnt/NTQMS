@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NT.QAMS — Compliance & Validation Readiness Audit</title>
+<style>
+  :root{
+    --bg:#ffffff; --ink:#1a202c; --muted:#5a6473; --line:#e2e8f0; --soft:#f7f9fc;
+    --brand:#0b4f6c; --brand2:#0a6e8a; --accent:#12707f;
+    --crit:#b3261e; --crit-bg:#fdecea; --major:#c05621; --major-bg:#fdf0e6;
+    --minor:#8a6d00; --minor-bg:#fdf8e3; --obs:#2b6cb0; --obs-bg:#ebf3fb;
+    --ok:#1b7a4b; --ok-bg:#e8f6ee; --warn:#a15c00; --warn-bg:#fbf1e2; --no:#b3261e; --no-bg:#fdecea; --nv:#5a6473; --nv-bg:#eef1f5;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+  a{color:var(--brand2);text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  /* Cover */
+  header.cover{background:linear-gradient(135deg,var(--brand),var(--accent));color:#fff;padding:48px 0 40px}
+  header.cover .wrap{position:relative}
+  .eyebrow{letter-spacing:.14em;text-transform:uppercase;font-size:12px;opacity:.85;font-weight:600}
+  header.cover h1{font-size:30px;line-height:1.2;margin:10px 0 6px;font-weight:700}
+  header.cover .sub{font-size:16px;opacity:.92;max-width:820px}
+  .meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:26px}
+  .meta-grid div{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:8px;padding:10px 12px}
+  .meta-grid .k{font-size:11px;text-transform:uppercase;letter-spacing:.08em;opacity:.8}
+  .meta-grid .v{font-size:14px;font-weight:600;margin-top:2px}
+
+  /* Layout */
+  .layout{display:grid;grid-template-columns:250px 1fr;gap:34px;margin-top:30px}
+  nav.toc{position:sticky;top:16px;align-self:start;max-height:calc(100vh - 32px);overflow:auto;
+    font-size:13px;border-right:1px solid var(--line);padding-right:14px}
+  nav.toc h4{margin:6px 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+  nav.toc a{display:block;padding:4px 8px;border-radius:6px;color:var(--muted)}
+  nav.toc a:hover{background:var(--soft);color:var(--ink);text-decoration:none}
+  main{min-width:0}
+
+  section{margin:0 0 34px;scroll-margin-top:16px}
+  h2{font-size:21px;color:var(--brand);border-bottom:2px solid var(--line);padding-bottom:6px;margin:34px 0 14px}
+  h3{font-size:16px;margin:20px 0 8px;color:var(--brand2)}
+  p{margin:8px 0}
+  ul{margin:8px 0 8px 0;padding-left:20px}
+  li{margin:3px 0}
+  code{background:var(--soft);border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:12.5px;
+    font-family:"SF Mono",Consolas,"Liberation Mono",monospace}
+
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}
+  th,td{text-align:left;padding:8px 10px;border:1px solid var(--line);vertical-align:top}
+  th{background:var(--soft);font-weight:600;color:var(--brand)}
+  tbody tr:nth-child(even){background:#fbfcfe}
+  td.num,th.num{text-align:right;white-space:nowrap}
+
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap;line-height:1.5}
+  .b-crit{background:var(--crit-bg);color:var(--crit)}
+  .b-major{background:var(--major-bg);color:var(--major)}
+  .b-minor{background:var(--minor-bg);color:var(--minor)}
+  .b-obs{background:var(--obs-bg);color:var(--obs)}
+  .b-ok{background:var(--ok-bg);color:var(--ok)}
+  .b-warn{background:var(--warn-bg);color:var(--warn)}
+  .b-no{background:var(--no-bg);color:var(--no)}
+  .b-nv{background:var(--nv-bg);color:var(--nv)}
+
+  .callout{border-left:4px solid var(--brand2);background:var(--soft);border-radius:0 8px 8px 0;padding:12px 16px;margin:14px 0}
+  .callout.crit{border-color:var(--crit);background:var(--crit-bg)}
+  .callout.ok{border-color:var(--ok);background:var(--ok-bg)}
+  .callout.warn{border-color:var(--warn);background:var(--warn-bg)}
+  .callout h4{margin:0 0 4px;font-size:14px}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:14px 0}
+  .card{border:1px solid var(--line);border-radius:10px;padding:14px;background:#fff}
+  .card .lab{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  .card .val{font-size:18px;font-weight:700;margin-top:4px}
+  .card .val.small{font-size:15px}
+
+  .scorebar{height:8px;background:var(--nv-bg);border-radius:999px;overflow:hidden;margin-top:6px}
+  .scorebar > span{display:block;height:100%;border-radius:999px}
+
+  .kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+  .kpi .k{border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center;background:#fff}
+  .kpi .k .n{font-size:22px;font-weight:800;color:var(--brand)}
+  .kpi .k .t{font-size:12px;color:var(--muted)}
+
+  .timeline{border-left:2px solid var(--line);margin:14px 0 14px 8px;padding-left:18px}
+  .phase{position:relative;margin-bottom:18px}
+  .phase::before{content:"";position:absolute;left:-25px;top:3px;width:12px;height:12px;border-radius:50%;background:var(--brand2);border:2px solid #fff;box-shadow:0 0 0 2px var(--brand2)}
+  .phase h4{margin:0 0 2px;font-size:15px;color:var(--brand)}
+  .phase .when{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+
+  footer{border-top:1px solid var(--line);margin-top:20px;padding:22px 0 40px;color:var(--muted);font-size:12.5px}
+
+  @media (max-width:820px){
+    .layout{grid-template-columns:1fr}
+    nav.toc{display:none}
+  }
+  @media print{
+    header.cover{background:var(--brand)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    nav.toc{display:none}
+    .layout{grid-template-columns:1fr;margin-top:10px}
+    body{font-size:11.5px}
+    h2{page-break-after:avoid}
+    table,.callout,.phase{page-break-inside:avoid}
+    section{page-break-inside:auto}
+    a{color:var(--ink)}
+    .badge,.card,.kpi .k,.b-ok,.b-crit,.b-major,.b-minor,.b-obs,.b-warn,.b-no,.b-nv{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+</style>
+</head>
+<body>
+
+<header class="cover">
+  <div class="wrap">
+    <div class="eyebrow">Independent Computerized-System Validation &amp; Regulatory Readiness Audit</div>
+    <h1>NT.QAMS — Compliance &amp; Validation Readiness Audit</h1>
+    <div class="sub">Evidence-based assessment of the deployed Quality Assurance Management System against ISO/IEC 17025:2017, ISO 15189:2022, ISO 9001:2015, 21 CFR Part 11 and EU GMP Annex 11.</div>
+    <div class="meta-grid">
+      <div><div class="k">Application</div><div class="v">NT.QAMS (multi-tenant SaaS QMS)</div></div>
+      <div><div class="k">Environment</div><div class="v">Production (live)</div></div>
+      <div><div class="k">Report date</div><div class="v">2026-08-03</div></div>
+      <div><div class="k">Report status</div><div class="v">Interim / evidence-limited</div></div>
+      <div><div class="k">Stack</div><div class="v">.NET 8 · PostgreSQL 17 · IIS/TLS</div></div>
+      <div><div class="k">Go-live verdict</div><div class="v">Production prohibited (regulated use)</div></div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+<div class="layout">
+
+<nav class="toc">
+  <h4>Contents</h4>
+  <a href="#s1">1 · Application &amp; audit info</a>
+  <a href="#s2">2 · Scope &amp; limitations</a>
+  <a href="#s3">3 · Executive summary</a>
+  <a href="#s4">4 · Readiness scorecard</a>
+  <a href="#s5">5 · Standards applicability</a>
+  <a href="#s6">6 · Architecture &amp; modules</a>
+  <a href="#s7">7 · Missing capabilities</a>
+  <a href="#s8">8 · Incomplete controls</a>
+  <a href="#s9">9 · Duplicates &amp; shared services</a>
+  <a href="#s10">10 · Part 11 / Annex 11</a>
+  <a href="#s11">11 · Data integrity (ALCOA+)</a>
+  <a href="#s12">12 · Security &amp; access</a>
+  <a href="#s13">13 · Traceability (clause)</a>
+  <a href="#s14">14 · Findings register</a>
+  <a href="#s15">15 · Implementation plan</a>
+  <a href="#s16">16 · Readiness decision</a>
+  <a href="#s17">17 · External review needed</a>
+</nav>
+
+<main>
+
+<!-- 1 -->
+<section id="s1">
+  <h2>1 · Application &amp; Audit Information</h2>
+  <table>
+    <tbody>
+      <tr><th>Application</th><td><strong>NT.QAMS</strong> — Quality Assurance Management System (multi-tenant SaaS)</td></tr>
+      <tr><th>Supplier</th><td>National Technology (repository <code>arfaawadnt/NTQMS</code>)</td></tr>
+      <tr><th>Version / build</th><td><span class="badge b-nv">Not Verified</span> — no version stamp exposed; 59 EF Core migrations applied</td></tr>
+      <tr><th>Deployment</th><td>On-premises, single Windows Server 2022 host</td></tr>
+      <tr><th>Architecture</th><td>.NET 8 ASP.NET Core (Kestrel, loopback :5000) → IIS ARR TLS reverse proxy :443 → PostgreSQL 17; event-sourced domain</td></tr>
+      <tr><th>Environment reviewed</th><td><strong>Production</strong> (service <code>NTQAMS</code>, Auto-start, LocalSystem)</td></tr>
+      <tr><th>Tenancy / users</th><td>1 tenant (<code>arfa</code> — “Arfa Lab”); 2 users (1 PlatformAdmin, 1 TenantAdmin)</td></tr>
+      <tr><th>Intended use (inferred)</th><td>Electronic QMS for a <strong>medical / testing / calibration laboratory</strong> with analytical quality control (ISO 15189 / ISO 17025 focus)</td></tr>
+    </tbody>
+  </table>
+  <div class="callout warn">
+    <h4>Assumption note</h4>
+    The master-prompt scope placeholders (contractual standards &amp; editions, predicate rules, intended-use statement, GxP jurisdiction, exclusions) were <strong>not supplied</strong>. Per audit rule 22, the assessment was not delayed; it evaluates the standards the application is demonstrably engineered for and flags everything dependent on those inputs as <span class="badge b-nv">Not Verified</span>.
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="s2">
+  <h2>2 · Audit Scope &amp; Limitations</h2>
+  <h3>Reviewed (objective evidence obtained)</h3>
+  <ul>
+    <li>Full PostgreSQL schema — <strong>100 tables</strong> across <code>qams</code>, <code>saas</code>, <code>audit</code>, <code>read</code>, <code>public</code>.</li>
+    <li>Tenant-isolation implementation (Row-Level Security policies + role attributes) — <strong>tested empirically</strong>.</li>
+    <li>Audit-trail, electronic-signature, field-change and security-event structures <strong>and live contents</strong>.</li>
+    <li>Immutability / append-only enforcement (triggers + privilege grants) — <strong>tested empirically</strong>.</li>
+    <li>RBAC model (5 roles, 171 permission keys), access-control columns, deployment topology, <code>appsettings.json</code>.</li>
+  </ul>
+  <h3>Not available (drives most “Not Verified” results)</h3>
+  <ul>
+    <li><strong>No validation package</strong> on host: no VMP, URS, FS/DS, risk assessment, IQ/OQ/PQ, traceability matrix, test evidence, or validation summary.</li>
+    <li><strong>No application source code</strong> on host (only PowerShell deploy assets).</li>
+    <li><strong>No approved SOPs / quality manual / policies</strong> to test procedure-controlled requirements.</li>
+    <li><strong>Near-zero production records</strong> — “used in production” and “effective operation” cannot be demonstrated (see §3).</li>
+    <li>API route inventory not fully enumerable (Swagger disabled in production). No backup/restore, DR or penetration-test evidence supplied.</li>
+  </ul>
+  <p><strong>Effect:</strong> where a control was <em>provable at the database layer</em> it is reported as evidenced; where a control depends on application logic, procedures, or usage that could not be observed, it is <span class="badge b-nv">Not Verified</span> — not assumed conforming (audit rule 21.7).</p>
+</section>
+
+<!-- 3 -->
+<section id="s3">
+  <h2>3 · Executive Summary</h2>
+  <p>The single decisive theme: <strong>the software is architecturally strong, but operational and validation evidence is near-zero.</strong> Both halves are true simultaneously and together they set the readiness verdict.</p>
+
+  <div class="callout ok">
+    <h4>Strengths — genuinely enforced controls (tested)</h4>
+    <ul>
+      <li><strong>Hash-chained, append-only audit trail</strong> (<code>prev_hash</code>→<code>entry_hash</code>) enforced by <em>both</em> least-privilege grants <em>and</em> BEFORE UPDATE/DELETE triggers — tamper attempts by the app role return <em>permission denied</em>.</li>
+      <li><strong>Forced Row-Level Security</strong> on 93 tables; app roles are non-superuser / non-bypassrls, so tenant isolation holds at the database.</li>
+      <li><strong>Immutability triggers</strong> on the analytical-validation records; <strong>no delete path</strong> for regulated data (app role can delete only 3 transient tables).</li>
+      <li><strong>Fine-grained RBAC</strong> — 171 permission keys across 31 namespaces; 5 roles with real least-privilege differentiation. Refresh-token <strong>reuse detection</strong> observed.</li>
+      <li>Comprehensive ISO 15189/17025 analytical suite (Westgard QC, proficiency testing, uncertainty budgets, method comparison, reference intervals).</li>
+    </ul>
+  </div>
+
+  <div class="callout crit">
+    <h4>Blocking gaps — why it is not production-ready for regulated use</h4>
+    <ul>
+      <li><strong>No validation evidence</strong> (F-06) — no VMP/URS/IQ/OQ/PQ/traceability. The system cannot be shown fit for its intended use. <span class="badge b-crit">Critical</span></li>
+      <li><strong>Electronic signatures never used</strong> (F-04) — 0 signatures ever created; signing integrity is unproven in operation. <span class="badge b-major">Major</span></li>
+      <li><strong>Core QMS records not DB-immutable after approval</strong> (F-01) — post-approval integrity relies on app logic only. <span class="badge b-major">Major</span></li>
+      <li><strong>RLS bypass reachable by the app role</strong> (F-02) — a <code>qams_app</code> session can set <code>app.bypass_rls='on'</code> itself; an injection flaw could cross tenants. <span class="badge b-major">Major</span></li>
+      <li><strong>Audit capture is application-layer</strong> (F-05) — direct database edits are not recorded in the trail. <span class="badge b-major">Major</span></li>
+    </ul>
+  </div>
+
+  <h3>Production usage snapshot (why “effectiveness” is unproven)</h3>
+  <div class="kpi">
+    <div class="k"><div class="n">1</div><div class="t">Tenant</div></div>
+    <div class="k"><div class="n">2</div><div class="t">Users</div></div>
+    <div class="k"><div class="n">0</div><div class="t">Controlled documents</div></div>
+    <div class="k"><div class="n">0</div><div class="t">CAPA actions</div></div>
+    <div class="k"><div class="n">1</div><div class="t">Nonconformances (test)</div></div>
+    <div class="k"><div class="n">0</div><div class="t">E-signatures ever</div></div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section id="s4">
+  <h2>4 · Readiness Scorecard</h2>
+  <p>Risk-weighted, evidence-based. <strong>Not Verified = 0</strong> (audit rule §20). Low scores are dominated by absent validation evidence and near-zero usage — <em>not</em> by poor software. No single aggregate percentage is offered: unresolved Critical/Major items override any high capability score.</p>
+  <table>
+    <thead><tr><th>Dimension</th><th style="width:52%">Level</th><th class="num">Indicator</th></tr></thead>
+    <tbody>
+      <tr><td>Requirements coverage (capability breadth)</td><td><div class="scorebar"><span style="width:85%;background:var(--ok)"></span></div></td><td class="num">~85%</td></tr>
+      <tr><td>Functional completeness (schema)</td><td><div class="scorebar"><span style="width:80%;background:var(--ok)"></span></div></td><td class="num">~80%</td></tr>
+      <tr><td>Audit trails</td><td><div class="scorebar"><span style="width:85%;background:var(--ok)"></span></div></td><td class="num">~85%</td></tr>
+      <tr><td>Control effectiveness (DB-enforced)</td><td><div class="scorebar"><span style="width:70%;background:var(--warn)"></span></div></td><td class="num">~70%</td></tr>
+      <tr><td>Security</td><td><div class="scorebar"><span style="width:70%;background:var(--warn)"></span></div></td><td class="num">~70%</td></tr>
+      <tr><td>Data integrity</td><td><div class="scorebar"><span style="width:60%;background:var(--warn)"></span></div></td><td class="num">~60%</td></tr>
+      <tr><td>Operational readiness</td><td><div class="scorebar"><span style="width:10%;background:var(--crit)"></span></div></td><td class="num">~10%</td></tr>
+      <tr><td>Electronic signatures (operation)</td><td><div class="scorebar"><span style="width:2%;background:var(--crit)"></span></div></td><td class="num">0%</td></tr>
+      <tr><td>Validation evidence</td><td><div class="scorebar"><span style="width:5%;background:var(--crit)"></span></div></td><td class="num">~5%</td></tr>
+      <tr><td>Documentation (validation / SOP)</td><td><div class="scorebar"><span style="width:5%;background:var(--crit)"></span></div></td><td class="num">~5%</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 5 -->
+<section id="s5">
+  <h2>5 · Standards Applicability</h2>
+  <table>
+    <thead><tr><th>Standard</th><th>Applicable?</th><th>Basis</th></tr></thead>
+    <tbody>
+      <tr><td>ISO/IEC 17025:2017</td><td><span class="badge b-ok">Yes</span></td><td>Testing/calibration-lab features present; confirm edition &amp; accreditation scope</td></tr>
+      <tr><td>ISO 15189:2022</td><td><span class="badge b-ok">Yes</span></td><td>Medical-lab features (reference intervals, PT, critical results)</td></tr>
+      <tr><td>ISO 9001:2015 (+A1:2024)</td><td><span class="badge b-ok">Yes</span></td><td>Governance / document / CAPA / management-review modules</td></tr>
+      <tr><td>21 CFR Part 11</td><td><span class="badge b-warn">Conditional</span></td><td>Only if a predicate rule makes the records federally regulated — <span class="badge b-nv">Not Verified</span></td></tr>
+      <tr><td>EU GMP Annex 11</td><td><span class="badge b-warn">Conditional</span></td><td>Only under an EU GMP obligation — <span class="badge b-nv">Not Verified</span></td></tr>
+      <tr><td>GMP (manufacturing)</td><td><span class="badge b-nv">N/A</span></td><td>No manufacturing, batch-record or product-release domain in NT.QAMS</td></tr>
+    </tbody>
+  </table>
+  <p><em>Do not treat ISO 15189:2022 and ISO 17025:2017 as interchangeable — confirm which (or both) is contractually in scope.</em></p>
+</section>
+
+<!-- 6 -->
+<section id="s6">
+  <h2>6 · Architecture &amp; Module Inventory</h2>
+  <p><strong>Schemas:</strong> <code>qams</code> (business domain, 90+ tables) · <code>saas</code> (platform/tenant) · <code>audit</code> (compliance records) · <code>read</code> (KPI/projection) · <code>public</code> (EF migrations).</p>
+  <p><strong>Shared platform services present:</strong> identity/JWT auth, RBAC (171 permissions), hash-chained audit trail, e-signature service, field-change capture, security-event log, notification &amp; escalation engine, SLA definitions, transactional outbox, idempotency store, file/attachment service, archive service, KPI projections.</p>
+
+  <h3>Module Assessment Matrix</h3>
+  <p>Completeness reflects <strong>database/control evidence</strong>, not usage. “In-use” is <strong>No</strong> almost everywhere (see §3).</p>
+  <table>
+    <thead><tr><th>Module (domain)</th><th>Required by</th><th>Completeness</th><th>In-use</th><th>Validation</th><th>Risk</th></tr></thead>
+    <tbody>
+      <tr><td>QMS governance (context, parties, policy, objectives, mgmt review)</td><td>9001, 17025 §5, 15189</td><td>Substantially complete</td><td>No</td><td><span class="badge b-nv">Not verified</span></td><td>High</td></tr>
+      <tr><td>Document &amp; record control</td><td>All</td><td>Substantially complete</td><td>No (0 docs)</td><td><span class="badge b-nv">Not verified</span></td><td>High</td></tr>
+      <tr><td>Quality events (NC / complaint / feedback)</td><td>All</td><td>Substantially complete</td><td>Minimal (1 NC)</td><td><span class="badge b-nv">Not verified</span></td><td>High</td></tr>
+      <tr><td>CAPA / action management</td><td>All</td><td>Partially complete (F-07)</td><td>No</td><td><span class="badge b-nv">Not verified</span></td><td>High</td></tr>
+      <tr><td>Audit management</td><td>All</td><td>Substantially complete</td><td>No</td><td><span class="badge b-nv">Not verified</span></td><td>Medium</td></tr>
+      <tr><td>Training &amp; competency</td><td>All</td><td>Substantially complete</td><td>No</td><td><span class="badge b-nv">Not verified</span></td><td>High</td></tr>
+      <tr><td>Equipment / calibration / standards</td><td>17025 §6.4, 15189</td><td>Substantially complete</td><td>No</td><td><span class="badge b-nv">Not verified</span></td><td>High</td></tr>
+      <tr><td>Supplier quality</td><td>All</td><td>Substantially complete</td><td>No</td><td><span class="badge b-nv">Not verified</span></td><td>Medium</td></tr>
+      <tr><td>Change control</td><td>All</td><td>Substantially complete</td><td>No</td><td><span class="badge b-nv">Not verified</span></td><td>High</td></tr>
+      <tr><td>Risk &amp; opportunity</td><td>9001, 17025 §8.5</td><td>Substantially complete</td><td>No</td><td><span class="badge b-nv">Not verified</span></td><td>Medium</td></tr>
+      <tr><td>Analytical validation suite (precision, linearity, LoD, method comparison, uncertainty, reference interval, carryover, interference, sigma)</td><td>17025, 15189</td><td>Complete + <strong>immutability triggers</strong></td><td>No</td><td><span class="badge b-nv">Not verified</span></td><td>High</td></tr>
+      <tr><td>Proficiency testing / EQA</td><td>17025 §7.7, 15189</td><td>Substantially complete</td><td>No</td><td><span class="badge b-nv">Not verified</span></td><td>High</td></tr>
+      <tr><td>Internal QC (Westgard)</td><td>15189, 17025</td><td>Substantially complete</td><td>No</td><td><span class="badge b-nv">Not verified</span></td><td>High</td></tr>
+      <tr><td>Access control / security</td><td>Part 11, Annex 11</td><td>Substantially complete</td><td>Partial (2 users)</td><td><span class="badge b-nv">Not verified</span></td><td>High</td></tr>
+      <tr><td>Electronic records / signatures</td><td>Part 11 §11.50/70</td><td>Capability complete; <strong>0 signatures used</strong></td><td>No</td><td><span class="badge b-nv">Not verified</span></td><td>Critical (evidence)</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Hidden/experimental functions:</strong> none positively identified, but full menu/API surface was not enumerable (Swagger disabled) — API inventory is <span class="badge b-nv">Not Verified</span>.</p>
+</section>
+
+<!-- 7 -->
+<section id="s7">
+  <h2>7 · Missing Modules / Capabilities</h2>
+  <p>No wholesale mandatory QMS domain is absent — coverage is unusually broad. Gaps are control- and evidence-level, plus:</p>
+  <table>
+    <thead><tr><th>#</th><th>Missing / weak capability</th><th>Standard</th><th>Risk</th></tr></thead>
+    <tbody>
+      <tr><td>M-01</td><td>Validation lifecycle artifacts (VMP, URS→test traceability, IQ/OQ/PQ) — no evidence they exist</td><td>Annex 11 §4/§7; GAMP 5; 17025 §6.4.13, §7.11</td><td><span class="badge b-crit">Critical</span></td></tr>
+      <tr><td>M-02</td><td>Periodic access review executed — <code>user_access_review</code> exists but 0 records</td><td>Part 11 §11.10(d); Annex 11 §12</td><td><span class="badge b-major">High</span></td></tr>
+      <tr><td>M-03</td><td>Backup/restore &amp; DR test evidence</td><td>Annex 11 §7.2; 17025 §7.11.3</td><td><span class="badge b-major">High</span></td></tr>
+      <tr><td>M-04</td><td>Audit-trail periodic review executed — <code>audit_trail_review</code> exists but unused</td><td>Part 11; Annex 11 §9</td><td><span class="badge b-major">High</span></td></tr>
+      <tr><td>M-05</td><td>Data-retention / legal-hold enforcement &amp; secure disposal not evidenced</td><td>17025 §8.4; Part 11 §11.10(c)</td><td><span class="badge b-minor">Medium</span></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 8 -->
+<section id="s8">
+  <h2>8 · Incomplete Modules — Control-Level Findings</h2>
+  <table>
+    <thead><tr><th>#</th><th>Module</th><th>Missing control</th><th>Risk</th></tr></thead>
+    <tbody>
+      <tr><td>I-01</td><td>Core QMS records (NC, CAPA, complaint, document, change, calibration, competency, mgmt review)</td><td>No DB-level immutability after approval/closure; <code>qams_app</code> holds UPDATE on all 92 business tables; <code>frozen_immutability</code> triggers exist only on the 13 analytical-study tables</td><td><span class="badge b-major">High</span></td></tr>
+      <tr><td>I-02</td><td>Electronic signature</td><td>Never exercised (0 rows) → re-authentication, failed-attempt logging, and “post-sign change invalidates approval” unproven</td><td><span class="badge b-crit">Critical (evidence)</span></td></tr>
+      <tr><td>I-03</td><td>CAPA</td><td><code>capa_action</code> lacks <code>created_by / created_at / modified_by</code> attributability columns present on peer tables</td><td><span class="badge b-minor">Medium</span></td></tr>
+      <tr><td>I-04</td><td>Audit-trail capture</td><td>Change capture is application-layer; direct DB edits not captured</td><td><span class="badge b-major">High</span></td></tr>
+      <tr><td>I-05</td><td>Notifications / escalation</td><td>Rules seeded but not demonstrated firing; delivery-failure handling unproven</td><td><span class="badge b-minor">Medium</span></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 9 -->
+<section id="s9">
+  <h2>9 · Duplicates &amp; Shared Services</h2>
+  <div class="callout ok">
+    <h4>No harmful duplication identified</h4>
+    The design already consolidates shared concerns: one audit-trail service, one e-signature service, one RBAC engine, one notification engine, one attachment service, one archive service. Analytical sub-study tables are distinct by regulatory meaning — <strong>retain separately</strong>, do not consolidate.
+  </div>
+  <table>
+    <thead><tr><th>Shared service</th><th>Central?</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td>Identity / auth / RBAC</td><td><span class="badge b-ok">Yes</span></td><td>JWT + 171-permission model</td></tr>
+      <tr><td>Electronic signatures</td><td><span class="badge b-ok">Yes</span></td><td>Single service — unused in production</td></tr>
+      <tr><td>Audit trail</td><td><span class="badge b-ok">Yes</span></td><td>Hash-chained, append-only — working for platform events</td></tr>
+      <tr><td>Notification / escalation</td><td><span class="badge b-ok">Yes</span></td><td>Firing not verified</td></tr>
+      <tr><td>Attachment / file · Archive / retention</td><td><span class="badge b-ok">Yes</span></td><td>Storage at <code>E:\ntqams-data\files</code>; retention rules not evidenced</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Only architectural concern:</strong> the RLS bypass switch (F-02), not service duplication. No module re-implements its own audit trail or signature store.</p>
+</section>
+
+<!-- 10 -->
+<section id="s10">
+  <h2>10 · 21 CFR Part 11 / Annex 11 — Electronic Records &amp; Signatures</h2>
+  <p><em>Applicability is conditional on a predicate rule (Not Verified). Assessment is of technical capability + operational evidence.</em></p>
+
+  <h3>Access controls — mostly evidenced</h3>
+  <ul>
+    <li><span class="badge b-ok">✓</span> Unique user IDs; PBKDF2 password hashing; password policy (90-day age, 5-history); lockout columns; MFA columns present.</li>
+    <li><span class="badge b-ok">✓</span> Session control: JWT 120-min; refresh sessions with <strong>token-reuse detection</strong> (observed in security events).</li>
+    <li><span class="badge b-warn">△</span> Periodic access review not executed (M-02); SoD rule-set enforcement <span class="badge b-nv">Not Verified</span>.</li>
+  </ul>
+
+  <h3>Electronic signatures — capability present, operation unproven</h3>
+  <p>Schema supports the mandatory manifestations: <code>signer_display</code> (name), <code>meaning</code>, <code>signed_at_utc</code> (time), and <code>subject_ref</code> + <code>content_hash</code> (permanent, tamper-evident link to the signed content). <strong>However the table has 0 rows</strong> — so identity verification at signing, re-authentication, failed-attempt capture, non-transferability, “record reviewed before signing,” and “post-signature change invalidates prior approval” are all <span class="badge b-nv">Not Verified</span>.</p>
+
+  <h3>Audit trails — strong and evidenced</h3>
+  <ul>
+    <li><span class="badge b-ok">✓</span> Computer-generated, timestamped, <strong>append-only enforced by BOTH grant (INSERT/SELECT only) and BEFORE UPDATE/DELETE triggers</strong> (tested: app-role UPDATE/DELETE → permission denied).</li>
+    <li><span class="badge b-ok">✓</span> <strong>Tamper-evident hash chain</strong> (<code>prev_hash</code>→<code>entry_hash</code>, per-tenant sequence; 0 null hashes, chain intact).</li>
+    <li><span class="badge b-ok">✓</span> <code>field_change</code> captures actor, old value, new value, reason, timestamp (773 rows, working).</li>
+    <li><span class="badge b-warn">△</span> Human-readable review/export &amp; periodic review operationally <span class="badge b-nv">Not Verified</span> (M-04).</li>
+    <li><span class="badge b-warn">△</span> Coverage limit: trail reflects application actions only; direct DB changes are invisible (F-05).</li>
+  </ul>
+</section>
+
+<!-- 11 -->
+<section id="s11">
+  <h2>11 · Data Integrity (ALCOA+)</h2>
+  <table>
+    <thead><tr><th>ALCOA+</th><th>Status</th><th>Evidence</th></tr></thead>
+    <tbody>
+      <tr><td>Attributable</td><td><span class="badge b-ok">Mostly</span> (⚠ CAPA gap I-03)</td><td><code>created_by / modified_by / created_by_user_id</code> on core tables; actor in <code>field_change</code></td></tr>
+      <tr><td>Legible</td><td><span class="badge b-ok">Yes</span></td><td>Structured records + human-readable field_change</td></tr>
+      <tr><td>Contemporaneous</td><td><span class="badge b-ok">Yes</span></td><td>Server-side UTC timestamps</td></tr>
+      <tr><td>Original / true copy</td><td><span class="badge b-ok">Yes</span></td><td>content_hash on signatures</td></tr>
+      <tr><td>Accurate</td><td><span class="badge b-nv">Not Verified</span></td><td>No OQ/PQ evidence</td></tr>
+      <tr><td>Complete / Consistent / Enduring / Available</td><td><span class="badge b-warn">Partly</span></td><td>Append-only + hash chain support Enduring; Available depends on unproven backup/DR</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 12 -->
+<section id="s12">
+  <h2>12 · Security &amp; Access Control</h2>
+  <ul>
+    <li><strong>Authentication:</strong> JWT (120 min), PBKDF2 hashing, password aging + history, lockout, MFA columns — strong design.</li>
+    <li><strong>Authorization:</strong> 171 permissions across 31 namespaces; 5 roles with real least-privilege differentiation (Tenant Admin 171 → Quality Manager 165 → Dept Head 90 → Analyst 65 → External Auditor 47, read-oriented).</li>
+    <li><strong>Tenant isolation:</strong> forced RLS — strong, except the bypass switch (F-02) and <code>user_account</code> RLS off (F-03).</li>
+    <li><strong>Transport:</strong> TLS at IIS; API bound to loopback only — not externally reachable except via proxy.</li>
+    <li><span class="badge b-nv">Not Verified</span>: penetration test, UI session-timeout behavior, emergency/service-account governance, IdP/SSO.</li>
+  </ul>
+</section>
+
+<!-- 13 -->
+<section id="s13">
+  <h2>13 · Clause-Level Traceability (representative)</h2>
+  <p>Licensed standard text was not supplied; requirements are <strong>paraphrased</strong> and limited to key clauses. “Conforming” is used only where objective evidence exists.</p>
+  <table>
+    <thead><tr><th>Standard</th><th>Clause (paraphrased)</th><th>Evidence</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>ISO 17025</td><td>6.4 Equipment: ID, calibration, records, status</td><td>Equipment/calibration tables; 0 records</td><td><span class="badge b-warn">Partial</span></td></tr>
+      <tr><td>ISO 17025</td><td>7.5 Technical records: retention, amendments traceable</td><td>field_change; analytical-study immutability</td><td><span class="badge b-warn">Partial</span></td></tr>
+      <tr><td>ISO 17025</td><td>7.7 Ensuring validity (QC/PT)</td><td>Westgard QC, PT tables; unused</td><td><span class="badge b-warn">Partial</span></td></tr>
+      <tr><td>ISO 17025</td><td>7.11 Control of data / IT systems: validated, protected, backed up</td><td>RLS/audit strong; no validation/backup evidence</td><td><span class="badge b-no">Nonconforming (evidence)</span></td></tr>
+      <tr><td>ISO 15189:2022</td><td>5 Quality / impartiality / confidentiality</td><td><code>conflict_declaration</code>; RLS confidentiality</td><td><span class="badge b-warn">Partial</span></td></tr>
+      <tr><td>ISO 15189</td><td>7 Examination / critical results / amended reports</td><td>Lab modules exist; unused</td><td><span class="badge b-nv">Not verified</span></td></tr>
+      <tr><td>ISO 9001</td><td>7.5 Documented information control</td><td>Document module; 0 docs</td><td><span class="badge b-warn">Partial</span></td></tr>
+      <tr><td>ISO 9001</td><td>9.3 Management review</td><td><code>management_review</code>; unused</td><td><span class="badge b-nv">Not verified</span></td></tr>
+      <tr><td>ISO 9001</td><td>10.2 NC &amp; corrective action</td><td>NC/CAPA modules; 1 NC</td><td><span class="badge b-warn">Partial</span></td></tr>
+      <tr><td>Part 11</td><td>11.10(a) Validation</td><td>None</td><td><span class="badge b-no">Nonconforming</span></td></tr>
+      <tr><td>Part 11</td><td>11.10(e) Audit trail</td><td>Hash-chained append-only</td><td><span class="badge b-ok">Conforming (capability)</span></td></tr>
+      <tr><td>Part 11</td><td>11.10(d) Access limited to authorized</td><td>RBAC + RLS</td><td><span class="badge b-warn">Partial (F-02/03)</span></td></tr>
+      <tr><td>Part 11</td><td>11.50/11.70 Signatures</td><td>Model present; 0 used</td><td><span class="badge b-nv">Not verified</span></td></tr>
+      <tr><td>Annex 11</td><td>§9 Audit trails / §12 Security</td><td>Strong; reviews not operating</td><td><span class="badge b-warn">Partial</span></td></tr>
+      <tr><td>Annex 11</td><td>§7 Data storage / backup</td><td>No evidence</td><td><span class="badge b-no">Nonconforming (evidence)</span></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 14 -->
+<section id="s14">
+  <h2>14 · Findings Register</h2>
+  <table>
+    <thead><tr><th>ID</th><th>Std / clause</th><th>Finding</th><th>Class</th><th>Required correction</th></tr></thead>
+    <tbody>
+      <tr><td><strong>F-06</strong></td><td>Part 11 11.10(a); Annex 11 §4/§7; GAMP 5</td><td>No validation evidence for intended use</td><td><span class="badge b-crit">Critical</span></td><td>Execute full CSV (VMP→IQ/OQ/PQ→traceability→summary) before production reliance</td></tr>
+      <tr><td><strong>F-04</strong></td><td>Part 11 11.50/11.70</td><td>Electronic signatures never exercised (0 rows)</td><td><span class="badge b-major">Major*</span></td><td>OQ/PQ proving re-auth, binding, invalidation-on-change, failed-attempt logging</td></tr>
+      <tr><td><strong>F-01</strong></td><td>Part 11 11.10(c/e); ALCOA</td><td>No post-approval immutability on core QMS records; app role has UPDATE</td><td><span class="badge b-major">Major</span></td><td>Add “frozen” immutability triggers to approved/closed regulated records; test</td></tr>
+      <tr><td><strong>F-02</strong></td><td>Annex 11 §12; Part 11 11.10(d)</td><td>App role can disable RLS via <code>app.bypass_rls</code></td><td><span class="badge b-major">Major</span></td><td>Remove/segregate bypass to a dedicated platform role; forbid on <code>qams_app</code>; add injection tests</td></tr>
+      <tr><td><strong>F-05</strong></td><td>ALCOA; Annex 11 §9</td><td>Direct-DB edits not captured by app-layer audit</td><td><span class="badge b-major">Major</span></td><td>DB-access lockdown SOP + monitoring; document residual risk; consider DB-trigger capture</td></tr>
+      <tr><td><strong>F-08</strong></td><td>Part 11 11.10(d); Annex 11 §9</td><td>Periodic access review &amp; audit-trail review not operating</td><td><span class="badge b-major">Major</span></td><td>Stand up both review cycles with records</td></tr>
+      <tr><td><strong>F-09</strong></td><td>Annex 11 §7.2; 17025 7.11</td><td>Backup/restore &amp; DR untested/unevidenced</td><td><span class="badge b-major">Major</span></td><td>Perform &amp; document restore + DR test</td></tr>
+      <tr><td><strong>F-03</strong></td><td>Annex 11 §12</td><td>RLS disabled on <code>user_account</code></td><td><span class="badge b-minor">Minor→Major</span></td><td>Enable RLS or prove app-layer isolation by test</td></tr>
+      <tr><td><strong>F-07</strong></td><td>ALCOA (Attributable)</td><td>CAPA missing attributability columns</td><td><span class="badge b-minor">Minor</span></td><td>Add columns or confirm field_change coverage</td></tr>
+      <tr><td><strong>M-05</strong></td><td>17025 8.4; Part 11 11.10(c)</td><td>Retention/disposal not evidenced</td><td><span class="badge b-minor">Minor</span></td><td>Define retention schedule + legal-hold; configure archive</td></tr>
+      <tr><td><strong>F-10</strong></td><td>Annex 11 §12</td><td>Historic plaintext secrets / weak superuser password (remediated 2026-08-02)</td><td><span class="badge b-obs">Observation</span></td><td>Adopt secret-management SOP</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:12.5px;color:var(--muted)">* F-04 becomes <span class="badge b-crit">Critical</span> if electronic signatures are relied upon for record approval / result authorization once live.</p>
+</section>
+
+<!-- 15 -->
+<section id="s15">
+  <h2>15 · Recommended Implementation Plan</h2>
+  <p>Six sequenced phases. Effort is indicative (engineering + QA/validation). “Owner” names the accountable function; “Evidence” is the artifact that closes the item; every item requires documented retest and formal approval before its phase gate is passed.</p>
+
+  <div class="timeline">
+    <div class="phase">
+      <div class="when">Phase 0 · Immediate containment — week 0</div>
+      <h4>Stop regulated reliance &amp; close the highest-risk technical gaps</h4>
+    </div>
+  </div>
+  <table>
+    <thead><tr><th>Action</th><th>Finding</th><th>Owner</th><th>Effort</th><th>Evidence to close</th></tr></thead>
+    <tbody>
+      <tr><td>Freeze go-live for GxP/accredited use; risk-assess any records already created live</td><td>F-06</td><td>Quality / CSV lead</td><td>1–2 d</td><td>Signed risk assessment + go-live hold notice</td></tr>
+      <tr><td>Lock down direct database access; interim DBA-access SOP; enable connection logging</td><td>F-05</td><td>IT / DBA</td><td>2–3 d</td><td>Approved interim SOP + access list + log config</td></tr>
+      <tr><td>Remove <code>bypass_rls</code> capability from <code>qams_app</code>; move cross-tenant ops to a dedicated, governed platform role</td><td>F-02</td><td>Engineering</td><td>3–5 d</td><td>Migration + negative test (app role cannot cross tenants)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="timeline">
+    <div class="phase">
+      <div class="when">Phase 1 · Validation foundation — weeks 1–4</div>
+      <h4>Author the CSV package the audit found missing</h4>
+    </div>
+  </div>
+  <table>
+    <thead><tr><th>Action</th><th>Finding</th><th>Owner</th><th>Effort</th><th>Evidence to close</th></tr></thead>
+    <tbody>
+      <tr><td>Validation Master Plan, GxP classification, intended-use statement, supplier qualification of NT.QAMS</td><td>F-06 / M-01</td><td>CSV lead</td><td>1–2 wk</td><td>Approved VMP + supplier assessment</td></tr>
+      <tr><td>URS, functional/design spec, data-flow &amp; interface specs, risk assessment</td><td>F-06</td><td>Quality + Engineering</td><td>2–3 wk</td><td>Approved URS/FS/DS + risk assessment</td></tr>
+      <tr><td>Requirements→test traceability matrix (baseline)</td><td>F-06</td><td>SQA / test lead</td><td>1 wk</td><td>Traceability matrix v1</td></tr>
+    </tbody>
+  </table>
+
+  <div class="timeline">
+    <div class="phase">
+      <div class="when">Phase 2 · Technical remediation — weeks 2–6 (parallel)</div>
+      <h4>Add the missing enforced controls</h4>
+    </div>
+  </div>
+  <table>
+    <thead><tr><th>Action</th><th>Finding</th><th>Owner</th><th>Effort</th><th>Retest / evidence</th></tr></thead>
+    <tbody>
+      <tr><td>Extend immutability enforcement (DB triggers or equivalent) to approved/closed core QMS records</td><td>F-01</td><td>Engineering</td><td>1–2 wk</td><td>Regression: UPDATE on closed NC/CAPA/doc blocked</td></tr>
+      <tr><td>Enable RLS on <code>user_account</code> (or prove app-layer isolation)</td><td>F-03</td><td>Engineering</td><td>2–3 d</td><td>Cross-tenant user-read test</td></tr>
+      <tr><td>Add CAPA attributability columns (created/modified by + timestamps)</td><td>F-07</td><td>Engineering</td><td>1–2 d</td><td>Schema + audit-column verification</td></tr>
+      <tr><td>Configure &amp; verify notification/escalation firing and delivery-failure handling</td><td>I-05</td><td>Engineering + Quality</td><td>3–5 d</td><td>Dispatch logs for a triggered rule</td></tr>
+      <tr><td>Define retention schedule, legal-hold, secure-disposal; configure archive</td><td>M-05</td><td>Quality + IT</td><td>1 wk</td><td>Approved retention policy + archive config</td></tr>
+    </tbody>
+  </table>
+
+  <div class="timeline">
+    <div class="phase">
+      <div class="when">Phase 3 · Qualification execution (IQ/OQ/PQ) — weeks 5–9</div>
+      <h4>Prove the controls work in operation</h4>
+    </div>
+  </div>
+  <table>
+    <thead><tr><th>Action</th><th>Finding</th><th>Owner</th><th>Effort</th><th>Evidence to close</th></tr></thead>
+    <tbody>
+      <tr><td>IQ: installation, configuration, environment, service &amp; TLS baseline</td><td>F-06</td><td>IT / CSV</td><td>3–5 d</td><td>Executed IQ protocol</td></tr>
+      <tr><td>OQ: RBAC/SoD, tenant isolation (incl. injection/negative tests), audit-trail review &amp; export, account lockout, session timeout</td><td>F-02/F-08</td><td>SQA</td><td>1–2 wk</td><td>Executed OQ with expected/actual + defects resolved</td></tr>
+      <tr><td><strong>E-signature lifecycle OQ/PQ</strong>: identity verification, re-authentication, record-before-signing, content binding, post-sign change invalidation, failed-attempt logging</td><td>F-04</td><td>SQA + Quality</td><td>1 wk</td><td>Signature records + test evidence</td></tr>
+      <tr><td>Backup/restore + disaster-recovery test</td><td>F-09</td><td>IT</td><td>3–5 d</td><td>Restore log + RTO/RPO record</td></tr>
+      <tr><td>PQ / UAT: end-to-end quality workflows on controlled test data (NC→CAPA→closure, doc review→approval→acknowledgement, calibration, QC/PT)</td><td>F-06</td><td>Quality (users)</td><td>2–3 wk</td><td>Executed PQ/UAT + sign-off</td></tr>
+    </tbody>
+  </table>
+
+  <div class="timeline">
+    <div class="phase">
+      <div class="when">Phase 4 · Procedures, training &amp; release — weeks 8–11</div>
+      <h4>Wrap governance around the validated system</h4>
+    </div>
+  </div>
+  <table>
+    <thead><tr><th>Action</th><th>Finding</th><th>Owner</th><th>Effort</th><th>Evidence to close</th></tr></thead>
+    <tbody>
+      <tr><td>Approve SOPs: e-signature policy, audit-trail review, access management, backup/DR, data retention, change control, incident management, secret management</td><td>F-05/F-08/F-10</td><td>Quality</td><td>2 wk</td><td>Approved, effective SOP set</td></tr>
+      <tr><td>Role-based user training + training records</td><td>—</td><td>Quality / HR</td><td>1 wk</td><td>Completed training records</td></tr>
+      <tr><td>Validation Summary Report + formal release approval</td><td>F-06</td><td>CSV + Quality mgmt</td><td>3–5 d</td><td>Signed VSR + release authorization</td></tr>
+    </tbody>
+  </table>
+
+  <div class="timeline">
+    <div class="phase">
+      <div class="when">Phase 5 · Sustained compliance — 30 / 90 days &amp; ongoing</div>
+      <h4>Keep the validated state</h4>
+    </div>
+  </div>
+  <table>
+    <thead><tr><th>Action</th><th>Finding</th><th>Owner</th><th>Cadence</th><th>Evidence</th></tr></thead>
+    <tbody>
+      <tr><td>Periodic access review + audit-trail review operating with records</td><td>F-08/M-02/M-04</td><td>Quality + IT</td><td>Within 30 d, then periodic</td><td>Signed review records</td></tr>
+      <tr><td>Penetration test</td><td>Security</td><td>Independent</td><td>Within 90 d</td><td>Pentest report + remediation</td></tr>
+      <tr><td>Periodic (re)validation review; change-control-driven revalidation</td><td>F-06</td><td>CSV</td><td>Annual / on change</td><td>Periodic review record</td></tr>
+      <tr><td>CAPA / complaint effectiveness metrics &amp; trending</td><td>—</td><td>Quality</td><td>Ongoing</td><td>Trend reports</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <h4>Phase gates</h4>
+    Do not begin Phase 3 qualification until Phase 1 specs are approved and Phase 2 technical remediations pass regression. Production release for regulated use is authorized only after Phase 4 (Validation Summary Report + release approval). Phase 0 items are prerequisites for everything else.
+  </div>
+</section>
+
+<!-- 16 -->
+<section id="s16">
+  <h2>16 · Final Readiness Decision</h2>
+  <div class="cards">
+    <div class="card"><div class="lab">ISO/IEC 17025:2017</div><div class="val small"><span class="badge b-no">Not ready</span></div></div>
+    <div class="card"><div class="lab">ISO 15189:2022</div><div class="val small"><span class="badge b-no">Not ready</span></div></div>
+    <div class="card"><div class="lab">ISO 9001:2015</div><div class="val small"><span class="badge b-warn">Conditionally ready</span></div></div>
+    <div class="card"><div class="lab">21 CFR Part 11</div><div class="val small"><span class="badge b-nv">Insufficient evidence</span></div></div>
+    <div class="card"><div class="lab">EU GMP Annex 11</div><div class="val small"><span class="badge b-nv">Insufficient evidence</span></div></div>
+    <div class="card"><div class="lab">GMP (manufacturing)</div><div class="val small"><span class="badge b-nv">Not applicable</span></div></div>
+  </div>
+
+  <div class="callout crit">
+    <h4>Go-live recommendation</h4>
+    <p><strong>Production release prohibited for regulated / accredited use</strong> until the Phase 0–4 items — above all a completed CSV package (F-06), proven electronic-signature operation (F-04), and closure of the RLS bypass (F-02) — are complete and approved.</p>
+    <p><strong>Permitted now:</strong> continued <strong>UAT / limited pilot in a non-regulated capacity</strong> to generate the very validation and usage evidence this audit found missing.</p>
+    <p>Because the system is <strong>already deployed to production</strong>, apply an <strong>immediate risk assessment</strong> to confirm no regulated records are being created and relied upon before validation completes.</p>
+  </div>
+</section>
+
+<!-- 17 -->
+<section id="s17">
+  <h2>17 · Items Requiring External / Qualified Review</h2>
+  <ul>
+    <li>Predicate-rule &amp; Part 11 / Annex 11 <strong>applicability</strong> determination — regulatory / legal counsel.</li>
+    <li>Accreditation-scope conformity (17025 / 15189) — <strong>accreditation body</strong> assessment (this audit is not a substitute).</li>
+    <li>Final validated-state release — organization’s <strong>Quality / CSV governance</strong> and Qualified Person where applicable.</li>
+  </ul>
+  <p style="margin-top:14px">To convert the <span class="badge b-nv">Not Verified</span> items into firm determinations and produce a full-fidelity clause-level matrix, supply: (1) contractual standards &amp; editions, (2) predicate-rule / Part 11 applicability, (3) the validation package and SOPs (if they exist).</p>
+</section>
+
+<footer>
+  <div class="wrap" style="padding:0">
+    <p><strong>Independent readiness assessment — not a certification or regulatory approval.</strong> Conclusions are limited to evidence obtainable from the deployed system on 2026-08-03. Where requirement text, procedures, or validation evidence were unavailable, items are classified <em>Not Verified</em> rather than assumed conforming. This document does not reproduce copyrighted standard text; clause requirements are paraphrased.</p>
+    <p>NT.QAMS Compliance &amp; Validation Readiness Audit · Generated 2026-08-03.</p>
+  </div>
+</footer>
+
+</main>
+</div>
+</div>
+</body>
+</html>

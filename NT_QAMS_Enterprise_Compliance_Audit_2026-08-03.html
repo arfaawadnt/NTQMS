@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NT.QAMS — Enterprise Application Compliance Assessment (2026-08-03)</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --panel:#ffffff; --ink:#1c2330; --muted:#5b6472; --line:#e3e7ee;
+    --accent:#2f6fed; --accent-soft:#eaf1ff;
+    --crit:#b3261e; --high:#c0561d; --med:#b78103; --low:#3a7d3a; --info:#5b6472;
+    --ok:#1c7d4d; --okbg:#e7f6ee; --partbg:#fff6e0; --nobg:#fdeaea; --nabg:#eef0f3;
+    --chipbg:#eef2f8;
+    --shadow:0 1px 3px rgba(16,24,40,.06),0 1px 2px rgba(16,24,40,.04);
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0e1117; --panel:#161b23; --ink:#e6e9ef; --muted:#9aa4b2; --line:#262d38;
+      --accent:#6f9bff; --accent-soft:#182236;
+      --crit:#ff6b60; --high:#ff9d5c; --med:#e7c04a; --low:#7fce7f; --info:#9aa4b2;
+      --ok:#5fd39b; --okbg:#12241b; --partbg:#2a2410; --nobg:#2a1414; --nabg:#1c222b;
+      --chipbg:#1d2530; --shadow:0 1px 2px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="light"]{ --bg:#f6f7f9; --panel:#fff; --ink:#1c2330; --muted:#5b6472; --line:#e3e7ee; --accent:#2f6fed; --accent-soft:#eaf1ff; --crit:#b3261e; --high:#c0561d; --med:#b78103; --low:#3a7d3a; --ok:#1c7d4d; --okbg:#e7f6ee; --partbg:#fff6e0; --nobg:#fdeaea; --nabg:#eef0f3; --chipbg:#eef2f8; }
+  :root[data-theme="dark"]{ --bg:#0e1117; --panel:#161b23; --ink:#e6e9ef; --muted:#9aa4b2; --line:#262d38; --accent:#6f9bff; --accent-soft:#182236; --crit:#ff6b60; --high:#ff9d5c; --med:#e7c04a; --low:#7fce7f; --ok:#5fd39b; --okbg:#12241b; --partbg:#2a2410; --nobg:#2a1414; --nabg:#1c222b; --chipbg:#1d2530; }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 20px 96px;}
+  header.masthead{background:linear-gradient(135deg,var(--accent) 0%,#1c47b0 100%);color:#fff;border-radius:16px;padding:30px 32px;box-shadow:var(--shadow);}
+  header.masthead .mode{font:600 12px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;opacity:.9}
+  header.masthead h1{margin:.5rem 0 .3rem;font-size:27px;line-height:1.2}
+  header.masthead .sub{opacity:.92;font-size:14px}
+  .meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:2px 22px;margin-top:16px;font-size:13px}
+  .meta-grid div{padding:3px 0}
+  .meta-grid b{opacity:.8;font-weight:600}
+  code,.mono{font-family:var(--mono);font-size:.9em}
+  .file{font-family:var(--mono);font-size:.86em;background:var(--chipbg);padding:1px 5px;border-radius:4px;white-space:nowrap}
+
+  .verdict{display:grid;grid-template-columns:170px 1fr;gap:22px;margin:22px 0;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:var(--shadow)}
+  @media(max-width:640px){.verdict{grid-template-columns:1fr}}
+  .gauge{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  .gauge .num{font-size:44px;font-weight:800;line-height:1;color:var(--accent)}
+  .gauge .band{font-size:12px;color:var(--muted);margin-top:6px;max-width:150px}
+  .bar{height:9px;border-radius:6px;background:var(--line);overflow:hidden;margin-top:12px;width:150px}
+  .bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--med),var(--accent))}
+  .verdict .decision{align-self:center}
+  .pill{display:inline-block;font:700 12px/1 var(--mono);letter-spacing:.03em;padding:6px 11px;border-radius:999px}
+  .pill.cond{background:var(--partbg);color:var(--med);border:1px solid color-mix(in srgb,var(--med) 40%,transparent)}
+  .kpis{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+  .kpi{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:13px}
+  .kpi b{font-size:18px;display:block}
+
+  nav.toc{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin:22px 0;box-shadow:var(--shadow);columns:2;column-gap:28px}
+  @media(max-width:640px){nav.toc{columns:1}}
+  nav.toc a{color:var(--ink);text-decoration:none;font-size:13px;display:block;padding:3px 0;break-inside:avoid}
+  nav.toc a:hover{color:var(--accent)}
+  nav.toc .n{color:var(--muted);font-family:var(--mono);font-size:11px;margin-right:6px}
+
+  section{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px 26px;margin:18px 0;box-shadow:var(--shadow)}
+  section>h2{margin:0 0 14px;font-size:20px;display:flex;align-items:baseline;gap:10px;border-bottom:2px solid var(--accent-soft);padding-bottom:10px}
+  section>h2 .n{font:700 13px/1 var(--mono);color:var(--accent);background:var(--accent-soft);padding:5px 8px;border-radius:6px}
+  h3{font-size:16px;margin:20px 0 8px}
+  h4{font-size:14px;margin:16px 0 6px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  p{margin:.55rem 0}
+  ul,ol{margin:.5rem 0 .7rem;padding-left:1.25rem}
+  li{margin:.28rem 0}
+  .lead{font-size:15.5px}
+  .muted{color:var(--muted)}
+  .assume{font-family:var(--mono);font-size:.85em;background:var(--chipbg);padding:2px 6px;border-radius:5px;font-weight:600}
+
+  .tablewrap{overflow-x:auto;margin:12px 0;border:1px solid var(--line);border-radius:10px}
+  table{border-collapse:collapse;width:100%;font-size:13px;min-width:560px}
+  th,td{padding:9px 11px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  thead th{background:var(--bg);position:sticky;top:0;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted)}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:color-mix(in srgb,var(--accent-soft) 45%,transparent)}
+  td.c,th.c{text-align:center}
+  .tot td{font-weight:800;background:var(--accent-soft)}
+
+  .tag{display:inline-block;font:700 11px/1.4 var(--mono);padding:2px 7px;border-radius:5px;white-space:nowrap}
+  .s-comp{background:var(--okbg);color:var(--ok)}
+  .s-part{background:var(--partbg);color:var(--med)}
+  .s-non{background:var(--nobg);color:var(--crit)}
+  .s-na{background:var(--nabg);color:var(--info)}
+  .sev-CRIT{background:var(--nobg);color:var(--crit)}
+  .sev-HIGH{color:#fff;background:var(--high)}
+  .sev-MED{color:#3a2f00;background:var(--med)}
+  .sev-LOW{background:var(--okbg);color:var(--low)}
+  .sev-INFO{background:var(--nabg);color:var(--info)}
+  .score{font:800 12px/1 var(--mono);padding:3px 7px;border-radius:5px;background:var(--chipbg)}
+
+  .finding{border:1px solid var(--line);border-left:4px solid var(--muted);border-radius:10px;padding:16px 18px;margin:14px 0;background:var(--panel)}
+  .finding.hi{border-left-color:var(--high)}
+  .finding.me{border-left-color:var(--med)}
+  .finding.lo{border-left-color:var(--low)}
+  .finding.inf{border-left-color:var(--accent)}
+  .finding h3{margin:0 0 8px;font-size:15.5px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .finding h3 .fid{font-family:var(--mono);font-size:12px;background:var(--chipbg);padding:2px 7px;border-radius:5px}
+  .finding .row{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 10px}
+  .finding dl{display:grid;grid-template-columns:130px 1fr;gap:4px 12px;margin:8px 0 0;font-size:13.5px}
+  @media(max-width:640px){.finding dl{grid-template-columns:1fr}.finding dl dt{margin-top:8px}}
+  .finding dt{font-weight:700;color:var(--muted)}
+  .finding dd{margin:0}
+
+  .phase{border:1px solid var(--line);border-radius:12px;margin:16px 0;overflow:hidden}
+  .phase>.ph-head{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:14px 18px;background:var(--accent-soft)}
+  .phase>.ph-head .code{font:800 13px/1 var(--mono);color:var(--accent)}
+  .phase>.ph-head h3{margin:0;font-size:16px;flex:1;min-width:180px}
+  .phase>.ph-head .when{font-size:12px;color:var(--muted);font-family:var(--mono)}
+  .phase .ph-body{padding:6px 18px 14px}
+  .gate{background:var(--bg);border:1px dashed var(--line);border-radius:8px;padding:10px 14px;margin:10px 0;font-size:13px}
+  .gate b{color:var(--accent)}
+  .timeline{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 4px}
+  .swim{flex:1;min-width:150px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:12.5px}
+  .swim .t{font-weight:800;font-family:var(--mono);color:var(--accent);font-size:12px}
+
+  .callout{border-radius:10px;padding:14px 16px;margin:14px 0;font-size:13.5px;border:1px solid var(--line)}
+  .callout.good{background:var(--okbg)}
+  .callout.warn{background:var(--partbg)}
+  .callout.note{background:var(--accent-soft)}
+  .callout b{display:block;margin-bottom:3px}
+
+  footer{color:var(--muted);font-size:12px;text-align:center;margin-top:30px}
+  .backtop{position:fixed;right:16px;bottom:16px;background:var(--accent);color:#fff;border-radius:50%;width:42px;height:42px;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:var(--shadow);font-size:20px;opacity:.9}
+  @media print{
+    body{background:#fff}.backtop{display:none}nav.toc{columns:2}
+    section,.verdict,header.masthead{box-shadow:none;break-inside:avoid}
+    header.masthead{background:#1c47b0 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .finding,.phase{break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="masthead">
+  <div class="mode">MODE · Enterprise Application Compliance Assessment</div>
+  <h1>NT.QAMS — Enterprise Application Compliance Assessment</h1>
+  <div class="sub">Independent, evidence-based architecture &amp; security audit against the Enterprise Application Architecture checklist and the project's own standards (CLAUDE.md, ADRs, SRS).</div>
+  <div class="meta-grid">
+    <div><b>Report ID</b> · EA-AUD-NTQMS-IND-001</div>
+    <div><b>Date</b> · 2026-08-03</div>
+    <div><b>Subject</b> · Multi-tenant SaaS QMS</div>
+    <div><b>Source</b> · C:\src\NTQMS @ d74d4bf (v1.52.0)</div>
+    <div><b>Stack</b> · .NET 9 · PG 17 · Angular 22</div>
+    <div><b>Method</b> · Static + Release build (tests not executed)</div>
+  </div>
+</header>
+
+<div class="verdict">
+  <div class="gauge">
+    <div class="num">83%</div>
+    <div class="bar"><i style="width:83%"></i></div>
+    <div class="band">Generally aligned — material improvements required (75–89%)</div>
+  </div>
+  <div class="decision">
+    <span class="pill cond">PRODUCTION DECISION: APPROVED WITH CONDITIONS</span>
+    <p style="margin:.6rem 0 0">Zero CRITICAL findings and <b>no cross-tenant data-exposure path</b>. The headline controls — tenant isolation, backend authorization, database integrity, audit immutability — are layered, fail-closed, and CI-gated. Material gaps are in <b>completeness and consistency at the edges</b> (object-level file authz, e-signature record binding, JWT lifetime drift, primitive obsession, specific test holes) and in the <b>open regulated-validation track</b> (pen test, signed CSV, staging load/observability, restore drill).</p>
+    <div class="kpis">
+      <div class="kpi"><b>0</b>Critical</div>
+      <div class="kpi"><b>~4</b>High</div>
+      <div class="kpi"><b>70/84</b>Score</div>
+      <div class="kpi"><b>~82%</b>Verif. coverage</div>
+      <div class="kpi"><b>Medium</b>Confidence</div>
+      <div class="kpi"><b>21/22</b>Categories (SignalR N/A)</div>
+    </div>
+  </div>
+</div>
+
+<nav class="toc" aria-label="Contents">
+  <a href="#s1"><span class="n">01</span>Objective &amp; scope</a>
+  <a href="#s2"><span class="n">02</span>Artifacts reviewed</a>
+  <a href="#s3"><span class="n">03</span>Artifacts not provided / not executed</a>
+  <a href="#s4"><span class="n">04</span>Assumptions</a>
+  <a href="#s5"><span class="n">05</span>Open questions</a>
+  <a href="#s6"><span class="n">06</span>Executive summary</a>
+  <a href="#s9"><span class="n">07–09</span>Score, coverage &amp; scorecard</a>
+  <a href="#s10"><span class="n">10</span>Mandatory-rule assessment</a>
+  <a href="#s11"><span class="n">11</span>Production blockers</a>
+  <a href="#s12"><span class="n">12</span>Detailed findings</a>
+  <a href="#s13"><span class="n">13</span>Aggregate &amp; domain model</a>
+  <a href="#s14"><span class="n">14</span>Database &amp; tenant isolation</a>
+  <a href="#s15"><span class="n">15</span>Security &amp; STRIDE</a>
+  <a href="#s16"><span class="n">16–19</span>API · Angular · Testing · Ops</a>
+  <a href="#s20"><span class="n">20</span>Risk register</a>
+  <a href="#s21"><span class="n">21</span>Remediation backlog</a>
+  <a href="#plan"><span class="n">★</span>Recommended implementation plan</a>
+  <a href="#s23"><span class="n">23</span>Required ADRs</a>
+  <a href="#s24"><span class="n">24</span>Compliance status &amp; decision</a>
+  <a href="#s25"><span class="n">25</span>Limitations &amp; unverified areas</a>
+</nav>
+
+<section id="s1">
+  <h2><span class="n">01</span>Objective and reviewed scope</h2>
+  <p class="lead">Determine how closely NT.QAMS complies with the Enterprise Application Architecture checklist and the project's own "law" (CLAUDE.md, ADRs, SRS). The system is a regulated multi-tenant QMS targeting ISO/IEC 17025, ISO 15189, ISO 9001, 21 CFR Part 11, and EU GMP Annex 11.</p>
+  <p>Compliance was <b>not</b> inferred from folder names, interfaces, comments, or prior self-audits. Behavior was validated against concrete artifacts: project references, the <span class="file">DbContext</span>, interceptors, migrations, middleware, MediatR handlers/behaviors, ADRs, and the test-suite source. Evidence is cited as <span class="file">file:line</span> throughout.</p>
+</section>
+
+<section id="s2">
+  <h2><span class="n">02</span>Artifacts reviewed</h2>
+  <ul>
+    <li>Solution + 6 source projects <span class="file">NT.QAMS.{Domain, Application, Infrastructure, Contracts, SharedKernel, WebApi}</span> (~435 hand-written <span class="file">.cs</span>).</li>
+    <li>6 test projects: Domain/Application/Architecture unit tests, IntegrationTests, WebApi.FunctionalTests, LoadTests.</li>
+    <li>58 EF migrations (non-designer); <span class="file">AppDbContext</span>, interceptors, 16 <span class="file">IEntityTypeConfiguration</span> files.</li>
+    <li>9 ADRs, full SRS (00–15), GAMP-5 validation set, module test-case docs, technical-debt report.</li>
+    <li><span class="file">deploy/</span> (Dockerfile, compose.production.yml, harden-runtime-role.sql, db-init.sql, BACKUP-RESTORE-DR.md, observability/), <span class="file">.github/workflows/ci.yml</span>.</li>
+    <li>CLAUDE.md, README.md, prior self-audit HTML reports, remediation closure report.</li>
+  </ul>
+  <div class="callout good"><b>Execution performed this pass</b><code>dotnet build NT.QAMS.sln -c Release</code> → <b>succeeded, 0 errors, 6 warnings</b> (.NET SDK 9.0.316). Verified fact.</div>
+</section>
+
+<section id="s3">
+  <h2><span class="n">03</span>Artifacts not provided / not executed</h2>
+  <ul>
+    <li><b>Enterprise_Application_Development_Standard.txt was not present in the repository.</b> The embedded checklist + CLAUDE.md + ADRs were used as the standard. <span class="muted">(Limitation.)</span></li>
+    <li>The <b>automated test suite was not executed</b> in this audit (integration/RLS tests need a migrated real PostgreSQL; the running WebApi locks its DLLs). CI is designed to run them; I did not.</li>
+    <li><b>Migrations were not applied</b> to a PostgreSQL instance this pass.</li>
+    <li>No runtime penetration test, restore-drill execution, or staging observability/load run were performed.</li>
+  </ul>
+</section>
+
+<section id="s4">
+  <h2><span class="n">04</span>Assumptions</h2>
+  <ul>
+    <li><span class="assume">ASSUMPTION</span> Production connects as least-privilege <span class="file">qams_app</span> and <span class="file">harden-runtime-role.sql</span> was applied — the runtime RLS guarantee depends on it (a boot-time <span class="file">DatabaseRoleGuard</span> enforces this, mitigating the risk).</li>
+    <li><span class="assume">ASSUMPTION</span> CI runs on every push with a real migrated PG17, so the RLS/immutability/constraint integration tests actually execute there (they <span class="file">[Skip]</span> locally; <span class="file">RuntimeRolePrivilegeTests</span> <span class="file">Assert.Fail</span>s if the CI env var is set and the role is wrong).</li>
+    <li><span class="assume">ASSUMPTION</span> "Tests green (460 backend / 87 frontend / 6 e2e)" in CLAUDE.md reflects the last CI run; treated as a <b>claim</b>, not independently verified here.</li>
+  </ul>
+</section>
+
+<section id="s5">
+  <h2><span class="n">05</span>Open questions</h2>
+  <ul>
+    <li><span class="assume">OPEN QUESTION</span> Is production <span class="file">Jwt:ExpiryMinutes</span> overridden to 15 (per ADR-0009) or left at the shipped default of <b>120</b>? The shipped config contradicts the ADR that underpins the token-storage risk acceptance.</li>
+    <li><span class="assume">OPEN QUESTION</span> Should evidence-file downloads enforce per-record (document/branch/department) entitlement, or is tenant-scope-only the intended confidentiality boundary for attachments?</li>
+    <li><span class="assume">OPEN QUESTION</span> Is asymmetric JWT signing / key rotation planned, or is the shared HS256 secret the accepted long-term posture?</li>
+  </ul>
+</section>
+
+<section id="s6">
+  <h2><span class="n">06</span>Executive summary</h2>
+  <p class="lead">NT.QAMS is an <b>unusually mature, defense-in-depth, and honestly-documented</b> enterprise application that has clearly been through multiple remediation cycles. Its strongest controls are implemented as <i>layered, testable, fail-closed</i> mechanisms rather than single points of trust, and several are enforced as <b>build-time CI gates</b> (deny-by-default command policy, module boundaries, API-surface snapshot).</p>
+  <p>The audit found <b>zero CRITICAL findings and no cross-tenant data-exposure path</b>. Tenant isolation is genuinely triple-layered — EF global query filter + PostgreSQL <span class="file">FORCE ROW LEVEL SECURITY</span> + a <span class="file">NOSUPERUSER NOBYPASSRLS</span> runtime role — reinforced by tenant-composite foreign keys and a boot-time role guard that refuses to start if the DB role could bypass RLS. It is exercised by cross-tenant denial tests against real PostgreSQL with the EF filter deliberately disabled.</p>
+  <p>The material gaps are <b>not</b> in the headline security architecture but in <b>completeness and consistency at the edges</b>: broken object-level authorization on file downloads (within a tenant), an e-signature record that binds the signed record's <i>version</i> only in free text, a JWT lifetime that contradicts its governing ADR, primitive-obsession where the domain documents ~30 value objects but implements ~1, no enforced transaction boundary, and specific test holes (validators, migration-drift, value-objects). The named "Serilog" observability standard is met in spirit by structured <span class="file">Microsoft.Extensions.Logging</span> JSON, not Serilog itself.</p>
+  <div class="callout good"><b>Verified strengths (evidence-backed, not assumed)</b>
+    Multi-tenant isolation (EF filter + FORCE RLS + NOBYPASSRLS role + tenant-composite FKs + boot guard + real-PG denial tests) · deny-by-default authorization at build &amp; runtime · Clean Architecture enforced by NetArchTest · append-only hash-chained audit ledger with a tamper test · <span class="file">xmin</span> optimistic concurrency · transactional outbox with dead-letter/backoff/SKIP-LOCKED · fully-validated JWT + rotating replay-resistant refresh cookie · ConfigGuard fail-fast · unusually candid docs (tech-debt register &amp; RTM disclose their own defects).
+  </div>
+</section>
+
+<section id="s9">
+  <h2><span class="n">07–09</span>Overall score, verification coverage &amp; executive scorecard</h2>
+  <div class="kpis" style="margin-bottom:8px">
+    <div class="kpi"><b>83.3%</b>Overall (70/84)</div>
+    <div class="kpi"><b>~82%</b>Verification coverage</div>
+    <div class="kpi"><b>Medium</b>Confidence</div>
+  </div>
+  <p class="muted">Score = earned ÷ max applicable verified (21 categories × 4; SignalR excluded as N/A). Verification coverage is Medium because execution-dependent proofs (tests passing, migrations applying, runtime RLS) were read but not run this pass. <b>A high score at medium coverage is not a production certification.</b></p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>#</th><th>Category</th><th class="c">Score</th><th class="c">Max</th><th class="c">Compl.%</th><th class="c">Verif.%</th><th class="c">Crit</th><th class="c">High</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Business / Functional Alignment</td><td class="c"><span class="score">3</span></td><td class="c">4</td><td class="c">75</td><td class="c">90</td><td class="c">0</td><td class="c">0</td><td><span class="tag s-part">PARTIAL</span></td></tr>
+      <tr><td>2</td><td>Solution Architecture</td><td class="c"><span class="score">4</span></td><td class="c">4</td><td class="c">100</td><td class="c">95</td><td class="c">0</td><td class="c">0</td><td><span class="tag s-comp">COMPLIANT</span></td></tr>
+      <tr><td>3</td><td>SOLID / Code Structure</td><td class="c"><span class="score">4</span></td><td class="c">4</td><td class="c">100</td><td class="c">90</td><td class="c">0</td><td class="c">0</td><td><span class="tag s-comp">COMPLIANT</span></td></tr>
+      <tr><td>4</td><td>Domain-Driven Design</td><td class="c"><span class="score">3</span></td><td class="c">4</td><td class="c">75</td><td class="c">90</td><td class="c">0</td><td class="c">0</td><td><span class="tag s-part">PARTIAL</span></td></tr>
+      <tr><td>5</td><td>CQRS / MediatR</td><td class="c"><span class="score">3</span></td><td class="c">4</td><td class="c">75</td><td class="c">90</td><td class="c">0</td><td class="c">0</td><td><span class="tag s-part">PARTIAL</span></td></tr>
+      <tr><td>6</td><td>API Design</td><td class="c"><span class="score">3</span></td><td class="c">4</td><td class="c">75</td><td class="c">85</td><td class="c">0</td><td class="c">1</td><td><span class="tag s-part">PARTIAL</span></td></tr>
+      <tr><td>7</td><td>AuthN / AuthZ</td><td class="c"><span class="score">3</span></td><td class="c">4</td><td class="c">75</td><td class="c">85</td><td class="c">0</td><td class="c">0</td><td><span class="tag s-part">PARTIAL</span></td></tr>
+      <tr><td>8</td><td>Multi-Tenancy</td><td class="c"><span class="score">4</span></td><td class="c">4</td><td class="c">100</td><td class="c">85</td><td class="c">0</td><td class="c">0</td><td><span class="tag s-comp">COMPLIANT</span></td></tr>
+      <tr><td>9</td><td>Database / EF Core</td><td class="c"><span class="score">4</span></td><td class="c">4</td><td class="c">100</td><td class="c">80</td><td class="c">0</td><td class="c">0</td><td><span class="tag s-comp">COMPLIANT</span></td></tr>
+      <tr><td>10</td><td>Transactions / Consistency / Messaging</td><td class="c"><span class="score">3</span></td><td class="c">4</td><td class="c">75</td><td class="c">85</td><td class="c">0</td><td class="c">0</td><td><span class="tag s-part">PARTIAL</span></td></tr>
+      <tr><td>11</td><td>Background Processing</td><td class="c"><span class="score">3</span></td><td class="c">4</td><td class="c">75</td><td class="c">85</td><td class="c">0</td><td class="c">0</td><td><span class="tag s-part">PARTIAL</span></td></tr>
+      <tr><td>12</td><td>SignalR / Real-Time</td><td class="c"><span class="score">N/A</span></td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c">0</td><td class="c">0</td><td><span class="tag s-na">NOT APPLICABLE</span></td></tr>
+      <tr><td>13</td><td>Angular 22 Frontend</td><td class="c"><span class="score">3</span></td><td class="c">4</td><td class="c">75</td><td class="c">85</td><td class="c">0</td><td class="c">0</td><td><span class="tag s-part">PARTIAL</span></td></tr>
+      <tr><td>14</td><td>Validation / Error Handling</td><td class="c"><span class="score">4</span></td><td class="c">4</td><td class="c">100</td><td class="c">90</td><td class="c">0</td><td class="c">0</td><td><span class="tag s-comp">COMPLIANT</span></td></tr>
+      <tr><td>15</td><td>Audit &amp; E-Signatures</td><td class="c"><span class="score">3</span></td><td class="c">4</td><td class="c">75</td><td class="c">85</td><td class="c">0</td><td class="c">1</td><td><span class="tag s-part">PARTIAL</span></td></tr>
+      <tr><td>16</td><td>Security / STRIDE</td><td class="c"><span class="score">3</span></td><td class="c">4</td><td class="c">75</td><td class="c">80</td><td class="c">0</td><td class="c">1</td><td><span class="tag s-part">PARTIAL</span></td></tr>
+      <tr><td>17</td><td>Logging / Observability</td><td class="c"><span class="score">3</span></td><td class="c">4</td><td class="c">75</td><td class="c">85</td><td class="c">0</td><td class="c">0</td><td><span class="tag s-part">PARTIAL</span></td></tr>
+      <tr><td>18</td><td>Configuration / Secrets</td><td class="c"><span class="score">4</span></td><td class="c">4</td><td class="c">100</td><td class="c">90</td><td class="c">0</td><td class="c">0</td><td><span class="tag s-comp">COMPLIANT</span></td></tr>
+      <tr><td>19</td><td>Health / Resilience / Ops</td><td class="c"><span class="score">3</span></td><td class="c">4</td><td class="c">75</td><td class="c">70</td><td class="c">0</td><td class="c">0</td><td><span class="tag s-part">PARTIAL</span></td></tr>
+      <tr><td>20</td><td>Docker / Deployment</td><td class="c"><span class="score">3</span></td><td class="c">4</td><td class="c">75</td><td class="c">75</td><td class="c">0</td><td class="c">0</td><td><span class="tag s-part">PARTIAL</span></td></tr>
+      <tr><td>21</td><td>Testing</td><td class="c"><span class="score">3</span></td><td class="c">4</td><td class="c">75</td><td class="c">70</td><td class="c">0</td><td class="c">0</td><td><span class="tag s-part">PARTIAL</span></td></tr>
+      <tr><td>22</td><td>Documentation / Traceability</td><td class="c"><span class="score">4</span></td><td class="c">4</td><td class="c">100</td><td class="c">90</td><td class="c">0</td><td class="c">0</td><td><span class="tag s-comp">COMPLIANT</span></td></tr>
+      <tr class="tot"><td colspan="2">TOTAL (applicable)</td><td class="c">70</td><td class="c">84</td><td class="c">83.3</td><td class="c">~82</td><td class="c">0</td><td class="c">~4</td><td>Generally aligned</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section id="s10">
+  <h2><span class="n">10</span>Mandatory-rule assessment</h2>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Rule (project "law" / standard)</th><th>Status</th><th class="c">Score</th><th>Evidence</th><th>Main gap</th><th class="c">Blocker</th></tr></thead>
+    <tbody>
+      <tr><td>Clean Architecture dependency direction</td><td><span class="tag s-comp">COMPLIANT</span></td><td class="c">4</td><td>5 NetArchTest layer facts; Domain refs only SharedKernel</td><td><span class="file">Supplier.cs:188</span> BCL JSON serialize in domain (minor)</td><td class="c">No</td></tr>
+      <tr><td>No magic strings (permissions/codes/config)</td><td><span class="tag s-comp">COMPLIANT</span></td><td class="c">4</td><td><span class="file">PermissionCatalog</span>; typed <span class="file">[RequirePermission]</span>; structured error codes</td><td>SPA hardcodes <span class="file">can('nc.approve')</span> keys</td><td class="c">No</td></tr>
+      <tr><td>Domain protects itself (private setters, invariants)</td><td><span class="tag s-part">PARTIAL</span></td><td class="c">3</td><td>Private setters, factories, guarded transitions, coded <span class="file">DomainException</span></td><td>Public tenant setters; primitive obsession</td><td class="c">No</td></tr>
+      <tr><td>DTOs in Contracts, never expose entities</td><td><span class="tag s-comp">COMPLIANT</span></td><td class="c">4</td><td>Contracts has zero project refs; hand-written DTO records</td><td>—</td><td class="c">No</td></tr>
+      <tr><td>Multi-tenancy: EF filter AND FORCE RLS on every tenant table</td><td><span class="tag s-comp">COMPLIANT</span></td><td class="c">4</td><td>Convention filter <span class="file">AppDbContext.cs:152-211</span>; 93 policies; NOBYPASSRLS role; boot guard</td><td><span class="file">user_account</span> exempt (accepted; build-failing test)</td><td class="c">No</td></tr>
+      <tr><td>Deny-by-default authorization</td><td><span class="tag s-comp">COMPLIANT</span></td><td class="c">4</td><td><span class="file">AuthorizationBehavior</span> + <span class="file">CommandPolicyTests</span> (CI gate); <span class="file">FallbackPolicy</span></td><td>Read-side not pipeline-backstopped; file-download authz</td><td class="c">No</td></tr>
+      <tr><td>Signed-record immutability / append-only audit</td><td><span class="tag s-part">PARTIAL</span></td><td class="c">3</td><td>5 append-only DB triggers; hash-chained trail; tamper test</td><td>Signature ledger not chained; version in free text</td><td class="c">No</td></tr>
+      <tr><td>Optimistic concurrency on regulated records</td><td><span class="tag s-comp">COMPLIANT</span></td><td class="c">4</td><td><span class="file">xmin</span> on every AggregateRoot; 409 CONCURRENCY-409</td><td>Not exercised on InMemory test provider</td><td class="c">No</td></tr>
+      <tr><td>Config externalized, fail-fast, secrets from env</td><td><span class="tag s-comp">COMPLIANT</span></td><td class="c">4</td><td><span class="file">ConfigGuard</span>; Jwt/conn-string boot checks; empty secrets in appsettings</td><td>Not idiomatic <span class="file">IOptions&lt;T&gt;</span></td><td class="c">No</td></tr>
+      <tr><td>Reliable messaging via Outbox</td><td><span class="tag s-part">PARTIAL</span></td><td class="c">3</td><td><span class="file">OutboxInterceptor</span> enqueues in same SaveChanges; dead-letter/backoff/SKIP LOCKED</td><td>No ordering contract documented</td><td class="c">No</td></tr>
+      <tr><td>Token storage per current ADR (in-memory + httpOnly refresh)</td><td><span class="tag s-part">PARTIAL</span></td><td class="c">3</td><td>In-memory token; rotating <span class="file">qams_rt</span> cookie; replay detection</td><td><span class="file">Jwt:ExpiryMinutes=120</span> contradicts ADR-0009 (15 min)</td><td class="c">No</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section id="s11">
+  <h2><span class="n">11</span>Production blockers</h2>
+  <div class="callout note"><b>No CRITICAL, no cross-tenant exposure.</b> There are no absolute code-level blockers. For a <i>regulated</i> go-live the standard requires evidence that critical controls are implemented <b>and tested/validated</b>; the items below are <b>conditions</b> that gate a compliant regulated release.</div>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>ID</th><th>Blocker (condition)</th><th>Sev</th><th>Risk</th><th>Required action</th></tr></thead>
+    <tbody>
+      <tr><td>API-001</td><td>Broken object-level authz on file download (intra-tenant)</td><td><span class="tag sev-HIGH">HIGH</span></td><td>Any tenant user can fetch any file by GUID</td><td>Require <span class="file">documents.view</span> / record entitlement</td></tr>
+      <tr><td>SEC-001</td><td>No independent penetration test performed</td><td><span class="tag sev-HIGH">HIGH</span></td><td>Unvalidated exploitability</td><td>Commission external pen test (SOW drafted)</td></tr>
+      <tr><td>DOC-001</td><td>Formal CSV validation (IQ/OQ/PQ) not executed/signed</td><td><span class="tag sev-HIGH">HIGH</span></td><td>Part 11 evidentiary gap</td><td>Execute &amp; sign the validation package</td></tr>
+      <tr><td>OPS-001</td><td>Observability + production-scale load/soak not run on staging</td><td><span class="tag sev-MED">MED</span></td><td>Unproven at scale; alerts unfired</td><td>Stand up staging; run failure-drills + load</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section id="s12">
+  <h2><span class="n">12</span>Detailed checklist findings</h2>
+
+  <div class="finding inf">
+    <h3><span class="fid">TENANT-001</span> Multi-tenant isolation is genuine, layered, and fail-closed</h3>
+    <div class="row"><span class="tag s-comp">COMPLIANT</span><span class="tag sev-INFO">INFORMATIONAL</span><span class="score">Score 4</span><span class="muted">Cat 8 · Prod blocker: No</span></div>
+    <dl>
+      <dt>Evidence</dt><dd>Tenant identity from validated JWT claim only <span class="file">RequestIdentity.cs:57</span>; convention query filter over every <span class="file">ITenantScoped</span> <span class="file">AppDbContext.cs:152-211</span>; per-connection GUC via <span class="file">TenantConnectionInterceptor.cs:53-56</span>; 93 <span class="file">CREATE POLICY tenant_isolation</span> + FORCE RLS; role <span class="file">NOSUPERUSER NOBYPASSRLS</span>, DELETE revoked <span class="file">harden-runtime-role.sql:55,85</span>; boot <span class="file">DatabaseRoleGuard.cs</span>; real-PG denial tests <span class="file">RlsTenantIsolationTests.cs:48-75</span>, <span class="file">OwnedChildTenancyTests.cs:128-155</span>.</dd>
+      <dt>Analysis</dt><dd>Isolation does not rest on a <span class="file">TenantId</span> property; four independent mechanisms plus a build-failing arch test for the one exempt table. Tenant-composite FKs make a child under another tenant's parent structurally impossible.</dd>
+      <dt>Risk</dt><dd>Low — no cross-tenant path found.</dd>
+      <dt>Remediation</dt><dd>None required; keep the RLS-parity gate green for new tables.</dd>
+      <dt>Confidence</dt><dd>High.</dd>
+    </dl>
+  </div>
+
+  <div class="finding hi">
+    <h3><span class="fid">API-001</span> File download lacks object-level authorization <span class="tag sev-HIGH">HIGH</span></h3>
+    <div class="row"><span class="tag s-part">PARTIALLY COMPLIANT</span><span class="score">Score 2</span><span class="muted">Cat 6/7 · Priority P1 · Prod blocker: borderline</span></div>
+    <dl>
+      <dt>Evidence</dt><dd><span class="file">FilesController.cs:60</span> <span class="file">Download</span> gated only by class-level <span class="file">[Authorize]</span> + tenant filter; <span class="file">FileReference</span> is <span class="file">ITenantScoped</span> only, not <span class="file">IAllocatable</span> <span class="file">Files/FileReference.cs:12</span>; no <span class="file">documents.view</span>/record entitlement; ids are time-ordered GUIDv7.</dd>
+      <dt>Analysis</dt><dd>Any authenticated user <i>within the tenant</i> can retrieve <i>any</i> file by id regardless of access to the owning record or its branch/department. Upload hardening (size, magic-byte sniff, canonical content-type) is otherwise strong.</dd>
+      <dt>Risk</dt><dd>Intra-tenant confidentiality breach of regulated evidence (e.g. a technician reading management/HR attachments). Not cross-tenant.</dd>
+      <dt>Remediation</dt><dd>Require a module permission and resolve entitlement through the owning aggregate; apply branch/department scope where the parent is <span class="file">IAllocatable</span>.</dd>
+      <dt>Required tests</dt><dd>User without <span class="file">documents.view</span> (and out-of-branch) → 403 on <span class="file">GET /api/files/{id}</span>.</dd>
+      <dt>Confidence</dt><dd>High.</dd>
+    </dl>
+  </div>
+
+  <div class="finding hi">
+    <h3><span class="fid">ESIG-001</span> E-signature record binding is incomplete; signature ledger not hash-chained <span class="tag sev-HIGH">HIGH</span></h3>
+    <div class="row"><span class="tag s-part">PARTIALLY COMPLIANT</span><span class="score">Score 2</span><span class="muted">Cat 15 · Priority P1 · Prod blocker: No</span></div>
+    <dl>
+      <dt>Evidence</dt><dd><span class="file">ComplianceLedger/LedgerEntries.cs:27-37</span> binds signer, meaning, <span class="file">SubjectRef</span>, <span class="file">ContentHash</span>, timestamp, tenant — but <b>no structured RecordVersion, Reason, or AuthLevel</b>; version lives only in free-text <span class="file">Meaning</span> (<span class="file">DocumentCommands.cs:156</span>) and <span class="file">SubjectRef=DOC:{id}</span>. Only <span class="file">AuditTrailEntry</span> is hash-chained; the signature ledger is append-only (trigger) but not chained; audit linkage is by string match, not FK.</dd>
+      <dt>Analysis</dt><dd>Content modification <i>is</i> detectable (bound SHA-256) and re-signing <i>is</i> required on a new version — the core Part 11 intent is met — but "which version, what reason, what auth assurance, linked to which audit entry" requires parsing free text.</dd>
+      <dt>Risk</dt><dd>Weakens 21 CFR Part 11 §11.50/§11.70 signature-to-record binding under scrutiny.</dd>
+      <dt>Remediation</dt><dd>Add <span class="file">RecordVersion</span>, <span class="file">Reason</span>, <span class="file">AuthLevel</span> columns; set <span class="file">SubjectRef=DOC:{id}:v{n}</span>; chain/FK-link into the audit trail.</dd>
+      <dt>Required tests</dt><dd>Signature captures version+reason; verification detects a version mismatch; chain verify.</dd>
+      <dt>Confidence</dt><dd>High.</dd>
+    </dl>
+  </div>
+
+  <div class="finding me">
+    <h3><span class="fid">SEC-002</span> JWT access-token lifetime contradicts ADR-0009 <span class="tag sev-MED">MEDIUM</span></h3>
+    <div class="row"><span class="tag s-part">PARTIALLY COMPLIANT</span><span class="score">Score 2</span><span class="muted">Cat 7/16/18 · Priority P1</span></div>
+    <dl>
+      <dt>Evidence</dt><dd><span class="file">appsettings.json:24</span> <span class="file">"ExpiryMinutes":120</span>; ADR-0009 bases XSS risk-acceptance on ≤15-min in-memory exposure; closure report cites 60-min (ADR-0003 era). Three sources disagree.</dd>
+      <dt>Analysis</dt><dd>Shipped default is 8× the ADR window, undermining the documented compensating control for the in-memory token model.</dd>
+      <dt>Remediation</dt><dd>Set default to 15 (or amend ADR-0009 and re-baseline). Add a <span class="file">ConfigGuard</span> assertion that config matches the ADR.</dd>
+      <dt>Confidence</dt><dd>High.</dd>
+    </dl>
+  </div>
+
+  <div class="finding me">
+    <h3><span class="fid">AUDIT-001</span> Tamper-evident audit chain lacks structured actor/correlation columns <span class="tag sev-MED">MEDIUM</span></h3>
+    <div class="row"><span class="tag s-part">PARTIALLY COMPLIANT</span><span class="score">Score 3</span><span class="muted">Cat 15 · Priority P2</span></div>
+    <dl>
+      <dt>Evidence</dt><dd><span class="file">AuditTrailEntry</span> hashes <span class="file">PrevHash‖Sequence‖EventId‖EventType‖Payload‖OccurredAt</span>; actor/outcome/correlation live in the serialized payload and the separate <span class="file">FieldChangeRecord</span>, not as chained columns. Append-only via triggers <span class="file">ComplianceAndAuth.cs:154-165</span>; tamper test <span class="file">ComplianceHardeningTests.cs:65,93</span>.</dd>
+      <dt>Remediation</dt><dd>Promote <span class="file">ActorId</span>, <span class="file">Outcome</span>, <span class="file">CorrelationId</span> into columns included in the hash pre-image; extend the tamper test.</dd>
+      <dt>Confidence</dt><dd>High.</dd>
+    </dl>
+  </div>
+
+  <div class="finding me">
+    <h3><span class="fid">CQRS-001</span> No enforced transaction boundary <span class="tag sev-MED">MEDIUM</span></h3>
+    <div class="row"><span class="tag s-part">PARTIALLY COMPLIANT</span><span class="score">Score 3</span><span class="muted">Cat 5/10 · Priority P2</span></div>
+    <dl>
+      <dt>Evidence</dt><dd>Pipeline is Tracing→Logging→Authorization→Idempotency→Validation <span class="file">Application/DependencyInjection.cs:20-24</span> — no <span class="file">TransactionBehavior</span>. Atomicity relies on one <span class="file">SaveChangesAsync</span> per handler; outbox enqueued in that same save.</dd>
+      <dt>Analysis</dt><dd>Correct today, but "one aggregate per transaction" is convention with no guard; a future multi-save handler would split into two uncoordinated transactions with no compensation.</dd>
+      <dt>Remediation</dt><dd>Add an explicit <span class="file">TransactionBehavior</span> or an arch test forbidding &gt;1 <span class="file">SaveChanges</span> per handler.</dd>
+      <dt>Confidence</dt><dd>High.</dd>
+    </dl>
+  </div>
+
+  <div class="finding me">
+    <h3><span class="fid">DDD-001</span> Primitive obsession — documented value-object layer largely unimplemented <span class="tag sev-MED">MEDIUM</span></h3>
+    <div class="row"><span class="tag s-part">PARTIALLY COMPLIANT</span><span class="score">Score 3</span><span class="muted">Cat 3/4 · Priority P2</span></div>
+    <dl>
+      <dt>Evidence</dt><dd>Only real <span class="file">ValueObject</span> subclass is <span class="file">TenantSlug</span>; <span class="file">Domain_Model.md §6</span> claims ~30 VOs but <span class="file">Severity/Rpn/Email/DocumentCode/SemanticVersion</span> are raw <span class="file">string</span>/<span class="file">int</span> (<span class="file">Nonconformance.cs:99-104</span>, <span class="file">UserAccount.cs:43</span>). RPN computed inline.</dd>
+      <dt>Analysis</dt><dd>Encapsulation, invariants, transitions, events are otherwise strong DDD; validation/equality/semantics simply aren't localized in types, and the doc overstates the model.</dd>
+      <dt>Remediation</dt><dd>Introduce VOs for the highest-risk concepts (Email, DocumentCode, SemanticVersion, RPN); correct the doc's inventory. Add VO unit tests.</dd>
+      <dt>Confidence</dt><dd>High.</dd>
+    </dl>
+  </div>
+
+  <div class="finding me">
+    <h3><span class="fid">OBS-001</span> "Serilog" met by MEL JSON; no SpanId, no redaction policy <span class="tag sev-MED">MEDIUM</span></h3>
+    <div class="row"><span class="tag s-part">PARTIALLY COMPLIANT</span><span class="score">Score 3</span><span class="muted">Cat 17 · Priority P2</span></div>
+    <dl>
+      <dt>Evidence</dt><dd>No Serilog; <span class="file">Program.cs:41-51</span> <span class="file">AddJsonConsole</span>; <span class="file">ObservabilityMiddleware.cs</span> scope stamps Service/Environment/CorrelationId/TraceId + a canonical completion log (tenant/user/outcome/duration). OTel traces HTTP+Npgsql+MediatR+outbox+jobs; business metrics + 7 PromQL alerts + Grafana. <b>Missing:</b> SpanId enrichment; any masking/redaction policy (no sensitive logging was found).</dd>
+      <dt>Remediation</dt><dd>Enrich SpanId; add a redaction policy; if the standard mandates Serilog specifically, adopt it or record an ADR deviation.</dd>
+      <dt>Confidence</dt><dd>High.</dd>
+    </dl>
+  </div>
+
+  <div class="finding me">
+    <h3><span class="fid">TEST-001</span> Specific test-type holes (validators, migration-drift, value-objects) <span class="tag sev-MED">MEDIUM</span></h3>
+    <div class="row"><span class="tag s-part">PARTIALLY COMPLIANT</span><span class="score">Score 3</span><span class="muted">Cat 21 · Priority P2</span></div>
+    <dl>
+      <dt>Evidence</dt><dd>No FluentValidation <span class="file">Validate()</span> tests; no EF <span class="file">HasPendingModelChanges</span> drift test; no dedicated VO tests. Strong &amp; present: cross-tenant RLS (real PG, filters off), deny-matrix authz, <span class="file">CheckConstraintTests</span> (SQLSTATE 23514), <span class="file">OutboxResilienceTests</span>, <span class="file">OptimisticConcurrencyTests</span>, <span class="file">ProblemContractTests</span>, arch gates, audit hash-chain tamper test. Functional tests default to InMemory; local integration suite is <span class="file">[SkippableFact]</span>.</dd>
+      <dt>Integrity note</dt><dd>The suite was <b>not executed</b> in this audit; "all green" is a documented claim.</dd>
+      <dt>Remediation</dt><dd>Add validator, migration-drift, and VO tests; run the deny-matrix + a core happy path on real PG in functional tests.</dd>
+      <dt>Confidence</dt><dd>High.</dd>
+    </dl>
+  </div>
+
+  <div class="finding me">
+    <h3><span class="fid">JOB-001</span> Recurring jobs — UTC-only day boundaries, pipeline bypass, asymmetric dead-lettering <span class="tag sev-MED">MEDIUM</span></h3>
+    <div class="row"><span class="tag s-part">PARTIALLY COMPLIANT</span><span class="score">Score 3</span><span class="muted">Cat 11 · Priority P2</span></div>
+    <dl>
+      <dt>Evidence</dt><dd><span class="file">ScheduledSweepService.cs:88</span> &amp; <span class="file">KpiSnapshotService.cs:87</span> use <span class="file">clock.UtcNow</span> for "due today" (no per-tenant TZ); sweep calls aggregate methods directly (<span class="file">:95-148</span>), bypassing validation/idempotency behaviors; only the outbox dead-letters; sweep leader-election untested (no-op on InMemory). Uses <span class="file">BackgroundService</span>, not Hangfire (acceptable design choice).</dd>
+      <dt>Remediation</dt><dd>Per-tenant timezone for day-boundary logic; terminal-failure alert for sweeps; a leader-election test.</dd>
+      <dt>Confidence</dt><dd>High.</dd>
+    </dl>
+  </div>
+
+  <div class="finding me">
+    <h3><span class="fid">BIZ-001</span> Documented functional defect — rejected NC blocks complaint closure <span class="tag sev-MED">MEDIUM</span></h3>
+    <div class="row"><span class="tag s-part">PARTIALLY COMPLIANT</span><span class="score">Score 3</span><span class="muted">Cat 1 · Priority P2</span></div>
+    <dl>
+      <dt>Evidence</dt><dd><span class="file">Improvement/Complaint.cs:155-160</span> <span class="file">Close</span> throws <span class="file">CMP-020</span> unless the linked NC is <span class="file">Closed</span>; a <i>Rejected</i> NC never reaches <span class="file">Closed</span>, so such a complaint is unclosable. Honestly recorded in the RTM (FR-CMP-03).</dd>
+      <dt>Remediation</dt><dd>Allow complaint closure when the linked NC is Rejected (or provide an override with reason). Add a closure-on-rejected test.</dd>
+      <dt>Confidence</dt><dd>High.</dd>
+    </dl>
+  </div>
+
+  <div class="finding lo">
+    <h3><span class="fid">SEC-003</span> Latent security-hardening gaps <span class="tag sev-LOW">LOW</span></h3>
+    <div class="row"><span class="tag s-part">PARTIALLY COMPLIANT</span><span class="score">Score 3</span><span class="muted">Cat 16 · Priority P2/P3</span></div>
+    <dl>
+      <dt>Evidence</dt><dd>(a) <span class="file">LocalFileStorage.cs:72</span> <span class="file">Path.Combine</span> with no rooted-path/<span class="file">..</span> assertion (keys server-generated → not currently exploitable); (b) <span class="file">appsettings.json:32</span> <span class="file">AllowedHosts:"*"</span>; (c) HS256 shared secret, no rotation/asymmetric option; (d) no minimum-length guard on <span class="file">Jwt:Secret</span>. CORS correctly absent (same-origin, ADR-0007); headers/CSP/HSTS/rate-limiting strong.</dd>
+      <dt>Remediation</dt><dd>Rooted-path assertion; set real <span class="file">AllowedHosts</span>; ≥32-byte secret guard at boot; key-rotation ADR.</dd>
+      <dt>Confidence</dt><dd>High.</dd>
+    </dl>
+  </div>
+
+  <div class="finding lo">
+    <h3><span class="fid">ARCH-001</span> Module-boundary test omits <span class="file">Authorization</span> module; pipeline order untested <span class="tag sev-LOW">LOW</span></h3>
+    <div class="row"><span class="tag s-part">PARTIALLY COMPLIANT</span><span class="score">Score 3</span><span class="muted">Cat 2/5 · Priority P3</span></div>
+    <dl>
+      <dt>Evidence</dt><dd><span class="file">ModuleBoundaryTests.cs</span> hardcodes 18 modules; Domain has 19 (the <span class="file">Authorization</span> folder is unguarded). No test pins the MediatR behavior order (comments only). <span class="file">Supplier.cs:188</span> does BCL JSON serialization in the domain.</dd>
+      <dt>Remediation</dt><dd>Derive the module list dynamically (or add <span class="file">Authorization</span>); add a behavior-order test; move Supplier JSON shaping to Infrastructure.</dd>
+      <dt>Confidence</dt><dd>High.</dd>
+    </dl>
+  </div>
+
+  <div class="finding lo">
+    <h3><span class="fid">DDD-002</span> Public tenant/branch/department setters on aggregate roots <span class="tag sev-LOW">LOW</span></h3>
+    <div class="row"><span class="tag s-part">PARTIALLY COMPLIANT</span><span class="score">Score 3</span><span class="muted">Cat 4 · Priority P3</span></div>
+    <dl>
+      <dt>Evidence</dt><dd><span class="file">Nonconformance.cs:96-98</span>, <span class="file">Audit.cs:64-66</span> expose <span class="file">public get;set</span> for tenant ids (interceptor-stamped). <span class="file">UserAccount.cs:42</span> shows <span class="file">private set</span> is feasible.</dd>
+      <dt>Remediation</dt><dd>Make setters private/internal and stamp via the interceptor's backing field.</dd>
+      <dt>Confidence</dt><dd>High.</dd>
+    </dl>
+  </div>
+
+  <div class="finding me">
+    <h3><span class="fid">OPS-002</span> Ops proofs pending — restore drill, staging observability/load, no CD/SAST <span class="tag sev-MED">MEDIUM</span></h3>
+    <div class="row"><span class="tag s-part">PARTIALLY COMPLIANT</span><span class="score">Score 3</span><span class="muted">Cat 19/20 · Priority P1/P2</span></div>
+    <dl>
+      <dt>Evidence</dt><dd><span class="file">BACKUP-RESTORE-DR.md</span> strong (RPO≤5m/RTO≤4h) but restore drill <b>not executed</b> (TD-04); observability stack authored but <b>not run</b> (closure R-7); load harness has only a dev-box baseline (R-5). CI runs real-PG tests + Trivy + dual SCA + non-root assertion, but <b>no SAST/CodeQL, no Dependabot, no CD</b>. No expand/contract migration guarantee (rollback = restore/PITR). No explicit connection-pool sizing.</dd>
+      <dt>Remediation</dt><dd>Execute a restore drill; run observability + failure-drills + production-scale load on staging; add CodeQL + Dependabot; document expand/contract migration policy.</dd>
+      <dt>Confidence</dt><dd>High.</dd>
+    </dl>
+  </div>
+
+  <div class="finding lo">
+    <h3><span class="fid">DOC-002</span> Documentation-currency drift <span class="tag sev-LOW">LOW</span></h3>
+    <div class="row"><span class="tag s-comp">COMPLIANT (minor)</span><span class="score">Score 4</span><span class="muted">Cat 22 · Priority P3</span></div>
+    <dl>
+      <dt>Evidence</dt><dd><span class="file">README.md:12</span> "114 automated tests" vs CLAUDE.md 460 vs closure 359 vs ~394 counted; <span class="file">Domain_Model.md</span> inventory diverges from code; <span class="file">package.json:4</span> still says "Angular 18"; many overlapping HTML audit vintages; TD-01 lists <span class="file">security_event</span> "no RLS" though <span class="file">Hardening2_RlsGapClosure</span> appears to have added it. Docs otherwise broad, current, and candid.</dd>
+      <dt>Remediation</dt><dd>Reconcile headline metrics; mark one authoritative report; refresh the domain-model inventory.</dd>
+      <dt>Confidence</dt><dd>High.</dd>
+    </dl>
+  </div>
+</section>
+
+<section id="s13">
+  <h2><span class="n">13</span>Aggregate and domain-model assessment</h2>
+  <p>~57 aggregate roots over <span class="file">AggregateRoot</span>/<span class="file">Entity</span>/<span class="file">ValueObject</span> primitives in SharedKernel. Encapsulation is real: private setters, EF-only private ctors, factories, guarded state machines throwing coded <span class="file">DomainException</span>s, SoD enforced <i>in the aggregate</i>. 82 past-tense domain events drained to the outbox in-transaction. <span class="file">xmin</span> optimistic concurrency applied by convention to every root.</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Root</th><th>Responsibility</th><th>Invariants (in-domain)</th><th>Transitions</th><th>Concur.</th><th>Tenant</th><th>Audit</th></tr></thead>
+    <tbody>
+      <tr><td><span class="file">Nonconformance</span></td><td>CAPA/quality-event lifecycle</td><td>NC-001/002; SOD-CAPA-001/002; open-CAPA gate</td><td>Submit→Triage→Rca→Capa→Verify→Close (9-state)</td><td>xmin</td><td>ITenantScoped</td><td>hash-chain + field-change</td></tr>
+      <tr><td><span class="file">ControlledDocument</span></td><td>SOP version lifecycle</td><td>exactly-one-Published; one in-flight; SOD-DOC-001/002</td><td>Draft→Review→Recommend→Publish→Retire</td><td>xmin</td><td>ITenantScoped</td><td>e-sig on publish (SHA-256)</td></tr>
+      <tr><td><span class="file">Audit</span></td><td>Internal audit execution/sign-off</td><td>AUD-017/018/020; immutable after sign-off</td><td>Schedule→Execute→Sign-off</td><td>xmin</td><td>ITenantScoped</td><td>append-only</td></tr>
+      <tr><td><span class="file">Tenant</span></td><td>Control-plane tenant</td><td>TENANT-001/003/004; <span class="file">TenantSlug</span> VO</td><td>Provision→Suspend/Reactivate/Terminate</td><td>xmin</td><td>control-plane</td><td>security-event</td></tr>
+      <tr><td><span class="file">UserAccount</span></td><td>Identity/MFA/lockout</td><td>USER-001..004; MFA/PIN state machines</td><td>Create→lock/unlock/role/scope</td><td>xmin</td><td>IOptionallyTenantScoped (private set)</td><td>security-event</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="muted"><b>Gaps:</b> primitive obsession (DDD-001); public tenant setters on some roots (DDD-002).</p>
+</section>
+
+<section id="s14">
+  <h2><span class="n">14</span>Database and tenant-isolation assessment</h2>
+  <ul>
+    <li><b>Isolation:</b> EF convention filter + 93 FORCE-RLS policies + tenant-composite PKs <span class="file">(tenant_id, id)</span> + tenant-composite FKs + NOBYPASSRLS role + boot <span class="file">DatabaseRoleGuard</span>. GUC set per pooled connection open. Elevation confined to outbox/sweeps/KPI/provisioning.</li>
+    <li><b>Integrity:</b> ~85 CHECK constraints via raw SQL <span class="file">Phase5CheckConstraints</span>, tenant-scoped unique constraints, 88 Cascade / 3 Restrict FKs, <span class="file">HasPrecision(18,6)</span> money, <span class="file">timestamptz</span> UTC, minimal JSONB.</li>
+    <li><b>Anti-patterns avoided:</b> no generic repository, no UoW-over-DbContext, no <span class="file">IQueryable</span> across boundaries, <span class="file">IEntityTypeConfiguration</span> mapping only.</li>
+    <li><b>Accepted deviation:</b> <span class="file">user_account</span> has no RLS (auth precedes tenant resolution); held by a build-failing source-scan test.</li>
+    <li><b>Verification:</b> cross-tenant denial tests run against <b>real PostgreSQL</b> with the EF filter disabled — the strongest proof short of production. <b>Not executed this pass.</b></li>
+  </ul>
+</section>
+
+<section id="s15">
+  <h2><span class="n">15</span>Security and STRIDE assessment</h2>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Threat</th><th>Strongest control</th><th>Residual gap</th></tr></thead>
+    <tbody>
+      <tr><td>Spoofing</td><td>JWT (issuer/audience/lifetime/key all validated, 1-min skew), deny-by-default fallback, password+PIN e-sign</td><td>HS256 shared secret, no rotation/asymmetric; no secret min-length guard</td></tr>
+      <tr><td>Tampering</td><td>Hash-chained audit + append-only triggers + NOBYPASSRLS role + boot guard</td><td>Signature ledger not chained; e-sig version binding in free text</td></tr>
+      <tr><td>Repudiation</td><td>Contemporaneous field-change ledger + e-sig + security-event ledger</td><td>Audit chain lacks structured actor/correlation columns</td></tr>
+      <tr><td>Info disclosure</td><td>Locked API CSP, tenant RLS, secrets from env, Prod stack-trace hiding</td><td><b>File-download object authz (API-001)</b>; <span class="file">AllowedHosts:*</span></td></tr>
+      <tr><td>DoS</td><td>Rate limiter (global + per-actor auth/e-sign partitions), readiness gate</td><td>Rate-limit tuning unproven under load</td></tr>
+      <tr><td>Elevation</td><td>Boot refuses SUPERUSER/BYPASSRLS/owner; SoD checks; FORCE RLS</td><td>File path-traversal guard absent (low; server-gen keys)</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Secrets: <span class="file">appsettings.json</span> ships empty; env injection with fail-if-unset in <span class="file">compose.production.yml</span>; no secrets in Angular bundle or image. Supply chain: Trivy + NuGet/npm SCA in CI; <b>no SAST/CodeQL</b>.</p>
+</section>
+
+<section id="s16">
+  <h2><span class="n">16–19</span>API · Angular · Testing · Observability/Ops</h2>
+  <h3>16 · API</h3>
+  <p>DTOs only (never entities); URL-segment versioning (<span class="file">api/…</span>↔<span class="file">api/v1/…</span>, ADR-0004); single ProblemDetails writer (400/401/403/404/409/422 distinct, stable <span class="file">code</span> + traceId/correlationId); pagination clamped <span class="file">[1,200]</span>; allow-listed server-fixed sorting (no <span class="file">IQueryable</span>/OData); opt-in <span class="file">Idempotency-Key</span> replay; upload magic-byte sniffing + attachment downloads; no stack/SQL leakage. <b>Gaps:</b> file-download object authz (API-001); read-side authorization not backstopped by the MediatR pipeline.</p>
+  <h3>17 · Angular 22</h3>
+  <p>100% standalone + lazy routes; strict TS (<span class="file">strictTemplates</span>); typed <span class="file">nonNullable</span> reactive forms; signals/computed state; centralized typed API layer; <b>token in-memory + httpOnly rotating refresh cookie (ADR-0009)</b> — verified no token in web storage; authz-visibility framed as UX with server enforcement; 3-language i18n + RTL; axe-core a11y in e2e. <b>Gaps:</b> no 409 concurrency-conflict UX; permission keys hardcoded; no e2e for authz-based visibility; stale metadata.</p>
+  <h3>18 · Testing</h3>
+  <p>Real-PostgreSQL fixture that refuses to run unless FORCE RLS is applied and the role is non-privileged; RLS tests with EF filter off; direct-SQL corruption rejected (23514); outbox SKIP-LOCKED/lease/backoff; racing-edit 409; ProblemDetails contract; NetArch boundary + API-surface snapshot gates; audit hash-chain tamper test. <b>Holes:</b> validator, migration-drift, value-object tests; functional tests default to InMemory; local integration suite <span class="file">[SkippableFact]</span>. <b>Suite not executed this audit</b> — pass/green is a documented claim; build compiles clean (verified).</p>
+  <h3>19 · Observability &amp; Ops</h3>
+  <p>Structured JSON logs with the required property set; OTel traces HTTP+DB+MediatR+outbox+jobs (traceparent persisted → one trace across the async boundary); business metrics + 7 PromQL alerts + Grafana; health live/ready split correct; EF retry+timeout; cancellation propagated; graceful shutdown; strong Backup/DR runbook. <b>Gaps:</b> no Serilog/SpanId/redaction; observability + load not run on staging; restore drill not executed; no circuit breaker (near-moot); pool sizing/capacity undocumented.</p>
+</section>
+
+<section id="s20">
+  <h2><span class="n">20</span>Risk register</h2>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>ID</th><th>Risk</th><th>Likelihood</th><th>Impact</th><th>Sev</th><th>Owner</th><th>Mitigation</th></tr></thead>
+    <tbody>
+      <tr><td>API-001</td><td>Intra-tenant file over-exposure</td><td>Medium</td><td>High</td><td><span class="tag sev-HIGH">HIGH</span></td><td>Unassigned</td><td>Object-level entitlement on download</td></tr>
+      <tr><td>ESIG-001</td><td>Weak machine-verifiable signature binding (Part 11)</td><td>Medium</td><td>High</td><td><span class="tag sev-HIGH">HIGH</span></td><td>Unassigned</td><td>Version/reason/auth cols; chain the ledger</td></tr>
+      <tr><td>SEC-001</td><td>Unvalidated exploitability (no pen test)</td><td>Medium</td><td>High</td><td><span class="tag sev-HIGH">HIGH</span></td><td>Unassigned</td><td>External pen test</td></tr>
+      <tr><td>DOC-001</td><td>Part 11 CSV validation not executed/signed</td><td>High</td><td>High</td><td><span class="tag sev-HIGH">HIGH</span></td><td>Unassigned</td><td>Execute &amp; sign IQ/OQ/PQ</td></tr>
+      <tr><td>SEC-002</td><td>Oversized JWT window vs ADR</td><td>Medium</td><td>Medium</td><td><span class="tag sev-MED">MED</span></td><td>Unassigned</td><td>Set 15-min default</td></tr>
+      <tr><td>CQRS-001</td><td>Unenforced transaction boundary</td><td>Low</td><td>High</td><td><span class="tag sev-MED">MED</span></td><td>Unassigned</td><td>TransactionBehavior / arch test</td></tr>
+      <tr><td>OPS-002</td><td>Unproven at scale; alerts unfired; no restore drill</td><td>Medium</td><td>Medium</td><td><span class="tag sev-MED">MED</span></td><td>Unassigned</td><td>Staging load + drills + restore</td></tr>
+      <tr><td>AUDIT-001</td><td>Attribution not inside tamper-evident chain</td><td>Low</td><td>Medium</td><td><span class="tag sev-MED">MED</span></td><td>Unassigned</td><td>Promote actor/correlation into hash</td></tr>
+      <tr><td>JOB-001</td><td>UTC-only day boundaries for multi-zone tenants</td><td>Medium</td><td>Medium</td><td><span class="tag sev-MED">MED</span></td><td>Unassigned</td><td>Per-tenant timezone</td></tr>
+      <tr><td>BIZ-001</td><td>Rejected NC blocks complaint closure</td><td>Medium</td><td>Medium</td><td><span class="tag sev-MED">MED</span></td><td>Unassigned</td><td>Allow closure on NC rejected</td></tr>
+      <tr><td>DDD-001</td><td>Primitive obsession / doc drift</td><td>High</td><td>Low</td><td><span class="tag sev-LOW">LOW</span></td><td>Unassigned</td><td>Introduce key VOs; fix docs</td></tr>
+      <tr><td>SEC-003</td><td>Path-traversal guard, AllowedHosts, secret entropy</td><td>Low</td><td>Medium</td><td><span class="tag sev-LOW">LOW</span></td><td>Unassigned</td><td>Rooted-path check; host list; secret guard</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section id="s21">
+  <h2><span class="n">21</span>Prioritized remediation backlog</h2>
+  <p class="muted">Ordered by: cross-tenant/authz → data/consistency → secrets/exposure → availability → integrity/tests → boundaries → maintainability.</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Prio</th><th>ID</th><th>Corrective action</th><th>Affected components</th><th>Required tests</th></tr></thead>
+    <tbody>
+      <tr><td>P1</td><td>API-001</td><td>Enforce object-level entitlement on file download</td><td><span class="file">FilesController</span>, <span class="file">FileReference</span>, <span class="file">PermissionCatalog</span></td><td>403 for no-permission / out-of-branch</td></tr>
+      <tr><td>P1</td><td>ESIG-001</td><td>Structured version/reason/auth-level + chain signature ledger</td><td><span class="file">SignatureRecord</span>, <span class="file">ComplianceLedgerServices</span>, migration</td><td>version-mismatch detected; chain verify</td></tr>
+      <tr><td>P1</td><td>SEC-002</td><td>Reconcile JWT lifetime to ADR (15 min)</td><td><span class="file">appsettings</span>, <span class="file">ConfigGuard</span>, ADR-0009</td><td>config-vs-ADR assertion</td></tr>
+      <tr><td>P1</td><td>SEC-001 / DOC-001 / OPS-002</td><td>Pen test; execute+sign CSV; staging observability/load/restore</td><td>external + <span class="file">deploy/</span></td><td>drill/alert firing evidence</td></tr>
+      <tr><td>P2</td><td>CQRS-001</td><td>Add <span class="file">TransactionBehavior</span> (or single-SaveChanges arch test)</td><td><span class="file">Application/Behaviors</span></td><td>rollback-on-throw; arch test</td></tr>
+      <tr><td>P2</td><td>AUDIT-001</td><td>Promote actor/outcome/correlation into hashed columns</td><td>audit schema, appender</td><td>extended tamper test</td></tr>
+      <tr><td>P2</td><td>TEST-001</td><td>Validator, migration-drift, value-object tests</td><td>test projects</td><td>new suites green</td></tr>
+      <tr><td>P2</td><td>JOB-001</td><td>Per-tenant timezone; sweep terminal-failure alert; leader-election test</td><td><span class="file">Jobs/*</span></td><td>TZ boundary + leader tests</td></tr>
+      <tr><td>P2</td><td>BIZ-001</td><td>Allow complaint closure when linked NC rejected</td><td><span class="file">Complaint</span></td><td>closure-on-rejected test</td></tr>
+      <tr><td>P2</td><td>OBS-001</td><td>SpanId enrichment + log redaction policy</td><td><span class="file">ObservabilityMiddleware</span></td><td>redaction test</td></tr>
+      <tr><td>P3</td><td>DDD-001/002</td><td>Key value objects; private tenant setters; fix docs</td><td>Domain, docs</td><td>VO unit tests</td></tr>
+      <tr><td>P3</td><td>ARCH-001</td><td>Dynamic module list + behavior-order test; move Supplier JSON</td><td>tests, <span class="file">Supplier</span></td><td>order + boundary tests</td></tr>
+      <tr><td>P3</td><td>SEC-003</td><td>Rooted-path check; AllowedHosts; JWT secret min-length; key-rotation ADR</td><td>storage, config, boot</td><td>path-traversal test</td></tr>
+      <tr><td>P3</td><td>DOC-002</td><td>Reconcile metrics; one authoritative report; refresh domain-model doc</td><td>docs</td><td>—</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section id="plan">
+  <h2><span class="n">★</span>Recommended implementation plan</h2>
+  <p class="lead">Five workstreams. Phases A–C are the engineering track (sequence them; ~6–7 calendar weeks for a small team). Phase D is the external regulated-validation track and runs <b>in parallel</b> — it, not the code, is the long pole for a compliant go-live. Phase E is maintainability cleanup that can be interleaved. Effort is rough order-of-magnitude for one senior full-stack engineer; each phase ends with an explicit <b>exit gate</b>.</p>
+
+  <div class="callout note"><b>Guiding principle</b> Every fix ships with the test that would have caught it. The codebase already gates behavior in CI (deny-by-default policy, module boundaries, API-surface snapshot) — extend that discipline to each new control rather than relying on review.</div>
+
+  <div class="phase">
+    <div class="ph-head"><span class="code">PHASE A</span><h3>Pre-release security &amp; compliance fixes</h3><span class="when">P1 · ~1.5 weeks</span></div>
+    <div class="ph-body">
+      <p class="muted">The highest-value, lowest-risk fixes; ship before the next release.</p>
+      <div class="timeline">
+        <div class="swim"><div class="t">A1 · API-001 (2–3 d)</div>Add <span class="file">documents.view</span>/evidence permission to <span class="file">FilesController.Download</span> and resolve entitlement through the owning aggregate; apply branch/department scope where the parent is <span class="file">IAllocatable</span>. <b>Test:</b> unauthorized/out-of-branch → 403.</div>
+        <div class="swim"><div class="t">A2 · SEC-002 (0.5 d)</div>Set <span class="file">Jwt:ExpiryMinutes</span> default to 15; add a <span class="file">ConfigGuard</span> assertion tying config to ADR-0009. Amend the ADR if 15 is not the intended value. <b>Test:</b> config-vs-ADR.</div>
+        <div class="swim"><div class="t">A3 · ESIG-001 (3–4 d)</div>Add <span class="file">RecordVersion</span>/<span class="file">Reason</span>/<span class="file">AuthLevel</span> columns to <span class="file">SignatureRecord</span> (+ migration); set <span class="file">SubjectRef=DOC:{id}:v{n}</span>; hash-chain or FK-link the signature ledger to the audit trail. <b>Test:</b> version-mismatch detected + chain verify.</div>
+      </div>
+      <div class="gate"><b>Exit gate A:</b> No authenticated user can download a file they aren't entitled to; JWT lifetime matches its ADR; a signature machine-proves which record version it covers. New tests green in CI.</div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="ph-head"><span class="code">PHASE B</span><h3>Consistency &amp; integrity hardening</h3><span class="when">P2 · ~2 weeks</span></div>
+    <div class="ph-body">
+      <div class="timeline">
+        <div class="swim"><div class="t">B1 · CQRS-001 (2 d)</div>Add a <span class="file">TransactionBehavior</span> (opt-in via marker or applied to commands) <i>and</i> an architecture test forbidding &gt;1 <span class="file">SaveChanges</span> per handler. <b>Test:</b> rollback-on-throw + arch test.</div>
+        <div class="swim"><div class="t">B2 · AUDIT-001 (2 d)</div>Promote <span class="file">ActorId</span>/<span class="file">Outcome</span>/<span class="file">CorrelationId</span> into first-class columns inside the hashed pre-image of <span class="file">AuditTrailEntry</span> (+ migration). <b>Test:</b> extend the tamper test to the new columns.</div>
+        <div class="swim"><div class="t">B3 · TEST-001 (3 d)</div>Add FluentValidation validator tests, an EF <span class="file">HasPendingModelChanges</span> migration-drift test, and value-object unit tests; run the deny-matrix + one core happy path on real PG in functional tests.</div>
+        <div class="swim"><div class="t">B4 · OBS-001 (1 d)</div>Enrich <span class="file">SpanId</span> into logs; add a redaction/masking policy for sensitive fields. <b>Test:</b> redaction test.</div>
+      </div>
+      <div class="gate"><b>Exit gate B:</b> Atomicity guaranteed by behavior + guarded by CI; audit attribution lives inside the tamper-evident chain; the three named test holes are closed; logs carry SpanId and are redaction-safe.</div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="ph-head"><span class="code">PHASE C</span><h3>Correctness &amp; UX polish</h3><span class="when">P2/P3 · ~1.5 weeks</span></div>
+    <div class="ph-body">
+      <div class="timeline">
+        <div class="swim"><div class="t">C1 · JOB-001 (2 d)</div>Per-tenant timezone for "due today" logic in the sweep/KPI jobs; a distinct terminal-failure alert for chronically failing sweeps; a leader-election skip test. <b>Test:</b> TZ boundary + leader tests.</div>
+        <div class="swim"><div class="t">C2 · BIZ-001 (1 d)</div>Allow complaint closure when the linked NC is <i>Rejected</i> (or a reasoned override). <b>Test:</b> closure-on-rejected.</div>
+        <div class="swim"><div class="t">C3 · Frontend (2–3 d)</div>Add a 409 concurrency-conflict UX (surface xmin conflicts with reload-and-retry); centralize permission keys into a <span class="file">PermissionKeys</span> constants module; add an e2e asserting permission-hidden approve/sign buttons per role.</div>
+      </div>
+      <div class="gate"><b>Exit gate C:</b> Multi-zone tenants see local day boundaries; no unclosable complaints; users get a meaningful conflict experience; authz-visibility is tested end-to-end.</div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="ph-head"><span class="code">PHASE D</span><h3>Regulated go-live validation (external track — parallel)</h3><span class="when">P1 · ~4–8 weeks · gates certification</span></div>
+    <div class="ph-body">
+      <p class="muted">These are the actual conditions on the "APPROVED WITH CONDITIONS" decision. Start them at the same time as Phase A — they have the longest lead times and external dependencies.</p>
+      <div class="timeline">
+        <div class="swim"><div class="t">D1 · SEC-001</div>Commission the independent penetration test (SOW already drafted); remediate findings; retest.</div>
+        <div class="swim"><div class="t">D2 · DOC-001</div>Execute and <b>sign</b> the CSV package (IQ/OQ/PQ) in a qualified environment; update the RTM and validation summary.</div>
+        <div class="swim"><div class="t">D3 · OPS-001/002</div>Stand up staging; <span class="file">docker compose up</span> the observability stack; run <span class="file">failure-drills.ps1</span> to confirm dead-letter/readiness alerts fire; run production-scale load + 24 h soak; execute a real backup <b>restore drill</b> and record RTO/RPO.</div>
+        <div class="swim"><div class="t">D4 · Test evidence</div>Run the full automated suite against real PostgreSQL in CI and archive the run (backend/integration/functional/e2e) as validation evidence.</div>
+      </div>
+      <div class="gate"><b>Exit gate D:</b> Signed pen-test report + signed CSV records + a staging run with fired alerts, load numbers, and a completed restore drill + an archived green real-PG test run. <b>This gate, once met, lifts the release conditions.</b></div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="ph-head"><span class="code">PHASE E</span><h3>Maintainability &amp; documentation cleanup</h3><span class="when">P3 · interleave, ~1 week</span></div>
+    <div class="ph-body">
+      <div class="timeline">
+        <div class="swim"><div class="t">E1 · DDD</div>Introduce value objects for the highest-risk concepts (Email, DocumentCode, SemanticVersion, RPN); make tenant/branch/department setters private; correct the domain-model inventory.</div>
+        <div class="swim"><div class="t">E2 · ARCH</div>Derive the module-boundary list dynamically (covers the missing <span class="file">Authorization</span> module and future modules); add a MediatR behavior-order test; move Supplier JSON shaping to Infrastructure.</div>
+        <div class="swim"><div class="t">E3 · SEC-003</div>Rooted-path assertion in <span class="file">LocalFileStorage</span>; real <span class="file">AllowedHosts</span>; ≥32-byte <span class="file">Jwt:Secret</span> boot guard; key-rotation ADR.</div>
+        <div class="swim"><div class="t">E4 · DOC</div>Reconcile headline metrics (test counts, Angular version); designate one authoritative compliance report; add CodeQL + Dependabot to CI.</div>
+        <div class="swim"><div class="t">E5 · ADRs</div>Author ADR-0010…0014 and amend 0006/0009 (see §23).</div>
+      </div>
+      <div class="gate"><b>Exit gate E:</b> Documentation matches implementation; boundary/order gates cover all modules; SAST + dependency automation in CI; decisions recorded.</div>
+    </div>
+  </div>
+
+  <h3>Effort &amp; sequencing at a glance</h3>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Phase</th><th>Focus</th><th>Priority</th><th>Rough effort</th><th>Runs</th><th>Lifts a condition?</th></tr></thead>
+    <tbody>
+      <tr><td>A</td><td>Security/compliance pre-release fixes</td><td>P1</td><td>~1.5 wk</td><td>First</td><td>API-001 ✓</td></tr>
+      <tr><td>B</td><td>Consistency &amp; integrity</td><td>P2</td><td>~2 wk</td><td>After A</td><td>—</td></tr>
+      <tr><td>C</td><td>Correctness &amp; UX</td><td>P2/P3</td><td>~1.5 wk</td><td>After B</td><td>—</td></tr>
+      <tr><td>D</td><td>Regulated validation (external)</td><td>P1</td><td>~4–8 wk</td><td><b>Parallel from day 1</b></td><td>SEC-001, DOC-001, OPS-001 ✓</td></tr>
+      <tr><td>E</td><td>Maintainability &amp; docs</td><td>P3</td><td>~1 wk</td><td>Interleaved</td><td>—</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="callout warn"><b>Critical path to a compliant regulated release</b> = Phase A (fix API-001, SEC-002, ESIG-001) <b>AND</b> Phase D (pen test + signed CSV + staging load/observability + restore drill + archived real-PG test run). Phases B/C/E raise quality and close the remaining checklist gaps but are not, by themselves, release-gating.</div>
+</section>
+
+<section id="s23">
+  <h2><span class="n">23</span>Required ADRs</h2>
+  <ul>
+    <li><b>ADR-0010</b> — E-signature record binding &amp; signature-ledger integrity (version/reason/auth-level, chaining) [ESIG-001].</li>
+    <li><b>ADR-0011</b> — Object-level authorization model for evidence files [API-001].</li>
+    <li><b>ADR-0012</b> — JWT signing &amp; key rotation (HS256 vs asymmetric; secret entropy) [SEC-003].</li>
+    <li><b>ADR-0013</b> — Transaction-boundary policy (single-aggregate; when explicit transactions are allowed) [CQRS-001].</li>
+    <li><b>ADR-0014</b> — Multi-tenant time-zone strategy for scheduled/day-boundary logic [JOB-001].</li>
+    <li><b>(amend) ADR-0009</b> — restate the access-token lifetime actually shipped [SEC-002].</li>
+    <li><b>(amend) ADR-0006</b> — add an explicit message-ordering (no-ordering) contract [Cat 10].</li>
+  </ul>
+</section>
+
+<section id="s24">
+  <h2><span class="n">24</span>Compliance status &amp; production decision</h2>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Metric</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Overall score</td><td><b>83.3%</b> (70/84) — Generally aligned; material improvements required</td></tr>
+      <tr><td>Verification coverage</td><td>~82% — <b>Medium confidence</b> (execution-dependent controls read, not run)</td></tr>
+      <tr><td>Critical findings</td><td>0</td></tr>
+      <tr><td>High findings</td><td>~4 (API-001, ESIG-001, SEC-001, DOC-001)</td></tr>
+      <tr><td>Production blockers (conditions)</td><td>4 (see §11)</td></tr>
+      <tr><td>Tenant isolation verified?</td><td>By code &amp; test design (real-PG cross-tenant denial) — <b>strong</b>; not executed at runtime this pass</td></tr>
+      <tr><td>Backend authorization verified?</td><td>Yes — deny-by-default at build (CI gate) &amp; runtime; one object-level gap (API-001)</td></tr>
+      <tr><td>Database integrity verified?</td><td>In source (constraints/RLS/concurrency + real-PG tests) — <b>strong</b>; migrations not applied this pass</td></tr>
+      <tr><td>Tests provide sufficient evidence?</td><td>Design is strong &amp; skeptical, with named holes, and <b>not executed here</b></td></tr>
+      <tr><td>Can it reasonably proceed to production?</td><td>Software architecture is production-grade; a <i>regulated</i> go-live still requires Phase A fixes + the Phase D validation track</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p style="margin-top:16px"><span class="pill cond">PRODUCTION DECISION: APPROVED WITH CONDITIONS</span></p>
+  <p><b>Conditions:</b> (1) remediate <b>API-001</b> (file object authz) and <b>SEC-002</b> (JWT lifetime); (2) address <b>ESIG-001</b> signature binding for Part 11; (3) complete the external validation track — <b>SEC-001</b> pen test, <b>DOC-001</b> signed CSV, <b>OPS-001/002</b> staging observability/load + executed restore drill; (4) execute the full automated test suite against real PostgreSQL and retain the evidence. Absent these, a compliant <i>regulated</i> production certification cannot be asserted from the available evidence.</p>
+</section>
+
+<section id="s25">
+  <h2><span class="n">25</span>Limitations and unverified areas</h2>
+  <ul>
+    <li>The referenced <span class="file">Enterprise_Application_Development_Standard.txt</span> was not in the repo; the embedded checklist / CLAUDE.md / ADRs were used as the standard.</li>
+    <li>Test suite, EF migrations, RLS runtime enforcement, restore drill, and observability stack were <b>not executed</b> — those proofs rest on CI design and code, read but not run.</li>
+    <li>Angular a11y/keyboard depth, and read-side <span class="file">[RequirePermission]</span> per-controller coverage, were sampled, not exhaustively enumerated.</li>
+    <li>Prior self-audit reports were treated as claims; where they conflicted with code (e.g. "18 modules", "114 tests", TD-01 RLS), the code was taken as authoritative.</li>
+  </ul>
+  <p class="muted"><b>Incomplete items (partially compliant / not verified by execution):</b> Categories 1, 4, 5, 6, 7, 10, 11, 13, 15, 16, 17, 19, 20, 21; plus all execution-dependent claims (test pass, migration apply, runtime RLS, restore drill, pen test).</p>
+</section>
+
+<footer>
+  NT.QAMS Enterprise Application Compliance Assessment · EA-AUD-NTQMS-IND-001 · 2026-08-03 · Independent evidence-based review.<br>
+  Distinguishes verified facts from assumptions and recommendations. Prepared from static inspection + a successful Release build; automated tests were not executed in this pass.
+</footer>
+
+</div>
+<a class="backtop" href="#top" aria-label="Back to top">↑</a>
+</body>
+</html>
