@@ -34,14 +34,23 @@ NT.QMS is a **multi-tenant SaaS Quality Management System** for ISO 17025 / 1518
    never expose entities.
 7. **Multi-tenancy is sacred:** every `ITenantScoped` table is protected by BOTH the EF
    global query filter AND PostgreSQL FORCE RLS. See rule in §5.
-8. **Commit discipline:** work on `master`; commit/push only when asked; end commit
-   messages with `Co-Authored-By: Claude <noreply@anthropic.com>` (use the current model).
-   **Stage by explicit path, never `git add -A`** — a blanket add once swept an unrelated file
-   into a commit.
+8. **Commit / branch discipline (updated 2026-08-03):** **work on `dev` and push EVERYTHING to
+   `origin/dev` ONLY. NEVER push to `master` until the user manually and explicitly says "push to
+   master."** New work → `dev` → dev-team review → merge to `master`. A plain "push" means push to
+   `dev`. Commit/push only when asked; **stage by explicit path, never `git add -A`** (a blanket add
+   once swept an unrelated file into a commit); end commit messages with
+   `Co-Authored-By: Claude <noreply@anthropic.com>` (use the current model).
 9. **Authorization is the permission catalogue, not the role enum** (v1.51.0). Endpoints use
    `[RequirePermission(module, action)]`; commands use `[RequirePermissionPolicy]`. The
    `UserRole` enum still exists but is the platform/tenant *structural tier*, not the
    authorization mechanism. Do not add new `[Authorize(Roles=…)]` gates to tenant endpoints.
+10. **Production change discipline (standing rule, 2026-08-03):** this is a **production application** —
+    make **ONLY the exact change requested, nothing more.** Do **not** alter the architecture (it must
+    fit inside the existing Clean Architecture / CQRS / DDD / RLS structure, never reshape it) and do
+    **not** make any unrequested edits to any page, component, or file (no drive-by refactors, cleanups,
+    reformatting, renames, or fixing unrelated stale items). If a request appears to require an
+    architectural change or a wider edit, **stop and surface it for the user's decision** instead of
+    proceeding. Keep every diff minimal and surgical.
 
 ## 3. Current state (as of 2026-08-02)
 - Code at **`v1.52.0`** — EA remediation COMPLETE (Phases 0–6, closed at v1.44); **Role Privilege
