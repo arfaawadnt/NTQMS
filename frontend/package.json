@@ -1,7 +1,7 @@
 {
   "name": "nt-qams-frontend",
   "version": "1.0.0",
-  "description": "NT.QAMS Angular 18 frontend",
+  "description": "NT.QAMS Angular 22 frontend",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --host 0.0.0.0 --disable-host-check --proxy-config proxy.conf.json",
