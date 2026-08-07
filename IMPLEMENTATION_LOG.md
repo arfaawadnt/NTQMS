@@ -826,3 +826,29 @@ ceremony and the §11.50 manifest across the UI.
   witnessed positive-mint OQ for the SoD-guarded gates (needs a second PIN'd operator so signer ≠
   preparer) and the execution + signature of URS-123..128 / OQ doc 14 remain **QA's**, folded under
   DOC-001. Does NOT close DOC-001, SEC-001 or OPS-001; the release verdict stays Pre-production.
+
+## Deploy remediation — role/DDL correctness + Windows-service hosting (2026-08-07)
+
+Post-review fixes to the deployment path (no application behaviour, API surface, or schema change):
+- **Deploy docs — DDL role (`6eabfbb`):** the two ANTIGRAVITY prompts told operators to apply
+  `migrations.sql` as `qams_app`, which either fails (runtime role has no DDL) or trips the
+  TENANT-004 start-up guard (Production refuses to boot if `qams_app` owns the tables). Both now
+  run DDL as `qams_owner` + add the previously-missing `harden-runtime-role.sql` grant step, and
+  `DEPLOY.md`'s package manifest now lists that script (Step 1 already required it).
+- **`harden-runtime-role.sql` — stale `ref` schema (`ce8ad04`):** the script granted on a `ref`
+  schema no migration creates (schemas are `audit, qams, read, saas`); with `\set ON_ERROR_STOP on`
+  the first `GRANT USAGE … ref` aborted the whole script on fresh install and re-run, so the
+  least-privilege runtime role was never provisioned. Removed `ref` from all six references.
+  `DatabaseRoleGuard` still lists `ref` harmlessly (it filters `pg_tables` by schema → 0 rows).
+- **`Program.cs` — Windows-service SCM integration (this commit):** added
+  `builder.Host.UseWindowsService()` (+ `Microsoft.Extensions.Hosting.WindowsServices` package).
+  The deploy scripts register the exe via `sc.exe create` + `Start-Service`, but source had no SCM
+  integration, so a recompiled build would hang `Start-Pending` and fail the A5 start gate
+  (error 1053). The call is a no-op for console/dev and Linux-container hosting.
+- **Docs:** IQ-31 added to delta doc 06 Part B (Template — unexecuted); Deployment Spec 10.2
+  Windows-service row cites the mechanism.
+- **VERIFIED:** `dotnet build src/NT.QAMS.WebApi -c Debug` → succeeded, **0 warnings** (package
+  restored; `TreatWarningsAsErrors` holds); API restarted in console mode → `GET /health/ready`
+  → **200** (proves the `UseWindowsService()` no-op path). **NOT run:** the full test suite, and the
+  actual Windows-service install (`sc.exe`-reaches-Running) — that is IQ-31, a deploy-side check
+  owned by QA. No API route changed, so `ApiSurface.approved.txt` is untouched.

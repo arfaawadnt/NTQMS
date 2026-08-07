@@ -27,6 +27,13 @@ using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Windows-service hosting: integrate with the Service Control Manager so the
+// deploy scripts' `sc.exe create ... NT.QAMS.WebApi.exe` reaches "Running"
+// instead of timing out (error 1053). This is a no-op when the process is not
+// launched as a Windows service — console runs (dev), tests, and the Linux
+// container path are unaffected — so it is safe to call unconditionally.
+builder.Host.UseWindowsService();
+
 // ---------------------------------------------------------------------------
 // OBS-001/002/003 — observability baseline.
 // Logs: structured JSON console in Production (scopes carry service/tenant/

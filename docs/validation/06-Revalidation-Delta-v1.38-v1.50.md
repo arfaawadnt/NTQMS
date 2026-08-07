@@ -511,6 +511,7 @@ Append to QP-NTQMS-001 Part 1. Templates for execution in the qualified environm
 | IQ-28 | Guard triggers survived installation/restore | `pg_trigger` shows **17** enabled guards (4 append-only ledgers + 13 `frozen_immutability`), `tgenabled = 'O'` | | | psql transcript |
 | IQ-29 | Identifier limit respected | No relation or constraint name exceeds 62 characters | | | psql transcript |
 | IQ-30 | Deployment script current | `deploy/migrations.sql` regenerated `--idempotent` covers all 56 migrations; applied as `qams_owner`, followed by `harden-runtime-role.sql`; app connects as `qams_app` | | | script header + migration id list; role grants |
+| IQ-31 | Windows-service SCM integration | The API registered via `sc.exe create … NT.QAMS.WebApi.exe` reaches **Running** (no error 1053) and stops cleanly, enabled by `builder.Host.UseWindowsService()` in `Program.cs`; the call is a no-op for console/container hosting so those paths are unaffected | | | `Get-Service`/`sc query` transcript; `Deploy-FullStack.ps1` A5 start gate green; `Install-NTQMS-IIS.ps1` service step |
 
 ---
 

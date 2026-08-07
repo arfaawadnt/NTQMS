@@ -59,7 +59,7 @@ So a second instance is *survivable* (no duplicate scheduled work, no duplicate 
 | Target | Status | Artefacts |
 |---|---|---|
 | **Windows Server + IIS** | ✅ **verified in this environment** | `deploy/iis/Install-NTQMS-IIS.ps1`, `Verify-NTQMS-IIS.ps1`, `web.config`, `publish-win-x64/` |
-| **Windows service** | ✅ documented | `DEPLOY.md` §3 |
+| **Windows service** | ✅ documented | `DEPLOY.md` §3; `Deploy-FullStack.ps1` A5 / `Install-NTQMS-IIS.ps1` (`sc.exe create`); SCM integration via `Program.cs` `builder.Host.UseWindowsService()` (IQ-31) |
 | **Linux container** | ⚠ **authored, never executed here** — no Docker on the build host | `src/NT.QAMS.WebApi/Dockerfile`, `deploy/compose.production.yml` |
 | **Observability stack** | ⚠ **authored, never brought up** — residual R-7 | `deploy/observability/` (otel-collector, Prometheus, alert rules, Grafana) |
 
