@@ -37,7 +37,7 @@ END $$;
 --       REASSIGN OWNED BY <old_owner> TO qams_owner;
 
 -- 3. Schema usage (no CREATE — the runtime never issues DDL) ------------------
-GRANT USAGE ON SCHEMA qams, audit, ref, read, saas TO qams_app;
+GRANT USAGE ON SCHEMA qams, audit, read, saas TO qams_app;
 
 -- 4. Table privileges --------------------------------------------------------
 --    Business data: read + write, but NEVER delete (regulated records are never
@@ -45,14 +45,13 @@ GRANT USAGE ON SCHEMA qams, audit, ref, read, saas TO qams_app;
 GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA qams  TO qams_app;
 GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA read  TO qams_app;
 GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA saas  TO qams_app;
-GRANT SELECT              ON ALL TABLES IN SCHEMA ref   TO qams_app;
 
 --    Audit ledgers: append-only. INSERT + SELECT only — no UPDATE, no DELETE.
 --    (The append-only triggers are defence-in-depth on top of this.)
 GRANT SELECT, INSERT ON ALL TABLES IN SCHEMA audit TO qams_app;
 
 --    Explicitly remove DELETE anywhere it may have been inherited.
-REVOKE DELETE ON ALL TABLES IN SCHEMA qams, audit, read, saas, ref FROM qams_app;
+REVOKE DELETE ON ALL TABLES IN SCHEMA qams, audit, read, saas FROM qams_app;
 
 --    Exception (MSG-007): the transactional outbox is delivery transport, not a
 --    regulated record — processed events live on in the hash-chained audit
@@ -68,16 +67,14 @@ GRANT DELETE ON qams.idempotency_record TO qams_app;
 GRANT DELETE ON qams.refresh_session TO qams_app;
 
 -- 5. Sequences (reference-number counters etc.) ------------------------------
-GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA qams, saas, ref TO qams_app;
+GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA qams, saas TO qams_app;
 
 -- 6. Default privileges for objects created by future migrations -------------
 ALTER DEFAULT PRIVILEGES FOR ROLE qams_owner IN SCHEMA qams, read, saas
     GRANT SELECT, INSERT, UPDATE ON TABLES TO qams_app;
-ALTER DEFAULT PRIVILEGES FOR ROLE qams_owner IN SCHEMA ref
-    GRANT SELECT ON TABLES TO qams_app;
 ALTER DEFAULT PRIVILEGES FOR ROLE qams_owner IN SCHEMA audit
     GRANT SELECT, INSERT ON TABLES TO qams_app;
-ALTER DEFAULT PRIVILEGES FOR ROLE qams_owner IN SCHEMA qams, saas, ref
+ALTER DEFAULT PRIVILEGES FOR ROLE qams_owner IN SCHEMA qams, saas
     GRANT USAGE, SELECT, UPDATE ON SEQUENCES TO qams_app;
 
 -- 7. Confirm qams_app is NOT a superuser / bypassrls -------------------------
