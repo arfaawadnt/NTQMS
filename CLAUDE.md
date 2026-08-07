@@ -52,8 +52,17 @@ NT.QMS is a **multi-tenant SaaS Quality Management System** for ISO 17025 / 1518
     architectural change or a wider edit, **stop and surface it for the user's decision** instead of
     proceeding. Keep every diff minimal and surgical.
 
-## 3. Current state (as of 2026-08-02)
-- Code at **`v1.52.0`** — EA remediation COMPLETE (Phases 0–6, closed at v1.44); **Role Privilege
+## 3. Current state (as of 2026-08-07)
+- Code at **`v1.53.0`** — latest: **v1.53.0 (tagged 2026-08-07) — RISK-03 21 CFR Part 11 e-signature
+  ceremony** extended from document-publish to **every** signed-record gate (NC verify/close, all 14
+  analytical-quality sign-offs incl. PtPlan, audit sign-off, quality-policy & change approval,
+  management-review close, the 4 borderline SoD gates, and both periodic-review completions); 4 new
+  `.sign` catalogue keys (`proficiency-testing`/`suppliers`/`conflicts`/`compliance`); self-fetching
+  signature manifest on every gate; backend **478** + frontend **95** green; live-PostgreSQL proofs.
+  **Admin upgrade action for existing tenants:** grant the new `.sign` keys —
+  `deploy/RELEASE-NOTE-RISK-03-SIGNING-KEYS.md` (detail in `docs/validation/06-…` §A.13–A.19,
+  URS-123–128). Release posture unchanged — Pre-production; DOC-001 + SEC-001 remain open.
+  Prior history — EA remediation COMPLETE (Phases 0–6, closed at v1.44); **Role Privilege
   module** (v1.51.0, dynamic tenant-defined roles over a 170-key permission catalogue, branch/
   department as a hard data filter); **schema hardening** (v1.51.2, six `Hardening*` migrations);
   **Quality Analytics** (v1.52.0 — one computation serving a Quality Statistics dashboard and an

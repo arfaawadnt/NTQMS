@@ -1,11 +1,11 @@
-# CSV Re-Validation Delta — v1.38.0 → v1.51.2
+# CSV Re-Validation Delta — v1.38.0 → v1.53.0
 
 | Field | Value |
 | ----- | ----- |
-| Document ID | REVAL-NTQMS-001 (rev 5 — extended to v1.51.2; filename retained for reference stability) |
+| Document ID | REVAL-NTQMS-001 (rev 6 — extended to v1.53.0 on 2026-08-07; filename retained for reference stability) |
 | System | NT.QMS |
 | Baseline validated version | 1.0 (VMP/URS/FRA/QP/RTM/VSR — docs 00–05) |
-| Scope of this delta | Changes across releases **v1.38.0 → v1.51.1** (EA-remediation Phases 0–6 + Road-to-100 backlog/Phases 7–9 + v1.49 supply-chain assurance & Angular 22 upgrade + v1.50 sign-in surface & statistic presentation + **v1.51 Role Privilege module**, v1.51.1 RP-D1 audit-attribution fix, and the **v1.51.2 database schema-hardening programme** (6 migrations)) |
+| Scope of this delta | Changes across releases **v1.38.0 → v1.53.0** (EA-remediation Phases 0–6 + Road-to-100 backlog/Phases 7–9 + v1.49 supply-chain assurance & Angular 22 upgrade + v1.50 sign-in surface & statistic presentation + **v1.51 Role Privilege module**, v1.51.1 RP-D1 audit-attribution fix, the **v1.51.2 database schema-hardening programme** (6 migrations), **v1.52.0 Quality Analytics + usability/self-service set** (§A.11–A.12, URS-108–122), and **v1.53.0 (2026-08-07) the RISK-03 21 CFR Part 11 e-signature ceremony** across every signed-record gate (§A.13–A.19, URS-123–128)) |
 | Parent | VMP-NTQMS-001; URS-NTQMS-001; RTM-NTQMS-001; QP-NTQMS-001; VSR-NTQMS-001 |
 | Status | **DRAFT for QA execution.** Engineering-prepared traceability + qualification stubs; **QA owns, executes, witnesses, and signs.** |
 
