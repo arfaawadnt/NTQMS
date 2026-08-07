@@ -22,15 +22,9 @@
 \set ON_ERROR_STOP on
 
 -- 1. Roles -------------------------------------------------------------------
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'qams_owner') THEN
-        CREATE ROLE qams_owner LOGIN PASSWORD :'owner_password';
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'qams_app') THEN
-        CREATE ROLE qams_app LOGIN PASSWORD :'app_password';
-    END IF;
-END $$;
+--    The qams_owner and qams_app roles (with their passwords) are created by
+--    deploy/db-init.sql BEFORE this script runs. This script only grants the
+--    runtime role its least-privilege surface — it never creates roles.
 
 -- 2. Ownership of all objects belongs to qams_owner (run migrations as it) ----
 --    If the schema was created by another role, reassign it:
@@ -81,8 +75,7 @@ ALTER DEFAULT PRIVILEGES FOR ROLE qams_owner IN SCHEMA qams, saas
 --    (RLS is only enforced when the connecting role lacks BYPASSRLS.)
 ALTER ROLE qams_app NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE;
 
--- Usage:
---   psql "host=... dbname=ntqams user=postgres" \
---        -v owner_password="'<secret>'" -v app_password="'<secret>'" \
---        -f harden-runtime-role.sql
+-- Usage (run as a superuser, AFTER db-init.sql created the roles and the
+-- migrations created the schema):
+--   psql "host=... dbname=ntqams user=postgres" -f harden-runtime-role.sql
 -- Then set the app connection string Username=qams_app; migrations run as qams_owner.
