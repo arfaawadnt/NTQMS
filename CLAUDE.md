@@ -53,7 +53,17 @@ NT.QMS is a **multi-tenant SaaS Quality Management System** for ISO 17025 / 1518
     proceeding. Keep every diff minimal and surgical.
 
 ## 3. Current state (as of 2026-08-07)
-- Code at **`v1.53.0`** — latest: **v1.53.0 (tagged 2026-08-07) — RISK-03 21 CFR Part 11 e-signature
+- Code at **`v1.53.1`** — latest: **v1.53.1 (tagged 2026-08-07) — deploy/migration-mechanics fixes**
+  (no application behaviour, API surface, or schema change; backend **478** + frontend **95** +
+  **6** e2e green on real PostgreSQL). Corrects the from-source/idempotent deploy path: migrations'
+  FORCE-RLS bypass uses `SET LOCAL app.bypass_rls` (a bare `SELECT set_config` aborted 42601 inside
+  the idempotent `DO $EF$` wrapper); `Program.cs` `UseWindowsService()` so the `sc.exe` service
+  reaches Running; `harden-runtime-role.sql` drops a stale non-existent `ref` schema and its dead
+  role-creation branch; ANTIGRAVITY prompts run migrations as `qams_owner` (not `qams_app`).
+  Convention docs (CLAUDE.md §5, `ntqms-database` Trap 1) now prescribe `SET LOCAL`; IQ-30/IQ-31
+  added. Two deploy-side checks stay QA-owned: from-empty-DB `psql -f migrations.sql` (IQ-30) and
+  Windows-service start (IQ-31). Release posture unchanged — Pre-production; DOC-001 + SEC-001 open.
+- **v1.53.0 (tagged 2026-08-07) — RISK-03 21 CFR Part 11 e-signature
   ceremony** extended from document-publish to **every** signed-record gate (NC verify/close, all 14
   analytical-quality sign-offs incl. PtPlan, audit sign-off, quality-policy & change approval,
   management-review close, the 4 borderline SoD gates, and both periodic-review completions); 4 new
