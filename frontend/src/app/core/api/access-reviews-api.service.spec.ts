@@ -29,10 +29,13 @@ describe('AccessReviewsApiService', () => {
     expect(await done).toEqual({ id: 'uar1' });
   });
 
-  it('completes a review with the changes-required flag and conclusion', async () => {
-    const done = firstValueFrom(api.complete('uar1', true, 'Deactivated one dormant account.'));
+  it('completes a review with the changes-required flag, conclusion and e-signature', async () => {
+    const done = firstValueFrom(
+      api.complete('uar1', true, 'Deactivated one dormant account.', { password: 'Sign-Pass-1', pin: '2468' }));
     const req = http.expectOne(`${base}/uar1/complete`);
-    expect(req.request.body).toEqual({ changesRequired: true, conclusion: 'Deactivated one dormant account.' });
+    expect(req.request.body).toEqual({
+      changesRequired: true, conclusion: 'Deactivated one dormant account.', password: 'Sign-Pass-1', pin: '2468',
+    });
     req.flush(null);
     await done;
   });

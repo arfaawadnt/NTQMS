@@ -13,6 +13,7 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { WorkflowStepperComponent } from '../../shared/ui/workflow-stepper.component';
 import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 import { EsignCredentials, EsignDialogComponent } from '../../shared/ui/esign-dialog.component';
+import { SignatureManifestComponent } from '../../shared/ui/signature-manifest.component';
 
 /**
  * PT plan workspace: the committed scheme/analyte lines (editable in Draft,
@@ -22,7 +23,7 @@ import { EsignCredentials, EsignDialogComponent } from '../../shared/ui/esign-di
 @Component({
     selector: 'qams-pt-plan-detail',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, EsignDialogComponent],
+    imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, EsignDialogComponent, SignatureManifestComponent],
     template: `
     @if (item(); as p) {
       <qams-page-header [title]="p.planRef + ' — ' + p.year" [subtitle]="i18n.t('ptp.subtitle')">
@@ -133,6 +134,8 @@ import { EsignCredentials, EsignDialogComponent } from '../../shared/ui/esign-di
           <p>{{ p.closureSummary }}</p>
         </section>
       }
+
+      <qams-signature-manifest [subjectUrl]="'/api/pt-plans/' + p.id + '/signatures'" />
 
       <qams-audit-trail [subject]="p.id" />
     } @else {

@@ -45,8 +45,11 @@ export class ComplianceApiService {
     return this.http.post<{ id: string }>(`${this.base}/audit-trail-reviews`, { periodStart, periodEnd });
   }
 
-  completeAuditTrailReview(id: string, anomaliesFound: boolean, conclusion: string): Observable<void> {
-    return this.http.post<void>(`${this.base}/audit-trail-reviews/${id}/complete`, { anomaliesFound, conclusion });
+  completeAuditTrailReview(
+    id: string, anomaliesFound: boolean, conclusion: string,
+    credentials: { password: string; pin: string }): Observable<void> {
+    return this.http.post<void>(
+      `${this.base}/audit-trail-reviews/${id}/complete`, { anomaliesFound, conclusion, ...credentials });
   }
 
   verifyChain(): Observable<ChainVerification> {

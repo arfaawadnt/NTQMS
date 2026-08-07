@@ -12,6 +12,7 @@ import {
 } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
+import { EsignCredentials, EsignDialogComponent } from '../../shared/ui/esign-dialog.component';
 
 type LedgerTab = 'trail' | 'signatures' | 'security' | 'reviews';
 
@@ -24,7 +25,7 @@ type LedgerTab = 'trail' | 'signatures' | 'security' | 'reviews';
 @Component({
     selector: 'qams-compliance',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [FormsModule, DatePipe, PageHeaderComponent, ExportMenuComponent],
+    imports: [FormsModule, DatePipe, PageHeaderComponent, ExportMenuComponent, EsignDialogComponent],
     template: `
     <qams-page-header [title]="i18n.t('cmp.title')" [subtitle]="i18n.t('cmp.subtitle')">
       @if (tab() === 'trail') {
@@ -178,12 +179,12 @@ type LedgerTab = 'trail' | 'signatures' | 'security' | 'reviews';
                   <td class="muted">{{ r.conclusion ?? '—' }}</td>
                   <td>{{ r.status }}</td>
                 </tr>
-                @if (r.status === 'Open' && perms.can('compliance.approve')) {
+                @if (r.status === 'Open' && perms.can('compliance.sign')) {
                   <tr><td colspan="6">
                     <div class="completerow">
                       <label class="chk"><input type="checkbox" [(ngModel)]="anomalies" /> {{ i18n.t('atr.anomaliesFound') }}</label>
                       <input class="grow" [(ngModel)]="conclusion" [placeholder]="i18n.t('atr.conclusionHint')" />
-                      <button (click)="completeReview(r.id)" [disabled]="!conclusion.trim()">{{ i18n.t('atr.complete') }}</button>
+                      <button (click)="askComplete(r.id)" [disabled]="!conclusion.trim()">{{ i18n.t('atr.complete') }}</button>
                     </div>
                   </td></tr>
                 }
@@ -194,6 +195,9 @@ type LedgerTab = 'trail' | 'signatures' | 'security' | 'reviews';
         <div class="hint">{{ i18n.t('atr.anomalyNote') }}</div>
       </div>
     }
+
+    <qams-esign-dialog [open]="esignOpen()" [meaning]="i18n.t('esign.signMeaning')" [busy]="loading()"
+                       [error]="error()" (confirm)="completeReview($event)" (cancel)="esignOpen.set(false)" />
   `,
     styles: [`
     .chain { margin-bottom: 1rem; font-weight: 600; }
@@ -271,6 +275,9 @@ export class ComplianceComponent implements OnInit {
   periodEnd = '';
   anomalies = false;
   conclusion = '';
+  /** Part 11 signing dialog state for the review being completed. */
+  readonly esignOpen = signal(false);
+  private readonly pendingReviewId = signal('');
   readonly trail = signal<AuditTrailEntry[]>([]);
   readonly signatures = signal<SignatureRecord[]>([]);
   readonly security = signal<SecurityEvent[]>([]);
@@ -305,13 +312,24 @@ export class ComplianceComponent implements OnInit {
     });
   }
 
-  async completeReview(id: string): Promise<void> {
+  /** Completing a review is a Part 11 signing ceremony — open the dialog to capture the e-signature. */
+  askComplete(id: string): void {
+    if (!this.conclusion.trim()) { return; }
+    this.pendingReviewId.set(id);
+    this.error.set('');
+    this.esignOpen.set(true);
+  }
+
+  async completeReview(credentials: EsignCredentials): Promise<void> {
+    const id = this.pendingReviewId();
+    if (!id || !this.conclusion.trim()) { return; }
     await this.run(async () => {
-      await firstValueFrom(this.api.completeAuditTrailReview(id, this.anomalies, this.conclusion.trim()));
+      await firstValueFrom(this.api.completeAuditTrailReview(id, this.anomalies, this.conclusion.trim(), credentials));
       this.anomalies = false;
       this.conclusion = '';
       this.reviews.set(await firstValueFrom(this.api.auditTrailReviews()));
     });
+    if (this.error() === '') { this.esignOpen.set(false); }
   }
 
   async loadTrail(): Promise<void> {

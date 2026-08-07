@@ -14,6 +14,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { WorkflowStepperComponent } from '../../shared/ui/workflow-stepper.component';
 import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
+import { EsignCredentials, EsignDialogComponent } from '../../shared/ui/esign-dialog.component';
 
 /**
  * Controlled-document workspace: version history + the state-appropriate action
@@ -24,7 +25,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 @Component({
     selector: 'qams-document-detail',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, FormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent],
+    imports: [ReactiveFormsModule, FormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, EsignDialogComponent],
     template: `
     @if (doc(); as d) {
       <qams-page-header [title]="d.code + ' — ' + d.title" [subtitle]="d.category">
@@ -78,14 +79,10 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
           }
           @if (inFlightState() === 'Approved') {
             @if (perms.can('documents.sign')) {
-              <form [formGroup]="publishForm" (ngSubmit)="facade.publish(d.id, publishForm.getRawValue())">
-                <label>{{ i18n.t('doc.signPassword') }}</label>
-                <input formControlName="password" type="password" autocomplete="current-password" />
-                <label>{{ i18n.t('doc.pin') }}</label>
-                <input formControlName="pin" inputmode="numeric" maxlength="4" [placeholder]="i18n.t('doc.pinHint')" />
-                <div class="hint">{{ i18n.t('doc.twoComponentHint') }}</div>
-                <button type="submit" [disabled]="publishForm.invalid">{{ i18n.t('doc.publish') }}</button>
-              </form>
+              <div class="hint">{{ i18n.t('doc.twoComponentHint') }}</div>
+              <button (click)="esignOpen.set(true)">{{ i18n.t('doc.publish') }}</button>
+              <qams-esign-dialog [open]="esignOpen()" [meaning]="i18n.t('esign.signMeaning')" [busy]="facade.loading()"
+                                 [error]="facade.error()" (confirm)="doPublish(d.id, $event)" (cancel)="esignOpen.set(false)" />
             } @else { <p class="muted">{{ i18n.t('doc.awaitPublish') }}</p> }
           }
           @if (d.status === 'Published') {
@@ -265,10 +262,8 @@ export class DocumentDetailComponent implements OnInit {
   });
 
   readonly rejectForm = this.fb.nonNullable.group({ reason: ['', [Validators.required, Validators.maxLength(1000)]] });
-  readonly publishForm = this.fb.nonNullable.group({
-    password: ['', [Validators.required]],
-    pin: ['', [Validators.required, Validators.pattern(/^\d{4}$/)]],
-  });
+  /** Part 11 publish-signature dialog state. */
+  readonly esignOpen = signal(false);
   readonly versionForm = this.fb.nonNullable.group({
     bump: ['Minor' as VersionBump, [Validators.required]],
     changeSummary: ['', [Validators.required, Validators.maxLength(1000)]],
@@ -277,6 +272,12 @@ export class DocumentDetailComponent implements OnInit {
   /** True when the next periodic review date has passed. */
   reviewOverdue(due: string | null): boolean {
     return !!due && new Date(due).getTime() < Date.now();
+  }
+
+  /** Publishes through the ceremony dialog; closes on success, stays open (showing the error) on failure. */
+  async doPublish(id: string, credentials: EsignCredentials): Promise<void> {
+    await this.facade.publish(id, credentials);
+    if (this.facade.error() === '') { this.esignOpen.set(false); }
   }
 
   ngOnInit(): void {

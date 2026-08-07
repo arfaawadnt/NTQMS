@@ -8,6 +8,7 @@ import { I18nService } from '../../core/i18n.service';
 import { UserAccessReview } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
+import { EsignCredentials, EsignDialogComponent } from '../../shared/ui/esign-dialog.component';
 
 /**
  * Periodic user-access review / recertification (21 CFR Part 11 §11.10(d) /
@@ -18,7 +19,7 @@ import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.c
 @Component({
     selector: 'qams-access-reviews',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [FormsModule, DatePipe, PageHeaderComponent, ExportMenuComponent],
+    imports: [FormsModule, DatePipe, PageHeaderComponent, ExportMenuComponent, EsignDialogComponent],
     template: `
     <qams-page-header [title]="i18n.t('uar.title')" [subtitle]="i18n.t('uar.subtitle')">
       <qams-export-menu [title]="i18n.t('uar.title')" [columns]="exportColumns" [rows]="reviews()"
@@ -57,7 +58,7 @@ import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.c
                     <div class="completerow">
                       <label class="chk"><input type="checkbox" [(ngModel)]="changesRequired" /> {{ i18n.t('uar.changesFound') }}</label>
                       <input class="grow" [(ngModel)]="conclusion" [placeholder]="i18n.t('uar.conclusionHint')" />
-                      <button (click)="complete(r.id)" [disabled]="!conclusion.trim()">{{ i18n.t('uar.complete') }}</button>
+                      <button (click)="askComplete(r.id)" [disabled]="!conclusion.trim()">{{ i18n.t('uar.complete') }}</button>
                     </div>
                   </td></tr>
                 }
@@ -68,6 +69,9 @@ import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.c
         <div class="hint">{{ i18n.t('uar.note') }}</div>
       </div>
     }
+
+    <qams-esign-dialog [open]="esignOpen()" [meaning]="i18n.t('esign.signMeaning')" [busy]="loading()"
+                       [error]="error()" (confirm)="complete($event)" (cancel)="esignOpen.set(false)" />
   `,
     styles: [`
     .completerow { display: flex; gap: 10px; align-items: center; padding: 6px 0; flex-wrap: wrap; }
@@ -105,6 +109,10 @@ export class AccessReviewsComponent implements OnInit {
   changesRequired = false;
   conclusion = '';
 
+  /** Part 11 signing dialog state for the review being completed. */
+  readonly esignOpen = signal(false);
+  private readonly pendingId = signal('');
+
   ngOnInit(): void { void this.load(); }
 
   async load(): Promise<void> {
@@ -118,14 +126,24 @@ export class AccessReviewsComponent implements OnInit {
     });
   }
 
-  async complete(id: string): Promise<void> {
+  /** Completing a review is a Part 11 signing ceremony — open the dialog to capture the e-signature. */
+  askComplete(id: string): void {
     if (!this.conclusion.trim()) { return; }
+    this.pendingId.set(id);
+    this.error.set('');
+    this.esignOpen.set(true);
+  }
+
+  async complete(credentials: EsignCredentials): Promise<void> {
+    const id = this.pendingId();
+    if (!id || !this.conclusion.trim()) { return; }
     await this.run(async () => {
-      await firstValueFrom(this.api.complete(id, this.changesRequired, this.conclusion.trim()));
+      await firstValueFrom(this.api.complete(id, this.changesRequired, this.conclusion.trim(), credentials));
       this.changesRequired = false;
       this.conclusion = '';
       this.reviews.set(await firstValueFrom(this.api.list()));
     });
+    if (this.error() === '') { this.esignOpen.set(false); }
   }
 
   private async run(operation: () => Promise<void>): Promise<void> {

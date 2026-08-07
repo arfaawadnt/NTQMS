@@ -18,7 +18,9 @@ export class AccessReviewsApiService {
     return this.http.post<CreatedResource>(this.base, {});
   }
 
-  complete(id: string, changesRequired: boolean, conclusion: string): Observable<void> {
-    return this.http.post<void>(`${this.base}/${id}/complete`, { changesRequired, conclusion });
+  complete(
+    id: string, changesRequired: boolean, conclusion: string,
+    credentials: { password: string; pin: string }): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/complete`, { changesRequired, conclusion, ...credentials });
   }
 }
