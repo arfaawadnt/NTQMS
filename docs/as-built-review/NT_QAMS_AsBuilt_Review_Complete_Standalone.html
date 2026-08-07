@@ -66,7 +66,7 @@ border-radius:8px;padding:14px 18px;margin:18px 0;color:#a7f3d0;font-size:.9rem;
     <div class="legend"><strong>How to read this pack.</strong> Read-only static review; source code is authoritative.
     Evidence classes: Implemented · UI-only · Documentation-only · Mocked · Missing · Unknown.
     Runtime behaviour (RLS, jobs, health, performance) is source-reconstructed and confidence-capped — nothing was executed.
-    All secret values are redacted. Three release blockers: DOC-001 (signed validation), SEC-001 (pen test), RISK-03 (Part 11 e-signature ceremony).</div>
+    All secret values are redacted. Two release blockers remain: DOC-001 (signed validation), SEC-001 (pen test). RISK-03 (Part 11 e-signature ceremony) — <strong>CLOSED 2026-08-07</strong>.</div>
     <section id="doc-00" class="doc"><div class="doc-anchor"></div><h1>NT.QAMS — AS-BUILT Reverse-Engineering Review</h1>
 <h2>Document 00 · Review Manifest &amp; Audit Contract</h2>
 <table>
@@ -7277,14 +7277,14 @@ WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true),'')::
 <td>Doc 08 §4; <code>CLAUDE.md:75</code></td>
 </tr>
 <tr>
-<td><strong>RISK-03 / SEC-01 (NB-03-02)</strong></td>
-<td>21 CFR Part 11 <strong>e-signature manifestation on document publish only</strong> — ~19 of ~20 signed-record gates (audit sign-off, NC verify/close, quality-policy/change approve, review close, 14 AQ sign-offs) write signer fields but mint <strong>no <code>signature_record</code></strong></td>
-<td>§11.50/§11.70 not satisfied for most regulated sign-offs</td>
-<td>Docs 03/07/11; <code>DocumentCommands.cs:122</code> (sole call site)</td>
+<td><strong>RISK-03 / SEC-01 (NB-03-02)</strong> — ✅ <strong>CLOSED 2026-08-07</strong></td>
+<td><s>21 CFR Part 11 e-signature manifestation on document publish only</s> — <strong>RESOLVED:</strong> the signing ceremony now mints a <code>signature_record</code> on <strong>every</strong> regulated sign-off gate (NC verify/close, 14 AQ sign-offs incl. PtPlan, audit sign-off, quality-policy/change approve, management-review close, the 4 borderline SoD gates, and both periodic-review completions)</td>
+<td>§11.50/§11.70 <strong>now satisfied</strong> across all signed-record transitions</td>
+<td>Closed on <code>dev</code> (<code>ddd1551</code>…<code>3d43849</code>); <code>docs/validation/06-…</code> §A.13–A.19, URS-123–128</td>
 </tr>
 </tbody>
 </table>
-<p><em>RISK-03 is a code gap, not an assurance gap — and it is the single highest-value code change in the review: the catalogue already models a <code>Sign</code> action and SoD is already enforced; only the signature ceremony is missing on the other gates.</em></p>
+<p><em>RISK-03 was the single highest-value code change in the review; it is now <strong>CLOSED</strong> (2026-08-07). The ceremony was propagated from document-publish to all ~20 signed-record gates, reusing the existing <code>Sign</code> action and in-domain SoD — each handler pre-validates its state/SoD gates before minting, so a refused sign-off leaves no signature. Engineering-complete and verified (backend 478 + frontend 95 green; live-PostgreSQL proofs: wrong PIN → SIG-001, missing-key → AUTHZ-403). The remaining obligation is QA's execution and signature of the validation records for URS-123–128 (which belongs under RISK-01/DOC-001, not RISK-03).</em></p>
 <h2>2. Full risk register</h2>
 <table>
 <thead>
@@ -7331,12 +7331,12 @@ WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true),'')::
 <td>Compliance</td>
 <td>Crit</td>
 <td>Doc03 NB-03-02</td>
-<td>Most sign-offs lack Part 11 signature</td>
-<td>Audit finding: no signed record</td>
+<td>✅ <strong>CLOSED 2026-08-07</strong> — ceremony minted on all signed-record gates</td>
+<td>— (resolved)</td>
 <td>Audits, NC, QP, Change, Review, AQ</td>
-<td>Mint signature ceremony on all signed-record transitions</td>
+<td><s>Mint signature ceremony on all signed-record transitions</s> <strong>Done</strong> (<code>ddd1551</code>…<code>3d43849</code>)</td>
 <td>P0</td>
-<td><strong>Yes (Part 11 scope)</strong></td>
+<td><strong>CLOSED</strong></td>
 </tr>
 <tr>
 <td>RISK-04</td>
@@ -7760,7 +7760,7 @@ WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true),'')::
 <h2>5. Dependency-aware remediation order</h2>
 <ol>
 <li><strong>RISK-04 (MFA default-on), RISK-05 (file download gate), RISK-35/31/28 (doc/dup/i18n quick wins), RISK-20 (version pinning)</strong> — low-effort, high-value; independent; do first.</li>
-<li><strong>RISK-03 (e-signature ceremony)</strong> — the core Part 11 code fix; unblocks the compliance half of a validated release. Do before RISK-01.</li>
+<li><strong>RISK-03 (e-signature ceremony)</strong> — ✅ <strong>DONE (2026-08-07).</strong> The core Part 11 code fix; unblocked the compliance half of a validated release. Was sequenced before RISK-01 for the reason in the note below.</li>
 <li><strong>RISK-06 + RISK-10 (AQ tests + gates), RISK-08/12/13 (test estate), RISK-16/11/23/26 (authz/SoD/code hygiene)</strong> — code hardening; several share the AQ module and should batch.</li>
 <li><strong>RISK-07 + RISK-25 + RISK-15 (staging observability/load, guard in qualified env, trace backend)</strong> — operational assurance; prerequisite for OPS-001 closure.</li>
 <li><strong>RISK-01 (signed validation on qualified env) + RISK-02 (pentest)</strong> — <strong>executed last</strong>, once the code hardening (2-3) and ops assurance (4) are in place, so the qualified-environment run and pentest exercise the fixed system. Validating before the fixes would waste the qualified run.</li>
@@ -7771,7 +7771,7 @@ WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true),'')::
 - Single shared HS256 key (RISK-09) — chosen simplicity over rotation.
 - Coarse <code>[RequireInternalActor]</code> on some writes (RISK-10) — a documented "full Phase 1" deferral.
 - <code>[RequireInternalActor]</code> command policy instead of <code>[RequirePermissionPolicy]</code> on audit sign-off etc. — leaves fine-grained authz to the HTTP filter only.
-- e-signature wired to one workflow (RISK-03) — the ceremony pattern exists but wasn't propagated.
+- <s>e-signature wired to one workflow (RISK-03) — the ceremony pattern exists but wasn't propagated.</s> <strong>Resolved 2026-08-07:</strong> the ceremony is now propagated to every signed-record gate.
 - Two RLS-exempt tables (B9) — a formally accepted structural deviation.
 - SMTP best-effort / no external queue (RISK-14) — modular-monolith simplicity.</p>
 <p><strong>Inherited/environmental (not this rebuild's code):</strong>
@@ -8572,7 +8572,7 @@ node node_modules/@playwright/test/cli.js test                                  
 - <strong>MFA policy (AOD-1):</strong> the target mandates MFA for all active accounts; the build defaults it off. Which is the intended production posture?
 - <strong>File-storage tier (AOD-3):</strong> is local-disk storage acceptable for production, or is the target's S3 + virus-scan + WORM required before GA?
 - <strong>Reporting aggregate (AOD-4)</strong> and <strong>no-Redis privilege eval (AOD-2):</strong> ratify with ADRs or change?
-- <strong>E-signature scope (RISK-03):</strong> is Part 11 signature manifestation on document-publish-only acceptable, or must audit/NC/quality-policy/change/review/AQ sign-offs also mint signatures?</p>
+- <strong>E-signature scope (RISK-03):</strong> is Part 11 signature manifestation on document-publish-only acceptable, or must audit/NC/quality-policy/change/review/AQ sign-offs also mint signatures? — <strong>RESOLVED 2026-08-07:</strong> full scope directed; the ceremony now mints on every signed-record gate.</p>
 <p><strong>Compliance Officer / QA:</strong>
 - <strong>DOC-001:</strong> when will IQ/OQ/PQ be executed and <strong>signed on a qualified environment</strong>? (OQ transcripts 12/13 are currently unsigned; validation ran on a dev workstation.)
 - Are the accepted deviations (<strong>B9</strong> two tables without RLS; <strong>B10</strong> historical nil-tenant rows) formally signed off for the regulated release?</p>
@@ -8649,7 +8649,7 @@ node node_modules/@playwright/test/cli.js test                                  
 <td><strong>E-signature gap severity</strong></td>
 <td>Doc 01 §8 (top-10 risks) vs Doc 12 (RISK-03 Critical/blocker)</td>
 <td>Doc 01's executive top-10 lists MFA/HS256/FE as #3–5 but <strong>does not rank the Part-11 e-signature-manifestation gap in the top 3</strong>; Doc 08 (SEC-01) and Doc 12 (RISK-03) later rate it <strong>Critical / release-blocking</strong>. The Executive Summary predates the deep Part 11 pass (Docs 03/07/08).</td>
-<td><strong>Elevate the e-signature-ceremony gap (RISK-03/NB-03-02) to a top-3 executive risk.</strong> The Risk Register (Doc 12) is authoritative; treat Doc 01 §8 as superseded on this ranking. <em>(Reported, not silently edited.)</em></td>
+<td><strong>Elevate the e-signature-ceremony gap (RISK-03/NB-03-02) to a top-3 executive risk.</strong> The Risk Register (Doc 12) is authoritative; treat Doc 01 §8 as superseded on this ranking. <em>(Reported, not silently edited.)</em> <strong>Now moot — RISK-03 CLOSED 2026-08-07.</strong></td>
 </tr>
 <tr>
 <td>C-2</td>
@@ -8972,7 +8972,7 @@ node node_modules/@playwright/test/cli.js test                                  
 <tr>
 <td><strong>Product / Compliance review</strong></td>
 <td>⚠ <strong>not yet</strong></td>
-<td>DOC-001 signed validation (blocker); RISK-03 e-signature ceremony scope; validation on qualified env (Doc 08/11/12)</td>
+<td>DOC-001 signed validation (blocker); validation on qualified env (Doc 08/11/12). <em>RISK-03 e-signature ceremony scope — <strong>CLOSED 2026-08-07</strong>, no longer outstanding.</em></td>
 </tr>
 <tr>
 <td><strong>Operations review</strong></td>
@@ -8981,11 +8981,11 @@ node node_modules/@playwright/test/cli.js test                                  
 </tr>
 </tbody>
 </table>
-<p><strong>Overall: Pre-production (Doc 01 verdict confirmed).</strong> Database and architecture are sign-off-ready; security, QA, compliance, and operations each have named, tracked gate items — none a code-execution blocker, three (DOC-001/SEC-001 + the e-signature ceremony RISK-03) genuinely release-gating for a regulated launch.</p>
+<p><strong>Overall: Pre-production (Doc 01 verdict confirmed).</strong> Database and architecture are sign-off-ready; security, QA, compliance, and operations each have named, tracked gate items — none a code-execution blocker. <strong>RISK-03 (the Part 11 e-signature ceremony) is now CLOSED (2026-08-07)</strong>, leaving <strong>two</strong> items genuinely release-gating for a regulated launch: DOC-001 (signed validation on a qualified environment) and SEC-001 (independent penetration test).</p>
 <h2>7. Top 20 questions to resolve before any production release</h2>
 <p><strong>Compliance / validation (release-gating):</strong>
 1. When will IQ/OQ/PQ be executed and <strong>signed on a qualified environment</strong> (closing DOC-001)? OQ transcripts 12/13 are currently unsigned.
-2. Is Part 11 e-signature on <strong>document-publish-only</strong> acceptable, or must audit/NC/quality-policy/change/review/AQ sign-offs also mint <code>signature_record</code>s (RISK-03)? — <em>the top code question.</em>
+2. Is Part 11 e-signature on <strong>document-publish-only</strong> acceptable, or must audit/NC/quality-policy/change/review/AQ sign-offs also mint <code>signature_record</code>s (RISK-03)? — <em>was the top code question; <strong>RESOLVED 2026-08-07</strong>: full scope directed; the ceremony now mints a <code>signature_record</code> on every signed-record gate.</em>
 3. Are deviations <strong>B9</strong> (two tables without RLS) and <strong>B10</strong> (historical nil-tenant rows) formally signed off for the regulated release?
 4. Who performs the <strong>independent penetration test</strong> (SEC-001), and when?</p>
 <p><strong>Security / architecture-owner decisions (Doc 13):</strong>

@@ -14,15 +14,15 @@
 
 ## 1. Critical blockers — must resolve before a regulated production go-live
 
-These three are **assurance blockers the repository itself lists as open** (`CLAUDE.md:75-77`) — they are not code defects but they gate a validated release.
+Of the three originally listed, **RISK-03 is now CLOSED** (2026-08-07 — the Part 11 e-signature ceremony was propagated to every regulated sign-off gate; see the closure note below). **Two remain open** — RISK-01/DOC-001 and RISK-02/SEC-001 — both **assurance blockers the repository itself lists as open** (`CLAUDE.md:75-77`), not code defects but they gate a validated release.
 
 | ID | Blocker | Why it blocks | Evidence |
 |---|---|---|---|
 | **RISK-01 / DOC-001** | Validation not executed on a qualified environment; OQ transcripts 12/13 **unsigned**; schema hardening never applied to a qualified install | Validated status is not defensible in a GxP inspection today | Doc 08 §4; `docs/validation/12-…:220-221`, `13-…:133-134` |
 | **RISK-02 / SEC-001** | No independent penetration test (in-house probes only) | Standard buyer/auditor requirement for a Part 11 product | Doc 08 §4; `CLAUDE.md:75` |
-| **RISK-03 / SEC-01 (NB-03-02)** | 21 CFR Part 11 **e-signature manifestation on document publish only** — ~19 of ~20 signed-record gates (audit sign-off, NC verify/close, quality-policy/change approve, review close, 14 AQ sign-offs) write signer fields but mint **no `signature_record`** | §11.50/§11.70 not satisfied for most regulated sign-offs | Docs 03/07/11; `DocumentCommands.cs:122` (sole call site) |
+| **RISK-03 / SEC-01 (NB-03-02)** — ✅ **CLOSED 2026-08-07** | ~~21 CFR Part 11 e-signature manifestation on document publish only~~ — **RESOLVED:** the signing ceremony now mints a `signature_record` on **every** regulated sign-off gate (NC verify/close, 14 AQ sign-offs incl. PtPlan, audit sign-off, quality-policy/change approve, management-review close, the 4 borderline SoD gates, and both periodic-review completions) | §11.50/§11.70 **now satisfied** across all signed-record transitions | Closed on `dev` (`ddd1551`…`3d43849`); `docs/validation/06-…` §A.13–A.19, URS-123–128 |
 
-*RISK-03 is a code gap, not an assurance gap — and it is the single highest-value code change in the review: the catalogue already models a `Sign` action and SoD is already enforced; only the signature ceremony is missing on the other gates.*
+*RISK-03 was the single highest-value code change in the review; it is now **CLOSED** (2026-08-07). The ceremony was propagated from document-publish to all ~20 signed-record gates, reusing the existing `Sign` action and in-domain SoD — each handler pre-validates its state/SoD gates before minting, so a refused sign-off leaves no signature. Engineering-complete and verified (backend 478 + frontend 95 green; live-PostgreSQL proofs: wrong PIN → SIG-001, missing-key → AUTHZ-403). The remaining obligation is QA's execution and signature of the validation records for URS-123–128 (which belongs under RISK-01/DOC-001, not RISK-03).*
 
 ## 2. Full risk register
 
@@ -30,7 +30,7 @@ These three are **assurance blockers the repository itself lists as open** (`CLA
 |---|---|---|---|---|---|---|---|---|---|
 | RISK-01 | Compliance | Crit | Doc08 DOC-001 | Unvalidated for GxP | Inspection failure | All | Execute + sign OQ on qualified env | P0 | **Yes** |
 | RISK-02 | Security | Crit | Doc08 SEC-001 | Unverified real-world exposure | Undiscovered vuln | All | Commission independent pentest | P0 | **Yes** |
-| RISK-03 | Compliance | Crit | Doc03 NB-03-02 | Most sign-offs lack Part 11 signature | Audit finding: no signed record | Audits, NC, QP, Change, Review, AQ | Mint signature ceremony on all signed-record transitions | P0 | **Yes (Part 11 scope)** |
+| RISK-03 | Compliance | Crit | Doc03 NB-03-02 | ✅ **CLOSED 2026-08-07** — ceremony minted on all signed-record gates | — (resolved) | Audits, NC, QP, Change, Review, AQ | ~~Mint signature ceremony on all signed-record transitions~~ **Done** (`ddd1551`…`3d43849`) | P0 | **CLOSED** |
 | RISK-04 | Security | High | Doc08 SEC-02 | Privileged MFA off in reference prod | Single-factor privileged accounts | IdentityAccess | Default-on in reference prod compose | P1 | Yes |
 | RISK-05 | Security | High | Doc08 NB-08-01/SEC-03 | File **download** ungated + unlogged | Tenant user pulls unviewable evidence, no trace | Files | Add `[RequirePermission]` + SecurityEvent on download | P1 | Pre-GA |
 | RISK-06 | Testing | High | Doc09 T-1 | 107 AQ routes functionally untested; **PT-result→NC ungated + untested** | Regression in regulated auto-NC undetected | AnalyticalQuality | Add functional/integration tests + permission gates for AQ | P1 | Pre-GA |
@@ -102,7 +102,7 @@ quadrantChart
 ## 5. Dependency-aware remediation order
 
 1. **RISK-04 (MFA default-on), RISK-05 (file download gate), RISK-35/31/28 (doc/dup/i18n quick wins), RISK-20 (version pinning)** — low-effort, high-value; independent; do first.
-2. **RISK-03 (e-signature ceremony)** — the core Part 11 code fix; unblocks the compliance half of a validated release. Do before RISK-01.
+2. **RISK-03 (e-signature ceremony)** — ✅ **DONE (2026-08-07).** The core Part 11 code fix; unblocked the compliance half of a validated release. Was sequenced before RISK-01 for the reason in the note below.
 3. **RISK-06 + RISK-10 (AQ tests + gates), RISK-08/12/13 (test estate), RISK-16/11/23/26 (authz/SoD/code hygiene)** — code hardening; several share the AQ module and should batch.
 4. **RISK-07 + RISK-25 + RISK-15 (staging observability/load, guard in qualified env, trace backend)** — operational assurance; prerequisite for OPS-001 closure.
 5. **RISK-01 (signed validation on qualified env) + RISK-02 (pentest)** — **executed last**, once the code hardening (2-3) and ops assurance (4) are in place, so the qualified-environment run and pentest exercise the fixed system. Validating before the fixes would waste the qualified run.
@@ -115,7 +115,7 @@ quadrantChart
 - Single shared HS256 key (RISK-09) — chosen simplicity over rotation.
 - Coarse `[RequireInternalActor]` on some writes (RISK-10) — a documented "full Phase 1" deferral.
 - `[RequireInternalActor]` command policy instead of `[RequirePermissionPolicy]` on audit sign-off etc. — leaves fine-grained authz to the HTTP filter only.
-- e-signature wired to one workflow (RISK-03) — the ceremony pattern exists but wasn't propagated.
+- ~~e-signature wired to one workflow (RISK-03) — the ceremony pattern exists but wasn't propagated.~~ **Resolved 2026-08-07:** the ceremony is now propagated to every signed-record gate.
 - Two RLS-exempt tables (B9) — a formally accepted structural deviation.
 - SMTP best-effort / no external queue (RISK-14) — modular-monolith simplicity.
 

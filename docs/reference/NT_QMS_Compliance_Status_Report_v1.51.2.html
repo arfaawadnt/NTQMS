@@ -73,6 +73,22 @@
 </header>
 
 <div class="note">
+  <b>Addendum — 2026-08-07 (post-issue update).</b> After this report was issued (rev 3.1, 2026-08-01),
+  the standalone AS-BUILT reverse-engineering review (series 00–15) raised <b>RISK-03</b>: the 21 CFR
+  Part 11 electronic-signature ceremony (§11.50/§11.70) was minted only on document-publish, leaving
+  ~19 other regulated sign-off gates writing signer fields but no <code>signature_record</code>.
+  <b>RISK-03 is now CLOSED</b> — on <code>dev</code>, commits <code>ddd1551</code>…<code>3d43849</code>:
+  the ceremony is minted on <b>every</b> signed-record gate — NC verify/close, all 14 analytical-quality
+  sign-offs (incl. PtPlan), audit sign-off, quality-policy and change approval, management-review close,
+  the four borderline SoD gates, and both periodic-review completions. Verified by <b>478 backend + 95
+  frontend</b> tests (all green) and live-PostgreSQL proofs (wrong PIN → SIG-001; missing key → AUTHZ-403).
+  This does <b>not</b> change the three open conditions below — they concern external/environmental
+  assurance (independent penetration test, signed validation on a qualified environment, staging
+  observability/load). RISK-03 was a code gap; the execution and signature of its validation records
+  (URS-123–128) remain part of that pending qualified-environment validation, not a separate condition.
+</div>
+
+<div class="note">
   <b>What this report is.</b> A single consolidated view over four registers that previously had to be read
   together: the CSV/Part-11 validation set (<code>docs/validation/</code>), the enterprise application audit
   (EAC-NTQMS-001 rev 4), the schema-hardening programme (<code>SCHEMA-HARDENING-REPORT.md</code>), and the

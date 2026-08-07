@@ -18,7 +18,7 @@
 
 | # | Item | Where | Finding | Correction |
 |---|---|---|---|---|
-| **C-1** | **E-signature gap severity** | Doc 01 §8 (top-10 risks) vs Doc 12 (RISK-03 Critical/blocker) | Doc 01's executive top-10 lists MFA/HS256/FE as #3–5 but **does not rank the Part-11 e-signature-manifestation gap in the top 3**; Doc 08 (SEC-01) and Doc 12 (RISK-03) later rate it **Critical / release-blocking**. The Executive Summary predates the deep Part 11 pass (Docs 03/07/08). | **Elevate the e-signature-ceremony gap (RISK-03/NB-03-02) to a top-3 executive risk.** The Risk Register (Doc 12) is authoritative; treat Doc 01 §8 as superseded on this ranking. *(Reported, not silently edited.)* |
+| **C-1** | **E-signature gap severity** | Doc 01 §8 (top-10 risks) vs Doc 12 (RISK-03 Critical/blocker) | Doc 01's executive top-10 lists MFA/HS256/FE as #3–5 but **does not rank the Part-11 e-signature-manifestation gap in the top 3**; Doc 08 (SEC-01) and Doc 12 (RISK-03) later rate it **Critical / release-blocking**. The Executive Summary predates the deep Part 11 pass (Docs 03/07/08). | **Elevate the e-signature-ceremony gap (RISK-03/NB-03-02) to a top-3 executive risk.** The Risk Register (Doc 12) is authoritative; treat Doc 01 §8 as superseded on this ranking. *(Reported, not silently edited.)* **Now moot — RISK-03 CLOSED 2026-08-07.** |
 | C-2 | Permission-key count | Docs 01/03/06 (**170**) vs one requirement extraction in Doc 11 source (171) | Review docs consistently say **170** (matches `CLAUDE.md`); a single upstream requirement note said 171. | Canonical value **170**; the 171 is an upstream requirement-doc figure, not a review count. |
 | C-3 | Module count framing | Doc 06 ("34 modules" matrix) vs Doc 02 ("19 Domain folders / 28 feature folders") | Not a contradiction — Doc 06's 34 rows enumerate business modules **including sub-modules** (Calibration, Maintenance, Privileges) and cross-layer groupings; Doc 02 counts source folders. | Clarify in reading: **19 Domain modules / 28 frontend features / 34 business-capability rows** — three different valid enumerations. |
 | C-4 | FORCE-RLS / composite-PK counts | 93 / 91 (v1.52, reviewed commit) vs 90 / 88 (v1.51.2 hardening snapshot) | Both appear across Docs 04/08/11 — always **version-labelled**. | No conflict; reviewed commit is v1.52 → **93 FORCE-RLS, 91 composite PKs** are the as-built figures. |
@@ -92,16 +92,16 @@ Scored on: source-citation density, adversarial verification, and independence f
 | **Security review** | ⚠ **not yet** | SEC-001 pentest (blocker); SEC-02 MFA default (AOD-1); SEC-03 file-download gate; SEC-05 key rotation (Doc 08) |
 | **Database review** | ✅ | Clean 3NF, RLS + hardening complete; B9/B10 formally accepted; TRUNCATE note (NB-04-02) low (Doc 04) |
 | **QA review** | ⚠ **not yet** | AQ HTTP surface untested (T-1); FE coverage (T-2); regulated e2e not in CI (T-3); no coverage gate (Doc 09) |
-| **Product / Compliance review** | ⚠ **not yet** | DOC-001 signed validation (blocker); RISK-03 e-signature ceremony scope; validation on qualified env (Doc 08/11/12) |
+| **Product / Compliance review** | ⚠ **not yet** | DOC-001 signed validation (blocker); validation on qualified env (Doc 08/11/12). *RISK-03 e-signature ceremony scope — **CLOSED 2026-08-07**, no longer outstanding.* |
 | **Operations review** | ⚠ **not yet** | OPS-001 staging observability + load/soak; alerts not deployed; trace/log backend unwired (Doc 10) |
 
-**Overall: Pre-production (Doc 01 verdict confirmed).** Database and architecture are sign-off-ready; security, QA, compliance, and operations each have named, tracked gate items — none a code-execution blocker, three (DOC-001/SEC-001 + the e-signature ceremony RISK-03) genuinely release-gating for a regulated launch.
+**Overall: Pre-production (Doc 01 verdict confirmed).** Database and architecture are sign-off-ready; security, QA, compliance, and operations each have named, tracked gate items — none a code-execution blocker. **RISK-03 (the Part 11 e-signature ceremony) is now CLOSED (2026-08-07)**, leaving **two** items genuinely release-gating for a regulated launch: DOC-001 (signed validation on a qualified environment) and SEC-001 (independent penetration test).
 
 ## 7. Top 20 questions to resolve before any production release
 
 **Compliance / validation (release-gating):**
 1. When will IQ/OQ/PQ be executed and **signed on a qualified environment** (closing DOC-001)? OQ transcripts 12/13 are currently unsigned.
-2. Is Part 11 e-signature on **document-publish-only** acceptable, or must audit/NC/quality-policy/change/review/AQ sign-offs also mint `signature_record`s (RISK-03)? — *the top code question.*
+2. Is Part 11 e-signature on **document-publish-only** acceptable, or must audit/NC/quality-policy/change/review/AQ sign-offs also mint `signature_record`s (RISK-03)? — *was the top code question; **RESOLVED 2026-08-07**: the System Owner directed full scope, and the ceremony now mints a `signature_record` on every signed-record gate.*
 3. Are deviations **B9** (two tables without RLS) and **B10** (historical nil-tenant rows) formally signed off for the regulated release?
 4. Who performs the **independent penetration test** (SEC-001), and when?
 
@@ -155,4 +155,4 @@ All 16 documents delivered (00–15), each at baseline `d74d4bf`, each carrying 
 
 ---
 
-*End of Document 15 and of the NT.QAMS AS-BUILT Review series (Documents 00–15). Reviewed at manifest baseline `d74d4bf` (no drift). Verdict: **Pre-production** — engineering-complete and high-conformance, gated for a regulated launch by validation, independent security testing, operational assurance, and the Part 11 e-signature-ceremony scope.*
+*End of Document 15 and of the NT.QAMS AS-BUILT Review series (Documents 00–15). Reviewed at manifest baseline `d74d4bf` (no drift). Verdict: **Pre-production** — engineering-complete and high-conformance, gated for a regulated launch by validation, independent security testing, and operational assurance. The Part 11 e-signature-ceremony scope (RISK-03) has since been **CLOSED** (2026-08-07) and is no longer a gate.*
