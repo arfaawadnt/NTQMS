@@ -54,9 +54,13 @@ A3. Database
     psql -U postgres -f <edited db-init.sql>
   (If the role/database already exist from a prior install, skip creation — do
   not drop.)
-- Apply schema (idempotent, safe to re-run on upgrades):
-    psql -U qams_app -d ntqams -f C:\apps\ntqams\...\migrations.sql
-  (migrations.sql ships inside the backend zip.)
+- Apply schema AS THE OWNER (idempotent, safe to re-run on upgrades):
+    psql -U qams_owner -d ntqams -f C:\apps\ntqams\...\migrations.sql
+  DDL MUST run as qams_owner, NEVER qams_app (the runtime role has no DDL rights;
+  in Production the app refuses to start if qams_app owns the tables — TENANT-004).
+- Grant the runtime role its least-privilege DML surface (as superuser):
+    psql -U postgres -d ntqams -f C:\apps\ntqams\...\harden-runtime-role.sql
+  (both scripts ship inside the backend zip.)
 
 A4. Backend configuration (machine-scope environment variables)
 Generate: JWT_SECRET (48 random alphanumerics), PLATFORM_ADMIN_PASSWORD (20 chars).

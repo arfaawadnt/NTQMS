@@ -50,8 +50,12 @@ Step 3 -- Database
   32-char password (record per rule 2).
 - Run it once as superuser:  psql -U postgres -f <edited-db-init.sql>
   (If role/database already exist from a prior install, skip creation -- do not drop.)
-- Apply schema:  psql -U qams_app -d ntqams -f <package>\migrations.sql
-  This script is idempotent -- safe on re-runs and upgrades.
+- Apply schema AS THE OWNER:  psql -U qams_owner -d ntqams -f <package>\migrations.sql
+  This script is idempotent -- safe on re-runs and upgrades. DDL MUST run as
+  qams_owner, NEVER qams_app: the runtime role has no DDL rights, and in Production
+  the app refuses to start if qams_app owns the tables (TENANT-004 guard).
+- Grant the runtime role its least-privilege DML surface (as superuser):
+    psql -U postgres -d ntqams -f <package>\harden-runtime-role.sql
 - Verify: psql -U qams_app -d ntqams -c "\dt qams.*"  must list nonconformance,
   capa_action, rca_record, user_account, ref_counter, outbox_event,
   controlled_document, document_version, file_reference, audit,

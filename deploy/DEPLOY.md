@@ -70,6 +70,7 @@ replace folder, run new `migrations.sql`, start.
 | `publish-win-x64/` | Self-contained Windows x64 build — **no .NET runtime needed on the server** |
 | `migrations.sql` | Idempotent schema script (safe to re-run on every upgrade) |
 | `db-init.sql` | One-time role + database bootstrap (run as postgres superuser) |
+| `harden-runtime-role.sql` | Least-privilege runtime grants for `qams_app` (run as superuser after every `migrations.sql`) |
 | `DEPLOY.md` | This guide |
 | `ANTIGRAVITY_DEPLOY_PROMPT.md` | Copy-paste prompt for AI-assisted deployment |
 
