@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NT.QAMS.Application.Abstractions;
+using NT.QAMS.Application.Compliance;
 using NT.QAMS.Contracts.Compliance;
 using NT.QAMS.Domain.ComplianceLedger;
 using NT.QAMS.Domain.Improvement;
@@ -15,9 +16,11 @@ namespace NT.QAMS.Application.ComplianceLedger;
 
 [RequireInternalActor]
 public sealed record OpenAuditTrailReviewCommand(DateOnly PeriodStart, DateOnly PeriodEnd) : ICommand<Guid>;
-[RequireInternalActor]
+/// <summary>Completing a periodic audit-trail review is a Part 11 signing ceremony: it requires the reviewer's e-signature (account password + PIN).</summary>
+[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.Compliance,
+    NT.QAMS.Domain.Authorization.PermissionAction.Sign)]
 public sealed record CompleteAuditTrailReviewCommand(
-    Guid ReviewId, bool AnomaliesFound, string Conclusion) : ICommand;
+    Guid ReviewId, bool AnomaliesFound, string Conclusion, string Password, string Pin) : ICommand;
 
 public sealed class CompleteAuditTrailReviewValidator : AbstractValidator<CompleteAuditTrailReviewCommand>
 {
@@ -44,7 +47,8 @@ public sealed class OpenAuditTrailReviewHandler(
 }
 
 public sealed class CompleteAuditTrailReviewHandler(
-    IAppDbContext db, IComplianceLedgerStore ledger, ICurrentTenant tenant, ICurrentUser user, IClock clock)
+    IAppDbContext db, IComplianceLedgerStore ledger, ICurrentTenant tenant, ICurrentUser user, IClock clock,
+    IESignatureService signatures)
     : ICommandHandler<CompleteAuditTrailReviewCommand>
 {
     public async Task Handle(CompleteAuditTrailReviewCommand c, CancellationToken ct)
@@ -56,10 +60,27 @@ public sealed class CompleteAuditTrailReviewHandler(
         var review = await db.AuditTrailReviews.FirstOrDefaultAsync(r => r.Id == c.ReviewId, ct)
             ?? throw new DomainException("ATR-404", "Audit-trail review not found.");
 
+        // Pre-validate before minting (append-only ledger; mirrors the pilot). The aggregate re-checks.
+        if (review.Status != AuditTrailReviewStatus.Open)
+        {
+            throw new InvalidStateTransitionException(
+                "ATR-010", "The review is already completed and immutable.");
+        }
+
         // Coverage evidence: the ledger volumes for the period, counted at completion.
         var fromUtc = new DateTimeOffset(review.PeriodStart.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
         var toUtc = new DateTimeOffset(review.PeriodEnd.AddDays(1).ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
         var (events, fieldChanges) = await ledger.CountForPeriodAsync(tenantId, fromUtc, toUtc, ct);
+
+        // Bind the signature to the determination being attested (§11.70), then mint before completing.
+        await signatures.SignAsync(
+            actor, c.Password, c.Pin,
+            $"Completed audit-trail review {review.ReviewRef}: {(c.AnomaliesFound ? "anomalies found" : "no anomalies")}",
+            $"ATR:{review.Id:N}",
+            SignatureContentHash.Compute(
+                ("review", review.ReviewRef),
+                ("outcome", c.AnomaliesFound ? "anomalies-found" : "no-anomalies"),
+                ("conclusion", c.Conclusion)), ct);
 
         review.Complete(actor, clock.UtcNow, events, fieldChanges, c.AnomaliesFound, c.Conclusion);
         await db.SaveChangesAsync(ct);

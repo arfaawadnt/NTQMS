@@ -29,9 +29,11 @@ public sealed class AccessReviewsController(ISender sender) : ControllerBase
         Ok(new { id = await sender.Send(new OpenAccessReviewCommand(), ct) });
 
     [HttpPost("{id:guid}/complete")]
+    [RequirePermission(PermissionCatalog.AccessReviews, PermissionAction.Sign)]
     public async Task<IActionResult> Complete(Guid id, CompleteAccessReviewRequest request, CancellationToken ct)
     {
-        await sender.Send(new CompleteAccessReviewCommand(id, request.ChangesRequired, request.Conclusion), ct);
+        await sender.Send(
+            new CompleteAccessReviewCommand(id, request.ChangesRequired, request.Conclusion, request.Password, request.Pin), ct);
         return NoContent();
     }
 }

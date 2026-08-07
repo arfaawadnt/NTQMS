@@ -49,11 +49,12 @@ public sealed class ComplianceController(ISender sender) : ControllerBase
         Ok(new { id = await sender.Send(new OpenAuditTrailReviewCommand(request.PeriodStart, request.PeriodEnd), ct) });
 
     [HttpPost("audit-trail-reviews/{id:guid}/complete")]
-    [RequirePermission(PermissionCatalog.Compliance, PermissionAction.Approve)]
+    [RequirePermission(PermissionCatalog.Compliance, PermissionAction.Sign)]
     public async Task<IActionResult> CompleteAuditTrailReview(
         Guid id, NT.QAMS.Contracts.Compliance.CompleteAuditTrailReviewRequest request, CancellationToken ct)
     {
-        await sender.Send(new CompleteAuditTrailReviewCommand(id, request.AnomaliesFound, request.Conclusion), ct);
+        await sender.Send(
+            new CompleteAuditTrailReviewCommand(id, request.AnomaliesFound, request.Conclusion, request.Password, request.Pin), ct);
         return NoContent();
     }
 

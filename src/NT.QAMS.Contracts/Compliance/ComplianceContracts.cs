@@ -4,7 +4,7 @@ namespace NT.QAMS.Contracts.Compliance;
 
 public sealed record OpenAuditTrailReviewRequest(DateOnly PeriodStart, DateOnly PeriodEnd);
 
-public sealed record CompleteAuditTrailReviewRequest(bool AnomaliesFound, string Conclusion);
+public sealed record CompleteAuditTrailReviewRequest(bool AnomaliesFound, string Conclusion, string Password, string Pin);
 
 public sealed record AuditTrailReviewDto(
     Guid Id, string ReviewRef, DateOnly PeriodStart, DateOnly PeriodEnd, string Status,

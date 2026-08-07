@@ -166,7 +166,7 @@ Examples: `TC-AUTH-API-001`, `TC-TENANT-RLS-014`, `TC-QC-WESTGARD-007`, `TC-COMP
 
 **Gap IDs:** `GAP-<MODULE>-<NNN>`. **Risk IDs:** reuse `docs/validation/02-Functional-Risk-Assessment.md` IDs where they exist; otherwise mint `RSK-<MODULE>-<NNN>` and say so.
 
-**Requirement IDs [corrected 2026-08-01]:** the baseline set is `URS-001`…`URS-055` in `docs/validation/01-User-Requirements-Specification.md`. Everything after the 1.0 baseline — `URS-056`…`URS-107` — is defined in `docs/validation/06-Revalidation-Delta-v1.38-v1.50.md` **Part A**, which is their single source of truth (A.9 role privileges `URS-095`…`099`; A.10 schema hardening `URS-100`…`107`). Trace to those first. Where no URS requirement covers the behaviour, trace to the source file and open a Gap for the missing requirement.
+**Requirement IDs [corrected 2026-08-07]:** the baseline set is `URS-001`…`URS-055` in `docs/validation/01-User-Requirements-Specification.md`. Everything after the 1.0 baseline — `URS-056`…`URS-128` — is defined in `docs/validation/06-Revalidation-Delta-v1.38-v1.50.md` **Part A**, which is their single source of truth (A.9 role privileges `URS-095`…`099`; A.10 schema hardening `URS-100`…`107`; A.11/A.12 Quality Analytics + usability `URS-108`…`122`; A.13–A.19 the RISK-03 Part 11 e-signature ceremony `URS-123`…`128`). The next free id is `URS-129`. Trace to those first. Where no URS requirement covers the behaviour, trace to the source file and open a Gap for the missing requirement.
 
 ---
 

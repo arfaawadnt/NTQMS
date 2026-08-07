@@ -69,4 +69,9 @@ public sealed class PtPlansController(ISender sender) : ControllerBase
         await sender.Send(new ClosePtPlanCommand(id, request.ClosureSummary), ct);
         return NoContent();
     }
+
+    /// <summary>Part 11 §11.50 signature manifest for this plan, visible to any viewer of the record.</summary>
+    [HttpGet("{id:guid}/signatures")]
+    public async Task<IActionResult> Signatures(Guid id, CancellationToken ct) =>
+        Ok(await sender.Send(new NT.QAMS.Application.ComplianceLedger.GetSignaturesForSubjectQuery($"PTP:{id:N}"), ct));
 }

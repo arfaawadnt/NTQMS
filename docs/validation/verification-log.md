@@ -43,6 +43,7 @@ exactly how two wrong totals reached the commit record (see the note below the t
 
 | Date | Commit | Env | Domain | App | Arch | Integ | Func | Backend | FE unit | E2E | Result |
 | ---- | ------ | --- | -----: | --: | ---: | ----: | ---: | ------: | ------: | --: | ------ |
+| 2026-08-07 | (pending commit) | dev + real PG | 242 | 90 | 33 | 31 (+1 skip) | 82 | **478** | 95 | — (not run) | All green (RISK-03 close-out: PtPlan manifest endpoint+display; periodic-review completion signing — audit-trail-review + access-review, new compliance.sign key; document-detail migrated to shared e-sign dialog. AccessReviewSigningTests +2; ApiSurface +2 PtPlan signatures routes, reviewed) |
 | 2026-08-06 | (pending commit) | dev + real PG | 242 | 88 | 33 | 31 (+1 skip) | 82 | **476** | 95 | — (not run) | All green (RISK-03 AQ manifest endpoints: 13 GET /api/<study>/{id}/signatures added; ApiSurface snapshot regenerated +26 routes, reviewed) |
 | 2026-08-06 | (pending commit) | dev + real PG | 242 | 88 | 33 | 31 (+1 skip) | 82 | **476** | 95 | — (not run) | All green (RISK-03 borderline gates frontend: supplier/competency/conflict/test-auth UIs wired to the e-sign dialog; prod build + karma green) |
 | 2026-08-06 | (pending commit) | dev + real PG | 242 | 88 | 33 | 31 (+1 skip) | 82 | **476** | 95 | — (not run) | All green (RISK-03 borderline gates backend: supplier/conflict/competency/test-auth signing ceremonies + suppliers.sign & conflicts.sign catalogue keys; role/catalog tests green) |

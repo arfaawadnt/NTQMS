@@ -322,8 +322,11 @@ shared `qams-signature-manifest` component was made **self-fetching** — an opt
 input drives an `HttpClient` GET, so no per-study facade/API signal was needed and the NC page's
 presentational `[signatures]` binding stays backward-compatible — and placed above the audit trail
 on every study page. Signatures are therefore visible both on the record and in the compliance
-signature log. **PtPlan remains excluded** — its `GET /api/pt-plans/{id}/signatures` endpoint was
-not part of this batch, so its signatures stay visible in the compliance signature log only.
+signature log. **PtPlan's manifest has since been added (2026-08-07):** its
+`GET /api/pt-plans/{id}/signatures` endpoint (subject `PTP:{id}`) and the self-fetching
+`qams-signature-manifest` block now render on the PT-plan workspace exactly as the 13 studies do, so
+every analytical signing gate now surfaces its manifest on-page. `ApiSurface.approved.txt` gained the
+two PtPlan signatures routes (versioned + non-versioned), reviewed as an intentional contract change.
 
 ### A.15 Part 11 electronic-signature ceremony — non-analytical gates (RISK-03)
 
@@ -408,6 +411,82 @@ API directly, so credentials go straight through), and the test-authorization **
 authorization-matrix page (`test-authorizations.sign` — the form is validated, then the dialog is
 opened, then the grant is submitted with the credentials). Frontend production build clean; 95 Karma
 unit tests green.
+
+### A.18 Part 11 electronic-signature ceremony — periodic-review completions (RISK-03)
+
+Brings the two periodic recertification *completions* into Part 11 scope, closing the last regulated
+sign-off gates identified in the as-built review (Doc 03/07). Completing a **periodic audit-trail
+review** (21 CFR Part 11 §11.10(e)) and completing a **periodic user-access review / recertification**
+(§11.10(d) / EU Annex 11 §12) each concludes and freezes an immutable evidence record; each now also
+requires the reviewer's electronic signature. Neither gate carries segregation of duties (the reviewer
+records their own determination, as the domain models it — like the management-review close of §A.16),
+so the only pre-signature guard is state (the review must still be Open). No schema or domain change;
+the aggregates already carried their state and required-conclusion invariants. Each handler
+pre-validates state **before** minting, so a refused completion leaves no signature (append-only
+ledger).
+
+One **new catalogue key `compliance.sign`** was minted: the `compliance` module previously carried
+`[View, Create, Approve, Export]` with no `Sign`. It is auto-granted to **Tenant Administrator** (via
+`AllKeys`) and **Quality Manager** (its `KeysWhere` default arm), and correctly **excluded from the
+External Auditor** — the auditor's predicate grants only `View`/`Export`, so the read-only auditor
+gains no signing capability (pinned by `SystemRoleCatalogTests.The_external_auditor_holds_no_write_privileges_at_all`).
+`access-reviews.sign` already existed (the module uses `SignedRecordLifecycle`).
+
+| URS | Requirement (delta) | Design element(s) | Verification | Status |
+| --- | ------------------- | ----------------- | ------------ | ------ |
+| URS-128 | Completing a periodic audit-trail review and completing a periodic user-access review shall each require the reviewer's electronic signature (account password + PIN, §11.200(a)(1)), recorded as an immutable signature bound to the review and its outcome (§11.50/§11.70); the state gate shall be checked **before** any signature is minted. | `CompleteAuditTrailReviewCommand` / `CompleteAccessReviewCommand` each gain `Password`+`Pin` and move from `[RequireInternalActor]` to `[RequirePermissionPolicy(<module>, Sign)]` (`compliance` / `access-reviews`); handlers inject `IESignatureService`, pre-validate the Open state (ATR-010 / UAR-010), `SignAsync` (subjects `ATR:{id}` / `UAR:{id}`), then the aggregate's `Complete`; `PermissionCatalog` adds `compliance.sign`; request DTOs (`CompleteAuditTrailReviewRequest`, `CompleteAccessReviewRequest`) extended; the compliance-ledger `reviews` tab and the access-reviews page open the shared `qams-esign-dialog` (gated `compliance.sign` / `access-reviews.sign`) | AUTO — `AccessReviewSigningTests` (2, representative of both completions, driving the **real** `ESignatureService`: a valid credential completes the review and mints exactly one manifest entry bound to `UAR:{id}`; a wrong PIN → SIG-001 + zero signatures + review still Open); full backend suite 242/90/33/31+1/82 = **478**; `SystemRoleCatalogTests` green with the new `compliance.sign` key; frontend production build clean + 95 Karma | Template — engineering complete; automated evidence recorded; witnessed positive-mint OQ pending (QA execution) |
+
+**Authorization upgrade note (act before release).** `compliance.sign` is a **new key** — existing
+tenants' already-seeded roles lack it and additive seeding will not backfill it; an administrator must
+grant it (or a data migration must). The **audit-trail-review complete** endpoint moved from
+`compliance.approve` to `compliance.sign`, and the **access-review complete** endpoint gained an
+explicit `access-reviews.sign` gate (it previously had none at the action level): any tenant role that
+completed these via the old permission loses the action until granted `.sign`.
+
+### A.19 RISK-03 authorization upgrade summary (release action — act before deploying to existing tenants)
+
+RISK-03 extended the Part 11 signing ceremony across every regulated sign-off gate. Because seeding is
+additive and idempotent *per role name*, **existing tenants' already-seeded roles do not gain new keys
+automatically, and endpoints whose required permission was tightened will deny holders of the old
+permission** until an administrator re-grants, or a deliberate data migration runs. System roles
+seeded *after* this release (new tenants) are unaffected — Tenant Administrator picks up new keys via
+`AllKeys`, Quality Manager via its predicate default. This section consolidates every gap for the
+release note; the per-section notes above are authoritative for the detail.
+
+**New catalogue keys (must be granted to the roles that perform these actions):**
+
+| New key | Module | Introduced in | Auto-granted (new tenants) to |
+| ------- | ------ | ------------- | ----------------------------- |
+| `proficiency-testing.sign` | Proficiency Testing | §A.14 (PtPlan) | Tenant Administrator, Quality Manager |
+| `suppliers.sign` | Suppliers | §A.17 | Tenant Administrator, Quality Manager |
+| `conflicts.sign` | Conflicts | §A.17 | Tenant Administrator, Quality Manager |
+| `compliance.sign` | Compliance | §A.18 | Tenant Administrator, Quality Manager |
+
+**Endpoints whose required permission was tightened (holders of the OLD action lose it until granted the NEW one):**
+
+| Gate | Old permission | New permission | Section |
+| ---- | -------------- | -------------- | ------- |
+| NC verify | `nc.approve` | `nc.sign` | §A.13 |
+| Uncertainty-budget approve | `analytical-quality.approve` | `analytical-quality.sign` | §A.14 |
+| NC confirm-effectiveness (close) | `nc.approve` | `nc.sign` | §A.15 |
+| Quality-policy approve | `quality-policy.approve` | `quality-policy.sign` | §A.15 |
+| Change approve | `changes.approve` | `changes.sign` | §A.15 |
+| Management-review close | `reviews.void` | `reviews.sign` | §A.16 |
+| Supplier approve | `suppliers.approve` | `suppliers.sign` | §A.17 |
+| Conflict assess | `conflicts.approve` | `conflicts.sign` | §A.17 |
+| Competency authorize | `competencies.approve` | `competencies.sign` | §A.17 |
+| Test-authorization grant | `test-authorizations.create` | `test-authorizations.sign` | §A.17 |
+| Audit-trail-review complete | `compliance.approve` | `compliance.sign` | §A.18 |
+| Access-review complete | *(none at action level)* | `access-reviews.sign` | §A.18 |
+
+*(The 12 analytical study sign-off endpoints of §A.14 already required `analytical-quality.sign`, and
+internal-audit sign-off already required `audits.sign` — no change for those.)*
+
+**Recommended release step.** For each existing tenant, add the four new keys and the tightened `.sign`
+keys above to the roles that legitimately sign (typically Quality Manager and any custom approver
+roles), so the roles reproduce their prior reach. This is an administrator action in the role-privilege
+matrix, or a one-off data migration — engineering has **not** written such a migration, by design: which
+custom roles should sign is a tenant policy decision, not a system default.
 
 ---
 

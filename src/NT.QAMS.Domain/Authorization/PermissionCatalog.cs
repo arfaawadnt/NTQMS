@@ -149,7 +149,7 @@ public static class PermissionCatalog
         // ── Risk & governance ────────────────────────────────────────────────
         new(Risks, GroupRisk, "perm.mod.risks", FullRecordLifecycle),
         new(Compliance, GroupRisk, "perm.mod.compliance",
-            [PermissionAction.View, PermissionAction.Create, PermissionAction.Approve, PermissionAction.Export]),
+            [PermissionAction.View, PermissionAction.Create, PermissionAction.Approve, PermissionAction.Sign, PermissionAction.Export]),
         new(Conflicts, GroupRisk, "perm.mod.conflicts", SignedRecordLifecycle),
         new(OrgContext, GroupRisk, "perm.mod.orgContext",
             [PermissionAction.View, PermissionAction.Create, PermissionAction.Edit, PermissionAction.Void, PermissionAction.Export]),
