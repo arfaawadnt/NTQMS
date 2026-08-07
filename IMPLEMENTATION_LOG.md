@@ -776,3 +776,53 @@ Replaces role-name authorization with tenant-configurable privileges end to end.
   with the qualified-environment re-execution still required. CSR rev 3.1: DOC-001 progress now
   36 OQ cases across docs 09-13, all unsigned.
 - Does NOT close DOC-001 (dev workstation, unsigned), SEC-001 or OPS-001.
+
+## RISK-03 — Part 11 e-signature ceremony extended to every signed-record gate (2026-08-06..07) [CLOSED on dev, UNSIGNED validation]
+
+Closes RISK-03 / SEC-01 / NB-03-02 from the AS-BUILT review (Doc 12): before this work the
+21 CFR Part 11 signing ceremony (`IESignatureService.SignAsync`, password + PIN, §11.200(a)(1))
+was wired only to document-publish, so ~19 other regulated sign-off gates wrote signer fields but
+minted **no `signature_record`** (§11.50/§11.70 unsatisfied). The ceremony is now minted on **every**
+signed-record transition. No domain/schema change — the aggregates already carried their SoD + state
+invariants; each handler pre-validates state/SoD **before** minting, so a refused sign-off leaves no
+signature (append-only ledger). A reusable `SignatureContentHash` helper binds the signature to
+non-file records; a reusable `qams-esign-dialog` + self-fetching `qams-signature-manifest` carry the
+ceremony and the §11.50 manifest across the UI.
+
+- **Gates converted (all mint + surface a manifest):** NC verify + NC close; the 14 analytical-quality
+  sign-offs (linearity, detection-limit, outlier, method-comparison, reference-interval,
+  instrument-comparability, precision, sigma, interference, carryover, lot-comparison, validation-study,
+  uncertainty-budget approve, **and PtPlan approve**); internal-audit sign-off; quality-policy approve;
+  change-control approve; management-review close; the 4 borderline SoD gates (supplier approve,
+  conflict assess, competency authorize, test-authorization grant); and the 2 periodic-review
+  completions (audit-trail review, user-access review).
+- **New catalogue keys:** `proficiency-testing.sign`, `suppliers.sign`, `conflicts.sign`,
+  `compliance.sign` (each auto-granted to Tenant Administrator via AllKeys + Quality Manager via
+  predicate default; External Auditor correctly excluded — read-only). `access-reviews.sign`,
+  `analytical-quality.sign`, `nc.sign`, `audits.sign` already existed.
+- **Manifest display:** `GET /api/<subject>/{id}/signatures` on the 13 AQ studies + PtPlan (reusing
+  `GetSignaturesForSubjectQuery`); `qams-signature-manifest` made self-fetching (`subjectUrl` input) so
+  no per-study facade/API signal was needed and the NC page's `[signatures]` binding stays
+  backward-compatible. `document-detail` migrated off its raw inline password/PIN form onto the shared
+  dialog, so every gate uses one ceremony UI.
+- **Tests:** `SignatureContentHashTests` (5), `VerifyNcSigningTests` (4), `AnalyticalSignOffSigningTests`
+  (4), `QualityPolicySigningTests` (3), `AccessReviewSigningTests` (2) — all drive the **real**
+  `ESignatureService`. Backend **478** (Domain 242 / App 90 / Arch 33 / Integ 31 +1 skip / Func 82),
+  frontend **95** Karma, all green; `ApiSurface.approved.txt` reconciled (+28 GET signatures routes total).
+- **Live PostgreSQL proofs:** wrong PIN → 422 SIG-001 (fence before mint); missing credential body → 400;
+  preparer signing own record → SOD-* (fenced before mint); new-key-not-yet-granted → 403 AUTHZ-403;
+  management-review close → 204 positive mint (`subjectRef = MRV:{id}` persisted).
+- **UPGRADE GAP (act before release):** existing tenants' seeded roles need the 4 new `.sign` keys
+  granted, plus 12 endpoints tightened `approve/void/create → sign` re-granted — enumerated in
+  `docs/validation/06-…` **§A.19** (admin-grant or a deliberate data migration; not written, by design).
+- **Docs:** delta doc 06 Part A §A.13–A.19 + URS-123..128 (Template); OQ doc 14 (NC-verify, unsigned);
+  verification-log rows; ground-truth URS ceiling → 128. AS-BUILT review Doc 12/15 + standalone HTML and
+  the Consolidated Compliance Status Report addendum all mark RISK-03 CLOSED.
+- **Commits (dev):** `ddd1551` (pilot), `713ed40` + `b980921` (AQ), `0211fb6` + `eb4c596` (non-AQ),
+  `3917dee` (PtPlan gate), `ed556e7` (review-close), `a16c77d` + `6bfccb3` (borderline), `eb7330d` +
+  `58130f6` (AQ manifest), `1ce8a31` (delta doc), `9b6c63c` + `3d43849` (close-out: PtPlan manifest,
+  periodic-review signing, document-detail migration), `bdcafac` (reports marked closed).
+- **HONEST STATUS:** RISK-03 is a **code** closure — engineering-complete and verified on `dev`. The
+  witnessed positive-mint OQ for the SoD-guarded gates (needs a second PIN'd operator so signer ≠
+  preparer) and the execution + signature of URS-123..128 / OQ doc 14 remain **QA's**, folded under
+  DOC-001. Does NOT close DOC-001, SEC-001 or OPS-001; the release verdict stays Pre-production.
