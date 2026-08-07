@@ -303,7 +303,7 @@ analytical + quality-policy signing unit tests (identical mechanism).
 
 | URS | Requirement (delta) | Design element(s) | Verification | Status |
 | --- | ------------------- | ----------------- | ------------ | ------ |
-| URS-124 | Signing off / approving an analytical study, assessment or uncertainty budget shall require the signer's electronic signature (account password **and** PIN, §11.200(a)(1)), recorded as an immutable signature bound to the record and outcome (§11.50/§11.70); the segregation-of-duties and state gates shall be checked **before** any signature is minted. Applies to: linearity, instrument comparability, carryover, method comparison, precision, interference, lot comparison, detection limit, outlier screening, reference interval, validation study, sigma assessment (sign-off) and uncertainty budget (approval). | Each `SignOff*Command`/`ApproveUncertaintyBudgetCommand` gains `Password`+`Pin` and `[RequirePermissionPolicy(analytical-quality, Sign)]`; each workflow handler pre-validates SoD (`CreatedByUserId`) + the study's state, then `IESignatureService.SignAsync`, then the aggregate's `SignOff`/`Approve` (slices under `src/NT.QAMS.Application/AnalyticalQuality/`); shared `AnalyticalSignOffRequest(Password, Pin)` contract; 12 sign-off endpoints already gated `analytical-quality.sign`, uncertainty `/approve` tightened from `Approve` to `Sign` | AUTO — `AnalyticalSignOffSigningTests` (4: Sigma valid sign-off mints exactly one manifest entry against the **real** `ESignatureService`; wrong PIN → SIG-001 + zero signatures + still Draft; preparer → SOD-AQ-001 + zero signatures; wrong state → LIN-012 + zero signatures); full backend suite 242/85/33/31+1/82. INSP live (dev, real PostgreSQL, 2026-08-06) — linearity sign-off as the preparer with correct password+PIN → **422 SOD-AQ-001** (fenced before minting); sign-off with no credential body → **400** (endpoint now requires the e-signature body) | Template — engineering complete; automated + partial live evidence recorded; witnessed positive-mint OQ pending (needs a second operator account so signer ≠ preparer) |
+| URS-124 | Signing off / approving an analytical study, assessment or uncertainty budget shall require the signer's electronic signature (account password **and** PIN, §11.200(a)(1)), recorded as an immutable signature bound to the record and outcome (§11.50/§11.70); the segregation-of-duties and state gates shall be checked **before** any signature is minted. Applies to: linearity, instrument comparability, carryover, method comparison, precision, interference, lot comparison, detection limit, outlier screening, reference interval, validation study, sigma assessment (sign-off) and uncertainty budget (approval). | Each `SignOff*Command`/`ApproveUncertaintyBudgetCommand` gains `Password`+`Pin` and `[RequirePermissionPolicy(analytical-quality, Sign)]`; each workflow handler pre-validates SoD (`CreatedByUserId`) + the study's state, then `IESignatureService.SignAsync`, then the aggregate's `SignOff`/`Approve` (slices under `src/NT.QAMS.Application/AnalyticalQuality/`); shared `AnalyticalSignOffRequest(Password, Pin)` contract; 12 sign-off endpoints already gated `analytical-quality.sign`, uncertainty `/approve` tightened from `Approve` to `Sign` | AUTO — `AnalyticalSignOffSigningTests` (4: Sigma valid sign-off mints exactly one manifest entry against the **real** `ESignatureService`; wrong PIN → SIG-001 + zero signatures + still Draft; preparer → SOD-AQ-001 + zero signatures; wrong state → LIN-012 + zero signatures); full backend suite 242/85/33/31+1/82. INSP live (dev, real PostgreSQL, 2026-08-06) — linearity sign-off as the preparer with correct password+PIN → **422 SOD-AQ-001** (fenced before minting); sign-off with no credential body → **400** (endpoint now requires the e-signature body). MANIFEST DISPLAY (delivered 2026-08-06) — the recorded §11.50 signature is now shown on each of the 13 study pages: a `GET /api/<study>/{id}/signatures` read endpoint was added per study (reusing `GetSignaturesForSubjectQuery`), the shared `qams-signature-manifest` component was made self-fetching (optional `subjectUrl` input), and a manifest block renders above the audit trail on every study page; `ApiSurface.approved.txt` regenerated (+26 routes reviewed); frontend production build clean and 95/95 Karma green | Template — engineering complete; signing + manifest display in place; automated + partial live evidence recorded; witnessed positive-mint OQ pending (needs a second operator account so signer ≠ preparer) |
 
 **Authorization upgrade note (act before release).** Twelve analytical sign-off endpoints already
 required `analytical-quality.sign`, so they are unaffected. The **uncertainty-budget `/approve`**
@@ -312,13 +312,18 @@ role that approved uncertainty budgets via `analytical-quality.approve` without
 `analytical-quality.sign` will lose that ability until an administrator grants `.sign`. Seeding is
 additive per role name and will not backfill this.
 
-**Frontend (this increment).** The 13 analytical study/assessment sign-off (and uncertainty
-approval) actions now open the shared `qams-esign-dialog` to capture the account password + PIN
-before submitting; the credentials thread through each per-study API service and facade. The
-per-study §11.50 signature-**manifest** display on each study page is deferred to a follow-up (it
-needs a `GET …/signatures` read endpoint per study, as added for NC in §A.13); signatures are
-meanwhile visible in the compliance signature log. PtPlan remains excluded (needs
-`proficiency-testing.sign`).
+**Frontend.** The 13 analytical study/assessment sign-off (and uncertainty approval) actions open
+the shared `qams-esign-dialog` to capture the account password + PIN before submitting; the
+credentials thread through each per-study API service and facade. The per-study §11.50
+signature-**manifest** display now renders on each study page (delivered 2026-08-06): a
+`GET /api/<study>/{id}/signatures` read endpoint was added to all 13 study controllers (reusing
+`GetSignaturesForSubjectQuery` with each study's subject prefix, as added for NC in §A.13), and the
+shared `qams-signature-manifest` component was made **self-fetching** — an optional `subjectUrl`
+input drives an `HttpClient` GET, so no per-study facade/API signal was needed and the NC page's
+presentational `[signatures]` binding stays backward-compatible — and placed above the audit trail
+on every study page. Signatures are therefore visible both on the record and in the compliance
+signature log. **PtPlan remains excluded** — its `GET /api/pt-plans/{id}/signatures` endpoint was
+not part of this batch, so its signatures stay visible in the compliance signature log only.
 
 ### A.15 Part 11 electronic-signature ceremony — non-analytical gates (RISK-03)
 
@@ -344,8 +349,9 @@ capture the account password + PIN: NC-detail's effectiveness (close) decision (
 alongside the verify pilot's, gated on `nc.sign`), audit-detail sign-off, change-detail approve, and
 the quality-policy page's approve (a single-page component with no facade — the credentials go
 straight to its API service). Credentials thread through each facade/API. The NC signature manifest
-(added for verify in §A.13) now also shows the close signature. Per-study AQ manifests remain the
-only deferred display item.
+(added for verify in §A.13) now also shows the close signature. The per-study AQ manifest display
+has since been delivered (see §A.14); the only manifest not yet on-page is PtPlan's (its
+`GET …/signatures` endpoint is still outstanding).
 
 **Scope boundary.** "Review close" (the as-built list's fifth non-AQ item) is resolved to
 **`ManagementReview.Close`** — see §A.16 (it is the only review aggregate with a *Close* action, and
