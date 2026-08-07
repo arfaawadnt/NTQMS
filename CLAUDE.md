@@ -147,8 +147,12 @@ end-to-end playbook; it is the current, measured procedure, and it supersedes th
   applies to the migration's own session *and to PostgreSQL's referential-integrity checks*.
   Without it, a data-backfill `UPDATE ... FROM parent` silently updates **zero rows** and a
   later `ADD CONSTRAINT ... FOREIGN KEY` fails because the RI check cannot see the parent. Put
-  `SELECT set_config('app.bypass_rls', 'on', true);` (transaction-local) at the top of **both**
-  `Up()` and `Down()` in any migration that backfills from, or adds an FK to, a FORCE-RLS table.
+  `SET LOCAL app.bypass_rls = 'on';` (transaction-local) at the top of **both** `Up()` and `Down()`
+  in any migration that backfills from, or adds an FK to, a FORCE-RLS table. **Use `SET LOCAL`, not
+  `SELECT set_config(...)`:** EF wraps each migration in a `DO $EF$ … $EF$` plpgsql block for the
+  `--idempotent` script, and a bare `SELECT` there aborts with 42601 ("no destination for result
+  data"); `PERFORM` would fix the script but breaks `ef database update`/`MigrateOnStartup` (invalid
+  at top level). `SET LOCAL` is valid in both apply paths.
 - **EF's model snapshot does not learn raw-SQL DDL.** If a migration renames or replaces a
   constraint via `migrationBuilder.Sql(...)`, EF still believes the old name, and the *next*
   scaffolded migration will emit a drop for a constraint that no longer exists. Reconcile

@@ -87,8 +87,15 @@ referential-integrity checks**. Without a bypass:
 Put this at the top of **both** `Up()` and `Down()` in any migration that backfills from, or adds
 an FK to, a FORCE-RLS table. Transaction-local, so nothing leaks:
 ```csharp
-migrationBuilder.Sql("SELECT set_config('app.bypass_rls', 'on', true);");
+migrationBuilder.Sql("SET LOCAL app.bypass_rls = 'on';");
 ```
+**Use `SET LOCAL`, not `SELECT set_config(...)`.** The `--idempotent` script wraps every migration in
+a `DO $EF$ … $EF$` plpgsql block, and a bare `SELECT` inside plpgsql aborts with `42601` ("query has
+no destination for result data") — so a from-scratch `psql -f migrations.sql` fails. `PERFORM
+set_config(...)` fixes the script but is invalid at the top level, so it breaks `ef database update`
+and `MigrateOnStartup`. `SET LOCAL` (equivalent to `set_config(..., is_local => true)`) is valid in
+**both** apply paths. This bit us: the idempotent script silently carried the defect because dev and
+CI apply via `MigrateOnStartup` (top level), where the bare `SELECT` is legal.
 
 ### Trap 2 — EF's model snapshot does not learn raw-SQL DDL
 If a migration renames or replaces a constraint via `migrationBuilder.Sql(...)`, EF still believes

@@ -852,3 +852,21 @@ Post-review fixes to the deployment path (no application behaviour, API surface,
   → **200** (proves the `UseWindowsService()` no-op path). **NOT run:** the full test suite, and the
   actual Windows-service install (`sc.exe`-reaches-Running) — that is IQ-31, a deploy-side check
   owned by QA. No API route changed, so `ApiSurface.approved.txt` is untouched.
+- **`migrations.sql` — FORCE-RLS bypass syntax (this commit):** two migrations
+  (`Hardening4_ChildTenancy`, `QualityHealthProfile`) opened their RLS-bypass with
+  `SELECT set_config('app.bypass_rls','on',true);`. That is valid at top level (so `ef database
+  update` / `MigrateOnStartup` — the dev/CI path — always worked), but EF wraps each migration in a
+  `DO $EF$ … $EF$` plpgsql block for the `--idempotent` script, where a bare `SELECT` aborts with
+  **42601** ("query has no destination for result data"). A from-scratch `psql -f deploy/migrations.sql`
+  therefore failed — the path `Deploy-FullStack.ps1` and `DEPLOY.md` §1 use. Changed all four
+  occurrences (Up + Down ×2) to `SET LOCAL app.bypass_rls = 'on';`, which is valid in **both** apply
+  paths; `PERFORM` (proposed elsewhere) was rejected — it fixes the script but breaks the top-level
+  path (invalid SQL outside plpgsql). Regenerated `deploy/migrations.sql`. Updated the documented
+  convention that had prescribed the broken form (CLAUDE.md §5; `ntqms-database` skill Trap 1) and
+  IQ-30 (now requires a from-scratch `psql -f` apply, not only `MigrateOnStartup`).
+- **VERIFIED (live PostgreSQL 17, parse/behaviour):** inside `DO $EF$ BEGIN … END $EF$` — old
+  `SELECT set_config` → **ERROR 42601**; `SET LOCAL` → **OK**. At top level — `PERFORM` → **syntax
+  error**; `SET LOCAL` (in txn) → **OK**; old `SELECT set_config` → OK (why dev never saw it).
+  `dotnet ef migrations script --idempotent` regenerated clean; the two bypass lines now read
+  `SET LOCAL app.bypass_rls = 'on';`. **NOT run:** a full end-to-end from-empty-DB apply (no
+  superuser/clean DB on this host) — that is IQ-30, owned by QA; and the full test suite.

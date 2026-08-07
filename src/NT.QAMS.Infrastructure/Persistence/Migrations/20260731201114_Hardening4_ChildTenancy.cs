@@ -257,7 +257,7 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
 -- policies would otherwise hide them from the tenant-less migration session
 -- (the round-trip proved it: every UPDATE..FROM was a no-op and the first
 -- composite FK failed on a nil tenant). Transaction-local, so nothing leaks.
-SELECT set_config('app.bypass_rls', 'on', true);
+SET LOCAL app.bypass_rls = 'on';
 
 -- 1) Backfill tenant_id from the owning aggregate, then drop the nil default.
 UPDATE qams.assessment_result c SET tenant_id = p.tenant_id FROM qams.competency_record p WHERE p.id = c.competency_id;
@@ -732,7 +732,7 @@ ALTER TABLE qams.user_account VALIDATE CONSTRAINT fk_user_account_tenant;
 -- Same reason as Up: FORCE ROW LEVEL SECURITY applies to referential-integrity
 -- checks too, so re-adding the single-column FKs needs the parent rows visible
 -- to this tenant-less migration session. Transaction-local.
-SELECT set_config('app.bypass_rls', 'on', true);
+SET LOCAL app.bypass_rls = 'on';
 
 ALTER TABLE qams.outbox_event DROP CONSTRAINT fk_outbox_event_tenant;
 ALTER TABLE qams.ref_counter DROP CONSTRAINT fk_ref_counter_tenant;

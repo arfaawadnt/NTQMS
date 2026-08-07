@@ -5738,7 +5738,7 @@ BEGIN
     -- policies would otherwise hide them from the tenant-less migration session
     -- (the round-trip proved it: every UPDATE..FROM was a no-op and the first
     -- composite FK failed on a nil tenant). Transaction-local, so nothing leaks.
-    SELECT set_config('app.bypass_rls', 'on', true);
+    SET LOCAL app.bypass_rls = 'on';
 
     -- 1) Backfill tenant_id from the owning aggregate, then drop the nil default.
     UPDATE qams.assessment_result c SET tenant_id = p.tenant_id FROM qams.competency_record p WHERE p.id = c.competency_id;
@@ -8364,7 +8364,7 @@ END $EF$;
 DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260801131521_QualityHealthProfile') THEN
-    SELECT set_config('app.bypass_rls', 'on', true);
+    SET LOCAL app.bypass_rls = 'on';
 
     INSERT INTO qams.role_permission (tenant_id, role_id, permission_key)
     SELECT r.tenant_id, r.id, 'reports.manage'

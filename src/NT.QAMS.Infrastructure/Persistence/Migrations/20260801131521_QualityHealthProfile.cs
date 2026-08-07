@@ -113,7 +113,7 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
             // and QualityManager); tenant-authored roles are left untouched,
             // because their privileges are the customer's decision, not ours.
             migrationBuilder.Sql("""
-                SELECT set_config('app.bypass_rls', 'on', true);
+                SET LOCAL app.bypass_rls = 'on';
 
                 INSERT INTO qams.role_permission (tenant_id, role_id, permission_key)
                 SELECT r.tenant_id, r.id, 'reports.manage'
@@ -135,7 +135,7 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
             // transaction-local and required: role_permission is a FORCE-RLS table,
             // so an unscoped DELETE would otherwise match nothing.
             migrationBuilder.Sql("""
-                SELECT set_config('app.bypass_rls', 'on', true);
+                SET LOCAL app.bypass_rls = 'on';
                 DELETE FROM qams.role_permission WHERE permission_key = 'reports.manage';
                 """);
 
