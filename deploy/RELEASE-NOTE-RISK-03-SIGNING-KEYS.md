@@ -1,13 +1,14 @@
-# Release Note — Part 11 Electronic-Signature Ceremony (RISK-03)
+# Release Note — v1.53.0 Part 11 E-Signature Ceremony (RISK-03) + v1.53.1 Deploy-Path Fixes
 
-**Action required for existing tenants before this release is used in production.**
+**Action required for existing tenants before v1.53.x is used in production** — grant the new
+signing keys (§1–§2). The v1.53.1 items are deploy mechanics for whoever runs the install/upgrade.
 
 | Field | Value |
 | ----- | ----- |
 | Document ID | RN-NTQMS-RISK03-001 |
-| Applies to | The RISK-03 e-signature close-out (on `dev` through commit `6b60386`) |
-| Audience | Tenant Administrators / whoever maintains role privileges |
-| Type | Post-deploy configuration — **no data is migrated automatically** |
+| Applies to | **v1.53.0** — RISK-03 e-signature close-out (`dev` thru `6b60386`, tag `v1.53.0`); **v1.53.1** — deploy/migration-mechanics fixes (`dev` thru `9271bd6`, tag `v1.53.1`) |
+| Audience | Tenant Administrators / role maintainers (§1–§2); whoever runs the install/upgrade (Deploy-path corrections) |
+| Type | Post-deploy configuration — **no data is migrated automatically** — plus deploy-path mechanics (v1.53.1, no schema/behaviour change) |
 
 ## What changed
 
@@ -15,6 +16,9 @@ The 21 CFR Part 11 electronic-signature ceremony (account **password + signature
 §11.200(a)(1)) was previously required only when publishing a controlled document. It is now
 required on **every regulated sign-off gate** — each mints an immutable signature record bound to
 the record and its outcome (§11.50/§11.70).
+
+**v1.53.1** adds no functional change — it corrects the deployment/upgrade path only (no schema,
+API, permission, or behaviour change); see **Deploy-path corrections (v1.53.1)** below.
 
 ## Why action is needed
 
