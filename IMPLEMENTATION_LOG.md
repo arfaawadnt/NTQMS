@@ -870,3 +870,72 @@ Post-review fixes to the deployment path (no application behaviour, API surface,
   `dotnet ef migrations script --idempotent` regenerated clean; the two bypass lines now read
   `SET LOCAL app.bypass_rls = 'on';`. **NOT run:** a full end-to-end from-empty-DB apply (no
   superuser/clean DB on this host) — that is IQ-30, owned by QA; and the full test suite.
+
+## Product enhancement program (2026-08-08) [DONE on dev — pushed `b8259ee`/`cada683`, UNSIGNED validation]
+
+Five product-backlog features (URS-129…134), each with domain/application/functional tests and a
+validation-record set. Delivered in one commit (`b8259ee`) plus a deployment release note
+(`cada683`). **No new permission keys** — every feature reuses an existing key, so there is **no
+tenant authorization-upgrade action** (contrast RISK-03). Full backend suite **515** (Domain 254 /
+App 102 / Arch 33 / Integration 33 +1 skip / Functional 93) + **95** frontend Karma, green on real
+PostgreSQL; both new migrations round-trip; `ApiSurface.approved.txt` updated for every new route;
+`deploy/migrations.sql` regenerated.
+
+- **URS-129 — NC re-open (`nc.sign`, no new key):** `Nonconformance.Reopen(reason, actor)` — guarded
+  `Closed → ActionPlan` (NC-023 wrong state, NC-024 missing reason), new `ReopenReason` (text) column,
+  `NcReopened` event. NC is deliberately **not** in the `frozen_immutability` trigger set, so the
+  transition is a legitimate audited state change. `ReopenNcCommand(NcId, Reason, Password, Pin)`
+  `[RequirePermissionPolicy(nc, Sign)]` + handler copies the verify/close ceremony — pre-validate
+  `Closed`, `IESignatureService.SignAsync` (subject `NC:{id}`, reason folded into the meaning and the
+  content hash), then `Reopen`. `POST /api/nonconformances/{id}/reopen`; migration `AddNcReopenReason`.
+  Frontend: shared `EsignDialogComponent` gains an optional mandatory-reason field (backward-compatible),
+  Closed-state re-open action gated `nc.sign`. Tests: domain +3, `ReopenNcSigningTests` +3.
+- **URS-130 — Quality Analytics report PDF & Excel (`reports.export`, already in catalogue):** new
+  `IExportService.ToQualityAnalyticsReportPdf/Xlsx` (`ExportService.QualityAnalytics.cs`, partial) over a
+  `QualityAnalyticsReportPack` wrapping `QualityAnalyticsDto` — branded QuestPDF with a health-score
+  gauge, per-category weighted progress bars, Pareto bars and a 5×5 risk heat-matrix; ClosedXML summary
+  sheet + one sheet per sub-system. `GET /api/exports/quality-analytics.pdf|.xlsx` re-query
+  `GetQualityAnalyticsQuery` under the caller's scope, logged `RECORD_EXPORTED`. Frontend Export PDF/Excel
+  buttons on the dashboard. Tests: `ExportServiceTests` +4 (full + empty computation render), functional
+  +3. Live: both endpoints 200; sample 67 KB PDF / 17.5 KB XLSX generated from demo-lab.
+- **URS-131 — User Manual PDF (authenticated, no key):** `IExportService.ToManualPdf`
+  (`ExportService.Manual.cs`) — cover coverage-by-section chart, a linked table of contents with page
+  numbers (`Section`/`SectionLink`/`BeginPageNumberOfSection`), and per-topic cards with a numbered step
+  progress bar mirroring `HelpBodyComponent`. Content lives only in the SPA (the help catalogue), so the
+  caller posts it localized (`ManualExportRequest`); `POST /api/exports/manual.pdf` auth-only,
+  `EXPORT-003` size ceiling. Frontend "Export PDF Manual" button assembling `HELP_TOPICS` + i18n for the
+  active language. Tests: `ExportServiceTests` +1, `ManualExportTests` +3. Live: POST 200, 78 KB PDF.
+- **URS-132 — My Tasks unified action centre (authenticated, no key):** root cause of "not working" was
+  `WorkTask` being a standalone table fed by only three inserts. New `GetMyActionsQuery`/`Handler`
+  (`Sla/MyActionsSlice.cs`) — a **live read model** unioning composable per-source providers via
+  `IAppDbContext` (no writes, no migration): manual tasks (inline-completable, completed history kept per
+  URS-115), NCs assigned, CAPA actions owned, NC verify/close the user may sign (gated `nc.sign`, never
+  their own NC), risk mitigation actions owned, objectives owned, review participation. `GET
+  /api/tasks/my-actions`; the tasks page becomes a grouped feed with deep links; action/category types are
+  stable codes localized client-side. **Gotcha fixed:** EF InMemory (the functional-test host) cannot
+  translate `SelectMany` over an owned collection — the CAPA/risk providers use an owner-filter-then-flatten
+  projection so the query runs on both InMemory and PostgreSQL (a handler-level InMemory test locks this in).
+  Tests: `MyActionsHandlerTests` +1 (6 sources), `MyActionsTests` +2.
+- **URS-133/134 — Mail Management + HTML e-mail (`notifications.manage`, no new key):** new tenant-scoped
+  `TenantMailSettings` aggregate (`Domain/Notifications`) — sender identity (from name/address, reply-to),
+  enable switch, brand accent, footer; invariants MAIL-001…004; `MailSettingsChanged` event. Migration
+  `AddTenantMailSettings` — new table with **mandatory FORCE RLS + `tenant_isolation` policy**, a
+  `tenant_id` unique index (one row per tenant), and a `#RRGGBB` CHECK; round-tripped; RLS verified from
+  `pg_class`/`pg_policies`. **No SMTP transport credential is stored** — the relay stays in server config
+  (SEC-001 posture). `IEmailSender.SendAsync` now takes a rich `EmailMessage`; `HtmlEmailTemplate`
+  (`Infrastructure/Email`) renders a self-contained, brand-accented, HTML-escaped e-mail with a plain-text
+  alternate; `SmtpEmailSender` sets the From/Reply-To from the message; `NotificationDispatcher` resolves
+  the tenant's mail identity per dispatch and gates e-mail on `Enabled`. `GET`/`PUT
+  /api/notifications/mail-settings` gated `notifications.manage`; frontend `/mail-management` page (nav +
+  help topic). Tests: `TenantMailSettingsTests` +9, `MailSettingsRlsTests` +2 (real-PG isolation),
+  `MailSettingsEndpointTests` +3, `HtmlEmailTemplateTests` +3. Live: settings saved (`PUT 204`) and persisted.
+- **VERIFIED:** full solution suite on real PostgreSQL — Domain 254 / App 102 / Arch 33 / Integration 31 +1
+  skip → 33 / Functional 93 = **515** green; frontend production build clean + **95** Karma; migrations
+  `AddNcReopenReason` and `AddTenantMailSettings` applied and round-tripped; each feature exercised live in
+  the running app (browser). **NOT run:** the Playwright e2e suite (unchanged). **Left for QA** (documented
+  in the OQ records): the positive NC-reopen live walk (needs a Closed NC + a PIN-holding non-raiser), a
+  multi-source My-Tasks live walk, and a witnessed live SMTP send on a configured relay.
+- **Docs:** delta doc 06 URS-129…134; OQ execution records `docs/validation/15…19-OQ-Execution-Record-*.md`;
+  FRA hazard #7 (NC re-open); `verification-log.md` rows; `deploy/RELEASE-NOTE-PRODUCT-ENHANCEMENTS.md`.
+  Validation records ship **Template/unsigned** — QA owns execution and signature (folds under DOC-001).
+  Release posture unchanged — **Pre-production**; DOC-001 + SEC-001 remain the open blockers.
