@@ -91,8 +91,37 @@ concerns configuration only; it does not affect the two open release blockers: *
 validation on a qualified environment) and **SEC-001** (independent penetration test). RISK-03's own
 validation-record execution and signatures (URS-123–128) fold under DOC-001.
 
+## Deploy-path corrections (v1.53.1)
+
+Tagged **`v1.53.1`** on top of the v1.53.0 e-signature release. These are **deploy/upgrade
+mechanics only** — no application behaviour, API surface, permission, or database schema change (the
+schema is identical to v1.53.0), and they do **not** alter the signing-key grant steps in §1–§2
+above. They matter only to whoever runs the install/upgrade:
+
+- **Apply migrations as `qams_owner`, not `qams_app`,** then run `harden-runtime-role.sql` as a
+  superuser. Applying DDL as the runtime role either fails (no DDL rights) or trips the TENANT-004
+  start-up guard (the app refuses to boot if `qams_app` owns the tables). The two ANTIGRAVITY
+  prompts were corrected and `DEPLOY.md`'s package manifest now lists `harden-runtime-role.sql`.
+- **From-scratch `psql -f deploy/migrations.sql` now applies.** Two migrations opened their
+  FORCE-RLS bypass with `SELECT set_config('app.bypass_rls','on',true)`, which aborts with **42601**
+  inside the idempotent `DO $EF$` wrapper — so a fresh idempotent apply failed (the `MigrateOnStartup`
+  path was unaffected, which is why it went unnoticed). Now `SET LOCAL app.bypass_rls = 'on'`, valid
+  in both paths. **If deploying < v1.52.0 → v1.53.x, use the v1.53.1 `migrations.sql`** (or regenerate
+  it with `dotnet ef migrations script --idempotent`).
+- **`harden-runtime-role.sql` no longer aborts** on grants to a non-existent `ref` schema, and its
+  dead role-creation branch (roles come from `db-init.sql`) was removed.
+- **The Windows service reaches `Running`.** `Program.cs` now calls `UseWindowsService()`, so an
+  `sc.exe`-registered service integrates with the SCM instead of timing out (error 1053) — relevant
+  if you deploy from source / recompile rather than the shipped self-contained build.
+
+Two deploy-side checks remain QA-owned and are **not** proven by the automated suite: **IQ-30**
+(from-empty-DB `psql -f migrations.sql` applies) and **IQ-31** (Windows-service start). See the
+v1.53.0 upgrade checklist (`deploy/UPGRADE-CHECKLIST-v1.53.0.md`) for the full mechanics.
+
 ## Reference
 
 Full engineering detail and the authoritative upgrade table:
 `docs/validation/06-Revalidation-Delta-v1.38-v1.50.md` **§A.19** (and §A.13–A.18 per gate).
 Change log: `IMPLEMENTATION_LOG.md` (RISK-03 close-out entry). Commits `ddd1551`…`6b60386` on `dev`.
+Deploy-path corrections (v1.53.1): `IMPLEMENTATION_LOG.md` "Deploy remediation" entry; commits
+`6eabfbb`…`9271bd6` on `dev`; IQ-30/IQ-31 in `docs/validation/06-…` Part B.
