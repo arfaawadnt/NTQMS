@@ -31,7 +31,7 @@ public class TracePropagationTests
 
     private sealed class NoopEmailSender : IEmailSender
     {
-        public Task SendAsync(string to, string subject, string body, CancellationToken cancellationToken) =>
+        public Task SendAsync(EmailMessage message, CancellationToken cancellationToken) =>
             Task.CompletedTask;
     }
 

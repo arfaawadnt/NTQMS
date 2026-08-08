@@ -109,6 +109,24 @@ public sealed class NotificationDispatchConfiguration : IEntityTypeConfiguration
     }
 }
 
+public sealed class TenantMailSettingsConfiguration : IEntityTypeConfiguration<TenantMailSettings>
+{
+    public void Configure(EntityTypeBuilder<TenantMailSettings> builder)
+    {
+        builder.ToTable("tenant_mail_settings", "qams");
+        builder.HasKey(m => new { m.TenantId, m.Id });
+        builder.Property(m => m.FromName).HasMaxLength(150);
+        builder.Property(m => m.FromAddress).HasMaxLength(320);
+        builder.Property(m => m.ReplyTo).HasMaxLength(320);
+        builder.Property(m => m.BrandColor).HasMaxLength(9);
+        builder.Property(m => m.FooterNote).HasMaxLength(500);
+        // One settings row per tenant. The unique index includes the partition key
+        // (tenant_id), so it stays legal on a partitioned table (schema-hardening rule).
+        builder.HasIndex(m => m.TenantId).IsUnique().HasDatabaseName("ux_tenant_mail_settings_tenant");
+        builder.Ignore(m => m.DomainEvents);
+    }
+}
+
 public sealed class InterestedPartyConfiguration : IEntityTypeConfiguration<InterestedParty>
 {
     public void Configure(EntityTypeBuilder<InterestedParty> builder)

@@ -4,7 +4,8 @@ import { firstValueFrom } from 'rxjs';
 import { NcApiService } from '../../core/api/nc-api.service';
 import {
   ConfirmEffectivenessRequest, NcDetail, NcListItem, PlanCapaActionRequest,
-  RaiseNcRequest, RecordRcaRequest, RejectNcRequest, SignatureRecord, TriageNcRequest, VerifyNcRequest,
+  RaiseNcRequest, RecordRcaRequest, RejectNcRequest, ReopenNcRequest, SignatureRecord,
+  TriageNcRequest, VerifyNcRequest,
 } from '../../core/models';
 
 /**
@@ -110,6 +111,12 @@ export class NcFacade {
   async confirmEffectiveness(id: string, r: ConfirmEffectivenessRequest): Promise<void> {
     await this.mutate(id, () => this.api.confirmEffectiveness(id, r));
     // A successful (effective) close mints a §11.50 signature; refresh the manifest.
+    if (this._error() === '') { await this.loadSignatures(id); }
+  }
+
+  /** Re-opens a closed nonconformance (signed + reasoned); refreshes the §11.50 manifest on success. */
+  async reopen(id: string, r: ReopenNcRequest): Promise<void> {
+    await this.mutate(id, () => this.api.reopen(id, r));
     if (this._error() === '') { await this.loadSignatures(id); }
   }
 

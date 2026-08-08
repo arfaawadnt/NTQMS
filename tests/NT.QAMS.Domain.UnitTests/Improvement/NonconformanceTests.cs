@@ -130,6 +130,54 @@ public class NonconformanceTests
         nc.Status.Should().Be(NcStatus.EffectivenessCheck, "the illegal close must not change state");
     }
 
+    private static Nonconformance Closed()
+    {
+        var nc = Raised();
+        nc.Triage(Manager);
+        nc.RecordRca(RcaMethod.FiveWhys, "Root cause: worn seal", Manager);
+        var actionId = nc.PlanCapaAction(CapaActionType.Corrective, "Replace seal", Owner, Due);
+        nc.CompleteCapaAction(actionId, Now);
+        nc.SubmitForVerification();
+        nc.Verify(passed: true, actorId: Manager);
+        nc.ConfirmEffectiveness(effective: true, actorId: Manager);
+        return nc;
+    }
+
+    [Fact]
+    public void Reopen_returns_closed_nc_to_action_plan_and_records_reason()
+    {
+        var nc = Closed();
+
+        nc.Reopen("Recurrence observed on 2026-08-08", Manager);
+
+        nc.Status.Should().Be(NcStatus.ActionPlan);
+        nc.ReopenReason.Should().Be("Recurrence observed on 2026-08-08");
+        nc.DomainEvents.OfType<NcReopened>().Should().ContainSingle()
+            .Which.ReopenedBy.Should().Be(Manager);
+    }
+
+    [Fact]
+    public void Reopen_requires_a_reason()
+    {
+        var nc = Closed();
+
+        var act = () => nc.Reopen(" ", Manager);
+
+        act.Should().Throw<DomainException>().Which.Code.Should().Be("NC-024");
+        nc.Status.Should().Be(NcStatus.Closed, "the invalid reopen must not change state");
+    }
+
+    [Fact]
+    public void Reopen_only_from_closed()
+    {
+        var nc = Raised();
+
+        var act = () => nc.Reopen("Too early", Manager);
+
+        act.Should().Throw<InvalidStateTransitionException>().Which.Code.Should().Be("NC-023");
+        nc.Status.Should().Be(NcStatus.Raised);
+    }
+
     [Fact]
     public void Reject_only_from_raised_and_requires_reason()
     {

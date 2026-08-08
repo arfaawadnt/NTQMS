@@ -24,3 +24,22 @@ public sealed record CreateTaskRequest(
 public sealed record WorkTaskDto(
     Guid Id, string Subject, string? SubjectRef, Guid? AssigneeUserId, string? AssigneeRole,
     DateOnly DueDate, string Status, bool Overdue);
+
+/// <summary>
+/// One item in the unified "My Tasks" action centre: any action across the system
+/// that awaits the signed-in user — a manual task, or a pending state on an
+/// aggregate they own, are assigned, or may sign. <see cref="TaskId"/> is set only
+/// for manual work tasks (which can be completed inline); every other item carries a
+/// <see cref="Link"/> to the record where the action is taken.
+/// </summary>
+public sealed record MyActionDto(
+    Guid? TaskId,
+    string Category,
+    string Reference,
+    string Title,
+    string ActionType,
+    DateOnly? DueDate,
+    bool Overdue,
+    string Priority,
+    string Status,
+    string? Link);

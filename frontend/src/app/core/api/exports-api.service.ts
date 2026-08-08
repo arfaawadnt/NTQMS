@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { PageExportRequest } from '../models';
+import { ManualExportRequest, PageExportRequest } from '../models';
 
 /**
  * Client for the Part 11 export endpoints. Downloads run through HttpClient
@@ -49,5 +49,32 @@ export class ExportsApiService {
   signaturesXlsx(): Promise<void> { return this.download('signatures.xlsx', 'signature-manifest.xlsx'); }
   reviewPackPdf(reviewId: string): Promise<void> {
     return this.download(`review-pack/${reviewId}.pdf`, 'review-pack.pdf');
+  }
+
+  /**
+   * The complete User Manual as a PDF. The SPA assembles the manual localized to
+   * the active language and posts it; the server lays it out and stamps it.
+   */
+  async manualPdf(payload: ManualExportRequest): Promise<void> {
+    const response = await firstValueFrom(
+      this.http.post(`${this.base}/manual.pdf`, payload, { responseType: 'blob', observe: 'response' }));
+    const name = /filename="?([^";]+)"?/
+      .exec(response.headers.get('content-disposition') ?? '')?.[1] ?? 'nt-qams-user-manual.pdf';
+    const url = URL.createObjectURL(response.body ?? new Blob());
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = name;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  /** The comprehensive Quality Analytics report, honouring the caller's branch/department scope. */
+  qualityAnalyticsReport(format: 'pdf' | 'xlsx', branchId?: string, departmentId?: string): Promise<void> {
+    const params = new URLSearchParams();
+    if (branchId) { params.set('branchId', branchId); }
+    if (departmentId) { params.set('departmentId', departmentId); }
+    const query = params.toString();
+    return this.download(
+      `quality-analytics.${format}${query ? `?${query}` : ''}`, `quality-analytics.${format}`);
   }
 }

@@ -3,8 +3,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
-  CreatedResource, DEFAULT_PAGE_SIZE, DispatchMonitorItem, NotificationFeedItem, NotificationRule,
-  Paged, UpsertNotificationRuleRequest,
+  CreatedResource, DEFAULT_PAGE_SIZE, DispatchMonitorItem, MailSettings, NotificationFeedItem,
+  NotificationRule, Paged, UpdateMailSettingsRequest, UpsertNotificationRuleRequest,
 } from '../models';
 
 /**
@@ -37,5 +37,13 @@ export class NotificationsApiService {
     let params = new HttpParams();
     if (status) { params = params.set('status', status); }
     return this.http.get<Paged<DispatchMonitorItem>>(`${this.base}/monitor`, { params });
+  }
+
+  mailSettings(): Observable<MailSettings> {
+    return this.http.get<MailSettings>(`${this.base}/mail-settings`);
+  }
+
+  updateMailSettings(body: UpdateMailSettingsRequest): Observable<void> {
+    return this.http.put<void>(`${this.base}/mail-settings`, body);
   }
 }

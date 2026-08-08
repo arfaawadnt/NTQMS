@@ -111,6 +111,8 @@ public sealed class Nonconformance : AggregateRoot, ITenantScoped, IAllocatable
     public Guid RaisedBy { get; private set; }
     public Guid? AssignedTo { get; private set; }
     public string? RejectionReason { get; private set; }
+    /// <summary>The reason recorded the last time a closed nonconformance was re-opened (mirrors <see cref="RejectionReason"/>).</summary>
+    public string? ReopenReason { get; private set; }
 
     public IReadOnlyList<CapaAction> CapaActions => _capaActions.AsReadOnly();
     public IReadOnlyList<RcaRecord> RcaRecords => _rcaRecords.AsReadOnly();
@@ -272,6 +274,28 @@ public sealed class Nonconformance : AggregateRoot, ITenantScoped, IAllocatable
         Raise(new NcClosed(Id, NcRef, actorId));
     }
 
+    /// <summary>
+    /// Re-opens a closed nonconformance so its corrective/preventive work can be
+    /// revisited (ISO 17025 §8.7 / 21 CFR Part 11): Closed ⇒ ActionPlan, re-entering
+    /// the CAPA → verification → effectiveness flow. A reason is mandatory and the
+    /// caller must have signed the act (password + PIN) at the application boundary —
+    /// the signature manifest records who re-opened and why. The row is not frozen at
+    /// the database level (it is not in the signed-record immutability trigger set),
+    /// so the transition is a legitimate, audited state change, not a Part 11 violation.
+    /// </summary>
+    public void Reopen(string reason, Guid actorId)
+    {
+        Require(NcStatus.Closed, "NC-023", "reopen");
+        if (string.IsNullOrWhiteSpace(reason))
+        {
+            throw new DomainException("NC-024", "A re-open reason is required.");
+        }
+
+        ReopenReason = reason.Trim();
+        Status = NcStatus.ActionPlan;
+        Raise(new NcReopened(Id, NcRef, actorId, ReopenReason));
+    }
+
     private void Require(NcStatus expected, string code, string action)
     {
         if (Status != expected)
@@ -288,3 +312,4 @@ public sealed record CapaActionPlanned(Guid NcId, string NcRef, Guid ActionId, G
 public sealed record CapaActionCompleted(Guid NcId, string NcRef, Guid ActionId) : DomainEvent;
 public sealed record NcVerified(Guid NcId, string NcRef) : DomainEvent;
 public sealed record NcClosed(Guid NcId, string NcRef, Guid ClosedBy) : DomainEvent;
+public sealed record NcReopened(Guid NcId, string NcRef, Guid ReopenedBy, string Reason) : DomainEvent;

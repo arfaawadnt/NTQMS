@@ -97,6 +97,14 @@ public sealed class WorkTasksController(ISender sender) : ControllerBase
         // tier claim is not passed in because it goes stale on role reassignment.
         Ok(await sender.Send(new GetMyTasksQuery(page, pageSize), ct));
 
+    /// <summary>
+    /// The unified action centre: every pending action across the system that awaits
+    /// the signed-in user (plus their own manual-task history), as a live read model.
+    /// </summary>
+    [HttpGet("my-actions")]
+    public async Task<IActionResult> MyActions(CancellationToken ct) =>
+        Ok(await sender.Send(new GetMyActionsQuery(), ct));
+
     [HttpPost]
     [RequirePermission(PermissionCatalog.Tasks, PermissionAction.Create)]
     public async Task<IActionResult> Create(CreateTaskRequest request, CancellationToken ct) =>

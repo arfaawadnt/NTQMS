@@ -62,6 +62,8 @@ GET /api/equipment
 GET /api/equipment/{id}
 GET /api/exports/audit-trail.xlsx
 GET /api/exports/nonconformances.xlsx
+GET /api/exports/quality-analytics.pdf
+GET /api/exports/quality-analytics.xlsx
 GET /api/exports/review-pack/{reviewId}.pdf
 GET /api/exports/signatures.xlsx
 GET /api/feedback
@@ -90,6 +92,7 @@ GET /api/monitoring-points/{id}
 GET /api/nonconformances
 GET /api/nonconformances/{id}
 GET /api/nonconformances/{id}/signatures
+GET /api/notifications/mail-settings
 GET /api/notifications/mine
 GET /api/notifications/monitor
 GET /api/notifications/rules
@@ -135,6 +138,7 @@ GET /api/suppliers
 GET /api/suppliers/{id}
 GET /api/suppliers/{id}/evaluations
 GET /api/tasks/mine
+GET /api/tasks/my-actions
 GET /api/tenant-settings/mfa-policy
 GET /api/tenants
 GET /api/test-authorizations
@@ -187,6 +191,8 @@ GET /api/v{version}/equipment
 GET /api/v{version}/equipment/{id}
 GET /api/v{version}/exports/audit-trail.xlsx
 GET /api/v{version}/exports/nonconformances.xlsx
+GET /api/v{version}/exports/quality-analytics.pdf
+GET /api/v{version}/exports/quality-analytics.xlsx
 GET /api/v{version}/exports/review-pack/{reviewId}.pdf
 GET /api/v{version}/exports/signatures.xlsx
 GET /api/v{version}/feedback
@@ -215,6 +221,7 @@ GET /api/v{version}/monitoring-points/{id}
 GET /api/v{version}/nonconformances
 GET /api/v{version}/nonconformances/{id}
 GET /api/v{version}/nonconformances/{id}/signatures
+GET /api/v{version}/notifications/mail-settings
 GET /api/v{version}/notifications/mine
 GET /api/v{version}/notifications/monitor
 GET /api/v{version}/notifications/rules
@@ -260,6 +267,7 @@ GET /api/v{version}/suppliers
 GET /api/v{version}/suppliers/{id}
 GET /api/v{version}/suppliers/{id}/evaluations
 GET /api/v{version}/tasks/mine
+GET /api/v{version}/tasks/my-actions
 GET /api/v{version}/tenant-settings/mfa-policy
 GET /api/v{version}/tenants
 GET /api/v{version}/test-authorizations
@@ -344,6 +352,7 @@ POST /api/equipment/{id}/calibrations
 POST /api/equipment/{id}/checks
 POST /api/equipment/{id}/maintenance
 POST /api/equipment/{id}/retire
+POST /api/exports/manual.pdf
 POST /api/exports/page.pdf
 POST /api/exports/page.xlsx
 POST /api/feedback
@@ -388,6 +397,7 @@ POST /api/nonconformances/{id}/actions/{actionId}/complete
 POST /api/nonconformances/{id}/confirm-effectiveness
 POST /api/nonconformances/{id}/rca
 POST /api/nonconformances/{id}/reject
+POST /api/nonconformances/{id}/reopen
 POST /api/nonconformances/{id}/submit
 POST /api/nonconformances/{id}/submit-verification
 POST /api/nonconformances/{id}/triage
@@ -541,6 +551,7 @@ POST /api/v{version}/equipment/{id}/calibrations
 POST /api/v{version}/equipment/{id}/checks
 POST /api/v{version}/equipment/{id}/maintenance
 POST /api/v{version}/equipment/{id}/retire
+POST /api/v{version}/exports/manual.pdf
 POST /api/v{version}/exports/page.pdf
 POST /api/v{version}/exports/page.xlsx
 POST /api/v{version}/feedback
@@ -585,6 +596,7 @@ POST /api/v{version}/nonconformances/{id}/actions/{actionId}/complete
 POST /api/v{version}/nonconformances/{id}/confirm-effectiveness
 POST /api/v{version}/nonconformances/{id}/rca
 POST /api/v{version}/nonconformances/{id}/reject
+POST /api/v{version}/nonconformances/{id}/reopen
 POST /api/v{version}/nonconformances/{id}/submit
 POST /api/v{version}/nonconformances/{id}/submit-verification
 POST /api/v{version}/nonconformances/{id}/triage
@@ -669,6 +681,7 @@ POST /api/v{version}/validation-studies/{id}/calculate
 POST /api/v{version}/validation-studies/{id}/replicates
 POST /api/v{version}/validation-studies/{id}/sign-off
 PUT /api/auth/me/language
+PUT /api/notifications/mail-settings
 PUT /api/org-context/interested-parties/{id}
 PUT /api/org-context/issues/{id}
 PUT /api/qc/profiles/{id}/targets
@@ -682,6 +695,7 @@ PUT /api/users/{id}/assigned-role
 PUT /api/users/{id}/language
 PUT /api/users/{id}/scope
 PUT /api/v{version}/auth/me/language
+PUT /api/v{version}/notifications/mail-settings
 PUT /api/v{version}/org-context/interested-parties/{id}
 PUT /api/v{version}/org-context/issues/{id}
 PUT /api/v{version}/qc/profiles/{id}/targets

@@ -352,6 +352,7 @@ export class ShellComponent {
           { path: '/settings/security', label: 'nav.security', icon: 'security' },
           { path: '/reference-data', label: 'nav.reference', icon: 'reference' },
           { path: '/notification-rules', label: 'nav.notificationRules', icon: 'rules', visible: () => this.perms.can('notifications.manage') },
+          { path: '/mail-management', label: 'nav.mailManagement', icon: 'mail', visible: () => this.perms.can('notifications.manage') },
           { path: '/compliance', label: 'nav.compliance', icon: 'compliance', visible: () => this.perms.can('compliance.view') },
           { path: '/users', label: 'nav.users', icon: 'users', visible: () => this.perms.can('users.view') },
           { path: '/roles', label: 'nav.roles', icon: 'accessReview', visible: () => this.perms.can('roles.view') },

@@ -100,6 +100,7 @@ export interface RecordRcaRequest { method: RcaMethod; analysis: string; }
 export interface PlanCapaActionRequest { type: CapaActionType; details: string; ownerId: string; dueDate: string; }
 export interface VerifyNcRequest { passed: boolean; password: string; pin: string; }
 export interface ConfirmEffectivenessRequest { effective: boolean; password: string; pin: string; }
+export interface ReopenNcRequest { reason: string; password: string; pin: string; }
 
 // ── Reporting (read models — real data only) ─────────────────────────────────
 
@@ -174,6 +175,20 @@ export interface PageExportRequest {
   columns: string[];
   rows: string[][];
 }
+
+// ── User manual export (a localized copy of the help catalogue) ─────────────
+
+export interface ManualStepRequest { label: string; detail: string; }
+export interface ManualTopicRequest {
+  route: string;
+  title: string;
+  summary: string;
+  steps: ManualStepRequest[];
+  usage: string[];
+}
+export interface ManualGroupRequest { title: string; topics: ManualTopicRequest[]; }
+/** The manual, already localized to one language, for the server to lay out as a PDF. */
+export interface ManualExportRequest { language: string; groups: ManualGroupRequest[]; }
 
 export interface AnalyticsRow {
   reference: string;
@@ -2084,6 +2099,26 @@ export interface DispatchMonitorItem {
   createdAtUtc: string;
 }
 
+/** Per-tenant mail sender identity + branding (transport credentials stay server-side). */
+export interface MailSettings {
+  fromName: string;
+  fromAddress: string;
+  replyTo: string | null;
+  enabled: boolean;
+  brandColor: string | null;
+  footerNote: string | null;
+  configured: boolean;
+}
+
+export interface UpdateMailSettingsRequest {
+  fromName: string;
+  fromAddress: string;
+  replyTo: string | null;
+  enabled: boolean;
+  brandColor: string | null;
+  footerNote: string | null;
+}
+
 // ── Tasks & SLA ──────────────────────────────────────────────────────────────
 
 export interface WorkTask {
@@ -2095,6 +2130,20 @@ export interface WorkTask {
   dueDate: string;
   status: string;
   overdue: boolean;
+}
+
+/** One item in the unified "My Tasks" action centre (see MyActionDto on the server). */
+export interface MyAction {
+  taskId: string | null;
+  category: string;
+  reference: string;
+  title: string;
+  actionType: string;
+  dueDate: string | null;
+  overdue: boolean;
+  priority: string;
+  status: string;
+  link: string | null;
 }
 
 /** A task must name a user or a role (TASK-002). */

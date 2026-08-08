@@ -126,4 +126,21 @@ public sealed class NotificationsController(ISender sender) : ControllerBase
         [FromQuery] int page = 1, [FromQuery] int pageSize = 50,
         CancellationToken ct = default) =>
         Ok(await sender.Send(new GetDispatchMonitorQuery(status, page, pageSize), ct));
+
+    /// <summary>The tenant's mail sender identity and branding for the Mail Management page.</summary>
+    [HttpGet("mail-settings")]
+    [RequirePermission(PermissionCatalog.Notifications, PermissionAction.Manage)]
+    public async Task<IActionResult> MailSettings(CancellationToken ct) =>
+        Ok(await sender.Send(new GetMailSettingsQuery(), ct));
+
+    /// <summary>Sets the sender identity used for Mail-type notifications (transport credentials stay in server config).</summary>
+    [HttpPut("mail-settings")]
+    [RequirePermission(PermissionCatalog.Notifications, PermissionAction.Manage)]
+    public async Task<IActionResult> UpdateMailSettings(UpdateMailSettingsRequest request, CancellationToken ct)
+    {
+        await sender.Send(new UpsertMailSettingsCommand(
+            request.FromName, request.FromAddress, request.ReplyTo, request.Enabled,
+            request.BrandColor, request.FooterNote), ct);
+        return NoContent();
+    }
 }

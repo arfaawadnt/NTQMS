@@ -4,6 +4,7 @@ import { FormBuilder, FormControl, FormRecord, ReactiveFormsModule, Validators }
 import { I18nService } from '../../core/i18n.service';
 import { OrgDataService } from '../../core/org-data.service';
 import { PermissionsService } from '../../core/permissions.service';
+import { ExportsApiService } from '../../core/api/exports-api.service';
 import { AnalyticsRow, CategoryCount } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
@@ -43,6 +44,14 @@ type View = 'statistics' | 'review';
       [subtitle]="facade.analytics()
         ? i18n.t('dash.computedAt') + ' ' + ((facade.analytics()!.computedAtUtc | date:'medium') ?? '')
         : ''">
+      @if (perms.can('reports.export')) {
+        <button class="secondary" [disabled]="exporting()" (click)="exportReport('pdf')">
+          {{ exporting() ? i18n.t('exp.working') : i18n.t('exp.pdf') }}
+        </button>
+        <button class="secondary" [disabled]="exporting()" (click)="exportReport('xlsx')">
+          {{ exporting() ? i18n.t('exp.working') : i18n.t('exp.excel') }}
+        </button>
+      }
       @if (perms.can('reports.manage')) {
         <button class="secondary" (click)="openWeights()">{{ i18n.t('qa.tuneWeights') }}</button>
       }
@@ -439,12 +448,15 @@ export class QualityAnalyticsComponent implements OnInit {
   readonly i18n = inject(I18nService);
   readonly perms = inject(PermissionsService);
   readonly org = inject(OrgDataService);
+  private readonly exportsApi = inject(ExportsApiService);
   private readonly fb = inject(FormBuilder);
 
   readonly view = signal<View>('statistics');
   readonly weightsOpen = signal(false);
   readonly branch = signal('');
   readonly department = signal('');
+  /** True while a report download is in flight; disables the export buttons. */
+  readonly exporting = signal(false);
 
   /**
    * A FormRecord, not a typed group: the categories come from the permission
@@ -479,6 +491,22 @@ export class QualityAnalyticsComponent implements OnInit {
     this.branch.set('');
     this.department.set('');
     void this.facade.clearFilter();
+  }
+
+  /**
+   * Downloads the comprehensive Quality Analytics report in the caller's current
+   * scope. The server re-queries under the caller's own permissions, so the report
+   * can never widen what they may see.
+   */
+  async exportReport(format: 'pdf' | 'xlsx'): Promise<void> {
+    if (this.exporting()) { return; }
+    this.exporting.set(true);
+    try {
+      await this.exportsApi.qualityAnalyticsReport(
+        format, this.branch() || undefined, this.department() || undefined);
+    } finally {
+      this.exporting.set(false);
+    }
   }
 
   lower(value: string): string { return value.toLowerCase(); }

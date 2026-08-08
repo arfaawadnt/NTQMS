@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { CreateTaskRequest, CreatedResource, DEFAULT_PAGE_SIZE, Paged, SlaDefinition, UpsertSlaRequest, WorkTask } from '../models';
+import { CreateTaskRequest, CreatedResource, DEFAULT_PAGE_SIZE, MyAction, Paged, SlaDefinition, UpsertSlaRequest, WorkTask } from '../models';
 
 /** Typed client for the work-task queue and SLA definitions (one method per endpoint). */
 @Injectable({ providedIn: 'root' })
@@ -15,6 +15,11 @@ export class TasksApiService {
   mine(page = 1, pageSize = DEFAULT_PAGE_SIZE): Observable<Paged<WorkTask>> {
     const params = new HttpParams().set('page', page).set('pageSize', pageSize);
     return this.http.get<Paged<WorkTask>>(`${this.tasks}/mine`, { params });
+  }
+
+  /** The unified action centre: every pending action across the system awaiting the caller. */
+  myActions(): Observable<MyAction[]> {
+    return this.http.get<MyAction[]>(`${this.tasks}/my-actions`);
   }
 
   create(body: CreateTaskRequest): Observable<CreatedResource> {

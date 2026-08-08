@@ -894,6 +894,26 @@ export const HELP_TOPICS: HelpTopic[] = [
     ],
   },
   {
+    route: '/mail-management', titleKey: 'nav.mailManagement', groupKey: 'nav.groupAdmin', icon: 'mail',
+    summary: L(
+      'Mail Management: set the sender identity (from name, address, reply-to) and the brand accent and footer for the HTML e-mail template. The mail relay itself stays in secure server configuration.',
+      'إدارة البريد: اضبط هوية المُرسِل (الاسم والعنوان وعنوان الرد) ولون العلامة وتذييل قالب البريد HTML. يبقى خادم البريد في إعدادات الخادم الآمنة.',
+      "Gestion du courrier : définissez l'identité de l'expéditeur (nom, adresse, réponse) et l'accent de marque et le pied de page du modèle HTML. Le relais reste dans la configuration sécurisée du serveur."),
+    steps: [
+      S(L('Set sender', 'ضبط المُرسِل', "Définir l'expéditeur"), L('Enter the from name and address recipients will see.', 'أدخل اسم وعنوان المُرسِل الظاهر للمستلمين.', "Saisissez le nom et l'adresse d'expéditeur.")),
+      S(L('Brand it', 'إضافة العلامة', 'Personnaliser'), L('Optionally set a brand colour and footer note.', 'اختيارياً اضبط لون العلامة وملاحظة التذييل.', 'Définissez éventuellement une couleur et un pied de page.')),
+      S(L('Enable', 'تفعيل', 'Activer'), L('Turn e-mail notifications on or off for the tenant.', 'فعّل أو أوقف إشعارات البريد للمستأجر.', "Activez ou désactivez les e-mails pour le locataire.")),
+    ],
+    usage: [
+      L('Save the sender identity used for Mail-type notifications; the HTML template applies your branding.',
+        'احفظ هوية المُرسِل المستخدمة لإشعارات البريد؛ يطبّق قالب HTML علامتك.',
+        "Enregistrez l'identité d'expéditeur des notifications ; le modèle HTML applique votre marque."),
+      L('Transport credentials (SMTP host/user/password) are configured on the server, never here.',
+        'تُضبط بيانات النقل (خادم SMTP والمستخدم وكلمة المرور) على الخادم وليس هنا.',
+        "Les identifiants SMTP sont configurés sur le serveur, jamais ici."),
+    ],
+  },
+  {
     route: '/compliance', titleKey: 'nav.compliance', groupKey: 'nav.groupAdmin', icon: 'compliance',
     summary: L(
       'Compliance ledger: the tamper-evident, hash-chained record of electronic signatures and controlled actions for 21 CFR Part 11 / ISO 17025 audit readiness.',

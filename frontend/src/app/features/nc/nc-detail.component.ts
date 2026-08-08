@@ -112,6 +112,13 @@ import { SignatureManifestComponent } from '../../shared/ui/signature-manifest.c
                 <button class="secondary" (click)="openEffectiveness(false)">{{ i18n.t('nc.notEffective') }}</button>
               } @else { <p class="muted">{{ i18n.t('nc.awaitEffectiveness') }}</p> }
             }
+            @case ('Closed') {
+              <p class="muted">{{ i18n.t('nc.terminal') }}</p>
+              @if (perms.can('nc.sign')) {
+                <p class="muted">{{ i18n.t('nc.reopenSignHint') }}</p>
+                <button class="secondary" (click)="reopenOpen.set(true)">{{ i18n.t('nc.reopen') }}</button>
+              }
+            }
             @default { <p class="muted">{{ i18n.t('nc.terminal') }}</p> }
           }
 
@@ -160,6 +167,16 @@ import { SignatureManifestComponent } from '../../shared/ui/signature-manifest.c
         [error]="facade.error()"
         (confirm)="signEffectiveness(n.id, $event)"
         (cancel)="effOpen.set(false)" />
+
+      <qams-esign-dialog
+        [open]="reopenOpen()"
+        [meaning]="reopenMeaning()"
+        [reasonRequired]="true"
+        [reasonLabel]="i18n.t('nc.reopenReason')"
+        [busy]="facade.loading()"
+        [error]="facade.error()"
+        (confirm)="signReopen(n.id, $event)"
+        (cancel)="reopenOpen.set(false)" />
     } @else {
       <p class="muted">{{ i18n.t('common.loading') }}</p>
     }
@@ -276,5 +293,20 @@ export class NcDetailComponent implements OnInit {
       pin: credentials.pin,
     });
     if (this.facade.error() === '') { this.effOpen.set(false); }
+  }
+
+  /** Re-open (Part 11 signing + mandatory reason) dialog state for a closed NC. */
+  readonly reopenOpen = signal(false);
+  readonly reopenMeaning = computed(() =>
+    this.i18n.t('nc.signReopen').replace('{ref}', this.nc()?.ncRef ?? ''));
+
+  /** Signs, records the reason, and re-opens the NC; closes the dialog on success. */
+  async signReopen(id: string, credentials: EsignCredentials): Promise<void> {
+    await this.facade.reopen(id, {
+      reason: credentials.reason ?? '',
+      password: credentials.password,
+      pin: credentials.pin,
+    });
+    if (this.facade.error() === '') { this.reopenOpen.set(false); }
   }
 }

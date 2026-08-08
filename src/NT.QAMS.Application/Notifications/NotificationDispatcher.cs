@@ -6,10 +6,27 @@ using NT.QAMS.SharedKernel.Abstractions;
 
 namespace NT.QAMS.Application.Notifications;
 
+/// <summary>
+/// One outbound e-mail: the recipient, subject and (plain-text) body, plus the
+/// per-tenant sender identity and branding that the adapter uses to build the From
+/// header and the HTML template. Transport credentials are NOT here — they stay in
+/// server configuration; this carries only what a tenant administrator owns.
+/// </summary>
+public sealed record EmailMessage(
+    string To,
+    string Subject,
+    string BodyText,
+    string? FromName,
+    string? FromAddress,
+    string? ReplyTo,
+    string TenantName,
+    string? BrandColor,
+    string? FooterNote);
+
 /// <summary>Email delivery port. Infrastructure supplies SMTP (or a logging no-op when unconfigured).</summary>
 public interface IEmailSender
 {
-    Task SendAsync(string to, string subject, string body, CancellationToken cancellationToken);
+    Task SendAsync(EmailMessage message, CancellationToken cancellationToken);
 }
 
 /// <summary>
@@ -46,6 +63,11 @@ public sealed partial class NotificationDispatcher(
             return;
         }
 
+        // Per-tenant sender identity: mail may be disabled (in-app only), and when
+        // enabled it drives the From header and HTML branding. Absent settings mean
+        // "enabled, server-default sender" — unchanged behaviour for tenants that
+        // have not configured mail.
+        var mail = await ResolveMailAsync(tenantId, ct);
         var pending = new List<NotificationDispatch>();
 
         foreach (var rule in rules)
@@ -66,7 +88,7 @@ public sealed partial class NotificationDispatcher(
             {
                 pending.Add(NotificationDispatch.Create(
                     sourceEventId, eventKey, recipient.Id, recipient.Email,
-                    subject, body, rule.EmailEnabled));
+                    subject, body, rule.EmailEnabled && mail.Enabled));
             }
         }
 
@@ -84,11 +106,36 @@ public sealed partial class NotificationDispatcher(
         // attempt email best-effort — a dead SMTP server never loses the record.
         await db.SaveChangesAsync(ct);
 
+        await SendQueuedAsync(pending, mail, eventKey, ct);
+
+        await db.SaveChangesAsync(ct);
+    }
+
+    /// <summary>The tenant's resolved mail identity for this dispatch (server default when unset).</summary>
+    private sealed record MailIdentity(
+        bool Enabled, string TenantName, string? FromName, string? FromAddress, string? ReplyTo,
+        string? BrandColor, string? FooterNote);
+
+    private async Task<MailIdentity> ResolveMailAsync(Guid tenantId, CancellationToken ct)
+    {
+        var tenantName = (await db.Tenants.FindAsync([tenantId], ct))?.Name ?? "NT.QAMS";
+        var m = await db.MailSettings.AsNoTracking().FirstOrDefaultAsync(ct);
+        return m is null
+            ? new MailIdentity(true, tenantName, null, null, null, null, null)
+            : new MailIdentity(m.Enabled, tenantName, m.FromName, m.FromAddress, m.ReplyTo, m.BrandColor, m.FooterNote);
+    }
+
+    private async Task SendQueuedAsync(
+        IEnumerable<NotificationDispatch> pending, MailIdentity mail, string eventKey, CancellationToken ct)
+    {
         foreach (var dispatch in pending.Where(d => d.EmailStatus == DispatchStatus.Queued))
         {
             try
             {
-                await emailSender.SendAsync(dispatch.RecipientEmail!, dispatch.Subject, dispatch.Body, ct);
+                await emailSender.SendAsync(new EmailMessage(
+                    dispatch.RecipientEmail!, dispatch.Subject, dispatch.Body,
+                    mail.FromName, mail.FromAddress, mail.ReplyTo,
+                    mail.TenantName, mail.BrandColor, mail.FooterNote), ct);
                 dispatch.MarkEmailSent(clock.UtcNow);
             }
             catch (Exception ex)
@@ -97,8 +144,6 @@ public sealed partial class NotificationDispatcher(
                 LogEmailFailed(logger, ex, dispatch.RecipientEmail!, eventKey);
             }
         }
-
-        await db.SaveChangesAsync(ct);
     }
 
     /// <summary>
@@ -132,9 +177,10 @@ public sealed partial class NotificationDispatcher(
             .Select(u => new { u.Id, u.Email })
             .ToListAsync(ct);
 
+        var mail = await ResolveMailAsync(tenantId, ct);
         var pending = recipients
             .Select(r => NotificationDispatch.Create(
-                sourceEventId, eventKey, r.Id, r.Email, subject, body, emailRequested: true))
+                sourceEventId, eventKey, r.Id, r.Email, subject, body, emailRequested: mail.Enabled))
             .ToList();
 
         if (pending.Count == 0)
@@ -150,19 +196,7 @@ public sealed partial class NotificationDispatcher(
         // Feed rows first, then best-effort email — same guarantee as the rule path.
         await db.SaveChangesAsync(ct);
 
-        foreach (var dispatch in pending.Where(d => d.EmailStatus == DispatchStatus.Queued))
-        {
-            try
-            {
-                await emailSender.SendAsync(dispatch.RecipientEmail!, dispatch.Subject, dispatch.Body, ct);
-                dispatch.MarkEmailSent(clock.UtcNow);
-            }
-            catch (Exception ex)
-            {
-                dispatch.MarkEmailFailed(ex.Message);
-                LogEmailFailed(logger, ex, dispatch.RecipientEmail!, eventKey);
-            }
-        }
+        await SendQueuedAsync(pending, mail, eventKey, ct);
 
         await db.SaveChangesAsync(ct);
     }

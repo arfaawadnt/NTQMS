@@ -35,6 +35,16 @@ public sealed record DispatchMonitorItemDto(
     Guid Id, string EventKey, Guid RecipientUserId, string? RecipientEmail,
     string Subject, string EmailStatus, string? Error, DateTimeOffset CreatedAtUtc);
 
+// ── Mail management (per-tenant sender identity + branding) ─────────────────
+
+public sealed record MailSettingsDto(
+    string FromName, string FromAddress, string? ReplyTo, bool Enabled,
+    string? BrandColor, string? FooterNote, bool Configured);
+
+public sealed record UpdateMailSettingsRequest(
+    string FromName, string FromAddress, string? ReplyTo, bool Enabled,
+    string? BrandColor, string? FooterNote);
+
 // ── Context & Interested Parties (ISO 9001 §4.1/§4.2) ───────────────────────
 
 public sealed record RegisterInterestedPartyRequest(

@@ -415,6 +415,10 @@ export const routes: Routes = [
             path: 'notification-rules',
             loadComponent: () => import('./features/notifications/notification-admin.component').then((m) => m.NotificationAdminComponent),
           },
+          {
+            path: 'mail-management',
+            loadComponent: () => import('./features/notifications/mail-management.component').then((m) => m.MailManagementComponent),
+          },
         ],
       },
     ],

@@ -21,14 +21,14 @@ public class NotificationDispatcherTests
         public List<(string To, string Subject)> Sent { get; } = [];
         public bool Fail { get; set; }
 
-        public Task SendAsync(string to, string subject, string body, CancellationToken ct)
+        public Task SendAsync(EmailMessage message, CancellationToken ct)
         {
             if (Fail)
             {
                 throw new InvalidOperationException("SMTP unreachable");
             }
 
-            Sent.Add((to, subject));
+            Sent.Add((message.To, message.Subject));
             return Task.CompletedTask;
         }
     }

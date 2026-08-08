@@ -1,5 +1,7 @@
 using System.Net;
 using System.Net.Mail;
+using System.Net.Mime;
+using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NT.QAMS.Application.Notifications;
@@ -7,17 +9,20 @@ using NT.QAMS.Application.Notifications;
 namespace NT.QAMS.Infrastructure.Email;
 
 /// <summary>
-/// SMTP adapter. Configured entirely by environment (Smtp__Host etc.); when no
-/// host is configured, DI registers <see cref="LoggingEmailSender"/> instead —
-/// the in-app feed still works, email quietly logs. No credentials in code.
+/// SMTP adapter. The transport (host/port/ssl/user/password) is configured entirely
+/// by environment (Smtp__Host etc.) — no credentials in code. The <b>sender identity</b>
+/// (From name/address, reply-to) and branding come per-tenant on the message; when a
+/// tenant has not set one, the server default From applies. Bodies are sent as a
+/// branded HTML view with a plain-text alternate. When no host is configured, DI
+/// registers <see cref="LoggingEmailSender"/> instead.
 /// </summary>
 public sealed class SmtpEmailSender(IConfiguration configuration) : IEmailSender
 {
-    public async Task SendAsync(string to, string subject, string body, CancellationToken cancellationToken)
+    public async Task SendAsync(EmailMessage message, CancellationToken cancellationToken)
     {
         var host = configuration["Smtp:Host"]!;
         var port = int.TryParse(configuration["Smtp:Port"], out var p) ? p : 587;
-        var from = configuration["Smtp:From"] ?? configuration["Smtp:User"] ?? "ntqams@localhost";
+        var defaultFrom = configuration["Smtp:From"] ?? configuration["Smtp:User"] ?? "ntqams@localhost";
 
         using var client = new SmtpClient(host, port)
         {
@@ -30,16 +35,33 @@ public sealed class SmtpEmailSender(IConfiguration configuration) : IEmailSender
             client.Credentials = new NetworkCredential(user, configuration["Smtp:Password"]);
         }
 
-        using var message = new MailMessage(from, to, subject, body);
-        await client.SendMailAsync(message, cancellationToken);
+        var fromAddress = string.IsNullOrWhiteSpace(message.FromAddress) ? defaultFrom : message.FromAddress;
+        var from = string.IsNullOrWhiteSpace(message.FromName)
+            ? new MailAddress(fromAddress)
+            : new MailAddress(fromAddress, message.FromName);
+
+        using var mail = new MailMessage { From = from, Subject = message.Subject };
+        mail.To.Add(message.To);
+        if (!string.IsNullOrWhiteSpace(message.ReplyTo))
+        {
+            mail.ReplyToList.Add(new MailAddress(message.ReplyTo));
+        }
+
+        // Plain-text alternate first, HTML view second (clients prefer the last view they can render).
+        mail.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(
+            message.BodyText, null, MediaTypeNames.Text.Plain));
+        mail.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(
+            HtmlEmailTemplate.Render(message), null, MediaTypeNames.Text.Html));
+
+        await client.SendMailAsync(mail, cancellationToken);
     }
 }
 
 public sealed partial class LoggingEmailSender(ILogger<LoggingEmailSender> logger) : IEmailSender
 {
-    public Task SendAsync(string to, string subject, string body, CancellationToken cancellationToken)
+    public Task SendAsync(EmailMessage message, CancellationToken cancellationToken)
     {
-        LogSkipped(logger, to, subject);
+        LogSkipped(logger, message.To, message.Subject);
         return Task.CompletedTask;
     }
 

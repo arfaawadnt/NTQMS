@@ -4,8 +4,8 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   ConfirmEffectivenessRequest, CreatedResource, DEFAULT_PAGE_SIZE, NcDetail, NcListItem, Paged,
-  PlanCapaActionRequest, RaiseNcRequest, RecordRcaRequest, RejectNcRequest, SignatureRecord,
-  TriageNcRequest, VerifyNcRequest,
+  PlanCapaActionRequest, RaiseNcRequest, RecordRcaRequest, RejectNcRequest, ReopenNcRequest,
+  SignatureRecord, TriageNcRequest, VerifyNcRequest,
 } from '../models';
 
 /**
@@ -74,5 +74,9 @@ export class NcApiService {
 
   confirmEffectiveness(id: string, body: ConfirmEffectivenessRequest): Observable<void> {
     return this.http.post<void>(`${this.base}/${id}/confirm-effectiveness`, body);
+  }
+
+  reopen(id: string, body: ReopenNcRequest): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/reopen`, body);
   }
 }

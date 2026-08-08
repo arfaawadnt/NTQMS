@@ -106,6 +106,19 @@ negative), because a failure is both **severe** (data-integrity / Part 11 breach
    every DELETE (400 if absent), stamped into `FieldChangeRecord.Reason`; QC target changes
    require a reason and are effective-dated.
 
+7. **Re-opening a closed nonconformance (URS-129).** A closed NC is a terminal quality record;
+   re-opening it without accountability would let corrective-action history be reset silently
+   (S high, P low, D medium — the act is visible in the workflow but its *justification* could be
+   lost). Controls: `Nonconformance.Reopen` is a guarded transition (NC-023 refuses any state but
+   Closed) requiring a **mandatory reason** (NC-024) and an **electronic signature** — both Part 11
+   §11.200(a)(1) components — minted **before** the state changes, with the reason bound into the
+   signature meaning and an immutable `NcReopened` event in the audit trail. Re-open reuses the
+   `nc.sign` privilege. NC is deliberately **not** in the `reject_frozen_mutation` trigger set
+   (hazard #4): unlike a signed analytical record, a nonconformance has a legitimate reasoned
+   re-open path, so the transition is an audited state change, not an immutability breach. Negative
+   testing (wrong PIN / wrong state leave no signature) is the key evidence
+   (`ReopenNcSigningTests`, `NonconformanceTests`).
+
 ---
 
 ## 4. Risk Controls Already Verified in Development (evidence pointers)

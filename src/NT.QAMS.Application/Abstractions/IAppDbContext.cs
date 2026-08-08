@@ -64,6 +64,7 @@ public interface IAppDbContext
     DbSet<LovEntry> LovEntries { get; }
     DbSet<NotificationRule> NotificationRules { get; }
     DbSet<NotificationDispatch> NotificationDispatches { get; }
+    DbSet<TenantMailSettings> MailSettings { get; }
     DbSet<QcProfile> QcProfiles { get; }
     DbSet<QcRun> QcRuns { get; }
     DbSet<ValidationStudy> ValidationStudies { get; }

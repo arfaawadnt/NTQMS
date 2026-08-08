@@ -1,18 +1,15 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
-import { firstValueFrom } from 'rxjs';
+import { RouterLink } from '@angular/router';
 import { TasksFacade } from './tasks.facade';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
 import { RolesApiService } from '../../core/api/roles-api.service';
-import { TasksApiService } from '../../core/api/tasks-api.service';
-import { TENANT_ROLES, WorkTask } from '../../core/models';
+import { MyAction, TENANT_ROLES } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
-import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { UserSelectComponent } from '../../shared/ui/user-select.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
-import { LoadMoreComponent } from '../../shared/ui/load-more.component';
 import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 import { ListStat } from '../../shared/ui/list-stats.component';
 
@@ -24,17 +21,20 @@ function assigneeRequired(group: AbstractControl): ValidationErrors | null {
 }
 
 /**
- * "My Tasks" queue (direct + role assignments, overdue flagged server-side)
- * with role-gated task creation, plus the SLA definitions that drive the
- * backend escalation sweep (QM/TenantAdmin only).
+ * "My Tasks" — the unified action centre: every pending action across the system
+ * that awaits the signed-in user (manual tasks, NCs assigned, CAPA actions owned,
+ * NC sign-offs available, risk treatments, objectives, review participation),
+ * grouped by source with a deep link to each record. Manual tasks are completable
+ * inline and keep their completed history (URS-115). Task creation and the SLA
+ * definitions that drive the escalation sweep stay role-gated.
  */
 @Component({
     selector: 'qams-tasks',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, StatusPillComponent, UserSelectComponent, LoadMoreComponent, ExportMenuComponent],
+    imports: [ReactiveFormsModule, DatePipe, RouterLink, PageHeaderComponent, DrawerComponent, UserSelectComponent, ExportMenuComponent],
     template: `
-    <qams-page-header [title]="i18n.t('task.title')" [subtitle]="i18n.t('task.subtitle')">
-      <qams-export-menu [title]="i18n.t('task.title')" [stats]="stats()" [columns]="exportColumns" [rows]="facade.tasks()" />
+    <qams-page-header [title]="i18n.t('task.title')" [subtitle]="i18n.t('mytasks.subtitle')">
+      <qams-export-menu [title]="i18n.t('task.title')" [stats]="stats()" [columns]="exportColumns" [rows]="facade.actions()" />
       @if (perms.can('tasks.create')) {
         <button (click)="showForm.set(!showForm())">{{ i18n.t('task.new') }}</button>
       }
@@ -65,41 +65,49 @@ function assigneeRequired(group: AbstractControl): ValidationErrors | null {
     </qams-drawer>
 
     @if (facade.error() && !showForm()) { <div class="error">{{ facade.error() }}</div> }
-    @if (facade.loading() && facade.tasks().length === 0) {
+    @if (facade.loading() && facade.actions().length === 0) {
       <p class="muted">{{ i18n.t('common.loading') }}</p>
-    } @else if (facade.tasks().length === 0) {
-      <p class="muted">{{ i18n.t('task.empty') }}</p>
+    } @else if (facade.actions().length === 0) {
+      <p class="muted">{{ i18n.t('mytasks.empty') }}</p>
     } @else {
-      <div class="card">
-        <table>
-          <thead><tr>
-            <th>{{ i18n.t('task.subject') }}</th><th>{{ i18n.t('task.subjectRef') }}</th>
-            <th>{{ i18n.t('task.assignedTo') }}</th><th>{{ i18n.t('train.dueDate') }}</th>
-            <th>{{ i18n.t('nc.status') }}</th><th></th>
-          </tr></thead>
-          <tbody>
-            @for (t of facade.tasks(); track t.id) {
-              <tr [class.overdue]="t.overdue && t.status === 'Pending'">
-                <td>{{ t.subject }}</td>
-                <td class="code">{{ t.subjectRef ?? '—' }}</td>
-                <td>{{ t.assigneeRole ?? i18n.t('task.direct') }}</td>
-                <td>
-                  {{ t.dueDate | date:'mediumDate' }}
-                  @if (t.overdue && t.status === 'Pending') { <span class="over-tag">{{ i18n.t('task.overdue') }}</span> }
-                </td>
-                <td><qams-status-pill [status]="t.status === 'Pending' ? 'InProgress' : t.status" /></td>
-                <td>
-                  @if (t.status === 'Pending') {
-                    <button class="link" type="button" (click)="facade.completeTask(t.id)">{{ i18n.t('task.complete') }}</button>
-                  }
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-      <qams-load-more [shown]="facade.tasks().length" [total]="facade.total()" [hasMore]="facade.hasMore()"
-                      [loading]="facade.loading()" (more)="facade.loadMore()" />
+      @for (g of grouped(); track g.cat) {
+        <section class="card grp">
+          <h3 class="ghead">{{ catLabel(g.cat) }} <span class="cnt">{{ g.items.length }}</span></h3>
+          <table>
+            <thead><tr>
+              <th>{{ i18n.t('mytasks.reference') }}</th><th>{{ i18n.t('mytasks.item') }}</th>
+              <th>{{ i18n.t('mytasks.action') }}</th><th>{{ i18n.t('train.dueDate') }}</th><th></th>
+            </tr></thead>
+            <tbody>
+              @for (i of g.items; track $index) {
+                <tr [class.overdue]="i.overdue">
+                  <td class="code">{{ i.reference }}</td>
+                  <td>
+                    {{ i.title }}
+                    @if (i.priority === 'high') { <span class="hi">{{ i18n.t('mytasks.high') }}</span> }
+                  </td>
+                  <td>{{ actLabel(i.actionType) }}</td>
+                  <td>
+                    @if (i.dueDate) {
+                      {{ i.dueDate | date:'mediumDate' }}
+                      @if (i.overdue) { <span class="over-tag">{{ i18n.t('task.overdue') }}</span> }
+                    } @else { — }
+                  </td>
+                  <td>
+                    @if (i.taskId && i.status === 'Pending') {
+                      <button class="link" type="button" (click)="completeAction(i)">{{ i18n.t('task.complete') }}</button>
+                    } @else if (i.status === 'Completed') {
+                      <span class="muted">{{ i18n.t('mytasks.done') }}</span>
+                    } @else if (i.link) {
+                      <a class="link" [routerLink]="i.link">{{ i18n.t('mytasks.open') }} →</a>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </section>
+      }
     }
 
     @if (perms.can('tasks.manage')) {
@@ -129,6 +137,19 @@ function assigneeRequired(group: AbstractControl): ValidationErrors | null {
   `,
     styles: [`
     .row { display: flex; gap: .6rem; margin-top: 1rem; }
+    .grp { margin-bottom: 1rem; }
+    .ghead {
+      font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+      color: var(--nt-grey-m); margin: 0 0 .6rem; display: flex; align-items: center; gap: 8px;
+    }
+    .cnt {
+      font-size: 11px; font-weight: 700; color: var(--nt-ink-info);
+      background: color-mix(in srgb, var(--nt-blue) 12%, transparent); border-radius: 999px; padding: 1px 8px;
+    }
+    .hi {
+      margin-inline-start: 8px; font-size: 10.5px; font-weight: 700; color: var(--nt-ink-serious);
+      background: rgba(180, 67, 15, .12); border-radius: 999px; padding: 2px 8px;
+    }
     .overdue td { color: var(--nt-red); }
     .over-tag {
       margin-inline-start: 8px; font-size: 10.5px; font-weight: 700; color: var(--nt-red);
@@ -150,19 +171,40 @@ export class TasksComponent implements OnInit {
 
   private readonly rolesApi = inject(RolesApiService);
 
-  readonly exportColumns: ExportColumn<WorkTask>[] = [
-    { header: 'Subject', cell: (r) => r.subject },
-    { header: 'Subject Ref', cell: (r) => r.subjectRef ?? '—' },
-    { header: 'Assignee Role', cell: (r) => r.assigneeRole ?? '—' },
+  /** Fixed source order for the grouped feed. */
+  private readonly categoryOrder = ['task', 'nc', 'capa', 'risk', 'objective', 'review'] as const;
+
+  readonly exportColumns: ExportColumn<MyAction>[] = [
+    { header: 'Category', cell: (r) => this.catLabel(r.category) },
+    { header: 'Reference', cell: (r) => r.reference },
+    { header: 'Item', cell: (r) => r.title },
+    { header: 'Action', cell: (r) => this.actLabel(r.actionType) },
     { header: 'Due Date', cell: (r) => r.dueDate ? r.dueDate.substring(0, 10) : '—' },
+    { header: 'Priority', cell: (r) => r.priority },
     { header: 'Status', cell: (r) => r.status },
-    { header: 'Overdue', cell: (r) => r.overdue ? 'Yes' : 'No' },
   ];
 
-  readonly stats = computed<readonly ListStat[]>(() => [
-    { label: 'Total Tasks', value: this.facade.total(), tone: 'blue' },
-    { label: 'Loaded', value: this.facade.tasks().length, tone: 'slate' },
-  ]);
+  /** The feed grouped by source, in a fixed order; empty groups drop out. */
+  readonly grouped = computed(() => {
+    const items = this.facade.actions();
+    return this.categoryOrder
+      .map((cat) => ({ cat, items: items.filter((i) => i.category === cat) }))
+      .filter((g) => g.items.length > 0);
+  });
+
+  readonly stats = computed<readonly ListStat[]>(() => {
+    const items = this.facade.actions();
+    const pending = items.filter((i) => i.status === 'Pending');
+    return [
+      { label: 'Pending Actions', value: pending.length, tone: 'blue' },
+      { label: 'Overdue', value: pending.filter((i) => i.overdue).length, tone: 'red' },
+      { label: 'High Priority', value: pending.filter((i) => i.priority === 'high').length, tone: 'orange' },
+    ];
+  });
+
+  catLabel(category: string): string { return this.i18n.t('mytasks.cat.' + category); }
+  actLabel(actionType: string): string { return this.i18n.t('mytasks.act.' + actionType); }
+  completeAction(item: MyAction): void { if (item.taskId) { void this.facade.completeTask(item.taskId); } }
 
   /**
    * Role options for assignment. The tenant's real, active role names when the
@@ -188,7 +230,7 @@ export class TasksComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    void this.facade.loadTasks();
+    void this.facade.loadActions();
     if (this.perms.can('tasks.manage')) { void this.facade.loadSla(); }
     if (this.perms.can('roles.view')) {
       this.rolesApi.list().subscribe({

@@ -8459,5 +8459,82 @@ BEGIN
     VALUES ('20260801194628_MaintenanceCertificate', '9.0.18');
     END IF;
 END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260808073533_AddNcReopenReason') THEN
+    ALTER TABLE qams.nonconformance ADD reopen_reason text;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260808073533_AddNcReopenReason') THEN
+    INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+    VALUES ('20260808073533_AddNcReopenReason', '9.0.18');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260808152142_AddTenantMailSettings') THEN
+    CREATE TABLE qams.tenant_mail_settings (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        from_name character varying(150) NOT NULL,
+        from_address character varying(320) NOT NULL,
+        reply_to character varying(320),
+        enabled boolean NOT NULL,
+        brand_color character varying(9),
+        footer_note character varying(500),
+        created_at_utc timestamp with time zone NOT NULL,
+        created_by text,
+        created_by_user_id uuid,
+        modified_at_utc timestamp with time zone,
+        modified_by text,
+        CONSTRAINT pk_tenant_mail_settings PRIMARY KEY (tenant_id, id)
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260808152142_AddTenantMailSettings') THEN
+    CREATE UNIQUE INDEX ux_tenant_mail_settings_tenant ON qams.tenant_mail_settings (tenant_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260808152142_AddTenantMailSettings') THEN
+    ALTER TABLE qams.tenant_mail_settings ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.tenant_mail_settings FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.tenant_mail_settings;
+    CREATE POLICY tenant_isolation ON qams.tenant_mail_settings
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260808152142_AddTenantMailSettings') THEN
+    ALTER TABLE qams.tenant_mail_settings
+      ADD CONSTRAINT ck_tenant_mail_settings_brand_color
+      CHECK (brand_color IS NULL OR brand_color ~ '^#[0-9A-Fa-f]{6}$') NOT VALID;
+    ALTER TABLE qams.tenant_mail_settings VALIDATE CONSTRAINT ck_tenant_mail_settings_brand_color;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260808152142_AddTenantMailSettings') THEN
+    INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+    VALUES ('20260808152142_AddTenantMailSettings', '9.0.18');
+    END IF;
+END $EF$;
 COMMIT;
 

@@ -3828,6 +3828,10 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("rejection_reason");
 
+                    b.Property<string>("ReopenReason")
+                        .HasColumnType("text")
+                        .HasColumnName("reopen_reason");
+
                     b.Property<int>("Rpn")
                         .HasColumnType("integer")
                         .HasColumnName("rpn");
@@ -4255,6 +4259,83 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_notification_rule_tenant_id_event_key");
 
                     b.ToTable("notification_rule", "qams");
+                });
+
+            modelBuilder.Entity("NT.QAMS.Domain.Notifications.TenantMailSettings", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("BrandColor")
+                        .HasMaxLength(9)
+                        .HasColumnType("character varying(9)")
+                        .HasColumnName("brand_color");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_user_id");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("enabled");
+
+                    b.Property<string>("FooterNote")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("footer_note");
+
+                    b.Property<string>("FromAddress")
+                        .IsRequired()
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)")
+                        .HasColumnName("from_address");
+
+                    b.Property<string>("FromName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("from_name");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("modified_at_utc");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("modified_by");
+
+                    b.Property<string>("ReplyTo")
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)")
+                        .HasColumnName("reply_to");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("TenantId", "Id")
+                        .HasName("pk_tenant_mail_settings");
+
+                    b.HasIndex("TenantId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_tenant_mail_settings_tenant");
+
+                    b.ToTable("tenant_mail_settings", "qams");
                 });
 
             modelBuilder.Entity("NT.QAMS.Domain.Organization.Branch", b =>

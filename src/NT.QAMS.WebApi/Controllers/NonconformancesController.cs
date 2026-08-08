@@ -118,4 +118,17 @@ public sealed class NonconformancesController(ISender sender) : ControllerBase
             new ConfirmNcEffectivenessCommand(id, request.Effective, request.Password, request.Pin), ct);
         return NoContent();
     }
+
+    /// <summary>
+    /// Re-opens a closed nonconformance. Part 11 signing ceremony: a documented reason
+    /// and the actor's e-signature (password + PIN) are required. Returns the NC to the
+    /// action-plan stage so its CAPA work can be revisited and re-verified.
+    /// </summary>
+    [HttpPost("{id:guid}/reopen")]
+    [RequirePermission(PermissionCatalog.Nonconformances, PermissionAction.Sign)]
+    public async Task<IActionResult> Reopen(Guid id, ReopenNcRequest request, CancellationToken ct)
+    {
+        await sender.Send(new ReopenNcCommand(id, request.Reason, request.Password, request.Pin), ct);
+        return NoContent();
+    }
 }

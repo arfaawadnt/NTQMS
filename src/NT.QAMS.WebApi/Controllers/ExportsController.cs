@@ -3,6 +3,7 @@ using NT.QAMS.WebApi.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Application.ComplianceLedger;
 using NT.QAMS.Application.Improvement.Commands;
@@ -31,6 +32,8 @@ public sealed class ExportsController(
     private const int MaxExportRows = 10_000;
     private const int MaxExportColumns = 40;
     private const int MaxExportStats = 16;
+    private const int MaxManualGroups = 40;
+    private const int MaxManualTopics = 500;
 
     /// <summary>
     /// Renders the caller's current register view as a branded document. The
@@ -45,6 +48,35 @@ public sealed class ExportsController(
         await LogExportAsync($"page/{request.Title}.pdf", ct);
         return File(exports.ToPagePdf(pack), "application/pdf",
             $"{FileSlug(request.Title)}-{clock.UtcNow:yyyyMMdd-HHmm}.pdf");
+    }
+
+    /// <summary>
+    /// Renders the complete User Manual as a professional PDF. The manual content
+    /// lives only in the SPA (the trilingual help catalogue), so the caller posts
+    /// it already localized; the server lays it out and stamps provenance — the
+    /// same "format the caller's own view" contract as the generic page export, so
+    /// no permission gate applies beyond authentication.
+    /// </summary>
+    [HttpPost("manual.pdf")]
+    public async Task<IActionResult> ManualPdf(Contracts.Common.ManualExportRequest request, CancellationToken ct)
+    {
+        if (request.Groups.Count is 0 or > MaxManualGroups
+            || request.Groups.Sum(g => g.Topics.Count) is 0 or > MaxManualTopics)
+        {
+            throw new NT.QAMS.SharedKernel.Primitives.DomainException(
+                "EXPORT-003", "The manual payload is empty or exceeds the size ceiling.");
+        }
+
+        var tenantName = tenant.TenantId is { } id
+            ? (await db.Tenants.FindAsync([id], ct))?.Name ?? "(unknown)"
+            : "(platform)";
+        var language = string.IsNullOrWhiteSpace(request.Language) ? "en" : request.Language.Trim();
+        var pack = new ManualExportPack(
+            tenantName, user.DisplayName ?? "system", clock.UtcNow, language, request.Groups);
+
+        await LogExportAsync("manual.pdf", ct);
+        return File(exports.ToManualPdf(pack), "application/pdf",
+            $"nt-qams-user-manual-{language}-{clock.UtcNow:yyyyMMdd-HHmm}.pdf");
     }
 
     /// <summary>Same view rendered as a real workbook (frozen, filterable grid).</summary>
@@ -226,6 +258,64 @@ public sealed class ExportsController(
         await LogExportAsync($"review-pack/{review.ReviewRef}.pdf", ct);
         return File(exports.ToPdf(pack), "application/pdf",
             $"review-pack-{review.ReviewRef}-{clock.UtcNow:yyyyMMdd}.pdf");
+    }
+
+    /// <summary>
+    /// The comprehensive Quality Analytics report as a branded PDF (score gauge,
+    /// weighted-component progress bars, Pareto bars, risk heat-matrix). Re-queries
+    /// the same computation the dashboard shows, honouring the caller's branch/
+    /// department scope and view permissions (a section the caller cannot see is
+    /// absent from both the analytics and the report).
+    /// </summary>
+    [HttpGet("quality-analytics.pdf")]
+    [RequirePermission(PermissionCatalog.Reports, PermissionAction.Export)]
+    public async Task<IActionResult> QualityAnalyticsPdf(
+        [FromQuery] Guid? branchId, [FromQuery] Guid? departmentId, CancellationToken ct)
+    {
+        var pack = await BuildAnalyticsPackAsync(branchId, departmentId, ct);
+        await LogExportAsync("quality-analytics.pdf", ct);
+        return File(exports.ToQualityAnalyticsReportPdf(pack), "application/pdf",
+            $"quality-analytics-{clock.UtcNow:yyyyMMdd-HHmm}.pdf");
+    }
+
+    /// <summary>The same report as a real workbook — a health-score summary sheet plus one sheet per sub-system.</summary>
+    [HttpGet("quality-analytics.xlsx")]
+    [RequirePermission(PermissionCatalog.Reports, PermissionAction.Export)]
+    public async Task<IActionResult> QualityAnalyticsXlsx(
+        [FromQuery] Guid? branchId, [FromQuery] Guid? departmentId, CancellationToken ct)
+    {
+        var pack = await BuildAnalyticsPackAsync(branchId, departmentId, ct);
+        await LogExportAsync("quality-analytics.xlsx", ct);
+        return File(exports.ToQualityAnalyticsReportXlsx(pack),
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            $"quality-analytics-{clock.UtcNow:yyyyMMdd-HHmm}.xlsx");
+    }
+
+    private async Task<QualityAnalyticsReportPack> BuildAnalyticsPackAsync(
+        Guid? branchId, Guid? departmentId, CancellationToken ct)
+    {
+        var analytics = await sender.Send(new GetQualityAnalyticsQuery(branchId, departmentId), ct);
+
+        var tenantName = tenant.TenantId is { } id
+            ? (await db.Tenants.FindAsync([id], ct))?.Name ?? "(unknown)"
+            : "(platform)";
+
+        // Human-readable scope line — resolved names, so the copy states what it was filtered to.
+        var parts = new List<string>();
+        if (branchId is { } b)
+        {
+            var name = await db.Branches.AsNoTracking().Where(x => x.Id == b).Select(x => x.Name).FirstOrDefaultAsync(ct);
+            parts.Add($"Branch: {name ?? b.ToString()}");
+        }
+        if (departmentId is { } d)
+        {
+            var name = await db.Departments.AsNoTracking().Where(x => x.Id == d).Select(x => x.Name).FirstOrDefaultAsync(ct);
+            parts.Add($"Department: {name ?? d.ToString()}");
+        }
+        var filters = parts.Count == 0 ? null : string.Join(" · ", parts);
+
+        return new QualityAnalyticsReportPack(
+            tenantName, user.DisplayName ?? "system", clock.UtcNow, filters, analytics);
     }
 
     private async Task<ExportPack> PackAsync(string title, CancellationToken ct, params ExportTable[] tables)

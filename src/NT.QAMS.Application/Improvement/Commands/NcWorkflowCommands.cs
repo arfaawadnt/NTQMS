@@ -80,10 +80,19 @@ public sealed record VerifyNcCommand(Guid NcId, bool Passed, string Password, st
 [RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.Nonconformances,
     NT.QAMS.Domain.Authorization.PermissionAction.Sign)]
 public sealed record ConfirmNcEffectivenessCommand(Guid NcId, bool Effective, string Password, string Pin) : ICommand;
+/// <summary>Re-opening a closed nonconformance is a Part 11 signing ceremony: it requires a documented reason and the actor's e-signature (account password + PIN).</summary>
+[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.Nonconformances,
+    NT.QAMS.Domain.Authorization.PermissionAction.Sign)]
+public sealed record ReopenNcCommand(Guid NcId, string Reason, string Password, string Pin) : ICommand;
 
 public sealed class RejectNcValidator : AbstractValidator<RejectNcCommand>
 {
     public RejectNcValidator() => RuleFor(x => x.Reason).NotEmpty().MaximumLength(1000);
+}
+
+public sealed class ReopenNcValidator : AbstractValidator<ReopenNcCommand>
+{
+    public ReopenNcValidator() => RuleFor(x => x.Reason).NotEmpty().MaximumLength(1000);
 }
 
 public sealed class RecordRcaValidator : AbstractValidator<RecordRcaCommand>
@@ -259,6 +268,37 @@ public sealed class ConfirmNcEffectivenessHandler(
                 ("nc", nc.NcRef), ("outcome", c.Effective ? "effective" : "not-effective")), ct);
 
         nc.ConfirmEffectiveness(c.Effective, actor);
+        await db.SaveChangesAsync(ct);
+    }
+}
+
+public sealed class ReopenNcHandler(IAppDbContext db, ICurrentUser user, IESignatureService signatures)
+    : ICommandHandler<ReopenNcCommand>
+{
+    public async Task Handle(ReopenNcCommand c, CancellationToken ct)
+    {
+        var actor = user.UserId ?? throw new DomainException("AUTH-003", "An authenticated user is required.");
+        var nc = await NcLoader.LoadAsync(db, c.NcId, ct);
+
+        // Pre-validate the state gate BEFORE minting the signature — the ledger is
+        // append-only, so a signature must never exist for a re-open that then fails
+        // (mirrors the verify/confirm pilots). The aggregate re-checks the invariant.
+        if (nc.Status != NcStatus.Closed)
+        {
+            throw new InvalidStateTransitionException(
+                "NC-023", $"Cannot reopen a nonconformance in state {nc.Status}.");
+        }
+
+        // Bind the signature to the record and the documented rationale (§11.70) so the
+        // reason lands in the tamper-evident signature manifest, not only the aggregate.
+        await signatures.SignAsync(
+            actor, c.Password, c.Pin,
+            $"Re-opened {nc.NcRef}: {c.Reason.Trim()}",
+            $"NC:{nc.Id:N}",
+            SignatureContentHash.Compute(
+                ("nc", nc.NcRef), ("action", "reopen"), ("reason", c.Reason.Trim())), ct);
+
+        nc.Reopen(c.Reason, actor);
         await db.SaveChangesAsync(ct);
     }
 }

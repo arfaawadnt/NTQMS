@@ -12,7 +12,7 @@ namespace NT.QAMS.Infrastructure.Exports;
 /// QuestPDF (Community license) with the provenance stamp in every page
 /// footer. Deliberately no HTML-as-xls tricks — these are inspection copies.
 /// </summary>
-public sealed class ExportService : IExportService
+public sealed partial class ExportService : IExportService
 {
     static ExportService()
     {

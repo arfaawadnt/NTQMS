@@ -16,6 +16,8 @@ public sealed record VerifyNcRequest(bool Passed, string Password, string Pin);
 
 public sealed record ConfirmEffectivenessRequest(bool Effective, string Password, string Pin);
 
+public sealed record ReopenNcRequest(string Reason, string Password, string Pin);
+
 public sealed record CapaActionDto(
     Guid Id, string Type, string Details, Guid OwnerId, DateOnly DueDate,
     string Status, DateTimeOffset? CompletedAtUtc);

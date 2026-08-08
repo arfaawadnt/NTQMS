@@ -8,6 +8,8 @@ import { I18nService } from '../../core/i18n.service';
 export interface EsignCredentials {
   password: string;
   pin: string;
+  /** Optional documented rationale, present only when the ceremony requires a reason (e.g. re-opening a closed NC). */
+  reason?: string;
 }
 
 /**
@@ -32,6 +34,15 @@ export interface EsignCredentials {
       <div class="modal" role="dialog" aria-modal="true" aria-labelledby="esign-title">
         <h3 id="esign-title">{{ i18n.t('esign.title') }}</h3>
         <p class="meaning">{{ meaning() }}</p>
+
+        @if (reasonRequired()) {
+          <label for="esign-reason">{{ reasonLabel() || i18n.t('esign.reason') }}</label>
+          <textarea
+            id="esign-reason"
+            rows="3"
+            [value]="reason()"
+            (input)="reason.set($any($event.target).value)"></textarea>
+        }
 
         <label for="esign-password">{{ i18n.t('esign.password') }}</label>
         <input
@@ -76,7 +87,8 @@ export interface EsignCredentials {
     h3 { margin: 0 0 8px; font-size: 15px; font-weight: 700; color: var(--nt-slate); }
     .meaning { margin: 0 0 14px; font-size: 13px; color: var(--nt-slate); }
     label { display: block; font-size: 12.5px; font-weight: 600; color: var(--nt-slate); margin-bottom: 4px; }
-    input { width: 100%; box-sizing: border-box; margin-bottom: 10px; }
+    input, textarea { width: 100%; box-sizing: border-box; margin-bottom: 10px; }
+    textarea { resize: vertical; font: inherit; }
     .row { display: flex; gap: .6rem; margin-top: 6px; }
     button { width: auto; }
   `],
@@ -92,6 +104,10 @@ export class EsignDialogComponent {
   readonly busy = input(false);
   /** Server error to surface (e.g. wrong PIN); cleared by the parent on reopen. */
   readonly error = input('');
+  /** When true, a mandatory free-text reason is collected alongside the credentials (e.g. NC re-open). */
+  readonly reasonRequired = input(false);
+  /** Optional label for the reason field; falls back to the generic esign.reason string. */
+  readonly reasonLabel = input('');
 
   /** Emits the captured credentials when the operator confirms. */
   readonly confirm = output<EsignCredentials>();
@@ -100,9 +116,16 @@ export class EsignDialogComponent {
 
   readonly password = signal('');
   readonly pin = signal('');
+  readonly reason = signal('');
 
-  /** Both identification components must be present before signing is offered (§11.200(a)(1)). */
-  readonly canConfirm = computed(() => this.password().trim() !== '' && this.pin().trim() !== '');
+  /**
+   * Both identification components must be present before signing is offered
+   * (§11.200(a)(1)); when the ceremony requires a rationale, the reason must be
+   * present too.
+   */
+  readonly canConfirm = computed(() =>
+    this.password().trim() !== '' && this.pin().trim() !== ''
+    && (!this.reasonRequired() || this.reason().trim() !== ''));
 
   private readonly firstBox = viewChild<ElementRef<HTMLInputElement>>('firstBox');
   private previouslyFocused: HTMLElement | null = null;
@@ -115,6 +138,7 @@ export class EsignDialogComponent {
         this.previouslyFocused = active instanceof HTMLElement ? active : null;
         this.password.set('');
         this.pin.set('');
+        this.reason.set('');
         box.nativeElement.focus();
       } else if (!this.open() && this.previouslyFocused) {
         this.previouslyFocused.focus();
@@ -125,7 +149,10 @@ export class EsignDialogComponent {
 
   onConfirm(): void {
     if (this.canConfirm() && !this.busy()) {
-      this.confirm.emit({ password: this.password(), pin: this.pin() });
+      this.confirm.emit(
+        this.reasonRequired()
+          ? { password: this.password(), pin: this.pin(), reason: this.reason().trim() }
+          : { password: this.password(), pin: this.pin() });
     }
   }
 

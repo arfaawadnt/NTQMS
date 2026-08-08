@@ -3,6 +3,8 @@ import { RouterLink } from '@angular/router';
 import { I18nService } from '../../core/i18n.service';
 import { HELP_TOPICS, HelpTopic, helpGroupsInOrder, tr } from '../../core/help/help-content';
 import { navIcon } from '../../core/nav-icons';
+import { ExportsApiService } from '../../core/api/exports-api.service';
+import { ManualGroupRequest } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { HelpBodyComponent } from '../../shared/ui/help-body.component';
 
@@ -23,7 +25,11 @@ interface ManualSection {
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [RouterLink, PageHeaderComponent, HelpBodyComponent],
     template: `
-    <qams-page-header [title]="i18n.t('nav.manual')" [subtitle]="i18n.t('manual.subtitle')" />
+    <qams-page-header [title]="i18n.t('nav.manual')" [subtitle]="i18n.t('manual.subtitle')">
+      <button class="secondary" [disabled]="exporting()" (click)="exportPdf()">
+        {{ exporting() ? i18n.t('exp.working') : i18n.t('manual.exportPdf') }}
+      </button>
+    </qams-page-header>
 
     <div class="toolbar card">
       <input class="search" [value]="search()" (input)="search.set($any($event.target).value)"
@@ -108,10 +114,13 @@ interface ManualSection {
 })
 export class ManualComponent {
   readonly i18n = inject(I18nService);
+  private readonly exportsApi = inject(ExportsApiService);
 
   readonly total = HELP_TOPICS.length;
   readonly search = signal('');
   readonly expanded = signal<string>('');
+  /** True while the manual PDF is being generated/downloaded. */
+  readonly exporting = signal(false);
 
   private readonly matches = computed(() => {
     const q = this.search().trim().toLowerCase();
@@ -137,4 +146,32 @@ export class ManualComponent {
   icon(name: string): string { return navIcon(name); }
 
   text(value: Parameters<typeof tr>[0]): string { return tr(value, this.i18n.lang()); }
+
+  /**
+   * Exports the whole manual (not the current search filter) as a PDF, localized
+   * to the active language. The SPA owns the help content, so it assembles the
+   * payload; the server lays it out and stamps provenance.
+   */
+  async exportPdf(): Promise<void> {
+    if (this.exporting()) { return; }
+    this.exporting.set(true);
+    try {
+      const lang = this.i18n.lang();
+      const groups: ManualGroupRequest[] = helpGroupsInOrder()
+        .map((groupKey) => ({
+          title: this.i18n.t(groupKey),
+          topics: HELP_TOPICS.filter((t) => t.groupKey === groupKey).map((t) => ({
+            route: t.route,
+            title: this.i18n.t(t.titleKey),
+            summary: tr(t.summary, lang),
+            steps: t.steps.map((s) => ({ label: tr(s.label, lang), detail: tr(s.detail, lang) })),
+            usage: t.usage.map((u) => tr(u, lang)),
+          })),
+        }))
+        .filter((g) => g.topics.length > 0);
+      await this.exportsApi.manualPdf({ language: lang, groups });
+    } finally {
+      this.exporting.set(false);
+    }
+  }
 }

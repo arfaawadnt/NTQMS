@@ -2,7 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { TasksApiService } from '../../core/api/tasks-api.service';
-import { CreateTaskRequest, Paged, SlaDefinition, UpsertSlaRequest, WorkTask } from '../../core/models';
+import { CreateTaskRequest, MyAction, Paged, SlaDefinition, UpsertSlaRequest, WorkTask } from '../../core/models';
 
 /**
  * Signal store for the work-task queue and SLA definitions. "My tasks" covers
@@ -13,6 +13,7 @@ import { CreateTaskRequest, Paged, SlaDefinition, UpsertSlaRequest, WorkTask } f
 export class TasksFacade {
   private readonly api = inject(TasksApiService);
 
+  private readonly _actions = signal<MyAction[]>([]);
   private readonly _tasks = signal<WorkTask[]>([]);
   private readonly _total = signal(0);
   private readonly _hasMore = signal(false);
@@ -22,6 +23,8 @@ export class TasksFacade {
   /** 1-based page of the last fetched slice (R-3 load-more pager). */
   private readonly _page = signal(1);
 
+  /** The unified action feed: every pending action across the system awaiting the caller. */
+  readonly actions = this._actions.asReadonly();
   readonly tasks = this._tasks.asReadonly();
   /** Total matching tasks on the server (pagination envelope, API-004). */
   readonly total = this._total.asReadonly();
@@ -33,6 +36,11 @@ export class TasksFacade {
 
   async loadTasks(): Promise<void> {
     await this.run(async () => this.applyFirstPage(await firstValueFrom(this.api.mine())));
+  }
+
+  /** Loads the unified action feed (the primary content of the page). */
+  async loadActions(): Promise<void> {
+    await this.run(async () => this._actions.set(await firstValueFrom(this.api.myActions())));
   }
 
   /** Appends the next page of my tasks (R-3); no-op while loading or exhausted. */
@@ -52,6 +60,7 @@ export class TasksFacade {
     return await this.run(async () => {
       await firstValueFrom(this.api.create(request));
       this.applyFirstPage(await firstValueFrom(this.api.mine()));
+      this._actions.set(await firstValueFrom(this.api.myActions()));
       return true;
     }) ?? false;
   }
@@ -60,6 +69,7 @@ export class TasksFacade {
     await this.run(async () => {
       await firstValueFrom(this.api.complete(id));
       this.applyFirstPage(await firstValueFrom(this.api.mine()));
+      this._actions.set(await firstValueFrom(this.api.myActions()));
     });
   }
 

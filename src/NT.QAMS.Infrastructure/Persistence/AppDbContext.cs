@@ -80,6 +80,7 @@ public sealed class AppDbContext(
     public DbSet<LovEntry> LovEntries => Set<LovEntry>();
     public DbSet<NotificationRule> NotificationRules => Set<NotificationRule>();
     public DbSet<NotificationDispatch> NotificationDispatches => Set<NotificationDispatch>();
+    public DbSet<TenantMailSettings> MailSettings => Set<TenantMailSettings>();
     public DbSet<QcProfile> QcProfiles => Set<QcProfile>();
     public DbSet<QcRun> QcRuns => Set<QcRun>();
     public DbSet<ValidationStudy> ValidationStudies => Set<ValidationStudy>();
