@@ -110,7 +110,7 @@ is included for container hosts.
 
 ## Increment history
 
-Current version: **v1.52.0** (full detail in [`IMPLEMENTATION_LOG.md`](IMPLEMENTATION_LOG.md);
+Current version: **v1.54.0** (full detail in [`IMPLEMENTATION_LOG.md`](IMPLEMENTATION_LOG.md);
 per-run test history in [`docs/validation/verification-log.md`](docs/validation/verification-log.md)).
 
 ### Stage 1 — Initial vertical-slice build (v0.1 → v1.0, 2026-07-22)
@@ -157,15 +157,22 @@ Every increment a complete UI→API→domain→DB→tests slice:
 | v1.49 / v1.49.1 | GAMP 5 validation: engineering dry-run, OQ execution records, system-owner release decision |
 | v1.50 | Compliance status milestone (EA posture 88%, 0 critical) |
 
-### Stage 5 — Product build-out (v1.51.0 → v1.52.0)
+### Stage 5 — Product build-out (v1.51.0 → v1.54.0)
 | Ver | Delivered |
 |---|---|
 | v1.51.0 | **Role Privilege module** — dynamic tenant-defined roles over a **170-key permission catalogue**; branch/department as a hard data filter |
 | v1.51.1 | Role Privilege OQ execution + defect RP-D1 fix |
 | v1.51.2 | **Schema hardening** — six `Hardening*` migrations (composite PKs, RLS parity, CHECK domains, deferrable tenant FKs); OQ-DB-01..08 executed |
-| **v1.52.0** | **Quality Analytics** (one computation serving a Quality Statistics dashboard + ISO 17025 §8.9.2 Management-Review pack; 9 sub-systems; tenant-configurable weighted Quality Health Score; URS-108…114) + **usability / self-service set** (My-Tasks role resolution, route↔help parity, management-review agenda/link/participants + dispatch, self-service & admin-issued e-signature PINs, self-service password change, tabbed equipment workspace with maintenance certificates; URS-115…122) |
+| v1.52.0 | **Quality Analytics** (one computation serving a Quality Statistics dashboard + ISO 17025 §8.9.2 Management-Review pack; 9 sub-systems; tenant-configurable weighted Quality Health Score; URS-108…114) + **usability / self-service set** (My-Tasks role resolution, route↔help parity, management-review agenda/link/participants + dispatch, self-service & admin-issued e-signature PINs, self-service password change, tabbed equipment workspace with maintenance certificates; URS-115…122) |
+| v1.53.0 | **RISK-03 — 21 CFR Part 11 e-signature ceremony** extended from document-publish to **every** signed-record gate (NC verify/close, all 14 analytical-quality sign-offs, audit sign-off, quality-policy & change approval, management-review close, the borderline SoD gates, both periodic-review completions); 4 new `.sign` permission keys; self-fetching signature manifest on every gate; URS-123…128 |
+| v1.53.1 | Deploy/upgrade-path corrections (apply DDL as `qams_owner`, `SET LOCAL` RLS-bypass so the idempotent script applies from scratch, Windows-service SCM integration, `harden-runtime-role.sql` fixes) — **no application/schema change** |
+| **v1.54.0** | **Product enhancement program** (URS-129…134) — **NC re-open** (reason + e-signature, reuses `nc.sign`); **Quality Analytics report** as branded PDF & Excel (`reports.export`); **User Manual PDF** (cover chart, linked TOC, per-topic progress bars); **My Tasks unified action centre** (live read model over 7 pending-action sources); **Mail Management** — per-tenant mail sender identity (FORCE-RLS `tenant_mail_settings`) + branded HTML e-mail template. No new permission keys; two additive migrations |
 
-> **Note:** v1.52.0 is committed on `master` but not yet git-tagged (newest tag is `v1.51.2`).
+> **Note:** the newest git tag is **`v1.54.0`** (@ `dea0d2b`). This work lands on `dev`; `master` is
+> promoted separately by the dev-team review process. Release posture remains **Pre-production /
+> Approved-with-conditions** — the open blockers are **DOC-001** (signed validation on a qualified
+> environment) and **SEC-001** (independent penetration test); v1.54.0's validation records
+> (URS-129…134) ship as Template/unsigned and fold under DOC-001.
 
 ## Remaining / open items
 
