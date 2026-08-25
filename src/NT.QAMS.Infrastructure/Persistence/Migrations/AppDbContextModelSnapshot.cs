@@ -18,10 +18,164 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.18")
+                .HasAnnotation("ProductVersion", "9.0.19")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("NT.QAMS.Domain.Accreditation.EvidenceLink", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_user_id");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("description");
+
+                    b.Property<Guid>("ElementId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("element_id");
+
+                    b.Property<DateTimeOffset>("LinkedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("linked_at_utc");
+
+                    b.Property<Guid>("LinkedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("linked_by");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("modified_at_utc");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("modified_by");
+
+                    b.Property<Guid>("SourceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("source_id");
+
+                    b.Property<string>("SourceRef")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("source_ref");
+
+                    b.Property<string>("SourceType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("source_type");
+
+                    b.Property<Guid>("StandardSetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("standard_set_id");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("TenantId", "Id")
+                        .HasName("pk_evidence_link");
+
+                    b.HasIndex("TenantId", "ElementId")
+                        .HasDatabaseName("ix_evidence_link_tenant_id_element_id");
+
+                    b.HasIndex("TenantId", "StandardSetId")
+                        .HasDatabaseName("ix_evidence_link_tenant_id_standard_set_id");
+
+                    b.ToTable("evidence_link", "qams");
+                });
+
+            modelBuilder.Entity("NT.QAMS.Domain.Accreditation.StandardSet", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_user_id");
+
+                    b.Property<string>("Framework")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("framework");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("modified_at_utc");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("modified_by");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Version")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("version");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("TenantId", "Id")
+                        .HasName("pk_standard_set");
+
+                    b.HasIndex("TenantId", "Status")
+                        .HasDatabaseName("ix_standard_set_tenant_id_status");
+
+                    b.ToTable("standard_set", "qams");
+                });
 
             modelBuilder.Entity("NT.QAMS.Domain.AnalyticalQuality.CarryoverStudy", b =>
                 {
@@ -1925,6 +2079,67 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                     b.ToTable("audit", "qams");
                 });
 
+            modelBuilder.Entity("NT.QAMS.Domain.AuditManagement.AuditProgram", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_user_id");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("modified_at_utc");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("modified_by");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("title");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("integer")
+                        .HasColumnName("year");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("TenantId", "Id")
+                        .HasName("pk_audit_program");
+
+                    b.HasIndex("TenantId", "Year")
+                        .HasDatabaseName("ix_audit_program_tenant_id_year");
+
+                    b.ToTable("audit_program", "qams");
+                });
+
             modelBuilder.Entity("NT.QAMS.Domain.Authorization.Role", b =>
                 {
                     b.Property<Guid>("TenantId")
@@ -1999,6 +2214,155 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_role_tenant_id_normalized_name");
 
                     b.ToTable("role", "qams");
+                });
+
+            modelBuilder.Entity("NT.QAMS.Domain.Committees.Committee", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_user_id");
+
+                    b.Property<string>("Frequency")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("frequency");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("modified_at_utc");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("modified_by");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("name");
+
+                    b.Property<int>("QuorumSize")
+                        .HasColumnType("integer")
+                        .HasColumnName("quorum_size");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("TermsOfReference")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("terms_of_reference");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("TenantId", "Id")
+                        .HasName("pk_committee");
+
+                    b.HasIndex("TenantId", "Status")
+                        .HasDatabaseName("ix_committee_tenant_id_status");
+
+                    b.ToTable("committee", "qams");
+                });
+
+            modelBuilder.Entity("NT.QAMS.Domain.Committees.Meeting", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("CommitteeId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("committee_id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_user_id");
+
+                    b.Property<string>("MeetingRef")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("meeting_ref");
+
+                    b.Property<string>("Minutes")
+                        .HasColumnType("text")
+                        .HasColumnName("minutes");
+
+                    b.Property<Guid?>("MinutesApprovedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("minutes_approved_by");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("modified_at_utc");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("modified_by");
+
+                    b.Property<DateTimeOffset>("ScheduledAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("scheduled_at_utc");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("TenantId", "Id")
+                        .HasName("pk_meeting");
+
+                    b.HasIndex("TenantId", "CommitteeId")
+                        .HasDatabaseName("ix_meeting_tenant_id_committee_id");
+
+                    b.HasIndex("TenantId", "MeetingRef")
+                        .IsUnique()
+                        .HasDatabaseName("ix_meeting_tenant_id_meeting_ref");
+
+                    b.ToTable("meeting", "qams");
                 });
 
             modelBuilder.Entity("NT.QAMS.Domain.Competency.CompetencyRecord", b =>
@@ -2583,6 +2947,12 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<string>("AudienceScope")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("audience_scope");
+
                     b.Property<string>("Category")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -2618,6 +2988,10 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                     b.Property<DateOnly?>("NextReviewDue")
                         .HasColumnType("date")
                         .HasColumnName("next_review_due");
+
+                    b.Property<bool>("RequiresAcknowledgement")
+                        .HasColumnType("boolean")
+                        .HasColumnName("requires_acknowledgement");
 
                     b.Property<int>("ReviewCycleMonths")
                         .HasColumnType("integer")
@@ -4089,6 +4463,162 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                     b.ToTable("quality_policy", "qams");
                 });
 
+            modelBuilder.Entity("NT.QAMS.Domain.IncidentReporting.Incident", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AnonymousReferenceHash")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("anonymous_reference_hash");
+
+                    b.Property<Guid?>("AssignedTo")
+                        .HasColumnType("uuid")
+                        .HasColumnName("assigned_to");
+
+                    b.Property<Guid?>("BranchId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("branch_id");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("category");
+
+                    b.Property<string>("Channel")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("channel");
+
+                    b.Property<string>("ClosureSummary")
+                        .HasColumnType("text")
+                        .HasColumnName("closure_summary");
+
+                    b.Property<Guid?>("CorrectiveActionNcId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("corrective_action_nc_id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_user_id");
+
+                    b.Property<Guid?>("DepartmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("department_id");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("HarmGrade")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("harm_grade");
+
+                    b.Property<string>("IncidentRef")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("incident_ref");
+
+                    b.Property<string>("InvestigationSummary")
+                        .HasColumnType("text")
+                        .HasColumnName("investigation_summary");
+
+                    b.Property<Guid?>("InvestigatorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("investigator_id");
+
+                    b.Property<bool>("IsAnonymous")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_anonymous");
+
+                    b.Property<bool>("IsSentinel")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_sentinel");
+
+                    b.Property<string>("Location")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("location");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("modified_at_utc");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("modified_by");
+
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at_utc");
+
+                    b.Property<string>("RejectionReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("rejection_reason");
+
+                    b.Property<Guid?>("ReportedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reported_by");
+
+                    b.Property<DateTimeOffset?>("SentinelDeclaredAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("sentinel_declared_at_utc");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("title");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("TenantId", "Id")
+                        .HasName("pk_incident");
+
+                    b.HasIndex("TenantId", "AnonymousReferenceHash")
+                        .HasDatabaseName("ix_incident_tenant_id_anonymous_reference_hash");
+
+                    b.HasIndex("TenantId", "IncidentRef")
+                        .IsUnique()
+                        .HasDatabaseName("ix_incident_tenant_id_incident_ref");
+
+                    b.HasIndex("TenantId", "Status")
+                        .HasDatabaseName("ix_incident_tenant_id_status");
+
+                    b.ToTable("incident", "qams");
+                });
+
             modelBuilder.Entity("NT.QAMS.Domain.Notifications.NotificationDispatch", b =>
                 {
                     b.Property<Guid>("TenantId")
@@ -4780,6 +5310,271 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                     b.ToTable("test_catalog_item", "qams");
                 });
 
+            modelBuilder.Entity("NT.QAMS.Domain.PatientExperience.SatisfactionSurvey", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_user_id");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("description");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("modified_at_utc");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("modified_by");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("title");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("TenantId", "Id")
+                        .HasName("pk_satisfaction_survey");
+
+                    b.HasIndex("TenantId", "Status")
+                        .HasDatabaseName("ix_satisfaction_survey_tenant_id_status");
+
+                    b.ToTable("satisfaction_survey", "qams");
+                });
+
+            modelBuilder.Entity("NT.QAMS.Domain.PatientExperience.SurveyResponse", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_user_id");
+
+                    b.Property<Guid?>("DepartmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("department_id");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("modified_at_utc");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("modified_by");
+
+                    b.Property<string>("ServiceLine")
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("service_line");
+
+                    b.Property<DateTimeOffset>("SubmittedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("submitted_at_utc");
+
+                    b.Property<Guid>("SurveyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("survey_id");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("TenantId", "Id")
+                        .HasName("pk_survey_response");
+
+                    b.HasIndex("TenantId", "SurveyId")
+                        .HasDatabaseName("ix_survey_response_tenant_id_survey_id");
+
+                    b.ToTable("survey_response", "qams");
+                });
+
+            modelBuilder.Entity("NT.QAMS.Domain.QualityIndicators.QualityIndicator", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal?>("ActionThreshold")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("action_threshold");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("code");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_user_id");
+
+                    b.Property<string>("DataSource")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("data_source");
+
+                    b.Property<string>("Denominator")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("denominator");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Direction")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("direction");
+
+                    b.Property<string>("Exclusions")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("exclusions");
+
+                    b.Property<string>("Frequency")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("frequency");
+
+                    b.Property<string>("Inclusions")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("inclusions");
+
+                    b.Property<string>("IndicatorRef")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("indicator_ref");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("modified_at_utc");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("modified_by");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Numerator")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("numerator");
+
+                    b.Property<decimal>("RateFactor")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("rate_factor");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<decimal?>("Target")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("target");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("unit");
+
+                    b.Property<decimal?>("WarningThreshold")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("warning_threshold");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("TenantId", "Id")
+                        .HasName("pk_quality_indicator");
+
+                    b.HasIndex("TenantId", "Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_quality_indicator_tenant_id_code");
+
+                    b.HasIndex("TenantId", "Status")
+                        .HasDatabaseName("ix_quality_indicator_tenant_id_status");
+
+                    b.ToTable("quality_indicator", "qams");
+                });
+
             modelBuilder.Entity("NT.QAMS.Domain.Records.ArchiveEntry", b =>
                 {
                     b.Property<Guid>("TenantId")
@@ -5210,6 +6005,93 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_conflict_declaration_tenant_id_status");
 
                     b.ToTable("conflict_declaration", "qams");
+                });
+
+            modelBuilder.Entity("NT.QAMS.Domain.RiskGovernance.FmeaStudy", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid?>("BranchId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("branch_id");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by_user_id");
+
+                    b.Property<Guid?>("DepartmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("department_id");
+
+                    b.Property<string>("FmeaRef")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("fmea_ref");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("modified_at_utc");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("modified_by");
+
+                    b.Property<string>("ProcessName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("process_name");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("title");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("type");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("TenantId", "Id")
+                        .HasName("pk_fmea_study");
+
+                    b.HasIndex("TenantId", "FmeaRef")
+                        .IsUnique()
+                        .HasDatabaseName("ix_fmea_study_tenant_id_fmea_ref");
+
+                    b.HasIndex("TenantId", "Status")
+                        .HasDatabaseName("ix_fmea_study_tenant_id_status");
+
+                    b.ToTable("fmea_study", "qams");
                 });
 
             modelBuilder.Entity("NT.QAMS.Domain.RiskGovernance.ManagementReview", b =>
@@ -6004,6 +6886,90 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                     b.ToTable("ref_counter", "qams");
                 });
 
+            modelBuilder.Entity("NT.QAMS.Domain.Accreditation.StandardSet", b =>
+                {
+                    b.OwnsMany("NT.QAMS.Domain.Accreditation.StandardElement", "Elements", b1 =>
+                        {
+                            b1.Property<Guid>("TenantId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("tenant_id");
+
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<DateTimeOffset?>("AssessedAtUtc")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("assessed_at_utc");
+
+                            b1.Property<Guid?>("AssessedBy")
+                                .HasColumnType("uuid")
+                                .HasColumnName("assessed_by");
+
+                            b1.Property<string>("AssessmentNote")
+                                .HasColumnType("text")
+                                .HasColumnName("assessment_note");
+
+                            b1.Property<string>("ChapterCode")
+                                .IsRequired()
+                                .HasMaxLength(40)
+                                .HasColumnType("character varying(40)")
+                                .HasColumnName("chapter_code");
+
+                            b1.Property<string>("ChapterTitle")
+                                .IsRequired()
+                                .HasMaxLength(300)
+                                .HasColumnType("character varying(300)")
+                                .HasColumnName("chapter_title");
+
+                            b1.Property<string>("ComplianceStatus")
+                                .IsRequired()
+                                .HasMaxLength(20)
+                                .HasColumnType("character varying(20)")
+                                .HasColumnName("compliance_status");
+
+                            b1.Property<string>("ElementCode")
+                                .IsRequired()
+                                .HasMaxLength(40)
+                                .HasColumnType("character varying(40)")
+                                .HasColumnName("element_code");
+
+                            b1.Property<string>("StandardCode")
+                                .IsRequired()
+                                .HasMaxLength(40)
+                                .HasColumnType("character varying(40)")
+                                .HasColumnName("standard_code");
+
+                            b1.Property<string>("Text")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("text");
+
+                            b1.Property<int>("Weight")
+                                .HasColumnType("integer")
+                                .HasColumnName("weight");
+
+                            b1.Property<Guid>("standard_set_id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("standard_set_id");
+
+                            b1.HasKey("TenantId", "Id")
+                                .HasName("pk_standard_element");
+
+                            b1.HasIndex("TenantId", "standard_set_id", "ElementCode")
+                                .IsUnique()
+                                .HasDatabaseName("ux_standard_element_set_code");
+
+                            b1.ToTable("standard_element", "qams");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TenantId", "standard_set_id")
+                                .HasConstraintName("fk_standard_element_standard_set_tenant_id_standard_set_id");
+                        });
+
+                    b.Navigation("Elements");
+                });
+
             modelBuilder.Entity("NT.QAMS.Domain.AnalyticalQuality.CarryoverStudy", b =>
                 {
                     b.OwnsMany("NT.QAMS.Domain.AnalyticalQuality.CarryoverReading", "Readings", b1 =>
@@ -6707,6 +7673,77 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                     b.Navigation("Findings");
                 });
 
+            modelBuilder.Entity("NT.QAMS.Domain.AuditManagement.AuditProgram", b =>
+                {
+                    b.OwnsMany("NT.QAMS.Domain.AuditManagement.PlannedAudit", "Plan", b1 =>
+                        {
+                            b1.Property<Guid>("TenantId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("tenant_id");
+
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<DateOnly?>("CompletedOn")
+                                .HasColumnType("date")
+                                .HasColumnName("completed_on");
+
+                            b1.Property<Guid?>("DepartmentId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("department_id");
+
+                            b1.Property<int>("PlannedQuarter")
+                                .HasColumnType("integer")
+                                .HasColumnName("planned_quarter");
+
+                            b1.Property<string>("Priority")
+                                .IsRequired()
+                                .HasMaxLength(20)
+                                .HasColumnType("character varying(20)")
+                                .HasColumnName("priority");
+
+                            b1.Property<Guid?>("ScheduledAuditId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("scheduled_audit_id");
+
+                            b1.Property<string>("ScopeArea")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("character varying(200)")
+                                .HasColumnName("scope_area");
+
+                            b1.Property<string>("StandardChapter")
+                                .HasMaxLength(120)
+                                .HasColumnType("character varying(120)")
+                                .HasColumnName("standard_chapter");
+
+                            b1.Property<string>("Status")
+                                .IsRequired()
+                                .HasMaxLength(20)
+                                .HasColumnType("character varying(20)")
+                                .HasColumnName("status");
+
+                            b1.Property<Guid>("audit_program_id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("audit_program_id");
+
+                            b1.HasKey("TenantId", "Id")
+                                .HasName("pk_planned_audit");
+
+                            b1.HasIndex("TenantId", "audit_program_id")
+                                .HasDatabaseName("ix_planned_audit_tenant_id_audit_program_id");
+
+                            b1.ToTable("planned_audit", "qams");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TenantId", "audit_program_id")
+                                .HasConstraintName("fk_planned_audit_audit_program_tenant_id_audit_program_id");
+                        });
+
+                    b.Navigation("Plan");
+                });
+
             modelBuilder.Entity("NT.QAMS.Domain.Authorization.Role", b =>
                 {
                     b.OwnsMany("NT.QAMS.Domain.Authorization.RolePermission", "Permissions", b1 =>
@@ -6735,6 +7772,191 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                         });
 
                     b.Navigation("Permissions");
+                });
+
+            modelBuilder.Entity("NT.QAMS.Domain.Committees.Committee", b =>
+                {
+                    b.OwnsMany("NT.QAMS.Domain.Committees.CommitteeMember", "Members", b1 =>
+                        {
+                            b1.Property<Guid>("TenantId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("tenant_id");
+
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("RoleTitle")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("role_title");
+
+                            b1.Property<Guid>("UserId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("user_id");
+
+                            b1.Property<Guid>("committee_id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("committee_id");
+
+                            b1.HasKey("TenantId", "Id")
+                                .HasName("pk_committee_member");
+
+                            b1.HasIndex("TenantId", "committee_id")
+                                .HasDatabaseName("ix_committee_member_tenant_id_committee_id");
+
+                            b1.ToTable("committee_member", "qams");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TenantId", "committee_id")
+                                .HasConstraintName("fk_committee_member_committee_tenant_id_committee_id");
+                        });
+
+                    b.Navigation("Members");
+                });
+
+            modelBuilder.Entity("NT.QAMS.Domain.Committees.Meeting", b =>
+                {
+                    b.OwnsMany("NT.QAMS.Domain.Committees.AgendaItem", "Agenda", b1 =>
+                        {
+                            b1.Property<Guid>("TenantId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("tenant_id");
+
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<bool>("CarriedForward")
+                                .HasColumnType("boolean")
+                                .HasColumnName("carried_forward");
+
+                            b1.Property<string>("Detail")
+                                .HasMaxLength(2000)
+                                .HasColumnType("character varying(2000)")
+                                .HasColumnName("detail");
+
+                            b1.Property<string>("SourceRef")
+                                .HasMaxLength(120)
+                                .HasColumnType("character varying(120)")
+                                .HasColumnName("source_ref");
+
+                            b1.Property<string>("Title")
+                                .IsRequired()
+                                .HasMaxLength(300)
+                                .HasColumnType("character varying(300)")
+                                .HasColumnName("title");
+
+                            b1.Property<Guid>("meeting_id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("meeting_id");
+
+                            b1.HasKey("TenantId", "Id")
+                                .HasName("pk_meeting_agenda_item");
+
+                            b1.HasIndex("TenantId", "meeting_id")
+                                .HasDatabaseName("ix_meeting_agenda_item_tenant_id_meeting_id");
+
+                            b1.ToTable("meeting_agenda_item", "qams");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TenantId", "meeting_id")
+                                .HasConstraintName("fk_meeting_agenda_item_meeting_tenant_id_meeting_id");
+                        });
+
+                    b.OwnsMany("NT.QAMS.Domain.Committees.MeetingAttendance", "Attendance", b1 =>
+                        {
+                            b1.Property<Guid>("TenantId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("tenant_id");
+
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<bool>("Present")
+                                .HasColumnType("boolean")
+                                .HasColumnName("present");
+
+                            b1.Property<Guid>("UserId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("user_id");
+
+                            b1.Property<Guid>("meeting_id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("meeting_id");
+
+                            b1.HasKey("TenantId", "Id")
+                                .HasName("pk_meeting_attendance");
+
+                            b1.HasIndex("TenantId", "meeting_id")
+                                .HasDatabaseName("ix_meeting_attendance_tenant_id_meeting_id");
+
+                            b1.ToTable("meeting_attendance", "qams");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TenantId", "meeting_id")
+                                .HasConstraintName("fk_meeting_attendance_meeting_tenant_id_meeting_id");
+                        });
+
+                    b.OwnsMany("NT.QAMS.Domain.Committees.MeetingDecision", "Decisions", b1 =>
+                        {
+                            b1.Property<Guid>("TenantId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("tenant_id");
+
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("ClosureNote")
+                                .HasMaxLength(2000)
+                                .HasColumnType("character varying(2000)")
+                                .HasColumnName("closure_note");
+
+                            b1.Property<string>("Description")
+                                .IsRequired()
+                                .HasMaxLength(2000)
+                                .HasColumnType("character varying(2000)")
+                                .HasColumnName("description");
+
+                            b1.Property<DateOnly?>("DueDate")
+                                .HasColumnType("date")
+                                .HasColumnName("due_date");
+
+                            b1.Property<Guid?>("OwnerId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("owner_id");
+
+                            b1.Property<string>("Status")
+                                .IsRequired()
+                                .HasMaxLength(20)
+                                .HasColumnType("character varying(20)")
+                                .HasColumnName("status");
+
+                            b1.Property<Guid>("meeting_id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("meeting_id");
+
+                            b1.HasKey("TenantId", "Id")
+                                .HasName("pk_meeting_decision");
+
+                            b1.HasIndex("TenantId", "meeting_id")
+                                .HasDatabaseName("ix_meeting_decision_tenant_id_meeting_id");
+
+                            b1.ToTable("meeting_decision", "qams");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TenantId", "meeting_id")
+                                .HasConstraintName("fk_meeting_decision_meeting_tenant_id_meeting_id");
+                        });
+
+                    b.Navigation("Agenda");
+
+                    b.Navigation("Attendance");
+
+                    b.Navigation("Decisions");
                 });
 
             modelBuilder.Entity("NT.QAMS.Domain.Competency.CompetencyRecord", b =>
@@ -6783,6 +8005,37 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("NT.QAMS.Domain.DocumentControl.ControlledDocument", b =>
                 {
+                    b.OwnsMany("NT.QAMS.Domain.DocumentControl.DocumentAudienceDepartment", "AudienceDepartments", b1 =>
+                        {
+                            b1.Property<Guid>("TenantId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("tenant_id");
+
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<Guid>("DepartmentId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("department_id");
+
+                            b1.Property<Guid>("document_id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("document_id");
+
+                            b1.HasKey("TenantId", "Id")
+                                .HasName("pk_document_audience_department");
+
+                            b1.HasIndex("TenantId", "document_id")
+                                .HasDatabaseName("ix_document_audience_department_tenant_id_document_id");
+
+                            b1.ToTable("document_audience_department", "qams");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TenantId", "document_id")
+                                .HasConstraintName("fk_document_audience_department_controlled_document_tenant_id_");
+                        });
+
                     b.OwnsMany("NT.QAMS.Domain.DocumentControl.DocumentVersion", "Versions", b1 =>
                         {
                             b1.Property<Guid>("TenantId")
@@ -6856,6 +8109,8 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                                 .HasForeignKey("TenantId", "document_id")
                                 .HasConstraintName("fk_document_version_controlled_document_tenant_id_document_id");
                         });
+
+                    b.Navigation("AudienceDepartments");
 
                     b.Navigation("Versions");
                 });
@@ -7278,6 +8533,91 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                     b.Navigation("Updates");
                 });
 
+            modelBuilder.Entity("NT.QAMS.Domain.IncidentReporting.Incident", b =>
+                {
+                    b.OwnsMany("NT.QAMS.Domain.IncidentReporting.ContributingFactor", "ContributingFactors", b1 =>
+                        {
+                            b1.Property<Guid>("TenantId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("tenant_id");
+
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("Category")
+                                .IsRequired()
+                                .HasMaxLength(20)
+                                .HasColumnType("character varying(20)")
+                                .HasColumnName("category");
+
+                            b1.Property<string>("Description")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("description");
+
+                            b1.Property<Guid>("incident_id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("incident_id");
+
+                            b1.HasKey("TenantId", "Id")
+                                .HasName("pk_incident_contributing_factor");
+
+                            b1.HasIndex("TenantId", "incident_id")
+                                .HasDatabaseName("ix_incident_contributing_factor_tenant_id_incident_id");
+
+                            b1.ToTable("incident_contributing_factor", "qams");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TenantId", "incident_id")
+                                .HasConstraintName("fk_incident_contributing_factor_incident_tenant_id_incident_id");
+                        });
+
+                    b.OwnsMany("NT.QAMS.Domain.IncidentReporting.IncidentTimelineEntry", "Timeline", b1 =>
+                        {
+                            b1.Property<Guid>("TenantId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("tenant_id");
+
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("Note")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("note");
+
+                            b1.Property<DateTimeOffset>("OccurredAtUtc")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("occurred_at_utc");
+
+                            b1.Property<Guid>("RecordedBy")
+                                .HasColumnType("uuid")
+                                .HasColumnName("recorded_by");
+
+                            b1.Property<Guid>("incident_id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("incident_id");
+
+                            b1.HasKey("TenantId", "Id")
+                                .HasName("pk_incident_timeline_entry");
+
+                            b1.HasIndex("TenantId", "incident_id")
+                                .HasDatabaseName("ix_incident_timeline_entry_tenant_id_incident_id");
+
+                            b1.ToTable("incident_timeline_entry", "qams");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TenantId", "incident_id")
+                                .HasConstraintName("fk_incident_timeline_entry_incident_tenant_id_incident_id");
+                        });
+
+                    b.Navigation("ContributingFactors");
+
+                    b.Navigation("Timeline");
+                });
+
             modelBuilder.Entity("NT.QAMS.Domain.Organization.Department", b =>
                 {
                     b.HasOne("NT.QAMS.Domain.Organization.Branch", null)
@@ -7329,6 +8669,164 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("NT.QAMS.Domain.PatientExperience.SatisfactionSurvey", b =>
+                {
+                    b.OwnsMany("NT.QAMS.Domain.PatientExperience.SurveyQuestion", "Questions", b1 =>
+                        {
+                            b1.Property<Guid>("TenantId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("tenant_id");
+
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<int>("DisplayOrder")
+                                .HasColumnType("integer")
+                                .HasColumnName("display_order");
+
+                            b1.Property<string>("Domain")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("domain");
+
+                            b1.Property<string>("Text")
+                                .IsRequired()
+                                .HasMaxLength(500)
+                                .HasColumnType("character varying(500)")
+                                .HasColumnName("text");
+
+                            b1.Property<Guid>("survey_id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("survey_id");
+
+                            b1.HasKey("TenantId", "Id")
+                                .HasName("pk_survey_question");
+
+                            b1.HasIndex("TenantId", "survey_id")
+                                .HasDatabaseName("ix_survey_question_tenant_id_survey_id");
+
+                            b1.ToTable("survey_question", "qams");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TenantId", "survey_id")
+                                .HasConstraintName("fk_survey_question_satisfaction_survey_tenant_id_survey_id");
+                        });
+
+                    b.Navigation("Questions");
+                });
+
+            modelBuilder.Entity("NT.QAMS.Domain.PatientExperience.SurveyResponse", b =>
+                {
+                    b.OwnsMany("NT.QAMS.Domain.PatientExperience.SurveyAnswer", "Answers", b1 =>
+                        {
+                            b1.Property<Guid>("TenantId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("tenant_id");
+
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<Guid>("QuestionId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("question_id");
+
+                            b1.Property<int>("Score")
+                                .HasColumnType("integer")
+                                .HasColumnName("score");
+
+                            b1.Property<Guid>("survey_response_id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("survey_response_id");
+
+                            b1.HasKey("TenantId", "Id")
+                                .HasName("pk_survey_answer");
+
+                            b1.HasIndex("TenantId", "survey_response_id")
+                                .HasDatabaseName("ix_survey_answer_tenant_id_survey_response_id");
+
+                            b1.ToTable("survey_answer", "qams");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TenantId", "survey_response_id")
+                                .HasConstraintName("fk_survey_answer_survey_response_tenant_id_survey_response_id");
+                        });
+
+                    b.Navigation("Answers");
+                });
+
+            modelBuilder.Entity("NT.QAMS.Domain.QualityIndicators.QualityIndicator", b =>
+                {
+                    b.OwnsMany("NT.QAMS.Domain.QualityIndicators.IndicatorMeasurement", "Measurements", b1 =>
+                        {
+                            b1.Property<Guid>("TenantId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("tenant_id");
+
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<decimal>("Denominator")
+                                .HasPrecision(18, 4)
+                                .HasColumnType("numeric(18,4)")
+                                .HasColumnName("denominator");
+
+                            b1.Property<Guid>("EnteredBy")
+                                .HasColumnType("uuid")
+                                .HasColumnName("entered_by");
+
+                            b1.Property<string>("Note")
+                                .HasColumnType("text")
+                                .HasColumnName("note");
+
+                            b1.Property<decimal>("Numerator")
+                                .HasPrecision(18, 4)
+                                .HasColumnType("numeric(18,4)")
+                                .HasColumnName("numerator");
+
+                            b1.Property<DateOnly>("Period")
+                                .HasColumnType("date")
+                                .HasColumnName("period");
+
+                            b1.Property<DateTimeOffset>("RecordedAtUtc")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("recorded_at_utc");
+
+                            b1.Property<string>("Status")
+                                .IsRequired()
+                                .HasMaxLength(20)
+                                .HasColumnType("character varying(20)")
+                                .HasColumnName("status");
+
+                            b1.Property<decimal>("Value")
+                                .HasPrecision(18, 4)
+                                .HasColumnType("numeric(18,4)")
+                                .HasColumnName("value");
+
+                            b1.Property<Guid>("indicator_id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("indicator_id");
+
+                            b1.HasKey("TenantId", "Id")
+                                .HasName("pk_indicator_measurement");
+
+                            b1.HasIndex("TenantId", "indicator_id", "Period")
+                                .IsUnique()
+                                .HasDatabaseName("ix_indicator_measurement_tenant_id_indicator_id_period");
+
+                            b1.ToTable("indicator_measurement", "qams");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TenantId", "indicator_id")
+                                .HasConstraintName("fk_indicator_measurement_quality_indicator_tenant_id_indicator");
+                        });
+
+                    b.Navigation("Measurements");
+                });
+
             modelBuilder.Entity("NT.QAMS.Domain.Reporting.QualityHealthProfile", b =>
                 {
                     b.OwnsMany("NT.QAMS.Domain.Reporting.QualityHealthWeight", "Weights", b1 =>
@@ -7373,6 +8871,109 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                         });
 
                     b.Navigation("Weights");
+                });
+
+            modelBuilder.Entity("NT.QAMS.Domain.RiskGovernance.FmeaStudy", b =>
+                {
+                    b.OwnsMany("NT.QAMS.Domain.RiskGovernance.FailureMode", "FailureModes", b1 =>
+                        {
+                            b1.Property<Guid>("TenantId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("tenant_id");
+
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<Guid?>("ActionOwnerId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("action_owner_id");
+
+                            b1.Property<string>("Cause")
+                                .IsRequired()
+                                .HasMaxLength(1000)
+                                .HasColumnType("character varying(1000)")
+                                .HasColumnName("cause");
+
+                            b1.Property<int>("Detection")
+                                .HasColumnType("integer")
+                                .HasColumnName("detection");
+
+                            b1.Property<string>("Effect")
+                                .IsRequired()
+                                .HasMaxLength(1000)
+                                .HasColumnType("character varying(1000)")
+                                .HasColumnName("effect");
+
+                            b1.Property<string>("FailureModeText")
+                                .IsRequired()
+                                .HasMaxLength(500)
+                                .HasColumnType("character varying(500)")
+                                .HasColumnName("failure_mode_text");
+
+                            b1.Property<int>("Occurrence")
+                                .HasColumnType("integer")
+                                .HasColumnName("occurrence");
+
+                            b1.Property<string>("ProcessStep")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("character varying(200)")
+                                .HasColumnName("process_step");
+
+                            b1.Property<string>("RecommendedAction")
+                                .HasMaxLength(2000)
+                                .HasColumnType("character varying(2000)")
+                                .HasColumnName("recommended_action");
+
+                            b1.Property<int?>("ResidualDetection")
+                                .HasColumnType("integer")
+                                .HasColumnName("residual_detection");
+
+                            b1.Property<int?>("ResidualOccurrence")
+                                .HasColumnType("integer")
+                                .HasColumnName("residual_occurrence");
+
+                            b1.Property<int?>("ResidualRpn")
+                                .HasColumnType("integer")
+                                .HasColumnName("residual_rpn");
+
+                            b1.Property<int?>("ResidualSeverity")
+                                .HasColumnType("integer")
+                                .HasColumnName("residual_severity");
+
+                            b1.Property<int>("Rpn")
+                                .HasColumnType("integer")
+                                .HasColumnName("rpn");
+
+                            b1.Property<int>("Severity")
+                                .HasColumnType("integer")
+                                .HasColumnName("severity");
+
+                            b1.Property<string>("Status")
+                                .IsRequired()
+                                .HasMaxLength(20)
+                                .HasColumnType("character varying(20)")
+                                .HasColumnName("status");
+
+                            b1.Property<Guid>("fmea_study_id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("fmea_study_id");
+
+                            b1.HasKey("TenantId", "Id")
+                                .HasName("pk_fmea_failure_mode");
+
+                            b1.HasIndex("TenantId", "fmea_study_id")
+                                .HasDatabaseName("ix_fmea_failure_mode_tenant_id_fmea_study_id");
+
+                            b1.ToTable("fmea_failure_mode", "qams");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TenantId", "fmea_study_id")
+                                .HasConstraintName("fk_fmea_failure_mode_fmea_study_tenant_id_fmea_study_id");
+                        });
+
+                    b.Navigation("FailureModes");
                 });
 
             modelBuilder.Entity("NT.QAMS.Domain.RiskGovernance.ManagementReview", b =>

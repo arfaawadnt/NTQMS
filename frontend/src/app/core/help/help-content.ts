@@ -168,6 +168,161 @@ export const HELP_TOPICS: HelpTopic[] = [
 
   // ── Improvement ───────────────────────────────────────────────────────────
   {
+    route: '/audit-programs', titleKey: 'nav.auditPrograms', groupKey: 'nav.groupImprovement', icon: 'auditPrograms',
+    summary: L(
+      'The annual audit programme: plan the audits for the cycle by scope, department, standards chapter and risk-based priority, link each plan line to the audit that fulfils it, and track coverage so no area goes unaudited.',
+      'برنامج التدقيق السنوي: خطّط تدقيقات الدورة حسب النطاق والقسم وفصل المعيار والأولوية المبنية على المخاطر، واربط كل بند بالتدقيق المنفّذ له، وتابع التغطية.',
+      'Le programme d’audit annuel : planifiez les audits du cycle par périmètre, département, chapitre de norme et priorité, liez chaque ligne à l’audit qui la réalise et suivez la couverture.'),
+    steps: [
+      S(L('Draft', 'مسودة', 'Brouillon'), L('Build the plan lines for the year.', 'ابنِ بنود خطة السنة.', 'Constituez les lignes du plan.')),
+      S(L('Active', 'نشط', 'Actif'), L('Activate, then schedule and complete each line.', 'فعّل، ثم جدول وأكمل كل بند.', 'Activez, puis planifiez et terminez chaque ligne.')),
+      S(L('Closed', 'مغلق', 'Clôturé'), L('Close the programme at cycle end.', 'أغلق البرنامج في نهاية الدورة.', 'Clôturez le programme en fin de cycle.')),
+    ],
+    usage: [
+      L('Create a programme for the year, then add plan lines with scope, priority and target quarter.',
+        'أنشئ برنامجًا للسنة، ثم أضف بنودًا بالنطاق والأولوية والربع المستهدف.',
+        'Créez un programme pour l’année, puis ajoutez des lignes avec périmètre, priorité et trimestre.'),
+      L('Activate the programme, link each plan line to a scheduled audit, and mark it complete when done.',
+        'فعّل البرنامج، واربط كل بند بتدقيق مجدول، وضع علامة مكتمل عند الانتهاء.',
+        'Activez le programme, liez chaque ligne à un audit et marquez-la terminée.'),
+      L('Watch the coverage figure — completed vs planned — to keep the hospital survey-ready all year.',
+        'راقب نسبة التغطية — المنجز مقابل المخطط — للحفاظ على الجاهزية طوال العام.',
+        'Surveillez la couverture — terminés vs planifiés — pour rester prêt toute l’année.'),
+    ],
+  },
+  {
+    route: '/surveys', titleKey: 'nav.surveys', groupKey: 'nav.groupImprovement', icon: 'surveys',
+    summary: L(
+      'Patient satisfaction surveys: define a survey with questions grouped by domain, open it for responses, capture responses by department, and read scored results (overall, by domain and by department) on a 1–5 scale.',
+      'استبيانات رضا المرضى: عرّف استبيانًا بأسئلة مجمّعة حسب المجال، وافتحه للردود، والتقط الردود حسب القسم، واقرأ النتائج المسجّلة (إجمالي، وحسب المجال والقسم) على مقياس 1-5.',
+      'Enquêtes de satisfaction : définissez une enquête avec des questions par domaine, ouvrez-la, saisissez les réponses par département et lisez les scores (global, par domaine et par département) sur une échelle 1–5.'),
+    steps: [
+      S(L('Draft', 'مسودة', 'Brouillon'), L('Add the questions grouped by domain.', 'أضف الأسئلة مجمّعة حسب المجال.', 'Ajoutez les questions par domaine.')),
+      S(L('Open', 'مفتوحة', 'Ouverte'), L('Open and collect responses.', 'افتح واجمع الردود.', 'Ouvrez et collectez les réponses.')),
+      S(L('Closed', 'مغلقة', 'Clôturée'), L('Close and read the final scores.', 'أغلق واقرأ النتائج.', 'Clôturez et lisez les scores.')),
+    ],
+    usage: [
+      L('Create a survey, add questions with a domain (e.g. Communication, Waiting time), then open it.',
+        'أنشئ استبيانًا، وأضف أسئلة بمجال (مثل التواصل، وقت الانتظار)، ثم افتحه.',
+        'Créez une enquête, ajoutez des questions avec un domaine, puis ouvrez-la.'),
+      L('Capture responses by department; read the results scored overall, by domain and by department.',
+        'التقط الردود حسب القسم؛ اقرأ النتائج مسجّلة إجمالًا وحسب المجال والقسم.',
+        'Saisissez les réponses par département ; lisez les scores global, par domaine et par département.'),
+    ],
+  },
+  {
+    route: '/committees', titleKey: 'nav.committees', groupKey: 'nav.groupImprovement', icon: 'committees',
+    summary: L(
+      'Committees & governance: define each committee (terms of reference, membership, quorum, frequency), run its meetings with an agenda, attendance and quorum, capture decisions and action items, and track those actions across meetings until closed — with minutes approved as the governance evidence.',
+      'اللجان والحوكمة: عرّف كل لجنة (الاختصاصات والأعضاء والنصاب والتكرار)، وأدر اجتماعاتها بجدول أعمال وحضور ونصاب، وسجّل القرارات والإجراءات، وتابعها عبر الاجتماعات حتى الإغلاق — مع اعتماد المحضر كدليل حوكمة.',
+      'Comités et gouvernance : définissez chaque comité (mandat, membres, quorum, fréquence), tenez ses réunions avec ordre du jour, présence et quorum, consignez décisions et actions, et suivez-les jusqu’à clôture — le PV approuvé faisant foi.'),
+    steps: [
+      S(L('Committee', 'اللجنة', 'Comité'), L('Define the committee and its members.', 'عرّف اللجنة وأعضاءها.', 'Définissez le comité et ses membres.')),
+      S(L('Meeting', 'الاجتماع', 'Réunion'), L('Schedule a meeting and build the agenda.', 'جدول اجتماعًا وابنِ جدول الأعمال.', 'Planifiez une réunion et l’ordre du jour.')),
+      S(L('Held', 'مُنعقد', 'Tenue'), L('Record attendance; hold once quorate.', 'سجّل الحضور؛ اعقد عند اكتمال النصاب.', 'Enregistrez la présence ; tenez si quorum.')),
+      S(L('Minutes', 'المحضر', 'PV'), L('Capture decisions, record and approve minutes.', 'سجّل القرارات، ودوّن واعتمد المحضر.', 'Consignez décisions et approuvez le PV.')),
+    ],
+    usage: [
+      L('Create a committee with its terms of reference, quorum and members.',
+        'أنشئ لجنة باختصاصاتها ونصابها وأعضائها.',
+        'Créez un comité avec son mandat, son quorum et ses membres.'),
+      L('Schedule a meeting, add agenda items, record attendance, and hold it once the quorum is met.',
+        'جدول اجتماعًا، وأضف بنودًا، وسجّل الحضور، واعقده عند اكتمال النصاب.',
+        'Planifiez une réunion, ajoutez des points, enregistrez la présence et tenez-la au quorum.'),
+      L('Capture decisions with owners and due dates; track open actions across meetings until closed, then approve the minutes.',
+        'سجّل القرارات بأصحابها وتواريخها؛ تابع الإجراءات المفتوحة حتى الإغلاق، ثم اعتمد المحضر.',
+        'Consignez les décisions avec responsables et échéances ; suivez les actions jusqu’à clôture, puis approuvez le PV.'),
+    ],
+  },
+  {
+    route: '/fmea', titleKey: 'nav.fmea', groupKey: 'nav.groupRisk', icon: 'fmea',
+    summary: L(
+      'Prospective failure-mode analysis (FMEA / HFMEA): map how a process can fail before harm occurs, score each failure mode Severity × Occurrence × Detection = RPN, work the highest-RPN modes first, and re-score after action to show the improvement.',
+      'تحليل استباقي لأنماط الفشل (FMEA/HFMEA): حدّد كيف يمكن أن تفشل العملية قبل وقوع الضرر، وقيّم كل نمط بالخطورة × التكرار × الاكتشاف = RPN، وعالج الأعلى أولًا، وأعد التقييم بعد الإجراء.',
+      'Analyse prospective des modes de défaillance (AMDEC / HFMEA) : identifiez comment un processus peut échouer, cotez chaque mode Gravité × Occurrence × Détection = RPN, traitez les RPN les plus élevés d’abord, puis re-cotez après action.'),
+    steps: [
+      S(L('Draft', 'مسودة', 'Brouillon'), L('Add the failure modes and score them.', 'أضف أنماط الفشل وقيّمها.', 'Ajoutez les modes et cotez-les.')),
+      S(L('Active', 'نشط', 'Actif'), L('Recommend actions and re-score.', 'أوصِ بإجراءات وأعد التقييم.', 'Recommandez des actions et re-cotez.')),
+      S(L('Closed', 'مغلق', 'Clôturé'), L('Close when the analysis cycle ends.', 'أغلق عند انتهاء الدورة.', 'Clôturez en fin de cycle.')),
+    ],
+    usage: [
+      L('Create an FMEA for a process, then add failure modes with Severity, Occurrence and Detection (1–10 each).',
+        'أنشئ تحليلًا لعملية، ثم أضف أنماط الفشل بالخطورة والتكرار والاكتشاف (1-10 لكلٍّ).',
+        'Créez une AMDEC pour un processus, puis ajoutez des modes avec Gravité, Occurrence et Détection (1–10).'),
+      L('Work the highest-RPN modes first: record a recommended action, then re-score to capture the residual RPN.',
+        'عالج أنماط RPN الأعلى أولًا: سجّل إجراءً موصى به، ثم أعد التقييم لالتقاط RPN المتبقي.',
+        'Traitez d’abord les RPN les plus élevés : enregistrez une action, puis re-cotez le RPN résiduel.'),
+    ],
+  },
+  {
+    route: '/standards', titleKey: 'nav.accreditation', groupKey: 'nav.groupRisk', icon: 'accreditation',
+    summary: L(
+      'The accreditation engine: hold each standard set (GAHAR, JCI, ISO) as measurable elements, self-assess every element, attach any record as evidence, and read a live readiness figure with a prioritised gap list — so compliance status is measured, not assumed.',
+      'محرك الاعتماد: احتفظ بكل مجموعة معايير (جهار، JCI، ISO) كعناصر قابلة للقياس، وقيّم كل عنصر ذاتيًا، وأرفق أي سجل كدليل، واقرأ نسبة جاهزية حية مع قائمة فجوات مرتّبة.',
+      'Le moteur d’accréditation : gérez chaque référentiel (GAHAR, JCI, ISO) en éléments mesurables, auto-évaluez chaque élément, attachez tout enregistrement comme preuve et lisez un taux de préparation en direct avec une liste d’écarts priorisée.'),
+    steps: [
+      S(L('Draft', 'مسودة', 'Brouillon'), L('Define the set and add its measurable elements.', 'عرّف المجموعة وأضف عناصرها القابلة للقياس.', 'Définissez le référentiel et ses éléments.')),
+      S(L('Active', 'نشط', 'Actif'), L('Activate to begin self-assessment and evidence linking.', 'فعّل لبدء التقييم الذاتي وربط الأدلة.', 'Activez pour l’auto-évaluation et les preuves.')),
+      S(L('Assess', 'التقييم', 'Évaluer'), L('Score each element and attach evidence.', 'قيّم كل عنصر وأرفق الأدلة.', 'Évaluez chaque élément et joignez les preuves.')),
+      S(L('Readiness', 'الجاهزية', 'Préparation'), L('Track the live readiness % and close the gaps.', 'تابع نسبة الجاهزية الحية وأغلق الفجوات.', 'Suivez le taux de préparation et comblez les écarts.')),
+    ],
+    usage: [
+      L('Define a standard set, add its chapters and measurable elements while it is in draft, then activate it.',
+        'عرّف مجموعة معايير، وأضف فصولها وعناصرها أثناء المسودة، ثم فعّلها.',
+        'Définissez un référentiel, ajoutez ses chapitres et éléments à l’état brouillon, puis activez-le.'),
+      L('Self-assess each element (Compliant / Partial / Non-compliant / Not applicable) and attach any record as evidence.',
+        'قيّم كل عنصر ذاتيًا (مطابق / جزئي / غير مطابق / غير منطبق) وأرفق أي سجل كدليل.',
+        'Auto-évaluez chaque élément et joignez tout enregistrement comme preuve.'),
+      L('Read the readiness dashboard and work the gap list — elements with no evidence, unassessed, or non-compliant, ranked by weight.',
+        'اقرأ لوحة الجاهزية وعالج قائمة الفجوات — العناصر بلا أدلة أو غير المُقيَّمة أو غير المطابقة، مرتّبة حسب الوزن.',
+        'Consultez le tableau de préparation et traitez la liste des écarts, classée par poids.'),
+    ],
+  },
+  {
+    route: '/indicators', titleKey: 'nav.indicators', groupKey: 'nav.groupImprovement', icon: 'indicators',
+    summary: L(
+      'The quality indicator library: define each indicator with a formal data dictionary, set its target and thresholds, record period values, and read a statistical-process-control chart that separates real signal from noise. Breaching the action threshold opens an analysis task automatically.',
+      'مكتبة مؤشرات الجودة: عرّف كل مؤشر بقاموس بيانات رسمي، وحدّد هدفه وحدوده، وسجّل قيم الفترات، واقرأ مخطط ضبط إحصائي يفصل الإشارة الحقيقية عن الضوضاء. تجاوز حد الإجراء يفتح مهمة تحليل تلقائيًا.',
+      'La bibliothèque d’indicateurs qualité : définissez chaque indicateur avec un dictionnaire de données, fixez sa cible et ses seuils, saisissez les valeurs par période et lisez une carte de contrôle statistique. Le dépassement du seuil d’action ouvre automatiquement une tâche d’analyse.'),
+    steps: [],
+    usage: [
+      L('Click Define Indicator and complete the data dictionary — numerator, denominator, inclusions/exclusions, source and frequency.',
+        'انقر «تعريف مؤشر» وأكمل قاموس البيانات — البسط والمقام والتضمين/الاستثناء والمصدر والتكرار.',
+        'Cliquez sur Définir un indicateur et complétez le dictionnaire de données — numérateur, dénominateur, inclusions/exclusions, source et fréquence.'),
+      L('Set the target with warning and action thresholds; the direction decides which side counts as a breach.',
+        'حدّد الهدف مع حدود التحذير والإجراء؛ يحدّد الاتجاه أي جهة تُعدّ تجاوزًا.',
+        'Fixez la cible avec les seuils d’alerte et d’action ; le sens décide quel côté constitue un dépassement.'),
+      L('Record each period’s numerator and denominator; the rate, its grade and the control chart update, and an action breach opens an analysis task.',
+        'سجّل بسط ومقام كل فترة؛ يتحدّث المعدل ودرجته ومخطط التحكم، ويفتح تجاوز الإجراء مهمة تحليل.',
+        'Saisissez le numérateur et le dénominateur de chaque période ; le taux, son classement et la carte se mettent à jour, et un dépassement ouvre une tâche.'),
+    ],
+  },
+  {
+    route: '/incidents', titleKey: 'nav.incidents', groupKey: 'nav.groupImprovement', icon: 'incidents',
+    summary: L(
+      'The incident & occurrence register: report an adverse event, near miss or unsafe condition — openly or anonymously — then triage, investigate its contributing factors, and close it. Severe events auto-escalate and can be declared sentinel.',
+      'سجل الحوادث والوقائع: أبلغ عن حدث ضار أو حالة كادت أن تقع أو ظرف غير آمن — علنًا أو بشكل مجهول — ثم صنّفه وحقّق في عوامله المساهمة وأغلقه. تُصعّد الأحداث الجسيمة تلقائيًا ويمكن إعلانها أحداثًا جسيمة.',
+      'Le registre des incidents et événements : signalez un événement indésirable, un quasi-incident ou une situation dangereuse — ouvertement ou anonymement — puis triez, investiguez les facteurs contributifs et clôturez. Les événements graves sont escaladés automatiquement et peuvent être déclarés sentinelles.'),
+    steps: [
+      S(L('Reported', 'مُبلّغ', 'Signalé'), L('Capture what happened, where, when and the degree of harm.', 'سجّل ما حدث وأين ومتى ودرجة الضرر.', 'Consignez ce qui s’est passé, où, quand et le préjudice.')),
+      S(L('Triaged', 'مُصنّف', 'Trié'), L('Classify and assign the incident to an owner.', 'صنّف الحادث وأسنده إلى مسؤول.', 'Classez et assignez l’incident à un responsable.')),
+      S(L('Investigation', 'التحقيق', 'Investigation'), L('Reconstruct the timeline and identify contributing factors.', 'أعد بناء التسلسل الزمني وحدّد العوامل المساهمة.', 'Reconstituez la chronologie et identifiez les facteurs.')),
+      S(L('Review', 'المراجعة', 'Revue'), L('Quality function reviews the completed investigation.', 'تراجع إدارة الجودة التحقيق المكتمل.', 'La fonction qualité examine l’investigation.')),
+      S(L('Closed', 'مغلق', 'Clôturé'), L('Closed with a signed outcome; frozen for audit.', 'يُغلق بنتيجة موقّعة ويُجمّد للتدقيق.', 'Clôturé avec un résultat signé ; gelé pour l’audit.')),
+    ],
+    usage: [
+      L('Click Report Incident, or Report Anonymously to submit without recording your identity (you receive a one-time reference).',
+        'انقر «الإبلاغ عن حادث»، أو «إبلاغ مجهول» للإرسال دون تسجيل هويتك (تحصل على مرجع لمرة واحدة).',
+        'Cliquez sur Signaler un incident, ou Signaler anonymement pour soumettre sans enregistrer votre identité (vous recevez une référence unique).'),
+      L('Triage assigns an owner and category; investigation records contributing factors and a timeline.',
+        'يُسند التصنيف مسؤولًا وفئة؛ ويسجّل التحقيق العوامل المساهمة وجدولًا زمنيًا.',
+        'Le tri assigne un responsable et une catégorie ; l’investigation consigne les facteurs et une chronologie.'),
+      L('Closing requires an electronic signature. A severe event can be declared a sentinel event, which triggers the executive protocol.',
+        'يتطلب الإغلاق توقيعًا إلكترونيًا. يمكن إعلان الحدث الجسيم حدثًا جسيمًا يُفعّل البروتوكول التنفيذي.',
+        'La clôture requiert une signature électronique. Un événement grave peut être déclaré sentinelle, déclenchant le protocole de direction.'),
+    ],
+  },
+  {
     route: '/nonconformances', titleKey: 'nav.nc', groupKey: 'nav.groupImprovement', icon: 'nc',
     summary: L(
       'The nonconformance & CAPA register: log a problem, find its root cause, plan corrective action, then verify the fix worked and was effective before closing.',

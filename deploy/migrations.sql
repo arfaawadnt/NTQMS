@@ -82,7 +82,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260721211309_InitialFoundation') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260721211309_InitialFoundation', '9.0.18');
+    VALUES ('20260721211309_InitialFoundation', '9.0.19');
     END IF;
 END $EF$;
 
@@ -226,7 +226,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260721214118_IdentityAndImprovement') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260721214118_IdentityAndImprovement', '9.0.18');
+    VALUES ('20260721214118_IdentityAndImprovement', '9.0.19');
     END IF;
 END $EF$;
 
@@ -336,7 +336,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260721215255_DocumentControl') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260721215255_DocumentControl', '9.0.18');
+    VALUES ('20260721215255_DocumentControl', '9.0.19');
     END IF;
 END $EF$;
 
@@ -442,7 +442,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260721220535_AuditManagement') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260721220535_AuditManagement', '9.0.18');
+    VALUES ('20260721220535_AuditManagement', '9.0.19');
     END IF;
 END $EF$;
 
@@ -641,7 +641,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260721221903_ResourcesModules') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260721221903_ResourcesModules', '9.0.18');
+    VALUES ('20260721221903_ResourcesModules', '9.0.19');
     END IF;
 END $EF$;
 
@@ -901,7 +901,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260721223052_GovernanceAndSuppliers') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260721223052_GovernanceAndSuppliers', '9.0.18');
+    VALUES ('20260721223052_GovernanceAndSuppliers', '9.0.19');
     END IF;
 END $EF$;
 
@@ -1118,7 +1118,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260721224327_OrgAndNotifications') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260721224327_OrgAndNotifications', '9.0.18');
+    VALUES ('20260721224327_OrgAndNotifications', '9.0.19');
     END IF;
 END $EF$;
 
@@ -1289,7 +1289,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260721225752_AnalyticalQuality') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260721225752_AnalyticalQuality', '9.0.18');
+    VALUES ('20260721225752_AnalyticalQuality', '9.0.19');
     END IF;
 END $EF$;
 
@@ -1459,7 +1459,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260721231005_RecordsAndSla') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260721231005_RecordsAndSla', '9.0.18');
+    VALUES ('20260721231005_RecordsAndSla', '9.0.19');
     END IF;
 END $EF$;
 
@@ -1624,7 +1624,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260721232300_ComplianceAndAuth') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260721232300_ComplianceAndAuth', '9.0.18');
+    VALUES ('20260721232300_ComplianceAndAuth', '9.0.19');
     END IF;
 END $EF$;
 
@@ -1687,7 +1687,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260724233505_Complaints') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260724233505_Complaints', '9.0.18');
+    VALUES ('20260724233505_Complaints', '9.0.19');
     END IF;
 END $EF$;
 
@@ -1742,7 +1742,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260724235242_ReportingKpiSnapshots') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260724235242_ReportingKpiSnapshots', '9.0.18');
+    VALUES ('20260724235242_ReportingKpiSnapshots', '9.0.19');
     END IF;
 END $EF$;
 
@@ -1862,7 +1862,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260725001513_RecordAllocation') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260725001513_RecordAllocation', '9.0.18');
+    VALUES ('20260725001513_RecordAllocation', '9.0.19');
     END IF;
 END $EF$;
 
@@ -1917,7 +1917,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260725005044_FieldChangeLedger') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260725005044_FieldChangeLedger', '9.0.18');
+    VALUES ('20260725005044_FieldChangeLedger', '9.0.19');
     END IF;
 END $EF$;
 
@@ -1952,7 +1952,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260725010119_PasswordPolicy') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260725010119_PasswordPolicy', '9.0.18');
+    VALUES ('20260725010119_PasswordPolicy', '9.0.19');
     END IF;
 END $EF$;
 
@@ -1981,7 +1981,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260725054703_DocumentReviewCycles') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260725054703_DocumentReviewCycles', '9.0.18');
+    VALUES ('20260725054703_DocumentReviewCycles', '9.0.19');
     END IF;
 END $EF$;
 
@@ -2065,7 +2065,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260725061912_UncertaintyBudgets') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260725061912_UncertaintyBudgets', '9.0.18');
+    VALUES ('20260725061912_UncertaintyBudgets', '9.0.19');
     END IF;
 END $EF$;
 
@@ -2153,7 +2153,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260725065112_MetrologicalTraceability') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260725065112_MetrologicalTraceability', '9.0.18');
+    VALUES ('20260725065112_MetrologicalTraceability', '9.0.19');
     END IF;
 END $EF$;
 
@@ -2225,7 +2225,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260725070822_PersonnelAuthorizationMatrix') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260725070822_PersonnelAuthorizationMatrix', '9.0.18');
+    VALUES ('20260725070822_PersonnelAuthorizationMatrix', '9.0.19');
     END IF;
 END $EF$;
 
@@ -2307,7 +2307,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260725073957_EnvironmentalMonitoring') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260725073957_EnvironmentalMonitoring', '9.0.18');
+    VALUES ('20260725073957_EnvironmentalMonitoring', '9.0.19');
     END IF;
 END $EF$;
 
@@ -2429,7 +2429,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260725075423_PtPlanAndAuditTrailReview') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260725075423_PtPlanAndAuditTrailReview', '9.0.18');
+    VALUES ('20260725075423_PtPlanAndAuditTrailReview', '9.0.19');
     END IF;
 END $EF$;
 
@@ -2561,7 +2561,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260725080545_ObjectivesAndFeedback') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260725080545_ObjectivesAndFeedback', '9.0.18');
+    VALUES ('20260725080545_ObjectivesAndFeedback', '9.0.19');
     END IF;
 END $EF$;
 
@@ -2685,7 +2685,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260725081714_ImpartialityAndOrgContext') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260725081714_ImpartialityAndOrgContext', '9.0.18');
+    VALUES ('20260725081714_ImpartialityAndOrgContext', '9.0.19');
     END IF;
 END $EF$;
 
@@ -2773,7 +2773,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260725114820_MethodComparison') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260725114820_MethodComparison', '9.0.18');
+    VALUES ('20260725114820_MethodComparison', '9.0.19');
     END IF;
 END $EF$;
 
@@ -2856,7 +2856,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260725120132_LinearityStudies') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260725120132_LinearityStudies', '9.0.18');
+    VALUES ('20260725120132_LinearityStudies', '9.0.19');
     END IF;
 END $EF$;
 
@@ -2940,7 +2940,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260725122046_DetectionLimitStudies') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260725122046_DetectionLimitStudies', '9.0.18');
+    VALUES ('20260725122046_DetectionLimitStudies', '9.0.19');
     END IF;
 END $EF$;
 
@@ -3023,7 +3023,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260725175812_ReferenceIntervalStudies') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260725175812_ReferenceIntervalStudies', '9.0.18');
+    VALUES ('20260725175812_ReferenceIntervalStudies', '9.0.19');
     END IF;
 END $EF$;
 
@@ -3082,7 +3082,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260725182042_SigmaAssessments') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260725182042_SigmaAssessments', '9.0.18');
+    VALUES ('20260725182042_SigmaAssessments', '9.0.19');
     END IF;
 END $EF$;
 
@@ -3169,7 +3169,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260725183152_PrecisionStudies') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260725183152_PrecisionStudies', '9.0.18');
+    VALUES ('20260725183152_PrecisionStudies', '9.0.19');
     END IF;
 END $EF$;
 
@@ -3519,7 +3519,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260725201422_AnalyticalComplianceModules') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260725201422_AnalyticalComplianceModules', '9.0.18');
+    VALUES ('20260725201422_AnalyticalComplianceModules', '9.0.19');
     END IF;
 END $EF$;
 
@@ -3558,7 +3558,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260726081443_ActivateForcedTenantRls') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260726081443_ActivateForcedTenantRls', '9.0.18');
+    VALUES ('20260726081443_ActivateForcedTenantRls', '9.0.19');
     END IF;
 END $EF$;
 
@@ -3746,7 +3746,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260726084134_SignedRecordImmutability') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260726084134_SignedRecordImmutability', '9.0.18');
+    VALUES ('20260726084134_SignedRecordImmutability', '9.0.19');
     END IF;
 END $EF$;
 
@@ -3785,7 +3785,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260726103650_RelaxAuditRlsWriteCheck') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260726103650_RelaxAuditRlsWriteCheck', '9.0.18');
+    VALUES ('20260726103650_RelaxAuditRlsWriteCheck', '9.0.19');
     END IF;
 END $EF$;
 
@@ -3800,7 +3800,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260726132544_TenantMfaPolicy') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260726132544_TenantMfaPolicy', '9.0.18');
+    VALUES ('20260726132544_TenantMfaPolicy', '9.0.19');
     END IF;
 END $EF$;
 
@@ -3822,7 +3822,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260726190957_QcTargetEffectiveDating') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260726190957_QcTargetEffectiveDating', '9.0.18');
+    VALUES ('20260726190957_QcTargetEffectiveDating', '9.0.19');
     END IF;
 END $EF$;
 
@@ -4187,7 +4187,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260726192118_CreatedByUserIdForSoD') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260726192118_CreatedByUserIdForSoD', '9.0.18');
+    VALUES ('20260726192118_CreatedByUserIdForSoD', '9.0.19');
     END IF;
 END $EF$;
 
@@ -4202,7 +4202,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260726193528_FieldChangeReason') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260726193528_FieldChangeReason', '9.0.18');
+    VALUES ('20260726193528_FieldChangeReason', '9.0.19');
     END IF;
 END $EF$;
 
@@ -4231,7 +4231,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260726195821_ArchiveLegalHold') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260726195821_ArchiveLegalHold', '9.0.18');
+    VALUES ('20260726195821_ArchiveLegalHold', '9.0.19');
     END IF;
 END $EF$;
 
@@ -4303,7 +4303,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260726203026_QualityPolicy') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260726203026_QualityPolicy', '9.0.18');
+    VALUES ('20260726203026_QualityPolicy', '9.0.19');
     END IF;
 END $EF$;
 
@@ -4366,7 +4366,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260726204141_DocumentAcknowledgement') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260726204141_DocumentAcknowledgement', '9.0.18');
+    VALUES ('20260726204141_DocumentAcknowledgement', '9.0.19');
     END IF;
 END $EF$;
 
@@ -4381,7 +4381,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260726205501_NcEventType') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260726205501_NcEventType', '9.0.18');
+    VALUES ('20260726205501_NcEventType', '9.0.19');
     END IF;
 END $EF$;
 
@@ -4417,7 +4417,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260726211332_ChangePostImplementationReview') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260726211332_ChangePostImplementationReview', '9.0.18');
+    VALUES ('20260726211332_ChangePostImplementationReview', '9.0.19');
     END IF;
 END $EF$;
 
@@ -4483,7 +4483,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260726213412_UserAccessReview') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260726213412_UserAccessReview', '9.0.18');
+    VALUES ('20260726213412_UserAccessReview', '9.0.19');
     END IF;
 END $EF$;
 
@@ -4551,7 +4551,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260726214512_DocumentControlledCopy') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260726214512_DocumentControlledCopy', '9.0.18');
+    VALUES ('20260726214512_DocumentControlledCopy', '9.0.19');
     END IF;
 END $EF$;
 
@@ -4608,7 +4608,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260727211942_Phase1OutboxResilienceAndConcurrency') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260727211942_Phase1OutboxResilienceAndConcurrency', '9.0.18');
+    VALUES ('20260727211942_Phase1OutboxResilienceAndConcurrency', '9.0.19');
     END IF;
 END $EF$;
 
@@ -4623,7 +4623,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260727215019_Phase2OutboxTraceParent') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260727215019_Phase2OutboxTraceParent', '9.0.18');
+    VALUES ('20260727215019_Phase2OutboxTraceParent', '9.0.19');
     END IF;
 END $EF$;
 
@@ -4660,7 +4660,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260727223029_Phase4IdempotencyRecords') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260727223029_Phase4IdempotencyRecords', '9.0.18');
+    VALUES ('20260727223029_Phase4IdempotencyRecords', '9.0.19');
     END IF;
 END $EF$;
 
@@ -4727,7 +4727,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260728073229_Phase5CheckConstraints') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260728073229_Phase5CheckConstraints', '9.0.18');
+    VALUES ('20260728073229_Phase5CheckConstraints', '9.0.19');
     END IF;
 END $EF$;
 
@@ -4773,7 +4773,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260728130923_Phase7RefreshSessions') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260728130923_Phase7RefreshSessions', '9.0.18');
+    VALUES ('20260728130923_Phase7RefreshSessions', '9.0.19');
     END IF;
 END $EF$;
 
@@ -4886,7 +4886,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260730112800_RolePrivilegeModule') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260730112800_RolePrivilegeModule', '9.0.18');
+    VALUES ('20260730112800_RolePrivilegeModule', '9.0.19');
     END IF;
 END $EF$;
 
@@ -5321,7 +5321,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260731180344_Hardening1_TypesAndNames') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260731180344_Hardening1_TypesAndNames', '9.0.18');
+    VALUES ('20260731180344_Hardening1_TypesAndNames', '9.0.19');
     END IF;
 END $EF$;
 
@@ -5360,7 +5360,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260731181845_Hardening2_RlsGapClosure') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260731181845_Hardening2_RlsGapClosure', '9.0.18');
+    VALUES ('20260731181845_Hardening2_RlsGapClosure', '9.0.19');
     END IF;
 END $EF$;
 
@@ -5516,7 +5516,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260731191212_Hardening3_CheckDomains') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260731191212_Hardening3_CheckDomains', '9.0.18');
+    VALUES ('20260731191212_Hardening3_CheckDomains', '9.0.19');
     END IF;
 END $EF$;
 
@@ -6210,7 +6210,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260731201114_Hardening4_ChildTenancy') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260731201114_Hardening4_ChildTenancy', '9.0.18');
+    VALUES ('20260731201114_Hardening4_ChildTenancy', '9.0.19');
     END IF;
 END $EF$;
 
@@ -8234,7 +8234,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260731210953_Hardening5_CompositeKeys') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260731210953_Hardening5_CompositeKeys', '9.0.18');
+    VALUES ('20260731210953_Hardening5_CompositeKeys', '9.0.19');
     END IF;
 END $EF$;
 
@@ -8263,7 +8263,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260731223800_Hardening6_DeferrableTenantFks') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260731223800_Hardening6_DeferrableTenantFks', '9.0.18');
+    VALUES ('20260731223800_Hardening6_DeferrableTenantFks', '9.0.19');
     END IF;
 END $EF$;
 
@@ -8383,7 +8383,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260801131521_QualityHealthProfile') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260801131521_QualityHealthProfile', '9.0.18');
+    VALUES ('20260801131521_QualityHealthProfile', '9.0.19');
     END IF;
 END $EF$;
 
@@ -8441,7 +8441,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260801183201_ReviewAgendaLinkParticipants') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260801183201_ReviewAgendaLinkParticipants', '9.0.18');
+    VALUES ('20260801183201_ReviewAgendaLinkParticipants', '9.0.19');
     END IF;
 END $EF$;
 
@@ -8456,7 +8456,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260801194628_MaintenanceCertificate') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260801194628_MaintenanceCertificate', '9.0.18');
+    VALUES ('20260801194628_MaintenanceCertificate', '9.0.19');
     END IF;
 END $EF$;
 
@@ -8471,7 +8471,7 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260808073533_AddNcReopenReason') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260808073533_AddNcReopenReason', '9.0.18');
+    VALUES ('20260808073533_AddNcReopenReason', '9.0.19');
     END IF;
 END $EF$;
 
@@ -8533,7 +8533,1278 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260808152142_AddTenantMailSettings') THEN
     INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
-    VALUES ('20260808152142_AddTenantMailSettings', '9.0.18');
+    VALUES ('20260808152142_AddTenantMailSettings', '9.0.19');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825085434_AddIncidentModule') THEN
+    CREATE TABLE qams.incident (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        branch_id uuid,
+        department_id uuid,
+        incident_ref character varying(30) NOT NULL,
+        title character varying(300) NOT NULL,
+        description text NOT NULL,
+        category character varying(30) NOT NULL,
+        location character varying(200),
+        occurred_at_utc timestamp with time zone NOT NULL,
+        channel character varying(20) NOT NULL,
+        harm_grade character varying(20) NOT NULL,
+        is_sentinel boolean NOT NULL,
+        sentinel_declared_at_utc timestamp with time zone,
+        status character varying(30) NOT NULL,
+        reported_by uuid,
+        is_anonymous boolean NOT NULL,
+        anonymous_reference_hash character varying(64),
+        assigned_to uuid,
+        investigator_id uuid,
+        investigation_summary text,
+        rejection_reason character varying(1000),
+        closure_summary text,
+        created_at_utc timestamp with time zone NOT NULL,
+        created_by text,
+        created_by_user_id uuid,
+        modified_at_utc timestamp with time zone,
+        modified_by text,
+        CONSTRAINT pk_incident PRIMARY KEY (tenant_id, id)
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825085434_AddIncidentModule') THEN
+    CREATE TABLE qams.incident_contributing_factor (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        category character varying(20) NOT NULL,
+        description text NOT NULL,
+        incident_id uuid NOT NULL,
+        CONSTRAINT pk_incident_contributing_factor PRIMARY KEY (tenant_id, id),
+        CONSTRAINT fk_incident_contributing_factor_incident_tenant_id_incident_id FOREIGN KEY (tenant_id, incident_id) REFERENCES qams.incident (tenant_id, id) ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825085434_AddIncidentModule') THEN
+    CREATE TABLE qams.incident_timeline_entry (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        occurred_at_utc timestamp with time zone NOT NULL,
+        note text NOT NULL,
+        recorded_by uuid NOT NULL,
+        incident_id uuid NOT NULL,
+        CONSTRAINT pk_incident_timeline_entry PRIMARY KEY (tenant_id, id),
+        CONSTRAINT fk_incident_timeline_entry_incident_tenant_id_incident_id FOREIGN KEY (tenant_id, incident_id) REFERENCES qams.incident (tenant_id, id) ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825085434_AddIncidentModule') THEN
+    CREATE INDEX ix_incident_tenant_id_anonymous_reference_hash ON qams.incident (tenant_id, anonymous_reference_hash);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825085434_AddIncidentModule') THEN
+    CREATE UNIQUE INDEX ix_incident_tenant_id_incident_ref ON qams.incident (tenant_id, incident_ref);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825085434_AddIncidentModule') THEN
+    CREATE INDEX ix_incident_tenant_id_status ON qams.incident (tenant_id, status);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825085434_AddIncidentModule') THEN
+    CREATE INDEX ix_incident_contributing_factor_tenant_id_incident_id ON qams.incident_contributing_factor (tenant_id, incident_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825085434_AddIncidentModule') THEN
+    CREATE INDEX ix_incident_timeline_entry_tenant_id_incident_id ON qams.incident_timeline_entry (tenant_id, incident_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825085434_AddIncidentModule') THEN
+    ALTER TABLE qams.incident ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.incident FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.incident;
+    CREATE POLICY tenant_isolation ON qams.incident
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825085434_AddIncidentModule') THEN
+    ALTER TABLE qams.incident_contributing_factor ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.incident_contributing_factor FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.incident_contributing_factor;
+    CREATE POLICY tenant_isolation ON qams.incident_contributing_factor
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825085434_AddIncidentModule') THEN
+    ALTER TABLE qams.incident_timeline_entry ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.incident_timeline_entry FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.incident_timeline_entry;
+    CREATE POLICY tenant_isolation ON qams.incident_timeline_entry
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825085434_AddIncidentModule') THEN
+    ALTER TABLE qams.incident ADD CONSTRAINT ck_incident_status_domain
+      CHECK (status IN ('Reported','Triaged','UnderInvestigation','PendingReview','Closed','Rejected')) NOT VALID;
+    ALTER TABLE qams.incident VALIDATE CONSTRAINT ck_incident_status_domain;
+
+    ALTER TABLE qams.incident ADD CONSTRAINT ck_incident_category_domain
+      CHECK (category IN ('Medication','Fall','Procedural','Transfusion','Device','Laboratory','Security','Documentation','Other')) NOT VALID;
+    ALTER TABLE qams.incident VALIDATE CONSTRAINT ck_incident_category_domain;
+
+    ALTER TABLE qams.incident ADD CONSTRAINT ck_incident_harm_grade_domain
+      CHECK (harm_grade IN ('NearMiss','NoHarm','Minor','Moderate','Severe','Death')) NOT VALID;
+    ALTER TABLE qams.incident VALIDATE CONSTRAINT ck_incident_harm_grade_domain;
+
+    ALTER TABLE qams.incident ADD CONSTRAINT ck_incident_channel_domain
+      CHECK (channel IN ('Web','Mobile','Kiosk','Phone','Paper')) NOT VALID;
+    ALTER TABLE qams.incident VALIDATE CONSTRAINT ck_incident_channel_domain;
+
+    ALTER TABLE qams.incident ADD CONSTRAINT ck_incident_anonymous_reference_hash
+      CHECK (anonymous_reference_hash IS NULL OR anonymous_reference_hash ~ '^[0-9a-f]{64}$') NOT VALID;
+    ALTER TABLE qams.incident VALIDATE CONSTRAINT ck_incident_anonymous_reference_hash;
+
+    ALTER TABLE qams.incident_contributing_factor ADD CONSTRAINT ck_incident_contributing_factor_category_domain
+      CHECK (category IN ('People','Process','Equipment','Environment','Materials','Management','Other')) NOT VALID;
+    ALTER TABLE qams.incident_contributing_factor VALIDATE CONSTRAINT ck_incident_contributing_factor_category_domain;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825085434_AddIncidentModule') THEN
+    INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+    VALUES ('20260825085434_AddIncidentModule', '9.0.19');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825110722_IncidentCapaConvergence') THEN
+    ALTER TABLE qams.incident ADD corrective_action_nc_id uuid;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825110722_IncidentCapaConvergence') THEN
+    ALTER TABLE qams.nonconformance DROP CONSTRAINT IF EXISTS ck_nonconformance_source_type_domain;
+    ALTER TABLE qams.nonconformance ADD CONSTRAINT ck_nonconformance_source_type_domain
+      CHECK (source_type IN ('Internal','Complaint','Audit','Supplier','ProficiencyTest','Incident')) NOT VALID;
+    ALTER TABLE qams.nonconformance VALIDATE CONSTRAINT ck_nonconformance_source_type_domain;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825110722_IncidentCapaConvergence') THEN
+    INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+    VALUES ('20260825110722_IncidentCapaConvergence', '9.0.19');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825121213_AddQualityIndicators') THEN
+    CREATE TABLE qams.quality_indicator (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        indicator_ref character varying(30) NOT NULL,
+        code character varying(50) NOT NULL,
+        name character varying(300) NOT NULL,
+        description character varying(2000),
+        numerator text NOT NULL,
+        denominator text NOT NULL,
+        inclusions character varying(2000),
+        exclusions character varying(2000),
+        data_source character varying(1000),
+        frequency character varying(20) NOT NULL,
+        unit character varying(50) NOT NULL,
+        rate_factor numeric(18,4) NOT NULL,
+        direction character varying(20) NOT NULL,
+        target numeric(18,4),
+        warning_threshold numeric(18,4),
+        action_threshold numeric(18,4),
+        status character varying(20) NOT NULL,
+        created_at_utc timestamp with time zone NOT NULL,
+        created_by text,
+        created_by_user_id uuid,
+        modified_at_utc timestamp with time zone,
+        modified_by text,
+        CONSTRAINT pk_quality_indicator PRIMARY KEY (tenant_id, id)
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825121213_AddQualityIndicators') THEN
+    CREATE TABLE qams.indicator_measurement (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        period date NOT NULL,
+        numerator numeric(18,4) NOT NULL,
+        denominator numeric(18,4) NOT NULL,
+        value numeric(18,4) NOT NULL,
+        status character varying(20) NOT NULL,
+        entered_by uuid NOT NULL,
+        recorded_at_utc timestamp with time zone NOT NULL,
+        note text,
+        indicator_id uuid NOT NULL,
+        CONSTRAINT pk_indicator_measurement PRIMARY KEY (tenant_id, id),
+        CONSTRAINT fk_indicator_measurement_quality_indicator_tenant_id_indicator FOREIGN KEY (tenant_id, indicator_id) REFERENCES qams.quality_indicator (tenant_id, id) ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825121213_AddQualityIndicators') THEN
+    CREATE UNIQUE INDEX ix_indicator_measurement_tenant_id_indicator_id_period ON qams.indicator_measurement (tenant_id, indicator_id, period);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825121213_AddQualityIndicators') THEN
+    CREATE UNIQUE INDEX ix_quality_indicator_tenant_id_code ON qams.quality_indicator (tenant_id, code);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825121213_AddQualityIndicators') THEN
+    CREATE INDEX ix_quality_indicator_tenant_id_status ON qams.quality_indicator (tenant_id, status);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825121213_AddQualityIndicators') THEN
+    ALTER TABLE qams.quality_indicator ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.quality_indicator FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.quality_indicator;
+    CREATE POLICY tenant_isolation ON qams.quality_indicator
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825121213_AddQualityIndicators') THEN
+    ALTER TABLE qams.indicator_measurement ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.indicator_measurement FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.indicator_measurement;
+    CREATE POLICY tenant_isolation ON qams.indicator_measurement
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825121213_AddQualityIndicators') THEN
+    ALTER TABLE qams.quality_indicator ADD CONSTRAINT ck_quality_indicator_frequency_domain
+      CHECK (frequency IN ('Weekly','Monthly','Quarterly','Annually')) NOT VALID;
+    ALTER TABLE qams.quality_indicator VALIDATE CONSTRAINT ck_quality_indicator_frequency_domain;
+
+    ALTER TABLE qams.quality_indicator ADD CONSTRAINT ck_quality_indicator_direction_domain
+      CHECK (direction IN ('HigherIsBetter','LowerIsBetter')) NOT VALID;
+    ALTER TABLE qams.quality_indicator VALIDATE CONSTRAINT ck_quality_indicator_direction_domain;
+
+    ALTER TABLE qams.quality_indicator ADD CONSTRAINT ck_quality_indicator_status_domain
+      CHECK (status IN ('Active','Retired')) NOT VALID;
+    ALTER TABLE qams.quality_indicator VALIDATE CONSTRAINT ck_quality_indicator_status_domain;
+
+    ALTER TABLE qams.indicator_measurement ADD CONSTRAINT ck_indicator_measurement_status_domain
+      CHECK (status IN ('InTarget','Warning','Breached')) NOT VALID;
+    ALTER TABLE qams.indicator_measurement VALIDATE CONSTRAINT ck_indicator_measurement_status_domain;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825121213_AddQualityIndicators') THEN
+    INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+    VALUES ('20260825121213_AddQualityIndicators', '9.0.19');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825141218_DocumentReadAndUnderstand') THEN
+    ALTER TABLE qams.controlled_document ADD audience_scope character varying(20) NOT NULL DEFAULT 'AllStaff';
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825141218_DocumentReadAndUnderstand') THEN
+    ALTER TABLE qams.controlled_document ADD requires_acknowledgement boolean NOT NULL DEFAULT FALSE;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825141218_DocumentReadAndUnderstand') THEN
+    CREATE TABLE qams.document_audience_department (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        department_id uuid NOT NULL,
+        document_id uuid NOT NULL,
+        CONSTRAINT pk_document_audience_department PRIMARY KEY (tenant_id, id),
+        CONSTRAINT fk_document_audience_department_controlled_document_tenant_id_ FOREIGN KEY (tenant_id, document_id) REFERENCES qams.controlled_document (tenant_id, id) ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825141218_DocumentReadAndUnderstand') THEN
+    CREATE INDEX ix_document_audience_department_tenant_id_document_id ON qams.document_audience_department (tenant_id, document_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825141218_DocumentReadAndUnderstand') THEN
+    ALTER TABLE qams.document_audience_department ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.document_audience_department FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.document_audience_department;
+    CREATE POLICY tenant_isolation ON qams.document_audience_department
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825141218_DocumentReadAndUnderstand') THEN
+    ALTER TABLE qams.controlled_document ADD CONSTRAINT ck_controlled_document_audience_scope_domain
+      CHECK (audience_scope IN ('AllStaff','ByDepartment')) NOT VALID;
+    ALTER TABLE qams.controlled_document VALIDATE CONSTRAINT ck_controlled_document_audience_scope_domain;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825141218_DocumentReadAndUnderstand') THEN
+    INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+    VALUES ('20260825141218_DocumentReadAndUnderstand', '9.0.19');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825163629_AddAccreditationEngine') THEN
+    CREATE TABLE qams.evidence_link (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        standard_set_id uuid NOT NULL,
+        element_id uuid NOT NULL,
+        source_type character varying(20) NOT NULL,
+        source_id uuid NOT NULL,
+        source_ref character varying(200) NOT NULL,
+        description character varying(1000),
+        linked_by uuid NOT NULL,
+        linked_at_utc timestamp with time zone NOT NULL,
+        created_at_utc timestamp with time zone NOT NULL,
+        created_by text,
+        created_by_user_id uuid,
+        modified_at_utc timestamp with time zone,
+        modified_by text,
+        CONSTRAINT pk_evidence_link PRIMARY KEY (tenant_id, id)
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825163629_AddAccreditationEngine') THEN
+    CREATE TABLE qams.standard_set (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        framework character varying(20) NOT NULL,
+        name character varying(200) NOT NULL,
+        version character varying(40) NOT NULL,
+        status character varying(20) NOT NULL,
+        created_at_utc timestamp with time zone NOT NULL,
+        created_by text,
+        created_by_user_id uuid,
+        modified_at_utc timestamp with time zone,
+        modified_by text,
+        CONSTRAINT pk_standard_set PRIMARY KEY (tenant_id, id)
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825163629_AddAccreditationEngine') THEN
+    CREATE TABLE qams.standard_element (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        chapter_code character varying(40) NOT NULL,
+        chapter_title character varying(300) NOT NULL,
+        standard_code character varying(40) NOT NULL,
+        element_code character varying(40) NOT NULL,
+        text text NOT NULL,
+        weight integer NOT NULL,
+        compliance_status character varying(20) NOT NULL,
+        assessment_note text,
+        assessed_by uuid,
+        assessed_at_utc timestamp with time zone,
+        standard_set_id uuid NOT NULL,
+        CONSTRAINT pk_standard_element PRIMARY KEY (tenant_id, id),
+        CONSTRAINT fk_standard_element_standard_set_tenant_id_standard_set_id FOREIGN KEY (tenant_id, standard_set_id) REFERENCES qams.standard_set (tenant_id, id) ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825163629_AddAccreditationEngine') THEN
+    CREATE INDEX ix_evidence_link_tenant_id_element_id ON qams.evidence_link (tenant_id, element_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825163629_AddAccreditationEngine') THEN
+    CREATE INDEX ix_evidence_link_tenant_id_standard_set_id ON qams.evidence_link (tenant_id, standard_set_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825163629_AddAccreditationEngine') THEN
+    CREATE UNIQUE INDEX ux_standard_element_set_code ON qams.standard_element (tenant_id, standard_set_id, element_code);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825163629_AddAccreditationEngine') THEN
+    CREATE INDEX ix_standard_set_tenant_id_status ON qams.standard_set (tenant_id, status);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825163629_AddAccreditationEngine') THEN
+    ALTER TABLE qams.standard_set ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.standard_set FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.standard_set;
+    CREATE POLICY tenant_isolation ON qams.standard_set
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825163629_AddAccreditationEngine') THEN
+    ALTER TABLE qams.standard_element ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.standard_element FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.standard_element;
+    CREATE POLICY tenant_isolation ON qams.standard_element
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825163629_AddAccreditationEngine') THEN
+    ALTER TABLE qams.evidence_link ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.evidence_link FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.evidence_link;
+    CREATE POLICY tenant_isolation ON qams.evidence_link
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825163629_AddAccreditationEngine') THEN
+    ALTER TABLE qams.standard_set ADD CONSTRAINT ck_standard_set_framework_domain
+      CHECK (framework IN ('GAHAR','JCI','ISO9001','ISO15189','Other')) NOT VALID;
+    ALTER TABLE qams.standard_set VALIDATE CONSTRAINT ck_standard_set_framework_domain;
+
+    ALTER TABLE qams.standard_set ADD CONSTRAINT ck_standard_set_status_domain
+      CHECK (status IN ('Draft','Active','Archived')) NOT VALID;
+    ALTER TABLE qams.standard_set VALIDATE CONSTRAINT ck_standard_set_status_domain;
+
+    ALTER TABLE qams.standard_element ADD CONSTRAINT ck_standard_element_compliance_status_domain
+      CHECK (compliance_status IN ('NotAssessed','Compliant','PartiallyCompliant','NonCompliant','NotApplicable')) NOT VALID;
+    ALTER TABLE qams.standard_element VALIDATE CONSTRAINT ck_standard_element_compliance_status_domain;
+
+    ALTER TABLE qams.evidence_link ADD CONSTRAINT ck_evidence_link_source_type_domain
+      CHECK (source_type IN ('Document','Incident','Nonconformance','Audit','Indicator','Training','Committee','Other')) NOT VALID;
+    ALTER TABLE qams.evidence_link VALIDATE CONSTRAINT ck_evidence_link_source_type_domain;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825163629_AddAccreditationEngine') THEN
+    INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+    VALUES ('20260825163629_AddAccreditationEngine', '9.0.19');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825165947_AddAuditProgram') THEN
+    CREATE TABLE qams.audit_program (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        year integer NOT NULL,
+        title character varying(200) NOT NULL,
+        status character varying(20) NOT NULL,
+        created_at_utc timestamp with time zone NOT NULL,
+        created_by text,
+        created_by_user_id uuid,
+        modified_at_utc timestamp with time zone,
+        modified_by text,
+        CONSTRAINT pk_audit_program PRIMARY KEY (tenant_id, id)
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825165947_AddAuditProgram') THEN
+    CREATE TABLE qams.planned_audit (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        scope_area character varying(200) NOT NULL,
+        department_id uuid,
+        standard_chapter character varying(120),
+        priority character varying(20) NOT NULL,
+        planned_quarter integer NOT NULL,
+        status character varying(20) NOT NULL,
+        scheduled_audit_id uuid,
+        completed_on date,
+        audit_program_id uuid NOT NULL,
+        CONSTRAINT pk_planned_audit PRIMARY KEY (tenant_id, id),
+        CONSTRAINT fk_planned_audit_audit_program_tenant_id_audit_program_id FOREIGN KEY (tenant_id, audit_program_id) REFERENCES qams.audit_program (tenant_id, id) ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825165947_AddAuditProgram') THEN
+    CREATE INDEX ix_audit_program_tenant_id_year ON qams.audit_program (tenant_id, year);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825165947_AddAuditProgram') THEN
+    CREATE INDEX ix_planned_audit_tenant_id_audit_program_id ON qams.planned_audit (tenant_id, audit_program_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825165947_AddAuditProgram') THEN
+    ALTER TABLE qams.audit_program ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.audit_program FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.audit_program;
+    CREATE POLICY tenant_isolation ON qams.audit_program
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825165947_AddAuditProgram') THEN
+    ALTER TABLE qams.planned_audit ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.planned_audit FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.planned_audit;
+    CREATE POLICY tenant_isolation ON qams.planned_audit
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825165947_AddAuditProgram') THEN
+    ALTER TABLE qams.audit_program ADD CONSTRAINT ck_audit_program_status_domain
+      CHECK (status IN ('Draft','Active','Closed')) NOT VALID;
+    ALTER TABLE qams.audit_program VALIDATE CONSTRAINT ck_audit_program_status_domain;
+
+    ALTER TABLE qams.planned_audit ADD CONSTRAINT ck_planned_audit_priority_domain
+      CHECK (priority IN ('Low','Medium','High')) NOT VALID;
+    ALTER TABLE qams.planned_audit VALIDATE CONSTRAINT ck_planned_audit_priority_domain;
+
+    ALTER TABLE qams.planned_audit ADD CONSTRAINT ck_planned_audit_status_domain
+      CHECK (status IN ('Planned','Scheduled','Completed')) NOT VALID;
+    ALTER TABLE qams.planned_audit VALIDATE CONSTRAINT ck_planned_audit_status_domain;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825165947_AddAuditProgram') THEN
+    INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+    VALUES ('20260825165947_AddAuditProgram', '9.0.19');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825172624_AddFmeaStudy') THEN
+    CREATE TABLE qams.fmea_study (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        branch_id uuid,
+        department_id uuid,
+        fmea_ref character varying(30) NOT NULL,
+        title character varying(200) NOT NULL,
+        process_name character varying(200) NOT NULL,
+        type character varying(20) NOT NULL,
+        status character varying(20) NOT NULL,
+        created_at_utc timestamp with time zone NOT NULL,
+        created_by text,
+        created_by_user_id uuid,
+        modified_at_utc timestamp with time zone,
+        modified_by text,
+        CONSTRAINT pk_fmea_study PRIMARY KEY (tenant_id, id)
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825172624_AddFmeaStudy') THEN
+    CREATE TABLE qams.fmea_failure_mode (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        process_step character varying(200) NOT NULL,
+        failure_mode_text character varying(500) NOT NULL,
+        effect character varying(1000) NOT NULL,
+        cause character varying(1000) NOT NULL,
+        severity integer NOT NULL,
+        occurrence integer NOT NULL,
+        detection integer NOT NULL,
+        rpn integer NOT NULL,
+        recommended_action character varying(2000),
+        action_owner_id uuid,
+        residual_severity integer,
+        residual_occurrence integer,
+        residual_detection integer,
+        residual_rpn integer,
+        status character varying(20) NOT NULL,
+        fmea_study_id uuid NOT NULL,
+        CONSTRAINT pk_fmea_failure_mode PRIMARY KEY (tenant_id, id),
+        CONSTRAINT fk_fmea_failure_mode_fmea_study_tenant_id_fmea_study_id FOREIGN KEY (tenant_id, fmea_study_id) REFERENCES qams.fmea_study (tenant_id, id) ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825172624_AddFmeaStudy') THEN
+    CREATE INDEX ix_fmea_failure_mode_tenant_id_fmea_study_id ON qams.fmea_failure_mode (tenant_id, fmea_study_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825172624_AddFmeaStudy') THEN
+    CREATE UNIQUE INDEX ix_fmea_study_tenant_id_fmea_ref ON qams.fmea_study (tenant_id, fmea_ref);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825172624_AddFmeaStudy') THEN
+    CREATE INDEX ix_fmea_study_tenant_id_status ON qams.fmea_study (tenant_id, status);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825172624_AddFmeaStudy') THEN
+    ALTER TABLE qams.fmea_study ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.fmea_study FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.fmea_study;
+    CREATE POLICY tenant_isolation ON qams.fmea_study
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825172624_AddFmeaStudy') THEN
+    ALTER TABLE qams.fmea_failure_mode ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.fmea_failure_mode FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.fmea_failure_mode;
+    CREATE POLICY tenant_isolation ON qams.fmea_failure_mode
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825172624_AddFmeaStudy') THEN
+    ALTER TABLE qams.fmea_study ADD CONSTRAINT ck_fmea_study_type_domain
+      CHECK (type IN ('Fmea','Hfmea')) NOT VALID;
+    ALTER TABLE qams.fmea_study VALIDATE CONSTRAINT ck_fmea_study_type_domain;
+
+    ALTER TABLE qams.fmea_study ADD CONSTRAINT ck_fmea_study_status_domain
+      CHECK (status IN ('Draft','Active','Closed')) NOT VALID;
+    ALTER TABLE qams.fmea_study VALIDATE CONSTRAINT ck_fmea_study_status_domain;
+
+    ALTER TABLE qams.fmea_failure_mode ADD CONSTRAINT ck_fmea_failure_mode_status_domain
+      CHECK (status IN ('Open','Actioned')) NOT VALID;
+    ALTER TABLE qams.fmea_failure_mode VALIDATE CONSTRAINT ck_fmea_failure_mode_status_domain;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825172624_AddFmeaStudy') THEN
+    INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+    VALUES ('20260825172624_AddFmeaStudy', '9.0.19');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825174944_AddCommittees') THEN
+    CREATE TABLE qams.committee (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        name character varying(200) NOT NULL,
+        terms_of_reference text NOT NULL,
+        frequency character varying(20) NOT NULL,
+        quorum_size integer NOT NULL,
+        status character varying(20) NOT NULL,
+        created_at_utc timestamp with time zone NOT NULL,
+        created_by text,
+        created_by_user_id uuid,
+        modified_at_utc timestamp with time zone,
+        modified_by text,
+        CONSTRAINT pk_committee PRIMARY KEY (tenant_id, id)
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825174944_AddCommittees') THEN
+    CREATE TABLE qams.meeting (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        committee_id uuid NOT NULL,
+        meeting_ref character varying(30) NOT NULL,
+        scheduled_at_utc timestamp with time zone NOT NULL,
+        status character varying(20) NOT NULL,
+        minutes text,
+        minutes_approved_by uuid,
+        created_at_utc timestamp with time zone NOT NULL,
+        created_by text,
+        created_by_user_id uuid,
+        modified_at_utc timestamp with time zone,
+        modified_by text,
+        CONSTRAINT pk_meeting PRIMARY KEY (tenant_id, id)
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825174944_AddCommittees') THEN
+    CREATE TABLE qams.committee_member (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        user_id uuid NOT NULL,
+        role_title character varying(100) NOT NULL,
+        committee_id uuid NOT NULL,
+        CONSTRAINT pk_committee_member PRIMARY KEY (tenant_id, id),
+        CONSTRAINT fk_committee_member_committee_tenant_id_committee_id FOREIGN KEY (tenant_id, committee_id) REFERENCES qams.committee (tenant_id, id) ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825174944_AddCommittees') THEN
+    CREATE TABLE qams.meeting_agenda_item (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        title character varying(300) NOT NULL,
+        detail character varying(2000),
+        source_ref character varying(120),
+        carried_forward boolean NOT NULL,
+        meeting_id uuid NOT NULL,
+        CONSTRAINT pk_meeting_agenda_item PRIMARY KEY (tenant_id, id),
+        CONSTRAINT fk_meeting_agenda_item_meeting_tenant_id_meeting_id FOREIGN KEY (tenant_id, meeting_id) REFERENCES qams.meeting (tenant_id, id) ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825174944_AddCommittees') THEN
+    CREATE TABLE qams.meeting_attendance (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        user_id uuid NOT NULL,
+        present boolean NOT NULL,
+        meeting_id uuid NOT NULL,
+        CONSTRAINT pk_meeting_attendance PRIMARY KEY (tenant_id, id),
+        CONSTRAINT fk_meeting_attendance_meeting_tenant_id_meeting_id FOREIGN KEY (tenant_id, meeting_id) REFERENCES qams.meeting (tenant_id, id) ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825174944_AddCommittees') THEN
+    CREATE TABLE qams.meeting_decision (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        description character varying(2000) NOT NULL,
+        owner_id uuid,
+        due_date date,
+        status character varying(20) NOT NULL,
+        closure_note character varying(2000),
+        meeting_id uuid NOT NULL,
+        CONSTRAINT pk_meeting_decision PRIMARY KEY (tenant_id, id),
+        CONSTRAINT fk_meeting_decision_meeting_tenant_id_meeting_id FOREIGN KEY (tenant_id, meeting_id) REFERENCES qams.meeting (tenant_id, id) ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825174944_AddCommittees') THEN
+    CREATE INDEX ix_committee_tenant_id_status ON qams.committee (tenant_id, status);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825174944_AddCommittees') THEN
+    CREATE INDEX ix_committee_member_tenant_id_committee_id ON qams.committee_member (tenant_id, committee_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825174944_AddCommittees') THEN
+    CREATE INDEX ix_meeting_tenant_id_committee_id ON qams.meeting (tenant_id, committee_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825174944_AddCommittees') THEN
+    CREATE UNIQUE INDEX ix_meeting_tenant_id_meeting_ref ON qams.meeting (tenant_id, meeting_ref);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825174944_AddCommittees') THEN
+    CREATE INDEX ix_meeting_agenda_item_tenant_id_meeting_id ON qams.meeting_agenda_item (tenant_id, meeting_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825174944_AddCommittees') THEN
+    CREATE INDEX ix_meeting_attendance_tenant_id_meeting_id ON qams.meeting_attendance (tenant_id, meeting_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825174944_AddCommittees') THEN
+    CREATE INDEX ix_meeting_decision_tenant_id_meeting_id ON qams.meeting_decision (tenant_id, meeting_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825174944_AddCommittees') THEN
+    ALTER TABLE qams.committee ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.committee FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.committee;
+    CREATE POLICY tenant_isolation ON qams.committee
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825174944_AddCommittees') THEN
+    ALTER TABLE qams.committee_member ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.committee_member FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.committee_member;
+    CREATE POLICY tenant_isolation ON qams.committee_member
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825174944_AddCommittees') THEN
+    ALTER TABLE qams.meeting ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.meeting FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.meeting;
+    CREATE POLICY tenant_isolation ON qams.meeting
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825174944_AddCommittees') THEN
+    ALTER TABLE qams.meeting_agenda_item ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.meeting_agenda_item FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.meeting_agenda_item;
+    CREATE POLICY tenant_isolation ON qams.meeting_agenda_item
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825174944_AddCommittees') THEN
+    ALTER TABLE qams.meeting_attendance ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.meeting_attendance FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.meeting_attendance;
+    CREATE POLICY tenant_isolation ON qams.meeting_attendance
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825174944_AddCommittees') THEN
+    ALTER TABLE qams.meeting_decision ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.meeting_decision FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.meeting_decision;
+    CREATE POLICY tenant_isolation ON qams.meeting_decision
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825174944_AddCommittees') THEN
+    ALTER TABLE qams.committee ADD CONSTRAINT ck_committee_frequency_domain
+      CHECK (frequency IN ('Weekly','Monthly','Quarterly','Biannual','Annual','AdHoc')) NOT VALID;
+    ALTER TABLE qams.committee VALIDATE CONSTRAINT ck_committee_frequency_domain;
+
+    ALTER TABLE qams.committee ADD CONSTRAINT ck_committee_status_domain
+      CHECK (status IN ('Active','Disbanded')) NOT VALID;
+    ALTER TABLE qams.committee VALIDATE CONSTRAINT ck_committee_status_domain;
+
+    ALTER TABLE qams.meeting ADD CONSTRAINT ck_meeting_status_domain
+      CHECK (status IN ('Scheduled','Held','MinutesApproved','Cancelled')) NOT VALID;
+    ALTER TABLE qams.meeting VALIDATE CONSTRAINT ck_meeting_status_domain;
+
+    ALTER TABLE qams.meeting_decision ADD CONSTRAINT ck_meeting_decision_status_domain
+      CHECK (status IN ('Open','Closed')) NOT VALID;
+    ALTER TABLE qams.meeting_decision VALIDATE CONSTRAINT ck_meeting_decision_status_domain;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825174944_AddCommittees') THEN
+    INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+    VALUES ('20260825174944_AddCommittees', '9.0.19');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825181300_AddSatisfactionSurveys') THEN
+    CREATE TABLE qams.satisfaction_survey (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        title character varying(200) NOT NULL,
+        description character varying(2000),
+        status character varying(20) NOT NULL,
+        created_at_utc timestamp with time zone NOT NULL,
+        created_by text,
+        created_by_user_id uuid,
+        modified_at_utc timestamp with time zone,
+        modified_by text,
+        CONSTRAINT pk_satisfaction_survey PRIMARY KEY (tenant_id, id)
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825181300_AddSatisfactionSurveys') THEN
+    CREATE TABLE qams.survey_response (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        survey_id uuid NOT NULL,
+        department_id uuid,
+        service_line character varying(150),
+        submitted_at_utc timestamp with time zone NOT NULL,
+        created_at_utc timestamp with time zone NOT NULL,
+        created_by text,
+        created_by_user_id uuid,
+        modified_at_utc timestamp with time zone,
+        modified_by text,
+        CONSTRAINT pk_survey_response PRIMARY KEY (tenant_id, id)
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825181300_AddSatisfactionSurveys') THEN
+    CREATE TABLE qams.survey_question (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        text character varying(500) NOT NULL,
+        domain character varying(100) NOT NULL,
+        display_order integer NOT NULL,
+        survey_id uuid NOT NULL,
+        CONSTRAINT pk_survey_question PRIMARY KEY (tenant_id, id),
+        CONSTRAINT fk_survey_question_satisfaction_survey_tenant_id_survey_id FOREIGN KEY (tenant_id, survey_id) REFERENCES qams.satisfaction_survey (tenant_id, id) ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825181300_AddSatisfactionSurveys') THEN
+    CREATE TABLE qams.survey_answer (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        question_id uuid NOT NULL,
+        score integer NOT NULL,
+        survey_response_id uuid NOT NULL,
+        CONSTRAINT pk_survey_answer PRIMARY KEY (tenant_id, id),
+        CONSTRAINT fk_survey_answer_survey_response_tenant_id_survey_response_id FOREIGN KEY (tenant_id, survey_response_id) REFERENCES qams.survey_response (tenant_id, id) ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825181300_AddSatisfactionSurveys') THEN
+    CREATE INDEX ix_satisfaction_survey_tenant_id_status ON qams.satisfaction_survey (tenant_id, status);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825181300_AddSatisfactionSurveys') THEN
+    CREATE INDEX ix_survey_answer_tenant_id_survey_response_id ON qams.survey_answer (tenant_id, survey_response_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825181300_AddSatisfactionSurveys') THEN
+    CREATE INDEX ix_survey_question_tenant_id_survey_id ON qams.survey_question (tenant_id, survey_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825181300_AddSatisfactionSurveys') THEN
+    CREATE INDEX ix_survey_response_tenant_id_survey_id ON qams.survey_response (tenant_id, survey_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825181300_AddSatisfactionSurveys') THEN
+    ALTER TABLE qams.satisfaction_survey ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.satisfaction_survey FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.satisfaction_survey;
+    CREATE POLICY tenant_isolation ON qams.satisfaction_survey
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825181300_AddSatisfactionSurveys') THEN
+    ALTER TABLE qams.survey_question ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.survey_question FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.survey_question;
+    CREATE POLICY tenant_isolation ON qams.survey_question
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825181300_AddSatisfactionSurveys') THEN
+    ALTER TABLE qams.survey_response ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.survey_response FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.survey_response;
+    CREATE POLICY tenant_isolation ON qams.survey_response
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825181300_AddSatisfactionSurveys') THEN
+    ALTER TABLE qams.survey_answer ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.survey_answer FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.survey_answer;
+    CREATE POLICY tenant_isolation ON qams.survey_answer
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825181300_AddSatisfactionSurveys') THEN
+    ALTER TABLE qams.satisfaction_survey ADD CONSTRAINT ck_satisfaction_survey_status_domain
+      CHECK (status IN ('Draft','Open','Closed')) NOT VALID;
+    ALTER TABLE qams.satisfaction_survey VALIDATE CONSTRAINT ck_satisfaction_survey_status_domain;
+
+    ALTER TABLE qams.survey_answer ADD CONSTRAINT ck_survey_answer_score_range
+      CHECK (score BETWEEN 1 AND 5) NOT VALID;
+    ALTER TABLE qams.survey_answer VALIDATE CONSTRAINT ck_survey_answer_score_range;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825181300_AddSatisfactionSurveys') THEN
+    INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+    VALUES ('20260825181300_AddSatisfactionSurveys', '9.0.19');
     END IF;
 END $EF$;
 COMMIT;

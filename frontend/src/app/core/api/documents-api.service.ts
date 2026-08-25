@@ -4,8 +4,8 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   ControlledCopy, CreateDocumentRequest, CreatedResource, DEFAULT_PAGE_SIZE, DocumentAcknowledgement,
-  DocumentDetail, DocumentListItem, DraftNewVersionRequest, MyDocumentAcknowledgement, Paged,
-  PublishDocumentRequest, RejectVersionRequest, SignatureRecord,
+  DocumentCompliance, DocumentDetail, DocumentListItem, DraftNewVersionRequest, MyDocumentAcknowledgement, Paged,
+  PublishDocumentRequest, ReadAndUnderstand, RejectVersionRequest, SetReadAndUnderstandRequest, SignatureRecord,
 } from '../models';
 
 /** Typed client for the Document Control API (one method per backend endpoint). */
@@ -48,6 +48,9 @@ export class DocumentsApiService {
   acknowledge(id: string): Observable<CreatedResource> { return this.http.post<CreatedResource>(`${this.base}/${id}/acknowledge`, {}); }
   myAcknowledgement(id: string): Observable<MyDocumentAcknowledgement> { return this.http.get<MyDocumentAcknowledgement>(`${this.base}/${id}/my-acknowledgement`); }
   acknowledgements(id: string): Observable<DocumentAcknowledgement[]> { return this.http.get<DocumentAcknowledgement[]>(`${this.base}/${id}/acknowledgements`); }
+  readAndUnderstand(id: string): Observable<ReadAndUnderstand> { return this.http.get<ReadAndUnderstand>(`${this.base}/${id}/read-and-understand`); }
+  setReadAndUnderstand(id: string, body: SetReadAndUnderstandRequest): Observable<void> { return this.http.post<void>(`${this.base}/${id}/read-and-understand`, body); }
+  compliance(id: string): Observable<DocumentCompliance> { return this.http.get<DocumentCompliance>(`${this.base}/${id}/compliance`); }
 
   controlledCopies(id: string): Observable<ControlledCopy[]> { return this.http.get<ControlledCopy[]>(`${this.base}/${id}/controlled-copies`); }
   issueControlledCopy(id: string, holder: string): Observable<CreatedResource> { return this.http.post<CreatedResource>(`${this.base}/${id}/controlled-copies`, { holder }); }

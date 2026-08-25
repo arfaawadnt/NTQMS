@@ -62,6 +62,37 @@ public sealed class DocumentsController(ISender sender) : ControllerBase
     public async Task<IActionResult> Acknowledgements(Guid id, CancellationToken ct) =>
         Ok(await sender.Send(new GetDocumentAcknowledgementsQuery(id), ct));
 
+    /// <summary>The read-and-understand distribution (mandatory flag + audience) configured on this document.</summary>
+    [HttpGet("{id:guid}/read-and-understand")]
+    [RequirePermission(PermissionCatalog.Documents, PermissionAction.View)]
+    public async Task<IActionResult> GetReadAndUnderstand(Guid id, CancellationToken ct) =>
+        Ok(await sender.Send(new GetDocumentReadAndUnderstandQuery(id), ct));
+
+    /// <summary>Configures the read-and-understand distribution (mandatory flag + target audience).</summary>
+    [HttpPost("{id:guid}/read-and-understand")]
+    [RequirePermission(PermissionCatalog.Documents, PermissionAction.Edit)]
+    public async Task<IActionResult> SetReadAndUnderstand(
+        Guid id, SetReadAndUnderstandRequest request, CancellationToken ct)
+    {
+        await sender.Send(new SetDocumentReadAndUnderstandCommand(
+            id, request.Required,
+            Enum.Parse<DocumentAudienceScope>(request.Scope, ignoreCase: true),
+            request.DepartmentIds ?? []), ct);
+        return NoContent();
+    }
+
+    /// <summary>Who is expected to read this mandatory document and who has — the outstanding-readers view.</summary>
+    [HttpGet("{id:guid}/compliance")]
+    [RequirePermission(PermissionCatalog.Documents, PermissionAction.View)]
+    public async Task<IActionResult> Compliance(Guid id, CancellationToken ct) =>
+        Ok(await sender.Send(new GetDocumentComplianceQuery(id), ct));
+
+    /// <summary>Tenant-wide Read-and-Understand compliance dashboard across every mandatory published document.</summary>
+    [HttpGet("read-and-understand/dashboard")]
+    [RequirePermission(PermissionCatalog.Documents, PermissionAction.View)]
+    public async Task<IActionResult> ReadAndUnderstandDashboard(CancellationToken ct) =>
+        Ok(await sender.Send(new GetReadAndUnderstandDashboardQuery(), ct));
+
     /// <summary>Controlled printed-copy / distribution register for this document (ISO 17025 §8.3).</summary>
     [HttpGet("{id:guid}/controlled-copies")]
     public async Task<IActionResult> ControlledCopies(Guid id, CancellationToken ct) =>

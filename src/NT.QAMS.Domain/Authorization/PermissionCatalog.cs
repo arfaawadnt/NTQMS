@@ -76,12 +76,17 @@ public static class PermissionCatalog
 
     // ── Module keys ───────────────────────────────────────────────────────────
     public const string Nonconformances = "nc";
+    public const string Incidents = "incidents";
+    public const string Indicators = "indicators";
+    public const string Standards = "standards";
     public const string Complaints = "complaints";
     public const string Feedback = "feedback";
+    public const string Surveys = "surveys";
     public const string Audits = "audits";
     public const string QualityObjectives = "objectives";
     public const string ChangeControl = "changes";
     public const string ManagementReviews = "reviews";
+    public const string Committees = "committees";
     public const string Documents = "documents";
     public const string QualityPolicy = "quality-policy";
     public const string Records = "records";
@@ -134,12 +139,16 @@ public static class PermissionCatalog
     [
         // ── Quality & improvement ────────────────────────────────────────────
         new(Nonconformances, GroupQuality, "perm.mod.nc", SignedRecordLifecycle),
+        new(Incidents, GroupQuality, "perm.mod.incidents", SignedRecordLifecycle),
+        new(Indicators, GroupQuality, "perm.mod.indicators", FullRecordLifecycle),
         new(Complaints, GroupQuality, "perm.mod.complaints", FullRecordLifecycle),
         new(Feedback, GroupQuality, "perm.mod.feedback", FullRecordLifecycle),
+        new(Surveys, GroupQuality, "perm.mod.surveys", FullRecordLifecycle),
         new(Audits, GroupQuality, "perm.mod.audits", SignedRecordLifecycle),
         new(QualityObjectives, GroupQuality, "perm.mod.objectives", FullRecordLifecycle),
         new(ChangeControl, GroupQuality, "perm.mod.changes", SignedRecordLifecycle),
         new(ManagementReviews, GroupQuality, "perm.mod.reviews", SignedRecordLifecycle),
+        new(Committees, GroupQuality, "perm.mod.committees", FullRecordLifecycle),
 
         // ── Documents & records ──────────────────────────────────────────────
         new(Documents, GroupDocuments, "perm.mod.documents", SignedRecordLifecycle),
@@ -150,6 +159,7 @@ public static class PermissionCatalog
         new(Risks, GroupRisk, "perm.mod.risks", FullRecordLifecycle),
         new(Compliance, GroupRisk, "perm.mod.compliance",
             [PermissionAction.View, PermissionAction.Create, PermissionAction.Approve, PermissionAction.Sign, PermissionAction.Export]),
+        new(Standards, GroupRisk, "perm.mod.standards", FullRecordLifecycle),
         new(Conflicts, GroupRisk, "perm.mod.conflicts", SignedRecordLifecycle),
         new(OrgContext, GroupRisk, "perm.mod.orgContext",
             [PermissionAction.View, PermissionAction.Create, PermissionAction.Edit, PermissionAction.Void, PermissionAction.Export]),

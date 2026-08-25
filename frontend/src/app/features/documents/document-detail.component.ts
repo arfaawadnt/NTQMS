@@ -1,14 +1,16 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { DocumentsFacade } from './documents.facade';
 import { DocumentsApiService } from '../../core/api/documents-api.service';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
+import { OrgDataService } from '../../core/org-data.service';
 import {
   VERSION_BUMPS, VersionBump, SignatureRecord, DocumentAcknowledgement, MyDocumentAcknowledgement, ControlledCopy,
+  DocumentAudienceScope,
 } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
@@ -25,7 +27,7 @@ import { EsignCredentials, EsignDialogComponent } from '../../shared/ui/esign-di
 @Component({
     selector: 'qams-document-detail',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, FormsModule, DatePipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, EsignDialogComponent],
+    imports: [ReactiveFormsModule, FormsModule, DatePipe, DecimalPipe, RouterLink, PageHeaderComponent, StatusPillComponent, WorkflowStepperComponent, AuditTrailComponent, EsignDialogComponent],
     template: `
     @if (doc(); as d) {
       <qams-page-header [title]="d.code + ' — ' + d.title" [subtitle]="d.category">
@@ -151,6 +153,52 @@ import { EsignCredentials, EsignDialogComponent } from '../../shared/ui/esign-di
         </section>
       }
 
+      <!-- Read-and-Understand distribution + compliance (HQMS M01) -->
+      <section class="card">
+        <h3>{{ i18n.t('doc.ruHeading') }}</h3>
+        @if (facade.error()) { <div class="error">{{ facade.error() }}</div> }
+
+        @if (perms.can('documents.edit') && d.status !== 'Obsolete') {
+          <div class="ru-config">
+            <label class="check"><input type="checkbox" [checked]="ruRequired()" (change)="ruRequired.set($any($event.target).checked)" /> {{ i18n.t('doc.ruMandatory') }}</label>
+            @if (ruRequired()) {
+              <label>{{ i18n.t('doc.ruAudience') }}</label>
+              <select [value]="ruScope()" (change)="ruScope.set($any($event.target).value)">
+                <option value="AllStaff">{{ i18n.t('doc.ruAllStaff') }}</option>
+                <option value="ByDepartment">{{ i18n.t('doc.ruByDepartment') }}</option>
+              </select>
+              @if (ruScope() === 'ByDepartment') {
+                <label>{{ i18n.t('doc.ruDepartments') }}</label>
+                <select multiple size="4" (change)="onDeptsChange($event)">
+                  @for (dept of org.departments(); track dept.id) {
+                    <option [value]="dept.id" [selected]="ruDepts().includes(dept.id)">{{ dept.name }}</option>
+                  }
+                </select>
+              }
+            }
+            <div><button (click)="saveReadAndUnderstand(d.id)">{{ i18n.t('doc.ruSave') }}</button></div>
+          </div>
+        }
+
+        @if (facade.compliance(); as c) {
+          @if (c.audienceCount > 0) {
+            <div class="ru-stats">
+              <span class="ru-pct" [class.ok]="c.compliancePercent >= 90" [class.warn]="c.compliancePercent < 90">{{ c.compliancePercent | number:'1.0-1' }}%</span>
+              <span class="muted">{{ i18n.t('doc.ruCoverage')
+                .replace('{ack}', c.acknowledgedCount + '').replace('{total}', c.audienceCount + '') }}</span>
+            </div>
+            @if (c.outstandingCount > 0) {
+              <h4>{{ i18n.t('doc.ruOutstanding') }} ({{ c.outstandingCount }})</h4>
+              <ul class="ru-outstanding">
+                @for (r of outstandingReaders(); track r.userId) { <li>{{ r.userDisplay }}</li> }
+              </ul>
+            } @else { <p class="ack-done">✓ {{ i18n.t('doc.ruAllRead') }}</p> }
+          } @else if (ruRequired()) {
+            <p class="muted">{{ i18n.t('doc.ruNoAudience') }}</p>
+          }
+        }
+      </section>
+
       @if (d.status === 'Published' || copies().length > 0) {
         <section class="card">
           <h3>{{ i18n.t('doc.copies') }}</h3>
@@ -233,6 +281,7 @@ export class DocumentDetailComponent implements OnInit {
   readonly facade = inject(DocumentsFacade);
   readonly i18n = inject(I18nService);
   readonly perms = inject(PermissionsService);
+  readonly org = inject(OrgDataService);
   private readonly fb = inject(FormBuilder);
   private readonly docsApi = inject(DocumentsApiService);
 
@@ -253,6 +302,15 @@ export class DocumentDetailComponent implements OnInit {
   /** Controlled printed-copy / distribution register. */
   readonly copies = signal<ControlledCopy[]>([]);
   copyHolder = '';
+
+  /** Read-and-Understand distribution edit state (seeded from the loaded config). */
+  readonly ruRequired = signal(false);
+  readonly ruScope = signal<DocumentAudienceScope>('AllStaff');
+  readonly ruDepts = signal<string[]>([]);
+
+  /** Outstanding (not-yet-acknowledged) readers from the compliance view. */
+  readonly outstandingReaders = computed(() =>
+    (this.facade.compliance()?.readers ?? []).filter((r) => !r.acknowledged));
 
   /** The state of the single in-flight (non-published, non-obsolete) version, if any. */
   readonly inFlightState = computed<string | null>(() => {
@@ -285,6 +343,34 @@ export class DocumentDetailComponent implements OnInit {
     void this.loadSignatures();
     void this.loadAcknowledgements();
     void this.loadCopies();
+    void this.org.ensureOrg();
+    void this.loadReadAndUnderstand();
+    if (this.perms.can('documents.view')) { void this.facade.loadCompliance(this.id()); }
+  }
+
+  /** Loads the R&U config and seeds the edit controls. */
+  private async loadReadAndUnderstand(): Promise<void> {
+    await this.facade.loadReadAndUnderstand(this.id());
+    const ru = this.facade.readAndUnderstand();
+    if (ru) {
+      this.ruRequired.set(ru.required);
+      this.ruScope.set(ru.scope === 'ByDepartment' ? 'ByDepartment' : 'AllStaff');
+      this.ruDepts.set([...ru.departmentIds]);
+    }
+  }
+
+  /** Reads the multi-select's chosen department ids into the signal. */
+  onDeptsChange(event: Event): void {
+    const options = Array.from((event.target as HTMLSelectElement).selectedOptions);
+    this.ruDepts.set(options.map((o) => o.value));
+  }
+
+  async saveReadAndUnderstand(id: string): Promise<void> {
+    await this.facade.setReadAndUnderstand(id, {
+      required: this.ruRequired(),
+      scope: this.ruScope(),
+      departmentIds: this.ruScope() === 'ByDepartment' ? this.ruDepts() : [],
+    });
   }
 
   private async loadCopies(): Promise<void> {

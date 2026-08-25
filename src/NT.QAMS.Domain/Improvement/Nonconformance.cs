@@ -8,7 +8,7 @@ public enum NcStatus
     Draft, Raised, Assigned, Rca, ActionPlan, PendingVerification, EffectivenessCheck, Closed, Rejected,
 }
 
-public enum NcSourceType { Internal, Complaint, Audit, Supplier, ProficiencyTest }
+public enum NcSourceType { Internal, Complaint, Audit, Supplier, ProficiencyTest, Incident }
 
 /// <summary>
 /// The kind of quality event (F-11 / GMP, ISO 17025 §7.10). All share the same

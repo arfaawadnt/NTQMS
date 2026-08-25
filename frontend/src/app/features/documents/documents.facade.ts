@@ -4,8 +4,8 @@ import { Observable, firstValueFrom } from 'rxjs';
 import { DocumentsApiService } from '../../core/api/documents-api.service';
 import { FilesApiService } from '../../core/api/files-api.service';
 import {
-  CreateDocumentRequest, DocumentDetail, DocumentListItem, DraftNewVersionRequest,
-  PublishDocumentRequest, RejectVersionRequest, VersionBump,
+  CreateDocumentRequest, DocumentCompliance, DocumentDetail, DocumentListItem, DraftNewVersionRequest,
+  PublishDocumentRequest, ReadAndUnderstand, RejectVersionRequest, SetReadAndUnderstandRequest, VersionBump,
 } from '../../core/models';
 
 /**
@@ -21,6 +21,8 @@ export class DocumentsFacade {
   private readonly _total = signal(0);
   private readonly _hasMore = signal(false);
   private readonly _selected = signal<DocumentDetail | null>(null);
+  private readonly _readAndUnderstand = signal<ReadAndUnderstand | null>(null);
+  private readonly _compliance = signal<DocumentCompliance | null>(null);
   private readonly _loading = signal(false);
   private readonly _error = signal('');
   /** 1-based page of the last fetched slice (R-3 load-more pager). */
@@ -34,6 +36,10 @@ export class DocumentsFacade {
   /** True when more pages exist beyond the loaded slice. */
   readonly hasMore = this._hasMore.asReadonly();
   readonly selected = this._selected.asReadonly();
+  /** The document's read-and-understand distribution (mandatory flag + audience). */
+  readonly readAndUnderstand = this._readAndUnderstand.asReadonly();
+  /** Read-and-understand compliance for the loaded document (who is expected to read, and who has). */
+  readonly compliance = this._compliance.asReadonly();
   readonly loading = this._loading.asReadonly();
   readonly error = this._error.asReadonly();
 
@@ -65,6 +71,27 @@ export class DocumentsFacade {
 
   async loadDetail(id: string): Promise<void> {
     await this.run(async () => this._selected.set(await firstValueFrom(this.api.getById(id))));
+  }
+
+  /** Loads the read-and-understand distribution config for the document. */
+  async loadReadAndUnderstand(id: string): Promise<void> {
+    const ru = await this.run(() => firstValueFrom(this.api.readAndUnderstand(id)));
+    if (ru) { this._readAndUnderstand.set(ru); }
+  }
+
+  /** Loads read-and-understand compliance (audience vs acknowledgements) for the document. */
+  async loadCompliance(id: string): Promise<void> {
+    const c = await this.run(() => firstValueFrom(this.api.compliance(id)));
+    if (c) { this._compliance.set(c); }
+  }
+
+  /** Saves the distribution config, then refreshes both the config and the compliance view. */
+  async setReadAndUnderstand(id: string, r: SetReadAndUnderstandRequest): Promise<void> {
+    await this.run(async () => {
+      await firstValueFrom(this.api.setReadAndUnderstand(id, r));
+      this._readAndUnderstand.set(await firstValueFrom(this.api.readAndUnderstand(id)));
+      this._compliance.set(await firstValueFrom(this.api.compliance(id)));
+    });
   }
 
   /** Uploads the file, then creates the document at v1.0; returns the new id or null. */

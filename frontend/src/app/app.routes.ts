@@ -64,6 +64,80 @@ export const routes: Routes = [
             ],
           },
           {
+            path: 'incidents',
+            loadComponent: () => import('./features/incidents/incidents-list.component').then((m) => m.IncidentsListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/incidents/incidents-detail.component').then((m) => m.IncidentsDetailComponent),
+              },
+            ],
+          },
+          {
+            path: 'surveys',
+            loadComponent: () => import('./features/surveys/surveys-list.component').then((m) => m.SurveysListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/surveys/surveys-detail.component').then((m) => m.SurveysDetailComponent),
+              },
+            ],
+          },
+          {
+            path: 'committees',
+            loadComponent: () => import('./features/committees/committees-list.component').then((m) => m.CommitteesListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/committees/committees-detail.component').then((m) => m.CommitteesDetailComponent),
+              },
+            ],
+          },
+          {
+            path: 'meetings/:id',
+            loadComponent: () => import('./features/committees/meeting-detail.component').then((m) => m.MeetingDetailComponent),
+          },
+          {
+            path: 'fmea',
+            loadComponent: () => import('./features/fmea/fmea-list.component').then((m) => m.FmeaListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/fmea/fmea-detail.component').then((m) => m.FmeaDetailComponent),
+              },
+            ],
+          },
+          {
+            path: 'audit-programs',
+            loadComponent: () => import('./features/audit-programs/audit-programs-list.component').then((m) => m.AuditProgramsListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/audit-programs/audit-programs-detail.component').then((m) => m.AuditProgramsDetailComponent),
+              },
+            ],
+          },
+          {
+            path: 'standards',
+            loadComponent: () => import('./features/standards/standards-list.component').then((m) => m.StandardsListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/standards/standards-detail.component').then((m) => m.StandardsDetailComponent),
+              },
+            ],
+          },
+          {
+            path: 'indicators',
+            loadComponent: () => import('./features/indicators/indicators-list.component').then((m) => m.IndicatorsListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/indicators/indicators-detail.component').then((m) => m.IndicatorsDetailComponent),
+              },
+            ],
+          },
+          {
             path: 'documents',
             loadComponent: () => import('./features/documents/document-list.component').then((m) => m.DocumentListComponent),
             children: [

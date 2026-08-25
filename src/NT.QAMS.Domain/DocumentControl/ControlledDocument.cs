@@ -7,6 +7,22 @@ public enum DocumentStatus { Draft, Published, Obsolete }
 
 public enum VersionState { Draft, UnderReview, Approved, Published, Obsolete, Rejected }
 
+/// <summary>
+/// Who is expected to read-and-understand a mandatory document: everyone in the
+/// tenant, or the staff of specific departments.
+/// </summary>
+public enum DocumentAudienceScope { AllStaff, ByDepartment }
+
+/// <summary>A department in a document's read-and-understand target audience.</summary>
+public sealed class DocumentAudienceDepartment : Entity
+{
+    internal DocumentAudienceDepartment(Guid departmentId) => DepartmentId = departmentId;
+
+    private DocumentAudienceDepartment() { }
+
+    public Guid DepartmentId { get; private set; }
+}
+
 public enum VersionBump { Major, Minor }
 
 /// <summary>A document version. File bytes live behind FileReference — the aggregate owns control, not content.</summary>
@@ -51,6 +67,7 @@ public sealed class DocumentVersion : Entity
 public sealed class ControlledDocument : AggregateRoot, ITenantScoped
 {
     private readonly List<DocumentVersion> _versions = [];
+    private readonly List<DocumentAudienceDepartment> _audienceDepartments = [];
 
     private ControlledDocument()
     {
@@ -74,7 +91,20 @@ public sealed class ControlledDocument : AggregateRoot, ITenantScoped
     /// <summary>True once the sweep has flagged the current cycle as due (prevents duplicate events).</summary>
     public bool ReviewDueRaised { get; private set; }
 
+    /// <summary>
+    /// True when staff must read-and-understand this document: it then appears in the
+    /// Read-and-Understand compliance dashboard and outstanding readers are tracked
+    /// against its target audience.
+    /// </summary>
+    public bool RequiresAcknowledgement { get; private set; }
+
+    /// <summary>Who is expected to acknowledge, when <see cref="RequiresAcknowledgement"/> is true.</summary>
+    public DocumentAudienceScope AudienceScope { get; private set; } = DocumentAudienceScope.AllStaff;
+
     public IReadOnlyList<DocumentVersion> Versions => _versions.AsReadOnly();
+
+    /// <summary>Target departments, when <see cref="AudienceScope"/> is <see cref="DocumentAudienceScope.ByDepartment"/>.</summary>
+    public IReadOnlyList<DocumentAudienceDepartment> AudienceDepartments => _audienceDepartments.AsReadOnly();
 
     public DocumentVersion? PublishedVersion => _versions.SingleOrDefault(v => v.State == VersionState.Published);
 
@@ -242,6 +272,43 @@ public sealed class ControlledDocument : AggregateRoot, ITenantScoped
 
         Status = DocumentStatus.Obsolete;
         Raise(new DocumentRetired(Id, Code, actorId));
+    }
+
+    /// <summary>
+    /// Configures the read-and-understand distribution. When acknowledgement is required
+    /// with a by-department scope, at least one department must be named. Retired documents
+    /// cannot have their distribution changed.
+    /// </summary>
+    public void SetReadAndUnderstand(bool required, DocumentAudienceScope scope, IEnumerable<Guid> departmentIds)
+    {
+        if (Status == DocumentStatus.Obsolete)
+        {
+            throw new InvalidStateTransitionException(
+                "DOC-030", "A retired document's distribution cannot be changed.");
+        }
+
+        _audienceDepartments.Clear();
+
+        if (!required)
+        {
+            RequiresAcknowledgement = false;
+            AudienceScope = DocumentAudienceScope.AllStaff;
+            return;
+        }
+
+        var departments = (departmentIds ?? []).Distinct().ToList();
+        if (scope == DocumentAudienceScope.ByDepartment && departments.Count == 0)
+        {
+            throw new DomainException(
+                "DOC-031", "A by-department audience requires at least one department.");
+        }
+
+        RequiresAcknowledgement = true;
+        AudienceScope = scope;
+        if (scope == DocumentAudienceScope.ByDepartment)
+        {
+            _audienceDepartments.AddRange(departments.Select(id => new DocumentAudienceDepartment(id)));
+        }
     }
 
     private DocumentVersion RequireInFlight(VersionState expected, string code, string action)

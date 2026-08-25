@@ -36,6 +36,29 @@ public sealed record MyDocumentAcknowledgementDto(
 public sealed record DocumentAcknowledgementDto(
     Guid UserId, string UserDisplay, string VersionLabel, DateTimeOffset AcknowledgedAtUtc);
 
+/// <summary>Configures a document's read-and-understand distribution (mandatory flag + audience).</summary>
+public sealed record SetReadAndUnderstandRequest(
+    bool Required, string Scope, IReadOnlyList<Guid> DepartmentIds);
+
+/// <summary>The read-and-understand distribution currently configured on a document.</summary>
+public sealed record ReadAndUnderstandDto(
+    bool Required, string Scope, IReadOnlyList<Guid> DepartmentIds);
+
+/// <summary>One expected reader and whether they have acknowledged the current published version.</summary>
+public sealed record AudienceReaderDto(
+    Guid UserId, string UserDisplay, bool Acknowledged, DateTimeOffset? AcknowledgedAtUtc);
+
+/// <summary>Compliance for one mandatory document: who is expected to read it and who has.</summary>
+public sealed record DocumentComplianceDto(
+    Guid DocumentId, string Code, string Title, string? PublishedVersion,
+    int AudienceCount, int AcknowledgedCount, int OutstandingCount, decimal CompliancePercent,
+    IReadOnlyList<AudienceReaderDto> Readers);
+
+/// <summary>One row of the tenant-wide Read-and-Understand compliance dashboard.</summary>
+public sealed record ReadAndUnderstandDashboardRowDto(
+    Guid DocumentId, string Code, string Title, string Scope, string? PublishedVersion,
+    int AudienceCount, int AcknowledgedCount, int OutstandingCount, decimal CompliancePercent);
+
 // ── Controlled printed-copy / distribution register (ISO 17025 §8.3 / 9001 §7.5.3) ──
 
 public sealed record IssueControlledCopyRequest(string Holder);

@@ -16,9 +16,20 @@ public sealed class ControlledDocumentConfiguration : IEntityTypeConfiguration<C
         builder.Property(d => d.Title).HasMaxLength(300);
         builder.Property(d => d.Category).HasMaxLength(50);
         builder.Property(d => d.Status).HasConversion<string>().HasMaxLength(20);
+        builder.Property(d => d.AudienceScope).HasConversion<string>().HasMaxLength(20);
 
         builder.HasIndex(d => new { d.TenantId, d.Code }).IsUnique();
         builder.HasIndex(d => new { d.TenantId, d.Status });
+
+        builder.OwnsMany(d => d.AudienceDepartments, aud =>
+        {
+            aud.ToTable("document_audience_department", "qams");
+            // Shadow tenant column stamped from the owner; the composite FK to the
+            // owner makes a mismatched value impossible to persist. RLS reads it.
+            aud.Property<Guid>("TenantId");
+            aud.WithOwner().HasForeignKey("TenantId", "document_id");
+            aud.HasKey("TenantId", "Id");
+        });
 
         builder.OwnsMany(d => d.Versions, version =>
         {

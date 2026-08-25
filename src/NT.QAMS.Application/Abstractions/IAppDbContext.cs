@@ -1,16 +1,21 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using NT.QAMS.Domain.Accreditation;
 using NT.QAMS.Domain.Authorization;
 using NT.QAMS.Domain.AnalyticalQuality;
 using NT.QAMS.Domain.AuditManagement;
+using NT.QAMS.Domain.Committees;
 using NT.QAMS.Domain.Competency;
 using NT.QAMS.Domain.DocumentControl;
 using NT.QAMS.Domain.Equipment;
 using NT.QAMS.Domain.Facility;
 using NT.QAMS.Domain.Files;
 using NT.QAMS.Domain.IdentityAccess;
+using NT.QAMS.Domain.IncidentReporting;
 using NT.QAMS.Domain.Improvement;
 using NT.QAMS.Domain.Notifications;
 using NT.QAMS.Domain.Organization;
+using NT.QAMS.Domain.PatientExperience;
+using NT.QAMS.Domain.QualityIndicators;
 using NT.QAMS.Domain.Records;
 using NT.QAMS.Domain.ComplianceLedger;
 using NT.QAMS.Domain.Reporting;
@@ -34,6 +39,10 @@ public interface IAppDbContext
     DbSet<PasswordHistoryEntry> PasswordHistory { get; }
     DbSet<RefreshSession> RefreshSessions { get; }
     DbSet<Nonconformance> Nonconformances { get; }
+    DbSet<Incident> Incidents { get; }
+    DbSet<QualityIndicator> QualityIndicators { get; }
+    DbSet<StandardSet> StandardSets { get; }
+    DbSet<EvidenceLink> EvidenceLinks { get; }
     DbSet<Complaint> Complaints { get; }
     DbSet<QualityObjective> QualityObjectives { get; }
     DbSet<QualityPolicy> QualityPolicies { get; }
@@ -44,6 +53,11 @@ public interface IAppDbContext
     DbSet<DocumentControlledCopy> DocumentControlledCopies { get; }
     DbSet<FileReference> Files { get; }
     DbSet<Audit> Audits { get; }
+    DbSet<AuditProgram> AuditPrograms { get; }
+    DbSet<Committee> Committees { get; }
+    DbSet<Meeting> Meetings { get; }
+    DbSet<SatisfactionSurvey> SatisfactionSurveys { get; }
+    DbSet<SurveyResponse> SurveyResponses { get; }
     DbSet<EquipmentItem> EquipmentItems { get; }
     DbSet<ReferenceStandard> ReferenceStandards { get; }
     DbSet<TestAuthorization> TestAuthorizations { get; }
@@ -51,6 +65,7 @@ public interface IAppDbContext
     DbSet<CompetencyRecord> Competencies { get; }
     DbSet<TrainingAssignment> TrainingAssignments { get; }
     DbSet<RiskItem> Risks { get; }
+    DbSet<FmeaStudy> FmeaStudies { get; }
     DbSet<ConflictDeclaration> ConflictDeclarations { get; }
     DbSet<InterestedParty> InterestedParties { get; }
     DbSet<ContextIssue> ContextIssues { get; }

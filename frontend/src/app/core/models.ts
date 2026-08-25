@@ -102,6 +102,512 @@ export interface VerifyNcRequest { passed: boolean; password: string; pin: strin
 export interface ConfirmEffectivenessRequest { effective: boolean; password: string; pin: string; }
 export interface ReopenNcRequest { reason: string; password: string; pin: string; }
 
+// ── Incident & Occurrence Reporting (HQMS M02) ───────────────────────────────
+
+/** Hospital event taxonomy accepted by the backend. */
+export const INCIDENT_CATEGORIES =
+  ['Medication', 'Fall', 'Procedural', 'Transfusion', 'Device', 'Laboratory', 'Security', 'Documentation', 'Other'] as const;
+export type IncidentCategory = (typeof INCIDENT_CATEGORIES)[number];
+
+/** Degree-of-harm scale, ordered least → most severe. */
+export const HARM_GRADES = ['NearMiss', 'NoHarm', 'Minor', 'Moderate', 'Severe', 'Death'] as const;
+export type HarmGrade = (typeof HARM_GRADES)[number];
+
+/** How the report entered the system. */
+export const INTAKE_CHANNELS = ['Web', 'Mobile', 'Kiosk', 'Phone', 'Paper'] as const;
+export type IntakeChannel = (typeof INTAKE_CHANNELS)[number];
+
+/** Fishbone axis for a contributing factor. */
+export const CONTRIBUTING_FACTOR_CATEGORIES =
+  ['People', 'Process', 'Equipment', 'Environment', 'Materials', 'Management', 'Other'] as const;
+export type ContributingFactorCategory = (typeof CONTRIBUTING_FACTOR_CATEGORIES)[number];
+
+/** Incident lifecycle states, in workflow order. */
+export const INCIDENT_STATUSES =
+  ['Reported', 'Triaged', 'UnderInvestigation', 'PendingReview', 'Closed', 'Rejected'] as const;
+
+export interface IncidentListItem {
+  id: string;
+  incidentRef: string;
+  title: string;
+  status: string;
+  category: string;
+  harmGrade: string;
+  isSentinel: boolean;
+  isAnonymous: boolean;
+  occurredAtUtc: string;
+  createdAtUtc: string;
+  branchId: string | null;
+  departmentId: string | null;
+}
+
+export interface IncidentContributingFactor {
+  id: string;
+  category: string;
+  description: string;
+}
+
+export interface IncidentTimelineEntry {
+  id: string;
+  occurredAtUtc: string;
+  note: string;
+  recordedBy: string;
+}
+
+export interface IncidentDetail {
+  id: string;
+  incidentRef: string;
+  title: string;
+  description: string;
+  status: string;
+  category: string;
+  location: string | null;
+  harmGrade: string;
+  channel: string;
+  isSentinel: boolean;
+  sentinelDeclaredAtUtc: string | null;
+  isAnonymous: boolean;
+  reportedBy: string | null;
+  assignedTo: string | null;
+  investigatorId: string | null;
+  investigationSummary: string | null;
+  rejectionReason: string | null;
+  closureSummary: string | null;
+  correctiveActionNcId: string | null;
+  occurredAtUtc: string;
+  createdAtUtc: string;
+  contributingFactors: IncidentContributingFactor[];
+  timeline: IncidentTimelineEntry[];
+}
+
+export interface ReportIncidentRequest {
+  title: string;
+  description: string;
+  category: IncidentCategory;
+  harmGrade: HarmGrade;
+  channel: IntakeChannel;
+  occurredAtUtc: string;
+  location: string | null;
+  branchId: string | null;
+  departmentId: string | null;
+}
+
+/** Same shape as a report, submitted with identity suppressed. */
+export type ReportAnonymousIncidentRequest = ReportIncidentRequest;
+
+/** One-time follow-up reference returned for an anonymous report (shown once). */
+export interface AnonymousIncidentReceipt { id: string; incidentRef: string; followUpReference: string; }
+
+export interface TriageIncidentRequest { assigneeId: string; category: IncidentCategory; }
+export interface RejectIncidentRequest { reason: string; }
+export interface StartInvestigationRequest { investigatorId: string; }
+export interface AddContributingFactorRequest { category: ContributingFactorCategory; description: string; }
+export interface AddTimelineEntryRequest { occurredAtUtc: string; note: string; }
+export interface RecordInvestigationSummaryRequest { summary: string; }
+export interface CloseIncidentRequest { closureSummary: string; password: string; pin: string; }
+export interface DeclareSentinelRequest { password: string; pin: string; }
+export interface IncidentTracking { incidentRef: string; status: string; isSentinel: boolean; }
+
+// ── Quality Indicators & KPIs (HQMS M06) ─────────────────────────────────────
+
+export const INDICATOR_FREQUENCIES = ['Weekly', 'Monthly', 'Quarterly', 'Annually'] as const;
+export type IndicatorFrequency = (typeof INDICATOR_FREQUENCIES)[number];
+
+export const INDICATOR_DIRECTIONS = ['HigherIsBetter', 'LowerIsBetter'] as const;
+export type IndicatorDirection = (typeof INDICATOR_DIRECTIONS)[number];
+
+export const INDICATOR_STATUSES = ['Active', 'Retired'] as const;
+
+export interface IndicatorListItem {
+  id: string;
+  indicatorRef: string;
+  code: string;
+  name: string;
+  unit: string;
+  frequency: string;
+  direction: string;
+  status: string;
+  target: number | null;
+  latestValue: number | null;
+  latestStatus: string | null;
+  latestPeriod: string | null;
+}
+
+export interface IndicatorMeasurement {
+  id: string;
+  period: string;
+  numerator: number;
+  denominator: number;
+  value: number;
+  status: string;
+  enteredBy: string;
+  recordedAtUtc: string;
+  note: string | null;
+}
+
+export interface IndicatorDetail {
+  id: string;
+  indicatorRef: string;
+  code: string;
+  name: string;
+  description: string | null;
+  numerator: string;
+  denominator: string;
+  inclusions: string | null;
+  exclusions: string | null;
+  dataSource: string | null;
+  unit: string;
+  rateFactor: number;
+  frequency: string;
+  direction: string;
+  status: string;
+  target: number | null;
+  warningThreshold: number | null;
+  actionThreshold: number | null;
+  measurements: IndicatorMeasurement[];
+}
+
+export interface DefineIndicatorRequest {
+  code: string;
+  name: string;
+  description: string | null;
+  numerator: string;
+  denominator: string;
+  unit: string;
+  rateFactor: number;
+  frequency: IndicatorFrequency;
+  direction: IndicatorDirection;
+  inclusions: string | null;
+  exclusions: string | null;
+  dataSource: string | null;
+}
+
+export type UpdateIndicatorDefinitionRequest = Omit<DefineIndicatorRequest, 'code'>;
+
+export interface SetIndicatorTargetsRequest {
+  target: number | null;
+  warningThreshold: number | null;
+  actionThreshold: number | null;
+}
+
+export interface RecordMeasurementRequest {
+  period: string;
+  numerator: number;
+  denominator: number;
+  note: string | null;
+}
+
+export interface SpcPoint {
+  period: string;
+  value: number;
+  specialCause: boolean;
+  rules: string[];
+}
+
+export interface IndicatorControlChart {
+  indicatorId: string;
+  code: string;
+  unit: string;
+  hasLimits: boolean;
+  mean: number;
+  stdDev: number;
+  ucl: number;
+  lcl: number;
+  upper2Sigma: number;
+  lower2Sigma: number;
+  upper1Sigma: number;
+  lower1Sigma: number;
+  target: number | null;
+  warningThreshold: number | null;
+  actionThreshold: number | null;
+  points: SpcPoint[];
+}
+
+// ── Accreditation & Standards Compliance (HQMS M07) ──────────────────────────
+
+export const ACCREDITATION_FRAMEWORKS = ['GAHAR', 'JCI', 'ISO9001', 'ISO15189', 'Other'] as const;
+export type AccreditationFramework = (typeof ACCREDITATION_FRAMEWORKS)[number];
+
+export const COMPLIANCE_STATUSES =
+  ['NotAssessed', 'Compliant', 'PartiallyCompliant', 'NonCompliant', 'NotApplicable'] as const;
+export type ComplianceStatus = (typeof COMPLIANCE_STATUSES)[number];
+
+export const EVIDENCE_SOURCE_TYPES =
+  ['Document', 'Incident', 'Nonconformance', 'Audit', 'Indicator', 'Training', 'Committee', 'Other'] as const;
+export type EvidenceSourceType = (typeof EVIDENCE_SOURCE_TYPES)[number];
+
+export interface StandardSetListItem {
+  id: string;
+  framework: string;
+  name: string;
+  version: string;
+  status: string;
+  elementCount: number;
+  compliancePercent: number;
+}
+
+export interface StandardElement {
+  id: string;
+  chapterCode: string;
+  chapterTitle: string;
+  standardCode: string;
+  elementCode: string;
+  text: string;
+  weight: number;
+  complianceStatus: string;
+  assessmentNote: string | null;
+  assessedBy: string | null;
+  assessedAtUtc: string | null;
+  evidenceCount: number;
+}
+
+export interface StandardSetDetail {
+  id: string;
+  framework: string;
+  name: string;
+  version: string;
+  status: string;
+  elements: StandardElement[];
+}
+
+export interface EvidenceLink {
+  id: string;
+  elementId: string;
+  sourceType: string;
+  sourceId: string;
+  sourceRef: string;
+  description: string | null;
+  linkedBy: string;
+  linkedAtUtc: string;
+}
+
+export interface ReadinessScore {
+  chapterCode: string;
+  chapterTitle: string;
+  elementCount: number;
+  applicableCount: number;
+  compliantCount: number;
+  partialCount: number;
+  nonCompliantCount: number;
+  notAssessedCount: number;
+  notApplicableCount: number;
+  compliancePercent: number;
+}
+
+export interface ReadinessDashboard {
+  standardSetId: string;
+  framework: string;
+  name: string;
+  version: string;
+  status: string;
+  overall: ReadinessScore;
+  chapters: ReadinessScore[];
+}
+
+export interface GapItem {
+  elementId: string;
+  chapterCode: string;
+  standardCode: string;
+  elementCode: string;
+  text: string;
+  weight: number;
+  complianceStatus: string;
+  evidenceCount: number;
+  reason: string;
+}
+
+export interface DefineStandardSetRequest { framework: AccreditationFramework; name: string; version: string; }
+export interface AddStandardElementRequest {
+  chapterCode: string; chapterTitle: string; standardCode: string; elementCode: string; text: string; weight: number;
+}
+export interface AssessElementRequest { status: ComplianceStatus; note: string | null; }
+export interface LinkEvidenceRequest {
+  elementId: string; sourceType: EvidenceSourceType; sourceId: string; sourceRef: string; description: string | null;
+}
+
+// ── Audit Programme & Annual Plan (HQMS M05) ─────────────────────────────────
+
+export const PLANNED_AUDIT_PRIORITIES = ['Low', 'Medium', 'High'] as const;
+export type PlannedAuditPriority = (typeof PLANNED_AUDIT_PRIORITIES)[number];
+
+export const AUDIT_PROGRAM_STATUSES = ['Draft', 'Active', 'Closed'] as const;
+
+export interface PlannedAudit {
+  id: string;
+  scopeArea: string;
+  departmentId: string | null;
+  standardChapter: string | null;
+  priority: string;
+  plannedQuarter: number;
+  status: string;
+  scheduledAuditId: string | null;
+  completedOn: string | null;
+}
+
+export interface AuditProgramCoverage {
+  planned: number;
+  scheduled: number;
+  completed: number;
+  coveragePercent: number;
+  scheduledPercent: number;
+}
+
+export interface AuditProgramListItem {
+  id: string;
+  year: number;
+  title: string;
+  status: string;
+  plannedCount: number;
+  coveragePercent: number;
+}
+
+export interface AuditProgramDetail {
+  id: string;
+  year: number;
+  title: string;
+  status: string;
+  coverage: AuditProgramCoverage;
+  plan: PlannedAudit[];
+}
+
+export interface CreateAuditProgramRequest { year: number; title: string; }
+export interface AddPlannedAuditRequest {
+  scopeArea: string; departmentId: string | null; standardChapter: string | null;
+  priority: PlannedAuditPriority; plannedQuarter: number;
+}
+export interface LinkScheduledAuditRequest { auditId: string; }
+export interface CompletePlannedAuditRequest { completedOn: string; }
+
+// ── FMEA / HFMEA (HQMS M04) ──────────────────────────────────────────────────
+
+export const FMEA_TYPES = ['Fmea', 'Hfmea'] as const;
+export type FmeaType = (typeof FMEA_TYPES)[number];
+
+export const FMEA_STATUSES = ['Draft', 'Active', 'Closed'] as const;
+
+export interface FailureMode {
+  id: string;
+  processStep: string;
+  failureMode: string;
+  effect: string;
+  cause: string;
+  severity: number;
+  occurrence: number;
+  detection: number;
+  rpn: number;
+  recommendedAction: string | null;
+  actionOwnerId: string | null;
+  residualSeverity: number | null;
+  residualOccurrence: number | null;
+  residualDetection: number | null;
+  residualRpn: number | null;
+  status: string;
+}
+
+export interface FmeaListItem {
+  id: string;
+  fmeaRef: string;
+  title: string;
+  processName: string;
+  type: string;
+  status: string;
+  failureModeCount: number;
+  highRpnCount: number;
+  maxRpn: number;
+}
+
+export interface FmeaDetail {
+  id: string;
+  fmeaRef: string;
+  title: string;
+  processName: string;
+  type: string;
+  status: string;
+  branchId: string | null;
+  departmentId: string | null;
+  highRpnThreshold: number;
+  failureModes: FailureMode[];
+}
+
+export interface CreateFmeaRequest { title: string; processName: string; type: FmeaType; branchId: string | null; departmentId: string | null; }
+export interface AddFailureModeRequest {
+  processStep: string; failureMode: string; effect: string; cause: string;
+  severity: number; occurrence: number; detection: number;
+}
+export interface RecommendActionRequest { action: string; ownerId: string | null; }
+export interface RecordResidualRequest { severity: number; occurrence: number; detection: number; }
+
+// ── Committees & Governance (HQMS M17) ───────────────────────────────────────
+
+export const COMMITTEE_FREQUENCIES = ['Weekly', 'Monthly', 'Quarterly', 'Biannual', 'Annual', 'AdHoc'] as const;
+export type CommitteeFrequency = (typeof COMMITTEE_FREQUENCIES)[number];
+
+export interface CommitteeMember { id: string; userId: string; roleTitle: string; }
+
+export interface CommitteeListItem {
+  id: string; name: string; frequency: string; quorumSize: number; status: string; memberCount: number;
+}
+
+export interface CommitteeDetail {
+  id: string; name: string; termsOfReference: string; frequency: string; quorumSize: number; status: string;
+  members: CommitteeMember[];
+}
+
+export interface MeetingListItem {
+  id: string; committeeId: string; meetingRef: string; scheduledAtUtc: string; status: string;
+  presentCount: number; openDecisions: number;
+}
+
+export interface AgendaItem { id: string; title: string; detail: string | null; sourceRef: string | null; carriedForward: boolean; }
+export interface MeetingAttendance { id: string; userId: string; present: boolean; }
+export interface MeetingDecision { id: string; description: string; ownerId: string | null; dueDate: string | null; status: string; closureNote: string | null; }
+
+export interface MeetingDetail {
+  id: string; committeeId: string; meetingRef: string; scheduledAtUtc: string; status: string;
+  minutes: string | null; minutesApprovedBy: string | null; presentCount: number;
+  agenda: AgendaItem[]; attendance: MeetingAttendance[]; decisions: MeetingDecision[];
+}
+
+export interface OpenAction {
+  meetingId: string; meetingRef: string; decisionId: string; description: string; ownerId: string | null; dueDate: string | null;
+}
+
+export interface CreateCommitteeRequest { name: string; termsOfReference: string; frequency: CommitteeFrequency; quorumSize: number; }
+export interface AddCommitteeMemberRequest { userId: string; roleTitle: string; }
+export interface ScheduleMeetingRequest { committeeId: string; scheduledAtUtc: string; }
+export interface AddAgendaItemRequest { title: string; detail: string | null; sourceRef: string | null; carriedForward: boolean; }
+export interface RecordAttendanceRequest { userId: string; present: boolean; }
+export interface AddMeetingDecisionRequest { description: string; ownerId: string | null; dueDate: string | null; }
+export interface RecordMinutesRequest { minutes: string; }
+
+// ── Patient Satisfaction Surveys (HQMS M11) ──────────────────────────────────
+
+export const SURVEY_STATUSES = ['Draft', 'Open', 'Closed'] as const;
+
+export interface SurveyQuestion { id: string; text: string; domain: string; displayOrder: number; }
+
+export interface SurveyListItem {
+  id: string; title: string; status: string; questionCount: number; responseCount: number; overallScore: number | null;
+}
+
+export interface SurveyDetail {
+  id: string; title: string; description: string | null; status: string; questions: SurveyQuestion[];
+}
+
+export interface QuestionScore { questionId: string; text: string; domain: string; meanScore: number; answers: number; }
+export interface DomainScore { domain: string; meanScore: number; answers: number; }
+export interface DepartmentScore { departmentId: string | null; meanScore: number; responses: number; }
+
+export interface SurveyResults {
+  surveyId: string; title: string; status: string; responseCount: number; overallScore: number | null;
+  byQuestion: QuestionScore[]; byDomain: DomainScore[]; byDepartment: DepartmentScore[];
+}
+
+export interface CreateSurveyRequest { title: string; description: string | null; }
+export interface AddSurveyQuestionRequest { text: string; domain: string; }
+export interface SurveyAnswerInput { questionId: string; score: number; }
+export interface SubmitSurveyResponseRequest { departmentId: string | null; serviceLine: string | null; answers: SurveyAnswerInput[]; }
+
 // ── Reporting (read models — real data only) ─────────────────────────────────
 
 export interface DashboardKpis {
@@ -465,6 +971,40 @@ export interface DocumentAcknowledgement {
   userDisplay: string;
   versionLabel: string;
   acknowledgedAtUtc: string;
+}
+
+export const DOCUMENT_AUDIENCE_SCOPES = ['AllStaff', 'ByDepartment'] as const;
+export type DocumentAudienceScope = (typeof DOCUMENT_AUDIENCE_SCOPES)[number];
+
+export interface ReadAndUnderstand {
+  required: boolean;
+  scope: string;
+  departmentIds: string[];
+}
+
+export interface SetReadAndUnderstandRequest {
+  required: boolean;
+  scope: DocumentAudienceScope;
+  departmentIds: string[];
+}
+
+export interface AudienceReader {
+  userId: string;
+  userDisplay: string;
+  acknowledged: boolean;
+  acknowledgedAtUtc: string | null;
+}
+
+export interface DocumentCompliance {
+  documentId: string;
+  code: string;
+  title: string;
+  publishedVersion: string | null;
+  audienceCount: number;
+  acknowledgedCount: number;
+  outstandingCount: number;
+  compliancePercent: number;
+  readers: AudienceReader[];
 }
 
 export interface ControlledCopy {

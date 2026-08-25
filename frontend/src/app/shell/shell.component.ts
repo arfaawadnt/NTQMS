@@ -283,13 +283,18 @@ export class ShellComponent {
       {
         key: 'improvement', label: 'nav.groupImprovement',
         items: [
+          { path: '/incidents', label: 'nav.incidents', icon: 'incidents' },
           { path: '/nonconformances', label: 'nav.nc', icon: 'nc' },
           { path: '/complaints', label: 'nav.complaints', icon: 'complaints' },
+          { path: '/surveys', label: 'nav.surveys', icon: 'surveys' },
           { path: '/feedback', label: 'nav.feedback', icon: 'feedback' },
           { path: '/audits', label: 'nav.audits', icon: 'audits' },
+          { path: '/audit-programs', label: 'nav.auditPrograms', icon: 'auditPrograms' },
           { path: '/quality-objectives', label: 'nav.objectives', icon: 'objectives' },
+          { path: '/indicators', label: 'nav.indicators', icon: 'indicators' },
           { path: '/changes', label: 'nav.changes', icon: 'changes' },
           { path: '/management-reviews', label: 'nav.reviews', icon: 'reviews' },
+          { path: '/committees', label: 'nav.committees', icon: 'committees' },
         ],
       },
       {
@@ -304,6 +309,8 @@ export class ShellComponent {
         key: 'risk', label: 'nav.groupRisk',
         items: [
           { path: '/risks', label: 'nav.risks', icon: 'risks' },
+          { path: '/fmea', label: 'nav.fmea', icon: 'fmea' },
+          { path: '/standards', label: 'nav.accreditation', icon: 'accreditation' },
           { path: '/conflicts', label: 'nav.coi', icon: 'coi' },
           { path: '/org-context', label: 'nav.ctx', icon: 'context' },
         ],
