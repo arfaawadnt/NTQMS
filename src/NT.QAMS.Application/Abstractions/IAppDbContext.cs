@@ -11,10 +11,12 @@ using NT.QAMS.Domain.Facility;
 using NT.QAMS.Domain.Files;
 using NT.QAMS.Domain.IdentityAccess;
 using NT.QAMS.Domain.IncidentReporting;
+using NT.QAMS.Domain.Integration;
 using NT.QAMS.Domain.Improvement;
 using NT.QAMS.Domain.Notifications;
 using NT.QAMS.Domain.Organization;
 using NT.QAMS.Domain.PatientExperience;
+using NT.QAMS.Domain.PatientSafety;
 using NT.QAMS.Domain.QualityIndicators;
 using NT.QAMS.Domain.Records;
 using NT.QAMS.Domain.ComplianceLedger;
@@ -58,6 +60,10 @@ public interface IAppDbContext
     DbSet<Meeting> Meetings { get; }
     DbSet<SatisfactionSurvey> SatisfactionSurveys { get; }
     DbSet<SurveyResponse> SurveyResponses { get; }
+    DbSet<IntegrationEndpoint> IntegrationEndpoints { get; }
+    DbSet<IntegrationMessage> IntegrationMessages { get; }
+    DbSet<PatientStay> PatientStays { get; }
+    DbSet<PatientSafetyEvent> PatientSafetyEvents { get; }
     DbSet<EquipmentItem> EquipmentItems { get; }
     DbSet<ReferenceStandard> ReferenceStandards { get; }
     DbSet<TestAuthorization> TestAuthorizations { get; }

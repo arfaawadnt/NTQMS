@@ -94,6 +94,10 @@ GET /api/indicators/{id}/control-chart
 GET /api/instrument-comparabilities
 GET /api/instrument-comparabilities/{id}
 GET /api/instrument-comparabilities/{id}/signatures
+GET /api/integration/census
+GET /api/integration/endpoints
+GET /api/integration/endpoints/{id}/messages
+GET /api/integration/reconciliation
 GET /api/interference-studies
 GET /api/interference-studies/{id}
 GET /api/interference-studies/{id}/signatures
@@ -124,6 +128,9 @@ GET /api/org-context/issues
 GET /api/outlier-screenings
 GET /api/outlier-screenings/{id}
 GET /api/outlier-screenings/{id}/signatures
+GET /api/patient-safety/events
+GET /api/patient-safety/events/{id}
+GET /api/patient-safety/rates
 GET /api/precision-studies
 GET /api/precision-studies/{id}
 GET /api/precision-studies/{id}/signatures
@@ -250,6 +257,10 @@ GET /api/v{version}/indicators/{id}/control-chart
 GET /api/v{version}/instrument-comparabilities
 GET /api/v{version}/instrument-comparabilities/{id}
 GET /api/v{version}/instrument-comparabilities/{id}/signatures
+GET /api/v{version}/integration/census
+GET /api/v{version}/integration/endpoints
+GET /api/v{version}/integration/endpoints/{id}/messages
+GET /api/v{version}/integration/reconciliation
 GET /api/v{version}/interference-studies
 GET /api/v{version}/interference-studies/{id}
 GET /api/v{version}/interference-studies/{id}/signatures
@@ -280,6 +291,9 @@ GET /api/v{version}/org-context/issues
 GET /api/v{version}/outlier-screenings
 GET /api/v{version}/outlier-screenings/{id}
 GET /api/v{version}/outlier-screenings/{id}/signatures
+GET /api/v{version}/patient-safety/events
+GET /api/v{version}/patient-safety/events/{id}
+GET /api/v{version}/patient-safety/rates
 GET /api/v{version}/precision-studies
 GET /api/v{version}/precision-studies/{id}
 GET /api/v{version}/precision-studies/{id}/signatures
@@ -455,6 +469,10 @@ POST /api/instrument-comparabilities
 POST /api/instrument-comparabilities/{id}/calculate
 POST /api/instrument-comparabilities/{id}/readings
 POST /api/instrument-comparabilities/{id}/sign-off
+POST /api/integration/endpoints
+POST /api/integration/endpoints/{id}/adt
+POST /api/integration/endpoints/{id}/resume
+POST /api/integration/endpoints/{id}/suspend
 POST /api/interference-studies
 POST /api/interference-studies/{id}/calculate
 POST /api/interference-studies/{id}/measurements
@@ -512,6 +530,10 @@ POST /api/outlier-screenings
 POST /api/outlier-screenings/{id}/calculate
 POST /api/outlier-screenings/{id}/points
 POST /api/outlier-screenings/{id}/sign-off
+POST /api/patient-safety/events/{id}/close
+POST /api/patient-safety/events/{id}/review
+POST /api/patient-safety/falls
+POST /api/patient-safety/pressure-injuries
 POST /api/precision-studies
 POST /api/precision-studies/{id}/calculate
 POST /api/precision-studies/{id}/measurements
@@ -706,6 +728,10 @@ POST /api/v{version}/instrument-comparabilities
 POST /api/v{version}/instrument-comparabilities/{id}/calculate
 POST /api/v{version}/instrument-comparabilities/{id}/readings
 POST /api/v{version}/instrument-comparabilities/{id}/sign-off
+POST /api/v{version}/integration/endpoints
+POST /api/v{version}/integration/endpoints/{id}/adt
+POST /api/v{version}/integration/endpoints/{id}/resume
+POST /api/v{version}/integration/endpoints/{id}/suspend
 POST /api/v{version}/interference-studies
 POST /api/v{version}/interference-studies/{id}/calculate
 POST /api/v{version}/interference-studies/{id}/measurements
@@ -763,6 +789,10 @@ POST /api/v{version}/outlier-screenings
 POST /api/v{version}/outlier-screenings/{id}/calculate
 POST /api/v{version}/outlier-screenings/{id}/points
 POST /api/v{version}/outlier-screenings/{id}/sign-off
+POST /api/v{version}/patient-safety/events/{id}/close
+POST /api/v{version}/patient-safety/events/{id}/review
+POST /api/v{version}/patient-safety/falls
+POST /api/v{version}/patient-safety/pressure-injuries
 POST /api/v{version}/precision-studies
 POST /api/v{version}/precision-studies/{id}/calculate
 POST /api/v{version}/precision-studies/{id}/measurements

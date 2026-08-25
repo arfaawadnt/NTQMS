@@ -74,6 +74,20 @@ export const routes: Routes = [
             ],
           },
           {
+            path: 'integration',
+            loadComponent: () => import('./features/integration/integration.component').then((m) => m.IntegrationComponent),
+          },
+          {
+            path: 'patient-safety',
+            loadComponent: () => import('./features/patient-safety/patient-safety-list.component').then((m) => m.PatientSafetyListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/patient-safety/patient-safety-detail.component').then((m) => m.PatientSafetyDetailComponent),
+              },
+            ],
+          },
+          {
             path: 'surveys',
             loadComponent: () => import('./features/surveys/surveys-list.component').then((m) => m.SurveysListComponent),
             children: [

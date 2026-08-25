@@ -277,6 +277,7 @@ export class ShellComponent {
             visible: () => this.perms.can('reports.view') },
           { path: '/tasks', label: 'nav.tasks', icon: 'tasks' },
           { path: '/notifications', label: 'nav.notifications', icon: 'bell' },
+          { path: '/integration', label: 'nav.integration', icon: 'integration' },
           { path: '/manual', label: 'nav.manual', icon: 'manual' },
         ],
       },
@@ -284,6 +285,7 @@ export class ShellComponent {
         key: 'improvement', label: 'nav.groupImprovement',
         items: [
           { path: '/incidents', label: 'nav.incidents', icon: 'incidents' },
+          { path: '/patient-safety', label: 'nav.patientSafety', icon: 'patientSafety' },
           { path: '/nonconformances', label: 'nav.nc', icon: 'nc' },
           { path: '/complaints', label: 'nav.complaints', icon: 'complaints' },
           { path: '/surveys', label: 'nav.surveys', icon: 'surveys' },

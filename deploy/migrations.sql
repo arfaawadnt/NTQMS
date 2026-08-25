@@ -9807,5 +9807,288 @@ BEGIN
     VALUES ('20260825181300_AddSatisfactionSurveys', '9.0.19');
     END IF;
 END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825223639_AddIntegrationHub') THEN
+    CREATE TABLE qams.integration_endpoint (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        name character varying(150) NOT NULL,
+        system character varying(20) NOT NULL,
+        protocol character varying(20) NOT NULL,
+        status character varying(20) NOT NULL,
+        last_message_at_utc timestamp with time zone,
+        last_error_at_utc timestamp with time zone,
+        consecutive_failures integer NOT NULL,
+        created_at_utc timestamp with time zone NOT NULL,
+        created_by text,
+        created_by_user_id uuid,
+        modified_at_utc timestamp with time zone,
+        modified_by text,
+        CONSTRAINT pk_integration_endpoint PRIMARY KEY (tenant_id, id)
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825223639_AddIntegrationHub') THEN
+    CREATE TABLE qams.integration_message (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        endpoint_id uuid NOT NULL,
+        dedup_key character varying(200) NOT NULL,
+        message_type character varying(40) NOT NULL,
+        raw_payload text NOT NULL,
+        status character varying(20) NOT NULL,
+        error_detail text,
+        received_at_utc timestamp with time zone NOT NULL,
+        processed_at_utc timestamp with time zone,
+        created_at_utc timestamp with time zone NOT NULL,
+        created_by text,
+        created_by_user_id uuid,
+        modified_at_utc timestamp with time zone,
+        modified_by text,
+        CONSTRAINT pk_integration_message PRIMARY KEY (tenant_id, id)
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825223639_AddIntegrationHub') THEN
+    CREATE TABLE qams.patient_stay (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        patient_ref character varying(100) NOT NULL,
+        encounter_ref character varying(100) NOT NULL,
+        unit character varying(100) NOT NULL,
+        department_id uuid,
+        admitted_at_utc timestamp with time zone NOT NULL,
+        discharged_at_utc timestamp with time zone,
+        status character varying(20) NOT NULL,
+        created_at_utc timestamp with time zone NOT NULL,
+        created_by text,
+        created_by_user_id uuid,
+        modified_at_utc timestamp with time zone,
+        modified_by text,
+        CONSTRAINT pk_patient_stay PRIMARY KEY (tenant_id, id)
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825223639_AddIntegrationHub') THEN
+    CREATE INDEX ix_integration_endpoint_tenant_id_status ON qams.integration_endpoint (tenant_id, status);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825223639_AddIntegrationHub') THEN
+    CREATE INDEX ix_integration_message_tenant_id_endpoint_id_status ON qams.integration_message (tenant_id, endpoint_id, status);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825223639_AddIntegrationHub') THEN
+    CREATE UNIQUE INDEX ux_integration_message_dedup ON qams.integration_message (tenant_id, endpoint_id, dedup_key);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825223639_AddIntegrationHub') THEN
+    CREATE INDEX ix_patient_stay_tenant_id_status ON qams.patient_stay (tenant_id, status);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825223639_AddIntegrationHub') THEN
+    CREATE UNIQUE INDEX ux_patient_stay_encounter ON qams.patient_stay (tenant_id, encounter_ref);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825223639_AddIntegrationHub') THEN
+    ALTER TABLE qams.integration_endpoint ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.integration_endpoint FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.integration_endpoint;
+    CREATE POLICY tenant_isolation ON qams.integration_endpoint
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825223639_AddIntegrationHub') THEN
+    ALTER TABLE qams.integration_message ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.integration_message FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.integration_message;
+    CREATE POLICY tenant_isolation ON qams.integration_message
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825223639_AddIntegrationHub') THEN
+    ALTER TABLE qams.patient_stay ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.patient_stay FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.patient_stay;
+    CREATE POLICY tenant_isolation ON qams.patient_stay
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825223639_AddIntegrationHub') THEN
+    ALTER TABLE qams.integration_endpoint ADD CONSTRAINT ck_integration_endpoint_system_domain
+      CHECK (system IN ('His','Lis','Pharmacy','Hr','Other')) NOT VALID;
+    ALTER TABLE qams.integration_endpoint VALIDATE CONSTRAINT ck_integration_endpoint_system_domain;
+
+    ALTER TABLE qams.integration_endpoint ADD CONSTRAINT ck_integration_endpoint_protocol_domain
+      CHECK (protocol IN ('Hl7V2','FhirR4','FileExtract','DbExtract')) NOT VALID;
+    ALTER TABLE qams.integration_endpoint VALIDATE CONSTRAINT ck_integration_endpoint_protocol_domain;
+
+    ALTER TABLE qams.integration_endpoint ADD CONSTRAINT ck_integration_endpoint_status_domain
+      CHECK (status IN ('Active','Suspended')) NOT VALID;
+    ALTER TABLE qams.integration_endpoint VALIDATE CONSTRAINT ck_integration_endpoint_status_domain;
+
+    ALTER TABLE qams.integration_message ADD CONSTRAINT ck_integration_message_status_domain
+      CHECK (status IN ('Received','Processed','Failed')) NOT VALID;
+    ALTER TABLE qams.integration_message VALIDATE CONSTRAINT ck_integration_message_status_domain;
+
+    ALTER TABLE qams.patient_stay ADD CONSTRAINT ck_patient_stay_status_domain
+      CHECK (status IN ('Admitted','Discharged')) NOT VALID;
+    ALTER TABLE qams.patient_stay VALIDATE CONSTRAINT ck_patient_stay_status_domain;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825223639_AddIntegrationHub') THEN
+    INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+    VALUES ('20260825223639_AddIntegrationHub', '9.0.19');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825232736_AddPatientSafety') THEN
+    CREATE TABLE qams.patient_safety_event (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        branch_id uuid,
+        department_id uuid,
+        event_ref character varying(30) NOT NULL,
+        type character varying(20) NOT NULL,
+        patient_ref character varying(100) NOT NULL,
+        unit character varying(100) NOT NULL,
+        occurred_at_utc timestamp with time zone NOT NULL,
+        harm_level character varying(20) NOT NULL,
+        origin character varying(20) NOT NULL,
+        description text NOT NULL,
+        stage character varying(20),
+        status character varying(20) NOT NULL,
+        reviewed_by uuid,
+        review_notes text,
+        reviewed_at_utc timestamp with time zone,
+        created_at_utc timestamp with time zone NOT NULL,
+        created_by text,
+        created_by_user_id uuid,
+        modified_at_utc timestamp with time zone,
+        modified_by text,
+        CONSTRAINT pk_patient_safety_event PRIMARY KEY (tenant_id, id)
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825232736_AddPatientSafety') THEN
+    CREATE UNIQUE INDEX ix_patient_safety_event_tenant_id_event_ref ON qams.patient_safety_event (tenant_id, event_ref);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825232736_AddPatientSafety') THEN
+    CREATE INDEX ix_patient_safety_event_tenant_id_occurred_at_utc ON qams.patient_safety_event (tenant_id, occurred_at_utc);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825232736_AddPatientSafety') THEN
+    CREATE INDEX ix_patient_safety_event_tenant_id_type_status ON qams.patient_safety_event (tenant_id, type, status);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825232736_AddPatientSafety') THEN
+    ALTER TABLE qams.patient_safety_event ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.patient_safety_event FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.patient_safety_event;
+    CREATE POLICY tenant_isolation ON qams.patient_safety_event
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825232736_AddPatientSafety') THEN
+    ALTER TABLE qams.patient_safety_event ADD CONSTRAINT ck_patient_safety_event_type_domain
+      CHECK (type IN ('Fall','PressureInjury')) NOT VALID;
+    ALTER TABLE qams.patient_safety_event VALIDATE CONSTRAINT ck_patient_safety_event_type_domain;
+
+    ALTER TABLE qams.patient_safety_event ADD CONSTRAINT ck_patient_safety_event_harm_level_domain
+      CHECK (harm_level IN ('None','Minor','Moderate','Severe','Death')) NOT VALID;
+    ALTER TABLE qams.patient_safety_event VALIDATE CONSTRAINT ck_patient_safety_event_harm_level_domain;
+
+    ALTER TABLE qams.patient_safety_event ADD CONSTRAINT ck_patient_safety_event_origin_domain
+      CHECK (origin IN ('PresentOnAdmission','HospitalAcquired')) NOT VALID;
+    ALTER TABLE qams.patient_safety_event VALIDATE CONSTRAINT ck_patient_safety_event_origin_domain;
+
+    ALTER TABLE qams.patient_safety_event ADD CONSTRAINT ck_patient_safety_event_stage_domain
+      CHECK (stage IS NULL OR stage IN ('Stage1','Stage2','Stage3','Stage4','Unstageable','DeepTissueInjury')) NOT VALID;
+    ALTER TABLE qams.patient_safety_event VALIDATE CONSTRAINT ck_patient_safety_event_stage_domain;
+
+    ALTER TABLE qams.patient_safety_event ADD CONSTRAINT ck_patient_safety_event_status_domain
+      CHECK (status IN ('Reported','Reviewed','Closed')) NOT VALID;
+    ALTER TABLE qams.patient_safety_event VALIDATE CONSTRAINT ck_patient_safety_event_status_domain;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260825232736_AddPatientSafety') THEN
+    INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+    VALUES ('20260825232736_AddPatientSafety', '9.0.19');
+    END IF;
+END $EF$;
 COMMIT;
 

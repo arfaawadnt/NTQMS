@@ -608,6 +608,67 @@ export interface AddSurveyQuestionRequest { text: string; domain: string; }
 export interface SurveyAnswerInput { questionId: string; score: number; }
 export interface SubmitSurveyResponseRequest { departmentId: string | null; serviceLine: string | null; answers: SurveyAnswerInput[]; }
 
+// ── Integration & Interoperability (HQMS M24) ────────────────────────────────
+
+export const INTERFACE_SYSTEMS = ['His', 'Lis', 'Pharmacy', 'Hr', 'Other'] as const;
+export type InterfaceSystem = (typeof INTERFACE_SYSTEMS)[number];
+
+export const INTERFACE_PROTOCOLS = ['Hl7V2', 'FhirR4', 'FileExtract', 'DbExtract'] as const;
+export type InterfaceProtocol = (typeof INTERFACE_PROTOCOLS)[number];
+
+export interface EndpointListItem {
+  id: string; name: string; system: string; protocol: string; status: string; healthy: boolean;
+  lastMessageAtUtc: string | null; lastErrorAtUtc: string | null; consecutiveFailures: number;
+  received: number; processed: number; failed: number;
+}
+
+export interface IntegrationMessage {
+  id: string; endpointId: string; dedupKey: string; messageType: string; status: string;
+  errorDetail: string | null; receivedAtUtc: string; processedAtUtc: string | null;
+}
+
+export interface PatientCensus {
+  activeStays: number; patientDaysWindow: number; asOfUtc: string; fromUtc: string;
+}
+
+export interface RegisterEndpointRequest { name: string; system: InterfaceSystem; protocol: InterfaceProtocol; }
+
+// ── Patient Safety (HQMS M08) ────────────────────────────────────────────────
+
+export const SAFETY_EVENT_TYPES = ['Fall', 'PressureInjury'] as const;
+export type SafetyEventType = (typeof SAFETY_EVENT_TYPES)[number];
+export const HARM_LEVELS = ['None', 'Minor', 'Moderate', 'Severe', 'Death'] as const;
+export type HarmLevel = (typeof HARM_LEVELS)[number];
+export const INJURY_ORIGINS = ['PresentOnAdmission', 'HospitalAcquired'] as const;
+export type InjuryOrigin = (typeof INJURY_ORIGINS)[number];
+export const PRESSURE_INJURY_STAGES = ['Stage1', 'Stage2', 'Stage3', 'Stage4', 'Unstageable', 'DeepTissueInjury'] as const;
+export type PressureInjuryStage = (typeof PRESSURE_INJURY_STAGES)[number];
+export const SAFETY_EVENT_STATUSES = ['Reported', 'Reviewed', 'Closed'] as const;
+
+export interface SafetyEventListItem {
+  id: string; eventRef: string; type: string; patientRef: string; unit: string; occurredAtUtc: string;
+  harmLevel: string; origin: string; stage: string | null; status: string;
+}
+
+export interface SafetyEventDetail {
+  id: string; eventRef: string; type: string; patientRef: string; unit: string; departmentId: string | null;
+  occurredAtUtc: string; harmLevel: string; origin: string; stage: string | null; description: string;
+  status: string; reviewedBy: string | null; reviewNotes: string | null; reviewedAtUtc: string | null;
+}
+
+export interface SafetyRate { type: string; eventCount: number; patientDays: number; ratePer1000: number; }
+export interface SafetyRates {
+  fromUtc: string; toUtc: string; patientDays: number;
+  falls: SafetyRate; pressureInjuries: SafetyRate;
+  hospitalAcquiredPressureInjuries: number; hapiRatePer1000: number;
+}
+
+export interface ReportFallRequest {
+  patientRef: string; unit: string; occurredAtUtc: string; harm: HarmLevel; description: string; departmentId: string | null;
+}
+export interface ReportPressureInjuryRequest extends ReportFallRequest { stage: PressureInjuryStage; origin: InjuryOrigin; }
+export interface ReviewSafetyEventRequest { notes: string; }
+
 // ── Reporting (read models — real data only) ─────────────────────────────────
 
 export interface DashboardKpis {

@@ -78,6 +78,7 @@ public static class PermissionCatalog
     public const string Nonconformances = "nc";
     public const string Incidents = "incidents";
     public const string Indicators = "indicators";
+    public const string PatientSafety = "patient-safety";
     public const string Standards = "standards";
     public const string Complaints = "complaints";
     public const string Feedback = "feedback";
@@ -106,6 +107,7 @@ public static class PermissionCatalog
     public const string ProficiencyTesting = "proficiency-testing";
     public const string Tasks = "tasks";
     public const string Notifications = "notifications";
+    public const string Integration = "integration";
     public const string Reports = "reports";
     public const string Organization = "organization";
     public const string TenantSettings = "tenant-settings";
@@ -141,6 +143,7 @@ public static class PermissionCatalog
         new(Nonconformances, GroupQuality, "perm.mod.nc", SignedRecordLifecycle),
         new(Incidents, GroupQuality, "perm.mod.incidents", SignedRecordLifecycle),
         new(Indicators, GroupQuality, "perm.mod.indicators", FullRecordLifecycle),
+        new(PatientSafety, GroupQuality, "perm.mod.patientSafety", FullRecordLifecycle),
         new(Complaints, GroupQuality, "perm.mod.complaints", FullRecordLifecycle),
         new(Feedback, GroupQuality, "perm.mod.feedback", FullRecordLifecycle),
         new(Surveys, GroupQuality, "perm.mod.surveys", FullRecordLifecycle),
@@ -186,6 +189,8 @@ public static class PermissionCatalog
         // ── Operations ───────────────────────────────────────────────────────
         new(Tasks, GroupOperations, "perm.mod.tasks", [PermissionAction.View, PermissionAction.Create, PermissionAction.Edit, PermissionAction.Manage]),
         new(Notifications, GroupOperations, "perm.mod.notifications", [PermissionAction.View, PermissionAction.Manage]),
+        new(Integration, GroupOperations, "perm.mod.integration",
+            [PermissionAction.View, PermissionAction.Create, PermissionAction.Edit, PermissionAction.Manage]),
         // Reporting carries Manage in addition to the read-only pair: the composite
         // Quality Health Score is a governance figure, so tuning its category
         // weighting is a privileged act distinct from reading the analytics.

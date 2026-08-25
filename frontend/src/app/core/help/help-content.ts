@@ -165,6 +165,22 @@ export const HELP_TOPICS: HelpTopic[] = [
         'Cliquez une notification pour ouvrir l’enregistrement lié ; marquez comme lu pour retirer le badge.'),
     ],
   },
+  {
+    route: '/integration', titleKey: 'nav.integration', groupKey: 'nav.groupOverview', icon: 'integration',
+    summary: L(
+      'Integration & interoperability: register interface endpoints (HIS/LIS/pharmacy/HR over HL7 v2, FHIR R4 or file/DB extract), watch their health, inspect the inbound message inbox including failures, and read the ADT-derived patient census that supplies rate denominators.',
+      'التكامل والتشغيل البيني: سجّل واجهات (HIS/LIS/الصيدلية/الموارد البشرية عبر HL7 v2 وFHIR R4 أو استخراج ملف/قاعدة بيانات)، وراقب حالتها، وافحص صندوق الرسائل الواردة بما فيها الفاشلة، واقرأ تعداد المرضى المشتق من ADT.',
+      'Intégration et interopérabilité : enregistrez des points d’accès (SIH/SIL/pharmacie/RH via HL7 v2, FHIR R4 ou extraction), surveillez leur santé, inspectez la boîte de réception (y compris les échecs) et lisez le recensement patient issu de l’ADT.'),
+    steps: [],
+    usage: [
+      L('Register an endpoint per source system and protocol; the adapter feeds messages into its inbox.',
+        'سجّل واجهة لكل نظام مصدر وبروتوكول؛ يغذّي المحوّل الرسائل في صندوقها.',
+        'Enregistrez un point d’accès par système et protocole ; l’adaptateur alimente sa boîte de réception.'),
+      L('Watch the health dashboard and failed-message list; suspend an endpoint to stop ingestion, resume to clear the failure streak.',
+        'راقب لوحة الحالة وقائمة الرسائل الفاشلة؛ علّق واجهة لإيقاف الاستقبال، واستأنف لمسح سلسلة الإخفاقات.',
+        'Surveillez le tableau de santé et les messages en échec ; suspendez pour arrêter l’ingestion, reprenez pour réinitialiser.'),
+    ],
+  },
 
   // ── Improvement ───────────────────────────────────────────────────────────
   {
@@ -320,6 +336,29 @@ export const HELP_TOPICS: HelpTopic[] = [
       L('Closing requires an electronic signature. A severe event can be declared a sentinel event, which triggers the executive protocol.',
         'يتطلب الإغلاق توقيعًا إلكترونيًا. يمكن إعلان الحدث الجسيم حدثًا جسيمًا يُفعّل البروتوكول التنفيذي.',
         'La clôture requiert une signature électronique. Un événement grave peut être déclaré sentinelle, déclenchant le protocole de direction.'),
+    ],
+  },
+  {
+    route: '/patient-safety', titleKey: 'nav.patientSafety', groupKey: 'nav.groupImprovement', icon: 'patientSafety',
+    summary: L(
+      'The patient-safety register for falls and pressure injuries. Each event carries its harm level, and pressure injuries also carry a stage and whether they were present on admission or hospital-acquired. Rates are computed per 1,000 patient-days from the ADT-derived census.',
+      'سجل سلامة المرضى لحالات السقوط وقرح الفراش. تحمل كل واقعة مستوى الضرر، وتحمل قرح الفراش أيضًا المرحلة وما إذا كانت موجودة عند الدخول أم مكتسبة بالمستشفى. تُحتسب المعدلات لكل 1000 يوم مريض من تعداد ADT.',
+      'Le registre de sécurité des patients pour les chutes et les escarres. Chaque événement porte son niveau de préjudice ; les escarres portent aussi un stade et l’origine (présente à l’admission ou acquise à l’hôpital). Les taux sont calculés pour 1 000 jours-patients à partir du recensement ADT.'),
+    steps: [
+      S(L('Reported', 'مُبلّغ', 'Signalé'), L('Capture the fall or pressure injury, its unit, harm and — for injuries — stage and origin.', 'سجّل السقوط أو قرحة الفراش ووحدتها والضرر — وللقرح المرحلة والمنشأ.', 'Consignez la chute ou l’escarre, son unité, le préjudice et — pour les escarres — le stade et l’origine.')),
+      S(L('Reviewed', 'تمت المراجعة', 'Examiné'), L('Clinical review records findings and any immediate action.', 'تسجّل المراجعة السريرية النتائج وأي إجراء فوري.', 'L’examen clinique consigne les constats et toute action immédiate.')),
+      S(L('Closed', 'مغلق', 'Clôturé'), L('Closed and frozen once review is complete.', 'يُغلق ويُجمّد بعد اكتمال المراجعة.', 'Clôturé et gelé une fois l’examen terminé.')),
+    ],
+    usage: [
+      L('Use Report fall or Report pressure injury; pressure injuries additionally capture stage and present-on-admission vs hospital-acquired.',
+        'استخدم «الإبلاغ عن سقوط» أو «الإبلاغ عن قرحة فراش»؛ تلتقط القرح إضافيًا المرحلة وما إذا كانت موجودة عند الدخول أم مكتسبة بالمستشفى.',
+        'Utilisez Signaler une chute ou Signaler une escarre ; les escarres saisissent en plus le stade et l’origine (admission ou hôpital).'),
+      L('The tiles show falls, pressure-injury and hospital-acquired-pressure-injury (HAPI) rates per 1,000 patient-days, using the patient-day denominator from the integration census.',
+        'تعرض البطاقات معدلات السقوط وقرح الفراش وقرح الفراش المكتسبة بالمستشفى لكل 1000 يوم مريض، باستخدام مقام أيام المرضى من تعداد التكامل.',
+        'Les tuiles affichent les taux de chutes, d’escarres et d’escarres acquises à l’hôpital (HAPI) pour 1 000 jours-patients, avec le dénominateur issu du recensement d’intégration.'),
+      L('Review records clinical findings; closing freezes the record for audit.',
+        'تسجّل المراجعة النتائج السريرية؛ ويُجمّد الإغلاق السجل للتدقيق.',
+        'L’examen consigne les constats cliniques ; la clôture gèle l’enregistrement pour l’audit.'),
     ],
   },
   {
