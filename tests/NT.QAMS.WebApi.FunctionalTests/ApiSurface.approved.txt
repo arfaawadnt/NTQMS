@@ -433,8 +433,10 @@ POST /api/carryover-studies/{id}/calculate
 POST /api/carryover-studies/{id}/readings
 POST /api/carryover-studies/{id}/sign-off
 POST /api/changes
+POST /api/changes/emergency
 POST /api/changes/{id}/approve
 POST /api/changes/{id}/close
+POST /api/changes/{id}/ratify
 POST /api/changes/{id}/reject
 POST /api/changes/{id}/review
 POST /api/changes/{id}/risk
@@ -732,8 +734,10 @@ POST /api/v{version}/carryover-studies/{id}/calculate
 POST /api/v{version}/carryover-studies/{id}/readings
 POST /api/v{version}/carryover-studies/{id}/sign-off
 POST /api/v{version}/changes
+POST /api/v{version}/changes/emergency
 POST /api/v{version}/changes/{id}/approve
 POST /api/v{version}/changes/{id}/close
+POST /api/v{version}/changes/{id}/ratify
 POST /api/v{version}/changes/{id}/reject
 POST /api/v{version}/changes/{id}/review
 POST /api/v{version}/changes/{id}/risk

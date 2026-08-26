@@ -31,13 +31,25 @@ import { EsignCredentials, EsignDialogComponent } from '../../shared/ui/esign-di
 
       <div class="meta card">
         <div><span class="muted">{{ i18n.t('nc.status') }}</span><qams-status-pill [status]="c.status" /></div>
+        <div><span class="muted">{{ i18n.t('chg.impactLevel') }}</span><span class="il" [class]="'il ' + c.impactLevel.toLowerCase()">{{ i18n.t('chg.il.' + c.impactLevel) }}</span></div>
         <div>
           <span class="muted">{{ i18n.t('chg.linkedRisk') }}</span>
           @if (c.riskItemId) { <a [routerLink]="['/risks', c.riskItemId]">{{ i18n.t('chg.viewRisk') }}</a> }
           @else { <span class="muted">{{ i18n.t('common.no') }}</span> }
         </div>
         @if (c.approvedBy) { <div><span class="muted">{{ i18n.t('chg.approvedBy') }}</span> {{ c.approvedBy }} · {{ c.approvedAtUtc | date:'medium' }}</div> }
+        @if (c.ratifiedBy) { <div><span class="muted">{{ i18n.t('chg.ratifiedBy') }}</span> {{ c.ratifiedBy }} · {{ c.ratifiedAtUtc | date:'medium' }}</div> }
       </div>
+
+      @if (c.isEmergency) {
+        <div class="banner emg">
+          {{ i18n.t('chg.emergencyBanner') }}
+          @if (c.retrospectiveDeadline) {
+            · {{ i18n.t('chg.retroDeadline') }}: {{ c.retrospectiveDeadline | date:'mediumDate' }}
+            @if (c.status === 'ImplementedPendingRatification' && overdue(c.retrospectiveDeadline)) { <b class="over">· {{ i18n.t('chg.overdue') }}</b> }
+          }
+        </div>
+      }
       @if (facade.error()) { <div class="error">{{ facade.error() }}</div> }
 
       <section class="card">
@@ -114,8 +126,36 @@ import { EsignCredentials, EsignDialogComponent } from '../../shared/ui/esign-di
             <button type="submit" [disabled]="reviewForm.invalid">{{ i18n.t('chg.recordPir') }}</button>
           </form>
         </section>
+      } @else if (c.status === 'ImplementedPendingRatification') {
+        <section class="card">
+          <h3>{{ i18n.t('chg.ratify') }}</h3>
+          <p class="muted small">{{ i18n.t('chg.ratifyHint') }}</p>
+
+          @if (!c.riskItemId) {
+            <form [formGroup]="linkForm" (ngSubmit)="linkRisk(c.id)">
+              <label>{{ i18n.t('chg.linkRiskRetro') }}</label>
+              <select formControlName="riskItemId">
+                <option value="">{{ i18n.t('chg.selectRisk') }}</option>
+                @for (r of facade.riskOptions(); track r.id) { <option [value]="r.id">{{ r.riskRef }} — {{ r.title }}</option> }
+              </select>
+              <button type="submit" [disabled]="linkForm.invalid">{{ i18n.t('chg.link') }}</button>
+            </form>
+          }
+
+          @if (perms.can('changes.sign')) {
+            <form [formGroup]="ratifyForm">
+              <label>{{ i18n.t('chg.implNotes') }}</label>
+              <textarea formControlName="implementationNotes" rows="3"></textarea>
+              <button type="button" (click)="ratifyOpen.set(true)" [disabled]="!c.riskItemId || ratifyForm.invalid">{{ i18n.t('chg.ratify') }}</button>
+              @if (!c.riskItemId) { <p class="muted small">{{ i18n.t('chg.ratifyRiskFirst') }}</p> }
+            </form>
+            <qams-esign-dialog [open]="ratifyOpen()" [meaning]="i18n.t('chg.ratifyMeaning')" [busy]="facade.loading()" [error]="facade.error()" (confirm)="doRatify(c.id, $event)" (cancel)="ratifyOpen.set(false)" />
+          } @else {
+            <p class="muted">{{ i18n.t('chg.approverOnly') }}</p>
+          }
+        </section>
       }
-    
+
       <qams-audit-trail [subject]="c.id" />
     } @else {
       <p class="muted">{{ i18n.t('common.loading') }}</p>
@@ -134,6 +174,13 @@ import { EsignCredentials, EsignDialogComponent } from '../../shared/ui/esign-di
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
     .pir.ok { border-left: 3px solid var(--nt-green); }
     .pir.bad { border-left: 3px solid var(--nt-red); }
+    .banner { padding: .5rem .8rem; border-radius: 6px; margin-bottom: 1rem; font-weight: 600; }
+    .banner.emg { background: color-mix(in srgb, var(--nt-ink-crit) 14%, transparent); color: var(--nt-ink-crit); }
+    .banner .over { color: var(--nt-ink-crit); }
+    .il { padding: 1px 7px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+    .il.low { background: color-mix(in srgb, var(--nt-slate) 18%, transparent); color: var(--nt-slate); }
+    .il.medium { background: color-mix(in srgb, var(--nt-ink-info) 16%, transparent); color: var(--nt-ink-info); }
+    .il.high { background: color-mix(in srgb, var(--nt-ink-serious) 20%, transparent); color: var(--nt-ink-serious); }
   `]
 })
 export class ChangeDetailComponent implements OnInit {
@@ -147,11 +194,24 @@ export class ChangeDetailComponent implements OnInit {
 
   /** Whether the Part 11 e-signature dialog is open for the approval. */
   readonly esignOpen = signal(false);
+  /** Whether the Part 11 e-signature dialog is open for the emergency-change ratification. */
+  readonly ratifyOpen = signal(false);
 
   /** Approves through the ceremony dialog; closes on success, stays open (showing the error) on failure. */
   async doApprove(id: string, credentials: EsignCredentials): Promise<void> {
     await this.facade.approve(id, credentials);
     if (this.facade.error() === '') { this.esignOpen.set(false); }
+  }
+
+  /** Ratifies an emergency change through the ceremony dialog. */
+  async doRatify(id: string, credentials: EsignCredentials): Promise<void> {
+    await this.facade.ratify(id, this.ratifyForm.getRawValue().implementationNotes, credentials);
+    if (this.facade.error() === '') { this.ratifyOpen.set(false); }
+  }
+
+  /** True when today is past the emergency change's retrospective deadline (yyyy-MM-dd). */
+  overdue(deadline: string): boolean {
+    return new Date().toISOString().slice(0, 10) > deadline.slice(0, 10);
   }
 
   /** Canonical workflow path for the stepper (off-path states render as terminal). */
@@ -171,6 +231,9 @@ export class ChangeDetailComponent implements OnInit {
   readonly reviewForm = this.fb.nonNullable.group({
     effective: [true, [Validators.required]],
     notes: ['', [Validators.required, Validators.maxLength(4000)]],
+  });
+  readonly ratifyForm = this.fb.nonNullable.group({
+    implementationNotes: ['', [Validators.required, Validators.maxLength(4000)]],
   });
 
   ngOnInit(): void {

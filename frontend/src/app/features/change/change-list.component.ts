@@ -6,7 +6,7 @@ import { ChangeFacade } from './change.facade';
 import { I18nService } from '../../core/i18n.service';
 import { OrgDataService } from '../../core/org-data.service';
 import { ChangeApiService } from '../../core/api/change-api.service';
-import { ChangeListItem } from '../../core/models';
+import { CHANGE_IMPACT_LEVELS, ChangeImpactLevel, ChangeListItem } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
@@ -25,6 +25,7 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
       <qams-export-menu [title]="i18n.t('chg.title')" [stats]="stats()" [columns]="exportColumns"
                         [rows]="filtered()" [fetchAll]="exportAll" [filtersSummary]="filtersSummary()" />
       <button (click)="showForm.set(!showForm())">{{ i18n.t('chg.new') }}</button>
+      <button class="danger" (click)="showEmergency.set(!showEmergency())">{{ i18n.t('chg.emergency') }}</button>
     </qams-page-header>
 
     <qams-list-stats [stats]="stats()" ratioFromFirst />
@@ -45,12 +46,32 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
       <form class="drawer-form" [formGroup]="form" (ngSubmit)="propose()">
         <label>{{ i18n.t('chg.changeTitle') }}</label>
         <input formControlName="title" />
+        <label>{{ i18n.t('chg.impactLevel') }}</label>
+        <select formControlName="impactLevel">@for (l of impactLevels; track l) { <option [value]="l">{{ i18n.t('chg.il.' + l) }}</option> }</select>
         <label>{{ i18n.t('chg.impact') }}</label>
         <textarea formControlName="impactAnalysis" rows="4" [placeholder]="i18n.t('chg.impactHint')"></textarea>
         <qams-allocation-picker [branchCtrl]="form.controls.branchId" [departmentCtrl]="form.controls.departmentId" />
         <div class="row">
           <button type="submit" [disabled]="form.invalid || facade.loading()">{{ i18n.t('chg.propose') }}</button>
           <button type="button" class="secondary" (click)="cancel()">{{ i18n.t('nc.cancel') }}</button>
+        </div>
+        @if (facade.error()) { <div class="error">{{ facade.error() }}</div> }
+      </form>
+    </qams-drawer>
+
+    <qams-drawer [open]="showEmergency()" [title]="i18n.t('chg.emergency')" (closed)="cancelEmergency()">
+      <form class="drawer-form" [formGroup]="emergencyForm" (ngSubmit)="proposeEmergency()">
+        <p class="muted">{{ i18n.t('chg.emergencyHint') }}</p>
+        <label>{{ i18n.t('chg.changeTitle') }}</label>
+        <input formControlName="title" />
+        <label>{{ i18n.t('chg.impact') }}</label>
+        <textarea formControlName="impactAnalysis" rows="3"></textarea>
+        <label>{{ i18n.t('chg.retroDeadline') }}</label>
+        <input type="date" formControlName="retrospectiveDeadline" />
+        <qams-allocation-picker [branchCtrl]="emergencyForm.controls.branchId" [departmentCtrl]="emergencyForm.controls.departmentId" />
+        <div class="row">
+          <button type="submit" class="danger" [disabled]="emergencyForm.invalid || facade.loading()">{{ i18n.t('chg.raiseEmergency') }}</button>
+          <button type="button" class="secondary" (click)="cancelEmergency()">{{ i18n.t('nc.cancel') }}</button>
         </div>
         @if (facade.error()) { <div class="error">{{ facade.error() }}</div> }
       </form>
@@ -65,13 +86,16 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
         <table>
           <thead><tr>
             <th>{{ i18n.t('chg.ref') }}</th><th>{{ i18n.t('chg.changeTitle') }}</th>
+            <th>{{ i18n.t('chg.impactLevel') }}</th>
             <th>{{ i18n.t('nc.status') }}</th><th>{{ i18n.t('chg.riskLinked') }}</th>
             <th>{{ i18n.t('alloc.branch') }}</th>
           </tr></thead>
           <tbody>
             @for (c of filtered(); track c.id) {
               <tr class="clickable" (click)="open(c.id)">
-                <td>{{ c.changeRef }}</td><td>{{ c.title }}</td>
+                <td>{{ c.changeRef }}@if (c.isEmergency) { <span class="emg">{{ i18n.t('chg.emergencyTag') }}</span> }</td>
+                <td>{{ c.title }}</td>
+                <td><span class="il" [class]="'il ' + c.impactLevel.toLowerCase()">{{ i18n.t('chg.il.' + c.impactLevel) }}</span></td>
                 <td><qams-status-pill [status]="c.status" /></td>
                 <td>{{ c.riskItemId ? i18n.t('common.yes') : i18n.t('common.no') }}</td>
                 <td class="code">{{ org.branchName(c.branchId) || '—' }}</td>
@@ -97,6 +121,11 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
     .row { display: flex; gap: .6rem; margin-top: 1rem; }
     .clickable { cursor: pointer; }
     button, select { width: auto; }
+    .emg { margin-inline-start: 6px; padding: 1px 6px; border-radius: 999px; font-size: 10.5px; font-weight: 700; background: var(--nt-ink-crit); color: #fff; }
+    .il { padding: 1px 7px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+    .il.low { background: color-mix(in srgb, var(--nt-slate) 18%, transparent); color: var(--nt-slate); }
+    .il.medium { background: color-mix(in srgb, var(--nt-ink-info) 16%, transparent); color: var(--nt-ink-info); }
+    .il.high { background: color-mix(in srgb, var(--nt-ink-serious) 20%, transparent); color: var(--nt-ink-serious); }
   `]
 })
 export class ChangeListComponent implements OnInit {
@@ -107,8 +136,10 @@ export class ChangeListComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
 
-  readonly statuses = ['Proposed', 'Approved', 'Rejected', 'Closed'];
+  readonly statuses = ['Proposed', 'Approved', 'Rejected', 'Closed', 'Reviewed', 'ImplementedPendingRatification'];
+  readonly impactLevels = CHANGE_IMPACT_LEVELS;
   readonly showForm = signal(false);
+  readonly showEmergency = signal(false);
   /** Whether the record-workspace drawer (child route) is active. */
   readonly detailOpen = signal(false);
   readonly statusFilter = signal('');
@@ -175,7 +206,16 @@ export class ChangeListComponent implements OnInit {
 
   readonly form = this.fb.nonNullable.group({
     title: ['', [Validators.required, Validators.maxLength(200)]],
+    impactLevel: ['Medium' as ChangeImpactLevel, [Validators.required]],
     impactAnalysis: ['', [Validators.required, Validators.maxLength(4000)]],
+    branchId: [''],
+    departmentId: [''],
+  });
+
+  readonly emergencyForm = this.fb.nonNullable.group({
+    title: ['', [Validators.required, Validators.maxLength(200)]],
+    impactAnalysis: ['', [Validators.required, Validators.maxLength(4000)]],
+    retrospectiveDeadline: ['', [Validators.required]],
     branchId: [''],
     departmentId: [''],
   });
@@ -201,9 +241,27 @@ export class ChangeListComponent implements OnInit {
     if (id) { this.cancel(); void this.router.navigate(['/changes', id]); }
   }
 
+  async proposeEmergency(): Promise<void> {
+    if (this.emergencyForm.invalid) { return; }
+    const raw = this.emergencyForm.getRawValue();
+    const id = await this.facade.proposeEmergency({
+      title: raw.title,
+      impactAnalysis: raw.impactAnalysis,
+      retrospectiveDeadline: raw.retrospectiveDeadline,
+      branchId: raw.branchId || null,
+      departmentId: raw.departmentId || null,
+    });
+    if (id) { this.cancelEmergency(); void this.router.navigate(['/changes', id]); }
+  }
+
   cancel(): void {
     this.showForm.set(false);
     this.form.reset();
+  }
+
+  cancelEmergency(): void {
+    this.showEmergency.set(false);
+    this.emergencyForm.reset();
   }
 
   open(id: string): void { void this.router.navigate(['/changes', id]); }

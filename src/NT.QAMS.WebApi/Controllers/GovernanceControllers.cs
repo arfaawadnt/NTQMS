@@ -83,7 +83,17 @@ public sealed class ChangeRequestsController(ISender sender) : ControllerBase
     public async Task<IActionResult> Propose(ProposeChangeRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new ProposeChangeCommand(request.Title, request.ImpactAnalysis,
+            Enum.Parse<NT.QAMS.Domain.RiskGovernance.ChangeImpactLevel>(request.ImpactLevel, ignoreCase: true),
             request.BranchId, request.DepartmentId), ct);
+        return CreatedAtAction(nameof(GetById), new { id }, new { id });
+    }
+
+    /// <summary>Raise an already-implemented emergency change for retrospective ratification (HQMS M18).</summary>
+    [HttpPost("emergency")]
+    public async Task<IActionResult> ProposeEmergency(ProposeEmergencyChangeRequest request, CancellationToken ct)
+    {
+        var id = await sender.Send(new ProposeEmergencyChangeCommand(
+            request.Title, request.ImpactAnalysis, request.RetrospectiveDeadline, request.BranchId, request.DepartmentId), ct);
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }
 
@@ -123,6 +133,15 @@ public sealed class ChangeRequestsController(ISender sender) : ControllerBase
     public async Task<IActionResult> Review(Guid id, ReviewChangeRequest request, CancellationToken ct)
     {
         await sender.Send(new ReviewChangeCommand(id, request.Effective, request.Notes), ct);
+        return NoContent();
+    }
+
+    /// <summary>Retrospectively ratify an emergency change — a Part 11 signing ceremony (HQMS M18).</summary>
+    [HttpPost("{id:guid}/ratify")]
+    [RequirePermission(PermissionCatalog.ChangeControl, PermissionAction.Sign)]
+    public async Task<IActionResult> Ratify(Guid id, RatifyChangeRequest request, CancellationToken ct)
+    {
+        await sender.Send(new RatifyChangeCommand(id, request.ImplementationNotes, request.Password, request.Pin), ct);
         return NoContent();
     }
 }

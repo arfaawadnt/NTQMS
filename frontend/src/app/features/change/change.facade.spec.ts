@@ -20,6 +20,7 @@ describe('ChangeFacade — post-implementation review', () => {
     status: 'Closed', proposedBy: 'u1', riskItemId: 'r1', approvedBy: 'u2', approvedAtUtc: '2026-07-01T00:00:00Z',
     rejectionReason: null, implementationNotes: 'Deployed', changeEffective: null,
     postImplementationReviewNotes: null, postImplementationReviewedBy: null, postImplementationReviewedAtUtc: null,
+    impactLevel: 'Medium', isEmergency: false, retrospectiveDeadline: null, ratifiedBy: null, ratifiedAtUtc: null,
   };
 
   beforeEach(() => {
@@ -58,12 +59,27 @@ describe('ChangeFacade — post-implementation review', () => {
     expect(facade.error()).toBe('Post-implementation review notes are required.');
   });
 
+  it('ratifies an emergency change and refetches it as Closed (HQMS M18)', async () => {
+    const done = facade.ratify('ch1', 'Documented and confirmed.', { password: 'pw', pin: '1234' });
+
+    const post = http.expectOne(`${base}/ch1/ratify`);
+    expect(post.request.body).toEqual({ implementationNotes: 'Documented and confirmed.', password: 'pw', pin: '1234' });
+    post.flush(null);
+
+    await new Promise((resolve) => setTimeout(resolve));
+    http.expectOne(`${base}/ch1`).flush({ ...closed, status: 'Closed', isEmergency: true, ratifiedBy: 'u2' });
+    await done;
+
+    expect(facade.selected()?.status).toBe('Closed');
+    expect(facade.selected()?.ratifiedBy).toBe('u2');
+  });
+
   // ── R-3 load-more pager over the API-004 envelope ─────────────────────────
 
   function item(id: string): ChangeListItem {
     return {
       id, changeRef: `CHG-2026-${id}`, title: `Change ${id}`, status: 'Proposed',
-      riskItemId: null, branchId: null, departmentId: null,
+      riskItemId: null, impactLevel: 'Medium', isEmergency: false, branchId: null, departmentId: null,
     };
   }
 

@@ -20,23 +20,32 @@ public sealed record RiskDetailDto(
 
 // ── Change control ───────────────────────────────────────────────────────────
 
-public sealed record ProposeChangeRequest(string Title, string ImpactAnalysis, Guid? BranchId = null, Guid? DepartmentId = null);
+public sealed record ProposeChangeRequest(
+    string Title, string ImpactAnalysis, string ImpactLevel = "Medium", Guid? BranchId = null, Guid? DepartmentId = null);
+/// <summary>Raise an already-implemented emergency change for retrospective ratification by a deadline (HQMS M18).</summary>
+public sealed record ProposeEmergencyChangeRequest(
+    string Title, string ImpactAnalysis, DateOnly RetrospectiveDeadline, Guid? BranchId = null, Guid? DepartmentId = null);
 public sealed record LinkRiskRequest(Guid RiskItemId);
 public sealed record RejectChangeRequest(string Reason);
 /// <summary>The two 21 CFR Part 11 identification components (§11.200(a)(1)) to approve a change.</summary>
 public sealed record ApproveChangeRequest(string Password, string Pin);
+/// <summary>Part 11 credentials plus the implementation notes to ratify an emergency change.</summary>
+public sealed record RatifyChangeRequest(string ImplementationNotes, string Password, string Pin);
 public sealed record CloseChangeRequest(string ImplementationNotes);
 public sealed record ReviewChangeRequest(bool Effective, string Notes);
 
 public sealed record ChangeListItemDto(
-    Guid Id, string ChangeRef, string Title, string Status, Guid? RiskItemId, Guid? BranchId = null, Guid? DepartmentId = null);
+    Guid Id, string ChangeRef, string Title, string Status, Guid? RiskItemId,
+    string ImpactLevel = "Medium", bool IsEmergency = false, Guid? BranchId = null, Guid? DepartmentId = null);
 
 public sealed record ChangeDetailDto(
     Guid Id, string ChangeRef, string Title, string ImpactAnalysis, string Status,
     Guid ProposedBy, Guid? RiskItemId, Guid? ApprovedBy, DateTimeOffset? ApprovedAtUtc,
     string? RejectionReason, string? ImplementationNotes,
     bool? ChangeEffective = null, string? PostImplementationReviewNotes = null,
-    Guid? PostImplementationReviewedBy = null, DateTimeOffset? PostImplementationReviewedAtUtc = null);
+    Guid? PostImplementationReviewedBy = null, DateTimeOffset? PostImplementationReviewedAtUtc = null,
+    string ImpactLevel = "Medium", bool IsEmergency = false, DateOnly? RetrospectiveDeadline = null,
+    Guid? RatifiedBy = null, DateTimeOffset? RatifiedAtUtc = null);
 
 // ── Management review ────────────────────────────────────────────────────────
 

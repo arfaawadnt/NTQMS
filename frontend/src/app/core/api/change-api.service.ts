@@ -4,7 +4,8 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   ChangeDetail, ChangeListItem, CloseChangeRequest, CreatedResource, DEFAULT_PAGE_SIZE,
-  LinkRiskRequest, Paged, ProposeChangeRequest, RejectChangeRequest, ReviewChangeRequest,
+  LinkRiskRequest, Paged, ProposeChangeRequest, ProposeEmergencyChangeRequest, RatifyChangeRequest,
+  RejectChangeRequest, ReviewChangeRequest,
 } from '../models';
 
 /** Typed client for the Change Control API (one method per backend endpoint). */
@@ -25,6 +26,14 @@ export class ChangeApiService {
 
   propose(body: ProposeChangeRequest): Observable<CreatedResource> {
     return this.http.post<CreatedResource>(this.base, body);
+  }
+
+  proposeEmergency(body: ProposeEmergencyChangeRequest): Observable<CreatedResource> {
+    return this.http.post<CreatedResource>(`${this.base}/emergency`, body);
+  }
+
+  ratify(id: string, body: RatifyChangeRequest): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/ratify`, body);
   }
 
   linkRisk(id: string, body: LinkRiskRequest): Observable<void> {

@@ -3,7 +3,13 @@ using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Domain.RiskGovernance;
 
-public enum ChangeStatus { Proposed, Approved, Rejected, Closed, Reviewed }
+public enum ChangeStatus { Proposed, Approved, Rejected, Closed, Reviewed, ImplementedPendingRatification }
+
+/// <summary>
+/// Assessed impact level of a change, captured at proposal so approval can be routed by risk
+/// (HQMS M18). A High-impact change may not be self-approved (segregation of duties).
+/// </summary>
+public enum ChangeImpactLevel { Low, Medium, High }
 
 /// <summary>
 /// Controlled change request. The load-bearing invariant: a change cannot be
@@ -25,9 +31,18 @@ public sealed class ChangeRequest : AggregateRoot, ITenantScoped, IAllocatable
     public string ChangeRef { get; private set; }
     public string Title { get; private set; }
     public string ImpactAnalysis { get; private set; }
+    public ChangeImpactLevel ImpactLevel { get; private set; }
     public Guid ProposedBy { get; private set; }
     public Guid? RiskItemId { get; private set; }
     public ChangeStatus Status { get; private set; }
+
+    // Emergency-change pathway (HQMS M18): an urgent change implemented before formal
+    // approval, then ratified retrospectively — with a hard deadline by which the
+    // retrospective documentation and risk assessment must be in place.
+    public bool IsEmergency { get; private set; }
+    public DateOnly? RetrospectiveDeadline { get; private set; }
+    public Guid? RatifiedBy { get; private set; }
+    public DateTimeOffset? RatifiedAtUtc { get; private set; }
     public Guid? ApprovedBy { get; private set; }
     public DateTimeOffset? ApprovedAtUtc { get; private set; }
     public string? RejectionReason { get; private set; }
@@ -41,7 +56,9 @@ public sealed class ChangeRequest : AggregateRoot, ITenantScoped, IAllocatable
     public bool? ChangeEffective { get; private set; }
     public string? PostImplementationReviewNotes { get; private set; }
 
-    public static ChangeRequest Propose(string changeRef, string title, string impactAnalysis, Guid proposedBy)
+    public static ChangeRequest Propose(
+        string changeRef, string title, string impactAnalysis, Guid proposedBy,
+        ChangeImpactLevel impactLevel = ChangeImpactLevel.Medium)
     {
         if (string.IsNullOrWhiteSpace(title))
         {
@@ -58,14 +75,53 @@ public sealed class ChangeRequest : AggregateRoot, ITenantScoped, IAllocatable
             ChangeRef = changeRef,
             Title = title.Trim(),
             ImpactAnalysis = impactAnalysis.Trim(),
+            ImpactLevel = impactLevel,
             ProposedBy = proposedBy,
             Status = ChangeStatus.Proposed,
         };
     }
 
+    /// <summary>
+    /// Raises an emergency change (HQMS M18): an urgent change that has already been implemented to
+    /// contain a live risk, entered here so it is documented and ratified retrospectively by the
+    /// <paramref name="retrospectiveDeadline"/>. Emergency changes are High-impact by nature and go
+    /// straight to <see cref="ChangeStatus.ImplementedPendingRatification"/>.
+    /// </summary>
+    public static ChangeRequest ProposeEmergency(
+        string changeRef, string title, string impactAnalysis, Guid proposedBy, DateOnly retrospectiveDeadline)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            throw new DomainException("CHG-001", "Change title is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(impactAnalysis))
+        {
+            throw new DomainException("CHG-002", "An impact analysis is required to propose a change.");
+        }
+
+        return new ChangeRequest
+        {
+            ChangeRef = changeRef,
+            Title = title.Trim(),
+            ImpactAnalysis = impactAnalysis.Trim(),
+            ImpactLevel = ChangeImpactLevel.High,
+            ProposedBy = proposedBy,
+            IsEmergency = true,
+            RetrospectiveDeadline = retrospectiveDeadline,
+            Status = ChangeStatus.ImplementedPendingRatification,
+        };
+    }
+
     public void LinkRiskAssessment(Guid riskItemId)
     {
-        Require(ChangeStatus.Proposed, "CHG-010", "link a risk assessment to");
+        // A risk assessment may be linked while a change is still Proposed, or retrospectively
+        // while an emergency change awaits ratification.
+        if (Status is not (ChangeStatus.Proposed or ChangeStatus.ImplementedPendingRatification))
+        {
+            throw new InvalidStateTransitionException("CHG-010", $"Cannot link a risk assessment to a change in state {Status}.");
+        }
+
         RiskItemId = riskItemId;
     }
 
@@ -75,6 +131,13 @@ public sealed class ChangeRequest : AggregateRoot, ITenantScoped, IAllocatable
         if (RiskItemId is null)
         {
             throw new DomainException("CHG-012", "A change cannot be approved without a linked risk assessment.");
+        }
+
+        // Impact-based routing (HQMS M18): a High-impact change cannot be self-approved by its
+        // proposer — it requires an independent approver (SoD-CHG-001).
+        if (ImpactLevel == ChangeImpactLevel.High && actorId == ProposedBy)
+        {
+            throw new DomainException("CHG-016", "A high-impact change must be approved by someone other than its proposer.");
         }
 
         Status = ChangeStatus.Approved;
@@ -123,6 +186,38 @@ public sealed class ChangeRequest : AggregateRoot, ITenantScoped, IAllocatable
         PostImplementationReviewNotes = notes.Trim();
         Raise(new ChangePostImplementationReviewed(Id, ChangeRef, effective, reviewerId, TenantId));
     }
+
+    /// <summary>
+    /// Retrospectively ratifies an emergency change (HQMS M18): the credentials committee confirms,
+    /// after the fact, that the already-implemented change was justified and its risk assessment is
+    /// in place. Requires a linked (retrospective) risk assessment; moves the change to Closed so it
+    /// can then pass the normal post-implementation review. A non-emergency change never enters this
+    /// state and so can never be ratified.
+    /// </summary>
+    public void Ratify(Guid actorId, string implementationNotes, DateTimeOffset at)
+    {
+        Require(ChangeStatus.ImplementedPendingRatification, "CHG-030", "ratify");
+        if (RiskItemId is null)
+        {
+            throw new DomainException("CHG-031", "An emergency change cannot be ratified without a retrospective risk assessment.");
+        }
+
+        if (actorId == ProposedBy)
+        {
+            throw new DomainException("CHG-032", "An emergency change must be ratified by someone other than its proposer.");
+        }
+
+        RatifiedBy = actorId;
+        RatifiedAtUtc = at;
+        ImplementationNotes = implementationNotes?.Trim() ?? string.Empty;
+        Status = ChangeStatus.Closed;
+        Raise(new ChangeRatified(Id, ChangeRef, actorId, TenantId));
+    }
+
+    /// <summary>True when an emergency change has not been ratified by its retrospective deadline.</summary>
+    public bool IsRatificationOverdue(DateOnly asOf) =>
+        IsEmergency && Status == ChangeStatus.ImplementedPendingRatification
+        && RetrospectiveDeadline is { } deadline && asOf > deadline;
 
     private void Require(ChangeStatus expected, string code, string action)
     {
@@ -290,6 +385,9 @@ public sealed record ChangeApproved(
 
 public sealed record ChangePostImplementationReviewed(
     Guid ChangeId, string ChangeRef, bool Effective, Guid ReviewedBy, Guid TenantId) : DomainEvent;
+
+public sealed record ChangeRatified(
+    Guid ChangeId, string ChangeRef, Guid RatifiedBy, Guid TenantId) : DomainEvent;
 
 public sealed record ReviewClosed(
     Guid ReviewId, string ReviewRef, Guid ClosedBy, int DecisionCount, Guid TenantId) : DomainEvent;

@@ -10955,5 +10955,69 @@ BEGIN
     VALUES ('20260826203856_AddEnvironmentOfCare', '9.0.19');
     END IF;
 END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826210742_ChangeControlEmergencyPathway') THEN
+    ALTER TABLE qams.change_request ALTER COLUMN status TYPE character varying(30);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826210742_ChangeControlEmergencyPathway') THEN
+    ALTER TABLE qams.change_request ADD impact_level character varying(10) NOT NULL DEFAULT 'Medium';
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826210742_ChangeControlEmergencyPathway') THEN
+    ALTER TABLE qams.change_request ADD is_emergency boolean NOT NULL DEFAULT FALSE;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826210742_ChangeControlEmergencyPathway') THEN
+    ALTER TABLE qams.change_request ADD ratified_at_utc timestamp with time zone;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826210742_ChangeControlEmergencyPathway') THEN
+    ALTER TABLE qams.change_request ADD ratified_by uuid;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826210742_ChangeControlEmergencyPathway') THEN
+    ALTER TABLE qams.change_request ADD retrospective_deadline date;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826210742_ChangeControlEmergencyPathway') THEN
+    ALTER TABLE qams.change_request DROP CONSTRAINT IF EXISTS ck_change_request_status_domain;
+    ALTER TABLE qams.change_request ADD CONSTRAINT ck_change_request_status_domain
+      CHECK (status IN ('Proposed','Approved','Rejected','Closed','Reviewed','ImplementedPendingRatification')) NOT VALID;
+    ALTER TABLE qams.change_request VALIDATE CONSTRAINT ck_change_request_status_domain;
+
+    ALTER TABLE qams.change_request ADD CONSTRAINT ck_change_request_impact_level_domain
+      CHECK (impact_level IN ('Low','Medium','High')) NOT VALID;
+    ALTER TABLE qams.change_request VALIDATE CONSTRAINT ck_change_request_impact_level_domain;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826210742_ChangeControlEmergencyPathway') THEN
+    INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+    VALUES ('20260826210742_ChangeControlEmergencyPathway', '9.0.19');
+    END IF;
+END $EF$;
 COMMIT;
 

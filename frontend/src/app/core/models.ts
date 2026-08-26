@@ -2467,12 +2467,17 @@ export interface ResidualAssessmentRequest { likelihood: number; impact: number;
 
 // ── Change Control ───────────────────────────────────────────────────────────
 
+export const CHANGE_IMPACT_LEVELS = ['Low', 'Medium', 'High'] as const;
+export type ChangeImpactLevel = (typeof CHANGE_IMPACT_LEVELS)[number];
+
 export interface ChangeListItem {
   id: string;
   changeRef: string;
   title: string;
   status: string;
   riskItemId: string | null;
+  impactLevel: string;
+  isEmergency: boolean;
   branchId: string | null;
   departmentId: string | null;
 }
@@ -2493,9 +2498,16 @@ export interface ChangeDetail {
   postImplementationReviewNotes: string | null;
   postImplementationReviewedBy: string | null;
   postImplementationReviewedAtUtc: string | null;
+  impactLevel: string;
+  isEmergency: boolean;
+  retrospectiveDeadline: string | null;
+  ratifiedBy: string | null;
+  ratifiedAtUtc: string | null;
 }
 
-export interface ProposeChangeRequest { title: string; impactAnalysis: string; branchId: string | null; departmentId: string | null; }
+export interface ProposeChangeRequest { title: string; impactAnalysis: string; impactLevel: ChangeImpactLevel; branchId: string | null; departmentId: string | null; }
+export interface ProposeEmergencyChangeRequest { title: string; impactAnalysis: string; retrospectiveDeadline: string; branchId: string | null; departmentId: string | null; }
+export interface RatifyChangeRequest { implementationNotes: string; password: string; pin: string; }
 export interface ReviewChangeRequest { effective: boolean; notes: string; }
 export interface LinkRiskRequest { riskItemId: string; }
 export interface RejectChangeRequest { reason: string; }

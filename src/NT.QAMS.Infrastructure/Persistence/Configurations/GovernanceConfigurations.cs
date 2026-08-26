@@ -42,7 +42,8 @@ public sealed class ChangeRequestConfiguration : IEntityTypeConfiguration<Change
         builder.HasKey(c => new { c.TenantId, c.Id });
         builder.Property(c => c.ChangeRef).HasMaxLength(30);
         builder.Property(c => c.Title).HasMaxLength(300);
-        builder.Property(c => c.Status).HasConversion<string>().HasMaxLength(20);
+        builder.Property(c => c.Status).HasConversion<string>().HasMaxLength(30);
+        builder.Property(c => c.ImpactLevel).HasConversion<string>().HasMaxLength(10);
         builder.HasIndex(c => new { c.TenantId, c.ChangeRef }).IsUnique();
         builder.Ignore(c => c.DomainEvents);
     }

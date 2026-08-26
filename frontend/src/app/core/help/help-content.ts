@@ -613,6 +613,9 @@ export const HELP_TOPICS: HelpTopic[] = [
       L('Assess impact and route for approval before implementation; verify after.',
         'قيّم الأثر ووجّه للاعتماد قبل التنفيذ؛ وتحقّق بعده.',
         'Évaluez l’impact et faites approuver avant mise en œuvre ; vérifiez ensuite.'),
+      L('Set the impact level — a high-impact change cannot be approved by its own proposer. For an urgent change already implemented, use Emergency change: it is recorded for retrospective ratification (a signed step) by a deadline, then follows the normal post-implementation review.',
+        'حدّد مستوى الأثر — لا يمكن لمقترح التغيير عالي الأثر اعتماده بنفسه. وللتغيير العاجل المُنفّذ بالفعل، استخدم «تغيير طارئ»: يُسجَّل للمصادقة الرجعية (خطوة موقّعة) بحلول موعد نهائي، ثم يتبع المراجعة اللاحقة المعتادة.',
+        'Définissez le niveau d’impact — un changement à fort impact ne peut être approuvé par son propre auteur. Pour un changement urgent déjà mis en œuvre, utilisez Changement urgent : il est enregistré pour ratification rétrospective (étape signée) avant une échéance, puis suit la revue post-implémentation habituelle.'),
     ],
   },
   {

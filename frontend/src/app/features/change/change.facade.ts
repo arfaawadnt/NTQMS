@@ -3,7 +3,9 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, firstValueFrom } from 'rxjs';
 import { ChangeApiService } from '../../core/api/change-api.service';
 import { RiskApiService } from '../../core/api/risk-api.service';
-import { ChangeDetail, ChangeListItem, ProposeChangeRequest, RiskListItem } from '../../core/models';
+import {
+  ChangeDetail, ChangeListItem, ProposeChangeRequest, ProposeEmergencyChangeRequest, RiskListItem,
+} from '../../core/models';
 
 /**
  * Signal-based facade for Change Control. Drives the propose → link-risk →
@@ -72,6 +74,14 @@ export class ChangeFacade {
 
   async propose(request: ProposeChangeRequest): Promise<string | null> {
     return this.run(async () => (await firstValueFrom(this.api.propose(request))).id);
+  }
+
+  async proposeEmergency(request: ProposeEmergencyChangeRequest): Promise<string | null> {
+    return this.run(async () => (await firstValueFrom(this.api.proposeEmergency(request))).id);
+  }
+
+  async ratify(id: string, implementationNotes: string, credentials: { password: string; pin: string }): Promise<void> {
+    await this.mutate(id, () => this.api.ratify(id, { implementationNotes, ...credentials }));
   }
 
   async linkRisk(id: string, riskItemId: string): Promise<void> {

@@ -153,6 +153,7 @@ public sealed class GetRiskByIdHandler(IAppDbContext db) : IQueryHandler<GetRisk
 
 [RequireInternalActor]
 public sealed record ProposeChangeCommand(string Title, string ImpactAnalysis,
+    ChangeImpactLevel ImpactLevel = ChangeImpactLevel.Medium,
     Guid? BranchId = null, Guid? DepartmentId = null) : ICommand<Guid>;
 
 public sealed class ProposeChangeValidator : AbstractValidator<ProposeChangeCommand>
@@ -172,7 +173,39 @@ public sealed class ProposeChangeHandler(
     {
         var changeRef = await refs.NextAsync(GovernanceHelpers.RequireTenant(tenant), "CHG", ct);
         var change = ChangeRequest.Propose(
-            changeRef, c.Title, c.ImpactAnalysis, GovernanceHelpers.RequireActor(user));
+            changeRef, c.Title, c.ImpactAnalysis, GovernanceHelpers.RequireActor(user), c.ImpactLevel);
+        change.BranchId = c.BranchId;
+        change.DepartmentId = c.DepartmentId;
+        db.ChangeRequests.Add(change);
+        await db.SaveChangesAsync(ct);
+        return change.Id;
+    }
+}
+
+// The emergency-change pathway (HQMS M18): the change is already implemented; this records it for
+// retrospective ratification by a deadline. Not a signing ceremony at intake — the ratification is.
+[RequireInternalActor]
+public sealed record ProposeEmergencyChangeCommand(string Title, string ImpactAnalysis,
+    DateOnly RetrospectiveDeadline, Guid? BranchId = null, Guid? DepartmentId = null) : ICommand<Guid>;
+
+public sealed class ProposeEmergencyChangeValidator : AbstractValidator<ProposeEmergencyChangeCommand>
+{
+    public ProposeEmergencyChangeValidator()
+    {
+        RuleFor(x => x.Title).NotEmpty().MaximumLength(300);
+        RuleFor(x => x.ImpactAnalysis).NotEmpty().MaximumLength(4000);
+    }
+}
+
+public sealed class ProposeEmergencyChangeHandler(
+    IAppDbContext db, ICurrentTenant tenant, ICurrentUser user, IReferenceNumberGenerator refs)
+    : ICommandHandler<ProposeEmergencyChangeCommand, Guid>
+{
+    public async Task<Guid> Handle(ProposeEmergencyChangeCommand c, CancellationToken ct)
+    {
+        var changeRef = await refs.NextAsync(GovernanceHelpers.RequireTenant(tenant), "CHG", ct);
+        var change = ChangeRequest.ProposeEmergency(
+            changeRef, c.Title, c.ImpactAnalysis, GovernanceHelpers.RequireActor(user), c.RetrospectiveDeadline);
         change.BranchId = c.BranchId;
         change.DepartmentId = c.DepartmentId;
         db.ChangeRequests.Add(change);
@@ -216,6 +249,17 @@ public sealed class ReviewChangeValidator : AbstractValidator<ReviewChangeComman
 {
     public ReviewChangeValidator() =>
         RuleFor(x => x.Notes).NotEmpty().MaximumLength(4000);
+}
+
+/// <summary>Ratifying an emergency change is a Part 11 signing ceremony (retrospective approval).</summary>
+[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.ChangeControl,
+    NT.QAMS.Domain.Authorization.PermissionAction.Sign)]
+public sealed record RatifyChangeCommand(Guid ChangeId, string ImplementationNotes, string Password, string Pin) : ICommand;
+
+public sealed class RatifyChangeValidator : AbstractValidator<RatifyChangeCommand>
+{
+    public RatifyChangeValidator() =>
+        RuleFor(x => x.ImplementationNotes).NotEmpty().MaximumLength(4000);
 }
 
 internal static class ChangeLoader
@@ -300,6 +344,38 @@ public sealed class ReviewChangeHandler(IAppDbContext db, ICurrentUser user, ICl
     }
 }
 
+public sealed class RatifyChangeHandler(
+    IAppDbContext db, ICurrentUser user, IClock clock, IESignatureService signatures)
+    : ICommandHandler<RatifyChangeCommand>
+{
+    public async Task Handle(RatifyChangeCommand c, CancellationToken ct)
+    {
+        var actor = GovernanceHelpers.RequireActor(user);
+        var change = await ChangeLoader.LoadAsync(db, c.ChangeId, ct);
+
+        // Pre-validate before minting the signature (append-only ledger); the aggregate re-checks.
+        if (change.Status != ChangeStatus.ImplementedPendingRatification)
+        {
+            throw new InvalidStateTransitionException(
+                "CHG-030", $"Cannot ratify a change in state {change.Status}.");
+        }
+
+        if (change.RiskItemId is null)
+        {
+            throw new DomainException(
+                "CHG-031", "An emergency change cannot be ratified without a retrospective risk assessment.");
+        }
+
+        var subjectRef = $"CHG:{change.Id:N}";
+        await signatures.SignAsync(
+            actor, c.Password, c.Pin, $"Ratified emergency change {change.ChangeRef}", subjectRef,
+            SignatureContentHash.Compute(("change", change.ChangeRef), ("outcome", "ratified")), ct);
+
+        change.Ratify(actor, c.ImplementationNotes, clock.UtcNow);
+        await db.SaveChangesAsync(ct);
+    }
+}
+
 public sealed record GetChangesQuery(
     string? Status = null, int Page = 1, int PageSize = PageRequest.DefaultPageSize)
     : IQuery<Contracts.Common.PagedResponse<ChangeListItemDto>>;
@@ -318,7 +394,9 @@ public sealed class GetChangesHandler(IAppDbContext db)
         // API-004: pagination envelope — no silent cap; the client sees the total.
         return await query
             .OrderByDescending(x => x.CreatedAtUtc)
-            .Select(x => new ChangeListItemDto(x.Id, x.ChangeRef, x.Title, x.Status.ToString(), x.RiskItemId, x.BranchId, x.DepartmentId))
+            .Select(x => new ChangeListItemDto(
+                x.Id, x.ChangeRef, x.Title, x.Status.ToString(), x.RiskItemId,
+                x.ImpactLevel.ToString(), x.IsEmergency, x.BranchId, x.DepartmentId))
             .ToPagedAsync(PageRequest.Normalized(q.Page, q.PageSize), ct);
     }
 }
@@ -338,7 +416,8 @@ public sealed class GetChangeByIdHandler(IAppDbContext db)
             x.ProposedBy, x.RiskItemId, x.ApprovedBy, x.ApprovedAtUtc,
             x.RejectionReason, x.ImplementationNotes,
             x.ChangeEffective, x.PostImplementationReviewNotes,
-            x.PostImplementationReviewedBy, x.PostImplementationReviewedAtUtc);
+            x.PostImplementationReviewedBy, x.PostImplementationReviewedAtUtc,
+            x.ImpactLevel.ToString(), x.IsEmergency, x.RetrospectiveDeadline, x.RatifiedBy, x.RatifiedAtUtc);
     }
 }
 
