@@ -21,6 +21,10 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.*" />
+    <!-- Direct reference so the self-contained publish always emits System.Text.Json.dll: the
+         floating 9.0.* deps pull a newer STJ patch than the bundled shared-framework runtime pack,
+         and a framework-overlapping *transitive* assembly is otherwise dropped from the output. -->
+    <PackageReference Include="System.Text.Json" Version="9.0.*" />
     <PackageReference Include="Npgsql.OpenTelemetry" Version="9.0.4" />
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.17.0" />
     <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.17.0-beta.1" />
