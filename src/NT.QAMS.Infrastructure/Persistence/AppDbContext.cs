@@ -27,6 +27,7 @@ using NT.QAMS.Domain.Sla;
 using NT.QAMS.Domain.RiskGovernance;
 using NT.QAMS.Domain.SupplierQuality;
 using NT.QAMS.Domain.Tenancy;
+using NT.QAMS.Domain.TrainingManagement;
 using NT.QAMS.Infrastructure.Persistence.Outbox;
 using NT.QAMS.SharedKernel.MultiTenancy;
 
@@ -83,6 +84,8 @@ public sealed class AppDbContext(
     public DbSet<PatientSafetyEvent> PatientSafetyEvents => Set<PatientSafetyEvent>();
     public DbSet<HaiCase> HaiCases => Set<HaiCase>();
     public DbSet<DeviceExposure> DeviceExposures => Set<DeviceExposure>();
+    public DbSet<TrainingCourse> TrainingCourses => Set<TrainingCourse>();
+    public DbSet<TrainingSession> TrainingSessions => Set<TrainingSession>();
     public DbSet<EquipmentItem> EquipmentItems => Set<EquipmentItem>();
     public DbSet<ReferenceStandard> ReferenceStandards => Set<ReferenceStandard>();
     public DbSet<CompetencyRecord> Competencies => Set<CompetencyRecord>();

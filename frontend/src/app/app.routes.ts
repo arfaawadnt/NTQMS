@@ -98,6 +98,20 @@ export const routes: Routes = [
             ],
           },
           {
+            path: 'training-catalogue/sessions/:id',
+            loadComponent: () => import('./features/training/session-detail.component').then((m) => m.SessionDetailComponent),
+          },
+          {
+            path: 'training-catalogue',
+            loadComponent: () => import('./features/training/training-list.component').then((m) => m.TrainingListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/training/course-detail.component').then((m) => m.CourseDetailComponent),
+              },
+            ],
+          },
+          {
             path: 'surveys',
             loadComponent: () => import('./features/surveys/surveys-list.component').then((m) => m.SurveysListComponent),
             children: [

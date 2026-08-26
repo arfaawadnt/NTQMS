@@ -385,6 +385,29 @@ export const HELP_TOPICS: HelpTopic[] = [
     ],
   },
   {
+    route: '/training-catalogue', titleKey: 'nav.trainingCatalogue', groupKey: 'nav.groupPeople', icon: 'trainingCatalogue',
+    summary: L(
+      'The training course catalogue and its delivery: define reusable courses with a pass mark and validity, schedule sessions, register trainees and capture pre/post assessment scores, then read the effectiveness roll-up and the compliance dashboard. This is distinct from the individual training-assignment queue.',
+      'فهرس الدورات التدريبية وتنفيذها: عرّف دورات قابلة لإعادة الاستخدام بدرجة نجاح وصلاحية، وجدول الجلسات، وسجّل المتدربين والتقييمات القبلية/البعدية، ثم اطّلع على ملخص الفعالية ولوحة الامتثال. يختلف هذا عن قائمة مهام التدريب الفردية.',
+      'Le catalogue des cours et leur déploiement : définissez des cours réutilisables avec un seuil de réussite et une validité, planifiez des sessions, inscrivez les stagiaires et saisissez les scores avant/après, puis consultez la synthèse d’efficacité et le tableau de conformité. Distinct de la file d’attente des affectations individuelles.'),
+    steps: [
+      S(L('Draft', 'مسودة', 'Brouillon'), L('Define the course — title, category, duration, pass mark and validity.', 'عرّف الدورة — العنوان والفئة والمدة ودرجة النجاح والصلاحية.', 'Définissez le cours — intitulé, catégorie, durée, seuil et validité.')),
+      S(L('Active', 'نشط', 'Actif'), L('Activate the course, then schedule and deliver sessions.', 'فعّل الدورة ثم جدول الجلسات ونفّذها.', 'Activez le cours, puis planifiez et animez des sessions.')),
+      S(L('Retired', 'متقاعد', 'Retiré'), L('Retire the course when it is superseded.', 'تقاعد الدورة عند استبدالها.', 'Retirez le cours lorsqu’il est remplacé.')),
+    ],
+    usage: [
+      L('Define a course and activate it; each session registers trainees, is held, then attendance and pre/post scores are recorded and the session is closed.',
+        'عرّف دورة وفعّلها؛ تُسجّل كل جلسة المتدربين وتُعقد ثم يُسجّل الحضور والتقييمات القبلية/البعدية وتُغلق الجلسة.',
+        'Définissez un cours et activez-le ; chaque session inscrit les stagiaires, est tenue, puis la présence et les scores avant/après sont enregistrés et la session clôturée.'),
+      L('Passing requires attendance and a post-assessment at or above the pass mark; the course shows the pass rate, mean pre/post scores and the mean gain.',
+        'يتطلب النجاح الحضور وتقييمًا بعديًا عند درجة النجاح أو أعلى؛ تعرض الدورة معدل النجاح ومتوسط الدرجات القبلية/البعدية ومتوسط التحسن.',
+        'La réussite exige la présence et un score après-formation au moins égal au seuil ; le cours affiche le taux de réussite, les moyennes avant/après et le gain moyen.'),
+      L('The compliance summary rolls up, per active course, the sessions held, distinct trainees reached and how many passed.',
+        'يلخّص ملخص الامتثال لكل دورة نشطة الجلسات المعقودة وعدد المتدربين المميزين وعدد الناجحين.',
+        'La synthèse de conformité récapitule, par cours actif, les sessions tenues, les stagiaires distincts atteints et le nombre de réussites.'),
+    ],
+  },
+  {
     route: '/nonconformances', titleKey: 'nav.nc', groupKey: 'nav.groupImprovement', icon: 'nc',
     summary: L(
       'The nonconformance & CAPA register: log a problem, find its root cause, plan corrective action, then verify the fix worked and was effective before closing.',

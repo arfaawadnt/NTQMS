@@ -333,6 +333,7 @@ export class ShellComponent {
           { path: '/competencies', label: 'nav.competency', icon: 'competencies' },
           { path: '/authorizations', label: 'nav.authz', icon: 'authorizations' },
           { path: '/training', label: 'nav.training', icon: 'training' },
+          { path: '/training-catalogue', label: 'nav.trainingCatalogue', icon: 'trainingCatalogue' },
         ],
       },
       {

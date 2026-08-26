@@ -25,6 +25,7 @@ using NT.QAMS.Domain.Reporting;
 using NT.QAMS.Domain.Sla;
 using NT.QAMS.Domain.RiskGovernance;
 using NT.QAMS.Domain.SupplierQuality;
+using NT.QAMS.Domain.TrainingManagement;
 using NT.QAMS.Domain.Tenancy;
 
 namespace NT.QAMS.Application.Abstractions;
@@ -67,6 +68,8 @@ public interface IAppDbContext
     DbSet<PatientSafetyEvent> PatientSafetyEvents { get; }
     DbSet<HaiCase> HaiCases { get; }
     DbSet<DeviceExposure> DeviceExposures { get; }
+    DbSet<TrainingCourse> TrainingCourses { get; }
+    DbSet<TrainingSession> TrainingSessions { get; }
     DbSet<EquipmentItem> EquipmentItems { get; }
     DbSet<ReferenceStandard> ReferenceStandards { get; }
     DbSet<TestAuthorization> TestAuthorizations { get; }

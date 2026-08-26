@@ -713,6 +713,55 @@ export interface RecordDeviceExposureRequest {
 }
 export interface RemoveDeviceRequest { removedAtUtc: string; }
 
+// ── Training management: catalogue, sessions, effectiveness (HQMS M12) ─────────
+
+export const TRAINING_CATEGORIES = ['Mandatory', 'Clinical', 'Safety', 'Orientation', 'Cme'] as const;
+export type TrainingCategory = (typeof TRAINING_CATEGORIES)[number];
+export const COURSE_STATUSES = ['Draft', 'Active', 'Retired'] as const;
+export const SESSION_STATUSES = ['Scheduled', 'Held', 'Closed', 'Cancelled'] as const;
+
+export interface CourseListItem {
+  id: string; courseRef: string; title: string; category: string; durationHours: number;
+  validityMonths: number | null; passMark: number; status: string; sessionCount: number;
+}
+export interface CourseEffectiveness {
+  sessionsHeld: number; attendedCount: number; passedCount: number; passRate: number;
+  meanPreScore: number | null; meanPostScore: number | null; meanGain: number | null;
+}
+export interface CourseDetail {
+  id: string; courseRef: string; title: string; category: string; description: string; durationHours: number;
+  validityMonths: number | null; passMark: number; status: string; effectiveness: CourseEffectiveness;
+}
+export interface SessionListItem {
+  id: string; courseId: string; courseTitle: string; sessionRef: string; scheduledAtUtc: string;
+  location: string; trainerName: string; status: string; registeredCount: number; attendedCount: number;
+}
+export interface SessionAttendanceItem {
+  id: string; traineeId: string; attended: boolean; preScore: number | null; postScore: number | null;
+  scoreGain: number | null; passed: boolean;
+}
+export interface SessionDetail {
+  id: string; courseId: string; courseTitle: string; sessionRef: string; scheduledAtUtc: string;
+  location: string; trainerName: string; status: string; passMark: number; attendance: SessionAttendanceItem[];
+}
+export interface TrainingComplianceRow {
+  courseId: string; courseRef: string; title: string; category: string; sessionsHeld: number;
+  distinctTrainees: number; passedTrainees: number; passRate: number; meanPostScore: number | null;
+}
+
+export interface DefineCourseRequest {
+  title: string; category: TrainingCategory; description: string; durationHours: number;
+  validityMonths: number | null; passMark: number;
+}
+export type UpdateCourseRequest = DefineCourseRequest;
+export interface ScheduleSessionRequest {
+  courseId: string; scheduledAtUtc: string; location: string; trainerName: string;
+}
+export interface RegisterAttendeeRequest { traineeId: string; }
+export interface RecordSessionAttendanceRequest {
+  traineeId: string; attended: boolean; preScore: number | null; postScore: number | null;
+}
+
 // ── Reporting (read models — real data only) ─────────────────────────────────
 
 export interface DashboardKpis {

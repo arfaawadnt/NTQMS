@@ -10232,5 +10232,190 @@ BEGIN
     VALUES ('20260826161611_AddInfectionControl', '9.0.19');
     END IF;
 END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826171401_AddTrainingManagement') THEN
+    CREATE TABLE qams.training_course (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        course_ref character varying(30) NOT NULL,
+        title character varying(200) NOT NULL,
+        category character varying(20) NOT NULL,
+        description text NOT NULL,
+        duration_hours numeric(6,2) NOT NULL,
+        validity_months integer,
+        pass_mark integer NOT NULL,
+        status character varying(20) NOT NULL,
+        created_at_utc timestamp with time zone NOT NULL,
+        created_by text,
+        created_by_user_id uuid,
+        modified_at_utc timestamp with time zone,
+        modified_by text,
+        CONSTRAINT pk_training_course PRIMARY KEY (tenant_id, id)
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826171401_AddTrainingManagement') THEN
+    CREATE TABLE qams.training_session (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        course_id uuid NOT NULL,
+        session_ref character varying(30) NOT NULL,
+        scheduled_at_utc timestamp with time zone NOT NULL,
+        location character varying(200) NOT NULL,
+        trainer_name character varying(200) NOT NULL,
+        status character varying(20) NOT NULL,
+        created_at_utc timestamp with time zone NOT NULL,
+        created_by text,
+        created_by_user_id uuid,
+        modified_at_utc timestamp with time zone,
+        modified_by text,
+        CONSTRAINT pk_training_session PRIMARY KEY (tenant_id, id)
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826171401_AddTrainingManagement') THEN
+    CREATE TABLE qams.training_session_attendance (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        trainee_id uuid NOT NULL,
+        attended boolean NOT NULL,
+        pre_score integer,
+        post_score integer,
+        passed boolean NOT NULL,
+        training_session_id uuid NOT NULL,
+        CONSTRAINT pk_training_session_attendance PRIMARY KEY (tenant_id, id),
+        CONSTRAINT fk_training_session_attendance_training_session_tenant_id_trai FOREIGN KEY (tenant_id, training_session_id) REFERENCES qams.training_session (tenant_id, id) ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826171401_AddTrainingManagement') THEN
+    CREATE INDEX ix_training_course_tenant_id_category_status ON qams.training_course (tenant_id, category, status);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826171401_AddTrainingManagement') THEN
+    CREATE UNIQUE INDEX ix_training_course_tenant_id_course_ref ON qams.training_course (tenant_id, course_ref);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826171401_AddTrainingManagement') THEN
+    CREATE INDEX ix_training_session_tenant_id_course_id ON qams.training_session (tenant_id, course_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826171401_AddTrainingManagement') THEN
+    CREATE UNIQUE INDEX ix_training_session_tenant_id_session_ref ON qams.training_session (tenant_id, session_ref);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826171401_AddTrainingManagement') THEN
+    CREATE INDEX ix_training_session_tenant_id_status ON qams.training_session (tenant_id, status);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826171401_AddTrainingManagement') THEN
+    CREATE INDEX ix_training_session_attendance_tenant_id_training_session_id ON qams.training_session_attendance (tenant_id, training_session_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826171401_AddTrainingManagement') THEN
+    ALTER TABLE qams.training_course ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.training_course FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.training_course;
+    CREATE POLICY tenant_isolation ON qams.training_course
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826171401_AddTrainingManagement') THEN
+    ALTER TABLE qams.training_session ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.training_session FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.training_session;
+    CREATE POLICY tenant_isolation ON qams.training_session
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826171401_AddTrainingManagement') THEN
+    ALTER TABLE qams.training_session_attendance ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.training_session_attendance FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.training_session_attendance;
+    CREATE POLICY tenant_isolation ON qams.training_session_attendance
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826171401_AddTrainingManagement') THEN
+    ALTER TABLE qams.training_course ADD CONSTRAINT ck_training_course_category_domain
+      CHECK (category IN ('Mandatory','Clinical','Safety','Orientation','Cme')) NOT VALID;
+    ALTER TABLE qams.training_course VALIDATE CONSTRAINT ck_training_course_category_domain;
+
+    ALTER TABLE qams.training_course ADD CONSTRAINT ck_training_course_status_domain
+      CHECK (status IN ('Draft','Active','Retired')) NOT VALID;
+    ALTER TABLE qams.training_course VALIDATE CONSTRAINT ck_training_course_status_domain;
+
+    ALTER TABLE qams.training_course ADD CONSTRAINT ck_training_course_pass_mark_range
+      CHECK (pass_mark BETWEEN 0 AND 100) NOT VALID;
+    ALTER TABLE qams.training_course VALIDATE CONSTRAINT ck_training_course_pass_mark_range;
+
+    ALTER TABLE qams.training_session ADD CONSTRAINT ck_training_session_status_domain
+      CHECK (status IN ('Scheduled','Held','Closed','Cancelled')) NOT VALID;
+    ALTER TABLE qams.training_session VALIDATE CONSTRAINT ck_training_session_status_domain;
+
+    ALTER TABLE qams.training_session_attendance ADD CONSTRAINT ck_training_session_attendance_score_range
+      CHECK ((pre_score IS NULL OR pre_score BETWEEN 0 AND 100)
+             AND (post_score IS NULL OR post_score BETWEEN 0 AND 100)) NOT VALID;
+    ALTER TABLE qams.training_session_attendance VALIDATE CONSTRAINT ck_training_session_attendance_score_range;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826171401_AddTrainingManagement') THEN
+    INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+    VALUES ('20260826171401_AddTrainingManagement', '9.0.19');
+    END IF;
+END $EF$;
 COMMIT;
 
