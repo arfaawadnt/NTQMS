@@ -13,6 +13,8 @@ using NT.QAMS.Domain.IdentityAccess;
 using NT.QAMS.Domain.IncidentReporting;
 using NT.QAMS.Domain.InfectionControl;
 using NT.QAMS.Domain.Integration;
+using NT.QAMS.Domain.MortalityReview;
+using MortalityReviewAggregate = NT.QAMS.Domain.MortalityReview.MortalityReview;
 using NT.QAMS.Domain.Improvement;
 using NT.QAMS.Domain.Notifications;
 using NT.QAMS.Domain.Organization;
@@ -70,6 +72,8 @@ public interface IAppDbContext
     DbSet<DeviceExposure> DeviceExposures { get; }
     DbSet<TrainingCourse> TrainingCourses { get; }
     DbSet<TrainingSession> TrainingSessions { get; }
+    DbSet<MortalityReviewAggregate> MortalityReviews { get; }
+    DbSet<ComplicationCase> ComplicationCases { get; }
     DbSet<EquipmentItem> EquipmentItems { get; }
     DbSet<ReferenceStandard> ReferenceStandards { get; }
     DbSet<TestAuthorization> TestAuthorizations { get; }

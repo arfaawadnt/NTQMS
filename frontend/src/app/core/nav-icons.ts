@@ -12,6 +12,7 @@ export const NAV_ICONS: Record<string, string> = {
   incidents: 'M22 12h-4l-3 9L9 3l-3 9H2',
   patientSafety: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z M9 11l2 2 4-4',
   infectionControl: 'M12 2a3 3 0 0 0-3 3v6.28A4 4 0 1 0 15 11.28V5a3 3 0 0 0-3-3z M9 8h6',
+  mortalityReview: 'M3 12h4l2 5 4-13 2 8h6',
   indicators: 'M18 20V10 M12 20V4 M6 20v-6',
   accreditation: 'M12 15a7 7 0 1 0 0-14 7 7 0 0 0 0 14z M8.21 13.89L7 23l5-3 5 3-1.21-9.12',
   fmea: 'M12 2L2 7l10 5 10-5-10-5z M2 17l10 5 10-5 M2 12l10 5 10-5',

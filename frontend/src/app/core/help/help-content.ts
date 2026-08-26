@@ -385,6 +385,31 @@ export const HELP_TOPICS: HelpTopic[] = [
     ],
   },
   {
+    route: '/mortality-review', titleKey: 'nav.mortalityReview', groupKey: 'nav.groupImprovement', icon: 'mortalityReview',
+    summary: L(
+      'Mortality & morbidity peer review: deaths are classified (expected / unexpected / potentially-preventable / preventable); any non-expected death needs an independent second review by a different reviewer and committee discussion before closure. A complication register captures morbidity such as returns to theatre and unplanned ICU admissions. The mortality rate is per 1,000 patient-days from the ADT denominator.',
+      'مراجعة الأقران للوفيات والمراضة: تُصنَّف الوفيات (متوقعة/غير متوقعة/يُحتمل تجنبها/يمكن تجنبها)؛ وتتطلب أي وفاة غير متوقعة مراجعة ثانية مستقلة بمراجع مختلف ومناقشة باللجنة قبل الإغلاق. يلتقط سجل المضاعفات المراضة مثل العودة لغرفة العمليات ودخول العناية غير المخطط. معدل الوفيات لكل 1000 يوم مريض من مقام ADT.',
+      'Revue par les pairs de la mortalité et de la morbidité : les décès sont classés (attendu / inattendu / potentiellement évitable / évitable) ; tout décès non attendu exige une seconde revue indépendante par un autre relecteur et une discussion en comité avant clôture. Un registre des complications capture la morbidité (reprises au bloc, admissions SI non planifiées). Le taux de mortalité est pour 1 000 jours-patients à partir du dénominateur ADT.'),
+    steps: [
+      S(L('Reported', 'مُبلّغ', 'Signalé'), L('Capture the death — patient, unit, date and primary diagnosis.', 'سجّل الوفاة — المريض والوحدة والتاريخ والتشخيص الأساسي.', 'Consignez le décès — patient, unité, date et diagnostic principal.')),
+      S(L('Classified', 'مُصنّف', 'Classé'), L('First reviewer classifies the death and records findings.', 'يصنّف المراجع الأول الوفاة ويسجّل النتائج.', 'Le premier relecteur classe le décès et consigne les constats.')),
+      S(L('Second review', 'مراجعة ثانية', 'Seconde revue'), L('A different reviewer independently reviews a non-expected death.', 'يراجع مراجع مختلف بشكل مستقل الوفاة غير المتوقعة.', 'Un autre relecteur revoit indépendamment un décès non attendu.')),
+      S(L('Committee', 'اللجنة', 'Comité'), L('The M&M committee discusses and records learnings.', 'تناقش لجنة الوفيات والمراضة وتسجّل الدروس.', 'Le comité de M&M discute et consigne les enseignements.')),
+      S(L('Closed', 'مغلق', 'Clôturé'), L('Closed and frozen for audit.', 'يُغلق ويُجمّد للتدقيق.', 'Clôturé et gelé pour l’audit.')),
+    ],
+    usage: [
+      L('Report a death, then classify it; an expected death may close after classification, while any non-expected death must pass an independent second review and committee discussion.',
+        'أبلغ عن وفاة ثم صنّفها؛ يمكن إغلاق الوفاة المتوقعة بعد التصنيف، بينما يجب أن تمر أي وفاة غير متوقعة بمراجعة ثانية مستقلة ومناقشة باللجنة.',
+        'Signalez un décès puis classez-le ; un décès attendu peut être clôturé après classification, tandis qu’un décès non attendu doit passer une seconde revue indépendante et une discussion en comité.'),
+      L('The second review must be recorded by a reviewer other than the one who classified the case (segregation of duties).',
+        'يجب أن تُسجّل المراجعة الثانية بواسطة مراجع غير الذي صنّف الحالة (فصل المهام).',
+        'La seconde revue doit être enregistrée par un relecteur autre que celui qui a classé le cas (séparation des tâches).'),
+      L('The complication register captures morbidity with a preventability judgement; the tiles show the mortality rate and (potentially) preventable death counts.',
+        'يلتقط سجل المضاعفات المراضة مع حكم على إمكانية التجنب؛ تعرض البطاقات معدل الوفيات وأعداد الوفيات (المحتمل) تجنبها.',
+        'Le registre des complications capture la morbidité avec un jugement d’évitabilité ; les tuiles affichent le taux de mortalité et le nombre de décès (potentiellement) évitables.'),
+    ],
+  },
+  {
     route: '/training-catalogue', titleKey: 'nav.trainingCatalogue', groupKey: 'nav.groupPeople', icon: 'trainingCatalogue',
     summary: L(
       'The training course catalogue and its delivery: define reusable courses with a pass mark and validity, schedule sessions, register trainees and capture pre/post assessment scores, then read the effectiveness roll-up and the compliance dashboard. This is distinct from the individual training-assignment queue.',

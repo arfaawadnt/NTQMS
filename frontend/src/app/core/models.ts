@@ -2980,3 +2980,53 @@ export interface ChainVerification {
 export interface Workspace {
   name: string;
 }
+
+// ── Mortality, Morbidity & Peer Review (HQMS M10) ─────────────────────────────
+
+export const DEATH_CLASSIFICATIONS = ['Expected', 'Unexpected', 'PotentiallyPreventable', 'Preventable'] as const;
+export type DeathClassification = (typeof DEATH_CLASSIFICATIONS)[number];
+export const MORTALITY_STATUSES = ['Reported', 'Classified', 'SecondReviewed', 'CommitteeDiscussed', 'Closed'] as const;
+export const COMPLICATION_TYPES = ['ReturnToTheatre', 'UnplannedIcuAdmission', 'UnplannedReadmission', 'HospitalAcquiredCondition', 'Other'] as const;
+export type ComplicationType = (typeof COMPLICATION_TYPES)[number];
+export const COMPLICATION_SEVERITIES = ['Minor', 'Moderate', 'Severe', 'LifeThreatening'] as const;
+export type ComplicationSeverity = (typeof COMPLICATION_SEVERITIES)[number];
+export const COMPLICATION_STATUSES = ['Reported', 'Reviewed', 'Closed'] as const;
+
+export interface MortalityListItem {
+  id: string; reviewRef: string; patientRef: string; unit: string; deathDateUtc: string;
+  classification: string | null; requiresSecondReview: boolean; status: string;
+}
+export interface MortalityDetail {
+  id: string; reviewRef: string; patientRef: string; unit: string; departmentId: string | null; deathDateUtc: string;
+  primaryDiagnosis: string | null; status: string; classification: string | null; requiresSecondReview: boolean;
+  firstReviewerId: string | null; classificationFindings: string | null;
+  secondReviewerId: string | null; secondReviewNotes: string | null; secondReviewerConcurs: boolean | null;
+  committeeLearnings: string | null;
+}
+export interface ComplicationListItem {
+  id: string; caseRef: string; patientRef: string; unit: string; type: string; severity: string;
+  occurredDateUtc: string; preventable: boolean | null; status: string;
+}
+export interface ComplicationDetail {
+  id: string; caseRef: string; patientRef: string; unit: string; departmentId: string | null; type: string;
+  severity: string; occurredDateUtc: string; description: string; status: string;
+  reviewedBy: string | null; reviewNotes: string | null; preventable: boolean | null; reviewedAtUtc: string | null;
+}
+export interface MortalityRates {
+  fromUtc: string; toUtc: string; patientDays: number;
+  deaths: number; mortalityRatePer1000: number;
+  expected: number; unexpected: number; potentiallyPreventable: number; preventable: number;
+  complications: number; preventableComplications: number;
+}
+
+export interface ReportMortalityRequest {
+  patientRef: string; unit: string; deathDateUtc: string; primaryDiagnosis: string | null; departmentId: string | null;
+}
+export interface ClassifyMortalityRequest { classification: DeathClassification; findings: string; }
+export interface SecondReviewRequest { notes: string; concurs: boolean; }
+export interface CommitteeDiscussedRequest { learnings: string; }
+export interface ReportComplicationRequest {
+  patientRef: string; unit: string; type: ComplicationType; severity: ComplicationSeverity;
+  occurredDateUtc: string; description: string; departmentId: string | null;
+}
+export interface ReviewComplicationRequest { notes: string; preventable: boolean; }

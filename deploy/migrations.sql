@@ -10417,5 +10417,171 @@ BEGIN
     VALUES ('20260826171401_AddTrainingManagement', '9.0.19');
     END IF;
 END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826173836_AddMortalityReview') THEN
+    CREATE TABLE qams.complication_case (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        branch_id uuid,
+        department_id uuid,
+        case_ref character varying(30) NOT NULL,
+        patient_ref character varying(100) NOT NULL,
+        unit character varying(100) NOT NULL,
+        type character varying(30) NOT NULL,
+        severity character varying(20) NOT NULL,
+        occurred_date_utc timestamp with time zone NOT NULL,
+        description text NOT NULL,
+        status character varying(20) NOT NULL,
+        reviewed_by uuid,
+        review_notes text,
+        preventable boolean,
+        reviewed_at_utc timestamp with time zone,
+        created_at_utc timestamp with time zone NOT NULL,
+        created_by text,
+        created_by_user_id uuid,
+        modified_at_utc timestamp with time zone,
+        modified_by text,
+        CONSTRAINT pk_complication_case PRIMARY KEY (tenant_id, id)
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826173836_AddMortalityReview') THEN
+    CREATE TABLE qams.mortality_review (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        branch_id uuid,
+        department_id uuid,
+        review_ref character varying(30) NOT NULL,
+        patient_ref character varying(100) NOT NULL,
+        unit character varying(100) NOT NULL,
+        death_date_utc timestamp with time zone NOT NULL,
+        primary_diagnosis character varying(300),
+        status character varying(20) NOT NULL,
+        classification character varying(30),
+        first_reviewer_id uuid,
+        classification_findings text,
+        second_reviewer_id uuid,
+        second_review_notes text,
+        second_reviewer_concurs boolean,
+        committee_learnings text,
+        created_at_utc timestamp with time zone NOT NULL,
+        created_by text,
+        created_by_user_id uuid,
+        modified_at_utc timestamp with time zone,
+        modified_by text,
+        CONSTRAINT pk_mortality_review PRIMARY KEY (tenant_id, id)
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826173836_AddMortalityReview') THEN
+    CREATE UNIQUE INDEX ix_complication_case_tenant_id_case_ref ON qams.complication_case (tenant_id, case_ref);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826173836_AddMortalityReview') THEN
+    CREATE INDEX ix_complication_case_tenant_id_occurred_date_utc ON qams.complication_case (tenant_id, occurred_date_utc);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826173836_AddMortalityReview') THEN
+    CREATE INDEX ix_complication_case_tenant_id_type_status ON qams.complication_case (tenant_id, type, status);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826173836_AddMortalityReview') THEN
+    CREATE INDEX ix_mortality_review_tenant_id_death_date_utc ON qams.mortality_review (tenant_id, death_date_utc);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826173836_AddMortalityReview') THEN
+    CREATE UNIQUE INDEX ix_mortality_review_tenant_id_review_ref ON qams.mortality_review (tenant_id, review_ref);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826173836_AddMortalityReview') THEN
+    CREATE INDEX ix_mortality_review_tenant_id_status ON qams.mortality_review (tenant_id, status);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826173836_AddMortalityReview') THEN
+    ALTER TABLE qams.mortality_review ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.mortality_review FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.mortality_review;
+    CREATE POLICY tenant_isolation ON qams.mortality_review
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826173836_AddMortalityReview') THEN
+    ALTER TABLE qams.complication_case ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.complication_case FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.complication_case;
+    CREATE POLICY tenant_isolation ON qams.complication_case
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826173836_AddMortalityReview') THEN
+    ALTER TABLE qams.mortality_review ADD CONSTRAINT ck_mortality_review_classification_domain
+      CHECK (classification IS NULL OR classification IN ('Expected','Unexpected','PotentiallyPreventable','Preventable')) NOT VALID;
+    ALTER TABLE qams.mortality_review VALIDATE CONSTRAINT ck_mortality_review_classification_domain;
+
+    ALTER TABLE qams.mortality_review ADD CONSTRAINT ck_mortality_review_status_domain
+      CHECK (status IN ('Reported','Classified','SecondReviewed','CommitteeDiscussed','Closed')) NOT VALID;
+    ALTER TABLE qams.mortality_review VALIDATE CONSTRAINT ck_mortality_review_status_domain;
+
+    ALTER TABLE qams.complication_case ADD CONSTRAINT ck_complication_case_type_domain
+      CHECK (type IN ('ReturnToTheatre','UnplannedIcuAdmission','UnplannedReadmission','HospitalAcquiredCondition','Other')) NOT VALID;
+    ALTER TABLE qams.complication_case VALIDATE CONSTRAINT ck_complication_case_type_domain;
+
+    ALTER TABLE qams.complication_case ADD CONSTRAINT ck_complication_case_severity_domain
+      CHECK (severity IN ('Minor','Moderate','Severe','LifeThreatening')) NOT VALID;
+    ALTER TABLE qams.complication_case VALIDATE CONSTRAINT ck_complication_case_severity_domain;
+
+    ALTER TABLE qams.complication_case ADD CONSTRAINT ck_complication_case_status_domain
+      CHECK (status IN ('Reported','Reviewed','Closed')) NOT VALID;
+    ALTER TABLE qams.complication_case VALIDATE CONSTRAINT ck_complication_case_status_domain;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826173836_AddMortalityReview') THEN
+    INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+    VALUES ('20260826173836_AddMortalityReview', '9.0.19');
+    END IF;
+END $EF$;
 COMMIT;
 

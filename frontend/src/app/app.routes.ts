@@ -98,6 +98,16 @@ export const routes: Routes = [
             ],
           },
           {
+            path: 'mortality-review',
+            loadComponent: () => import('./features/mortality-review/mortality-review-list.component').then((m) => m.MortalityReviewListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/mortality-review/mortality-review-detail.component').then((m) => m.MortalityReviewDetailComponent),
+              },
+            ],
+          },
+          {
             path: 'training-catalogue/sessions/:id',
             loadComponent: () => import('./features/training/session-detail.component').then((m) => m.SessionDetailComponent),
           },
