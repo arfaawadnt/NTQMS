@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.Resources;
 using NT.QAMS.Domain.Equipment;
+using NT.QAMS.SharedKernel.Abstractions;
 using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.Equipment;
@@ -82,6 +83,8 @@ internal static class EquipmentLoader
             .Include(e => e.Calibrations)
             .Include(e => e.Maintenance)
             .Include(e => e.IntermediateChecks)
+            .Include(e => e.Downtime)
+            .Include(e => e.SafetyNotices)
             .SingleOrDefaultAsync(e => e.Id == id, ct)
         ?? throw new DomainException("EQP-404", "Equipment not found.");
 }
@@ -169,6 +172,96 @@ public sealed class RecordIntermediateCheckHandler(IAppDbContext db, ICurrentUse
     }
 }
 
+// â”€â”€ Downtime & availability (HQMS M14) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+[RequireInternalActor]
+public sealed record StartDowntimeCommand(Guid EquipmentId, DateTimeOffset StartedAtUtc, DowntimeCategory Category, string Reason)
+    : ICommand<Guid>;
+
+public sealed class StartDowntimeValidator : AbstractValidator<StartDowntimeCommand>
+{
+    public StartDowntimeValidator() => RuleFor(x => x.Reason).MaximumLength(1000);
+}
+
+public sealed class StartDowntimeHandler(IAppDbContext db) : ICommandHandler<StartDowntimeCommand, Guid>
+{
+    public async Task<Guid> Handle(StartDowntimeCommand c, CancellationToken ct)
+    {
+        var equipment = await EquipmentLoader.LoadAsync(db, c.EquipmentId, ct);
+        var id = equipment.StartDowntime(c.StartedAtUtc, c.Category, c.Reason);
+        await db.SaveChangesAsync(ct);
+        return id;
+    }
+}
+
+[RequireInternalActor]
+public sealed record EndDowntimeCommand(Guid EquipmentId, Guid DowntimeId, DateTimeOffset EndedAtUtc) : ICommand;
+
+public sealed class EndDowntimeHandler(IAppDbContext db) : ICommandHandler<EndDowntimeCommand>
+{
+    public async Task Handle(EndDowntimeCommand c, CancellationToken ct)
+    {
+        (await EquipmentLoader.LoadAsync(db, c.EquipmentId, ct)).EndDowntime(c.DowntimeId, c.EndedAtUtc);
+        await db.SaveChangesAsync(ct);
+    }
+}
+
+// â”€â”€ Recalls & field safety notices (HQMS M14) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+[RequireInternalActor]
+public sealed record LogSafetyNoticeCommand(
+    Guid EquipmentId, SafetyNoticeType Type, string Reference, string Issuer,
+    SafetyNoticeSeverity Severity, DateOnly ReceivedOn, DateOnly? RequiredActionBy) : ICommand<Guid>;
+
+public sealed class LogSafetyNoticeValidator : AbstractValidator<LogSafetyNoticeCommand>
+{
+    public LogSafetyNoticeValidator()
+    {
+        RuleFor(x => x.Reference).NotEmpty().MaximumLength(100);
+        RuleFor(x => x.Issuer).MaximumLength(200);
+    }
+}
+
+public sealed class LogSafetyNoticeHandler(IAppDbContext db) : ICommandHandler<LogSafetyNoticeCommand, Guid>
+{
+    public async Task<Guid> Handle(LogSafetyNoticeCommand c, CancellationToken ct)
+    {
+        var equipment = await EquipmentLoader.LoadAsync(db, c.EquipmentId, ct);
+        var id = equipment.LogSafetyNotice(c.Type, c.Reference, c.Issuer, c.Severity, c.ReceivedOn, c.RequiredActionBy);
+        await db.SaveChangesAsync(ct);
+        return id;
+    }
+}
+
+[RequireInternalActor]
+public sealed record ActionSafetyNoticeCommand(Guid EquipmentId, Guid NoticeId, string Note, DateOnly On) : ICommand;
+
+public sealed class ActionSafetyNoticeValidator : AbstractValidator<ActionSafetyNoticeCommand>
+{
+    public ActionSafetyNoticeValidator() => RuleFor(x => x.Note).NotEmpty().MaximumLength(2000);
+}
+
+public sealed class ActionSafetyNoticeHandler(IAppDbContext db) : ICommandHandler<ActionSafetyNoticeCommand>
+{
+    public async Task Handle(ActionSafetyNoticeCommand c, CancellationToken ct)
+    {
+        (await EquipmentLoader.LoadAsync(db, c.EquipmentId, ct)).ActionSafetyNotice(c.NoticeId, c.Note, c.On);
+        await db.SaveChangesAsync(ct);
+    }
+}
+
+[RequireInternalActor]
+public sealed record CloseSafetyNoticeCommand(Guid EquipmentId, Guid NoticeId) : ICommand;
+
+public sealed class CloseSafetyNoticeHandler(IAppDbContext db) : ICommandHandler<CloseSafetyNoticeCommand>
+{
+    public async Task Handle(CloseSafetyNoticeCommand c, CancellationToken ct)
+    {
+        (await EquipmentLoader.LoadAsync(db, c.EquipmentId, ct)).CloseSafetyNotice(c.NoticeId);
+        await db.SaveChangesAsync(ct);
+    }
+}
+
 // â”€â”€ Queries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 public sealed record GetEquipmentQuery(
@@ -198,7 +291,7 @@ public sealed class GetEquipmentHandler(IAppDbContext db)
 
 public sealed record GetEquipmentByIdQuery(Guid EquipmentId) : IQuery<EquipmentDetailDto>;
 
-public sealed class GetEquipmentByIdHandler(IAppDbContext db)
+public sealed class GetEquipmentByIdHandler(IAppDbContext db, IClock clock)
     : IQueryHandler<GetEquipmentByIdQuery, EquipmentDetailDto>
 {
     public async Task<EquipmentDetailDto> Handle(GetEquipmentByIdQuery q, CancellationToken ct)
@@ -208,8 +301,15 @@ public sealed class GetEquipmentByIdHandler(IAppDbContext db)
             .Include(x => x.Calibrations)
             .Include(x => x.Maintenance)
             .Include(x => x.IntermediateChecks)
+            .Include(x => x.Downtime)
+            .Include(x => x.SafetyNotices)
             .SingleOrDefaultAsync(x => x.Id == q.EquipmentId, ct)
             ?? throw new DomainException("EQP-404", "Equipment not found.");
+
+        var now = clock.UtcNow;
+        var today = DateOnly.FromDateTime(now.UtcDateTime);
+        // Availability over the trailing 30 days, as a whole-number percentage.
+        var availability30d = decimal.Round((decimal)e.Availability(now.AddDays(-30), now) * 100, 1);
 
         return new EquipmentDetailDto(
             e.Id, e.Code, e.Name, e.SerialNumber, e.Location, e.Status.ToString(),
@@ -223,6 +323,45 @@ public sealed class GetEquipmentByIdHandler(IAppDbContext db)
             e.IntermediateChecks.OrderByDescending(x => x.PerformedOn)
                 .Select(x => new IntermediateCheckDto(
                     x.Id, x.PerformedOn, x.PerformedById, x.CheckType, x.Passed, x.ReferenceStandardId, x.Remarks))
-                .ToList());
+                .ToList(),
+            e.Downtime.OrderByDescending(x => x.StartedAtUtc)
+                .Select(x => new DowntimeEventDto(
+                    x.Id, x.StartedAtUtc, x.EndedAtUtc, x.Category.ToString(), x.Reason, x.IsOpen,
+                    decimal.Round((decimal)x.DurationHours(now), 1)))
+                .ToList(),
+            e.SafetyNotices.OrderByDescending(x => x.ReceivedOn)
+                .Select(x => new SafetyNoticeDto(
+                    x.Id, x.Type.ToString(), x.Reference, x.Issuer, x.Severity.ToString(), x.ReceivedOn,
+                    x.RequiredActionBy, x.Status.ToString(), x.ActionNote, x.ActionedOn, x.IsOverdue(today)))
+                .ToList(),
+            availability30d);
+    }
+}
+
+/// <summary>
+/// The recall / field-safety-notice register (HQMS M14): every open safety notice across the
+/// equipment fleet, so overdue actions can be chased. Flattened from the owning equipment items.
+/// </summary>
+public sealed record GetOpenSafetyNoticesQuery : IQuery<IReadOnlyList<OpenSafetyNoticeDto>>;
+
+public sealed class GetOpenSafetyNoticesHandler(IAppDbContext db, IClock clock)
+    : IQueryHandler<GetOpenSafetyNoticesQuery, IReadOnlyList<OpenSafetyNoticeDto>>
+{
+    public async Task<IReadOnlyList<OpenSafetyNoticeDto>> Handle(GetOpenSafetyNoticesQuery q, CancellationToken ct)
+    {
+        var today = DateOnly.FromDateTime(clock.UtcNow.UtcDateTime);
+        var items = await db.EquipmentItems.AsNoTracking().Include(e => e.SafetyNotices)
+            .Where(e => e.SafetyNotices.Any(n => n.Status != SafetyNoticeStatus.Closed))
+            .ToListAsync(ct);
+
+        return items
+            .SelectMany(e => e.SafetyNotices
+                .Where(n => n.Status != SafetyNoticeStatus.Closed)
+                .Select(n => new OpenSafetyNoticeDto(
+                    e.Id, e.Code, e.Name, n.Id, n.Type.ToString(), n.Reference, n.Issuer, n.Severity.ToString(),
+                    n.ReceivedOn, n.RequiredActionBy, n.Status.ToString(), n.IsOverdue(today))))
+            .OrderByDescending(n => n.IsOverdue)
+            .ThenBy(n => n.RequiredActionBy ?? DateOnly.MaxValue)
+            .ToList();
     }
 }

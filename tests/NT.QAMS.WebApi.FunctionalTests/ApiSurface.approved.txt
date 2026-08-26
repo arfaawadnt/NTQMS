@@ -81,6 +81,7 @@ GET /api/eoc/rounds
 GET /api/eoc/rounds/{id}
 GET /api/eoc/summary
 GET /api/equipment
+GET /api/equipment/safety-notices
 GET /api/equipment/{id}
 GET /api/exports/audit-trail.xlsx
 GET /api/exports/nonconformances.xlsx
@@ -267,6 +268,7 @@ GET /api/v{version}/eoc/rounds
 GET /api/v{version}/eoc/rounds/{id}
 GET /api/v{version}/eoc/summary
 GET /api/v{version}/equipment
+GET /api/v{version}/equipment/safety-notices
 GET /api/v{version}/equipment/{id}
 GET /api/v{version}/exports/audit-trail.xlsx
 GET /api/v{version}/exports/nonconformances.xlsx
@@ -499,8 +501,13 @@ POST /api/eoc/rounds/{id}/start
 POST /api/equipment
 POST /api/equipment/{id}/calibrations
 POST /api/equipment/{id}/checks
+POST /api/equipment/{id}/downtime
+POST /api/equipment/{id}/downtime/{downtimeId}/end
 POST /api/equipment/{id}/maintenance
 POST /api/equipment/{id}/retire
+POST /api/equipment/{id}/safety-notices
+POST /api/equipment/{id}/safety-notices/{noticeId}/action
+POST /api/equipment/{id}/safety-notices/{noticeId}/close
 POST /api/exports/manual.pdf
 POST /api/exports/page.pdf
 POST /api/exports/page.xlsx
@@ -800,8 +807,13 @@ POST /api/v{version}/eoc/rounds/{id}/start
 POST /api/v{version}/equipment
 POST /api/v{version}/equipment/{id}/calibrations
 POST /api/v{version}/equipment/{id}/checks
+POST /api/v{version}/equipment/{id}/downtime
+POST /api/v{version}/equipment/{id}/downtime/{downtimeId}/end
 POST /api/v{version}/equipment/{id}/maintenance
 POST /api/v{version}/equipment/{id}/retire
+POST /api/v{version}/equipment/{id}/safety-notices
+POST /api/v{version}/equipment/{id}/safety-notices/{noticeId}/action
+POST /api/v{version}/equipment/{id}/safety-notices/{noticeId}/close
 POST /api/v{version}/exports/manual.pdf
 POST /api/v{version}/exports/page.pdf
 POST /api/v{version}/exports/page.xlsx

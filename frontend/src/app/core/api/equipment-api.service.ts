@@ -3,8 +3,9 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
-  CreatedResource, DEFAULT_PAGE_SIZE, EquipmentDetail, EquipmentListItem, LogCalibrationRequest,
-  LogMaintenanceRequest, Paged, RecordIntermediateCheckRequest, RegisterEquipmentRequest,
+  ActionSafetyNoticeRequest, CreatedResource, DEFAULT_PAGE_SIZE, EndDowntimeRequest, EquipmentDetail,
+  EquipmentListItem, LogCalibrationRequest, LogMaintenanceRequest, LogSafetyNoticeRequest, OpenSafetyNotice,
+  Paged, RecordIntermediateCheckRequest, RegisterEquipmentRequest, StartDowntimeRequest,
 } from '../models';
 
 /** Typed client for the Equipment & Calibration API (one method per backend endpoint). */
@@ -40,4 +41,12 @@ export class EquipmentApiService {
   }
 
   retire(id: string): Observable<void> { return this.http.post<void>(`${this.base}/${id}/retire`, {}); }
+
+  startDowntime(id: string, body: StartDowntimeRequest): Observable<CreatedResource> { return this.http.post<CreatedResource>(`${this.base}/${id}/downtime`, body); }
+  endDowntime(id: string, downtimeId: string, body: EndDowntimeRequest): Observable<void> { return this.http.post<void>(`${this.base}/${id}/downtime/${downtimeId}/end`, body); }
+
+  openSafetyNotices(): Observable<OpenSafetyNotice[]> { return this.http.get<OpenSafetyNotice[]>(`${this.base}/safety-notices`); }
+  logSafetyNotice(id: string, body: LogSafetyNoticeRequest): Observable<CreatedResource> { return this.http.post<CreatedResource>(`${this.base}/${id}/safety-notices`, body); }
+  actionSafetyNotice(id: string, noticeId: string, body: ActionSafetyNoticeRequest): Observable<void> { return this.http.post<void>(`${this.base}/${id}/safety-notices/${noticeId}/action`, body); }
+  closeSafetyNotice(id: string, noticeId: string): Observable<void> { return this.http.post<void>(`${this.base}/${id}/safety-notices/${noticeId}/close`, {}); }
 }

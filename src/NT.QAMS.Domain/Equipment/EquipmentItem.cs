@@ -70,6 +70,88 @@ public sealed class IntermediateCheck : Entity
     public string? Remarks { get; private set; }
 }
 
+/// <summary>Why a device was out of use — distinguishes unplanned breakdown from planned service.</summary>
+public enum DowntimeCategory { Breakdown, AwaitingParts, ScheduledMaintenance, Other }
+
+/// <summary>
+/// A period a device was unavailable (HQMS M14). Open while the device is down; closed when it
+/// returns to use. Downtime hours across a window drive the availability figure.
+/// </summary>
+public sealed class DowntimeEvent : Entity
+{
+    internal DowntimeEvent(DateTimeOffset startedAtUtc, DowntimeCategory category, string reason)
+    {
+        StartedAtUtc = startedAtUtc;
+        Category = category;
+        Reason = reason;
+    }
+
+    private DowntimeEvent() { Reason = null!; }
+
+    public DateTimeOffset StartedAtUtc { get; private set; }
+    public DateTimeOffset? EndedAtUtc { get; private set; }
+    public DowntimeCategory Category { get; private set; }
+    public string Reason { get; private set; }
+
+    public bool IsOpen => EndedAtUtc is null;
+
+    /// <summary>Downtime hours accrued to <paramref name="asOf"/> (or to the end, if closed).</summary>
+    public double DurationHours(DateTimeOffset asOf)
+    {
+        var end = EndedAtUtc ?? asOf;
+        return end <= StartedAtUtc ? 0 : (end - StartedAtUtc).TotalHours;
+    }
+
+    internal void End(DateTimeOffset endedAtUtc) => EndedAtUtc = endedAtUtc;
+}
+
+/// <summary>The kind of manufacturer/regulator safety communication logged against a device.</summary>
+public enum SafetyNoticeType { Recall, FieldSafetyNotice, HazardAlert }
+
+/// <summary>Severity of a safety notice.</summary>
+public enum SafetyNoticeSeverity { Low, Medium, High }
+
+/// <summary>Lifecycle of a safety notice: open on receipt, actioned, then closed.</summary>
+public enum SafetyNoticeStatus { Open, Actioned, Closed }
+
+/// <summary>
+/// A recall / field safety notice / hazard alert affecting a device (HQMS M14): logged on receipt
+/// with a required-action deadline, actioned with a note, then closed. Open notices past their
+/// deadline are the safety backlog on the recall register.
+/// </summary>
+public sealed class SafetyNotice : Entity
+{
+    internal SafetyNotice(
+        SafetyNoticeType type, string reference, string issuer, SafetyNoticeSeverity severity,
+        DateOnly receivedOn, DateOnly? requiredActionBy)
+    {
+        Type = type;
+        Reference = reference;
+        Issuer = issuer;
+        Severity = severity;
+        ReceivedOn = receivedOn;
+        RequiredActionBy = requiredActionBy;
+        Status = SafetyNoticeStatus.Open;
+    }
+
+    private SafetyNotice() { Reference = null!; Issuer = null!; }
+
+    public SafetyNoticeType Type { get; private set; }
+    public string Reference { get; private set; }
+    public string Issuer { get; private set; }
+    public SafetyNoticeSeverity Severity { get; private set; }
+    public DateOnly ReceivedOn { get; private set; }
+    public DateOnly? RequiredActionBy { get; private set; }
+    public SafetyNoticeStatus Status { get; private set; }
+    public string? ActionNote { get; private set; }
+    public DateOnly? ActionedOn { get; private set; }
+
+    public bool IsOverdue(DateOnly asOf) => Status == SafetyNoticeStatus.Open && RequiredActionBy is { } by && asOf > by;
+
+    internal void Action(string note, DateOnly on) { Status = SafetyNoticeStatus.Actioned; ActionNote = note; ActionedOn = on; }
+    internal void Close() => Status = SafetyNoticeStatus.Closed;
+}
+
 /// <summary>
 /// Instrument/equipment with the canonical calibration state machine:
 /// registered as NeedsCalibration (first calibration activates) → Active →
@@ -83,6 +165,8 @@ public sealed class EquipmentItem : AggregateRoot, ITenantScoped, IAllocatable
     private readonly List<CalibrationRecord> _calibrations = [];
     private readonly List<MaintenanceRecord> _maintenance = [];
     private readonly List<IntermediateCheck> _intermediateChecks = [];
+    private readonly List<DowntimeEvent> _downtime = [];
+    private readonly List<SafetyNotice> _safetyNotices = [];
 
     private EquipmentItem()
     {
@@ -107,6 +191,8 @@ public sealed class EquipmentItem : AggregateRoot, ITenantScoped, IAllocatable
     public IReadOnlyList<CalibrationRecord> Calibrations => _calibrations.AsReadOnly();
     public IReadOnlyList<MaintenanceRecord> Maintenance => _maintenance.AsReadOnly();
     public IReadOnlyList<IntermediateCheck> IntermediateChecks => _intermediateChecks.AsReadOnly();
+    public IReadOnlyList<DowntimeEvent> Downtime => _downtime.AsReadOnly();
+    public IReadOnlyList<SafetyNotice> SafetyNotices => _safetyNotices.AsReadOnly();
 
     public static EquipmentItem Register(
         string code, string name, string serialNumber, string? location,
@@ -240,6 +326,120 @@ public sealed class EquipmentItem : AggregateRoot, ITenantScoped, IAllocatable
         }
 
         return check.Id;
+    }
+
+    // ── Downtime & availability (HQMS M14) ──────────────────────────────────────
+
+    /// <summary>Opens a downtime period for the device. Only one may be open at a time.</summary>
+    public Guid StartDowntime(DateTimeOffset startedAtUtc, DowntimeCategory category, string reason)
+    {
+        if (Status == EquipmentStatus.Retired)
+        {
+            throw new InvalidStateTransitionException("EQP-030", "Retired equipment cannot accrue downtime.");
+        }
+
+        if (_downtime.Any(d => d.IsOpen))
+        {
+            throw new DomainException("EQP-031", "An open downtime period already exists; end it before starting another.");
+        }
+
+        var evt = new DowntimeEvent(startedAtUtc, category, string.IsNullOrWhiteSpace(reason) ? "Unspecified" : reason.Trim());
+        _downtime.Add(evt);
+        return evt.Id;
+    }
+
+    /// <summary>Closes the open downtime period.</summary>
+    public void EndDowntime(Guid downtimeId, DateTimeOffset endedAtUtc)
+    {
+        var evt = _downtime.FirstOrDefault(d => d.Id == downtimeId)
+            ?? throw new DomainException("EQP-032", "Downtime event not found.");
+        if (!evt.IsOpen)
+        {
+            throw new InvalidStateTransitionException("EQP-033", "The downtime period is already ended.");
+        }
+
+        if (endedAtUtc < evt.StartedAtUtc)
+        {
+            throw new DomainException("EQP-034", "Downtime cannot end before it started.");
+        }
+
+        evt.End(endedAtUtc);
+    }
+
+    /// <summary>
+    /// Availability over a window [from, asOf]: uptime ÷ window, where downtime is each event's
+    /// hours clipped to the window. Returns a fraction 0–1.
+    /// </summary>
+    public double Availability(DateTimeOffset from, DateTimeOffset asOf)
+    {
+        var windowHours = (asOf - from).TotalHours;
+        if (windowHours <= 0)
+        {
+            return 1;
+        }
+
+        var down = _downtime.Sum(d =>
+        {
+            var start = d.StartedAtUtc > from ? d.StartedAtUtc : from;
+            var end = (d.EndedAtUtc ?? asOf) < asOf ? (d.EndedAtUtc ?? asOf) : asOf;
+            return end <= start ? 0 : (end - start).TotalHours;
+        });
+
+        var availability = 1 - (down / windowHours);
+        return availability < 0 ? 0 : availability;
+    }
+
+    // ── Recalls & field safety notices (HQMS M14) ───────────────────────────────
+
+    public Guid LogSafetyNotice(
+        SafetyNoticeType type, string reference, string issuer, SafetyNoticeSeverity severity,
+        DateOnly receivedOn, DateOnly? requiredActionBy)
+    {
+        if (string.IsNullOrWhiteSpace(reference))
+        {
+            throw new DomainException("EQP-040", "A notice reference is required.");
+        }
+
+        var notice = new SafetyNotice(
+            type, reference.Trim(), string.IsNullOrWhiteSpace(issuer) ? "Unknown" : issuer.Trim(),
+            severity, receivedOn, requiredActionBy);
+        _safetyNotices.Add(notice);
+        return notice.Id;
+    }
+
+    public void ActionSafetyNotice(Guid noticeId, string note, DateOnly on)
+    {
+        if (string.IsNullOrWhiteSpace(note))
+        {
+            throw new DomainException("EQP-041", "An action note is required.");
+        }
+
+        var notice = LoadOpenNotice(noticeId);
+        notice.Action(note.Trim(), on);
+    }
+
+    public void CloseSafetyNotice(Guid noticeId)
+    {
+        var notice = _safetyNotices.FirstOrDefault(n => n.Id == noticeId)
+            ?? throw new DomainException("EQP-042", "Safety notice not found.");
+        if (notice.Status != SafetyNoticeStatus.Actioned)
+        {
+            throw new InvalidStateTransitionException("EQP-043", "A safety notice must be actioned before it is closed.");
+        }
+
+        notice.Close();
+    }
+
+    private SafetyNotice LoadOpenNotice(Guid noticeId)
+    {
+        var notice = _safetyNotices.FirstOrDefault(n => n.Id == noticeId)
+            ?? throw new DomainException("EQP-042", "Safety notice not found.");
+        if (notice.Status != SafetyNoticeStatus.Open)
+        {
+            throw new InvalidStateTransitionException("EQP-044", $"A safety notice in state {notice.Status} cannot be actioned.");
+        }
+
+        return notice;
     }
 
     public void Retire()

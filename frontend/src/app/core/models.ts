@@ -1426,7 +1426,40 @@ export interface EquipmentDetail {
   calibrations: CalibrationRecord[];
   maintenance: MaintenanceRecord[];
   intermediateChecks: IntermediateCheck[];
+  downtime: DowntimeEvent[];
+  safetyNotices: SafetyNotice[];
+  availabilityPercent30d: number;
 }
+
+// ── Equipment downtime & safety notices (HQMS M14) ────────────────────────────
+
+export const DOWNTIME_CATEGORIES = ['Breakdown', 'AwaitingParts', 'ScheduledMaintenance', 'Other'] as const;
+export type DowntimeCategory = (typeof DOWNTIME_CATEGORIES)[number];
+export const SAFETY_NOTICE_TYPES = ['Recall', 'FieldSafetyNotice', 'HazardAlert'] as const;
+export type SafetyNoticeType = (typeof SAFETY_NOTICE_TYPES)[number];
+export const SAFETY_NOTICE_SEVERITIES = ['Low', 'Medium', 'High'] as const;
+export type SafetyNoticeSeverity = (typeof SAFETY_NOTICE_SEVERITIES)[number];
+
+export interface DowntimeEvent {
+  id: string; startedAtUtc: string; endedAtUtc: string | null; category: string; reason: string;
+  isOpen: boolean; durationHours: number;
+}
+export interface SafetyNotice {
+  id: string; type: string; reference: string; issuer: string; severity: string; receivedOn: string;
+  requiredActionBy: string | null; status: string; actionNote: string | null; actionedOn: string | null; isOverdue: boolean;
+}
+export interface OpenSafetyNotice {
+  equipmentId: string; equipmentCode: string; equipmentName: string; noticeId: string; type: string;
+  reference: string; issuer: string; severity: string; receivedOn: string; requiredActionBy: string | null;
+  status: string; isOverdue: boolean;
+}
+export interface StartDowntimeRequest { startedAtUtc: string; category: DowntimeCategory; reason: string; }
+export interface EndDowntimeRequest { endedAtUtc: string; }
+export interface LogSafetyNoticeRequest {
+  type: SafetyNoticeType; reference: string; issuer: string; severity: SafetyNoticeSeverity;
+  receivedOn: string; requiredActionBy: string | null;
+}
+export interface ActionSafetyNoticeRequest { note: string; on: string; }
 
 export interface IntermediateCheck {
   id: string;

@@ -11019,5 +11019,117 @@ BEGIN
     VALUES ('20260826210742_ChangeControlEmergencyPathway', '9.0.19');
     END IF;
 END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826213343_EquipmentDowntimeAndSafetyNotices') THEN
+    CREATE TABLE qams.equipment_downtime (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        started_at_utc timestamp with time zone NOT NULL,
+        ended_at_utc timestamp with time zone,
+        category character varying(20) NOT NULL,
+        reason character varying(1000) NOT NULL,
+        equipment_id uuid NOT NULL,
+        CONSTRAINT pk_equipment_downtime PRIMARY KEY (tenant_id, id),
+        CONSTRAINT fk_equipment_downtime_equipment_item_tenant_id_equipment_id FOREIGN KEY (tenant_id, equipment_id) REFERENCES qams.equipment_item (tenant_id, id) ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826213343_EquipmentDowntimeAndSafetyNotices') THEN
+    CREATE TABLE qams.equipment_safety_notice (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        type character varying(20) NOT NULL,
+        reference character varying(100) NOT NULL,
+        issuer character varying(200) NOT NULL,
+        severity character varying(10) NOT NULL,
+        received_on date NOT NULL,
+        required_action_by date,
+        status character varying(20) NOT NULL,
+        action_note character varying(2000),
+        actioned_on date,
+        equipment_id uuid NOT NULL,
+        CONSTRAINT pk_equipment_safety_notice PRIMARY KEY (tenant_id, id),
+        CONSTRAINT fk_equipment_safety_notice_equipment_item_tenant_id_equipment_ FOREIGN KEY (tenant_id, equipment_id) REFERENCES qams.equipment_item (tenant_id, id) ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826213343_EquipmentDowntimeAndSafetyNotices') THEN
+    CREATE INDEX ix_equipment_downtime_tenant_id_equipment_id ON qams.equipment_downtime (tenant_id, equipment_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826213343_EquipmentDowntimeAndSafetyNotices') THEN
+    CREATE INDEX ix_equipment_safety_notice_tenant_id_equipment_id ON qams.equipment_safety_notice (tenant_id, equipment_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826213343_EquipmentDowntimeAndSafetyNotices') THEN
+    ALTER TABLE qams.equipment_downtime ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.equipment_downtime FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.equipment_downtime;
+    CREATE POLICY tenant_isolation ON qams.equipment_downtime
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826213343_EquipmentDowntimeAndSafetyNotices') THEN
+    ALTER TABLE qams.equipment_safety_notice ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.equipment_safety_notice FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.equipment_safety_notice;
+    CREATE POLICY tenant_isolation ON qams.equipment_safety_notice
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826213343_EquipmentDowntimeAndSafetyNotices') THEN
+    ALTER TABLE qams.equipment_downtime ADD CONSTRAINT ck_equipment_downtime_category_domain
+      CHECK (category IN ('Breakdown','AwaitingParts','ScheduledMaintenance','Other')) NOT VALID;
+    ALTER TABLE qams.equipment_downtime VALIDATE CONSTRAINT ck_equipment_downtime_category_domain;
+
+    ALTER TABLE qams.equipment_safety_notice ADD CONSTRAINT ck_equipment_safety_notice_type_domain
+      CHECK (type IN ('Recall','FieldSafetyNotice','HazardAlert')) NOT VALID;
+    ALTER TABLE qams.equipment_safety_notice VALIDATE CONSTRAINT ck_equipment_safety_notice_type_domain;
+
+    ALTER TABLE qams.equipment_safety_notice ADD CONSTRAINT ck_equipment_safety_notice_severity_domain
+      CHECK (severity IN ('Low','Medium','High')) NOT VALID;
+    ALTER TABLE qams.equipment_safety_notice VALIDATE CONSTRAINT ck_equipment_safety_notice_severity_domain;
+
+    ALTER TABLE qams.equipment_safety_notice ADD CONSTRAINT ck_equipment_safety_notice_status_domain
+      CHECK (status IN ('Open','Actioned','Closed')) NOT VALID;
+    ALTER TABLE qams.equipment_safety_notice VALIDATE CONSTRAINT ck_equipment_safety_notice_status_domain;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826213343_EquipmentDowntimeAndSafetyNotices') THEN
+    INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+    VALUES ('20260826213343_EquipmentDowntimeAndSafetyNotices', '9.0.19');
+    END IF;
+END $EF$;
 COMMIT;
 

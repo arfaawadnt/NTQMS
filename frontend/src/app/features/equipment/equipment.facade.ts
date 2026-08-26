@@ -4,8 +4,8 @@ import { Observable, firstValueFrom } from 'rxjs';
 import { EquipmentApiService } from '../../core/api/equipment-api.service';
 import { FilesApiService } from '../../core/api/files-api.service';
 import {
-  EquipmentDetail, EquipmentListItem, LogMaintenanceRequest,
-  RecordIntermediateCheckRequest, RegisterEquipmentRequest,
+  ActionSafetyNoticeRequest, EndDowntimeRequest, EquipmentDetail, EquipmentListItem, LogMaintenanceRequest,
+  LogSafetyNoticeRequest, RecordIntermediateCheckRequest, RegisterEquipmentRequest, StartDowntimeRequest,
 } from '../../core/models';
 
 /** Signal-based facade for Equipment & Calibration, including certificate upload. */
@@ -97,7 +97,14 @@ export class EquipmentFacade {
 
   async retire(id: string): Promise<void> { await this.mutate(id, () => this.api.retire(id)); }
 
-  private async mutate(id: string, call: () => Observable<void>): Promise<void> {
+  // ── Downtime & safety notices (HQMS M14) ────────────────────────────────────
+  async startDowntime(id: string, r: StartDowntimeRequest): Promise<void> { await this.mutate(id, () => this.api.startDowntime(id, r)); }
+  async endDowntime(id: string, downtimeId: string, r: EndDowntimeRequest): Promise<void> { await this.mutate(id, () => this.api.endDowntime(id, downtimeId, r)); }
+  async logSafetyNotice(id: string, r: LogSafetyNoticeRequest): Promise<void> { await this.mutate(id, () => this.api.logSafetyNotice(id, r)); }
+  async actionSafetyNotice(id: string, noticeId: string, r: ActionSafetyNoticeRequest): Promise<void> { await this.mutate(id, () => this.api.actionSafetyNotice(id, noticeId, r)); }
+  async closeSafetyNotice(id: string, noticeId: string): Promise<void> { await this.mutate(id, () => this.api.closeSafetyNotice(id, noticeId)); }
+
+  private async mutate<T>(id: string, call: () => Observable<T>): Promise<void> {
     await this.run(async () => {
       await firstValueFrom(call());
       this._selected.set(await firstValueFrom(this.api.getById(id)));

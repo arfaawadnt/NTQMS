@@ -68,4 +68,51 @@ public sealed class EquipmentController(ISender sender) : ControllerBase
         await sender.Send(new RetireEquipmentCommand(id), ct);
         return NoContent();
     }
+
+    // ── Downtime & availability (HQMS M14) ──────────────────────────────────────
+    [HttpPost("{id:guid}/downtime")]
+    public async Task<IActionResult> StartDowntime(Guid id, StartDowntimeRequest request, CancellationToken ct)
+    {
+        var downtimeId = await sender.Send(new StartDowntimeCommand(
+            id, request.StartedAtUtc,
+            Enum.Parse<NT.QAMS.Domain.Equipment.DowntimeCategory>(request.Category, ignoreCase: true), request.Reason), ct);
+        return Ok(new { id = downtimeId });
+    }
+
+    [HttpPost("{id:guid}/downtime/{downtimeId:guid}/end")]
+    public async Task<IActionResult> EndDowntime(Guid id, Guid downtimeId, EndDowntimeRequest request, CancellationToken ct)
+    {
+        await sender.Send(new EndDowntimeCommand(id, downtimeId, request.EndedAtUtc), ct);
+        return NoContent();
+    }
+
+    // ── Recalls & field safety notices (HQMS M14) ───────────────────────────────
+    [HttpGet("safety-notices")]
+    public async Task<IActionResult> OpenSafetyNotices(CancellationToken ct) =>
+        Ok(await sender.Send(new GetOpenSafetyNoticesQuery(), ct));
+
+    [HttpPost("{id:guid}/safety-notices")]
+    public async Task<IActionResult> LogSafetyNotice(Guid id, LogSafetyNoticeRequest request, CancellationToken ct)
+    {
+        var noticeId = await sender.Send(new LogSafetyNoticeCommand(
+            id, Enum.Parse<NT.QAMS.Domain.Equipment.SafetyNoticeType>(request.Type, ignoreCase: true),
+            request.Reference, request.Issuer,
+            Enum.Parse<NT.QAMS.Domain.Equipment.SafetyNoticeSeverity>(request.Severity, ignoreCase: true),
+            request.ReceivedOn, request.RequiredActionBy), ct);
+        return Ok(new { id = noticeId });
+    }
+
+    [HttpPost("{id:guid}/safety-notices/{noticeId:guid}/action")]
+    public async Task<IActionResult> ActionSafetyNotice(Guid id, Guid noticeId, ActionSafetyNoticeRequest request, CancellationToken ct)
+    {
+        await sender.Send(new ActionSafetyNoticeCommand(id, noticeId, request.Note, request.On), ct);
+        return NoContent();
+    }
+
+    [HttpPost("{id:guid}/safety-notices/{noticeId:guid}/close")]
+    public async Task<IActionResult> CloseSafetyNotice(Guid id, Guid noticeId, CancellationToken ct)
+    {
+        await sender.Send(new CloseSafetyNoticeCommand(id, noticeId), ct);
+        return NoContent();
+    }
 }

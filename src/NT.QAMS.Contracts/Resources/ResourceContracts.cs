@@ -27,13 +27,34 @@ public sealed record IntermediateCheckDto(
     Guid Id, DateOnly PerformedOn, Guid PerformedById, string CheckType,
     bool Passed, Guid? ReferenceStandardId, string? Remarks);
 
+// ── Downtime & safety notices (HQMS M14) ─────────────────────────────────────
+
+public sealed record StartDowntimeRequest(DateTimeOffset StartedAtUtc, string Category, string Reason);
+public sealed record EndDowntimeRequest(DateTimeOffset EndedAtUtc);
+public sealed record DowntimeEventDto(
+    Guid Id, DateTimeOffset StartedAtUtc, DateTimeOffset? EndedAtUtc, string Category, string Reason,
+    bool IsOpen, decimal DurationHours);
+
+public sealed record LogSafetyNoticeRequest(
+    string Type, string Reference, string Issuer, string Severity, DateOnly ReceivedOn, DateOnly? RequiredActionBy);
+public sealed record ActionSafetyNoticeRequest(string Note, DateOnly On);
+public sealed record SafetyNoticeDto(
+    Guid Id, string Type, string Reference, string Issuer, string Severity, DateOnly ReceivedOn,
+    DateOnly? RequiredActionBy, string Status, string? ActionNote, DateOnly? ActionedOn, bool IsOverdue);
+public sealed record OpenSafetyNoticeDto(
+    Guid EquipmentId, string EquipmentCode, string EquipmentName, Guid NoticeId, string Type, string Reference,
+    string Issuer, string Severity, DateOnly ReceivedOn, DateOnly? RequiredActionBy, string Status, bool IsOverdue);
+
 public sealed record EquipmentDetailDto(
     Guid Id, string Code, string Name, string SerialNumber, string? Location,
     string Status, int CalibrationIntervalDays, int GracePeriodDays,
     DateOnly? LastCalibrationAt, DateOnly? NextCalibrationDue,
     IReadOnlyList<CalibrationRecordDto> Calibrations,
     IReadOnlyList<MaintenanceRecordDto> Maintenance,
-    IReadOnlyList<IntermediateCheckDto> IntermediateChecks);
+    IReadOnlyList<IntermediateCheckDto> IntermediateChecks,
+    IReadOnlyList<DowntimeEventDto> Downtime,
+    IReadOnlyList<SafetyNoticeDto> SafetyNotices,
+    decimal AvailabilityPercent30d);
 
 // ── Metrological Traceability (ISO 17025 §6.5) ──────────────────────────────
 
