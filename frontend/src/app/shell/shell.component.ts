@@ -332,6 +332,7 @@ export class ShellComponent {
         key: 'people', label: 'nav.groupPeople',
         items: [
           { path: '/competencies', label: 'nav.competency', icon: 'competencies' },
+          { path: '/credentialing', label: 'nav.credentialing', icon: 'credentialing' },
           { path: '/authorizations', label: 'nav.authz', icon: 'authorizations' },
           { path: '/training', label: 'nav.training', icon: 'training' },
           { path: '/training-catalogue', label: 'nav.trainingCatalogue', icon: 'trainingCatalogue' },

@@ -10583,5 +10583,174 @@ BEGIN
     VALUES ('20260826173836_AddMortalityReview', '9.0.19');
     END IF;
 END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826191030_AddCredentialing') THEN
+    CREATE TABLE qams.practitioner (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        practitioner_ref character varying(30) NOT NULL,
+        full_name character varying(200) NOT NULL,
+        specialty character varying(150) NOT NULL,
+        status character varying(20) NOT NULL,
+        appointed_until date,
+        suspension_reason character varying(1000),
+        created_at_utc timestamp with time zone NOT NULL,
+        created_by text,
+        created_by_user_id uuid,
+        modified_at_utc timestamp with time zone,
+        modified_by text,
+        CONSTRAINT pk_practitioner PRIMARY KEY (tenant_id, id)
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826191030_AddCredentialing') THEN
+    CREATE TABLE qams.practitioner_licence (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        type character varying(30) NOT NULL,
+        identifier character varying(100) NOT NULL,
+        issuer character varying(150) NOT NULL,
+        expires_on date NOT NULL,
+        verification_status character varying(20) NOT NULL,
+        verified_by uuid,
+        verification_source character varying(300),
+        verified_at_utc timestamp with time zone,
+        practitioner_id uuid NOT NULL,
+        CONSTRAINT pk_practitioner_licence PRIMARY KEY (tenant_id, id),
+        CONSTRAINT fk_practitioner_licence_practitioner_tenant_id_practitioner_id FOREIGN KEY (tenant_id, practitioner_id) REFERENCES qams.practitioner (tenant_id, id) ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826191030_AddCredentialing') THEN
+    CREATE TABLE qams.practitioner_privilege (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        name character varying(200) NOT NULL,
+        status character varying(20) NOT NULL,
+        granted_until date,
+        denial_reason character varying(1000),
+        practitioner_id uuid NOT NULL,
+        CONSTRAINT pk_practitioner_privilege PRIMARY KEY (tenant_id, id),
+        CONSTRAINT fk_practitioner_privilege_practitioner_tenant_id_practitioner_ FOREIGN KEY (tenant_id, practitioner_id) REFERENCES qams.practitioner (tenant_id, id) ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826191030_AddCredentialing') THEN
+    CREATE UNIQUE INDEX ix_practitioner_tenant_id_practitioner_ref ON qams.practitioner (tenant_id, practitioner_ref);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826191030_AddCredentialing') THEN
+    CREATE INDEX ix_practitioner_tenant_id_specialty ON qams.practitioner (tenant_id, specialty);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826191030_AddCredentialing') THEN
+    CREATE INDEX ix_practitioner_tenant_id_status ON qams.practitioner (tenant_id, status);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826191030_AddCredentialing') THEN
+    CREATE INDEX ix_practitioner_licence_tenant_id_practitioner_id ON qams.practitioner_licence (tenant_id, practitioner_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826191030_AddCredentialing') THEN
+    CREATE INDEX ix_practitioner_privilege_tenant_id_practitioner_id ON qams.practitioner_privilege (tenant_id, practitioner_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826191030_AddCredentialing') THEN
+    ALTER TABLE qams.practitioner ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.practitioner FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.practitioner;
+    CREATE POLICY tenant_isolation ON qams.practitioner
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826191030_AddCredentialing') THEN
+    ALTER TABLE qams.practitioner_licence ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.practitioner_licence FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.practitioner_licence;
+    CREATE POLICY tenant_isolation ON qams.practitioner_licence
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826191030_AddCredentialing') THEN
+    ALTER TABLE qams.practitioner_privilege ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.practitioner_privilege FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.practitioner_privilege;
+    CREATE POLICY tenant_isolation ON qams.practitioner_privilege
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826191030_AddCredentialing') THEN
+    ALTER TABLE qams.practitioner ADD CONSTRAINT ck_practitioner_status_domain
+      CHECK (status IN ('Pending','Credentialed','Suspended')) NOT VALID;
+    ALTER TABLE qams.practitioner VALIDATE CONSTRAINT ck_practitioner_status_domain;
+
+    ALTER TABLE qams.practitioner_licence ADD CONSTRAINT ck_practitioner_licence_type_domain
+      CHECK (type IN ('MedicalLicence','NursingLicence','BoardCertification','Bls','Acls','Other')) NOT VALID;
+    ALTER TABLE qams.practitioner_licence VALIDATE CONSTRAINT ck_practitioner_licence_type_domain;
+
+    ALTER TABLE qams.practitioner_licence ADD CONSTRAINT ck_practitioner_licence_verification_domain
+      CHECK (verification_status IN ('Pending','Verified')) NOT VALID;
+    ALTER TABLE qams.practitioner_licence VALIDATE CONSTRAINT ck_practitioner_licence_verification_domain;
+
+    ALTER TABLE qams.practitioner_privilege ADD CONSTRAINT ck_practitioner_privilege_status_domain
+      CHECK (status IN ('Requested','Granted','Denied','Expired')) NOT VALID;
+    ALTER TABLE qams.practitioner_privilege VALIDATE CONSTRAINT ck_practitioner_privilege_status_domain;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826191030_AddCredentialing') THEN
+    INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+    VALUES ('20260826191030_AddCredentialing', '9.0.19');
+    END IF;
+END $EF$;
 COMMIT;
 

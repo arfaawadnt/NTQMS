@@ -3030,3 +3030,43 @@ export interface ReportComplicationRequest {
   occurredDateUtc: string; description: string; departmentId: string | null;
 }
 export interface ReviewComplicationRequest { notes: string; preventable: boolean; }
+
+// ── Credentialing & Privileging (HQMS M13) ────────────────────────────────────
+
+export const PRACTITIONER_STATUSES = ['Pending', 'Credentialed', 'Suspended'] as const;
+export const CREDENTIAL_TYPES = ['MedicalLicence', 'NursingLicence', 'BoardCertification', 'Bls', 'Acls', 'Other'] as const;
+export type CredentialType = (typeof CREDENTIAL_TYPES)[number];
+export const PRIVILEGE_STATUSES = ['Requested', 'Granted', 'Denied', 'Expired'] as const;
+
+export interface PractitionerListItem {
+  id: string; practitionerRef: string; fullName: string; specialty: string; status: string;
+  appointedUntil: string | null; grantedPrivileges: number; verifiedLicences: number;
+}
+export interface Licence {
+  id: string; type: string; identifier: string; issuer: string; expiresOn: string; expired: boolean;
+  verificationStatus: string; verifiedBy: string | null; verificationSource: string | null; verifiedAtUtc: string | null;
+}
+export interface Privilege {
+  id: string; name: string; status: string; grantedUntil: string | null; denialReason: string | null;
+}
+export interface PractitionerDetail {
+  id: string; practitionerRef: string; fullName: string; specialty: string; status: string;
+  appointedUntil: string | null; suspensionReason: string | null; licences: Licence[]; privileges: Privilege[];
+}
+export interface ExpiringCredential {
+  practitionerId: string; practitionerRef: string; fullName: string; licenceId: string; type: string;
+  identifier: string; expiresOn: string; daysToExpiry: number; tier: string;
+}
+export interface PrivilegeCheckResult {
+  practitionerId: string; practitionerRef: string; fullName: string; privilegeName: string;
+  holds: boolean; practitionerStatus: string; detail: string | null;
+}
+
+export interface RegisterPractitionerRequest { fullName: string; specialty: string; }
+export interface AddLicenceRequest { type: CredentialType; identifier: string; issuer: string; expiresOn: string; }
+export interface VerifyLicenceRequest { source: string; }
+export interface RequestPrivilegeRequest { name: string; }
+export interface GrantPrivilegeRequest { grantedUntil: string | null; }
+export interface DenyPrivilegeRequest { reason: string; }
+export interface CredentialRequest { appointedUntil: string; }
+export interface SuspendPractitionerRequest { reason: string; }

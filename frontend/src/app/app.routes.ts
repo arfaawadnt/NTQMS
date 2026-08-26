@@ -108,6 +108,16 @@ export const routes: Routes = [
             ],
           },
           {
+            path: 'credentialing',
+            loadComponent: () => import('./features/credentialing/credentialing-list.component').then((m) => m.CredentialingListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/credentialing/credentialing-detail.component').then((m) => m.CredentialingDetailComponent),
+              },
+            ],
+          },
+          {
             path: 'training-catalogue/sessions/:id',
             loadComponent: () => import('./features/training/session-detail.component').then((m) => m.SessionDetailComponent),
           },

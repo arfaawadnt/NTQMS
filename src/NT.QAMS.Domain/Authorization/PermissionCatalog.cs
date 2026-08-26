@@ -102,6 +102,7 @@ public static class PermissionCatalog
     public const string MonitoringPoints = "monitoring-points";
     public const string Suppliers = "suppliers";
     public const string Competencies = "competencies";
+    public const string Credentialing = "credentialing";
     public const string Training = "training";
     public const string TestAuthorizations = "test-authorizations";
     public const string Users = "users";
@@ -180,6 +181,7 @@ public static class PermissionCatalog
 
         // ── People & competence ──────────────────────────────────────────────
         new(Competencies, GroupPeople, "perm.mod.competencies", SignedRecordLifecycle),
+        new(Credentialing, GroupPeople, "perm.mod.credentialing", FullRecordLifecycle),
         new(Training, GroupPeople, "perm.mod.training", FullRecordLifecycle),
         new(TestAuthorizations, GroupPeople, "perm.mod.testAuthorizations", SignedRecordLifecycle),
         new(Users, GroupPeople, "perm.mod.users", ConfigurationModule),

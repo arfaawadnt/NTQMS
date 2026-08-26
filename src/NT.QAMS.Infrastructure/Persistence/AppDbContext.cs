@@ -12,6 +12,7 @@ using NT.QAMS.Domain.Facility;
 using NT.QAMS.Domain.Files;
 using NT.QAMS.Domain.IdentityAccess;
 using NT.QAMS.Domain.IncidentReporting;
+using NT.QAMS.Domain.Credentialing;
 using NT.QAMS.Domain.InfectionControl;
 using NT.QAMS.Domain.Integration;
 using NT.QAMS.Domain.MortalityReview;
@@ -90,6 +91,7 @@ public sealed class AppDbContext(
     public DbSet<TrainingSession> TrainingSessions => Set<TrainingSession>();
     public DbSet<MortalityReviewAggregate> MortalityReviews => Set<MortalityReviewAggregate>();
     public DbSet<ComplicationCase> ComplicationCases => Set<ComplicationCase>();
+    public DbSet<Practitioner> Practitioners => Set<Practitioner>();
     public DbSet<EquipmentItem> EquipmentItems => Set<EquipmentItem>();
     public DbSet<ReferenceStandard> ReferenceStandards => Set<ReferenceStandard>();
     public DbSet<CompetencyRecord> Competencies => Set<CompetencyRecord>();

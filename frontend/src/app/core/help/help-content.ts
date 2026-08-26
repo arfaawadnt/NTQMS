@@ -433,6 +433,29 @@ export const HELP_TOPICS: HelpTopic[] = [
     ],
   },
   {
+    route: '/credentialing', titleKey: 'nav.credentialing', groupKey: 'nav.groupPeople', icon: 'credentialing',
+    summary: L(
+      'Practitioner credentialing and privileging: hold licences and certifications (each primary-source verified), delineate and grant clinical privileges, appoint and reappoint on a cycle, and suspend when needed. A tiered licence-expiry register chases renewals, and a point-of-care check confirms whether a practitioner holds an active privilege right now.',
+      'اعتماد الممارسين ومنح الامتيازات: الاحتفاظ بالتراخيص والشهادات (كل منها موثّق من المصدر)، وتحديد ومنح الامتيازات السريرية، والتعيين وإعادة التعيين دوريًا، والإيقاف عند الحاجة. يتابع سجل انتهاء التراخيص المتدرّج التجديدات، ويؤكد التحقق عند نقطة الرعاية ما إذا كان الممارس يحمل امتيازًا نشطًا الآن.',
+      'Accréditation et privilèges des praticiens : détenez licences et certifications (chacune vérifiée à la source), délimitez et accordez les privilèges cliniques, nommez et renouvelez selon un cycle, et suspendez au besoin. Un registre d’expiration à niveaux relance les renouvellements, et une vérification au point de soins confirme si un praticien détient un privilège actif à l’instant.'),
+    steps: [
+      S(L('Pending', 'قيد الانتظار', 'En attente'), L('Register the practitioner; add licences and request privileges.', 'سجّل الممارس؛ أضف التراخيص واطلب الامتيازات.', 'Enregistrez le praticien ; ajoutez les licences et demandez les privilèges.')),
+      S(L('Verified', 'موثّق', 'Vérifié'), L('Primary-source-verify each licence; the committee grants privileges.', 'وثّق كل ترخيص من المصدر؛ تمنح اللجنة الامتيازات.', 'Vérifiez chaque licence à la source ; le comité accorde les privilèges.')),
+      S(L('Credentialed', 'معتمد', 'Accrédité'), L('Appoint the practitioner once evidence is in place; reappoint on cycle.', 'عيّن الممارس بعد اكتمال الأدلة؛ أعد التعيين دوريًا.', 'Nommez le praticien une fois les preuves réunies ; renouvelez selon le cycle.')),
+    ],
+    usage: [
+      L('Add a licence, then primary-source-verify it (recording the source checked); request a privilege, which the committee grants (optionally time-limited) or denies with a reason.',
+        'أضف ترخيصًا ثم وثّقه من المصدر (مع تسجيل المصدر الذي رُوجع)؛ اطلب امتيازًا تمنحه اللجنة (بمدة اختيارية) أو ترفضه مع ذكر السبب.',
+        'Ajoutez une licence puis vérifiez-la à la source (en consignant la source contrôlée) ; demandez un privilège que le comité accorde (éventuellement limité dans le temps) ou refuse avec un motif.'),
+      L('A practitioner can be credentialed only with at least one verified licence and one granted privilege; reappointment renews the appointment, and suspension removes all active privileges.',
+        'لا يمكن اعتماد الممارس إلا بترخيص موثّق واحد وامتياز ممنوح واحد على الأقل؛ تجدد إعادة التعيين التعيين، ويزيل الإيقاف جميع الامتيازات النشطة.',
+        'Un praticien ne peut être accrédité qu’avec au moins une licence vérifiée et un privilège accordé ; le renouvellement prolonge la nomination et la suspension retire tous les privilèges actifs.'),
+      L('The expiry register tiers licences (Expired / Critical ≤30d / Warning ≤90d); the point-of-care check answers whether a privilege is active today.',
+        'يصنّف سجل الانتهاء التراخيص (منتهٍ / حرج ≤30 يومًا / تحذير ≤90 يومًا)؛ ويجيب التحقق عند نقطة الرعاية عمّا إذا كان الامتياز نشطًا اليوم.',
+        'Le registre d’expiration classe les licences (Expiré / Critique ≤30j / Alerte ≤90j) ; la vérification au point de soins indique si un privilège est actif aujourd’hui.'),
+    ],
+  },
+  {
     route: '/nonconformances', titleKey: 'nav.nc', groupKey: 'nav.groupImprovement', icon: 'nc',
     summary: L(
       'The nonconformance & CAPA register: log a problem, find its root cause, plan corrective action, then verify the fix worked and was effective before closing.',
