@@ -339,7 +339,7 @@ export const HELP_TOPICS: HelpTopic[] = [
     ],
   },
   {
-    route: '/patient-safety', titleKey: 'nav.patientSafety', groupKey: 'nav.groupImprovement', icon: 'patientSafety',
+    route: '/patient-safety', titleKey: 'nav.patientSafety', groupKey: 'nav.groupClinical', icon: 'patientSafety',
     summary: L(
       'The patient-safety register for falls and pressure injuries. Each event carries its harm level, and pressure injuries also carry a stage and whether they were present on admission or hospital-acquired. Rates are computed per 1,000 patient-days from the ADT-derived census.',
       'سجل سلامة المرضى لحالات السقوط وقرح الفراش. تحمل كل واقعة مستوى الضرر، وتحمل قرح الفراش أيضًا المرحلة وما إذا كانت موجودة عند الدخول أم مكتسبة بالمستشفى. تُحتسب المعدلات لكل 1000 يوم مريض من تعداد ADT.',
@@ -362,7 +362,7 @@ export const HELP_TOPICS: HelpTopic[] = [
     ],
   },
   {
-    route: '/infection-control', titleKey: 'nav.infectionControl', groupKey: 'nav.groupImprovement', icon: 'infectionControl',
+    route: '/infection-control', titleKey: 'nav.infectionControl', groupKey: 'nav.groupClinical', icon: 'infectionControl',
     summary: L(
       'Healthcare-associated infection surveillance: CLABSI, CAUTI, VAP and SSI. Device-associated rates are computed per 1,000 device-days from the device-exposure register, and the device-utilisation ratio uses the ADT patient-days as its denominator.',
       'ترصّد العدوى المرتبطة بالرعاية الصحية: عدوى مجرى الدم والمسالك البولية والالتهاب الرئوي المرتبط بالتنفس وعدوى الموقع الجراحي. تُحتسب المعدلات المرتبطة بالأجهزة لكل 1000 يوم جهاز من سجل استخدام الأجهزة، وتستخدم نسبة استخدام الجهاز أيام المرضى مقامًا لها.',
@@ -385,7 +385,7 @@ export const HELP_TOPICS: HelpTopic[] = [
     ],
   },
   {
-    route: '/mortality-review', titleKey: 'nav.mortalityReview', groupKey: 'nav.groupImprovement', icon: 'mortalityReview',
+    route: '/mortality-review', titleKey: 'nav.mortalityReview', groupKey: 'nav.groupClinical', icon: 'mortalityReview',
     summary: L(
       'Mortality & morbidity peer review: deaths are classified (expected / unexpected / potentially-preventable / preventable); any non-expected death needs an independent second review by a different reviewer and committee discussion before closure. A complication register captures morbidity such as returns to theatre and unplanned ICU admissions. The mortality rate is per 1,000 patient-days from the ADT denominator.',
       'مراجعة الأقران للوفيات والمراضة: تُصنَّف الوفيات (متوقعة/غير متوقعة/يُحتمل تجنبها/يمكن تجنبها)؛ وتتطلب أي وفاة غير متوقعة مراجعة ثانية مستقلة بمراجع مختلف ومناقشة باللجنة قبل الإغلاق. يلتقط سجل المضاعفات المراضة مثل العودة لغرفة العمليات ودخول العناية غير المخطط. معدل الوفيات لكل 1000 يوم مريض من مقام ADT.',
@@ -410,7 +410,7 @@ export const HELP_TOPICS: HelpTopic[] = [
     ],
   },
   {
-    route: '/eoc', titleKey: 'nav.eoc', groupKey: 'nav.groupImprovement', icon: 'eoc',
+    route: '/eoc', titleKey: 'nav.eoc', groupKey: 'nav.groupClinical', icon: 'eoc',
     summary: L(
       'Environment of care and emergency preparedness: schedule environmental safety rounds, log findings by severity and resolve them, and run emergency drills (fire, evacuation, code blue, …) through a scheduled → executed → evaluated cycle with an effectiveness score. The dashboard tracks round completion, the open-findings backlog and drill effectiveness.',
       'بيئة الرعاية والتأهب للطوارئ: جدول جولات السلامة البيئية، وسجّل الملاحظات حسب الشدة وحلّها، ونفّذ تمارين الطوارئ (حريق، إخلاء، الكود الأزرق، …) عبر دورة مجدولة ← منفّذة ← مُقيّمة بدرجة فعالية. تتابع اللوحة إتمام الجولات وتراكم الملاحظات المفتوحة وفعالية التمارين.',
@@ -456,7 +456,7 @@ export const HELP_TOPICS: HelpTopic[] = [
     ],
   },
   {
-    route: '/credentialing', titleKey: 'nav.credentialing', groupKey: 'nav.groupPeople', icon: 'credentialing',
+    route: '/credentialing', titleKey: 'nav.credentialing', groupKey: 'nav.groupClinical', icon: 'credentialing',
     summary: L(
       'Practitioner credentialing and privileging: hold licences and certifications (each primary-source verified), delineate and grant clinical privileges, appoint and reappoint on a cycle, and suspend when needed. A tiered licence-expiry register chases renewals, and a point-of-care check confirms whether a practitioner holds an active privilege right now.',
       'اعتماد الممارسين ومنح الامتيازات: الاحتفاظ بالتراخيص والشهادات (كل منها موثّق من المصدر)، وتحديد ومنح الامتيازات السريرية، والتعيين وإعادة التعيين دوريًا، والإيقاف عند الحاجة. يتابع سجل انتهاء التراخيص المتدرّج التجديدات، ويؤكد التحقق عند نقطة الرعاية ما إذا كان الممارس يحمل امتيازًا نشطًا الآن.',

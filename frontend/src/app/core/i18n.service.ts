@@ -1390,6 +1390,7 @@ export class I18nService {
     'ctx.issuesClosed': { en: 'Closed Issues', ar: 'قضايا مغلقة', fr: 'Enjeux clos' },
     'ctx.linkedRisks': { en: 'Linked to Risks', ar: 'مرتبطة بمخاطر', fr: 'Liés à des risques' },
     'nav.groupOverview': { en: 'Overview', ar: 'نظرة عامة', fr: 'Aperçu' },
+    'nav.groupClinical': { en: 'Clinical Governance', ar: 'الحوكمة السريرية', fr: 'Gouvernance clinique' },
     'nav.groupImprovement': { en: 'Quality & Improvement', ar: 'الجودة والتحسين', fr: 'Qualité et amélioration' },
     'nav.groupDocs': { en: 'Documents & Records', ar: 'الوثائق والسجلات', fr: 'Documents et enregistrements' },
     'nav.groupRisk': { en: 'Risk & Governance', ar: 'المخاطر والحوكمة', fr: 'Risques et gouvernance' },

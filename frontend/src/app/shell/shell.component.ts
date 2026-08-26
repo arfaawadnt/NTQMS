@@ -282,13 +282,19 @@ export class ShellComponent {
         ],
       },
       {
-        key: 'improvement', label: 'nav.groupImprovement',
+        key: 'clinical', label: 'nav.groupClinical',
         items: [
-          { path: '/incidents', label: 'nav.incidents', icon: 'incidents' },
           { path: '/patient-safety', label: 'nav.patientSafety', icon: 'patientSafety' },
           { path: '/infection-control', label: 'nav.infectionControl', icon: 'infectionControl' },
           { path: '/mortality-review', label: 'nav.mortalityReview', icon: 'mortalityReview' },
+          { path: '/credentialing', label: 'nav.credentialing', icon: 'credentialing' },
           { path: '/eoc', label: 'nav.eoc', icon: 'eoc' },
+        ],
+      },
+      {
+        key: 'improvement', label: 'nav.groupImprovement',
+        items: [
+          { path: '/incidents', label: 'nav.incidents', icon: 'incidents' },
           { path: '/nonconformances', label: 'nav.nc', icon: 'nc' },
           { path: '/complaints', label: 'nav.complaints', icon: 'complaints' },
           { path: '/surveys', label: 'nav.surveys', icon: 'surveys' },
@@ -333,7 +339,6 @@ export class ShellComponent {
         key: 'people', label: 'nav.groupPeople',
         items: [
           { path: '/competencies', label: 'nav.competency', icon: 'competencies' },
-          { path: '/credentialing', label: 'nav.credentialing', icon: 'credentialing' },
           { path: '/authorizations', label: 'nav.authz', icon: 'authorizations' },
           { path: '/training', label: 'nav.training', icon: 'training' },
           { path: '/training-catalogue', label: 'nav.trainingCatalogue', icon: 'trainingCatalogue' },
