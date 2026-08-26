@@ -410,6 +410,29 @@ export const HELP_TOPICS: HelpTopic[] = [
     ],
   },
   {
+    route: '/eoc', titleKey: 'nav.eoc', groupKey: 'nav.groupImprovement', icon: 'eoc',
+    summary: L(
+      'Environment of care and emergency preparedness: schedule environmental safety rounds, log findings by severity and resolve them, and run emergency drills (fire, evacuation, code blue, …) through a scheduled → executed → evaluated cycle with an effectiveness score. The dashboard tracks round completion, the open-findings backlog and drill effectiveness.',
+      'بيئة الرعاية والتأهب للطوارئ: جدول جولات السلامة البيئية، وسجّل الملاحظات حسب الشدة وحلّها، ونفّذ تمارين الطوارئ (حريق، إخلاء، الكود الأزرق، …) عبر دورة مجدولة ← منفّذة ← مُقيّمة بدرجة فعالية. تتابع اللوحة إتمام الجولات وتراكم الملاحظات المفتوحة وفعالية التمارين.',
+      'Environnement de soins et préparation aux urgences : planifiez les rondes de sécurité, consignez les constats par gravité et résolvez-les, et menez des exercices d’urgence (incendie, évacuation, code bleu, …) selon un cycle planifié → exécuté → évalué avec un score d’efficacité. Le tableau de bord suit l’achèvement des rondes, l’arriéré de constats ouverts et l’efficacité des exercices.'),
+    steps: [
+      S(L('Scheduled', 'مجدولة', 'Planifié'), L('Schedule a safety round for an area, or an emergency drill.', 'جدول جولة سلامة لمنطقة، أو تمرين طوارئ.', 'Planifiez une ronde pour une zone, ou un exercice d’urgence.')),
+      S(L('In progress / Executed', 'قيد التنفيذ', 'En cours / Exécuté'), L('Walk the round logging findings; or execute the drill with participants.', 'نفّذ الجولة مع تسجيل الملاحظات؛ أو نفّذ التمرين مع المشاركين.', 'Réalisez la ronde en consignant les constats ; ou exécutez l’exercice avec les participants.')),
+      S(L('Completed / Evaluated', 'مكتملة / مُقيّمة', 'Terminé / Évalué'), L('Complete the round; evaluate the drill with a score and improvement notes.', 'أكمل الجولة؛ قيّم التمرين بدرجة وملاحظات تحسين.', 'Terminez la ronde ; évaluez l’exercice avec un score et des notes d’amélioration.')),
+    ],
+    usage: [
+      L('Start a scheduled round to log findings (each with a severity), resolve findings with a corrective note, then complete the round.',
+        'ابدأ جولة مجدولة لتسجيل الملاحظات (كل منها بشدة)، وحلّ الملاحظات بملاحظة تصحيحية، ثم أكمل الجولة.',
+        'Démarrez une ronde planifiée pour consigner les constats (chacun avec une gravité), résolvez-les avec une note corrective, puis terminez la ronde.'),
+      L('Execute a drill (recording participants), then evaluate it with a 0–100 score; the score sets the effectiveness tier (Effective / Partially / Ineffective).',
+        'نفّذ التمرين (مع تسجيل المشاركين)، ثم قيّمه بدرجة من 0 إلى 100؛ تحدد الدرجة مستوى الفعالية (فعّال / جزئيًا / غير فعّال).',
+        'Exécutez un exercice (en enregistrant les participants), puis évaluez-le avec un score de 0 à 100 ; le score définit le niveau d’efficacité (Efficace / Partiel / Inefficace).'),
+      L('The dashboard rolls up completed rounds, the open- and critical-findings backlog, and drills evaluated with their mean score.',
+        'تلخّص اللوحة الجولات المكتملة وتراكم الملاحظات المفتوحة والحرجة والتمارين المُقيّمة بمتوسط درجاتها.',
+        'Le tableau de bord récapitule les rondes terminées, l’arriéré de constats ouverts et critiques, et les exercices évalués avec leur score moyen.'),
+    ],
+  },
+  {
     route: '/training-catalogue', titleKey: 'nav.trainingCatalogue', groupKey: 'nav.groupPeople', icon: 'trainingCatalogue',
     summary: L(
       'The training course catalogue and its delivery: define reusable courses with a pass mark and validity, schedule sessions, register trainees and capture pre/post assessment scores, then read the effectiveness roll-up and the compliance dashboard. This is distinct from the individual training-assignment queue.',

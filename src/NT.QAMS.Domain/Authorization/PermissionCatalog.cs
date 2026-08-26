@@ -111,6 +111,7 @@ public static class PermissionCatalog
     public const string Tasks = "tasks";
     public const string Notifications = "notifications";
     public const string Integration = "integration";
+    public const string EnvironmentOfCare = "environment-of-care";
     public const string Reports = "reports";
     public const string Organization = "organization";
     public const string TenantSettings = "tenant-settings";
@@ -197,6 +198,7 @@ public static class PermissionCatalog
         new(Notifications, GroupOperations, "perm.mod.notifications", [PermissionAction.View, PermissionAction.Manage]),
         new(Integration, GroupOperations, "perm.mod.integration",
             [PermissionAction.View, PermissionAction.Create, PermissionAction.Edit, PermissionAction.Manage]),
+        new(EnvironmentOfCare, GroupOperations, "perm.mod.environmentOfCare", FullRecordLifecycle),
         // Reporting carries Manage in addition to the read-only pair: the composite
         // Quality Health Score is a governance figure, so tuning its category
         // weighting is a privileged act distinct from reading the analytics.

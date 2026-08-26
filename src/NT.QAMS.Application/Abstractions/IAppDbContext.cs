@@ -11,6 +11,7 @@ using NT.QAMS.Domain.Facility;
 using NT.QAMS.Domain.Files;
 using NT.QAMS.Domain.IdentityAccess;
 using NT.QAMS.Domain.Credentialing;
+using NT.QAMS.Domain.EnvironmentOfCare;
 using NT.QAMS.Domain.IncidentReporting;
 using NT.QAMS.Domain.InfectionControl;
 using NT.QAMS.Domain.Integration;
@@ -76,6 +77,8 @@ public interface IAppDbContext
     DbSet<MortalityReviewAggregate> MortalityReviews { get; }
     DbSet<ComplicationCase> ComplicationCases { get; }
     DbSet<Practitioner> Practitioners { get; }
+    DbSet<SafetyRound> SafetyRounds { get; }
+    DbSet<Drill> Drills { get; }
     DbSet<EquipmentItem> EquipmentItems { get; }
     DbSet<ReferenceStandard> ReferenceStandards { get; }
     DbSet<TestAuthorization> TestAuthorizations { get; }

@@ -118,6 +118,20 @@ export const routes: Routes = [
             ],
           },
           {
+            path: 'eoc',
+            loadComponent: () => import('./features/eoc/eoc-list.component').then((m) => m.EocListComponent),
+            children: [
+              {
+                path: 'rounds/:id',
+                loadComponent: () => import('./features/eoc/round-detail.component').then((m) => m.RoundDetailComponent),
+              },
+              {
+                path: 'drills/:id',
+                loadComponent: () => import('./features/eoc/drill-detail.component').then((m) => m.DrillDetailComponent),
+              },
+            ],
+          },
+          {
             path: 'training-catalogue/sessions/:id',
             loadComponent: () => import('./features/training/session-detail.component').then((m) => m.SessionDetailComponent),
           },

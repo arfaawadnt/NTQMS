@@ -10752,5 +10752,208 @@ BEGIN
     VALUES ('20260826191030_AddCredentialing', '9.0.19');
     END IF;
 END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826203856_AddEnvironmentOfCare') THEN
+    CREATE TABLE qams.drill (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        branch_id uuid,
+        drill_ref character varying(30) NOT NULL,
+        type character varying(20) NOT NULL,
+        location character varying(150) NOT NULL,
+        scheduled_date date NOT NULL,
+        status character varying(20) NOT NULL,
+        executed_at_utc timestamp with time zone,
+        participant_count integer,
+        evaluation_score integer,
+        improvement_notes text,
+        created_at_utc timestamp with time zone NOT NULL,
+        created_by text,
+        created_by_user_id uuid,
+        modified_at_utc timestamp with time zone,
+        modified_by text,
+        CONSTRAINT pk_drill PRIMARY KEY (tenant_id, id)
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826203856_AddEnvironmentOfCare') THEN
+    CREATE TABLE qams.safety_round (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        branch_id uuid,
+        round_ref character varying(30) NOT NULL,
+        area character varying(150) NOT NULL,
+        type character varying(30) NOT NULL,
+        scheduled_date date NOT NULL,
+        status character varying(20) NOT NULL,
+        conducted_by uuid,
+        completed_at_utc timestamp with time zone,
+        created_at_utc timestamp with time zone NOT NULL,
+        created_by text,
+        created_by_user_id uuid,
+        modified_at_utc timestamp with time zone,
+        modified_by text,
+        CONSTRAINT pk_safety_round PRIMARY KEY (tenant_id, id)
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826203856_AddEnvironmentOfCare') THEN
+    CREATE TABLE qams.safety_round_finding (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        description character varying(2000) NOT NULL,
+        severity character varying(20) NOT NULL,
+        status character varying(20) NOT NULL,
+        corrective_note character varying(2000),
+        resolved_at_utc timestamp with time zone,
+        safety_round_id uuid NOT NULL,
+        CONSTRAINT pk_safety_round_finding PRIMARY KEY (tenant_id, id),
+        CONSTRAINT fk_safety_round_finding_safety_round_tenant_id_safety_round_id FOREIGN KEY (tenant_id, safety_round_id) REFERENCES qams.safety_round (tenant_id, id) ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826203856_AddEnvironmentOfCare') THEN
+    CREATE UNIQUE INDEX ix_drill_tenant_id_drill_ref ON qams.drill (tenant_id, drill_ref);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826203856_AddEnvironmentOfCare') THEN
+    CREATE INDEX ix_drill_tenant_id_scheduled_date ON qams.drill (tenant_id, scheduled_date);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826203856_AddEnvironmentOfCare') THEN
+    CREATE INDEX ix_drill_tenant_id_type_status ON qams.drill (tenant_id, type, status);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826203856_AddEnvironmentOfCare') THEN
+    CREATE UNIQUE INDEX ix_safety_round_tenant_id_round_ref ON qams.safety_round (tenant_id, round_ref);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826203856_AddEnvironmentOfCare') THEN
+    CREATE INDEX ix_safety_round_tenant_id_scheduled_date ON qams.safety_round (tenant_id, scheduled_date);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826203856_AddEnvironmentOfCare') THEN
+    CREATE INDEX ix_safety_round_tenant_id_type_status ON qams.safety_round (tenant_id, type, status);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826203856_AddEnvironmentOfCare') THEN
+    CREATE INDEX ix_safety_round_finding_tenant_id_safety_round_id ON qams.safety_round_finding (tenant_id, safety_round_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826203856_AddEnvironmentOfCare') THEN
+    ALTER TABLE qams.safety_round ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.safety_round FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.safety_round;
+    CREATE POLICY tenant_isolation ON qams.safety_round
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826203856_AddEnvironmentOfCare') THEN
+    ALTER TABLE qams.safety_round_finding ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.safety_round_finding FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.safety_round_finding;
+    CREATE POLICY tenant_isolation ON qams.safety_round_finding
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826203856_AddEnvironmentOfCare') THEN
+    ALTER TABLE qams.drill ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.drill FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.drill;
+    CREATE POLICY tenant_isolation ON qams.drill
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826203856_AddEnvironmentOfCare') THEN
+    ALTER TABLE qams.safety_round ADD CONSTRAINT ck_safety_round_type_domain
+      CHECK (type IN ('FireSafety','InfectionControl','GeneralSafety','HazardousMaterials','Utilities','Security')) NOT VALID;
+    ALTER TABLE qams.safety_round VALIDATE CONSTRAINT ck_safety_round_type_domain;
+
+    ALTER TABLE qams.safety_round ADD CONSTRAINT ck_safety_round_status_domain
+      CHECK (status IN ('Scheduled','InProgress','Completed')) NOT VALID;
+    ALTER TABLE qams.safety_round VALIDATE CONSTRAINT ck_safety_round_status_domain;
+
+    ALTER TABLE qams.safety_round_finding ADD CONSTRAINT ck_safety_round_finding_severity_domain
+      CHECK (severity IN ('Low','Medium','High','Critical')) NOT VALID;
+    ALTER TABLE qams.safety_round_finding VALIDATE CONSTRAINT ck_safety_round_finding_severity_domain;
+
+    ALTER TABLE qams.safety_round_finding ADD CONSTRAINT ck_safety_round_finding_status_domain
+      CHECK (status IN ('Open','Resolved')) NOT VALID;
+    ALTER TABLE qams.safety_round_finding VALIDATE CONSTRAINT ck_safety_round_finding_status_domain;
+
+    ALTER TABLE qams.drill ADD CONSTRAINT ck_drill_type_domain
+      CHECK (type IN ('Fire','Evacuation','CodeBlue','Disaster','Hazmat','ActiveShooter')) NOT VALID;
+    ALTER TABLE qams.drill VALIDATE CONSTRAINT ck_drill_type_domain;
+
+    ALTER TABLE qams.drill ADD CONSTRAINT ck_drill_status_domain
+      CHECK (status IN ('Scheduled','Executed','Evaluated')) NOT VALID;
+    ALTER TABLE qams.drill VALIDATE CONSTRAINT ck_drill_status_domain;
+
+    ALTER TABLE qams.drill ADD CONSTRAINT ck_drill_score_range
+      CHECK (evaluation_score IS NULL OR evaluation_score BETWEEN 0 AND 100) NOT VALID;
+    ALTER TABLE qams.drill VALIDATE CONSTRAINT ck_drill_score_range;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826203856_AddEnvironmentOfCare') THEN
+    INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+    VALUES ('20260826203856_AddEnvironmentOfCare', '9.0.19');
+    END IF;
+END $EF$;
 COMMIT;
 

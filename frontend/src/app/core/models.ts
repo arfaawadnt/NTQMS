@@ -3070,3 +3070,46 @@ export interface GrantPrivilegeRequest { grantedUntil: string | null; }
 export interface DenyPrivilegeRequest { reason: string; }
 export interface CredentialRequest { appointedUntil: string; }
 export interface SuspendPractitionerRequest { reason: string; }
+
+// ── Environment of Care & Emergency Preparedness (HQMS M15) ───────────────────
+
+export const ROUND_TYPES = ['FireSafety', 'InfectionControl', 'GeneralSafety', 'HazardousMaterials', 'Utilities', 'Security'] as const;
+export type RoundType = (typeof ROUND_TYPES)[number];
+export const ROUND_STATUSES = ['Scheduled', 'InProgress', 'Completed'] as const;
+export const FINDING_SEVERITIES = ['Low', 'Medium', 'High', 'Critical'] as const;
+export type FindingSeverity = (typeof FINDING_SEVERITIES)[number];
+export const DRILL_TYPES = ['Fire', 'Evacuation', 'CodeBlue', 'Disaster', 'Hazmat', 'ActiveShooter'] as const;
+export type DrillType = (typeof DRILL_TYPES)[number];
+export const DRILL_STATUSES = ['Scheduled', 'Executed', 'Evaluated'] as const;
+
+export interface RoundListItem {
+  id: string; roundRef: string; area: string; type: string; scheduledDate: string; status: string;
+  openFindings: number; totalFindings: number;
+}
+export interface RoundFinding {
+  id: string; description: string; severity: string; status: string; correctiveNote: string | null; resolvedAtUtc: string | null;
+}
+export interface RoundDetail {
+  id: string; roundRef: string; area: string; type: string; scheduledDate: string; status: string;
+  conductedBy: string | null; completedAtUtc: string | null; findings: RoundFinding[];
+}
+export interface DrillListItem {
+  id: string; drillRef: string; type: string; location: string; scheduledDate: string; status: string;
+  participantCount: number | null; evaluationScore: number | null; effectiveness: string | null;
+}
+export interface DrillDetail {
+  id: string; drillRef: string; type: string; location: string; scheduledDate: string; status: string;
+  executedAtUtc: string | null; participantCount: number | null; evaluationScore: number | null;
+  effectiveness: string | null; improvementNotes: string | null;
+}
+export interface EocSummary {
+  roundsScheduled: number; roundsCompleted: number; openFindings: number; criticalOpenFindings: number;
+  drillsScheduled: number; drillsEvaluated: number; meanDrillScore: number | null;
+}
+
+export interface ScheduleRoundRequest { area: string; type: RoundType; scheduledDate: string; }
+export interface AddFindingRequest { description: string; severity: FindingSeverity; }
+export interface ResolveFindingRequest { note: string; }
+export interface ScheduleDrillRequest { type: DrillType; location: string; scheduledDate: string; }
+export interface ExecuteDrillRequest { executedAtUtc: string; participantCount: number; }
+export interface EvaluateDrillRequest { score: number; improvementNotes: string; }
