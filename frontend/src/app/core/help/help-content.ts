@@ -166,7 +166,7 @@ export const HELP_TOPICS: HelpTopic[] = [
     ],
   },
   {
-    route: '/integration', titleKey: 'nav.integration', groupKey: 'nav.groupOverview', icon: 'integration',
+    route: '/integration', titleKey: 'nav.integration', groupKey: 'nav.groupAdmin', icon: 'integration',
     summary: L(
       'Integration & interoperability: register interface endpoints (HIS/LIS/pharmacy/HR over HL7 v2, FHIR R4 or file/DB extract), watch their health, inspect the inbound message inbox including failures, and read the ADT-derived patient census that supplies rate denominators.',
       'التكامل والتشغيل البيني: سجّل واجهات (HIS/LIS/الصيدلية/الموارد البشرية عبر HL7 v2 وFHIR R4 أو استخراج ملف/قاعدة بيانات)، وراقب حالتها، وافحص صندوق الرسائل الواردة بما فيها الفاشلة، واقرأ تعداد المرضى المشتق من ADT.',

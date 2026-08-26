@@ -277,7 +277,6 @@ export class ShellComponent {
             visible: () => this.perms.can('reports.view') },
           { path: '/tasks', label: 'nav.tasks', icon: 'tasks' },
           { path: '/notifications', label: 'nav.notifications', icon: 'bell' },
-          { path: '/integration', label: 'nav.integration', icon: 'integration' },
           { path: '/manual', label: 'nav.manual', icon: 'manual' },
         ],
       },
@@ -369,6 +368,7 @@ export class ShellComponent {
         key: 'admin', label: 'nav.groupAdmin',
         items: [
           { path: '/settings/security', label: 'nav.security', icon: 'security' },
+          { path: '/integration', label: 'nav.integration', icon: 'integration', visible: () => this.perms.can('integration.view') },
           { path: '/reference-data', label: 'nav.reference', icon: 'reference' },
           { path: '/notification-rules', label: 'nav.notificationRules', icon: 'rules', visible: () => this.perms.can('notifications.manage') },
           { path: '/mail-management', label: 'nav.mailManagement', icon: 'mail', visible: () => this.perms.can('notifications.manage') },
