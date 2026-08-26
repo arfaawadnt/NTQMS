@@ -5,17 +5,23 @@ using NT.QAMS.Application.Compliance;
 using NT.QAMS.Application.RiskGovernance;
 using NT.QAMS.Contracts.Governance;
 using NT.QAMS.Domain.SupplierQuality;
+using NT.QAMS.SharedKernel.Abstractions;
 using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.SupplierQuality;
 
 [RequireInternalActor]
 public sealed record RegisterSupplierCommand(string Name, string SupplierType,
+    bool IsOutsourcedClinicalService = false, string? ServiceScope = null,
     Guid? BranchId = null, Guid? DepartmentId = null) : ICommand<Guid>;
 
 public sealed class RegisterSupplierValidator : AbstractValidator<RegisterSupplierCommand>
 {
-    public RegisterSupplierValidator() => RuleFor(x => x.Name).NotEmpty().MaximumLength(200);
+    public RegisterSupplierValidator()
+    {
+        RuleFor(x => x.Name).NotEmpty().MaximumLength(200);
+        RuleFor(x => x.ServiceScope).MaximumLength(300);
+    }
 }
 
 public sealed class RegisterSupplierHandler(
@@ -26,7 +32,8 @@ public sealed class RegisterSupplierHandler(
     {
         var supplierRef = await refs.NextAsync(GovernanceHelpers.RequireTenant(tenant), "SUP", ct);
         var supplier = Supplier.Register(
-            supplierRef, c.Name, c.SupplierType, GovernanceHelpers.RequireActor(user));
+            supplierRef, c.Name, c.SupplierType, GovernanceHelpers.RequireActor(user),
+            c.IsOutsourcedClinicalService, c.ServiceScope);
         supplier.BranchId = c.BranchId;
         supplier.DepartmentId = c.DepartmentId;
         db.Suppliers.Add(supplier);
@@ -67,7 +74,8 @@ public sealed class RecordEvaluationValidator : AbstractValidator<RecordEvaluati
 internal static class SupplierLoader
 {
     public static async Task<Supplier> LoadAsync(IAppDbContext db, Guid id, CancellationToken ct) =>
-        await db.Suppliers.Include(s => s.Certificates).SingleOrDefaultAsync(s => s.Id == id, ct)
+        await db.Suppliers.Include(s => s.Certificates).Include(s => s.Contracts).Include(s => s.Cars)
+            .SingleOrDefaultAsync(s => s.Id == id, ct)
         ?? throw new DomainException("SUP-404", "Supplier not found.");
 }
 
@@ -140,6 +148,107 @@ public sealed class RecordEvaluationHandler(IAppDbContext db, ICurrentUser user)
     }
 }
 
+// ── Contract / SLA register (HQMS M16) ──────────────────────────────────────────
+
+[RequireInternalActor]
+public sealed record AddContractCommand(
+    Guid SupplierId, string Title, DateOnly StartDate, DateOnly EndDate, string? SlaSummary) : ICommand<Guid>;
+
+public sealed class AddContractValidator : AbstractValidator<AddContractCommand>
+{
+    public AddContractValidator()
+    {
+        RuleFor(x => x.Title).NotEmpty().MaximumLength(300);
+        RuleFor(x => x.SlaSummary).MaximumLength(4000);
+    }
+}
+
+public sealed class AddContractHandler(IAppDbContext db, ICurrentTenant tenant, IReferenceNumberGenerator refs)
+    : ICommandHandler<AddContractCommand, Guid>
+{
+    public async Task<Guid> Handle(AddContractCommand c, CancellationToken ct)
+    {
+        var supplier = await SupplierLoader.LoadAsync(db, c.SupplierId, ct);
+        var contractRef = await refs.NextAsync(GovernanceHelpers.RequireTenant(tenant), "SCT", ct);
+        var id = supplier.AddContract(contractRef, c.Title, c.StartDate, c.EndDate, c.SlaSummary);
+        await db.SaveChangesAsync(ct);
+        return id;
+    }
+}
+
+[RequireInternalActor]
+public sealed record TerminateContractCommand(Guid SupplierId, Guid ContractId, string Reason) : ICommand;
+
+public sealed class TerminateContractValidator : AbstractValidator<TerminateContractCommand>
+{
+    public TerminateContractValidator() => RuleFor(x => x.Reason).NotEmpty().MaximumLength(1000);
+}
+
+public sealed class TerminateContractHandler(IAppDbContext db) : ICommandHandler<TerminateContractCommand>
+{
+    public async Task Handle(TerminateContractCommand c, CancellationToken ct)
+    {
+        (await SupplierLoader.LoadAsync(db, c.SupplierId, ct)).TerminateContract(c.ContractId, c.Reason);
+        await db.SaveChangesAsync(ct);
+    }
+}
+
+// ── Corrective-action requests (HQMS M16) ────────────────────────────────────────
+
+[RequireInternalActor]
+public sealed record RaiseSupplierCarCommand(Guid SupplierId, string Description, DateOnly RaisedOn, DateOnly? DueDate)
+    : ICommand<Guid>;
+
+public sealed class RaiseSupplierCarValidator : AbstractValidator<RaiseSupplierCarCommand>
+{
+    public RaiseSupplierCarValidator() => RuleFor(x => x.Description).NotEmpty().MaximumLength(4000);
+}
+
+public sealed class RaiseSupplierCarHandler(IAppDbContext db) : ICommandHandler<RaiseSupplierCarCommand, Guid>
+{
+    public async Task<Guid> Handle(RaiseSupplierCarCommand c, CancellationToken ct)
+    {
+        var supplier = await SupplierLoader.LoadAsync(db, c.SupplierId, ct);
+        var id = supplier.RaiseCar(c.Description, c.RaisedOn, c.DueDate);
+        await db.SaveChangesAsync(ct);
+        return id;
+    }
+}
+
+[RequireInternalActor]
+public sealed record RecordCarResponseCommand(Guid SupplierId, Guid CarId, string Note, DateOnly On) : ICommand;
+
+public sealed class RecordCarResponseValidator : AbstractValidator<RecordCarResponseCommand>
+{
+    public RecordCarResponseValidator() => RuleFor(x => x.Note).NotEmpty().MaximumLength(4000);
+}
+
+public sealed class RecordCarResponseHandler(IAppDbContext db) : ICommandHandler<RecordCarResponseCommand>
+{
+    public async Task Handle(RecordCarResponseCommand c, CancellationToken ct)
+    {
+        (await SupplierLoader.LoadAsync(db, c.SupplierId, ct)).RecordCarResponse(c.CarId, c.Note, c.On);
+        await db.SaveChangesAsync(ct);
+    }
+}
+
+[RequireInternalActor]
+public sealed record CloseSupplierCarCommand(Guid SupplierId, Guid CarId, bool Effective, string ClosureNote) : ICommand;
+
+public sealed class CloseSupplierCarValidator : AbstractValidator<CloseSupplierCarCommand>
+{
+    public CloseSupplierCarValidator() => RuleFor(x => x.ClosureNote).NotEmpty().MaximumLength(4000);
+}
+
+public sealed class CloseSupplierCarHandler(IAppDbContext db) : ICommandHandler<CloseSupplierCarCommand>
+{
+    public async Task Handle(CloseSupplierCarCommand c, CancellationToken ct)
+    {
+        (await SupplierLoader.LoadAsync(db, c.SupplierId, ct)).CloseCar(c.CarId, c.Effective, c.ClosureNote);
+        await db.SaveChangesAsync(ct);
+    }
+}
+
 public sealed record GetSuppliersQuery(
     string? Status = null, int Page = 1, int PageSize = PageRequest.DefaultPageSize)
     : IQuery<Contracts.Common.PagedResponse<SupplierListItemDto>>;
@@ -159,27 +268,76 @@ public sealed class GetSuppliersHandler(IAppDbContext db)
         return await query
             .OrderBy(s => s.Name)
             .Select(s => new SupplierListItemDto(
-                s.Id, s.SupplierRef, s.Name, s.SupplierType, s.Status.ToString(), s.BranchId, s.DepartmentId))
+                s.Id, s.SupplierRef, s.Name, s.SupplierType, s.Status.ToString(),
+                s.IsOutsourcedClinicalService, s.BranchId, s.DepartmentId))
             .ToPagedAsync(PageRequest.Normalized(q.Page, q.PageSize), ct);
     }
 }
 
 public sealed record GetSupplierByIdQuery(Guid SupplierId) : IQuery<SupplierDetailDto>;
 
-public sealed class GetSupplierByIdHandler(IAppDbContext db)
+public sealed class GetSupplierByIdHandler(IAppDbContext db, IClock clock)
     : IQueryHandler<GetSupplierByIdQuery, SupplierDetailDto>
 {
     public async Task<SupplierDetailDto> Handle(GetSupplierByIdQuery q, CancellationToken ct)
     {
-        var s = await db.Suppliers.AsNoTracking().Include(x => x.Certificates)
+        var s = await db.Suppliers.AsNoTracking()
+            .Include(x => x.Certificates).Include(x => x.Contracts).Include(x => x.Cars)
             .SingleOrDefaultAsync(x => x.Id == q.SupplierId, ct)
             ?? throw new DomainException("SUP-404", "Supplier not found.");
 
+        var today = DateOnly.FromDateTime(clock.UtcNow.UtcDateTime);
         return new SupplierDetailDto(
             s.Id, s.SupplierRef, s.Name, s.SupplierType, s.Status.ToString(),
             s.RegisteredBy, s.ApprovedBy, s.SuspensionReason,
-            s.Certificates.Select(x => new CertificateDto(x.Id, x.CertificateType, x.ExpiresAt, x.FileId))
+            s.Certificates.Select(x => new CertificateDto(x.Id, x.CertificateType, x.ExpiresAt, x.FileId)).ToList(),
+            s.IsOutsourcedClinicalService, s.ServiceScope,
+            s.Contracts.OrderByDescending(x => x.StartDate)
+                .Select(x => new SupplierContractDto(
+                    x.Id, x.ContractRef, x.Title, x.StartDate, x.EndDate, x.SlaSummary,
+                    x.Status.ToString(), x.TerminationReason, x.IsExpired(today)))
+                .ToList(),
+            s.Cars.OrderByDescending(x => x.RaisedOn)
+                .Select(x => new SupplierCarDto(
+                    x.Id, x.Description, x.RaisedOn, x.DueDate, x.Status.ToString(), x.ResponseNote,
+                    x.ResponseOn, x.Effective, x.ClosureNote, x.IsOverdue(today)))
                 .ToList());
+    }
+}
+
+/// <summary>
+/// Outsourced clinical-services oversight (HQMS M16): the suppliers that deliver an outsourced
+/// clinical service (reference lab, radiology, dialysis…), each with its active-contract and
+/// open-CAR counts and latest evaluation score — the governance view of externalised services.
+/// </summary>
+public sealed record GetOutsourcedServicesQuery : IQuery<IReadOnlyList<OutsourcedServiceDto>>;
+
+public sealed class GetOutsourcedServicesHandler(IAppDbContext db, IClock clock)
+    : IQueryHandler<GetOutsourcedServicesQuery, IReadOnlyList<OutsourcedServiceDto>>
+{
+    public async Task<IReadOnlyList<OutsourcedServiceDto>> Handle(GetOutsourcedServicesQuery q, CancellationToken ct)
+    {
+        var today = DateOnly.FromDateTime(clock.UtcNow.UtcDateTime);
+        var suppliers = await db.Suppliers.AsNoTracking()
+            .Include(s => s.Contracts).Include(s => s.Cars)
+            .Where(s => s.IsOutsourcedClinicalService)
+            .OrderBy(s => s.Name)
+            .ToListAsync(ct);
+
+        // Latest evaluation score per supplier (the score of record for oversight).
+        var supplierIds = suppliers.Select(s => s.Id).ToList();
+        var evaluations = await db.SupplierEvaluations.AsNoTracking()
+            .Where(e => supplierIds.Contains(e.SupplierId))
+            .ToListAsync(ct);
+        var latestScore = evaluations
+            .GroupBy(e => e.SupplierId)
+            .ToDictionary(g => g.Key, g => g.OrderByDescending(e => e.PeriodEnd).First().WeightedTotal);
+
+        return suppliers.Select(s => new OutsourcedServiceDto(
+            s.Id, s.SupplierRef, s.Name, s.ServiceScope, s.Status.ToString(),
+            s.Contracts.Count(c => c.Status == ContractStatus.Active && !c.IsExpired(today)),
+            s.OpenCarCount,
+            latestScore.TryGetValue(s.Id, out var score) ? score : null)).ToList();
     }
 }
 

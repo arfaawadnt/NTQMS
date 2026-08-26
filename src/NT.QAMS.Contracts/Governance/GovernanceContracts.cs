@@ -73,7 +73,9 @@ public sealed record ReviewDetailDto(
 
 // ── Supplier quality ─────────────────────────────────────────────────────────
 
-public sealed record RegisterSupplierRequest(string Name, string SupplierType, Guid? BranchId = null, Guid? DepartmentId = null);
+public sealed record RegisterSupplierRequest(
+    string Name, string SupplierType, bool IsOutsourcedClinicalService = false, string? ServiceScope = null,
+    Guid? BranchId = null, Guid? DepartmentId = null);
 public sealed record AddCertificateRequest(string CertificateType, DateOnly ExpiresAt, Guid? FileId);
 public sealed record SuspendSupplierRequest(string Reason);
 /// <summary>The two 21 CFR Part 11 identification components (§11.200(a)(1)) to approve a supplier.</summary>
@@ -82,15 +84,36 @@ public sealed record EvaluationCriterionRequest(string Criterion, decimal Weight
 public sealed record RecordEvaluationRequest(
     DateOnly PeriodStart, DateOnly PeriodEnd, IReadOnlyList<EvaluationCriterionRequest> Criteria);
 
+// ── Contract / SLA register & corrective-action requests (HQMS M16) ───────────
+
+public sealed record AddContractRequest(string Title, DateOnly StartDate, DateOnly EndDate, string? SlaSummary);
+public sealed record TerminateContractRequest(string Reason);
+public sealed record RaiseSupplierCarRequest(string Description, DateOnly RaisedOn, DateOnly? DueDate);
+public sealed record RecordCarResponseRequest(string Note, DateOnly On);
+public sealed record CloseSupplierCarRequest(bool Effective, string ClosureNote);
+
 public sealed record CertificateDto(Guid Id, string CertificateType, DateOnly ExpiresAt, Guid? FileId);
+public sealed record SupplierContractDto(
+    Guid Id, string ContractRef, string Title, DateOnly StartDate, DateOnly EndDate, string? SlaSummary,
+    string Status, string? TerminationReason, bool IsExpired);
+public sealed record SupplierCarDto(
+    Guid Id, string Description, DateOnly RaisedOn, DateOnly? DueDate, string Status, string? ResponseNote,
+    DateOnly? ResponseOn, bool? Effective, string? ClosureNote, bool IsOverdue);
+public sealed record OutsourcedServiceDto(
+    Guid Id, string SupplierRef, string Name, string? ServiceScope, string Status,
+    int ActiveContracts, int OpenCars, decimal? LatestEvaluationScore);
 
 public sealed record SupplierListItemDto(
-    Guid Id, string SupplierRef, string Name, string SupplierType, string Status, Guid? BranchId = null, Guid? DepartmentId = null);
+    Guid Id, string SupplierRef, string Name, string SupplierType, string Status,
+    bool IsOutsourcedClinicalService = false, Guid? BranchId = null, Guid? DepartmentId = null);
 
 public sealed record SupplierDetailDto(
     Guid Id, string SupplierRef, string Name, string SupplierType, string Status,
     Guid RegisteredBy, Guid? ApprovedBy, string? SuspensionReason,
-    IReadOnlyList<CertificateDto> Certificates);
+    IReadOnlyList<CertificateDto> Certificates,
+    bool IsOutsourcedClinicalService = false, string? ServiceScope = null,
+    IReadOnlyList<SupplierContractDto>? Contracts = null,
+    IReadOnlyList<SupplierCarDto>? Cars = null);
 
 public sealed record SupplierEvaluationDto(
     Guid Id, Guid SupplierId, DateOnly PeriodStart, DateOnly PeriodEnd,

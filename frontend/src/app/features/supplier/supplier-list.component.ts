@@ -51,6 +51,11 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
             <qams-lov-select formControlName="supplierType" category="SUPPLIER_TYPE" [placeholder]="i18n.t('sup.type')" />
           </div>
         </div>
+        <label class="chk"><input type="checkbox" formControlName="isOutsourcedClinicalService" /> {{ i18n.t('sup.isOutsourced') }}</label>
+        @if (form.controls.isOutsourcedClinicalService.value) {
+          <label>{{ i18n.t('sup.serviceScope') }}</label>
+          <input formControlName="serviceScope" [placeholder]="i18n.t('sup.serviceScopeHint')" />
+        }
         <qams-allocation-picker [branchCtrl]="form.controls.branchId" [departmentCtrl]="form.controls.departmentId" />
         <div class="row">
           <button type="submit" [disabled]="form.invalid || facade.loading()">{{ i18n.t('sup.register') }}</button>
@@ -180,6 +185,8 @@ export class SupplierListComponent implements OnInit {
   readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(200)]],
     supplierType: ['Reagents', [Validators.required]],
+    isOutsourcedClinicalService: [false],
+    serviceScope: ['', [Validators.maxLength(300)]],
     branchId: [''],
     departmentId: [''],
   });
@@ -198,7 +205,10 @@ export class SupplierListComponent implements OnInit {
     if (this.form.invalid) { return; }
     const raw = this.form.getRawValue();
     const id = await this.facade.register({
-      ...raw,
+      name: raw.name,
+      supplierType: raw.supplierType,
+      isOutsourcedClinicalService: raw.isOutsourcedClinicalService,
+      serviceScope: raw.isOutsourcedClinicalService ? (raw.serviceScope || null) : null,
       branchId: raw.branchId || null,
       departmentId: raw.departmentId || null,
     });

@@ -46,6 +46,9 @@ interface CriterionForm {
           <qams-esign-dialog [open]="esignOpen()" [meaning]="i18n.t('esign.signMeaning')" [busy]="facade.loading()" [error]="facade.error()" (confirm)="doApprove(s.id, $event)" (cancel)="esignOpen.set(false)" />
         }
       </div>
+      @if (s.isOutsourcedClinicalService) {
+        <div class="banner outsourced">{{ i18n.t('sup.outsourcedBanner') }}@if (s.serviceScope) { <span> — {{ s.serviceScope }}</span> }</div>
+      }
       @if (s.suspensionReason) { <div class="error">{{ i18n.t('sup.suspended') }}: {{ s.suspensionReason }}</div> }
       @if (facade.error()) { <div class="error">{{ facade.error() }}</div> }
 
@@ -85,6 +88,89 @@ interface CriterionForm {
           } @else {
             <p class="muted">{{ i18n.t('comp.approverOnly') }}</p>
           }
+        </section>
+      </div>
+
+      <div class="grid2">
+        <!-- Contract / SLA register (HQMS M16) -->
+        <section class="card">
+          <h3>{{ i18n.t('sup.contracts') }}</h3>
+          @if (s.contracts.length === 0) { <p class="muted">{{ i18n.t('sup.noContracts') }}</p> }
+          @for (c of s.contracts; track c.id) {
+            <div class="row-item">
+              <div>
+                <b>{{ c.title }}</b> <span class="muted code">· {{ c.contractRef }}</span><br />
+                <span class="muted">{{ c.startDate | date:'mediumDate' }} → {{ c.endDate | date:'mediumDate' }}</span>
+                @if (c.isExpired) { <span class="tag expired">{{ i18n.t('sup.expired') }}</span> }
+                @if (c.slaSummary) { <div class="muted small">{{ c.slaSummary }}</div> }
+              </div>
+              <div>
+                <qams-status-pill [status]="c.status" />
+                @if (c.status === 'Active' && s.status !== 'Suspended') { <button type="button" class="link" (click)="startTerminate(c.id)">{{ i18n.t('sup.terminate') }}</button> }
+              </div>
+            </div>
+          }
+          @if (terminatingContract()) {
+            <form [formGroup]="terminateForm" (ngSubmit)="terminate(s.id)">
+              <label>{{ i18n.t('sup.terminationReason') }}</label><input formControlName="reason" />
+              <button type="submit" class="danger" [disabled]="terminateForm.invalid">{{ i18n.t('sup.terminate') }}</button>
+              <button type="button" class="secondary" (click)="terminatingContract.set(null)">{{ i18n.t('nc.cancel') }}</button>
+            </form>
+          }
+          <form [formGroup]="contractForm" (ngSubmit)="addContract(s.id)">
+            <label>{{ i18n.t('sup.contractTitle') }}</label><input formControlName="title" />
+            <div class="period">
+              <div><label>{{ i18n.t('sup.startDate') }}</label><input type="date" formControlName="startDate" /></div>
+              <div><label>{{ i18n.t('sup.endDate') }}</label><input type="date" formControlName="endDate" /></div>
+            </div>
+            <label>{{ i18n.t('sup.slaSummary') }}</label><input formControlName="slaSummary" />
+            <button type="submit" [disabled]="contractForm.invalid">{{ i18n.t('sup.addContract') }}</button>
+          </form>
+        </section>
+
+        <!-- Corrective-action requests (HQMS M16) -->
+        <section class="card">
+          <h3>{{ i18n.t('sup.cars') }}</h3>
+          @if (s.cars.length === 0) { <p class="muted">{{ i18n.t('sup.noCars') }}</p> }
+          @for (car of s.cars; track car.id) {
+            <div class="row-item">
+              <div>
+                {{ car.description }}<br />
+                <span class="muted">{{ i18n.t('sup.raisedOn') }} {{ car.raisedOn | date:'mediumDate' }}</span>
+                @if (car.dueDate) { <span class="muted" [class.danger-text]="car.isOverdue"> · {{ i18n.t('sup.due') }} {{ car.dueDate | date:'mediumDate' }}@if (car.isOverdue) { <b> · {{ i18n.t('sup.overdue') }}</b> }</span> }
+                @if (car.responseNote) { <div class="muted small">↳ {{ car.responseNote }}</div> }
+                @if (car.status === 'Closed') { <div class="small">{{ car.effective ? i18n.t('sup.effective') : i18n.t('sup.notEffective') }}</div> }
+              </div>
+              <div>
+                <qams-status-pill [status]="car.status" />
+                @if (s.status !== 'Suspended') {
+                  @if (car.status === 'Open') { <button type="button" class="link" (click)="startResponse(car.id)">{{ i18n.t('sup.respond') }}</button> }
+                  @else if (car.status === 'ResponseReceived' && perms.can('suppliers.approve')) { <button type="button" class="link" (click)="startClose(car.id)">{{ i18n.t('sup.closeCar') }}</button> }
+                }
+              </div>
+            </div>
+          }
+          @if (respondingCar()) {
+            <form [formGroup]="responseForm" (ngSubmit)="recordResponse(s.id)">
+              <label>{{ i18n.t('sup.responseNote') }}</label><input formControlName="note" />
+              <label>{{ i18n.t('sup.responseOn') }}</label><input type="date" formControlName="on" />
+              <button type="submit" [disabled]="responseForm.invalid">{{ i18n.t('sup.recordResponse') }}</button>
+              <button type="button" class="secondary" (click)="respondingCar.set(null)">{{ i18n.t('nc.cancel') }}</button>
+            </form>
+          }
+          @if (closingCar()) {
+            <form [formGroup]="closeForm" (ngSubmit)="closeCar(s.id)">
+              <label class="chk"><input type="checkbox" formControlName="effective" /> {{ i18n.t('sup.wasEffective') }}</label>
+              <label>{{ i18n.t('sup.closureNote') }}</label><input formControlName="closureNote" />
+              <button type="submit" [disabled]="closeForm.invalid">{{ i18n.t('sup.closeCar') }}</button>
+              <button type="button" class="secondary" (click)="closingCar.set(null)">{{ i18n.t('nc.cancel') }}</button>
+            </form>
+          }
+          <form [formGroup]="carForm" (ngSubmit)="raiseCar(s.id)">
+            <label>{{ i18n.t('sup.carDescription') }}</label><input formControlName="description" />
+            <label>{{ i18n.t('sup.due') }}</label><input type="date" formControlName="dueDate" />
+            <button type="submit" [disabled]="carForm.invalid">{{ i18n.t('sup.raiseCar') }}</button>
+          </form>
         </section>
       </div>
 
@@ -144,6 +230,12 @@ interface CriterionForm {
     form { border-top: 1px solid var(--nt-border); padding-top: .75rem; margin-top: .75rem; }
     form button { width: auto; margin-top: .5rem; }
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
+    button.link { background: none; border: none; color: var(--nt-blue); cursor: pointer; padding: 0; text-decoration: underline; width: auto; }
+    .banner { padding: .5rem .8rem; border-radius: 6px; margin-bottom: 1rem; font-weight: 600; }
+    .banner.outsourced { background: color-mix(in srgb, var(--nt-ink-info) 14%, transparent); color: var(--nt-ink-info); }
+    .tag.expired { margin-inline-start: 6px; padding: 1px 6px; border-radius: 999px; font-size: 10.5px; font-weight: 700; background: var(--nt-ink-crit); color: #fff; }
+    .small { font-size: .72rem; } .danger-text { color: var(--nt-ink-crit); }
+    .chk { display: flex; align-items: center; gap: .4rem; } .chk input { width: auto; }
     @media (max-width: 800px) { .grid2 { grid-template-columns: 1fr; } }
   `]
 })
@@ -184,6 +276,33 @@ export class SupplierDetailComponent implements OnInit {
     criteria: this.fb.array<FormGroup<CriterionForm>>([this.buildCriterion()]),
   });
 
+  // ── Contract / SLA register & CARs (HQMS M16) ───────────────────────────────
+  readonly terminatingContract = signal<string | null>(null);
+  readonly respondingCar = signal<string | null>(null);
+  readonly closingCar = signal<string | null>(null);
+
+  readonly contractForm = this.fb.nonNullable.group({
+    title: ['', [Validators.required, Validators.maxLength(300)]],
+    startDate: ['', [Validators.required]],
+    endDate: ['', [Validators.required]],
+    slaSummary: ['', [Validators.maxLength(4000)]],
+  });
+  readonly terminateForm = this.fb.nonNullable.group({
+    reason: ['', [Validators.required, Validators.maxLength(1000)]],
+  });
+  readonly carForm = this.fb.nonNullable.group({
+    description: ['', [Validators.required, Validators.maxLength(4000)]],
+    dueDate: [''],
+  });
+  readonly responseForm = this.fb.nonNullable.group({
+    note: ['', [Validators.required, Validators.maxLength(4000)]],
+    on: ['', [Validators.required]],
+  });
+  readonly closeForm = this.fb.nonNullable.group({
+    effective: [true],
+    closureNote: ['', [Validators.required, Validators.maxLength(4000)]],
+  });
+
   get criteria(): FormArray<FormGroup<CriterionForm>> {
     return this.evalForm.controls.criteria;
   }
@@ -219,6 +338,52 @@ export class SupplierDetailComponent implements OnInit {
     this.evalForm.reset();
     this.criteria.clear();
     this.addCriterion();
+  }
+
+  // ── Contract / SLA register (HQMS M16) ──────────────────────────────────────
+  startTerminate(contractId: string): void { this.terminateForm.reset({ reason: '' }); this.terminatingContract.set(contractId); }
+
+  async addContract(id: string): Promise<void> {
+    if (this.contractForm.invalid) { return; }
+    const raw = this.contractForm.getRawValue();
+    await this.facade.addContract(id, {
+      title: raw.title, startDate: raw.startDate, endDate: raw.endDate, slaSummary: raw.slaSummary || null,
+    });
+    if (this.facade.error() === '') { this.contractForm.reset(); }
+  }
+
+  async terminate(id: string): Promise<void> {
+    const contractId = this.terminatingContract();
+    if (!contractId || this.terminateForm.invalid) { return; }
+    await this.facade.terminateContract(id, contractId, this.terminateForm.getRawValue());
+    if (this.facade.error() === '') { this.terminatingContract.set(null); }
+  }
+
+  // ── Corrective-action requests (HQMS M16) ───────────────────────────────────
+  startResponse(carId: string): void { this.responseForm.reset({ note: '', on: '' }); this.respondingCar.set(carId); }
+  startClose(carId: string): void { this.closeForm.reset({ effective: true, closureNote: '' }); this.closingCar.set(carId); }
+
+  async raiseCar(id: string): Promise<void> {
+    if (this.carForm.invalid) { return; }
+    const raw = this.carForm.getRawValue();
+    await this.facade.raiseCar(id, {
+      description: raw.description, raisedOn: new Date().toISOString().slice(0, 10), dueDate: raw.dueDate || null,
+    });
+    if (this.facade.error() === '') { this.carForm.reset(); }
+  }
+
+  async recordResponse(id: string): Promise<void> {
+    const carId = this.respondingCar();
+    if (!carId || this.responseForm.invalid) { return; }
+    await this.facade.recordCarResponse(id, carId, this.responseForm.getRawValue());
+    if (this.facade.error() === '') { this.respondingCar.set(null); }
+  }
+
+  async closeCar(id: string): Promise<void> {
+    const carId = this.closingCar();
+    if (!carId || this.closeForm.invalid) { return; }
+    await this.facade.closeCar(id, carId, this.closeForm.getRawValue());
+    if (this.facade.error() === '') { this.closingCar.set(null); }
   }
 
   private buildCriterion(): FormGroup<CriterionForm> {

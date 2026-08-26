@@ -3,8 +3,10 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
-  AddCertificateRequest, CreatedResource, DEFAULT_PAGE_SIZE, Paged, RecordEvaluationRequest,
+  AddCertificateRequest, AddContractRequest, CloseSupplierCarRequest, CreatedResource, DEFAULT_PAGE_SIZE,
+  OutsourcedService, Paged, RaiseSupplierCarRequest, RecordCarResponseRequest, RecordEvaluationRequest,
   RegisterSupplierRequest, SupplierDetail, SupplierEvaluation, SupplierListItem, SuspendSupplierRequest,
+  TerminateContractRequest,
 } from '../models';
 
 /** Typed client for the Supplier Quality API (one method per backend endpoint). */
@@ -44,4 +46,12 @@ export class SuppliersApiService {
   recordEvaluation(id: string, body: RecordEvaluationRequest): Observable<{ evaluationId: string }> {
     return this.http.post<{ evaluationId: string }>(`${this.base}/${id}/evaluations`, body);
   }
+
+  // ── Contract / SLA register & CARs (HQMS M16) ───────────────────────────────
+  outsourcedServices(): Observable<OutsourcedService[]> { return this.http.get<OutsourcedService[]>(`${this.base}/outsourced-services`); }
+  addContract(id: string, body: AddContractRequest): Observable<CreatedResource> { return this.http.post<CreatedResource>(`${this.base}/${id}/contracts`, body); }
+  terminateContract(id: string, contractId: string, body: TerminateContractRequest): Observable<void> { return this.http.post<void>(`${this.base}/${id}/contracts/${contractId}/terminate`, body); }
+  raiseCar(id: string, body: RaiseSupplierCarRequest): Observable<CreatedResource> { return this.http.post<CreatedResource>(`${this.base}/${id}/cars`, body); }
+  recordCarResponse(id: string, carId: string, body: RecordCarResponseRequest): Observable<void> { return this.http.post<void>(`${this.base}/${id}/cars/${carId}/response`, body); }
+  closeCar(id: string, carId: string, body: CloseSupplierCarRequest): Observable<void> { return this.http.post<void>(`${this.base}/${id}/cars/${carId}/close`, body); }
 }

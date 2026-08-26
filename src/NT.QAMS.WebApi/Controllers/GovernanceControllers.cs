@@ -207,9 +207,15 @@ public sealed class SuppliersController(ISender sender) : ControllerBase
     public async Task<IActionResult> Register(RegisterSupplierRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new RegisterSupplierCommand(request.Name, request.SupplierType,
+            request.IsOutsourcedClinicalService, request.ServiceScope,
             request.BranchId, request.DepartmentId), ct);
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }
+
+    /// <summary>Outsourced clinical-services oversight dashboard (HQMS M16).</summary>
+    [HttpGet("outsourced-services")]
+    public async Task<IActionResult> OutsourcedServices(CancellationToken ct) =>
+        Ok(await sender.Send(new GetOutsourcedServicesQuery(), ct));
 
     [HttpPost("{id:guid}/certificates")]
     public async Task<IActionResult> AddCertificate(Guid id, AddCertificateRequest request, CancellationToken ct) =>
@@ -243,4 +249,38 @@ public sealed class SuppliersController(ISender sender) : ControllerBase
         Ok(new { evaluationId = await sender.Send(new RecordEvaluationCommand(
             id, request.PeriodStart, request.PeriodEnd,
             request.Criteria.Select(c => (c.Criterion, c.Weight, c.Score)).ToList()), ct) });
+
+    // ── Contract / SLA register (HQMS M16) ──────────────────────────────────────
+    [HttpPost("{id:guid}/contracts")]
+    public async Task<IActionResult> AddContract(Guid id, AddContractRequest request, CancellationToken ct) =>
+        Ok(new { contractId = await sender.Send(new AddContractCommand(
+            id, request.Title, request.StartDate, request.EndDate, request.SlaSummary), ct) });
+
+    [HttpPost("{id:guid}/contracts/{contractId:guid}/terminate")]
+    public async Task<IActionResult> TerminateContract(Guid id, Guid contractId, TerminateContractRequest request, CancellationToken ct)
+    {
+        await sender.Send(new TerminateContractCommand(id, contractId, request.Reason), ct);
+        return NoContent();
+    }
+
+    // ── Corrective-action requests (HQMS M16) ───────────────────────────────────
+    [HttpPost("{id:guid}/cars")]
+    public async Task<IActionResult> RaiseCar(Guid id, RaiseSupplierCarRequest request, CancellationToken ct) =>
+        Ok(new { carId = await sender.Send(new RaiseSupplierCarCommand(
+            id, request.Description, request.RaisedOn, request.DueDate), ct) });
+
+    [HttpPost("{id:guid}/cars/{carId:guid}/response")]
+    public async Task<IActionResult> RecordCarResponse(Guid id, Guid carId, RecordCarResponseRequest request, CancellationToken ct)
+    {
+        await sender.Send(new RecordCarResponseCommand(id, carId, request.Note, request.On), ct);
+        return NoContent();
+    }
+
+    [HttpPost("{id:guid}/cars/{carId:guid}/close")]
+    [RequirePermission(PermissionCatalog.Suppliers, PermissionAction.Approve)]
+    public async Task<IActionResult> CloseCar(Guid id, Guid carId, CloseSupplierCarRequest request, CancellationToken ct)
+    {
+        await sender.Send(new CloseSupplierCarCommand(id, carId, request.Effective, request.ClosureNote), ct);
+        return NoContent();
+    }
 }

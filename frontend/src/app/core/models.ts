@@ -2612,8 +2612,28 @@ export interface SupplierListItem {
   name: string;
   supplierType: string;
   status: string;
+  isOutsourcedClinicalService: boolean;
   branchId: string | null;
   departmentId: string | null;
+}
+
+// ── Supplier contract / SLA register & corrective-action requests (HQMS M16) ───
+
+export const CONTRACT_STATUSES = ['Active', 'Terminated'] as const;
+export const SUPPLIER_CAR_STATUSES = ['Open', 'ResponseReceived', 'Closed'] as const;
+
+export interface SupplierContract {
+  id: string; contractRef: string; title: string; startDate: string; endDate: string;
+  slaSummary: string | null; status: string; terminationReason: string | null; isExpired: boolean;
+}
+export interface SupplierCar {
+  id: string; description: string; raisedOn: string; dueDate: string | null; status: string;
+  responseNote: string | null; responseOn: string | null; effective: boolean | null;
+  closureNote: string | null; isOverdue: boolean;
+}
+export interface OutsourcedService {
+  id: string; supplierRef: string; name: string; serviceScope: string | null; status: string;
+  activeContracts: number; openCars: number; latestEvaluationScore: number | null;
 }
 
 export interface SupplierDetail {
@@ -2626,7 +2646,17 @@ export interface SupplierDetail {
   approvedBy: string | null;
   suspensionReason: string | null;
   certificates: SupplierCertificate[];
+  isOutsourcedClinicalService: boolean;
+  serviceScope: string | null;
+  contracts: SupplierContract[];
+  cars: SupplierCar[];
 }
+
+export interface AddContractRequest { title: string; startDate: string; endDate: string; slaSummary: string | null; }
+export interface TerminateContractRequest { reason: string; }
+export interface RaiseSupplierCarRequest { description: string; raisedOn: string; dueDate: string | null; }
+export interface RecordCarResponseRequest { note: string; on: string; }
+export interface CloseSupplierCarRequest { effective: boolean; closureNote: string; }
 
 export interface SupplierEvaluation {
   id: string;
@@ -2638,7 +2668,7 @@ export interface SupplierEvaluation {
   criteria: string;
 }
 
-export interface RegisterSupplierRequest { name: string; supplierType: string; branchId: string | null; departmentId: string | null; }
+export interface RegisterSupplierRequest { name: string; supplierType: string; isOutsourcedClinicalService: boolean; serviceScope: string | null; branchId: string | null; departmentId: string | null; }
 export interface AddCertificateRequest { certificateType: string; expiresAt: string; fileId: string | null; }
 export interface SuspendSupplierRequest { reason: string; }
 export interface EvaluationCriterion { criterion: string; weight: number; score: number; }

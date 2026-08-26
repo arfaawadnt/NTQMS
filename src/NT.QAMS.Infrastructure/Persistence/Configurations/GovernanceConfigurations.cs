@@ -103,6 +103,7 @@ public sealed class SupplierConfiguration : IEntityTypeConfiguration<Supplier>
         builder.Property(s => s.SupplierType).HasMaxLength(50);
         builder.Property(s => s.Status).HasConversion<string>().HasMaxLength(25);
         builder.Property(s => s.SuspensionReason).HasMaxLength(500);
+        builder.Property(s => s.ServiceScope).HasMaxLength(300);
         builder.HasIndex(s => new { s.TenantId, s.SupplierRef }).IsUnique();
         builder.HasIndex(s => new { s.TenantId, s.Status });
 
@@ -118,6 +119,32 @@ public sealed class SupplierConfiguration : IEntityTypeConfiguration<Supplier>
             c.Property(x => x.CertificateType).HasMaxLength(100);
         });
 
+        builder.OwnsMany(s => s.Contracts, con =>
+        {
+            con.ToTable("supplier_contract", "qams");
+            con.Property<Guid>("TenantId");
+            con.WithOwner().HasForeignKey("TenantId", "supplier_id");
+            con.HasKey("TenantId", "Id");
+            con.Property(x => x.ContractRef).HasMaxLength(60);
+            con.Property(x => x.Title).HasMaxLength(300);
+            con.Property(x => x.SlaSummary).HasMaxLength(4000);
+            con.Property(x => x.TerminationReason).HasMaxLength(1000);
+            con.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
+        });
+
+        builder.OwnsMany(s => s.Cars, car =>
+        {
+            car.ToTable("supplier_car", "qams");
+            car.Property<Guid>("TenantId");
+            car.WithOwner().HasForeignKey("TenantId", "supplier_id");
+            car.HasKey("TenantId", "Id");
+            car.Property(x => x.Description).HasMaxLength(4000);
+            car.Property(x => x.ResponseNote).HasMaxLength(4000);
+            car.Property(x => x.ClosureNote).HasMaxLength(4000);
+            car.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
+        });
+
+        builder.Ignore(s => s.OpenCarCount);
         builder.Ignore(s => s.DomainEvents);
     }
 }

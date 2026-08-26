@@ -11131,5 +11131,125 @@ BEGIN
     VALUES ('20260826213343_EquipmentDowntimeAndSafetyNotices', '9.0.19');
     END IF;
 END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826215744_SupplierContractsAndCars') THEN
+    ALTER TABLE qams.supplier ADD is_outsourced_clinical_service boolean NOT NULL DEFAULT FALSE;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826215744_SupplierContractsAndCars') THEN
+    ALTER TABLE qams.supplier ADD service_scope character varying(300);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826215744_SupplierContractsAndCars') THEN
+    CREATE TABLE qams.supplier_car (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        description character varying(4000) NOT NULL,
+        raised_on date NOT NULL,
+        due_date date,
+        status character varying(20) NOT NULL,
+        response_note character varying(4000),
+        response_on date,
+        effective boolean,
+        closure_note character varying(4000),
+        supplier_id uuid NOT NULL,
+        CONSTRAINT pk_supplier_car PRIMARY KEY (tenant_id, id),
+        CONSTRAINT fk_supplier_car_supplier_tenant_id_supplier_id FOREIGN KEY (tenant_id, supplier_id) REFERENCES qams.supplier (tenant_id, id) ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826215744_SupplierContractsAndCars') THEN
+    CREATE TABLE qams.supplier_contract (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        contract_ref character varying(60) NOT NULL,
+        title character varying(300) NOT NULL,
+        start_date date NOT NULL,
+        end_date date NOT NULL,
+        sla_summary character varying(4000),
+        status character varying(20) NOT NULL,
+        termination_reason character varying(1000),
+        supplier_id uuid NOT NULL,
+        CONSTRAINT pk_supplier_contract PRIMARY KEY (tenant_id, id),
+        CONSTRAINT fk_supplier_contract_supplier_tenant_id_supplier_id FOREIGN KEY (tenant_id, supplier_id) REFERENCES qams.supplier (tenant_id, id) ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826215744_SupplierContractsAndCars') THEN
+    CREATE INDEX ix_supplier_car_tenant_id_supplier_id ON qams.supplier_car (tenant_id, supplier_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826215744_SupplierContractsAndCars') THEN
+    CREATE INDEX ix_supplier_contract_tenant_id_supplier_id ON qams.supplier_contract (tenant_id, supplier_id);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826215744_SupplierContractsAndCars') THEN
+    ALTER TABLE qams.supplier_contract ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.supplier_contract FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.supplier_contract;
+    CREATE POLICY tenant_isolation ON qams.supplier_contract
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826215744_SupplierContractsAndCars') THEN
+    ALTER TABLE qams.supplier_car ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.supplier_car FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.supplier_car;
+    CREATE POLICY tenant_isolation ON qams.supplier_car
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826215744_SupplierContractsAndCars') THEN
+    ALTER TABLE qams.supplier_contract ADD CONSTRAINT ck_supplier_contract_status_domain
+      CHECK (status IN ('Active','Terminated')) NOT VALID;
+    ALTER TABLE qams.supplier_contract VALIDATE CONSTRAINT ck_supplier_contract_status_domain;
+
+    ALTER TABLE qams.supplier_car ADD CONSTRAINT ck_supplier_car_status_domain
+      CHECK (status IN ('Open','ResponseReceived','Closed')) NOT VALID;
+    ALTER TABLE qams.supplier_car VALIDATE CONSTRAINT ck_supplier_car_status_domain;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826215744_SupplierContractsAndCars') THEN
+    INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+    VALUES ('20260826215744_SupplierContractsAndCars', '9.0.19');
+    END IF;
+END $EF$;
 COMMIT;
 

@@ -189,6 +189,7 @@ GET /api/standards/{id}
 GET /api/standards/{id}/gap-analysis
 GET /api/standards/{id}/readiness
 GET /api/suppliers
+GET /api/suppliers/outsourced-services
 GET /api/suppliers/{id}
 GET /api/suppliers/{id}/evaluations
 GET /api/surveys
@@ -376,6 +377,7 @@ GET /api/v{version}/standards/{id}
 GET /api/v{version}/standards/{id}/gap-analysis
 GET /api/v{version}/standards/{id}/readiness
 GET /api/v{version}/suppliers
+GET /api/v{version}/suppliers/outsourced-services
 GET /api/v{version}/suppliers/{id}
 GET /api/v{version}/suppliers/{id}/evaluations
 GET /api/v{version}/surveys
@@ -667,7 +669,12 @@ POST /api/standards/{id}/elements/{elementId}/assess
 POST /api/standards/{id}/evidence
 POST /api/suppliers
 POST /api/suppliers/{id}/approve
+POST /api/suppliers/{id}/cars
+POST /api/suppliers/{id}/cars/{carId}/close
+POST /api/suppliers/{id}/cars/{carId}/response
 POST /api/suppliers/{id}/certificates
+POST /api/suppliers/{id}/contracts
+POST /api/suppliers/{id}/contracts/{contractId}/terminate
 POST /api/suppliers/{id}/evaluations
 POST /api/suppliers/{id}/suspend
 POST /api/surveys
@@ -973,7 +980,12 @@ POST /api/v{version}/standards/{id}/elements/{elementId}/assess
 POST /api/v{version}/standards/{id}/evidence
 POST /api/v{version}/suppliers
 POST /api/v{version}/suppliers/{id}/approve
+POST /api/v{version}/suppliers/{id}/cars
+POST /api/v{version}/suppliers/{id}/cars/{carId}/close
+POST /api/v{version}/suppliers/{id}/cars/{carId}/response
 POST /api/v{version}/suppliers/{id}/certificates
+POST /api/v{version}/suppliers/{id}/contracts
+POST /api/v{version}/suppliers/{id}/contracts/{contractId}/terminate
 POST /api/v{version}/suppliers/{id}/evaluations
 POST /api/v{version}/suppliers/{id}/suspend
 POST /api/v{version}/surveys

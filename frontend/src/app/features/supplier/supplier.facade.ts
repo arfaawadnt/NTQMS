@@ -4,8 +4,9 @@ import { Observable, firstValueFrom } from 'rxjs';
 import { SuppliersApiService } from '../../core/api/suppliers-api.service';
 import { FilesApiService } from '../../core/api/files-api.service';
 import {
+  AddContractRequest, CloseSupplierCarRequest, RaiseSupplierCarRequest, RecordCarResponseRequest,
   RecordEvaluationRequest, RegisterSupplierRequest, SupplierDetail, SupplierEvaluation,
-  SupplierListItem,
+  SupplierListItem, TerminateContractRequest,
 } from '../../core/models';
 
 /**
@@ -103,7 +104,14 @@ export class SupplierFacade {
     });
   }
 
-  private async mutate(id: string, call: () => Observable<void>): Promise<void> {
+  // ── Contract / SLA register & CARs (HQMS M16) ───────────────────────────────
+  async addContract(id: string, r: AddContractRequest): Promise<void> { await this.mutate(id, () => this.api.addContract(id, r)); }
+  async terminateContract(id: string, contractId: string, r: TerminateContractRequest): Promise<void> { await this.mutate(id, () => this.api.terminateContract(id, contractId, r)); }
+  async raiseCar(id: string, r: RaiseSupplierCarRequest): Promise<void> { await this.mutate(id, () => this.api.raiseCar(id, r)); }
+  async recordCarResponse(id: string, carId: string, r: RecordCarResponseRequest): Promise<void> { await this.mutate(id, () => this.api.recordCarResponse(id, carId, r)); }
+  async closeCar(id: string, carId: string, r: CloseSupplierCarRequest): Promise<void> { await this.mutate(id, () => this.api.closeCar(id, carId, r)); }
+
+  private async mutate<T>(id: string, call: () => Observable<T>): Promise<void> {
     await this.run(async () => {
       await firstValueFrom(call());
       this._selected.set(await firstValueFrom(this.api.getById(id)));
