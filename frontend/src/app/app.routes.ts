@@ -88,6 +88,16 @@ export const routes: Routes = [
             ],
           },
           {
+            path: 'infection-control',
+            loadComponent: () => import('./features/infection-control/infection-control-list.component').then((m) => m.InfectionControlListComponent),
+            children: [
+              {
+                path: ':id',
+                loadComponent: () => import('./features/infection-control/infection-control-detail.component').then((m) => m.InfectionControlDetailComponent),
+              },
+            ],
+          },
+          {
             path: 'surveys',
             loadComponent: () => import('./features/surveys/surveys-list.component').then((m) => m.SurveysListComponent),
             children: [

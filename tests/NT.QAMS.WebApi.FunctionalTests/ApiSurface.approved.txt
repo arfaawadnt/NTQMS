@@ -91,6 +91,10 @@ GET /api/incidents/{id}/signatures
 GET /api/indicators
 GET /api/indicators/{id}
 GET /api/indicators/{id}/control-chart
+GET /api/infection-control/cases
+GET /api/infection-control/cases/{id}
+GET /api/infection-control/devices
+GET /api/infection-control/rates
 GET /api/instrument-comparabilities
 GET /api/instrument-comparabilities/{id}
 GET /api/instrument-comparabilities/{id}/signatures
@@ -254,6 +258,10 @@ GET /api/v{version}/incidents/{id}/signatures
 GET /api/v{version}/indicators
 GET /api/v{version}/indicators/{id}
 GET /api/v{version}/indicators/{id}/control-chart
+GET /api/v{version}/infection-control/cases
+GET /api/v{version}/infection-control/cases/{id}
+GET /api/v{version}/infection-control/devices
+GET /api/v{version}/infection-control/rates
 GET /api/v{version}/instrument-comparabilities
 GET /api/v{version}/instrument-comparabilities/{id}
 GET /api/v{version}/instrument-comparabilities/{id}/signatures
@@ -465,6 +473,11 @@ POST /api/indicators
 POST /api/indicators/{id}/measurements
 POST /api/indicators/{id}/retire
 POST /api/indicators/{id}/targets
+POST /api/infection-control/cases
+POST /api/infection-control/cases/{id}/close
+POST /api/infection-control/cases/{id}/review
+POST /api/infection-control/devices
+POST /api/infection-control/devices/{id}/remove
 POST /api/instrument-comparabilities
 POST /api/instrument-comparabilities/{id}/calculate
 POST /api/instrument-comparabilities/{id}/readings
@@ -724,6 +737,11 @@ POST /api/v{version}/indicators
 POST /api/v{version}/indicators/{id}/measurements
 POST /api/v{version}/indicators/{id}/retire
 POST /api/v{version}/indicators/{id}/targets
+POST /api/v{version}/infection-control/cases
+POST /api/v{version}/infection-control/cases/{id}/close
+POST /api/v{version}/infection-control/cases/{id}/review
+POST /api/v{version}/infection-control/devices
+POST /api/v{version}/infection-control/devices/{id}/remove
 POST /api/v{version}/instrument-comparabilities
 POST /api/v{version}/instrument-comparabilities/{id}/calculate
 POST /api/v{version}/instrument-comparabilities/{id}/readings

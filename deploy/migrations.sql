@@ -10090,5 +10090,147 @@ BEGIN
     VALUES ('20260825232736_AddPatientSafety', '9.0.19');
     END IF;
 END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826161611_AddInfectionControl') THEN
+    CREATE TABLE qams.device_exposure (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        branch_id uuid,
+        department_id uuid,
+        patient_ref character varying(100) NOT NULL,
+        unit character varying(100) NOT NULL,
+        device_type character varying(20) NOT NULL,
+        inserted_at_utc timestamp with time zone NOT NULL,
+        removed_at_utc timestamp with time zone,
+        status character varying(20) NOT NULL,
+        created_at_utc timestamp with time zone NOT NULL,
+        created_by text,
+        created_by_user_id uuid,
+        modified_at_utc timestamp with time zone,
+        modified_by text,
+        CONSTRAINT pk_device_exposure PRIMARY KEY (tenant_id, id)
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826161611_AddInfectionControl') THEN
+    CREATE TABLE qams.hai_case (
+        id uuid NOT NULL,
+        tenant_id uuid NOT NULL,
+        branch_id uuid,
+        department_id uuid,
+        case_ref character varying(30) NOT NULL,
+        type character varying(20) NOT NULL,
+        patient_ref character varying(100) NOT NULL,
+        unit character varying(100) NOT NULL,
+        onset_date_utc timestamp with time zone NOT NULL,
+        organism character varying(200),
+        description text NOT NULL,
+        status character varying(20) NOT NULL,
+        reviewed_by uuid,
+        review_notes text,
+        reviewed_at_utc timestamp with time zone,
+        created_at_utc timestamp with time zone NOT NULL,
+        created_by text,
+        created_by_user_id uuid,
+        modified_at_utc timestamp with time zone,
+        modified_by text,
+        CONSTRAINT pk_hai_case PRIMARY KEY (tenant_id, id)
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826161611_AddInfectionControl') THEN
+    CREATE INDEX ix_device_exposure_tenant_id_device_type_status ON qams.device_exposure (tenant_id, device_type, status);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826161611_AddInfectionControl') THEN
+    CREATE INDEX ix_device_exposure_tenant_id_inserted_at_utc ON qams.device_exposure (tenant_id, inserted_at_utc);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826161611_AddInfectionControl') THEN
+    CREATE UNIQUE INDEX ix_hai_case_tenant_id_case_ref ON qams.hai_case (tenant_id, case_ref);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826161611_AddInfectionControl') THEN
+    CREATE INDEX ix_hai_case_tenant_id_onset_date_utc ON qams.hai_case (tenant_id, onset_date_utc);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826161611_AddInfectionControl') THEN
+    CREATE INDEX ix_hai_case_tenant_id_type_status ON qams.hai_case (tenant_id, type, status);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826161611_AddInfectionControl') THEN
+    ALTER TABLE qams.device_exposure ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.device_exposure FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.device_exposure;
+    CREATE POLICY tenant_isolation ON qams.device_exposure
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+
+    ALTER TABLE qams.hai_case ENABLE ROW LEVEL SECURITY;
+    ALTER TABLE qams.hai_case FORCE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS tenant_isolation ON qams.hai_case;
+    CREATE POLICY tenant_isolation ON qams.hai_case
+      FOR ALL
+      USING (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on')
+      WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant', true), '')::uuid
+             OR current_setting('app.bypass_rls', true) = 'on');
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826161611_AddInfectionControl') THEN
+    ALTER TABLE qams.device_exposure ADD CONSTRAINT ck_device_exposure_device_type_domain
+      CHECK (device_type IN ('CentralLine','UrinaryCatheter','Ventilator')) NOT VALID;
+    ALTER TABLE qams.device_exposure VALIDATE CONSTRAINT ck_device_exposure_device_type_domain;
+
+    ALTER TABLE qams.device_exposure ADD CONSTRAINT ck_device_exposure_status_domain
+      CHECK (status IN ('InPlace','Removed')) NOT VALID;
+    ALTER TABLE qams.device_exposure VALIDATE CONSTRAINT ck_device_exposure_status_domain;
+
+    ALTER TABLE qams.hai_case ADD CONSTRAINT ck_hai_case_type_domain
+      CHECK (type IN ('Clabsi','Cauti','Vap','Ssi')) NOT VALID;
+    ALTER TABLE qams.hai_case VALIDATE CONSTRAINT ck_hai_case_type_domain;
+
+    ALTER TABLE qams.hai_case ADD CONSTRAINT ck_hai_case_status_domain
+      CHECK (status IN ('Reported','Reviewed','Closed')) NOT VALID;
+    ALTER TABLE qams.hai_case VALIDATE CONSTRAINT ck_hai_case_status_domain;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20260826161611_AddInfectionControl') THEN
+    INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+    VALUES ('20260826161611_AddInfectionControl', '9.0.19');
+    END IF;
+END $EF$;
 COMMIT;
 

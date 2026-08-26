@@ -362,6 +362,29 @@ export const HELP_TOPICS: HelpTopic[] = [
     ],
   },
   {
+    route: '/infection-control', titleKey: 'nav.infectionControl', groupKey: 'nav.groupImprovement', icon: 'infectionControl',
+    summary: L(
+      'Healthcare-associated infection surveillance: CLABSI, CAUTI, VAP and SSI. Device-associated rates are computed per 1,000 device-days from the device-exposure register, and the device-utilisation ratio uses the ADT patient-days as its denominator.',
+      'ترصّد العدوى المرتبطة بالرعاية الصحية: عدوى مجرى الدم والمسالك البولية والالتهاب الرئوي المرتبط بالتنفس وعدوى الموقع الجراحي. تُحتسب المعدلات المرتبطة بالأجهزة لكل 1000 يوم جهاز من سجل استخدام الأجهزة، وتستخدم نسبة استخدام الجهاز أيام المرضى مقامًا لها.',
+      'Surveillance des infections associées aux soins : CLABSI, CAUTI, PAVM et ISO. Les taux liés aux dispositifs sont calculés pour 1 000 jours-dispositif à partir du registre d’exposition, et le ratio d’utilisation prend les jours-patients ADT comme dénominateur.'),
+    steps: [
+      S(L('Reported', 'مُبلّغ', 'Signalé'), L('Capture the infection, its type, unit, onset and organism.', 'سجّل العدوى ونوعها والوحدة وتاريخ البدء والكائن المسبب.', 'Consignez l’infection, son type, l’unité, la date de début et le micro-organisme.')),
+      S(L('Reviewed', 'تمت المراجعة', 'Examiné'), L('Infection control reviews the case and records findings.', 'تراجع مكافحة العدوى الحالة وتسجّل النتائج.', 'La prévention des infections examine le cas et consigne les constats.')),
+      S(L('Closed', 'مغلق', 'Clôturé'), L('Closed and frozen once review is complete.', 'يُغلق ويُجمّد بعد اكتمال المراجعة.', 'Clôturé et gelé une fois l’examen terminé.')),
+    ],
+    usage: [
+      L('Report an HAI case (CLABSI, CAUTI, VAP or SSI); record device exposures — central lines, urinary catheters, ventilators — which accrue the device-days denominator.',
+        'أبلغ عن حالة عدوى (CLABSI أو CAUTI أو VAP أو SSI)؛ وسجّل استخدام الأجهزة — القساطر الوريدية المركزية والبولية وأجهزة التنفس — التي تُراكم مقام أيام الأجهزة.',
+        'Signalez un cas d’IAS (CLABSI, CAUTI, PAVM ou ISO) ; enregistrez les expositions aux dispositifs — cathéters centraux, sondes urinaires, ventilateurs — qui constituent le dénominateur en jours-dispositif.'),
+      L('The tiles show device-associated rates per 1,000 device-days plus the SSI count; the device register shows lines in place and lets you record removal (which stops the device-day clock).',
+        'تعرض البطاقات المعدلات المرتبطة بالأجهزة لكل 1000 يوم جهاز إضافةً إلى عدد حالات عدوى الموقع الجراحي؛ ويعرض سجل الأجهزة القساطر قيد الاستخدام ويتيح تسجيل الإزالة التي توقف احتساب أيام الجهاز.',
+        'Les tuiles affichent les taux liés aux dispositifs pour 1 000 jours-dispositif ainsi que le nombre d’ISO ; le registre montre les dispositifs en place et permet d’enregistrer le retrait (qui arrête le décompte des jours-dispositif).'),
+      L('Review records infection-control findings; closing freezes the case for audit.',
+        'تسجّل المراجعة نتائج مكافحة العدوى؛ ويُجمّد الإغلاق الحالة للتدقيق.',
+        'L’examen consigne les constats ; la clôture gèle le cas pour l’audit.'),
+    ],
+  },
+  {
     route: '/nonconformances', titleKey: 'nav.nc', groupKey: 'nav.groupImprovement', icon: 'nc',
     summary: L(
       'The nonconformance & CAPA register: log a problem, find its root cause, plan corrective action, then verify the fix worked and was effective before closing.',

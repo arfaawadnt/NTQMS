@@ -79,6 +79,7 @@ public static class PermissionCatalog
     public const string Incidents = "incidents";
     public const string Indicators = "indicators";
     public const string PatientSafety = "patient-safety";
+    public const string InfectionControl = "infection-control";
     public const string Standards = "standards";
     public const string Complaints = "complaints";
     public const string Feedback = "feedback";
@@ -144,6 +145,7 @@ public static class PermissionCatalog
         new(Incidents, GroupQuality, "perm.mod.incidents", SignedRecordLifecycle),
         new(Indicators, GroupQuality, "perm.mod.indicators", FullRecordLifecycle),
         new(PatientSafety, GroupQuality, "perm.mod.patientSafety", FullRecordLifecycle),
+        new(InfectionControl, GroupQuality, "perm.mod.infectionControl", FullRecordLifecycle),
         new(Complaints, GroupQuality, "perm.mod.complaints", FullRecordLifecycle),
         new(Feedback, GroupQuality, "perm.mod.feedback", FullRecordLifecycle),
         new(Surveys, GroupQuality, "perm.mod.surveys", FullRecordLifecycle),

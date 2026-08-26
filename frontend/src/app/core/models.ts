@@ -669,6 +669,50 @@ export interface ReportFallRequest {
 export interface ReportPressureInjuryRequest extends ReportFallRequest { stage: PressureInjuryStage; origin: InjuryOrigin; }
 export interface ReviewSafetyEventRequest { notes: string; }
 
+// ── Infection Prevention & Control (HQMS M09) ─────────────────────────────────
+
+export const HAI_TYPES = ['Clabsi', 'Cauti', 'Vap', 'Ssi'] as const;
+export type HaiType = (typeof HAI_TYPES)[number];
+export const HAI_STATUSES = ['Reported', 'Reviewed', 'Closed'] as const;
+export const DEVICE_TYPES = ['CentralLine', 'UrinaryCatheter', 'Ventilator'] as const;
+export type DeviceType = (typeof DEVICE_TYPES)[number];
+export const DEVICE_STATUSES = ['InPlace', 'Removed'] as const;
+
+export interface HaiCaseListItem {
+  id: string; caseRef: string; type: string; patientRef: string; unit: string;
+  onsetDateUtc: string; organism: string | null; status: string;
+}
+
+export interface HaiCaseDetail {
+  id: string; caseRef: string; type: string; patientRef: string; unit: string; departmentId: string | null;
+  onsetDateUtc: string; organism: string | null; description: string; status: string;
+  reviewedBy: string | null; reviewNotes: string | null; reviewedAtUtc: string | null;
+}
+
+export interface DeviceExposureListItem {
+  id: string; patientRef: string; unit: string; deviceType: string;
+  insertedAtUtc: string; removedAtUtc: string | null; status: string;
+}
+
+export interface HaiDeviceRate {
+  haiType: string; deviceType: string; deviceDays: number; caseCount: number;
+  ratePer1000: number; utilizationRatio: number;
+}
+export interface HaiRates {
+  fromUtc: string; toUtc: string; patientDays: number;
+  clabsi: HaiDeviceRate; cauti: HaiDeviceRate; vap: HaiDeviceRate; ssiCount: number;
+}
+
+export interface ReportHaiCaseRequest {
+  type: HaiType; patientRef: string; unit: string; onsetDateUtc: string;
+  organism: string | null; description: string; departmentId: string | null;
+}
+export interface ReviewHaiCaseRequest { notes: string; }
+export interface RecordDeviceExposureRequest {
+  patientRef: string; unit: string; deviceType: DeviceType; insertedAtUtc: string; departmentId: string | null;
+}
+export interface RemoveDeviceRequest { removedAtUtc: string; }
+
 // ── Reporting (read models — real data only) ─────────────────────────────────
 
 export interface DashboardKpis {

@@ -11,6 +11,7 @@ using NT.QAMS.Domain.Facility;
 using NT.QAMS.Domain.Files;
 using NT.QAMS.Domain.IdentityAccess;
 using NT.QAMS.Domain.IncidentReporting;
+using NT.QAMS.Domain.InfectionControl;
 using NT.QAMS.Domain.Integration;
 using NT.QAMS.Domain.Improvement;
 using NT.QAMS.Domain.Notifications;
@@ -64,6 +65,8 @@ public interface IAppDbContext
     DbSet<IntegrationMessage> IntegrationMessages { get; }
     DbSet<PatientStay> PatientStays { get; }
     DbSet<PatientSafetyEvent> PatientSafetyEvents { get; }
+    DbSet<HaiCase> HaiCases { get; }
+    DbSet<DeviceExposure> DeviceExposures { get; }
     DbSet<EquipmentItem> EquipmentItems { get; }
     DbSet<ReferenceStandard> ReferenceStandards { get; }
     DbSet<TestAuthorization> TestAuthorizations { get; }

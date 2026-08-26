@@ -286,6 +286,7 @@ export class ShellComponent {
         items: [
           { path: '/incidents', label: 'nav.incidents', icon: 'incidents' },
           { path: '/patient-safety', label: 'nav.patientSafety', icon: 'patientSafety' },
+          { path: '/infection-control', label: 'nav.infectionControl', icon: 'infectionControl' },
           { path: '/nonconformances', label: 'nav.nc', icon: 'nc' },
           { path: '/complaints', label: 'nav.complaints', icon: 'complaints' },
           { path: '/surveys', label: 'nav.surveys', icon: 'surveys' },

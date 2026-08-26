@@ -12,6 +12,7 @@ using NT.QAMS.Domain.Facility;
 using NT.QAMS.Domain.Files;
 using NT.QAMS.Domain.IdentityAccess;
 using NT.QAMS.Domain.IncidentReporting;
+using NT.QAMS.Domain.InfectionControl;
 using NT.QAMS.Domain.Integration;
 using NT.QAMS.Domain.Improvement;
 using NT.QAMS.Domain.Notifications;
@@ -80,6 +81,8 @@ public sealed class AppDbContext(
     public DbSet<IntegrationMessage> IntegrationMessages => Set<IntegrationMessage>();
     public DbSet<PatientStay> PatientStays => Set<PatientStay>();
     public DbSet<PatientSafetyEvent> PatientSafetyEvents => Set<PatientSafetyEvent>();
+    public DbSet<HaiCase> HaiCases => Set<HaiCase>();
+    public DbSet<DeviceExposure> DeviceExposures => Set<DeviceExposure>();
     public DbSet<EquipmentItem> EquipmentItems => Set<EquipmentItem>();
     public DbSet<ReferenceStandard> ReferenceStandards => Set<ReferenceStandard>();
     public DbSet<CompetencyRecord> Competencies => Set<CompetencyRecord>();
