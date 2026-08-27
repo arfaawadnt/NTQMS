@@ -281,16 +281,6 @@ export class ShellComponent {
         ],
       },
       {
-        key: 'clinical', label: 'nav.groupClinical',
-        items: [
-          { path: '/patient-safety', label: 'nav.patientSafety', icon: 'patientSafety' },
-          { path: '/infection-control', label: 'nav.infectionControl', icon: 'infectionControl' },
-          { path: '/mortality-review', label: 'nav.mortalityReview', icon: 'mortalityReview' },
-          { path: '/credentialing', label: 'nav.credentialing', icon: 'credentialing' },
-          { path: '/eoc', label: 'nav.eoc', icon: 'eoc' },
-        ],
-      },
-      {
         key: 'improvement', label: 'nav.groupImprovement',
         items: [
           { path: '/incidents', label: 'nav.incidents', icon: 'incidents' },
@@ -313,6 +303,16 @@ export class ShellComponent {
           { path: '/quality-policy', label: 'nav.qualityPolicy', icon: 'qualityPolicy' },
           { path: '/documents', label: 'nav.documents', icon: 'documents' },
           { path: '/records', label: 'nav.records', icon: 'records' },
+        ],
+      },
+      {
+        key: 'clinical', label: 'nav.groupClinical',
+        items: [
+          { path: '/patient-safety', label: 'nav.patientSafety', icon: 'patientSafety' },
+          { path: '/infection-control', label: 'nav.infectionControl', icon: 'infectionControl' },
+          { path: '/mortality-review', label: 'nav.mortalityReview', icon: 'mortalityReview' },
+          { path: '/credentialing', label: 'nav.credentialing', icon: 'credentialing' },
+          { path: '/eoc', label: 'nav.eoc', icon: 'eoc' },
         ],
       },
       {
