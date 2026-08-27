@@ -106,7 +106,7 @@ export class AuditTrailComponent implements OnInit {
   readonly perms = inject(PermissionsService);
   private readonly api = inject(ComplianceApiService);
 
-  /** Filter — typically the record's id; matched against payload/event type server-side. */
+  /** The record's id (a GUID). Matched exactly server-side to the record's own entries. */
   readonly subject = input.required<string>();
 
   readonly entries = signal<AuditTrailEntry[]>([]);
@@ -121,7 +121,7 @@ export class AuditTrailComponent implements OnInit {
     this.loading.set(true);
     try {
       const [entries, changes] = await Promise.all([
-        firstValueFrom(this.api.auditTrail(this.subject())),
+        firstValueFrom(this.api.recordAuditTrail(this.subject())),
         firstValueFrom(this.api.fieldChanges(this.subject())),
       ]);
       this.entries.set(entries);

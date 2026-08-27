@@ -10,11 +10,22 @@ export class ComplianceApiService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiBaseUrl}/compliance`;
 
-  /** Audit-trail entries whose payload or event type contains `subject` (e.g. a record id). */
+  /**
+   * Ledger-wide search: audit-trail entries whose payload or event type *contains*
+   * `subject`. Backs the compliance search box — for one record's own timeline use
+   * {@link recordAuditTrail}, which matches exactly and never returns other records' logs.
+   */
   auditTrail(subject?: string, take = 200): Observable<AuditTrailEntry[]> {
     let params = new HttpParams().set('take', take);
     if (subject) { params = params.set('subject', subject); }
     return this.http.get<AuditTrailEntry[]>(`${this.base}/audit-trail`, { params });
+  }
+
+  /** Audit-trail entries a single record produced (matched on its aggregate id — no cross-record leakage). */
+  recordAuditTrail(subjectId: string, take = 200): Observable<AuditTrailEntry[]> {
+    return this.http.get<AuditTrailEntry[]>(`${this.base}/audit-trail/record/${subjectId}`, {
+      params: new HttpParams().set('take', take),
+    });
   }
 
   /** Field-level change rows, optionally filtered to one record's id. */

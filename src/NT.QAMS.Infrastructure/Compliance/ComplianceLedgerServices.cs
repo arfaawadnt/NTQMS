@@ -183,6 +183,31 @@ public sealed class ComplianceLedgerStore(AppDbContext db, ICurrentTenant tenant
         return await query.OrderByDescending(e => e.OccurredAtUtc).Take(take).ToListAsync(ct);
     }
 
+    public async Task<IReadOnlyList<AuditTrailEntry>> GetTrailForRecordAsync(Guid aggregateId, int take, CancellationToken ct)
+    {
+        // Anchor to the FIRST serialized JSON property. Every domain event declares
+        // its aggregate id as the first constructor parameter, and System.Text.Json
+        // serializes records in declaration order, so the record's own id is always
+        // the first "key":"value" pair. Matching only that pair attributes each entry
+        // to the record that produced it. A plain Payload.Contains(id) also matched
+        // entries where the id appears only as a *reference* — an actor (approvedBy,
+        // loggedBy), a linked record, a branch/department — leaking other records'
+        // logs into this record's trail. [A-Za-z0-9] bounds the key so the anchor
+        // cannot slide past the first property into a later one.
+        var pattern = "^\\{\"[A-Za-z0-9]+\":\"" + aggregateId.ToString() + "\"";
+        IQueryable<AuditTrailEntry> query = db.Set<AuditTrailEntry>()
+            .FromSqlInterpolated($"SELECT * FROM audit.audit_trail WHERE payload ~ {pattern}")
+            .AsNoTracking();
+
+        // Defence-in-depth: filter by resolved tenant in-app (RLS also scopes at the DB).
+        if (tenant.TenantId is { } tid)
+        {
+            query = query.Where(e => e.TenantId == tid);
+        }
+
+        return await query.OrderByDescending(e => e.OccurredAtUtc).Take(take).ToListAsync(ct);
+    }
+
     public async Task<IReadOnlyList<SignatureRecord>> GetSignaturesAsync(int take, CancellationToken ct)
     {
         var query = db.Set<SignatureRecord>().AsNoTracking();

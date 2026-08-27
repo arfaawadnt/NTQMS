@@ -33,6 +33,14 @@ public interface IESignatureService
 public interface IComplianceLedgerStore
 {
     Task<IReadOnlyList<AuditTrailEntry>> GetTrailAsync(string? subjectContains, int take, CancellationToken ct);
+
+    /// <summary>
+    /// The audit trail for ONE record: entries the record itself produced, and
+    /// nothing else. Matched on the aggregate id as the event's own identifier —
+    /// never a plain payload substring, which also pulls in entries that merely
+    /// *reference* the id (an actor, a linked record) and so leaks unrelated logs.
+    /// </summary>
+    Task<IReadOnlyList<AuditTrailEntry>> GetTrailForRecordAsync(Guid aggregateId, int take, CancellationToken ct);
     Task<IReadOnlyList<SignatureRecord>> GetSignaturesAsync(int take, CancellationToken ct);
     Task<IReadOnlyList<SignatureRecord>> GetSignaturesForSubjectAsync(string subjectRef, CancellationToken ct);
     Task<IReadOnlyList<SecurityEvent>> GetSecurityEventsAsync(int take, CancellationToken ct);

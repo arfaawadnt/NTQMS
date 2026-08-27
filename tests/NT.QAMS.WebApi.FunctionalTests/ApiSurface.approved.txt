@@ -52,6 +52,7 @@ GET /api/complaints
 GET /api/complaints/{id}
 GET /api/compliance/audit-trail
 GET /api/compliance/audit-trail-reviews
+GET /api/compliance/audit-trail/record/{subjectId}
 GET /api/compliance/chain-verification
 GET /api/compliance/field-changes
 GET /api/compliance/security-events
@@ -240,6 +241,7 @@ GET /api/v{version}/complaints
 GET /api/v{version}/complaints/{id}
 GET /api/v{version}/compliance/audit-trail
 GET /api/v{version}/compliance/audit-trail-reviews
+GET /api/v{version}/compliance/audit-trail/record/{subjectId}
 GET /api/v{version}/compliance/chain-verification
 GET /api/v{version}/compliance/field-changes
 GET /api/v{version}/compliance/security-events

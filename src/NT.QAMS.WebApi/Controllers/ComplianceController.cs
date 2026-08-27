@@ -25,6 +25,16 @@ public sealed class ComplianceController(ISender sender) : ControllerBase
         [FromQuery] string? subject, [FromQuery] int take = 200, CancellationToken ct = default) =>
         Ok(await sender.Send(new GetAuditTrailQuery(subject, take), ct));
 
+    /// <summary>
+    /// The audit trail for a single record (its detail-page timeline): entries the
+    /// record produced, matched on the aggregate id — never a payload substring, so
+    /// a record's trail never shows another record's logs.
+    /// </summary>
+    [HttpGet("audit-trail/record/{subjectId:guid}")]
+    public async Task<IActionResult> RecordAuditTrail(
+        Guid subjectId, [FromQuery] int take = 200, CancellationToken ct = default) =>
+        Ok(await sender.Send(new GetRecordAuditTrailQuery(subjectId, take), ct));
+
     [HttpGet("field-changes")]
     public async Task<IActionResult> FieldChanges(
         [FromQuery] string? entityId, [FromQuery] int take = 200, CancellationToken ct = default) =>

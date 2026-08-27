@@ -15,6 +15,22 @@ public sealed class GetAuditTrailHandler(IComplianceLedgerStore store)
         store.GetTrailAsync(q.SubjectContains, Math.Clamp(q.Take, 1, 1000), ct);
 }
 
+/// <summary>
+/// The audit trail for one record (its detail-page timeline): only the entries
+/// that record itself produced, matched on the aggregate id. Distinct from
+/// <see cref="GetAuditTrailQuery"/>, whose substring search backs the ledger-wide
+/// admin search box and would surface entries that merely reference the id.
+/// </summary>
+public sealed record GetRecordAuditTrailQuery(Guid SubjectId, int Take = 200)
+    : IQuery<IReadOnlyList<AuditTrailEntry>>;
+
+public sealed class GetRecordAuditTrailHandler(IComplianceLedgerStore store)
+    : IQueryHandler<GetRecordAuditTrailQuery, IReadOnlyList<AuditTrailEntry>>
+{
+    public Task<IReadOnlyList<AuditTrailEntry>> Handle(GetRecordAuditTrailQuery q, CancellationToken ct) =>
+        store.GetTrailForRecordAsync(q.SubjectId, Math.Clamp(q.Take, 1, 1000), ct);
+}
+
 public sealed record GetSignatureLogQuery(int Take = 200) : IQuery<IReadOnlyList<SignatureRecord>>;
 
 public sealed class GetSignatureLogHandler(IComplianceLedgerStore store)
