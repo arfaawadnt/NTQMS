@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.Resources;
+using NT.QAMS.Domain.Authorization;
 using NT.QAMS.Domain.Equipment;
 using NT.QAMS.SharedKernel.Abstractions;
 using NT.QAMS.SharedKernel.Primitives;
@@ -174,7 +175,7 @@ public sealed class RecordIntermediateCheckHandler(IAppDbContext db, ICurrentUse
 
 // â”€â”€ Downtime & availability (HQMS M14) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-[RequireInternalActor]
+[RequirePermissionPolicy(PermissionCatalog.Equipment, PermissionAction.Edit)]
 public sealed record StartDowntimeCommand(Guid EquipmentId, DateTimeOffset StartedAtUtc, DowntimeCategory Category, string Reason)
     : ICommand<Guid>;
 
@@ -194,7 +195,7 @@ public sealed class StartDowntimeHandler(IAppDbContext db) : ICommandHandler<Sta
     }
 }
 
-[RequireInternalActor]
+[RequirePermissionPolicy(PermissionCatalog.Equipment, PermissionAction.Edit)]
 public sealed record EndDowntimeCommand(Guid EquipmentId, Guid DowntimeId, DateTimeOffset EndedAtUtc) : ICommand;
 
 public sealed class EndDowntimeHandler(IAppDbContext db) : ICommandHandler<EndDowntimeCommand>
@@ -208,7 +209,7 @@ public sealed class EndDowntimeHandler(IAppDbContext db) : ICommandHandler<EndDo
 
 // â”€â”€ Recalls & field safety notices (HQMS M14) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-[RequireInternalActor]
+[RequirePermissionPolicy(PermissionCatalog.Equipment, PermissionAction.Edit)]
 public sealed record LogSafetyNoticeCommand(
     Guid EquipmentId, SafetyNoticeType Type, string Reference, string Issuer,
     SafetyNoticeSeverity Severity, DateOnly ReceivedOn, DateOnly? RequiredActionBy) : ICommand<Guid>;
@@ -233,7 +234,7 @@ public sealed class LogSafetyNoticeHandler(IAppDbContext db) : ICommandHandler<L
     }
 }
 
-[RequireInternalActor]
+[RequirePermissionPolicy(PermissionCatalog.Equipment, PermissionAction.Edit)]
 public sealed record ActionSafetyNoticeCommand(Guid EquipmentId, Guid NoticeId, string Note, DateOnly On) : ICommand;
 
 public sealed class ActionSafetyNoticeValidator : AbstractValidator<ActionSafetyNoticeCommand>
@@ -250,7 +251,7 @@ public sealed class ActionSafetyNoticeHandler(IAppDbContext db) : ICommandHandle
     }
 }
 
-[RequireInternalActor]
+[RequirePermissionPolicy(PermissionCatalog.Equipment, PermissionAction.Void)]
 public sealed record CloseSafetyNoticeCommand(Guid EquipmentId, Guid NoticeId) : ICommand;
 
 public sealed class CloseSafetyNoticeHandler(IAppDbContext db) : ICommandHandler<CloseSafetyNoticeCommand>

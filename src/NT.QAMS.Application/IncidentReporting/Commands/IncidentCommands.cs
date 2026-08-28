@@ -107,20 +107,20 @@ public sealed class ReportAnonymousIncidentHandler(
 
 // ── Workflow transitions (load → guarded aggregate method → save) ────────────
 
-[RequireInternalActor]
+[RequirePermissionPolicy(PermissionCatalog.Incidents, PermissionAction.Approve)]
 public sealed record TriageIncidentCommand(Guid IncidentId, Guid AssigneeId, IncidentCategory Category) : ICommand;
-[RequireInternalActor]
+[RequirePermissionPolicy(PermissionCatalog.Incidents, PermissionAction.Void)]
 public sealed record RejectIncidentCommand(Guid IncidentId, string Reason) : ICommand;
-[RequireInternalActor]
+[RequirePermissionPolicy(PermissionCatalog.Incidents, PermissionAction.Approve)]
 public sealed record StartIncidentInvestigationCommand(Guid IncidentId, Guid InvestigatorId) : ICommand;
-[RequireInternalActor]
+[RequirePermissionPolicy(PermissionCatalog.Incidents, PermissionAction.Edit)]
 public sealed record AddContributingFactorCommand(
     Guid IncidentId, ContributingFactorCategory Category, string Description) : ICommand;
-[RequireInternalActor]
+[RequirePermissionPolicy(PermissionCatalog.Incidents, PermissionAction.Edit)]
 public sealed record AddTimelineEntryCommand(Guid IncidentId, DateTimeOffset OccurredAtUtc, string Note) : ICommand;
-[RequireInternalActor]
+[RequirePermissionPolicy(PermissionCatalog.Incidents, PermissionAction.Edit)]
 public sealed record RecordInvestigationSummaryCommand(Guid IncidentId, string Summary) : ICommand;
-[RequireInternalActor]
+[RequirePermissionPolicy(PermissionCatalog.Incidents, PermissionAction.Approve)]
 public sealed record SubmitIncidentForReviewCommand(Guid IncidentId) : ICommand;
 
 /// <summary>Closing an incident is a Part 11 signing ceremony: it requires the actor's e-signature (account password + PIN).</summary>

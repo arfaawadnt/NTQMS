@@ -71,6 +71,7 @@ public sealed class EquipmentController(ISender sender) : ControllerBase
 
     // ── Downtime & availability (HQMS M14) ──────────────────────────────────────
     [HttpPost("{id:guid}/downtime")]
+    [RequirePermission(PermissionCatalog.Equipment, PermissionAction.Edit)]
     public async Task<IActionResult> StartDowntime(Guid id, StartDowntimeRequest request, CancellationToken ct)
     {
         var downtimeId = await sender.Send(new StartDowntimeCommand(
@@ -80,6 +81,7 @@ public sealed class EquipmentController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/downtime/{downtimeId:guid}/end")]
+    [RequirePermission(PermissionCatalog.Equipment, PermissionAction.Edit)]
     public async Task<IActionResult> EndDowntime(Guid id, Guid downtimeId, EndDowntimeRequest request, CancellationToken ct)
     {
         await sender.Send(new EndDowntimeCommand(id, downtimeId, request.EndedAtUtc), ct);
@@ -88,10 +90,12 @@ public sealed class EquipmentController(ISender sender) : ControllerBase
 
     // ── Recalls & field safety notices (HQMS M14) ───────────────────────────────
     [HttpGet("safety-notices")]
+    [RequirePermission(PermissionCatalog.Equipment, PermissionAction.View)]
     public async Task<IActionResult> OpenSafetyNotices(CancellationToken ct) =>
         Ok(await sender.Send(new GetOpenSafetyNoticesQuery(), ct));
 
     [HttpPost("{id:guid}/safety-notices")]
+    [RequirePermission(PermissionCatalog.Equipment, PermissionAction.Edit)]
     public async Task<IActionResult> LogSafetyNotice(Guid id, LogSafetyNoticeRequest request, CancellationToken ct)
     {
         var noticeId = await sender.Send(new LogSafetyNoticeCommand(
@@ -103,6 +107,7 @@ public sealed class EquipmentController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/safety-notices/{noticeId:guid}/action")]
+    [RequirePermission(PermissionCatalog.Equipment, PermissionAction.Edit)]
     public async Task<IActionResult> ActionSafetyNotice(Guid id, Guid noticeId, ActionSafetyNoticeRequest request, CancellationToken ct)
     {
         await sender.Send(new ActionSafetyNoticeCommand(id, noticeId, request.Note, request.On), ct);
@@ -110,6 +115,7 @@ public sealed class EquipmentController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/safety-notices/{noticeId:guid}/close")]
+    [RequirePermission(PermissionCatalog.Equipment, PermissionAction.Void)]
     public async Task<IActionResult> CloseSafetyNotice(Guid id, Guid noticeId, CancellationToken ct)
     {
         await sender.Send(new CloseSafetyNoticeCommand(id, noticeId), ct);

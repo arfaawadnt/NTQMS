@@ -214,6 +214,7 @@ public sealed class SuppliersController(ISender sender) : ControllerBase
 
     /// <summary>Outsourced clinical-services oversight dashboard (HQMS M16).</summary>
     [HttpGet("outsourced-services")]
+    [RequirePermission(PermissionCatalog.Suppliers, PermissionAction.View)]
     public async Task<IActionResult> OutsourcedServices(CancellationToken ct) =>
         Ok(await sender.Send(new GetOutsourcedServicesQuery(), ct));
 
@@ -252,11 +253,13 @@ public sealed class SuppliersController(ISender sender) : ControllerBase
 
     // ── Contract / SLA register (HQMS M16) ──────────────────────────────────────
     [HttpPost("{id:guid}/contracts")]
+    [RequirePermission(PermissionCatalog.Suppliers, PermissionAction.Edit)]
     public async Task<IActionResult> AddContract(Guid id, AddContractRequest request, CancellationToken ct) =>
         Ok(new { contractId = await sender.Send(new AddContractCommand(
             id, request.Title, request.StartDate, request.EndDate, request.SlaSummary), ct) });
 
     [HttpPost("{id:guid}/contracts/{contractId:guid}/terminate")]
+    [RequirePermission(PermissionCatalog.Suppliers, PermissionAction.Void)]
     public async Task<IActionResult> TerminateContract(Guid id, Guid contractId, TerminateContractRequest request, CancellationToken ct)
     {
         await sender.Send(new TerminateContractCommand(id, contractId, request.Reason), ct);
@@ -265,11 +268,13 @@ public sealed class SuppliersController(ISender sender) : ControllerBase
 
     // ── Corrective-action requests (HQMS M16) ───────────────────────────────────
     [HttpPost("{id:guid}/cars")]
+    [RequirePermission(PermissionCatalog.Suppliers, PermissionAction.Edit)]
     public async Task<IActionResult> RaiseCar(Guid id, RaiseSupplierCarRequest request, CancellationToken ct) =>
         Ok(new { carId = await sender.Send(new RaiseSupplierCarCommand(
             id, request.Description, request.RaisedOn, request.DueDate), ct) });
 
     [HttpPost("{id:guid}/cars/{carId:guid}/response")]
+    [RequirePermission(PermissionCatalog.Suppliers, PermissionAction.Edit)]
     public async Task<IActionResult> RecordCarResponse(Guid id, Guid carId, RecordCarResponseRequest request, CancellationToken ct)
     {
         await sender.Send(new RecordCarResponseCommand(id, carId, request.Note, request.On), ct);

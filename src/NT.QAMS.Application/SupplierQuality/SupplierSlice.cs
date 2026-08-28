@@ -150,7 +150,8 @@ public sealed class RecordEvaluationHandler(IAppDbContext db, ICurrentUser user)
 
 // ── Contract / SLA register (HQMS M16) ──────────────────────────────────────────
 
-[RequireInternalActor]
+[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.Suppliers,
+    NT.QAMS.Domain.Authorization.PermissionAction.Edit)]
 public sealed record AddContractCommand(
     Guid SupplierId, string Title, DateOnly StartDate, DateOnly EndDate, string? SlaSummary) : ICommand<Guid>;
 
@@ -176,7 +177,8 @@ public sealed class AddContractHandler(IAppDbContext db, ICurrentTenant tenant, 
     }
 }
 
-[RequireInternalActor]
+[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.Suppliers,
+    NT.QAMS.Domain.Authorization.PermissionAction.Void)]
 public sealed record TerminateContractCommand(Guid SupplierId, Guid ContractId, string Reason) : ICommand;
 
 public sealed class TerminateContractValidator : AbstractValidator<TerminateContractCommand>
@@ -195,7 +197,8 @@ public sealed class TerminateContractHandler(IAppDbContext db) : ICommandHandler
 
 // ── Corrective-action requests (HQMS M16) ────────────────────────────────────────
 
-[RequireInternalActor]
+[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.Suppliers,
+    NT.QAMS.Domain.Authorization.PermissionAction.Edit)]
 public sealed record RaiseSupplierCarCommand(Guid SupplierId, string Description, DateOnly RaisedOn, DateOnly? DueDate)
     : ICommand<Guid>;
 
@@ -215,7 +218,8 @@ public sealed class RaiseSupplierCarHandler(IAppDbContext db) : ICommandHandler<
     }
 }
 
-[RequireInternalActor]
+[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.Suppliers,
+    NT.QAMS.Domain.Authorization.PermissionAction.Edit)]
 public sealed record RecordCarResponseCommand(Guid SupplierId, Guid CarId, string Note, DateOnly On) : ICommand;
 
 public sealed class RecordCarResponseValidator : AbstractValidator<RecordCarResponseCommand>
@@ -232,7 +236,8 @@ public sealed class RecordCarResponseHandler(IAppDbContext db) : ICommandHandler
     }
 }
 
-[RequireInternalActor]
+[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.Suppliers,
+    NT.QAMS.Domain.Authorization.PermissionAction.Approve)]
 public sealed record CloseSupplierCarCommand(Guid SupplierId, Guid CarId, bool Effective, string ClosureNote) : ICommand;
 
 public sealed class CloseSupplierCarValidator : AbstractValidator<CloseSupplierCarCommand>
