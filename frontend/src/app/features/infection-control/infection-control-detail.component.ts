@@ -67,6 +67,15 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
             }
             @default { <p class="muted">{{ i18n.t('ipc.terminal') }}</p> }
           }
+
+          @if ((c.status === 'Reported' || c.status === 'Reviewed') && perms.can('infection-control.void')) {
+            <form class="reject" [formGroup]="rejectForm" (ngSubmit)="reject(c.id)">
+              <p class="muted">{{ i18n.t('ipc.rejectHint') }}</p>
+              <label>{{ i18n.t('ipc.rejectReason') }}</label>
+              <textarea rows="2" formControlName="reason"></textarea>
+              <button type="submit" class="danger" [disabled]="rejectForm.invalid || facade.loading()">{{ i18n.t('ipc.reject') }}</button>
+            </form>
+          }
         </section>
       </div>
 
@@ -102,6 +111,10 @@ export class InfectionControlDetailComponent implements OnInit {
     notes: ['', [Validators.required, Validators.maxLength(4000)]],
   });
 
+  readonly rejectForm = this.fb.nonNullable.group({
+    reason: ['', [Validators.required, Validators.maxLength(1000)]],
+  });
+
   ngOnInit(): void {
     void this.facade.loadDetail(this.id());
   }
@@ -110,5 +123,11 @@ export class InfectionControlDetailComponent implements OnInit {
     if (this.reviewForm.invalid) { return; }
     await this.facade.review(id, this.reviewForm.getRawValue());
     if (this.facade.error() === '') { this.reviewForm.reset({ notes: '' }); }
+  }
+
+  async reject(id: string): Promise<void> {
+    if (this.rejectForm.invalid) { return; }
+    await this.facade.reject(id, this.rejectForm.getRawValue().reason);
+    if (this.facade.error() === '') { this.rejectForm.reset({ reason: '' }); }
   }
 }

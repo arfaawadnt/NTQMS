@@ -128,9 +128,9 @@ export class PatientSafetyListComponent implements OnInit {
     const r = this.facade.rates();
     return [
       { label: this.i18n.t('psf.stat.total'), value: this.facade.list().length, tone: 'slate' },
-      { label: this.i18n.t('psf.stat.fallsRate'), value: r?.falls.ratePer1000 ?? 0, tone: 'orange' },
-      { label: this.i18n.t('psf.stat.piRate'), value: r?.pressureInjuries.ratePer1000 ?? 0, tone: 'red' },
-      { label: this.i18n.t('psf.stat.hapiRate'), value: r?.hapiRatePer1000 ?? 0, tone: 'red' },
+      { label: this.i18n.t('psf.stat.fallsRate'), value: r?.falls.ratePer1000 ?? '—', tone: 'orange' },
+      { label: this.i18n.t('psf.stat.piRate'), value: r?.pressureInjuries.ratePer1000 ?? '—', tone: 'red' },
+      { label: this.i18n.t('psf.stat.hapiRate'), value: r?.hapiRatePer1000 ?? '—', tone: 'red' },
       { label: this.i18n.t('psf.stat.patientDays'), value: r?.patientDays ?? 0, tone: 'teal' },
     ];
   });

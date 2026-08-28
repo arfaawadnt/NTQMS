@@ -7,6 +7,7 @@ public sealed record ReportHaiCaseRequest(
     string? Organism, string Description, Guid? DepartmentId);
 
 public sealed record ReviewHaiCaseRequest(string Notes);
+public sealed record RejectHaiCaseRequest(string Reason);
 
 public sealed record HaiCaseListItemDto(
     Guid Id, string CaseRef, string Type, string PatientRef, string Unit, DateTimeOffset OnsetDateUtc,
@@ -35,7 +36,7 @@ public sealed record DeviceExposureListItemDto(
 /// ratio (device-days ÷ patient-days) that contextualises it.
 /// </summary>
 public sealed record HaiDeviceRateDto(
-    string HaiType, string DeviceType, int DeviceDays, int CaseCount, decimal RatePer1000, decimal UtilizationRatio);
+    string HaiType, string DeviceType, int DeviceDays, int CaseCount, decimal? RatePer1000, decimal? UtilizationRatio);
 
 public sealed record HaiRatesDto(
     DateTimeOffset FromUtc, DateTimeOffset ToUtc, int PatientDays,

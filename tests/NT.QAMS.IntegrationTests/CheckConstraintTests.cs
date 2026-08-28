@@ -119,6 +119,44 @@ public sealed class CheckConstraintTests(RealPostgresFixture fx)
     }
 
     [SkippableFact]
+    public async Task The_hai_and_complication_status_domains_admit_the_rejected_state()
+    {
+        // M-18: the status CHECK domains shipped without a reject/void state, so
+        // a duplicate or wrong-patient case counted in official rates forever.
+        Skip.IfNot(fx.Available, fx.Unavailable ?? "PostgreSQL unavailable");
+
+        using var db = fx.CreateContext(out var ctx);
+        ctx.Elevate();
+        await using var tx = await db.Database.BeginTransactionAsync();
+        var tenant = Guid.CreateVersion7();
+
+        var hai = NT.QAMS.Domain.InfectionControl.HaiCase.Report(
+            "HAI-ITEST-1", NT.QAMS.Domain.InfectionControl.HaiType.Clabsi, "PT-1", "ICU",
+            new DateTimeOffset(2026, 8, 20, 0, 0, 0, TimeSpan.Zero), null, "probe");
+        ((ITenantScoped)hai).TenantId = tenant;
+        db.HaiCases.Add(hai);
+
+        var complication = NT.QAMS.Domain.MortalityReview.ComplicationCase.Report(
+            "CMP-ITEST-1", "PT-2", "Surgery",
+            NT.QAMS.Domain.MortalityReview.ComplicationType.ReturnToTheatre,
+            NT.QAMS.Domain.MortalityReview.ComplicationSeverity.Moderate,
+            new DateTimeOffset(2026, 8, 21, 0, 0, 0, TimeSpan.Zero), "probe");
+        ((ITenantScoped)complication).TenantId = tenant;
+        db.ComplicationCases.Add(complication);
+        await db.SaveChangesAsync();
+
+        var rejectHai = () => db.Database.ExecuteSqlRawAsync(
+            "UPDATE qams.hai_case SET status = 'Rejected' WHERE id = {0}", hai.Id);
+        await rejectHai.Should().NotThrowAsync("'Rejected' is a legal HAI state (M-18)");
+
+        var rejectComplication = () => db.Database.ExecuteSqlRawAsync(
+            "UPDATE qams.complication_case SET status = 'Rejected' WHERE id = {0}", complication.Id);
+        await rejectComplication.Should().NotThrowAsync("'Rejected' is a legal complication state (M-18)");
+
+        await tx.RollbackAsync();
+    }
+
+    [SkippableFact]
     public async Task Postgres_rejects_out_of_range_hqms_numerics()
     {
         Skip.IfNot(fx.Available, fx.Unavailable ?? "PostgreSQL unavailable");

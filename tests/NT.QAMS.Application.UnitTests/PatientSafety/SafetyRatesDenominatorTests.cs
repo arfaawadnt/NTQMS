@@ -39,4 +39,24 @@ public class SafetyRatesDenominatorTests
         rates.PatientDays.Should().Be(10,
             "days that have not elapsed must not enter the rate denominator");
     }
+
+    [Fact]
+    public async Task Rates_without_a_denominator_are_null_not_a_fabricated_zero()
+    {
+        // M-18: a window with no patient-days rendered 0.00 — indistinguishable
+        // from a genuinely zero event rate. No denominator means no rate.
+        var tenant = new FakeCurrentTenant { TenantId = TenantId };
+        var db = new AppDbContext(new DbContextOptionsBuilder<AppDbContext>()
+            .UseInMemoryDatabase($"psf-rates-{Guid.NewGuid()}")
+            .AddInterceptors(new TenantStampInterceptor(tenant))
+            .Options, tenant);
+
+        var rates = await new GetSafetyRatesHandler(db, new FixedClock(Now))
+            .Handle(new GetSafetyRatesQuery(30), CancellationToken.None);
+
+        rates.PatientDays.Should().Be(0);
+        ((decimal?)rates.Falls.RatePer1000).Should().BeNull();
+        ((decimal?)rates.PressureInjuries.RatePer1000).Should().BeNull();
+        ((decimal?)rates.HapiRatePer1000).Should().BeNull();
+    }
 }

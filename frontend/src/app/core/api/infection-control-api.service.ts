@@ -27,6 +27,7 @@ export class InfectionControlApiService {
   reportCase(body: ReportHaiCaseRequest): Observable<CreatedResource> { return this.http.post<CreatedResource>(`${this.base}/cases`, body); }
   reviewCase(id: string, body: ReviewHaiCaseRequest): Observable<void> { return this.http.post<void>(`${this.base}/cases/${id}/review`, body); }
   closeCase(id: string): Observable<void> { return this.http.post<void>(`${this.base}/cases/${id}/close`, {}); }
+  rejectCase(id: string, body: { reason: string }): Observable<void> { return this.http.post<void>(`${this.base}/cases/${id}/reject`, body); }
 
   listDevices(deviceType?: string, status?: string): Observable<DeviceExposureListItem[]> {
     let params = new HttpParams();

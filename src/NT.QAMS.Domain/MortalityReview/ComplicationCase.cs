@@ -10,7 +10,7 @@ public enum ComplicationType { ReturnToTheatre, UnplannedIcuAdmission, Unplanned
 public enum ComplicationSeverity { Minor, Moderate, Severe, LifeThreatening }
 
 /// <summary>Lifecycle of a complication case.</summary>
-public enum ComplicationStatus { Reported, Reviewed, Closed }
+public enum ComplicationStatus { Reported, Reviewed, Closed, Rejected }
 
 /// <summary>
 /// A complication / morbidity case (HQMS M10): the morbidity register captures events such as an
@@ -102,4 +102,35 @@ public sealed class ComplicationCase : AggregateRoot, ITenantScoped
 
         Status = ComplicationStatus.Closed;
     }
+
+    public Guid? RejectedBy { get; private set; }
+    public string? RejectionReason { get; private set; }
+    public DateTimeOffset? RejectedAtUtc { get; private set; }
+
+    /// <summary>
+    /// Rejects the case as not-a-complication (duplicate, wrong patient, or
+    /// ruled out on peer review) — Reported/Reviewed ⇒ Rejected. The record
+    /// stays for traceability but leaves the morbidity counts (M-18); a closed
+    /// case is settled history and cannot be rejected.
+    /// </summary>
+    public void Reject(Guid reviewerId, string reason, DateTimeOffset at)
+    {
+        if (Status is ComplicationStatus.Closed or ComplicationStatus.Rejected)
+        {
+            throw new InvalidStateTransitionException("CMP-013", $"Cannot reject a case in state {Status}.");
+        }
+
+        if (string.IsNullOrWhiteSpace(reason))
+        {
+            throw new DomainException("CMP-014", "A rejection reason is required.");
+        }
+
+        RejectedBy = reviewerId;
+        RejectionReason = reason.Trim();
+        RejectedAtUtc = at;
+        Status = ComplicationStatus.Rejected;
+        Raise(new ComplicationCaseRejected(Id, CaseRef, Type.ToString()));
+    }
 }
+
+public sealed record ComplicationCaseRejected(Guid ComplicationCaseId, string CaseRef, string Type) : DomainEvent;

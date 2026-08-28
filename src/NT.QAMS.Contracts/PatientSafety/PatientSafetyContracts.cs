@@ -20,9 +20,9 @@ public sealed record SafetyEventDetailDto(
 
 // ── Rates (per 1,000 patient-days, using the M24 ADT denominator) ─────────────
 
-public sealed record SafetyRateDto(string Type, int EventCount, int PatientDays, decimal RatePer1000);
+public sealed record SafetyRateDto(string Type, int EventCount, int PatientDays, decimal? RatePer1000);
 
 public sealed record SafetyRatesDto(
     DateTimeOffset FromUtc, DateTimeOffset ToUtc, int PatientDays,
     SafetyRateDto Falls, SafetyRateDto PressureInjuries,
-    int HospitalAcquiredPressureInjuries, decimal HapiRatePer1000);
+    int HospitalAcquiredPressureInjuries, decimal? HapiRatePer1000);

@@ -1062,3 +1062,18 @@ One atomic commit per finding; each carries a test that failed before the fix.
   a month picker (server normalizes regardless). Release-note disclosure for the correct-ward
   rejection of misaligned dates. Tests red-first: 2 domain normalization facts + 1 SPC fact + the
   arch snapshot shrink — all red pre-fix. Domain 442 · App 136 · Arch 190 · Karma 133 · prod build clean.
+- **M-18 (Major, closed)** — HAI/complication correction path + honest rates: `HaiCase.Reject` /
+  `ComplicationCase.Reject` (guarded — reason required, Closed/Rejected refuse; HAI-013/014,
+  CMP-013/014; events raised), endpoints `POST cases/{id}/reject` + `complications/{id}/reject`
+  (`<module>.void` at both tiers), migration `HaiComplicationRejectTransition` (3+3 reject columns
+  + both status CHECK domains gain `Rejected`; Down restores — loudly failing on Rejected rows,
+  deliberate). Counting convention decided and documented in the rates query: every non-rejected
+  case counts from report; rejection is the correction. All three rate families
+  (patient-safety/HAI/mortality) now return **null** for zero-denominator windows (DTOs additive-
+  nullable, disclosed) and the SPA renders "—"; reject forms on the HAI detail and complication
+  drawer (void-gated, trilingual keys). ApiSurface snapshot +4 additive routes (approved).
+  Tests red-first: nullable-rate fact (was 0m) + CHECK-domain probe (23514 pre-migration) both
+  red; HaiRatesTests' fabricated-zero assertion updated to the approved nullable contract; +2
+  domain reject facts ×2 aggregates + rejected-exclusion rate fact. Executed Down/Up: 6 cols/2
+  domains → 0/0 → 6/2. Domain 445 · App 138 · Integration 30+9 · Arch 192 · Functional 102 ·
+  Karma 133 · prod build clean.

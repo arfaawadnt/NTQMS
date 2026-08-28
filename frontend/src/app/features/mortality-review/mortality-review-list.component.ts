@@ -155,6 +155,15 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
           <p>{{ i18n.t('mm.preventable') }}: <b>{{ c.preventable ? i18n.t('mm.yes') : i18n.t('mm.no') }}</b></p>
           <button (click)="closeComplication(c.id)" [disabled]="facade.loading()">{{ i18n.t('mm.close') }}</button>
         } @else { <p class="muted">{{ i18n.t('mm.complicationClosed') }}</p> }
+
+        @if ((c.status === 'Reported' || c.status === 'Reviewed') && perms.can('mortality-review.void')) {
+          <form class="drawer-form" [formGroup]="rejectForm" (ngSubmit)="rejectComplication(c.id)">
+            <p class="muted">{{ i18n.t('mm.rejectHint') }}</p>
+            <label>{{ i18n.t('mm.rejectReason') }}</label>
+            <textarea rows="2" formControlName="reason"></textarea>
+            <button type="submit" class="danger" [disabled]="rejectForm.invalid || facade.loading()">{{ i18n.t('mm.rejectComplication') }}</button>
+          </form>
+        }
       }
     </qams-drawer>
 
@@ -194,7 +203,7 @@ export class MortalityReviewListComponent implements OnInit {
   readonly stats = computed<ListStat[]>(() => {
     const r = this.facade.rates();
     return [
-      { label: this.i18n.t('mm.stat.rate'), value: r?.mortalityRatePer1000 ?? 0, tone: 'red' },
+      { label: this.i18n.t('mm.stat.rate'), value: r?.mortalityRatePer1000 ?? '—', tone: 'red' },
       { label: this.i18n.t('mm.stat.deaths'), value: r?.deaths ?? 0, tone: 'slate' },
       { label: this.i18n.t('mm.stat.preventable'), value: (r?.potentiallyPreventable ?? 0) + (r?.preventable ?? 0), tone: 'orange' },
       { label: this.i18n.t('mm.stat.complications'), value: r?.complications ?? 0, tone: 'gold' },
@@ -223,6 +232,10 @@ export class MortalityReviewListComponent implements OnInit {
   readonly reviewForm = this.fb.nonNullable.group({
     notes: ['', [Validators.required, Validators.maxLength(4000)]],
     preventable: [false],
+  });
+
+  readonly rejectForm = this.fb.nonNullable.group({
+    reason: ['', [Validators.required, Validators.maxLength(1000)]],
   });
 
   ngOnInit(): void {
@@ -273,6 +286,12 @@ export class MortalityReviewListComponent implements OnInit {
   async closeComplication(id: string): Promise<void> {
     await this.facade.closeComplication(id);
     if (this.facade.error() === '') { this.selectedComp.set(null); }
+  }
+
+  async rejectComplication(id: string): Promise<void> {
+    if (this.rejectForm.invalid) { return; }
+    await this.facade.rejectComplication(id, this.rejectForm.getRawValue().reason);
+    if (this.facade.error() === '') { this.rejectForm.reset({ reason: '' }); this.selectedComp.set(null); }
   }
 
   openReview(id: string): void { void this.router.navigate(['/mortality-review', id]); }

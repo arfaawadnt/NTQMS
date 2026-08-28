@@ -180,6 +180,27 @@ public sealed class CloseComplicationHandler(IAppDbContext db) : ICommandHandler
     }
 }
 
+// M-18: the correction path — a duplicate or wrong-patient case is rejected
+// with a reason and leaves the morbidity counts.
+[RequirePermissionPolicy(PermissionCatalog.MortalityReview, PermissionAction.Void)]
+public sealed record RejectComplicationCommand(Guid CaseId, string Reason) : ICommand;
+
+public sealed class RejectComplicationValidator : AbstractValidator<RejectComplicationCommand>
+{
+    public RejectComplicationValidator() => RuleFor(x => x.Reason).NotEmpty().MaximumLength(1000);
+}
+
+public sealed class RejectComplicationHandler(IAppDbContext db, ICurrentUser user, IClock clock)
+    : ICommandHandler<RejectComplicationCommand>
+{
+    public async Task Handle(RejectComplicationCommand c, CancellationToken ct)
+    {
+        var actor = user.UserId ?? throw new DomainException("AUTH-003", "An authenticated user is required.");
+        (await ReviewComplicationHandler.LoadComplication(db, c.CaseId, ct)).Reject(actor, c.Reason, clock.UtcNow);
+        await db.SaveChangesAsync(ct);
+    }
+}
+
 // ── Queries ──────────────────────────────────────────────────────────────────
 
 public sealed record GetMortalityReviewsQuery(string? Classification = null, string? Status = null)
@@ -297,7 +318,7 @@ public sealed class GetMortalityRatesHandler(IAppDbContext db, IClock clock) : I
             .ToListAsync(ct);
 
         var complications = await db.ComplicationCases.AsNoTracking()
-            .Where(x => x.OccurredDateUtc >= from && x.OccurredDateUtc <= now)
+            .Where(x => x.OccurredDateUtc >= from && x.OccurredDateUtc <= now && x.Status != ComplicationStatus.Rejected)
             .Select(x => x.Preventable)
             .ToListAsync(ct);
 
@@ -305,7 +326,7 @@ public sealed class GetMortalityRatesHandler(IAppDbContext db, IClock clock) : I
 
         return new MortalityRatesDto(
             from, now, patientDays,
-            deaths.Count, patientDays == 0 ? 0m : decimal.Round(deaths.Count * 1000m / patientDays, 2),
+            deaths.Count, patientDays == 0 ? null : decimal.Round(deaths.Count * 1000m / patientDays, 2),
             CountClass(DeathClassification.Expected), CountClass(DeathClassification.Unexpected),
             CountClass(DeathClassification.PotentiallyPreventable), CountClass(DeathClassification.Preventable),
             complications.Count, complications.Count(p => p == true));

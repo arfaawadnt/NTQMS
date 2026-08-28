@@ -171,9 +171,9 @@ export class InfectionControlListComponent implements OnInit {
   readonly stats = computed<ListStat[]>(() => {
     const r = this.facade.rates();
     return [
-      { label: this.i18n.t('ipc.stat.clabsi'), value: r?.clabsi.ratePer1000 ?? 0, tone: 'red' },
-      { label: this.i18n.t('ipc.stat.cauti'), value: r?.cauti.ratePer1000 ?? 0, tone: 'orange' },
-      { label: this.i18n.t('ipc.stat.vap'), value: r?.vap.ratePer1000 ?? 0, tone: 'red' },
+      { label: this.i18n.t('ipc.stat.clabsi'), value: r?.clabsi.ratePer1000 ?? '—', tone: 'red' },
+      { label: this.i18n.t('ipc.stat.cauti'), value: r?.cauti.ratePer1000 ?? '—', tone: 'orange' },
+      { label: this.i18n.t('ipc.stat.vap'), value: r?.vap.ratePer1000 ?? '—', tone: 'red' },
       { label: this.i18n.t('ipc.stat.ssi'), value: r?.ssiCount ?? 0, tone: 'gold' },
       { label: this.i18n.t('ipc.stat.devicesInPlace'), value: this.facade.devicesInPlace(), tone: 'teal' },
       { label: this.i18n.t('ipc.stat.patientDays'), value: r?.patientDays ?? 0, tone: 'slate' },

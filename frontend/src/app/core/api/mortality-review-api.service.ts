@@ -42,4 +42,5 @@ export class MortalityReviewApiService {
   reportComplication(body: ReportComplicationRequest): Observable<CreatedResource> { return this.http.post<CreatedResource>(`${this.base}/complications`, body); }
   reviewComplication(id: string, body: ReviewComplicationRequest): Observable<void> { return this.http.post<void>(`${this.base}/complications/${id}/review`, body); }
   closeComplication(id: string): Observable<void> { return this.http.post<void>(`${this.base}/complications/${id}/close`, {}); }
+  rejectComplication(id: string, body: { reason: string }): Observable<void> { return this.http.post<void>(`${this.base}/complications/${id}/reject`, body); }
 }

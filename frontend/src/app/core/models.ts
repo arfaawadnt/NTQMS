@@ -656,11 +656,11 @@ export interface SafetyEventDetail {
   status: string; reviewedBy: string | null; reviewNotes: string | null; reviewedAtUtc: string | null;
 }
 
-export interface SafetyRate { type: string; eventCount: number; patientDays: number; ratePer1000: number; }
+export interface SafetyRate { type: string; eventCount: number; patientDays: number; ratePer1000: number | null; }
 export interface SafetyRates {
   fromUtc: string; toUtc: string; patientDays: number;
   falls: SafetyRate; pressureInjuries: SafetyRate;
-  hospitalAcquiredPressureInjuries: number; hapiRatePer1000: number;
+  hospitalAcquiredPressureInjuries: number; hapiRatePer1000: number | null;
 }
 
 export interface ReportFallRequest {
@@ -696,7 +696,7 @@ export interface DeviceExposureListItem {
 
 export interface HaiDeviceRate {
   haiType: string; deviceType: string; deviceDays: number; caseCount: number;
-  ratePer1000: number; utilizationRatio: number;
+  ratePer1000: number | null; utilizationRatio: number | null;
 }
 export interface HaiRates {
   fromUtc: string; toUtc: string; patientDays: number;
@@ -3089,7 +3089,7 @@ export interface ComplicationDetail {
 }
 export interface MortalityRates {
   fromUtc: string; toUtc: string; patientDays: number;
-  deaths: number; mortalityRatePer1000: number;
+  deaths: number; mortalityRatePer1000: number | null;
   expected: number; unexpected: number; potentiallyPreventable: number; preventable: number;
   complications: number; preventableComplications: number;
 }

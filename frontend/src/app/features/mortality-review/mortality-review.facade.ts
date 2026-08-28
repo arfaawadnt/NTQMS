@@ -75,6 +75,11 @@ export class MortalityReviewFacade {
     if (this._error() === '') { await this.reloadComplications(); }
   }
 
+  async rejectComplication(id: string, reason: string): Promise<void> {
+    await this.run(async () => { await firstValueFrom(this.api.rejectComplication(id, { reason })); });
+    if (this._error() === '') { await this.reloadComplications(); }
+  }
+
   private async reloadComplications(): Promise<void> {
     this._complications.set(await firstValueFrom(this.api.listComplications()));
   }

@@ -544,6 +544,7 @@ POST /api/indicators/{id}/retire
 POST /api/indicators/{id}/targets
 POST /api/infection-control/cases
 POST /api/infection-control/cases/{id}/close
+POST /api/infection-control/cases/{id}/reject
 POST /api/infection-control/cases/{id}/review
 POST /api/infection-control/devices
 POST /api/infection-control/devices/{id}/remove
@@ -592,6 +593,7 @@ POST /api/monitoring-points/{id}/retire
 POST /api/monitoring-points/{id}/suspend
 POST /api/mortality-review/complications
 POST /api/mortality-review/complications/{id}/close
+POST /api/mortality-review/complications/{id}/reject
 POST /api/mortality-review/complications/{id}/review
 POST /api/mortality-review/reviews
 POST /api/mortality-review/reviews/{id}/classify
@@ -855,6 +857,7 @@ POST /api/v{version}/indicators/{id}/retire
 POST /api/v{version}/indicators/{id}/targets
 POST /api/v{version}/infection-control/cases
 POST /api/v{version}/infection-control/cases/{id}/close
+POST /api/v{version}/infection-control/cases/{id}/reject
 POST /api/v{version}/infection-control/cases/{id}/review
 POST /api/v{version}/infection-control/devices
 POST /api/v{version}/infection-control/devices/{id}/remove
@@ -903,6 +906,7 @@ POST /api/v{version}/monitoring-points/{id}/retire
 POST /api/v{version}/monitoring-points/{id}/suspend
 POST /api/v{version}/mortality-review/complications
 POST /api/v{version}/mortality-review/complications/{id}/close
+POST /api/v{version}/mortality-review/complications/{id}/reject
 POST /api/v{version}/mortality-review/complications/{id}/review
 POST /api/v{version}/mortality-review/reviews
 POST /api/v{version}/mortality-review/reviews/{id}/classify

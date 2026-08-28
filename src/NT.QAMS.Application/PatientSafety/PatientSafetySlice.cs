@@ -189,6 +189,8 @@ public sealed class GetSafetyRatesHandler(IAppDbContext db, IClock clock) : IQue
             hapi, Rate(hapi, patientDays));
     }
 
-    private static decimal Rate(int count, int patientDays) =>
-        patientDays == 0 ? 0m : decimal.Round(count * 1000m / patientDays, 2);
+    // M-18: no denominator means no rate — a fabricated 0.00 is
+    // indistinguishable from a genuinely zero event rate.
+    private static decimal? Rate(int count, int patientDays) =>
+        patientDays == 0 ? null : decimal.Round(count * 1000m / patientDays, 2);
 }

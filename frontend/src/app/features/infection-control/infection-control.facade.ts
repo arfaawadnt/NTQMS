@@ -66,6 +66,7 @@ export class InfectionControlFacade {
 
   async review(id: string, r: ReviewHaiCaseRequest): Promise<void> { await this.mutate(id, () => this.api.reviewCase(id, r)); }
   async close(id: string): Promise<void> { await this.mutate(id, () => this.api.closeCase(id)); }
+  async reject(id: string, reason: string): Promise<void> { await this.mutate(id, () => this.api.rejectCase(id, { reason })); }
 
   private async mutate<T>(id: string, call: () => Observable<T>): Promise<void> {
     await this.run(async () => {

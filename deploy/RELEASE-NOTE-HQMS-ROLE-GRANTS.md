@@ -147,3 +147,12 @@ A measurement's period is now normalized to its frequency's canonical start day 
 1st of month / first day of quarter / 1 January) before the one-per-period check. Two periods in
 the same month can no longer coexist on a Monthly indicator. Dates that previously slipped through
 misaligned are rejected with `IND-016`; the SPA's Monthly picker now captures a month directly.
+
+## Also in this line — HAI/complication rejection and honest rates (M-18)
+
+HAI cases and complication cases gain a guarded **Reject** transition (`<module>.void`, reason
+required): a duplicate or wrong-patient entry is rejected on the record and **leaves the official
+rates and morbidity counts**. Rate endpoints change shape additively: `ratePer1000`,
+`utilizationRatio` and `mortalityRatePer1000` are now **nullable** — a window with no denominator
+returns `null` (rendered "—"), never a fabricated `0.00`. Rate values will change once rejected
+cases exist; that is the point.

@@ -62,4 +62,30 @@ public class HaiCaseTests
         c.Close();
         c.Status.Should().Be(HaiStatus.Closed);
     }
+
+    [Fact]
+    public void A_case_can_be_rejected_with_a_reason_from_reported_or_reviewed()
+    {
+        // M-18: the correction path — a rejected case leaves the official rates.
+        var c = HaiCase.Report("HAI-3", HaiType.Clabsi, "PT-3", "ICU", When, null, "duplicate entry");
+        c.Reject(Reviewer, "Duplicate of HAI-2.", When);
+
+        c.Status.Should().Be(HaiStatus.Rejected);
+        c.RejectedBy.Should().Be(Reviewer);
+        c.RejectionReason.Should().Be("Duplicate of HAI-2.");
+        c.DomainEvents.OfType<HaiCaseRejected>().Should().ContainSingle();
+    }
+
+    [Fact]
+    public void A_rejection_requires_a_reason_and_a_closed_case_cannot_be_rejected()
+    {
+        var c = HaiCase.Report("HAI-4", HaiType.Cauti, "PT-4", "Ward", When, null, "x");
+        var noReason = () => c.Reject(Reviewer, " ", When);
+        noReason.Should().Throw<DomainException>().Which.Code.Should().Be("HAI-014");
+
+        c.RecordReview(Reviewer, "Confirmed.", When);
+        c.Close();
+        var closed = () => c.Reject(Reviewer, "Too late.", When);
+        closed.Should().Throw<InvalidStateTransitionException>().Which.Code.Should().Be("HAI-013");
+    }
 }

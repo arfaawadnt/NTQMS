@@ -62,6 +62,14 @@ public sealed class InfectionControlController(ISender sender) : ControllerBase
         return NoContent();
     }
 
+    [HttpPost("cases/{id:guid}/reject")]
+    [RequirePermission(PermissionCatalog.InfectionControl, PermissionAction.Void)]
+    public async Task<IActionResult> RejectCase(Guid id, RejectHaiCaseRequest request, CancellationToken ct)
+    {
+        await sender.Send(new RejectHaiCaseCommand(id, request.Reason), ct);
+        return NoContent();
+    }
+
     // ── Device exposures (the device-day denominator) ──────────────────────────
     [HttpGet("devices")]
     [RequirePermission(PermissionCatalog.InfectionControl, PermissionAction.View)]

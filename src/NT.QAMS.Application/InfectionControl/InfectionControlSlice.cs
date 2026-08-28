@@ -77,6 +77,27 @@ public sealed class CloseHaiCaseHandler(IAppDbContext db) : ICommandHandler<Clos
     }
 }
 
+// M-18: the correction path — a duplicate or wrong-patient case is rejected
+// with a reason and leaves the official rates.
+[RequirePermissionPolicy(PermissionCatalog.InfectionControl, PermissionAction.Void)]
+public sealed record RejectHaiCaseCommand(Guid CaseId, string Reason) : ICommand;
+
+public sealed class RejectHaiCaseValidator : AbstractValidator<RejectHaiCaseCommand>
+{
+    public RejectHaiCaseValidator() => RuleFor(x => x.Reason).NotEmpty().MaximumLength(1000);
+}
+
+public sealed class RejectHaiCaseHandler(IAppDbContext db, ICurrentUser user, IClock clock)
+    : ICommandHandler<RejectHaiCaseCommand>
+{
+    public async Task Handle(RejectHaiCaseCommand c, CancellationToken ct)
+    {
+        var actor = user.UserId ?? throw new DomainException("AUTH-003", "An authenticated user is required.");
+        (await ReviewHaiCaseHandler.Load(db, c.CaseId, ct)).Reject(actor, c.Reason, clock.UtcNow);
+        await db.SaveChangesAsync(ct);
+    }
+}
+
 // ── Device-exposure commands (the device-day denominator) ─────────────────────
 
 [RequirePermissionPolicy(PermissionCatalog.InfectionControl, PermissionAction.Create)]
@@ -219,8 +240,11 @@ public sealed class GetHaiRatesHandler(IAppDbContext db, IClock clock) : IQueryH
         int DeviceDays(DeviceType t) =>
             exposures.Where(e => e.DeviceType == t).Sum(e => WindowedDays.Clipped(e.InsertedAtUtc, e.RemovedAtUtc, from, now));
 
+        // Counting convention (M-18): every non-rejected case counts from the
+        // moment it is reported — surveillance counts suspected cases, and
+        // rejection is the correction path that removes a wrong entry.
         var cases = await db.HaiCases.AsNoTracking()
-            .Where(e => e.OnsetDateUtc >= from && e.OnsetDateUtc <= now)
+            .Where(e => e.OnsetDateUtc >= from && e.OnsetDateUtc <= now && e.Status != HaiStatus.Rejected)
             .Select(e => e.Type)
             .ToListAsync(ct);
 
@@ -241,9 +265,11 @@ public sealed class GetHaiRatesHandler(IAppDbContext db, IClock clock) : IQueryH
             cases.Count(t => t == HaiType.Ssi));
     }
 
-    private static decimal Rate(int count, int deviceDays) =>
-        deviceDays == 0 ? 0m : decimal.Round(count * 1000m / deviceDays, 2);
+    // M-18: no denominator means no rate — a fabricated 0.00 is
+    // indistinguishable from a genuinely zero infection rate.
+    private static decimal? Rate(int count, int deviceDays) =>
+        deviceDays == 0 ? null : decimal.Round(count * 1000m / deviceDays, 2);
 
-    private static decimal Utilization(int deviceDays, int patientDays) =>
-        patientDays == 0 ? 0m : decimal.Round((decimal)deviceDays / patientDays, 2);
+    private static decimal? Utilization(int deviceDays, int patientDays) =>
+        patientDays == 0 ? null : decimal.Round((decimal)deviceDays / patientDays, 2);
 }

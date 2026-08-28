@@ -28,6 +28,7 @@ public sealed record ReportComplicationRequest(
     string Description, Guid? DepartmentId);
 
 public sealed record ReviewComplicationRequest(string Notes, bool Preventable);
+public sealed record RejectComplicationRequest(string Reason);
 
 public sealed record ComplicationListItemDto(
     Guid Id, string CaseRef, string PatientRef, string Unit, string Type, string Severity,
@@ -42,6 +43,6 @@ public sealed record ComplicationDetailDto(
 
 public sealed record MortalityRatesDto(
     DateTimeOffset FromUtc, DateTimeOffset ToUtc, int PatientDays,
-    int Deaths, decimal MortalityRatePer1000,
+    int Deaths, decimal? MortalityRatePer1000,
     int Expected, int Unexpected, int PotentiallyPreventable, int Preventable,
     int Complications, int PreventableComplications);

@@ -82,8 +82,34 @@ public class HaiRatesTests
         result.Vap.RatePer1000.Should().Be(100m, "1 VAP / 10 vent-days x 1000 = 100");
 
         result.Cauti.CaseCount.Should().Be(0);
-        result.Cauti.RatePer1000.Should().Be(0m, "no catheter-days and no cases yields a zero rate, not a divide-by-zero");
+        result.Cauti.RatePer1000.Should().BeNull("no catheter-days means no rate — not a fabricated 0.00 (M-18)");
 
         result.SsiCount.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task Rejected_cases_leave_the_official_rates()
+    {
+        // M-18: a duplicate or wrong-patient case is rejected and must not
+        // inflate the regulated metrics.
+        var db = NewContext();
+
+        var line = DeviceExposure.Record("PT", "ICU", DeviceType.CentralLine, Now.AddDays(-20));
+        line.TenantId = TenantId;
+        db.DeviceExposures.Add(line);
+
+        var counted = HaiCase.Report("HAI-1", HaiType.Clabsi, "PT-1", "ICU", Now.AddDays(-5), null, "real");
+        counted.TenantId = TenantId;
+        var rejected = HaiCase.Report("HAI-2", HaiType.Clabsi, "PT-1", "ICU", Now.AddDays(-5), null, "duplicate");
+        rejected.TenantId = TenantId;
+        rejected.Reject(Guid.CreateVersion7(), "Duplicate of HAI-1.", Now.AddDays(-1));
+        db.HaiCases.AddRange(counted, rejected);
+        await db.SaveChangesAsync();
+
+        var result = await new GetHaiRatesHandler(db, new FixedClock(Now))
+            .Handle(new GetHaiRatesQuery(WindowDays: 30), CancellationToken.None);
+
+        result.Clabsi.CaseCount.Should().Be(1, "the rejected duplicate leaves the numerator");
+        result.Clabsi.RatePer1000.Should().Be(50m, "1 CLABSI / 20 line-days x 1000 = 50");
     }
 }

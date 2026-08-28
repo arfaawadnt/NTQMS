@@ -60,4 +60,20 @@ public class ComplicationCaseTests
             ComplicationSeverity.Moderate, When, "x");
         act.Should().Throw<DomainException>().Which.Code.Should().Be("CMP-001");
     }
+
+    [Fact]
+    public void A_case_can_be_rejected_and_a_closed_case_cannot()
+    {
+        // M-18: the correction path — a rejected case leaves the morbidity counts.
+        var c = Reported();
+        c.Reject(Reviewer, "Wrong patient.", When);
+        c.Status.Should().Be(ComplicationStatus.Rejected);
+        c.DomainEvents.OfType<ComplicationCaseRejected>().Should().ContainSingle();
+
+        var closedCase = Reported();
+        closedCase.RecordReview(Reviewer, "Confirmed.", true, When);
+        closedCase.Close();
+        var act = () => closedCase.Reject(Reviewer, "Too late.", When);
+        act.Should().Throw<InvalidStateTransitionException>().Which.Code.Should().Be("CMP-013");
+    }
 }

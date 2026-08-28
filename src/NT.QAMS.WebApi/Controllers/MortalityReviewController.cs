@@ -115,4 +115,12 @@ public sealed class MortalityReviewController(ISender sender) : ControllerBase
         await sender.Send(new CloseComplicationCommand(id), ct);
         return NoContent();
     }
+
+    [HttpPost("complications/{id:guid}/reject")]
+    [RequirePermission(PermissionCatalog.MortalityReview, PermissionAction.Void)]
+    public async Task<IActionResult> RejectComplication(Guid id, RejectComplicationRequest request, CancellationToken ct)
+    {
+        await sender.Send(new RejectComplicationCommand(id, request.Reason), ct);
+        return NoContent();
+    }
 }

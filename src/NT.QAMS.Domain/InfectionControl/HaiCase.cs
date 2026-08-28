@@ -11,7 +11,7 @@ namespace NT.QAMS.Domain.InfectionControl;
 public enum HaiType { Clabsi, Cauti, Vap, Ssi }
 
 /// <summary>Lifecycle of an HAI case.</summary>
-public enum HaiStatus { Reported, Reviewed, Closed }
+public enum HaiStatus { Reported, Reviewed, Closed, Rejected }
 
 /// <summary>
 /// A healthcare-associated infection case (HQMS M09): a CLABSI, CAUTI, VAP or SSI. The case is
@@ -105,6 +105,35 @@ public sealed class HaiCase : AggregateRoot, ITenantScoped
         Status = HaiStatus.Closed;
     }
 
+    public Guid? RejectedBy { get; private set; }
+    public string? RejectionReason { get; private set; }
+    public DateTimeOffset? RejectedAtUtc { get; private set; }
+
+    /// <summary>
+    /// Rejects the case as not-a-HAI (duplicate, wrong patient, or ruled out on
+    /// review) — Reported/Reviewed ⇒ Rejected. The record stays on the register
+    /// for traceability, but a rejected case leaves the official rates (M-18);
+    /// a closed case is settled surveillance history and cannot be rejected.
+    /// </summary>
+    public void Reject(Guid reviewerId, string reason, DateTimeOffset at)
+    {
+        if (Status is HaiStatus.Closed or HaiStatus.Rejected)
+        {
+            throw new InvalidStateTransitionException("HAI-013", $"Cannot reject a case in state {Status}.");
+        }
+
+        if (string.IsNullOrWhiteSpace(reason))
+        {
+            throw new DomainException("HAI-014", "A rejection reason is required.");
+        }
+
+        RejectedBy = reviewerId;
+        RejectionReason = reason.Trim();
+        RejectedAtUtc = at;
+        Status = HaiStatus.Rejected;
+        Raise(new HaiCaseRejected(Id, CaseRef, Type.ToString()));
+    }
+
     /// <summary>The device whose device-days form this case's rate denominator, or null for SSI.</summary>
     public DeviceType? AssociatedDevice => Type switch
     {
@@ -116,3 +145,5 @@ public sealed class HaiCase : AggregateRoot, ITenantScoped
 }
 
 public sealed record HaiCaseReviewed(Guid HaiCaseId, string CaseRef, string Type) : DomainEvent;
+
+public sealed record HaiCaseRejected(Guid HaiCaseId, string CaseRef, string Type) : DomainEvent;
