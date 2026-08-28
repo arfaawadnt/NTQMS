@@ -77,6 +77,26 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            // DATA PRECONDITION (audit finding M-21): this rollback restores the 5-value status
+            // CHECK and narrows status to varchar(20) — both are impossible while any change sits
+            // in 'ImplementedPendingRatification' (30 chars, outside the old domain). Fail fast
+            // with an actionable message instead of dying midway through the VALIDATE: the
+            // operator must ratify or reject the emergency changes (an explicit, signed data
+            // decision) before this release can be rolled back.
+            migrationBuilder.Sql("""
+                DO $$
+                DECLARE pending integer;
+                BEGIN
+                  SELECT count(*) INTO pending FROM qams.change_request
+                   WHERE status = 'ImplementedPendingRatification';
+                  IF pending > 0 THEN
+                    RAISE EXCEPTION
+                      'Cannot roll back ChangeControlEmergencyPathway: % change_request row(s) are ImplementedPendingRatification. Ratify or reject them first.',
+                      pending;
+                  END IF;
+                END $$;
+                """);
+
             // Restore the original status CHECK domain and drop the impact_level domain before the
             // columns are removed.
             migrationBuilder.Sql("""
