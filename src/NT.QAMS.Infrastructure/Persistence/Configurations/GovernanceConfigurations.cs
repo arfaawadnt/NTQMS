@@ -127,8 +127,6 @@ public sealed class SupplierConfiguration : IEntityTypeConfiguration<Supplier>
             con.HasKey("TenantId", "Id");
             con.Property(x => x.ContractRef).HasMaxLength(60);
             con.Property(x => x.Title).HasMaxLength(300);
-            con.Property(x => x.SlaSummary).HasMaxLength(4000);
-            con.Property(x => x.TerminationReason).HasMaxLength(1000);
             con.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
         });
 
@@ -138,9 +136,6 @@ public sealed class SupplierConfiguration : IEntityTypeConfiguration<Supplier>
             car.Property<Guid>("TenantId");
             car.WithOwner().HasForeignKey("TenantId", "supplier_id");
             car.HasKey("TenantId", "Id");
-            car.Property(x => x.Description).HasMaxLength(4000);
-            car.Property(x => x.ResponseNote).HasMaxLength(4000);
-            car.Property(x => x.ClosureNote).HasMaxLength(4000);
             car.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
         });
 

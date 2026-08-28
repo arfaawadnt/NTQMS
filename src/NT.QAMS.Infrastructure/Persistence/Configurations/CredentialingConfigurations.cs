@@ -19,7 +19,6 @@ public sealed class PractitionerConfiguration : IEntityTypeConfiguration<Practit
         builder.Property(p => p.PractitionerRef).HasMaxLength(30);
         builder.Property(p => p.FullName).HasMaxLength(200);
         builder.Property(p => p.Specialty).HasMaxLength(150);
-        builder.Property(p => p.SuspensionReason).HasMaxLength(1000);
         builder.Property(p => p.Status).HasConversion<string>().HasMaxLength(20);
 
         builder.HasIndex(p => new { p.TenantId, p.PractitionerRef }).IsUnique()
@@ -48,7 +47,6 @@ public sealed class PractitionerConfiguration : IEntityTypeConfiguration<Practit
                 .HasConstraintName("fk_prac_priv_practitioner_tenant_id_practitioner_id");
             pr.HasKey("TenantId", "Id");
             pr.Property(x => x.Name).HasMaxLength(200);
-            pr.Property(x => x.DenialReason).HasMaxLength(1000);
             pr.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
         });
 

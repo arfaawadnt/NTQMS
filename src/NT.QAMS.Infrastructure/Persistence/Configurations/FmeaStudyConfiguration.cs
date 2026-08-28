@@ -37,9 +37,6 @@ public sealed class FmeaStudyConfiguration : IEntityTypeConfiguration<FmeaStudy>
             mode.HasKey("TenantId", "Id");
             mode.Property(x => x.ProcessStep).HasMaxLength(200);
             mode.Property(x => x.FailureModeText).HasMaxLength(500);
-            mode.Property(x => x.Effect).HasMaxLength(1000);
-            mode.Property(x => x.Cause).HasMaxLength(1000);
-            mode.Property(x => x.RecommendedAction).HasMaxLength(2000);
             mode.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
         });
 

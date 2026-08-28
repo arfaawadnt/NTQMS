@@ -188,4 +188,39 @@ public class RelationalNameTruncationTests
 
         Assert.True(offenders.Count == 0, string.Join("\n", offenders));
     }
+
+    [Fact]
+    public void No_free_text_column_is_a_bounded_varchar_of_1000_or_more()
+    {
+        // Schema hardening 1.2 / audit finding N-05: free text sized >= 1000 is
+        // `text` — the bound lives in the command validator, not the column.
+        // Bounded codes, refs, enum strings and hashes keep varchar(n) < 1000.
+        using var db = new AppDbContext(
+            new DbContextOptionsBuilder<AppDbContext>()
+                .UseNpgsql("Host=model-only;Database=model-only;Username=x")
+                .UseSnakeCaseNamingConvention()
+                .Options,
+            new FakeCurrentTenant());
+
+        var offenders = new List<string>();
+        foreach (var entity in db.Model.GetEntityTypes())
+        {
+            var tableName = entity.GetTableName();
+            if (tableName is null)
+            {
+                continue;
+            }
+
+            foreach (var property in entity.GetProperties())
+            {
+                if (property.ClrType == typeof(string) && property.GetMaxLength() is >= 1000 and var length)
+                {
+                    offenders.Add($"{tableName}.{property.GetColumnName()}: varchar({length}) — make it text "
+                        + "and keep the bound in the validator (CLAUDE.md §5, hardening 1.2)");
+                }
+            }
+        }
+
+        Assert.True(offenders.Count == 0, string.Join("\n", offenders));
+    }
 }

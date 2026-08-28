@@ -21,12 +21,8 @@ public sealed class QualityIndicatorConfiguration : IEntityTypeConfiguration<Qua
         builder.Property(i => i.IndicatorRef).HasMaxLength(30);
         builder.Property(i => i.Code).HasMaxLength(50);
         builder.Property(i => i.Name).HasMaxLength(300);
-        builder.Property(i => i.Description).HasMaxLength(2000);
         builder.Property(i => i.Numerator);            // >=1000 free text ⇒ text; bound in validator
         builder.Property(i => i.Denominator);
-        builder.Property(i => i.Inclusions).HasMaxLength(2000);
-        builder.Property(i => i.Exclusions).HasMaxLength(2000);
-        builder.Property(i => i.DataSource).HasMaxLength(1000);
         builder.Property(i => i.Unit).HasMaxLength(50);
         builder.Property(i => i.RateFactor).HasPrecision(18, 4);
         builder.Property(i => i.Target).HasPrecision(18, 4);

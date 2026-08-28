@@ -58,7 +58,6 @@ public sealed class EvidenceLinkConfiguration : IEntityTypeConfiguration<Evidenc
 
         builder.Property(l => l.SourceType).HasConversion<string>().HasMaxLength(20);
         builder.Property(l => l.SourceRef).HasMaxLength(200);
-        builder.Property(l => l.Description).HasMaxLength(1000);
 
         builder.HasIndex(l => new { l.TenantId, l.StandardSetId });
         builder.HasIndex(l => new { l.TenantId, l.ElementId });

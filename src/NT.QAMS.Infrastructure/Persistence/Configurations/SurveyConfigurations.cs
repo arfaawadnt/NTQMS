@@ -17,7 +17,6 @@ public sealed class SatisfactionSurveyConfiguration : IEntityTypeConfiguration<S
         builder.HasKey(s => new { s.TenantId, s.Id });
 
         builder.Property(s => s.Title).HasMaxLength(200);
-        builder.Property(s => s.Description).HasMaxLength(2000);
         builder.Property(s => s.Status).HasConversion<string>().HasMaxLength(20);
 
         builder.HasIndex(s => new { s.TenantId, s.Status });

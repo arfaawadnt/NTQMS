@@ -117,4 +117,69 @@ public sealed class CheckConstraintTests(RealPostgresFixture fx)
 
         await tx.RollbackAsync();
     }
+
+    [SkippableFact]
+    public async Task Postgres_rejects_out_of_range_hqms_numerics()
+    {
+        Skip.IfNot(fx.Available, fx.Unavailable ?? "PostgreSQL unavailable");
+
+        using var db = fx.CreateContext(out var ctx);
+        ctx.Elevate();
+        await using var tx = await db.Database.BeginTransactionAsync();
+        var tenant = Guid.CreateVersion7();
+
+        // Valid records, created the only sanctioned way — through the aggregates.
+        var fmea = NT.QAMS.Domain.RiskGovernance.FmeaStudy.Create(
+            "FME-ITEST-1", "constraint probe", "medication administration",
+            NT.QAMS.Domain.RiskGovernance.FmeaType.Fmea);
+        ((ITenantScoped)fmea).TenantId = tenant;
+        var modeId = fmea.AddFailureMode("dispense", "wrong dose", "harm", "lookalike vials", 5, 5, 5);
+        db.FmeaStudies.Add(fmea);
+
+        var program = NT.QAMS.Domain.AuditManagement.AuditProgram.Create(2026, "constraint probe");
+        ((ITenantScoped)program).TenantId = tenant;
+        var plannedId = program.AddPlannedAudit(
+            "pharmacy", null, null, NT.QAMS.Domain.AuditManagement.PlannedAuditPriority.Low, 2);
+        db.AuditPrograms.Add(program);
+
+        var indicator = NT.QAMS.Domain.QualityIndicators.QualityIndicator.Define(
+            "IND-ITEST-1", "ITEST-RATE", "constraint probe", null, "events", "patient days", "per 1000",
+            1000m, NT.QAMS.Domain.QualityIndicators.IndicatorFrequency.Monthly,
+            NT.QAMS.Domain.QualityIndicators.IndicatorDirection.LowerIsBetter);
+        ((ITenantScoped)indicator).TenantId = tenant;
+        db.QualityIndicators.Add(indicator);
+
+        var set = NT.QAMS.Domain.Accreditation.StandardSet.Define(
+            NT.QAMS.Domain.Accreditation.AccreditationFramework.Other, "constraint probe", "v1");
+        ((ITenantScoped)set).TenantId = tenant;
+        var elementId = set.AddElement("CH1", "Chapter one", "STD1", "EL1", "element text", 1);
+        db.StandardSets.Add(set);
+
+        await db.SaveChangesAsync();
+
+        // N-05: direct-SQL corruption of the HQMS numeric domains dies at the
+        // database — FMEA scales, program quarters/years, rate factors, weights.
+        var probes = new (string Name, string Sql, Guid Id)[]
+        {
+            ("FMEA severity 11", "UPDATE qams.fmea_failure_mode SET severity = 11 WHERE id = {0}", modeId),
+            ("FMEA occurrence 0", "UPDATE qams.fmea_failure_mode SET occurrence = 0 WHERE id = {0}", modeId),
+            ("FMEA detection 11", "UPDATE qams.fmea_failure_mode SET detection = 11 WHERE id = {0}", modeId),
+            ("FMEA rpn 1001", "UPDATE qams.fmea_failure_mode SET rpn = 1001 WHERE id = {0}", modeId),
+            ("planned quarter 5", "UPDATE qams.planned_audit SET planned_quarter = 5 WHERE id = {0}", plannedId),
+            ("program year 1899", "UPDATE qams.audit_program SET year = 1899 WHERE id = {0}", program.Id),
+            ("rate factor 0", "UPDATE qams.quality_indicator SET rate_factor = 0 WHERE id = {0}", indicator.Id),
+            ("element weight 0", "UPDATE qams.standard_element SET weight = 0 WHERE id = {0}", elementId),
+        };
+
+        foreach (var (name, sql, id) in probes)
+        {
+            await db.Database.ExecuteSqlRawAsync("SAVEPOINT probe");
+            var attack = () => db.Database.ExecuteSqlRawAsync(sql, id);
+            (await Assert.ThrowsAsync<PostgresException>(attack))
+                .SqlState.Should().Be(CheckViolation, $"'{name}' must be constrained in the database itself");
+            await db.Database.ExecuteSqlRawAsync("ROLLBACK TO SAVEPOINT probe");
+        }
+
+        await tx.RollbackAsync();
+    }
 }

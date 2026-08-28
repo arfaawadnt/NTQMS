@@ -28,7 +28,6 @@ public sealed class IncidentConfiguration : IEntityTypeConfiguration<Incident>
         builder.Property(i => i.Channel).HasConversion<string>().HasMaxLength(20);
         builder.Property(i => i.AnonymousReferenceHash).HasMaxLength(64);
         builder.Property(i => i.InvestigationSummary);
-        builder.Property(i => i.RejectionReason).HasMaxLength(1000);
         builder.Property(i => i.ClosureSummary);
 
         builder.HasIndex(i => new { i.TenantId, i.IncidentRef }).IsUnique()

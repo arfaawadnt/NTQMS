@@ -33,8 +33,6 @@ public sealed class SafetyRoundConfiguration : IEntityTypeConfiguration<SafetyRo
             f.Property<Guid>("TenantId");
             f.WithOwner().HasForeignKey("TenantId", "safety_round_id");
             f.HasKey("TenantId", "Id");
-            f.Property(x => x.Description).HasMaxLength(2000);
-            f.Property(x => x.CorrectiveNote).HasMaxLength(2000);
             f.Property(x => x.Severity).HasConversion<string>().HasMaxLength(20);
             f.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
         });

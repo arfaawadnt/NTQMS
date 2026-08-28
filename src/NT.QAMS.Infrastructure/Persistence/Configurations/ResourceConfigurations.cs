@@ -66,7 +66,6 @@ public sealed class EquipmentItemConfiguration : IEntityTypeConfiguration<Equipm
             d.Property<Guid>("TenantId");
             d.WithOwner().HasForeignKey("TenantId", "equipment_id");
             d.HasKey("TenantId", "Id");
-            d.Property(x => x.Reason).HasMaxLength(1000);
             d.Property(x => x.Category).HasConversion<string>().HasMaxLength(20);
             d.Ignore(x => x.IsOpen);
         });
@@ -80,7 +79,6 @@ public sealed class EquipmentItemConfiguration : IEntityTypeConfiguration<Equipm
             sn.HasKey("TenantId", "Id");
             sn.Property(x => x.Reference).HasMaxLength(100);
             sn.Property(x => x.Issuer).HasMaxLength(200);
-            sn.Property(x => x.ActionNote).HasMaxLength(2000);
             sn.Property(x => x.Type).HasConversion<string>().HasMaxLength(20);
             sn.Property(x => x.Severity).HasConversion<string>().HasMaxLength(10);
             sn.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);

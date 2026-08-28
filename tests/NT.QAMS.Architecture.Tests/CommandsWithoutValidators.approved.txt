@@ -27,7 +27,6 @@ NT.QAMS.Application.AnalyticalQuality.SignOffReferenceIntervalCommand
 NT.QAMS.Application.AnalyticalQuality.SignOffSigmaAssessmentCommand
 NT.QAMS.Application.AnalyticalQuality.SignOffStudyCommand
 NT.QAMS.Application.AuditManagement.Commands.SignOffAuditCommand
-NT.QAMS.Application.Committees.CloseDecisionCommand
 NT.QAMS.Application.Competency.AssignTrainingCommand
 NT.QAMS.Application.Competency.AuthorizeCompetencyCommand
 NT.QAMS.Application.DocumentControl.CloseControlledCopyCommand

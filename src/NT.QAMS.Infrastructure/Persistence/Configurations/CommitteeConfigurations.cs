@@ -65,7 +65,6 @@ public sealed class MeetingConfiguration : IEntityTypeConfiguration<Meeting>
             a.WithOwner().HasForeignKey("TenantId", "meeting_id");
             a.HasKey("TenantId", "Id");
             a.Property(x => x.Title).HasMaxLength(300);
-            a.Property(x => x.Detail).HasMaxLength(2000);
             a.Property(x => x.SourceRef).HasMaxLength(120);
         });
 
@@ -83,8 +82,6 @@ public sealed class MeetingConfiguration : IEntityTypeConfiguration<Meeting>
             d.Property<Guid>("TenantId");
             d.WithOwner().HasForeignKey("TenantId", "meeting_id");
             d.HasKey("TenantId", "Id");
-            d.Property(x => x.Description).HasMaxLength(2000);
-            d.Property(x => x.ClosureNote).HasMaxLength(2000);
             d.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
         });
 

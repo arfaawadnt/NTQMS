@@ -121,6 +121,12 @@ public sealed class AddDecisionHandler(IAppDbContext db) : ICommandHandler<AddDe
 [RequirePermissionPolicy(PermissionCatalog.Committees, PermissionAction.Edit)]
 public sealed record CloseDecisionCommand(Guid MeetingId, Guid DecisionId, string? Note) : ICommand;
 
+// The closure note's bound lives here — the column is text (hardening 1.2, N-05).
+public sealed class CloseDecisionValidator : AbstractValidator<CloseDecisionCommand>
+{
+    public CloseDecisionValidator() => RuleFor(x => x.Note).MaximumLength(2000);
+}
+
 public sealed class CloseDecisionHandler(IAppDbContext db) : ICommandHandler<CloseDecisionCommand>
 {
     public async Task Handle(CloseDecisionCommand c, CancellationToken ct)

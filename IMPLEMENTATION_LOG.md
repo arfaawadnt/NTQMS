@@ -1017,3 +1017,15 @@ One atomic commit per finding; each carries a test that failed before the fix.
   `RelationalNameTruncationTests` (48 pre-baseline `ix_` uniques frozen in a shrink-only
   allowlist) — red pre-fix naming exactly the 14. Executed proof: Up→14 `ux_`, Down→`ix_`
   restored, re-Up. App 132 · Integration 26+9 · Arch 190 · Domain 438.
+- **N-05 (Minor, closed)** — schema hardening regressions in the HQMS train: (a) all 24 free-text
+  `varchar(1000–4000)` columns are now `text`, with the bound in the command validator per
+  hardening 1.2 — 23 already had `MaximumLength` rules; the one gap (`CloseDecisionCommand.Note`)
+  gained `CloseDecisionValidator` (2000) and its `CommandsWithoutValidators` snapshot row was
+  removed (shrink-only). (b) 8 numeric CHECK constraints added: FMEA severity/occurrence/detection
+  1–10 and RPN 1–1000, planned-audit quarter 1–4, audit-program year 2000–2100,
+  `rate_factor > 0`, `standard_element.weight >= 1` (NOT VALID + VALIDATE idiom). Migration
+  `20260828220752_HqmsColumnHardening`; executed proof: Up → 0 over-bounded varchars + 8 checks,
+  Down → 24 varchars restored + 0 checks, re-Up. Tests red-first:
+  `No_free_text_column_is_a_bounded_varchar_of_1000_or_more` (model scan) and
+  `Postgres_rejects_out_of_range_hqms_numerics` (8 savepoint-isolated corruption probes, all
+  23514) both failed pre-fix. App 133 · Integration 27+9 · Arch 190.
