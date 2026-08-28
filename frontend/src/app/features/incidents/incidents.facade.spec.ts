@@ -87,4 +87,15 @@ describe('IncidentsFacade', () => {
 
     expect(facade.error()).toBe('A closure summary is required.');
   });
+
+  it('redeems an anonymous follow-up reference for the report status', async () => {
+    const done = facade.track('IR-ABCDEFGHJK');
+    const get = http.expectOne((r) => r.url.startsWith(`${base}/track`));
+    expect(get.request.method).toBe('GET');
+    get.flush({ incidentRef: 'INC-2026-0007', status: 'UnderInvestigation', isSentinel: false });
+
+    const tracking = await done;
+    expect(tracking?.incidentRef).toBe('INC-2026-0007');
+    expect(tracking?.status).toBe('UnderInvestigation');
+  });
 });

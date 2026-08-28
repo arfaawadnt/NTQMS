@@ -7,7 +7,7 @@ import { I18nService } from '../../core/i18n.service';
 import { OrgDataService } from '../../core/org-data.service';
 import {
   HARM_GRADES, HarmGrade, INCIDENT_CATEGORIES, INCIDENT_STATUSES, INTAKE_CHANNELS,
-  IncidentCategory, IntakeChannel,
+  IncidentCategory, IncidentTracking, IntakeChannel,
 } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
@@ -30,6 +30,7 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
     <qams-page-header [title]="i18n.t('inc.title')">
       <button (click)="openForm(false)">{{ i18n.t('inc.new') }}</button>
       <button class="secondary" (click)="openForm(true)">{{ i18n.t('inc.newAnonymous') }}</button>
+      <button class="secondary" (click)="openTrack()">{{ i18n.t('inc.track') }}</button>
     </qams-page-header>
 
     <qams-list-stats [stats]="stats()" ratioFromFirst />
@@ -40,12 +41,31 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
         <option value="">{{ i18n.t('inc.allStatuses') }}</option>
         @for (s of statuses; track s) { <option [value]="s">{{ i18n.t('inc.status.' + s) }}</option> }
       </select>
-      <select [value]="categoryFilter()" (change)="categoryFilter.set($any($event.target).value)" aria-label="Category filter">
+      <select [value]="categoryFilter()" (change)="onCategoryFilter($event)" aria-label="Category filter">
         <option value="">{{ i18n.t('inc.allCategories') }}</option>
         @for (c of categories; track c) { <option [value]="c">{{ i18n.t('inc.cat.' + c) }}</option> }
       </select>
-      <label class="check"><input type="checkbox" [checked]="sentinelOnly()" (change)="sentinelOnly.set($any($event.target).checked)" /> {{ i18n.t('inc.sentinelOnly') }}</label>
+      <label class="check"><input type="checkbox" [checked]="sentinelOnly()" (change)="onSentinelFilter($event)" /> {{ i18n.t('inc.sentinelOnly') }}</label>
     </div>
+
+    <!-- Anonymous follow-up: redeem the one-time reference the receipt promised. -->
+    <qams-drawer [open]="showTrack()" [title]="i18n.t('inc.track')" (closed)="showTrack.set(false)">
+      <form class="drawer-form" (ngSubmit)="track()">
+        <label>{{ i18n.t('inc.anonRef') }}</label>
+        <input [value]="trackRef()" (input)="trackRef.set($any($event.target).value)" [placeholder]="i18n.t('inc.trackPlaceholder')" />
+        <div class="row">
+          <button type="submit" [disabled]="!trackRef().trim() || facade.loading()">{{ i18n.t('inc.track') }}</button>
+          <button type="button" class="secondary" (click)="showTrack.set(false)">{{ i18n.t('common.close') }}</button>
+        </div>
+        @if (trackResult(); as t) {
+          <div class="receipt">
+            <p class="code">{{ t.incidentRef }}</p>
+            <p><qams-status-pill [status]="t.status" /> @if (t.isSentinel) { <span class="pill sentinel">{{ i18n.t('inc.sentinel') }}</span> }</p>
+          </div>
+        }
+        @if (facade.error()) { <div class="error">{{ facade.error() }}</div> }
+      </form>
+    </qams-drawer>
 
     <qams-drawer [open]="showForm()" [title]="anonymous() ? i18n.t('inc.newAnonymous') : i18n.t('inc.new')" (closed)="showForm.set(false)">
       @if (receipt(); as r) {
@@ -177,14 +197,19 @@ export class IncidentsListComponent implements OnInit {
   readonly categoryFilter = signal('');
   readonly sentinelOnly = signal(false);
   readonly search = signal('');
+  /** Anonymous follow-up tracking (the receipt's promise). */
+  readonly showTrack = signal(false);
+  readonly trackRef = signal('');
+  readonly trackResult = signal<IncidentTracking | null>(null);
 
-  /** Client-side narrowing over the loaded register (status/category/sentinel filter server-side). */
+  /**
+   * Status, category and sentinel filter SERVER-side (a reload per change);
+   * only the free-text search narrows the already-loaded pages client-side.
+   */
   readonly filtered = computed(() => {
     const q = this.search().trim().toLowerCase();
-    const category = this.categoryFilter();
     return this.facade.list().filter((inc) =>
-      (!category || inc.category === category)
-      && (!q || `${inc.incidentRef} ${inc.title} ${inc.status}`.toLowerCase().includes(q)));
+      !q || `${inc.incidentRef} ${inc.title} ${inc.status}`.toLowerCase().includes(q));
   });
 
   /** Live statistics computed from the real register. */
@@ -224,7 +249,34 @@ export class IncidentsListComponent implements OnInit {
 
   onStatusFilter(event: Event): void {
     this.statusFilter.set((event.target as HTMLSelectElement).value);
-    void this.facade.loadList(this.statusFilter() || undefined, undefined, undefined, this.sentinelOnly());
+    this.reload();
+  }
+
+  onCategoryFilter(event: Event): void {
+    this.categoryFilter.set((event.target as HTMLSelectElement).value);
+    this.reload();
+  }
+
+  onSentinelFilter(event: Event): void {
+    this.sentinelOnly.set((event.target as HTMLInputElement).checked);
+    this.reload();
+  }
+
+  private reload(): void {
+    void this.facade.loadList(
+      this.statusFilter() || undefined, undefined, this.categoryFilter() || undefined, this.sentinelOnly());
+  }
+
+  openTrack(): void {
+    this.trackResult.set(null);
+    this.trackRef.set('');
+    this.showTrack.set(true);
+  }
+
+  async track(): Promise<void> {
+    const reference = this.trackRef().trim();
+    if (!reference) { return; }
+    this.trackResult.set(await this.facade.track(reference));
   }
 
   async create(): Promise<void> {
@@ -247,7 +299,7 @@ export class IncidentsListComponent implements OnInit {
       if (receipt) {
         this.receipt.set(receipt);
         this.form.reset({ category: 'Fall', harmGrade: 'NoHarm', channel: 'Web' });
-        void this.facade.loadList(this.statusFilter() || undefined, undefined, undefined, this.sentinelOnly());
+        this.reload();
       }
       return;
     }

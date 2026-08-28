@@ -4,9 +4,9 @@ import { Observable, firstValueFrom } from 'rxjs';
 import { IncidentsApiService } from '../../core/api/incidents-api.service';
 import {
   AddContributingFactorRequest, AddTimelineEntryRequest, AnonymousIncidentReceipt, CloseIncidentRequest,
-  DeclareSentinelRequest, IncidentDetail, IncidentListItem, RecordInvestigationSummaryRequest,
-  RejectIncidentRequest, ReportAnonymousIncidentRequest, ReportIncidentRequest, SignatureRecord,
-  StartInvestigationRequest, TriageIncidentRequest,
+  DeclareSentinelRequest, IncidentDetail, IncidentListItem, IncidentTracking,
+  RecordInvestigationSummaryRequest, RejectIncidentRequest, ReportAnonymousIncidentRequest,
+  ReportIncidentRequest, SignatureRecord, StartInvestigationRequest, TriageIncidentRequest,
 } from '../../core/models';
 
 /**
@@ -96,6 +96,11 @@ export class IncidentsFacade {
   /** Reports a new attributed incident; returns its id on success or null on failure. */
   async report(request: ReportIncidentRequest): Promise<string | null> {
     return this.run(async () => (await firstValueFrom(this.api.report(request))).id);
+  }
+
+  /** Redeems an anonymous one-time follow-up reference for the report's status. */
+  async track(reference: string): Promise<IncidentTracking | null> {
+    return this.run(async () => firstValueFrom(this.api.track(reference)));
   }
 
   /** Reports anonymously; returns the one-time receipt (with follow-up reference) or null. */
