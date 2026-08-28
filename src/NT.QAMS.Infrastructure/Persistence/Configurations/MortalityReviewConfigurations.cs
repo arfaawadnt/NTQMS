@@ -25,7 +25,8 @@ public sealed class MortalityReviewConfiguration : IEntityTypeConfiguration<Mort
         builder.Property(m => m.Classification).HasConversion<string>().HasMaxLength(30);
         builder.Property(m => m.Status).HasConversion<string>().HasMaxLength(20);
 
-        builder.HasIndex(m => new { m.TenantId, m.ReviewRef }).IsUnique();
+        builder.HasIndex(m => new { m.TenantId, m.ReviewRef }).IsUnique()
+            .HasDatabaseName("ux_mortality_review_tenant_id_review_ref");
         builder.HasIndex(m => new { m.TenantId, m.Status });
         builder.HasIndex(m => new { m.TenantId, m.DeathDateUtc });
 
@@ -54,7 +55,8 @@ public sealed class ComplicationCaseConfiguration : IEntityTypeConfiguration<Com
         builder.Property(c => c.Severity).HasConversion<string>().HasMaxLength(20);
         builder.Property(c => c.Status).HasConversion<string>().HasMaxLength(20);
 
-        builder.HasIndex(c => new { c.TenantId, c.CaseRef }).IsUnique();
+        builder.HasIndex(c => new { c.TenantId, c.CaseRef }).IsUnique()
+            .HasDatabaseName("ux_complication_case_tenant_id_case_ref");
         builder.HasIndex(c => new { c.TenantId, c.Type, c.Status });
         builder.HasIndex(c => new { c.TenantId, c.OccurredDateUtc });
 

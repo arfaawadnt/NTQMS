@@ -53,7 +53,8 @@ public sealed class MeetingConfiguration : IEntityTypeConfiguration<Meeting>
         builder.Property(m => m.Status).HasConversion<string>().HasMaxLength(20);
 
         builder.HasIndex(m => new { m.TenantId, m.CommitteeId });
-        builder.HasIndex(m => new { m.TenantId, m.MeetingRef }).IsUnique();
+        builder.HasIndex(m => new { m.TenantId, m.MeetingRef }).IsUnique()
+            .HasDatabaseName("ux_meeting_tenant_id_meeting_ref");
 
         builder.Ignore(m => m.PresentCount);
 

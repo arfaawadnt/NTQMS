@@ -23,7 +23,8 @@ public sealed class FmeaStudyConfiguration : IEntityTypeConfiguration<FmeaStudy>
         builder.Property(f => f.Type).HasConversion<string>().HasMaxLength(20);
         builder.Property(f => f.Status).HasConversion<string>().HasMaxLength(20);
 
-        builder.HasIndex(f => new { f.TenantId, f.FmeaRef }).IsUnique();
+        builder.HasIndex(f => new { f.TenantId, f.FmeaRef }).IsUnique()
+            .HasDatabaseName("ux_fmea_study_tenant_id_fmea_ref");
         builder.HasIndex(f => new { f.TenantId, f.Status });
 
         builder.OwnsMany(f => f.FailureModes, mode =>

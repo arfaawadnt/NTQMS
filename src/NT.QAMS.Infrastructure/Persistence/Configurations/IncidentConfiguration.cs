@@ -31,7 +31,8 @@ public sealed class IncidentConfiguration : IEntityTypeConfiguration<Incident>
         builder.Property(i => i.RejectionReason).HasMaxLength(1000);
         builder.Property(i => i.ClosureSummary);
 
-        builder.HasIndex(i => new { i.TenantId, i.IncidentRef }).IsUnique();
+        builder.HasIndex(i => new { i.TenantId, i.IncidentRef }).IsUnique()
+            .HasDatabaseName("ux_incident_tenant_id_incident_ref");
         builder.HasIndex(i => new { i.TenantId, i.Status });
         builder.HasIndex(i => new { i.TenantId, i.AnonymousReferenceHash });
 

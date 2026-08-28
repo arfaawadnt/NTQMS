@@ -36,7 +36,8 @@ public sealed class QualityIndicatorConfiguration : IEntityTypeConfiguration<Qua
         builder.Property(i => i.Direction).HasConversion<string>().HasMaxLength(20);
         builder.Property(i => i.Status).HasConversion<string>().HasMaxLength(20);
 
-        builder.HasIndex(i => new { i.TenantId, i.Code }).IsUnique();
+        builder.HasIndex(i => new { i.TenantId, i.Code }).IsUnique()
+            .HasDatabaseName("ux_quality_indicator_tenant_id_code");
         builder.HasIndex(i => new { i.TenantId, i.Status });
 
         builder.OwnsMany(i => i.Measurements, m =>
@@ -53,7 +54,8 @@ public sealed class QualityIndicatorConfiguration : IEntityTypeConfiguration<Qua
             m.Property(x => x.Value).HasPrecision(18, 4);
             m.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
             m.Property(x => x.Note);
-            m.HasIndex("TenantId", "indicator_id", "Period").IsUnique();
+            m.HasIndex("TenantId", "indicator_id", "Period").IsUnique()
+                .HasDatabaseName("ux_indicator_measurement_tenant_id_indicator_id_period");
         });
 
         builder.Ignore(i => i.DomainEvents);

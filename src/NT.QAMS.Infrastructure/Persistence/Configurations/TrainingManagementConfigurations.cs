@@ -22,7 +22,8 @@ public sealed class TrainingCourseConfiguration : IEntityTypeConfiguration<Train
         builder.Property(c => c.Category).HasConversion<string>().HasMaxLength(20);
         builder.Property(c => c.Status).HasConversion<string>().HasMaxLength(20);
 
-        builder.HasIndex(c => new { c.TenantId, c.CourseRef }).IsUnique();
+        builder.HasIndex(c => new { c.TenantId, c.CourseRef }).IsUnique()
+            .HasDatabaseName("ux_training_course_tenant_id_course_ref");
         builder.HasIndex(c => new { c.TenantId, c.Category, c.Status });
 
         builder.Ignore(c => c.DomainEvents);
@@ -45,7 +46,8 @@ public sealed class TrainingSessionConfiguration : IEntityTypeConfiguration<Trai
         builder.Property(s => s.TrainerName).HasMaxLength(200);
         builder.Property(s => s.Status).HasConversion<string>().HasMaxLength(20);
 
-        builder.HasIndex(s => new { s.TenantId, s.SessionRef }).IsUnique();
+        builder.HasIndex(s => new { s.TenantId, s.SessionRef }).IsUnique()
+            .HasDatabaseName("ux_training_session_tenant_id_session_ref");
         builder.HasIndex(s => new { s.TenantId, s.CourseId });
         builder.HasIndex(s => new { s.TenantId, s.Status });
 

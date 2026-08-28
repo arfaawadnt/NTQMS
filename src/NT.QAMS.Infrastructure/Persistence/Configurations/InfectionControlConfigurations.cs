@@ -24,7 +24,8 @@ public sealed class HaiCaseConfiguration : IEntityTypeConfiguration<HaiCase>
         builder.Property(e => e.Type).HasConversion<string>().HasMaxLength(20);
         builder.Property(e => e.Status).HasConversion<string>().HasMaxLength(20);
 
-        builder.HasIndex(e => new { e.TenantId, e.CaseRef }).IsUnique();
+        builder.HasIndex(e => new { e.TenantId, e.CaseRef }).IsUnique()
+            .HasDatabaseName("ux_hai_case_tenant_id_case_ref");
         builder.HasIndex(e => new { e.TenantId, e.Type, e.Status });
         builder.HasIndex(e => new { e.TenantId, e.OnsetDateUtc });
 

@@ -1010,3 +1010,10 @@ One atomic commit per finding; each carries a test that failed before the fix.
   Guard test red-first: `RelationalNameTruncationTests` (model-level, snake_case-aware,
   prefix-detection; 3 pre-baseline truncations frozen in a shrink-only allowlist) named exactly
   the five pre-fix. App 131 · Integration 26+9 · Arch 190.
+- **N-04 (Minor, closed)** — the 14 HQMS unique indexes that shipped with EF's default `ix_`
+  prefix are pinned to the house `ux_` convention via `HasDatabaseName`; migration
+  `PinUniqueIndexNames` (EF `RenameIndex` → `ALTER INDEX … RENAME`, metadata-only), `Down()`
+  restores. Guard fact `Every_unique_index_uses_the_ux_prefix` added to
+  `RelationalNameTruncationTests` (48 pre-baseline `ix_` uniques frozen in a shrink-only
+  allowlist) — red pre-fix naming exactly the 14. Executed proof: Up→14 `ux_`, Down→`ix_`
+  restored, re-Up. App 132 · Integration 26+9 · Arch 190 · Domain 438.

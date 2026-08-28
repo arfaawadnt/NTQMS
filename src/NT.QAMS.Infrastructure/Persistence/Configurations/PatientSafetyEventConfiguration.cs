@@ -26,7 +26,8 @@ public sealed class PatientSafetyEventConfiguration : IEntityTypeConfiguration<P
         builder.Property(e => e.Stage).HasConversion<string>().HasMaxLength(20);
         builder.Property(e => e.Status).HasConversion<string>().HasMaxLength(20);
 
-        builder.HasIndex(e => new { e.TenantId, e.EventRef }).IsUnique();
+        builder.HasIndex(e => new { e.TenantId, e.EventRef }).IsUnique()
+            .HasDatabaseName("ux_patient_safety_event_tenant_id_event_ref");
         builder.HasIndex(e => new { e.TenantId, e.Type, e.Status });
         builder.HasIndex(e => new { e.TenantId, e.OccurredAtUtc });
 

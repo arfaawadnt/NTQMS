@@ -22,7 +22,8 @@ public sealed class PractitionerConfiguration : IEntityTypeConfiguration<Practit
         builder.Property(p => p.SuspensionReason).HasMaxLength(1000);
         builder.Property(p => p.Status).HasConversion<string>().HasMaxLength(20);
 
-        builder.HasIndex(p => new { p.TenantId, p.PractitionerRef }).IsUnique();
+        builder.HasIndex(p => new { p.TenantId, p.PractitionerRef }).IsUnique()
+            .HasDatabaseName("ux_practitioner_tenant_id_practitioner_ref");
         builder.HasIndex(p => new { p.TenantId, p.Status });
         builder.HasIndex(p => new { p.TenantId, p.Specialty });
 

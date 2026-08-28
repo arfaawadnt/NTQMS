@@ -20,7 +20,8 @@ public sealed class SafetyRoundConfiguration : IEntityTypeConfiguration<SafetyRo
         builder.Property(r => r.Type).HasConversion<string>().HasMaxLength(30);
         builder.Property(r => r.Status).HasConversion<string>().HasMaxLength(20);
 
-        builder.HasIndex(r => new { r.TenantId, r.RoundRef }).IsUnique();
+        builder.HasIndex(r => new { r.TenantId, r.RoundRef }).IsUnique()
+            .HasDatabaseName("ux_safety_round_tenant_id_round_ref");
         builder.HasIndex(r => new { r.TenantId, r.Type, r.Status });
         builder.HasIndex(r => new { r.TenantId, r.ScheduledDate });
 
@@ -56,7 +57,8 @@ public sealed class DrillConfiguration : IEntityTypeConfiguration<Drill>
         builder.Property(d => d.Type).HasConversion<string>().HasMaxLength(20);
         builder.Property(d => d.Status).HasConversion<string>().HasMaxLength(20);
 
-        builder.HasIndex(d => new { d.TenantId, d.DrillRef }).IsUnique();
+        builder.HasIndex(d => new { d.TenantId, d.DrillRef }).IsUnique()
+            .HasDatabaseName("ux_drill_tenant_id_drill_ref");
         builder.HasIndex(d => new { d.TenantId, d.Type, d.Status });
         builder.HasIndex(d => new { d.TenantId, d.ScheduledDate });
 
