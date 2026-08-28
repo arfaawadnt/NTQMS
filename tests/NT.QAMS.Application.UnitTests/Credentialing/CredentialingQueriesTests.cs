@@ -19,6 +19,7 @@ public class CredentialingQueriesTests
     private static readonly DateOnly Today = new(2026, 9, 1);
     private static readonly Guid TenantId = Guid.CreateVersion7();
     private static readonly Guid Verifier = Guid.CreateVersion7();
+    private static readonly Guid Adder = Guid.CreateVersion7();
 
     private static AppDbContext NewContext()
     {
@@ -35,14 +36,14 @@ public class CredentialingQueriesTests
     {
         var p = Practitioner.Register("PRC-1", "Dr Alice Roe", "Cardiology");
         // Three licences: expired, critical (≤30d), warning (≤90d).
-        p.AddLicence(CredentialType.MedicalLicence, "ML-1", "Council", Today.AddDays(-5));
-        p.AddLicence(CredentialType.Bls, "BLS-1", "AHA", Today.AddDays(20));
-        p.AddLicence(CredentialType.Acls, "ACLS-1", "AHA", Today.AddDays(60));
-        var verified = p.AddLicence(CredentialType.BoardCertification, "BC-1", "Board", Today.AddYears(1));
+        p.AddLicence(CredentialType.MedicalLicence, "ML-1", "Council", Today.AddDays(-5), Adder);
+        p.AddLicence(CredentialType.Bls, "BLS-1", "AHA", Today.AddDays(20), Adder);
+        p.AddLicence(CredentialType.Acls, "ACLS-1", "AHA", Today.AddDays(60), Adder);
+        var verified = p.AddLicence(CredentialType.BoardCertification, "BC-1", "Board", Today.AddYears(1), Adder);
         p.VerifyLicence(verified, Verifier, "Board register", Now);
-        var priv = p.RequestPrivilege("Coronary angiography");
+        var priv = p.RequestPrivilege("Coronary angiography", Today);
         p.GrantPrivilege(priv, Today.AddYears(1));
-        p.Credential(Today.AddYears(1));
+        p.Credential(Today.AddYears(1), Today);
         p.TenantId = TenantId;
         db.Practitioners.Add(p);
         return p;

@@ -22,12 +22,13 @@ public enum PrivilegeStatus { Requested, Granted, Denied, Expired }
 /// </summary>
 public sealed class LicenceCredential : Entity
 {
-    internal LicenceCredential(CredentialType type, string identifier, string issuer, DateOnly expiresOn)
+    internal LicenceCredential(CredentialType type, string identifier, string issuer, DateOnly expiresOn, Guid addedByUserId)
     {
         Type = type;
         Identifier = identifier;
         Issuer = issuer;
         ExpiresOn = expiresOn;
+        AddedByUserId = addedByUserId;
         VerificationStatus = VerificationStatus.Pending;
     }
 
@@ -37,6 +38,10 @@ public sealed class LicenceCredential : Entity
     public string Identifier { get; private set; }
     public string Issuer { get; private set; }
     public DateOnly ExpiresOn { get; private set; }
+
+    /// <summary>Who entered the credential — the PSV verifier must be someone else (SOD-CRD-001).</summary>
+    public Guid AddedByUserId { get; private set; }
+
     public VerificationStatus VerificationStatus { get; private set; }
     public Guid? VerifiedBy { get; private set; }
     public string? VerificationSource { get; private set; }
@@ -46,6 +51,13 @@ public sealed class LicenceCredential : Entity
 
     internal void Verify(Guid verifierId, string source, DateTimeOffset at)
     {
+        if (VerificationStatus == VerificationStatus.Verified)
+        {
+            // M-19: PSV is evidence — overwriting it in place would rewrite who
+            // verified against which source.
+            throw new InvalidStateTransitionException("CRD-014", "The licence is already verified.");
+        }
+
         VerificationStatus = VerificationStatus.Verified;
         VerifiedBy = verifierId;
         VerificationSource = source;
@@ -127,7 +139,7 @@ public sealed class Practitioner : AggregateRoot, ITenantScoped
         };
     }
 
-    public Guid AddLicence(CredentialType type, string identifier, string issuer, DateOnly expiresOn)
+    public Guid AddLicence(CredentialType type, string identifier, string issuer, DateOnly expiresOn, Guid addedByUserId)
     {
         if (Status == PractitionerStatus.Suspended)
         {
@@ -139,7 +151,8 @@ public sealed class Practitioner : AggregateRoot, ITenantScoped
             throw new DomainException("CRD-011", "A licence identifier is required.");
         }
 
-        var licence = new LicenceCredential(type, identifier.Trim(), string.IsNullOrWhiteSpace(issuer) ? "Unknown" : issuer.Trim(), expiresOn);
+        var licence = new LicenceCredential(
+            type, identifier.Trim(), string.IsNullOrWhiteSpace(issuer) ? "Unknown" : issuer.Trim(), expiresOn, addedByUserId);
         _licences.Add(licence);
         return licence.Id;
     }
@@ -154,10 +167,17 @@ public sealed class Practitioner : AggregateRoot, ITenantScoped
 
         var licence = _licences.FirstOrDefault(l => l.Id == licenceId)
             ?? throw new DomainException("CRD-013", "Licence not found.");
+        if (licence.AddedByUserId == verifierId)
+        {
+            // M-19: primary-source verification is only worth anything when it
+            // is INDEPENDENT of whoever keyed the credential in.
+            throw new DomainException("SOD-CRD-001", "The verifier must be independent of whoever added the credential.");
+        }
+
         licence.Verify(verifierId, source.Trim(), at);
     }
 
-    public Guid RequestPrivilege(string name)
+    public Guid RequestPrivilege(string name, DateOnly asOf)
     {
         if (Status == PractitionerStatus.Suspended)
         {
@@ -169,8 +189,10 @@ public sealed class Practitioner : AggregateRoot, ITenantScoped
             throw new DomainException("CRD-021", "A privilege name is required.");
         }
 
+        // M-19: a lapsed grant is not an open one — this is the renewal path.
+        // Only a pending request or a currently-active grant blocks a re-request.
         if (_privileges.Any(p => p.Name.Equals(name.Trim(), StringComparison.OrdinalIgnoreCase)
-                                 && p.Status is PrivilegeStatus.Requested or PrivilegeStatus.Granted))
+                                 && (p.Status == PrivilegeStatus.Requested || p.IsActive(asOf))))
         {
             throw new DomainException("CRD-022", "That privilege is already requested or granted.");
         }
@@ -212,40 +234,42 @@ public sealed class Practitioner : AggregateRoot, ITenantScoped
     /// Completes initial credentialing (Pending ⇒ Credentialed). Requires at least one verified
     /// licence and one granted privilege — the committee cannot appoint an unverified practitioner.
     /// </summary>
-    public void Credential(DateOnly appointedUntil)
+    public void Credential(DateOnly appointedUntil, DateOnly asOf)
     {
         if (Status != PractitionerStatus.Pending)
         {
             throw new InvalidStateTransitionException("CRD-030", "Only a pending practitioner can be credentialed.");
         }
 
-        RequireEvidence();
+        RequireEvidence(asOf);
         AppointedUntil = appointedUntil;
         Status = PractitionerStatus.Credentialed;
     }
 
     /// <summary>Reappointment cycle (Credentialed ⇒ Credentialed with a new appointment end).</summary>
-    public void Reappoint(DateOnly appointedUntil)
+    public void Reappoint(DateOnly appointedUntil, DateOnly asOf)
     {
         if (Status != PractitionerStatus.Credentialed)
         {
             throw new InvalidStateTransitionException("CRD-031", "Only a credentialed practitioner can be reappointed.");
         }
 
-        RequireEvidence();
+        RequireEvidence(asOf);
         AppointedUntil = appointedUntil;
     }
 
-    private void RequireEvidence()
+    // M-19: the evidence must be CURRENT — a verified-but-expired licence and a
+    // lapsed grant are history, not grounds to (re)appoint.
+    private void RequireEvidence(DateOnly asOf)
     {
-        if (!_licences.Any(l => l.VerificationStatus == VerificationStatus.Verified))
+        if (!_licences.Any(l => l.VerificationStatus == VerificationStatus.Verified && !l.IsExpired(asOf)))
         {
-            throw new DomainException("CRD-032", "At least one primary-source-verified licence is required.");
+            throw new DomainException("CRD-032", "At least one current primary-source-verified licence is required.");
         }
 
-        if (!_privileges.Any(p => p.Status == PrivilegeStatus.Granted))
+        if (!_privileges.Any(p => p.IsActive(asOf)))
         {
-            throw new DomainException("CRD-033", "At least one granted privilege is required.");
+            throw new DomainException("CRD-033", "At least one active granted privilege is required.");
         }
     }
 
@@ -278,9 +302,11 @@ public sealed class Practitioner : AggregateRoot, ITenantScoped
 
     /// <summary>
     /// The point-of-care check: does this practitioner hold the named privilege as an active grant
-    /// right now? Only a credentialed (not suspended) practitioner can exercise a privilege.
+    /// right now? Only a credentialed (not suspended) practitioner WITHIN their appointment window
+    /// can exercise a privilege — the answer goes dark the day the appointment lapses (M-19).
     /// </summary>
     public bool HasActivePrivilege(string name, DateOnly asOf) =>
         Status == PractitionerStatus.Credentialed
+        && (AppointedUntil is null || AppointedUntil >= asOf)
         && _privileges.Any(p => p.Name.Equals(name.Trim(), StringComparison.OrdinalIgnoreCase) && p.IsActive(asOf));
 }

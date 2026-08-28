@@ -156,3 +156,13 @@ rates and morbidity counts**. Rate endpoints change shape additively: `ratePer10
 `utilizationRatio` and `mortalityRatePer1000` are now **nullable** — a window with no denominator
 returns `null` (rendered "—"), never a fabricated `0.00`. Rate values will change once rejected
 cases exist; that is the point.
+
+## Also in this line — credentialing integrity (M-19)
+
+**Point-of-care answers change for lapsed appointments**: `verify-privilege` now answers
+**false** once `AppointedUntil` has passed (previously a lapsed appointment still answered
+"holds privilege = true" — clinically significant, intended). Also: PSV self-verification is
+refused (`SOD-CRD-001` — the verifier must differ from whoever keyed the credential in, now
+recorded as `added_by_user_id`); a verified licence cannot be silently re-verified in place
+(`CRD-014`); (re)appointment requires **current** evidence (an expired licence or lapsed grant no
+longer qualifies); and a lapsed privilege grant no longer blocks its own renewal request.

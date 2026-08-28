@@ -1077,3 +1077,14 @@ One atomic commit per finding; each carries a test that failed before the fix.
   domain reject facts ×2 aggregates + rejected-exclusion rate fact. Executed Down/Up: 6 cols/2
   domains → 0/0 → 6/2. Domain 445 · App 138 · Integration 30+9 · Arch 192 · Functional 102 ·
   Karma 133 · prod build clean.
+- **M-19 (Major, closed)** — credentialing integrity: PSV independence is enforced
+  (`LicenceCredential.AddedByUserId` persisted — migration `LicenceAddedByForPsvSod` — and
+  `VerifyLicence` throws `SOD-CRD-001` on self-verification); a verified licence cannot be
+  re-verified in place (CRD-014); `RequireEvidence(asOf)` demands CURRENT evidence (unexpired
+  verified licence + active grant) at Credential/Reappoint; a lapsed grant no longer blocks
+  renewal (`RequestPrivilege(name, asOf)`); the point-of-care check includes the appointment
+  window — a lapsed appointment answers false with "Appointment lapsed on …" detail (clinically
+  significant flip, release-noted). Handlers supply actor/clock; harness updated to the new
+  signatures. Tests red-first: lapsed-appointment and silent-re-verify facts failed pre-fix
+  (runnable red); SOD/renewal/stale-evidence facts ride the signature change. Executed migration
+  Down/Up. Domain 450 · App 138 · Arch 192 · Integration 30+9 · Functional 102.

@@ -50,12 +50,13 @@ public sealed class AddLicenceValidator : AbstractValidator<AddLicenceCommand>
     }
 }
 
-public sealed class AddLicenceHandler(IAppDbContext db) : ICommandHandler<AddLicenceCommand, Guid>
+public sealed class AddLicenceHandler(IAppDbContext db, ICurrentUser user) : ICommandHandler<AddLicenceCommand, Guid>
 {
     public async Task<Guid> Handle(AddLicenceCommand c, CancellationToken ct)
     {
         var practitioner = await Load(db, c.PractitionerId, ct);
-        var id = practitioner.AddLicence(c.Type, c.Identifier, c.Issuer, c.ExpiresOn);
+        var actor = user.UserId ?? throw new DomainException("AUTH-003", "An authenticated user is required.");
+        var id = practitioner.AddLicence(c.Type, c.Identifier, c.Issuer, c.ExpiresOn, actor);
         await db.SaveChangesAsync(ct);
         return id;
     }
@@ -92,12 +93,12 @@ public sealed class RequestPrivilegeValidator : AbstractValidator<RequestPrivile
     public RequestPrivilegeValidator() => RuleFor(x => x.Name).NotEmpty().MaximumLength(200);
 }
 
-public sealed class RequestPrivilegeHandler(IAppDbContext db) : ICommandHandler<RequestPrivilegeCommand, Guid>
+public sealed class RequestPrivilegeHandler(IAppDbContext db, IClock clock) : ICommandHandler<RequestPrivilegeCommand, Guid>
 {
     public async Task<Guid> Handle(RequestPrivilegeCommand c, CancellationToken ct)
     {
         var practitioner = await AddLicenceHandler.Load(db, c.PractitionerId, ct);
-        var id = practitioner.RequestPrivilege(c.Name);
+        var id = practitioner.RequestPrivilege(c.Name, DateOnly.FromDateTime(clock.UtcNow.UtcDateTime));
         await db.SaveChangesAsync(ct);
         return id;
     }
@@ -137,11 +138,11 @@ public sealed class DenyPrivilegeHandler(IAppDbContext db) : ICommandHandler<Den
 [RequirePermissionPolicy(PermissionCatalog.Credentialing, PermissionAction.Approve)]
 public sealed record CredentialPractitionerCommand(Guid PractitionerId, DateOnly AppointedUntil) : ICommand;
 
-public sealed class CredentialPractitionerHandler(IAppDbContext db) : ICommandHandler<CredentialPractitionerCommand>
+public sealed class CredentialPractitionerHandler(IAppDbContext db, IClock clock) : ICommandHandler<CredentialPractitionerCommand>
 {
     public async Task Handle(CredentialPractitionerCommand c, CancellationToken ct)
     {
-        (await AddLicenceHandler.Load(db, c.PractitionerId, ct)).Credential(c.AppointedUntil);
+        (await AddLicenceHandler.Load(db, c.PractitionerId, ct)).Credential(c.AppointedUntil, DateOnly.FromDateTime(clock.UtcNow.UtcDateTime));
         await db.SaveChangesAsync(ct);
     }
 }
@@ -149,11 +150,11 @@ public sealed class CredentialPractitionerHandler(IAppDbContext db) : ICommandHa
 [RequirePermissionPolicy(PermissionCatalog.Credentialing, PermissionAction.Approve)]
 public sealed record ReappointPractitionerCommand(Guid PractitionerId, DateOnly AppointedUntil) : ICommand;
 
-public sealed class ReappointPractitionerHandler(IAppDbContext db) : ICommandHandler<ReappointPractitionerCommand>
+public sealed class ReappointPractitionerHandler(IAppDbContext db, IClock clock) : ICommandHandler<ReappointPractitionerCommand>
 {
     public async Task Handle(ReappointPractitionerCommand c, CancellationToken ct)
     {
-        (await AddLicenceHandler.Load(db, c.PractitionerId, ct)).Reappoint(c.AppointedUntil);
+        (await AddLicenceHandler.Load(db, c.PractitionerId, ct)).Reappoint(c.AppointedUntil, DateOnly.FromDateTime(clock.UtcNow.UtcDateTime));
         await db.SaveChangesAsync(ct);
     }
 }
@@ -290,7 +291,9 @@ public sealed class VerifyPrivilegeHandler(IAppDbContext db, IClock clock) : IQu
             ? null
             : p.Status != PractitionerStatus.Credentialed
                 ? $"Practitioner is {p.Status}."
-                : "No active grant for that privilege.";
+                : p.AppointedUntil is { } until && until < today
+                    ? $"Appointment lapsed on {until:yyyy-MM-dd}."
+                    : "No active grant for that privilege.";
 
         return new PrivilegeCheckResultDto(
             p.Id, p.PractitionerRef, p.FullName, q.PrivilegeName.Trim(), holds, p.Status.ToString(), detail);
