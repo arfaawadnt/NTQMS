@@ -5,6 +5,13 @@ import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { StandardsFacade } from './standards.facade';
 import { StandardsApiService } from '../../core/api/standards-api.service';
+import { DocumentsApiService } from '../../core/api/documents-api.service';
+import { IncidentsApiService } from '../../core/api/incidents-api.service';
+import { NcApiService } from '../../core/api/nc-api.service';
+import { AuditsApiService } from '../../core/api/audits-api.service';
+import { IndicatorsApiService } from '../../core/api/indicators-api.service';
+import { TrainingApiService } from '../../core/api/training-api.service';
+import { CommitteesApiService } from '../../core/api/committees-api.service';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
 import {
@@ -15,6 +22,15 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
 
 interface ChapterGroup { code: string; title: string; elements: StandardElement[]; }
+
+/** A linkable in-system record offered by the evidence source picker. */
+interface SourceOption { id: string; ref: string; label: string; }
+
+/** Sentinel the backend stores for 'Other' (external) evidence — no in-system record exists. */
+const EXTERNAL_EVIDENCE_ID = '00000000-0000-0000-0000-000000000000';
+
+/** Breadth of each picker load; registers larger than this need the register's own search first. */
+const SOURCE_PICKER_PAGE = 200;
 
 /**
  * Standard-set workspace (HQMS M07): live readiness (overall + per-chapter), the
@@ -141,8 +157,15 @@ interface ChapterGroup { code: string; title: string; elements: StandardElement[
                     </ul>
                     @if (s.status !== 'Archived' && perms.can('standards.edit')) {
                       <form class="evidence-form" [formGroup]="evidenceForm" (ngSubmit)="linkEvidence(s.id, e.id)">
-                        <select formControlName="sourceType">@for (t of sourceTypes; track t) { <option [value]="t">{{ i18n.t('evd.' + t) }}</option> }</select>
-                        <input formControlName="sourceRef" [placeholder]="i18n.t('acr.sourceRef')" />
+                        <select formControlName="sourceType" (change)="onSourceTypeChange()" [attr.aria-label]="i18n.t('acr.sourceType')">@for (t of sourceTypes; track t) { <option [value]="t">{{ i18n.t('evd.' + t) }}</option> }</select>
+                        @if (evidenceForm.controls.sourceType.value === 'Other') {
+                          <input formControlName="sourceRef" [placeholder]="i18n.t('acr.sourceRef')" />
+                        } @else {
+                          <select formControlName="sourceId" [attr.aria-label]="i18n.t('acr.sourceRecord')">
+                            <option value="">{{ sourceOptionsLoading() ? i18n.t('common.loading') : i18n.t('acr.pickSource') }}</option>
+                            @for (o of sourceOptions(); track o.id) { <option [value]="o.id">{{ o.label }}</option> }
+                          </select>
+                        }
                         <input formControlName="description" [placeholder]="i18n.t('acr.evidenceDesc')" />
                         <button type="submit" [disabled]="evidenceForm.invalid">{{ i18n.t('acr.linkEvidence') }}</button>
                       </form>
@@ -194,6 +217,13 @@ export class StandardsDetailComponent implements OnInit {
   readonly perms = inject(PermissionsService);
   private readonly fb = inject(FormBuilder);
   private readonly api = inject(StandardsApiService);
+  private readonly documentsApi = inject(DocumentsApiService);
+  private readonly incidentsApi = inject(IncidentsApiService);
+  private readonly ncApi = inject(NcApiService);
+  private readonly auditsApi = inject(AuditsApiService);
+  private readonly indicatorsApi = inject(IndicatorsApiService);
+  private readonly trainingApi = inject(TrainingApiService);
+  private readonly committeesApi = inject(CommitteesApiService);
 
   readonly id = input.required<string>();
   readonly set = this.facade.selected;
@@ -227,12 +257,78 @@ export class StandardsDetailComponent implements OnInit {
 
   readonly evidenceForm = this.fb.nonNullable.group({
     sourceType: ['Document' as EvidenceSourceType, [Validators.required]],
-    sourceRef: ['', [Validators.required, Validators.maxLength(200)]],
+    sourceId: ['', [Validators.required]],
+    sourceRef: ['', [Validators.maxLength(200)]],
     description: ['', [Validators.maxLength(1000)]],
   });
 
+  /** Linkable records for the selected typed source; 'Other' takes a free-text reference instead. */
+  readonly sourceOptions = signal<SourceOption[]>([]);
+  readonly sourceOptionsLoading = signal(false);
+
   ngOnInit(): void {
     void this.facade.loadDetail(this.id());
+    void this.loadSourceOptions(this.evidenceForm.controls.sourceType.value);
+  }
+
+  onSourceTypeChange(): void {
+    const type = this.evidenceForm.controls.sourceType.value;
+    const external = type === 'Other';
+    this.evidenceForm.controls.sourceId.setValidators(external ? [] : [Validators.required]);
+    this.evidenceForm.controls.sourceRef.setValidators(
+      external ? [Validators.required, Validators.maxLength(200)] : [Validators.maxLength(200)]);
+    this.evidenceForm.controls.sourceId.setValue('');
+    this.evidenceForm.controls.sourceRef.setValue('');
+    this.evidenceForm.controls.sourceId.updateValueAndValidity();
+    this.evidenceForm.controls.sourceRef.updateValueAndValidity();
+    if (!external) { void this.loadSourceOptions(type); }
+  }
+
+  private async loadSourceOptions(type: EvidenceSourceType): Promise<void> {
+    this.sourceOptionsLoading.set(true);
+    this.sourceOptions.set([]);
+    try {
+      this.sourceOptions.set(await this.fetchSourceOptions(type));
+    } catch {
+      this.sourceOptions.set([]); // submit stays blocked: the required sourceId cannot be picked
+    } finally {
+      this.sourceOptionsLoading.set(false);
+    }
+  }
+
+  private async fetchSourceOptions(type: EvidenceSourceType): Promise<SourceOption[]> {
+    switch (type) {
+      case 'Document': {
+        const r = await firstValueFrom(this.documentsApi.list(undefined, undefined, 1, SOURCE_PICKER_PAGE));
+        return r.items.map(d => ({ id: d.id, ref: d.code, label: `${d.code} — ${d.title}` }));
+      }
+      case 'Incident': {
+        const r = await firstValueFrom(this.incidentsApi.list(undefined, undefined, undefined, false, 1, SOURCE_PICKER_PAGE));
+        return r.items.map(x => ({ id: x.id, ref: x.incidentRef, label: `${x.incidentRef} — ${x.title}` }));
+      }
+      case 'Nonconformance': {
+        const r = await firstValueFrom(this.ncApi.list(undefined, undefined, 1, SOURCE_PICKER_PAGE));
+        return r.items.map(x => ({ id: x.id, ref: x.ncRef, label: `${x.ncRef} — ${x.title}` }));
+      }
+      case 'Audit': {
+        const r = await firstValueFrom(this.auditsApi.list(undefined, 1, SOURCE_PICKER_PAGE));
+        return r.items.map(x => ({ id: x.id, ref: x.auditRef, label: `${x.auditRef} — ${x.title}` }));
+      }
+      case 'Indicator': {
+        const r = await firstValueFrom(this.indicatorsApi.list(undefined, undefined, 1, SOURCE_PICKER_PAGE));
+        return r.items.map(x => ({ id: x.id, ref: x.indicatorRef, label: `${x.code} — ${x.name}` }));
+      }
+      case 'Training': {
+        const r = await firstValueFrom(this.trainingApi.listCourses());
+        return r.map(x => ({ id: x.id, ref: x.courseRef, label: `${x.courseRef} — ${x.title}` }));
+      }
+      case 'Committee': {
+        const r = await firstValueFrom(this.committeesApi.list());
+        return r.map(x => ({ id: x.id, ref: x.name, label: x.name }));
+      }
+      default:
+        return [];
+    }
   }
 
   async addElement(id: string): Promise<void> {
@@ -255,12 +351,19 @@ export class StandardsDetailComponent implements OnInit {
   async linkEvidence(id: string, elementId: string): Promise<void> {
     if (this.evidenceForm.invalid) { return; }
     const raw = this.evidenceForm.getRawValue();
+    const external = raw.sourceType === 'Other';
+    const picked = external ? null : this.sourceOptions().find(o => o.id === raw.sourceId);
+    if (!external && !picked) { return; }
     await this.facade.linkEvidence(id, {
-      elementId, sourceType: raw.sourceType, sourceId: '00000000-0000-0000-0000-000000000000',
-      sourceRef: raw.sourceRef, description: raw.description || null,
+      elementId,
+      sourceType: raw.sourceType,
+      sourceId: external ? EXTERNAL_EVIDENCE_ID : raw.sourceId,
+      sourceRef: external ? raw.sourceRef : picked!.ref,
+      description: raw.description || null,
     });
     if (this.facade.error() === '') {
       this.evidenceForm.reset({ sourceType: 'Document' });
+      this.onSourceTypeChange();
       this.evidence.set(await firstValueFrom(this.api.elementEvidence(elementId)));
     }
   }

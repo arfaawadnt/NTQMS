@@ -49,12 +49,18 @@ public sealed class EvidenceLink : AggregateRoot, ITenantScoped
             throw new DomainException("EVD-002", "A source reference is required.");
         }
 
+        if (sourceType != EvidenceSourceType.Other && sourceId == Guid.Empty)
+        {
+            throw new DomainException("EVD-003", "A source record is required for this evidence type.");
+        }
+
         return new EvidenceLink
         {
             StandardSetId = standardSetId,
             ElementId = elementId,
             SourceType = sourceType,
-            SourceId = sourceId,
+            // 'Other' documents external evidence; an in-system id would be a dangling reference.
+            SourceId = sourceType == EvidenceSourceType.Other ? Guid.Empty : sourceId,
             SourceRef = sourceRef.Trim(),
             Description = string.IsNullOrWhiteSpace(description) ? null : description.Trim(),
             LinkedBy = linkedBy,

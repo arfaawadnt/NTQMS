@@ -127,6 +127,9 @@ public sealed class LinkEvidenceValidator : AbstractValidator<LinkEvidenceComman
     {
         RuleFor(x => x.SourceRef).NotEmpty().MaximumLength(200);
         RuleFor(x => x.Description).MaximumLength(1000);
+        RuleFor(x => x.SourceId).NotEmpty()
+            .When(x => x.SourceType != EvidenceSourceType.Other)
+            .WithMessage("A source record is required for this evidence type.");
     }
 }
 
@@ -142,6 +145,26 @@ public sealed class LinkEvidenceHandler(IAppDbContext db, ICurrentUser user, ICl
         if (set.Elements.All(e => e.Id != c.ElementId))
         {
             throw new DomainException("STD-019", "Element not found in this set.");
+        }
+
+        // The reference is deliberately loose (no FK), so this is the only place that
+        // can prove the source exists in this tenant before the link becomes counted
+        // accreditation evidence. 'Other' documents external evidence and has no
+        // in-system record to verify. The tenant query filter scopes every lookup.
+        var sourceExists = c.SourceType switch
+        {
+            EvidenceSourceType.Document => await db.Documents.AnyAsync(x => x.Id == c.SourceId, ct),
+            EvidenceSourceType.Incident => await db.Incidents.AnyAsync(x => x.Id == c.SourceId, ct),
+            EvidenceSourceType.Nonconformance => await db.Nonconformances.AnyAsync(x => x.Id == c.SourceId, ct),
+            EvidenceSourceType.Audit => await db.Audits.AnyAsync(x => x.Id == c.SourceId, ct),
+            EvidenceSourceType.Indicator => await db.QualityIndicators.AnyAsync(x => x.Id == c.SourceId, ct),
+            EvidenceSourceType.Training => await db.TrainingCourses.AnyAsync(x => x.Id == c.SourceId, ct),
+            EvidenceSourceType.Committee => await db.Committees.AnyAsync(x => x.Id == c.SourceId, ct),
+            _ => true,
+        };
+        if (!sourceExists)
+        {
+            throw new DomainException("EVD-004", "The referenced source record does not exist.");
         }
 
         var link = EvidenceLink.Create(
