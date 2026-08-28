@@ -139,6 +139,12 @@ public sealed class Meeting : AggregateRoot, ITenantScoped
     public void RecordAttendance(Guid userId, bool present)
     {
         RequireStatus(MeetingStatus.Scheduled, "MTG-012", "record attendance for");
+        if (userId == Guid.Empty)
+        {
+            // M-16: an empty Guid would count toward quorum as a phantom attendee.
+            throw new DomainException("MTG-024", "An attendee is required.");
+        }
+
         var existing = _attendance.FirstOrDefault(a => a.UserId == userId);
         if (existing is not null)
         {

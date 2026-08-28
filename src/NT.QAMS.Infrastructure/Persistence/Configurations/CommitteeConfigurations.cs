@@ -30,6 +30,10 @@ public sealed class CommitteeConfiguration : IEntityTypeConfiguration<Committee>
             m.WithOwner().HasForeignKey("TenantId", "committee_id");
             m.HasKey("TenantId", "Id");
             m.Property(x => x.RoleTitle).HasMaxLength(100);
+            // M-16: one membership row per user per committee — the aggregate
+            // guard (CMT-012) is first-line; this is the concurrency backstop.
+            m.HasIndex("TenantId", "committee_id", nameof(CommitteeMember.UserId)).IsUnique()
+                .HasDatabaseName("ux_committee_member_tenant_committee_user");
         });
 
         builder.Ignore(c => c.DomainEvents);
@@ -74,6 +78,10 @@ public sealed class MeetingConfiguration : IEntityTypeConfiguration<Meeting>
             at.Property<Guid>("TenantId");
             at.WithOwner().HasForeignKey("TenantId", "meeting_id");
             at.HasKey("TenantId", "Id");
+            // M-16: one attendance row per attendee per meeting — a doubled row
+            // would double-count the quorum under concurrent requests.
+            at.HasIndex("TenantId", "meeting_id", nameof(MeetingAttendance.UserId)).IsUnique()
+                .HasDatabaseName("ux_meeting_attendance_tenant_meeting_user");
         });
 
         builder.OwnsMany(m => m.Decisions, d =>

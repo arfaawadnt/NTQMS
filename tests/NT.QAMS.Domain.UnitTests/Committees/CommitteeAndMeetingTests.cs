@@ -67,6 +67,15 @@ public class CommitteeAndMeetingTests
     }
 
     [Fact]
+    public void Attendance_requires_an_attendee()
+    {
+        // M-16: an empty Guid would count toward quorum as a phantom attendee.
+        var m = Meeting.Schedule(Guid.CreateVersion7(), "MTG-1", When);
+        var act = () => m.RecordAttendance(Guid.Empty, present: true);
+        act.Should().Throw<DomainException>().Which.Code.Should().Be("MTG-024");
+    }
+
+    [Fact]
     public void Hold_when_quorate_transitions_to_held_and_raises_event()
     {
         var m = Quorate();

@@ -1042,3 +1042,13 @@ One atomic commit per finding; each carries a test that failed before the fix.
   dangling committee/survey ids — EF batching also cannot order SQL-declared FK inserts, so
   probe seeds save parents first; production flows always persist the parent in an earlier
   command). Functional 102/102 (incl. real-PG four) · Integration 28+9 · App 133 · Arch 190.
+- **M-16 (Major, code half closed; ceremony decision deferred to Group C)** — committee governance
+  integrity: `Meeting.RecordAttendance` rejects an empty attendee (MTG-024); `RecordAttendanceHandler`
+  admits only committee members (CMT-017 — quorum can no longer be met by arbitrary Guids);
+  Schedule/Hold/ApproveMinutes all refuse a disbanded committee (CMT-016). Unique backstops
+  `ux_meeting_attendance_tenant_meeting_user` and `ux_committee_member_tenant_committee_user`
+  (migration `CommitteeIntegrityIndexes`; EF also drops the two now-redundant FK-prefix indexes,
+  restored by `Down()`). Whether ApproveMinutes becomes a Part-11 signed gate remains the deferred
+  M-16 product decision. Tests red-first: 1 domain + 3 application (handler) + 1 integration
+  (duplicate-row 23505 probes) — all failed pre-fix. Executed index proof: Up→2 ux, Down→0 ux +
+  2 ix restored, re-Up. Domain 439 · App 136 · Integration 29+9 · Arch 190 · Functional 102.

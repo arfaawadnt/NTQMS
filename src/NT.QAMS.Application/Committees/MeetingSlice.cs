@@ -21,10 +21,13 @@ public sealed class ScheduleMeetingHandler(IAppDbContext db, ICurrentTenant tena
     {
         var tenantId = tenant.TenantId ?? throw new DomainException("TENANT-000", "A tenant context is required.");
 
-        var committeeExists = await db.Committees.AnyAsync(x => x.Id == c.CommitteeId, ct);
-        if (!committeeExists)
+        var committee = await db.Committees.AsNoTracking()
+            .Where(x => x.Id == c.CommitteeId).Select(x => new { x.Status }).SingleOrDefaultAsync(ct)
+            ?? throw new DomainException("CMT-404", "Committee not found.");
+        if (committee.Status != CommitteeStatus.Active)
         {
-            throw new DomainException("CMT-404", "Committee not found.");
+            // M-16: a disbanded committee is governance history — it conducts nothing.
+            throw new DomainException("CMT-016", "A disbanded committee cannot conduct meetings.");
         }
 
         var meetingRef = await refs.NextAsync(tenantId, "MTG", ct);
@@ -74,6 +77,17 @@ public sealed class RecordAttendanceHandler(IAppDbContext db) : ICommandHandler<
     public async Task Handle(RecordAttendanceCommand c, CancellationToken ct)
     {
         var meeting = await AddAgendaItemHandler.Load(db, c.MeetingId, ct);
+
+        // M-16: quorum counts attendance rows — they must belong to actual
+        // committee members, not arbitrary Guids.
+        var isMember = await db.Committees.AsNoTracking()
+            .Where(x => x.Id == meeting.CommitteeId)
+            .AnyAsync(x => x.Members.Any(m => m.UserId == c.UserId), ct);
+        if (!isMember)
+        {
+            throw new DomainException("CMT-017", "Only a committee member can be marked as an attendee.");
+        }
+
         meeting.RecordAttendance(c.UserId, c.Present);
         await db.SaveChangesAsync(ct);
     }
@@ -87,14 +101,17 @@ public sealed class HoldMeetingHandler(IAppDbContext db) : ICommandHandler<HoldM
     public async Task Handle(HoldMeetingCommand c, CancellationToken ct)
     {
         var meeting = await AddAgendaItemHandler.Load(db, c.MeetingId, ct);
-        var quorum = await db.Committees.AsNoTracking()
-            .Where(x => x.Id == meeting.CommitteeId).Select(x => x.QuorumSize).SingleOrDefaultAsync(ct);
-        if (quorum == 0)
+        var committee = await db.Committees.AsNoTracking()
+            .Where(x => x.Id == meeting.CommitteeId)
+            .Select(x => new { x.QuorumSize, x.Status }).SingleOrDefaultAsync(ct)
+            ?? throw new DomainException("CMT-404", "Committee not found.");
+        if (committee.Status != CommitteeStatus.Active)
         {
-            throw new DomainException("CMT-404", "Committee not found.");
+            // M-16: disbanding between scheduling and the meeting kills the meeting.
+            throw new DomainException("CMT-016", "A disbanded committee cannot conduct meetings.");
         }
 
-        meeting.Hold(quorum);
+        meeting.Hold(committee.QuorumSize);
         await db.SaveChangesAsync(ct);
     }
 }
@@ -164,6 +181,16 @@ public sealed class ApproveMinutesHandler(IAppDbContext db, ICurrentUser user) :
     {
         var actor = user.UserId ?? throw new DomainException("AUTH-003", "An authenticated user is required.");
         var meeting = await AddAgendaItemHandler.Load(db, c.MeetingId, ct);
+
+        // M-16: the approval mints governance evidence — not for a committee
+        // that no longer exists.
+        var active = await db.Committees.AsNoTracking()
+            .AnyAsync(x => x.Id == meeting.CommitteeId && x.Status == CommitteeStatus.Active, ct);
+        if (!active)
+        {
+            throw new DomainException("CMT-016", "A disbanded committee cannot conduct meetings.");
+        }
+
         meeting.ApproveMinutes(actor);
         await db.SaveChangesAsync(ct);
     }
