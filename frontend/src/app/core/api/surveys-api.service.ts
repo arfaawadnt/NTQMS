@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
@@ -14,9 +14,9 @@ export class SurveysApiService {
   private readonly base = `${environment.apiBaseUrl}/surveys`;
 
   list(status?: string): Observable<SurveyListItem[]> {
-    const params = new URLSearchParams();
-    if (status) { params.set('status', status); }
-    return this.http.get<SurveyListItem[]>(`${this.base}?${params.toString()}`);
+    let params = new HttpParams();
+    if (status) { params = params.set('status', status); }
+    return this.http.get<SurveyListItem[]>(this.base, { params });
   }
 
   getById(id: string): Observable<SurveyDetail> { return this.http.get<SurveyDetail>(`${this.base}/${id}`); }

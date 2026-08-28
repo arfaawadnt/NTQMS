@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
@@ -23,14 +23,12 @@ export class IncidentsApiService {
     status?: string, search?: string, category?: string, sentinelOnly = false,
     page = 1, pageSize = DEFAULT_PAGE_SIZE,
   ): Observable<Paged<IncidentListItem>> {
-    const params = new URLSearchParams();
-    if (status) { params.set('status', status); }
-    if (search) { params.set('search', search); }
-    if (category) { params.set('category', category); }
-    if (sentinelOnly) { params.set('sentinelOnly', 'true'); }
-    params.set('page', String(page));
-    params.set('pageSize', String(pageSize));
-    return this.http.get<Paged<IncidentListItem>>(`${this.base}?${params.toString()}`);
+    let params = new HttpParams().set('page', page).set('pageSize', pageSize);
+    if (status) { params = params.set('status', status); }
+    if (search) { params = params.set('search', search); }
+    if (category) { params = params.set('category', category); }
+    if (sentinelOnly) { params = params.set('sentinelOnly', true); }
+    return this.http.get<Paged<IncidentListItem>>(this.base, { params });
   }
 
   getById(id: string): Observable<IncidentDetail> {
@@ -44,8 +42,7 @@ export class IncidentsApiService {
 
   /** Anonymous follow-up: status only, matched on the stored reference hash. */
   track(reference: string): Observable<IncidentTracking> {
-    const params = new URLSearchParams({ reference });
-    return this.http.get<IncidentTracking>(`${this.base}/track?${params.toString()}`);
+    return this.http.get<IncidentTracking>(`${this.base}/track`, { params: new HttpParams().set('reference', reference) });
   }
 
   report(body: ReportIncidentRequest): Observable<CreatedResource> {

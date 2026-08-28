@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
@@ -15,10 +15,10 @@ export class TrainingApiService {
   private readonly base = `${environment.apiBaseUrl}/training`;
 
   listCourses(category?: string, status?: string): Observable<CourseListItem[]> {
-    const params = new URLSearchParams();
-    if (category) { params.set('category', category); }
-    if (status) { params.set('status', status); }
-    return this.http.get<CourseListItem[]>(`${this.base}/courses?${params.toString()}`);
+    let params = new HttpParams();
+    if (category) { params = params.set('category', category); }
+    if (status) { params = params.set('status', status); }
+    return this.http.get<CourseListItem[]>(`${this.base}/courses`, { params });
   }
 
   getCourse(id: string): Observable<CourseDetail> { return this.http.get<CourseDetail>(`${this.base}/courses/${id}`); }
@@ -29,10 +29,10 @@ export class TrainingApiService {
   retireCourse(id: string): Observable<void> { return this.http.post<void>(`${this.base}/courses/${id}/retire`, {}); }
 
   listSessions(courseId?: string, status?: string): Observable<SessionListItem[]> {
-    const params = new URLSearchParams();
-    if (courseId) { params.set('courseId', courseId); }
-    if (status) { params.set('status', status); }
-    return this.http.get<SessionListItem[]>(`${this.base}/sessions?${params.toString()}`);
+    let params = new HttpParams();
+    if (courseId) { params = params.set('courseId', courseId); }
+    if (status) { params = params.set('status', status); }
+    return this.http.get<SessionListItem[]>(`${this.base}/sessions`, { params });
   }
 
   getSession(id: string): Observable<SessionDetail> { return this.http.get<SessionDetail>(`${this.base}/sessions/${id}`); }

@@ -40,7 +40,7 @@ describe('PatientSafetyFacade', () => {
   it('loads the events register and the live rates together', async () => {
     const done = facade.loadList();
 
-    http.expectOne(`${base}/events?`).flush([]);
+    http.expectOne(`${base}/events`).flush([]);
     await new Promise((r) => setTimeout(r));
     http.expectOne(`${base}/rates?windowDays=30`).flush(rates);
     await done;

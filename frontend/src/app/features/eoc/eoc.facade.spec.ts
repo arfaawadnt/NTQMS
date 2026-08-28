@@ -38,9 +38,9 @@ describe('EocFacade', () => {
   it('loads rounds, drills and the summary together', async () => {
     const done = facade.loadAll();
 
-    http.expectOne(`${base}/rounds?`).flush([]);
+    http.expectOne(`${base}/rounds`).flush([]);
     await new Promise((r) => setTimeout(r));
-    http.expectOne(`${base}/drills?`).flush([]);
+    http.expectOne(`${base}/drills`).flush([]);
     await new Promise((r) => setTimeout(r));
     http.expectOne(`${base}/summary`).flush(summary);
     await done;
@@ -56,9 +56,9 @@ describe('EocFacade', () => {
     await new Promise((r) => setTimeout(r));
     http.expectOne(`${base}/drills/d1`).flush({ ...drill, status: 'Evaluated', evaluationScore: 90, effectiveness: 'Effective' });
     await new Promise((r) => setTimeout(r));
-    http.expectOne(`${base}/rounds?`).flush([]);
+    http.expectOne(`${base}/rounds`).flush([]);
     await new Promise((r) => setTimeout(r));
-    http.expectOne(`${base}/drills?`).flush([]);
+    http.expectOne(`${base}/drills`).flush([]);
     await new Promise((r) => setTimeout(r));
     http.expectOne(`${base}/summary`).flush(summary);
     await done;

@@ -33,7 +33,7 @@ describe('CredentialingFacade', () => {
   it('loads the roster and the expiry register together', async () => {
     const done = facade.loadAll();
 
-    http.expectOne(`${base}/practitioners?`).flush([]);
+    http.expectOne(`${base}/practitioners`).flush([]);
     await new Promise((r) => setTimeout(r));
     http.expectOne(`${base}/expiring?withinDays=90`).flush([]);
     await done;

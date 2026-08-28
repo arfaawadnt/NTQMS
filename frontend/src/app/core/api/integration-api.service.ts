@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { EndpointListItem, IntegrationMessage, PatientCensus, RegisterEndpointRequest } from '../models';
@@ -12,11 +12,13 @@ export class IntegrationApiService {
 
   endpoints(): Observable<EndpointListItem[]> { return this.http.get<EndpointListItem[]>(`${this.base}/endpoints`); }
   messages(id: string, status?: string): Observable<IntegrationMessage[]> {
-    const params = new URLSearchParams();
-    if (status) { params.set('status', status); }
-    return this.http.get<IntegrationMessage[]>(`${this.base}/endpoints/${id}/messages?${params.toString()}`);
+    let params = new HttpParams();
+    if (status) { params = params.set('status', status); }
+    return this.http.get<IntegrationMessage[]>(`${this.base}/endpoints/${id}/messages`, { params });
   }
-  census(windowDays = 30): Observable<PatientCensus> { return this.http.get<PatientCensus>(`${this.base}/census?windowDays=${windowDays}`); }
+  census(windowDays = 30): Observable<PatientCensus> {
+    return this.http.get<PatientCensus>(`${this.base}/census`, { params: new HttpParams().set('windowDays', windowDays) });
+  }
   register(body: RegisterEndpointRequest): Observable<{ id: string }> { return this.http.post<{ id: string }>(`${this.base}/endpoints`, body); }
   suspend(id: string): Observable<void> { return this.http.post<void>(`${this.base}/endpoints/${id}/suspend`, {}); }
   resume(id: string): Observable<void> { return this.http.post<void>(`${this.base}/endpoints/${id}/resume`, {}); }

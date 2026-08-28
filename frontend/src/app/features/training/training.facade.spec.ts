@@ -34,7 +34,7 @@ describe('TrainingFacade', () => {
   it('loads the catalogue and the compliance dashboard together', async () => {
     const done = facade.loadList();
 
-    http.expectOne(`${base}/courses?`).flush([]);
+    http.expectOne(`${base}/courses`).flush([]);
     await new Promise((r) => setTimeout(r));
     http.expectOne(`${base}/compliance`).flush([]);
     await done;

@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
@@ -15,10 +15,10 @@ export class EocApiService {
   private readonly base = `${environment.apiBaseUrl}/eoc`;
 
   listRounds(type?: string, status?: string): Observable<RoundListItem[]> {
-    const params = new URLSearchParams();
-    if (type) { params.set('type', type); }
-    if (status) { params.set('status', status); }
-    return this.http.get<RoundListItem[]>(`${this.base}/rounds?${params.toString()}`);
+    let params = new HttpParams();
+    if (type) { params = params.set('type', type); }
+    if (status) { params = params.set('status', status); }
+    return this.http.get<RoundListItem[]>(`${this.base}/rounds`, { params });
   }
 
   getRound(id: string): Observable<RoundDetail> { return this.http.get<RoundDetail>(`${this.base}/rounds/${id}`); }
@@ -30,10 +30,10 @@ export class EocApiService {
   completeRound(id: string): Observable<void> { return this.http.post<void>(`${this.base}/rounds/${id}/complete`, {}); }
 
   listDrills(type?: string, status?: string): Observable<DrillListItem[]> {
-    const params = new URLSearchParams();
-    if (type) { params.set('type', type); }
-    if (status) { params.set('status', status); }
-    return this.http.get<DrillListItem[]>(`${this.base}/drills?${params.toString()}`);
+    let params = new HttpParams();
+    if (type) { params = params.set('type', type); }
+    if (status) { params = params.set('status', status); }
+    return this.http.get<DrillListItem[]>(`${this.base}/drills`, { params });
   }
 
   getDrill(id: string): Observable<DrillDetail> { return this.http.get<DrillDetail>(`${this.base}/drills/${id}`); }

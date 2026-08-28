@@ -41,9 +41,9 @@ describe('MortalityReviewFacade', () => {
   it('loads reviews, complications and the live rates together', async () => {
     const done = facade.loadAll();
 
-    http.expectOne(`${base}/reviews?`).flush([]);
+    http.expectOne(`${base}/reviews`).flush([]);
     await new Promise((r) => setTimeout(r));
-    http.expectOne(`${base}/complications?`).flush([]);
+    http.expectOne(`${base}/complications`).flush([]);
     await new Promise((r) => setTimeout(r));
     http.expectOne(`${base}/rates?windowDays=30`).flush(rates);
     await done;
@@ -59,7 +59,7 @@ describe('MortalityReviewFacade', () => {
     await new Promise((r) => setTimeout(r));
     http.expectOne(`${base}/reviews/m1`).flush({ ...detail, status: 'Classified', classification: 'Unexpected', requiresSecondReview: true });
     await new Promise((r) => setTimeout(r));
-    http.expectOne(`${base}/reviews?`).flush([]);
+    http.expectOne(`${base}/reviews`).flush([]);
     await done;
 
     expect(facade.selected()?.requiresSecondReview).toBeTrue();

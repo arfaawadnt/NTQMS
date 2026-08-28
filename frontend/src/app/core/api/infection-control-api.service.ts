@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
@@ -14,23 +14,25 @@ export class InfectionControlApiService {
   private readonly base = `${environment.apiBaseUrl}/infection-control`;
 
   listCases(type?: string, status?: string): Observable<HaiCaseListItem[]> {
-    const params = new URLSearchParams();
-    if (type) { params.set('type', type); }
-    if (status) { params.set('status', status); }
-    return this.http.get<HaiCaseListItem[]>(`${this.base}/cases?${params.toString()}`);
+    let params = new HttpParams();
+    if (type) { params = params.set('type', type); }
+    if (status) { params = params.set('status', status); }
+    return this.http.get<HaiCaseListItem[]>(`${this.base}/cases`, { params });
   }
 
   getCase(id: string): Observable<HaiCaseDetail> { return this.http.get<HaiCaseDetail>(`${this.base}/cases/${id}`); }
-  rates(windowDays = 30): Observable<HaiRates> { return this.http.get<HaiRates>(`${this.base}/rates?windowDays=${windowDays}`); }
+  rates(windowDays = 30): Observable<HaiRates> {
+    return this.http.get<HaiRates>(`${this.base}/rates`, { params: new HttpParams().set('windowDays', windowDays) });
+  }
   reportCase(body: ReportHaiCaseRequest): Observable<CreatedResource> { return this.http.post<CreatedResource>(`${this.base}/cases`, body); }
   reviewCase(id: string, body: ReviewHaiCaseRequest): Observable<void> { return this.http.post<void>(`${this.base}/cases/${id}/review`, body); }
   closeCase(id: string): Observable<void> { return this.http.post<void>(`${this.base}/cases/${id}/close`, {}); }
 
   listDevices(deviceType?: string, status?: string): Observable<DeviceExposureListItem[]> {
-    const params = new URLSearchParams();
-    if (deviceType) { params.set('deviceType', deviceType); }
-    if (status) { params.set('status', status); }
-    return this.http.get<DeviceExposureListItem[]>(`${this.base}/devices?${params.toString()}`);
+    let params = new HttpParams();
+    if (deviceType) { params = params.set('deviceType', deviceType); }
+    if (status) { params = params.set('status', status); }
+    return this.http.get<DeviceExposureListItem[]>(`${this.base}/devices`, { params });
   }
 
   recordDevice(body: RecordDeviceExposureRequest): Observable<CreatedResource> { return this.http.post<CreatedResource>(`${this.base}/devices`, body); }

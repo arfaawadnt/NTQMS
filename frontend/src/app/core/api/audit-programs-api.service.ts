@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
@@ -17,9 +17,9 @@ export class AuditProgramsApiService {
   private readonly base = `${environment.apiBaseUrl}/audit-programs`;
 
   list(status?: string): Observable<AuditProgramListItem[]> {
-    const params = new URLSearchParams();
-    if (status) { params.set('status', status); }
-    return this.http.get<AuditProgramListItem[]>(`${this.base}?${params.toString()}`);
+    let params = new HttpParams();
+    if (status) { params = params.set('status', status); }
+    return this.http.get<AuditProgramListItem[]>(this.base, { params });
   }
 
   getById(id: string): Observable<AuditProgramDetail> { return this.http.get<AuditProgramDetail>(`${this.base}/${id}`); }

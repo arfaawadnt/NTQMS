@@ -42,9 +42,9 @@ describe('InfectionControlFacade', () => {
   it('loads cases, device exposures and the live rates together', async () => {
     const done = facade.loadAll();
 
-    http.expectOne(`${base}/cases?`).flush([]);
+    http.expectOne(`${base}/cases`).flush([]);
     await new Promise((r) => setTimeout(r));
-    http.expectOne(`${base}/devices?`).flush([]);
+    http.expectOne(`${base}/devices`).flush([]);
     await new Promise((r) => setTimeout(r));
     http.expectOne(`${base}/rates?windowDays=30`).flush(rates);
     await done;

@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
@@ -17,12 +17,10 @@ export class IndicatorsApiService {
   private readonly base = `${environment.apiBaseUrl}/indicators`;
 
   list(status?: string, search?: string, page = 1, pageSize = DEFAULT_PAGE_SIZE): Observable<Paged<IndicatorListItem>> {
-    const params = new URLSearchParams();
-    if (status) { params.set('status', status); }
-    if (search) { params.set('search', search); }
-    params.set('page', String(page));
-    params.set('pageSize', String(pageSize));
-    return this.http.get<Paged<IndicatorListItem>>(`${this.base}?${params.toString()}`);
+    let params = new HttpParams().set('page', page).set('pageSize', pageSize);
+    if (status) { params = params.set('status', status); }
+    if (search) { params = params.set('search', search); }
+    return this.http.get<Paged<IndicatorListItem>>(this.base, { params });
   }
 
   getById(id: string): Observable<IndicatorDetail> {

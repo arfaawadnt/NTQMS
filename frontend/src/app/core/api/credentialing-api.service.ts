@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
@@ -15,16 +15,19 @@ export class CredentialingApiService {
   private readonly base = `${environment.apiBaseUrl}/credentialing`;
 
   list(specialty?: string, status?: string): Observable<PractitionerListItem[]> {
-    const params = new URLSearchParams();
-    if (specialty) { params.set('specialty', specialty); }
-    if (status) { params.set('status', status); }
-    return this.http.get<PractitionerListItem[]>(`${this.base}/practitioners?${params.toString()}`);
+    let params = new HttpParams();
+    if (specialty) { params = params.set('specialty', specialty); }
+    if (status) { params = params.set('status', status); }
+    return this.http.get<PractitionerListItem[]>(`${this.base}/practitioners`, { params });
   }
 
   getById(id: string): Observable<PractitionerDetail> { return this.http.get<PractitionerDetail>(`${this.base}/practitioners/${id}`); }
-  expiring(withinDays = 90): Observable<ExpiringCredential[]> { return this.http.get<ExpiringCredential[]>(`${this.base}/expiring?withinDays=${withinDays}`); }
+  expiring(withinDays = 90): Observable<ExpiringCredential[]> {
+    return this.http.get<ExpiringCredential[]>(`${this.base}/expiring`, { params: new HttpParams().set('withinDays', withinDays) });
+  }
   verifyPrivilege(id: string, privilege: string): Observable<PrivilegeCheckResult> {
-    return this.http.get<PrivilegeCheckResult>(`${this.base}/practitioners/${id}/verify-privilege?privilege=${encodeURIComponent(privilege)}`);
+    return this.http.get<PrivilegeCheckResult>(
+      `${this.base}/practitioners/${id}/verify-privilege`, { params: new HttpParams().set('privilege', privilege) });
   }
 
   register(body: RegisterPractitionerRequest): Observable<CreatedResource> { return this.http.post<CreatedResource>(`${this.base}/practitioners`, body); }
