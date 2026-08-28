@@ -16,10 +16,18 @@ export class StatusPillComponent {
   /** The raw backend status string (e.g. "Closed", "ActionPlan"). */
   readonly status = input.required<string>();
 
-  private static readonly POSITIVE = ['closed', 'approved', 'active', 'satisfactory', 'signedoff', 'sent'];
+  private static readonly POSITIVE = [
+    'closed', 'approved', 'active', 'satisfactory', 'signedoff', 'sent',
+    // HQMS terminal-positive states
+    'credentialed', 'granted', 'completed', 'evaluated', 'minutesapproved',
+  ];
   /** Teal marks verified/authorized/published states per the design system. */
   private static readonly VERIFIED = ['authorized', 'published', 'verified'];
-  private static readonly NEGATIVE = ['rejected', 'revoked', 'suspended', 'outofservice', 'unsatisfactory', 'failed', 'disposed', 'obsolete'];
+  private static readonly NEGATIVE = [
+    'rejected', 'revoked', 'suspended', 'outofservice', 'unsatisfactory', 'failed', 'disposed', 'obsolete',
+    // HQMS terminal-negative states
+    'denied', 'cancelled', 'expired', 'terminated', 'disbanded', 'breached',
+  ];
 
   /** Resolved colour tone for the current status. */
   readonly tone = computed<'ok' | 'warn' | 'danger' | 'teal'>(() => {

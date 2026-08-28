@@ -28,6 +28,7 @@
   --nt-filter-grey: #EDEFF3;
   --nt-summary-blue:#E3F2FD;
   --nt-surface:     #FFFFFF;
+  --nt-surface-alt: #F4F7FA;   /* recessed panels: expanded rows, code/ref boxes */
 
   /* ---------- Semantic ---------- */
   --nt-green:   #188038;

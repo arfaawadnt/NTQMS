@@ -189,7 +189,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
     button.link { background: none; border: none; color: var(--nt-blue); cursor: pointer; padding: 0; text-decoration: underline; }
     .verified { color: var(--nt-ink-ok); font-weight: 700; }
     .small { font-size: .72rem; } .danger-text { color: var(--nt-ink-crit); }
-    .tier.expired { background: var(--nt-ink-crit); color: #fff; padding: 1px 6px; border-radius: 999px; font-size: 11px; margin-inline-start: 6px; }
+    .tier.expired { background: color-mix(in srgb, var(--nt-ink-crit) 14%, var(--nt-surface)); color: var(--nt-ink-crit); padding: 1px 6px; border-radius: 999px; font-size: 11px; margin-inline-start: 6px; }
     .result { margin-top: .6rem; padding: .5rem .7rem; border-radius: 6px; }
     .result.ok { background: color-mix(in srgb, var(--nt-ink-ok) 14%, transparent); }
     .result.no { background: color-mix(in srgb, var(--nt-ink-crit) 12%, transparent); }

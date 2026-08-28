@@ -116,10 +116,11 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
     .clickable { cursor: pointer; }
     h3 { margin: 1.4rem 0 .6rem; }
     select, button { width: auto; }
+    /* Ink tokens are text colours: pills carry a tint of the hue and the ink on top (≥4.5:1). */
     .tier { padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; }
-    .tier.expired { background: var(--nt-ink-crit); color: #fff; }
-    .tier.critical { background: var(--nt-ink-serious); color: #fff; }
-    .tier.warning { background: var(--nt-ink-warn); color: #3a2d00; }
+    .tier.expired { background: color-mix(in srgb, var(--nt-ink-crit) 14%, var(--nt-surface)); color: var(--nt-ink-crit); }
+    .tier.critical { background: color-mix(in srgb, var(--nt-ink-serious) 14%, var(--nt-surface)); color: var(--nt-ink-serious); }
+    .tier.warning { background: color-mix(in srgb, var(--nt-ink-warn) 16%, var(--nt-surface)); color: var(--nt-ink-warn); }
     .tier.ok { background: color-mix(in srgb, var(--nt-slate) 18%, transparent); color: var(--nt-slate); }
   `]
 })
