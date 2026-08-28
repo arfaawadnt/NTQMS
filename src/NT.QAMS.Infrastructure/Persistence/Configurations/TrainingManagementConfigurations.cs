@@ -55,7 +55,8 @@ public sealed class TrainingSessionConfiguration : IEntityTypeConfiguration<Trai
         {
             a.ToTable("training_session_attendance", "qams");
             a.Property<Guid>("TenantId");
-            a.WithOwner().HasForeignKey("TenantId", "training_session_id");
+            a.WithOwner().HasForeignKey("TenantId", "training_session_id")
+                .HasConstraintName("fk_ts_attendance_training_session_tenant_id_session_id");
             a.HasKey("TenantId", "Id");
             a.Ignore(x => x.ScoreGain);
         });

@@ -1001,3 +1001,12 @@ One atomic commit per finding; each carries a test that failed before the fix.
   `SignedRecordImmutabilityTests.Hqms_frozen_records_reject_raw_update_and_delete` (7 tamper
   probes, savepoint-isolated, all 23514) — both failed pre-fix. Domain 438 · App 130 · Arch 190 ·
   Integration 26+9 skips.
+- **M-14 (Major, closed)** — the five HQMS foreign keys that shipped with EF's silent 62-char
+  mid-word truncation ("…tenant_id_trai") are pinned to readable names via `HasConstraintName`
+  (map additions in CLAUDE.md §5: ind_meas, eq_safety_notice, prac_priv, doc_aud_dept,
+  ts_attendance); migration `20260828214735_PinTruncatedForeignKeyNames` renames in place
+  (`RENAME CONSTRAINT`, metadata-only — no FK revalidation), `Down()` restores the truncated
+  names. Executed proof on the throwaway: Up→5 pinned, Down→5 truncated restored, re-Up→5 pinned.
+  Guard test red-first: `RelationalNameTruncationTests` (model-level, snake_case-aware,
+  prefix-detection; 3 pre-baseline truncations frozen in a shrink-only allowlist) named exactly
+  the five pre-fix. App 131 · Integration 26+9 · Arch 190.

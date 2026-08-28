@@ -43,7 +43,8 @@ public sealed class PractitionerConfiguration : IEntityTypeConfiguration<Practit
         {
             pr.ToTable("practitioner_privilege", "qams");
             pr.Property<Guid>("TenantId");
-            pr.WithOwner().HasForeignKey("TenantId", "practitioner_id");
+            pr.WithOwner().HasForeignKey("TenantId", "practitioner_id")
+                .HasConstraintName("fk_prac_priv_practitioner_tenant_id_practitioner_id");
             pr.HasKey("TenantId", "Id");
             pr.Property(x => x.Name).HasMaxLength(200);
             pr.Property(x => x.DenialReason).HasMaxLength(1000);

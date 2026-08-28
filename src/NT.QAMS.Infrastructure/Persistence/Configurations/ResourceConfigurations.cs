@@ -75,7 +75,8 @@ public sealed class EquipmentItemConfiguration : IEntityTypeConfiguration<Equipm
         {
             sn.ToTable("equipment_safety_notice", "qams");
             sn.Property<Guid>("TenantId");
-            sn.WithOwner().HasForeignKey("TenantId", "equipment_id");
+            sn.WithOwner().HasForeignKey("TenantId", "equipment_id")
+                .HasConstraintName("fk_eq_safety_notice_equipment_item_tenant_id_equipment_id");
             sn.HasKey("TenantId", "Id");
             sn.Property(x => x.Reference).HasMaxLength(100);
             sn.Property(x => x.Issuer).HasMaxLength(200);

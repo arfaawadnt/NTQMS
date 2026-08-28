@@ -135,6 +135,11 @@ end-to-end playbook; it is the current, measured procedure, and it supersedes th
   `notification_dispatch->notif_dispatch` , `document_version->doc_ver` ,
   `supplier_evaluation->sup_eval` , `instrument_comparability_study->icp_study` ,
   `user_department_access->user_dept_access`. Unique indexes use the `ux_` prefix.
+  The same rule and map apply to FOREIGN KEY constraint names via `HasConstraintName()` (M-14):
+  `indicator_measurement->ind_meas` , `equipment_safety_notice->eq_safety_notice` ,
+  `practitioner_privilege->prac_priv` , `document_audience_department->doc_aud_dept` ,
+  `training_session_attendance->ts_attendance` (its FK column reads `session_id` in the name).
+  `RelationalNameTruncationTests` fails the build on any new silent FK truncation.
 - **Column sizing (schema hardening 1.2):** free-text columns sized >=1000 are `text` - the bound
   lives in the command validator (`MaximumLength`), not the column. Bounded codes, refs, enum
   strings and hashes keep explicit `varchar(n)` under 1000. Never drop a varchar bound without a

@@ -45,7 +45,8 @@ public sealed class QualityIndicatorConfiguration : IEntityTypeConfiguration<Qua
             // Shadow tenant column stamped from the owner; the composite FK to the owner
             // makes a mismatched value impossible to persist. RLS reads it.
             m.Property<Guid>("TenantId");
-            m.WithOwner().HasForeignKey("TenantId", "indicator_id");
+            m.WithOwner().HasForeignKey("TenantId", "indicator_id")
+                .HasConstraintName("fk_ind_meas_quality_indicator_tenant_id_indicator_id");
             m.HasKey("TenantId", "Id");
             m.Property(x => x.Numerator).HasPrecision(18, 4);
             m.Property(x => x.Denominator).HasPrecision(18, 4);

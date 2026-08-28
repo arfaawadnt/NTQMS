@@ -27,7 +27,8 @@ public sealed class ControlledDocumentConfiguration : IEntityTypeConfiguration<C
             // Shadow tenant column stamped from the owner; the composite FK to the
             // owner makes a mismatched value impossible to persist. RLS reads it.
             aud.Property<Guid>("TenantId");
-            aud.WithOwner().HasForeignKey("TenantId", "document_id");
+            aud.WithOwner().HasForeignKey("TenantId", "document_id")
+                .HasConstraintName("fk_doc_aud_dept_controlled_document_tenant_id_document_id");
             aud.HasKey("TenantId", "Id");
         });
 
