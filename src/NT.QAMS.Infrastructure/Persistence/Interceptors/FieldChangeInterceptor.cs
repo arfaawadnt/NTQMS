@@ -101,20 +101,29 @@ public sealed class FieldChangeInterceptor(
     }
 
     private FieldChangeRecord Record(
-        EntityEntry entry, string action, string? property, string? oldValue, string? newValue) => new()
+        EntityEntry entry, string action, string? property, string? oldValue, string? newValue)
     {
-        TenantId = TenantOf(entry),
-        EntityType = entry.Entity.GetType().Name,
-        EntityId = RenderKey(entry),
-        Action = action,
-        Property = property,
-        OldValue = oldValue,
-        NewValue = newValue,
-        ActorId = currentUser.UserId,
-        Actor = currentUser.DisplayName ?? "system",
-        Reason = changeReason.Reason,
-        OccurredAtUtc = clock.UtcNow,
-    };
+        // Anonymous origination (B-01): only the CREATION of an identity-suppressed
+        // record hides its actor — this ledger is tenant-visible, and the promise is
+        // that no reporter identity reaches it. Later transitions stay attributed.
+        var suppress = action == "Created"
+            && entry.Entity is NT.QAMS.SharedKernel.Primitives.IIdentitySuppressed { IdentitySuppressed: true };
+
+        return new()
+        {
+            TenantId = TenantOf(entry),
+            EntityType = entry.Entity.GetType().Name,
+            EntityId = RenderKey(entry),
+            Action = action,
+            Property = property,
+            OldValue = oldValue,
+            NewValue = newValue,
+            ActorId = suppress ? null : currentUser.UserId,
+            Actor = suppress ? "anonymous" : currentUser.DisplayName ?? "system",
+            Reason = changeReason.Reason,
+            OccurredAtUtc = clock.UtcNow,
+        };
+    }
 
     public static bool IsSensitive(string propertyName) =>
         Sensitive.Any(s => propertyName.Contains(s, StringComparison.OrdinalIgnoreCase));

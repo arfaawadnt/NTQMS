@@ -137,7 +137,7 @@ public sealed class IncidentTimelineEntry : Entity
 /// ceremonies handled at the application boundary — declaring a sentinel event and
 /// closing the record — and the aggregate re-checks their preconditions.
 /// </summary>
-public sealed class Incident : AggregateRoot, ITenantScoped
+public sealed class Incident : AggregateRoot, ITenantScoped, IIdentitySuppressed
 {
     private readonly List<ContributingFactor> _contributingFactors = [];
     private readonly List<IncidentTimelineEntry> _timeline = [];
@@ -196,6 +196,15 @@ public sealed class Incident : AggregateRoot, ITenantScoped
 
     /// <summary>True when identity was suppressed; no reporter is stored.</summary>
     public bool IsAnonymous { get; private set; }
+
+    /// <summary>
+    /// The anonymity promise, enforced at persistence (audit finding B-01): an
+    /// anonymous incident's CREATION is stamped "anonymous" with no user id — in
+    /// the audit columns and the tenant-visible field-change ledger alike. A
+    /// deliberate consequence: preparer-based SoD cannot apply to an anonymous
+    /// creation, because the system genuinely does not know the reporter.
+    /// </summary>
+    public bool IdentitySuppressed => IsAnonymous;
 
     /// <summary>
     /// SHA-256 (lower-case hex) of the one-time follow-up reference issued to an

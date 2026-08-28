@@ -45,8 +45,19 @@ public sealed class AuditStampInterceptor(IClock clock, ICurrentUser currentUser
             {
                 case EntityState.Added:
                     entry.Entity.CreatedAtUtc = now;
-                    entry.Entity.CreatedBy = actor;
-                    entry.Entity.CreatedByUserId = currentUser.UserId;
+                    if (entry.Entity is IIdentitySuppressed { IdentitySuppressed: true })
+                    {
+                        // Anonymous origination (B-01): the promise is that no
+                        // reporter identity is persisted anywhere on the record.
+                        entry.Entity.CreatedBy = "anonymous";
+                        entry.Entity.CreatedByUserId = null;
+                    }
+                    else
+                    {
+                        entry.Entity.CreatedBy = actor;
+                        entry.Entity.CreatedByUserId = currentUser.UserId;
+                    }
+
                     break;
                 case EntityState.Modified:
                     entry.Entity.ModifiedAtUtc = now;
