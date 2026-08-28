@@ -41,7 +41,7 @@ public sealed class PatientSafetyController(ISender sender) : ControllerBase
     {
         var id = await sender.Send(new ReportFallCommand(
             request.PatientRef, request.Unit, request.OccurredAtUtc,
-            Enum.Parse<HarmLevel>(request.Harm, ignoreCase: true), request.Description, request.DepartmentId), ct);
+            RequestEnum.Parse<HarmLevel>(request.Harm), request.Description, request.DepartmentId), ct);
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }
 
@@ -51,9 +51,9 @@ public sealed class PatientSafetyController(ISender sender) : ControllerBase
     {
         var id = await sender.Send(new ReportPressureInjuryCommand(
             request.PatientRef, request.Unit, request.OccurredAtUtc,
-            Enum.Parse<HarmLevel>(request.Harm, ignoreCase: true), request.Description,
-            Enum.Parse<PressureInjuryStage>(request.Stage, ignoreCase: true),
-            Enum.Parse<InjuryOrigin>(request.Origin, ignoreCase: true), request.DepartmentId), ct);
+            RequestEnum.Parse<HarmLevel>(request.Harm), request.Description,
+            RequestEnum.Parse<PressureInjuryStage>(request.Stage),
+            RequestEnum.Parse<InjuryOrigin>(request.Origin), request.DepartmentId), ct);
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }
 

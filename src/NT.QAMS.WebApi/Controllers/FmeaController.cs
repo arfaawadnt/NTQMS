@@ -35,7 +35,7 @@ public sealed class FmeaController(ISender sender) : ControllerBase
     {
         var id = await sender.Send(new CreateFmeaCommand(
             request.Title, request.ProcessName,
-            Enum.Parse<FmeaType>(request.Type, ignoreCase: true), request.BranchId, request.DepartmentId), ct);
+            RequestEnum.Parse<FmeaType>(request.Type), request.BranchId, request.DepartmentId), ct);
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }
 

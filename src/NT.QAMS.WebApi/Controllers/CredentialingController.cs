@@ -54,7 +54,7 @@ public sealed class CredentialingController(ISender sender) : ControllerBase
     public async Task<IActionResult> AddLicence(Guid id, AddLicenceRequest request, CancellationToken ct)
     {
         var licenceId = await sender.Send(new AddLicenceCommand(
-            id, Enum.Parse<CredentialType>(request.Type, ignoreCase: true), request.Identifier, request.Issuer, request.ExpiresOn), ct);
+            id, RequestEnum.Parse<CredentialType>(request.Type), request.Identifier, request.Issuer, request.ExpiresOn), ct);
         return Ok(new { id = licenceId });
     }
 

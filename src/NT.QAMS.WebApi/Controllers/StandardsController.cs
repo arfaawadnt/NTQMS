@@ -53,7 +53,7 @@ public sealed class StandardsController(ISender sender) : ControllerBase
     public async Task<IActionResult> Define(DefineStandardSetRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new DefineStandardSetCommand(
-            Enum.Parse<AccreditationFramework>(request.Framework, ignoreCase: true),
+            RequestEnum.Parse<AccreditationFramework>(request.Framework),
             request.Name, request.Version), ct);
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }
@@ -90,7 +90,7 @@ public sealed class StandardsController(ISender sender) : ControllerBase
         Guid id, Guid elementId, AssessElementRequest request, CancellationToken ct)
     {
         await sender.Send(new AssessElementCommand(
-            id, elementId, Enum.Parse<ComplianceStatus>(request.Status, ignoreCase: true), request.Note), ct);
+            id, elementId, RequestEnum.Parse<ComplianceStatus>(request.Status), request.Note), ct);
         return NoContent();
     }
 
@@ -99,7 +99,7 @@ public sealed class StandardsController(ISender sender) : ControllerBase
     public async Task<IActionResult> LinkEvidence(Guid id, LinkEvidenceRequest request, CancellationToken ct)
     {
         var evidenceId = await sender.Send(new LinkEvidenceCommand(
-            id, request.ElementId, Enum.Parse<EvidenceSourceType>(request.SourceType, ignoreCase: true),
+            id, request.ElementId, RequestEnum.Parse<EvidenceSourceType>(request.SourceType),
             request.SourceId, request.SourceRef, request.Description), ct);
         return Ok(new { evidenceId });
     }

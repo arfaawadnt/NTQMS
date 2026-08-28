@@ -47,8 +47,8 @@ public sealed class IntegrationController(ISender sender) : ControllerBase
     {
         var id = await sender.Send(new RegisterEndpointCommand(
             request.Name,
-            Enum.Parse<InterfaceSystem>(request.System, ignoreCase: true),
-            Enum.Parse<InterfaceProtocol>(request.Protocol, ignoreCase: true)), ct);
+            RequestEnum.Parse<InterfaceSystem>(request.System),
+            RequestEnum.Parse<InterfaceProtocol>(request.Protocol)), ct);
         return Ok(new { id });
     }
 
@@ -75,7 +75,7 @@ public sealed class IntegrationController(ISender sender) : ControllerBase
     {
         var result = await sender.Send(new IngestAdtEventCommand(
             id, request.DedupKey, request.MessageType, request.RawPayload,
-            Enum.Parse<AdtEventType>(request.EventType, ignoreCase: true),
+            RequestEnum.Parse<AdtEventType>(request.EventType),
             request.PatientRef, request.EncounterRef, request.Unit, request.DepartmentId, request.EventAtUtc), ct);
         return Ok(result);
     }

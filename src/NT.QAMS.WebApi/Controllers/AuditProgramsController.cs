@@ -43,7 +43,7 @@ public sealed class AuditProgramsController(ISender sender) : ControllerBase
     {
         var plannedId = await sender.Send(new AddPlannedAuditCommand(
             id, request.ScopeArea, request.DepartmentId, request.StandardChapter,
-            Enum.Parse<PlannedAuditPriority>(request.Priority, ignoreCase: true), request.PlannedQuarter), ct);
+            RequestEnum.Parse<PlannedAuditPriority>(request.Priority), request.PlannedQuarter), ct);
         return Ok(new { plannedId });
     }
 

@@ -39,7 +39,7 @@ public sealed class EnvironmentOfCareController(ISender sender) : ControllerBase
     public async Task<IActionResult> ScheduleRound(ScheduleRoundRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new ScheduleRoundCommand(
-            request.Area, Enum.Parse<RoundType>(request.Type, ignoreCase: true), request.ScheduledDate), ct);
+            request.Area, RequestEnum.Parse<RoundType>(request.Type), request.ScheduledDate), ct);
         return CreatedAtAction(nameof(GetRound), new { id }, new { id });
     }
 
@@ -56,7 +56,7 @@ public sealed class EnvironmentOfCareController(ISender sender) : ControllerBase
     public async Task<IActionResult> AddFinding(Guid id, AddFindingRequest request, CancellationToken ct)
     {
         var findingId = await sender.Send(new AddFindingCommand(
-            id, request.Description, Enum.Parse<FindingSeverity>(request.Severity, ignoreCase: true)), ct);
+            id, request.Description, RequestEnum.Parse<FindingSeverity>(request.Severity)), ct);
         return Ok(new { id = findingId });
     }
 
@@ -92,7 +92,7 @@ public sealed class EnvironmentOfCareController(ISender sender) : ControllerBase
     public async Task<IActionResult> ScheduleDrill(ScheduleDrillRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new ScheduleDrillCommand(
-            Enum.Parse<DrillType>(request.Type, ignoreCase: true), request.Location, request.ScheduledDate), ct);
+            RequestEnum.Parse<DrillType>(request.Type), request.Location, request.ScheduledDate), ct);
         return CreatedAtAction(nameof(GetDrill), new { id }, new { id });
     }
 

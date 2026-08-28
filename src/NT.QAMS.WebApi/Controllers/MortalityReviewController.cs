@@ -49,7 +49,7 @@ public sealed class MortalityReviewController(ISender sender) : ControllerBase
     public async Task<IActionResult> Classify(Guid id, ClassifyMortalityRequest request, CancellationToken ct)
     {
         await sender.Send(new ClassifyMortalityCommand(
-            id, Enum.Parse<DeathClassification>(request.Classification, ignoreCase: true), request.Findings), ct);
+            id, RequestEnum.Parse<DeathClassification>(request.Classification), request.Findings), ct);
         return NoContent();
     }
 
@@ -94,8 +94,8 @@ public sealed class MortalityReviewController(ISender sender) : ControllerBase
     {
         var id = await sender.Send(new ReportComplicationCommand(
             request.PatientRef, request.Unit,
-            Enum.Parse<ComplicationType>(request.Type, ignoreCase: true),
-            Enum.Parse<ComplicationSeverity>(request.Severity, ignoreCase: true),
+            RequestEnum.Parse<ComplicationType>(request.Type),
+            RequestEnum.Parse<ComplicationSeverity>(request.Severity),
             request.OccurredDateUtc, request.Description, request.DepartmentId), ct);
         return CreatedAtAction(nameof(GetComplication), new { id }, new { id });
     }

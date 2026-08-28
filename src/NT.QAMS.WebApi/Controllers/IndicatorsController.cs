@@ -46,8 +46,8 @@ public sealed class IndicatorsController(ISender sender) : ControllerBase
         var id = await sender.Send(new DefineIndicatorCommand(
             request.Code, request.Name, request.Description,
             request.Numerator, request.Denominator, request.Unit, request.RateFactor,
-            Enum.Parse<IndicatorFrequency>(request.Frequency, ignoreCase: true),
-            Enum.Parse<IndicatorDirection>(request.Direction, ignoreCase: true),
+            RequestEnum.Parse<IndicatorFrequency>(request.Frequency),
+            RequestEnum.Parse<IndicatorDirection>(request.Direction),
             request.Inclusions, request.Exclusions, request.DataSource), ct);
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }
@@ -59,8 +59,8 @@ public sealed class IndicatorsController(ISender sender) : ControllerBase
         await sender.Send(new UpdateIndicatorDefinitionCommand(
             id, request.Name, request.Description,
             request.Numerator, request.Denominator, request.Unit, request.RateFactor,
-            Enum.Parse<IndicatorFrequency>(request.Frequency, ignoreCase: true),
-            Enum.Parse<IndicatorDirection>(request.Direction, ignoreCase: true),
+            RequestEnum.Parse<IndicatorFrequency>(request.Frequency),
+            RequestEnum.Parse<IndicatorDirection>(request.Direction),
             request.Inclusions, request.Exclusions, request.DataSource), ct);
         return NoContent();
     }

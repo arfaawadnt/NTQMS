@@ -78,6 +78,17 @@ public sealed class DomainExceptionHandler : IExceptionHandler
                 Title = domain.Message,
                 Extensions = { ["code"] = domain.Code },
             },
+            // M-11: boundary conversions (RequestEnum, Guid/date parsing) throw
+            // ArgumentException for malformed request input — the client's
+            // error, surfaced as a 400 problem instead of an unhandled 500. The
+            // message is the parse diagnostic ("'X' is not a valid HarmGrade."),
+            // which identifies the offending field without leaking internals.
+            ArgumentException argument => new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = argument.Message,
+                Extensions = { ["code"] = "REQ-001" },
+            },
             _ => null,
         };
 

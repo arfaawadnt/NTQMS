@@ -50,9 +50,9 @@ public sealed class IncidentsController(ISender sender) : ControllerBase
     {
         var id = await sender.Send(new ReportIncidentCommand(
             request.Title, request.Description,
-            Enum.Parse<IncidentCategory>(request.Category, ignoreCase: true),
-            Enum.Parse<HarmGrade>(request.HarmGrade, ignoreCase: true),
-            Enum.Parse<IntakeChannel>(request.Channel, ignoreCase: true),
+            RequestEnum.Parse<IncidentCategory>(request.Category),
+            RequestEnum.Parse<HarmGrade>(request.HarmGrade),
+            RequestEnum.Parse<IntakeChannel>(request.Channel),
             request.OccurredAtUtc, request.Location, request.BranchId, request.DepartmentId), ct);
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }
@@ -63,9 +63,9 @@ public sealed class IncidentsController(ISender sender) : ControllerBase
     {
         var receipt = await sender.Send(new ReportAnonymousIncidentCommand(
             request.Title, request.Description,
-            Enum.Parse<IncidentCategory>(request.Category, ignoreCase: true),
-            Enum.Parse<HarmGrade>(request.HarmGrade, ignoreCase: true),
-            Enum.Parse<IntakeChannel>(request.Channel, ignoreCase: true),
+            RequestEnum.Parse<IncidentCategory>(request.Category),
+            RequestEnum.Parse<HarmGrade>(request.HarmGrade),
+            RequestEnum.Parse<IntakeChannel>(request.Channel),
             request.OccurredAtUtc, request.Location, request.BranchId, request.DepartmentId), ct);
         return Ok(receipt);
     }
@@ -76,7 +76,7 @@ public sealed class IncidentsController(ISender sender) : ControllerBase
     {
         await sender.Send(new TriageIncidentCommand(
             id, request.AssigneeId,
-            Enum.Parse<IncidentCategory>(request.Category, ignoreCase: true)), ct);
+            RequestEnum.Parse<IncidentCategory>(request.Category)), ct);
         return NoContent();
     }
 
@@ -102,7 +102,7 @@ public sealed class IncidentsController(ISender sender) : ControllerBase
         Guid id, AddContributingFactorRequest request, CancellationToken ct)
     {
         await sender.Send(new AddContributingFactorCommand(
-            id, Enum.Parse<ContributingFactorCategory>(request.Category, ignoreCase: true), request.Description), ct);
+            id, RequestEnum.Parse<ContributingFactorCategory>(request.Category), request.Description), ct);
         return NoContent();
     }
 

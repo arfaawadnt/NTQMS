@@ -126,8 +126,17 @@ permission configuration only. The lab-edition v1.53.x/v1.54.x posture and its o
 (DOC-001, SEC-001) are unaffected. The HQMS validation package (URS/FRA/RTM/OQ) is tracked
 separately under audit finding B-02.
 
+## Also in this line — API error-contract change (M-11)
+
+A malformed enum value in any request (e.g. `"category": "NotACategory"` or an out-of-range numeric
+string) now answers **400** problem+json with code **`REQ-001`** and a message naming the invalid
+value and field type. Previously the fleet answered **500** for unknown names, and numeric strings
+could smuggle undefined values to the database CHECK constraints. This applies to legacy endpoints
+too (the mapping is in the shared exception handler). Clients that treated the old 500 as a retry
+signal should treat `REQ-001` as a permanent request error.
+
 ## Reference
 
-Audit register: `E:\QMS\NT_QAMS_HQMS_Audit_Register_2026-08-28.md`, finding **M-07**.
+Audit register: `E:\QMS\NT_QAMS_HQMS_Audit_Register_2026-08-28.md`, findings **M-07**, **M-11**.
 Catalog source of truth: `src/NT.QAMS.Application/Authorization/SystemRoleCatalog.cs`.
 Change log: `IMPLEMENTATION_LOG.md` (M-07 entry).

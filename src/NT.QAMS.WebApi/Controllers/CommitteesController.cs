@@ -46,7 +46,7 @@ public sealed class CommitteesController(ISender sender) : ControllerBase
     {
         var id = await sender.Send(new CreateCommitteeCommand(
             request.Name, request.TermsOfReference,
-            Enum.Parse<CommitteeFrequency>(request.Frequency, ignoreCase: true), request.QuorumSize), ct);
+            RequestEnum.Parse<CommitteeFrequency>(request.Frequency), request.QuorumSize), ct);
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }
 

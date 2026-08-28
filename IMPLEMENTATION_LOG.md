@@ -974,3 +974,11 @@ One atomic commit per finding; each carries a test that failed before the fix.
   session) — risk bounded statically: `role_permission.permission_key` is varchar(60), longest new
   key is 26 chars, and Tenant Administrator's AllKeys grant already persisted all 65 keys on real
   PG in the 2026-08-28 green run; the new grants are same-shape subsets.
+- **M-11 (Major, closed)** — malformed enum input is a 400, not a 500 (and never a smuggled write):
+  new `RequestEnum.Parse<T>` (case-insensitive, defined-values-only) replaces `Enum.Parse` at all
+  36 boundary sites in the 13 HQMS controllers; `DomainExceptionHandler` maps `ArgumentException`
+  → 400 problem+json `REQ-001` fleet-wide (legacy endpoints' unknown-name path improves 500→400;
+  disclosed in the release note). Legacy `Enum.Parse` sites and the 11 application-layer sites
+  stay as recorded out-of-scope observations, now backstopped by the handler arm. Tests red-first:
+  `MalformedEnumRequestTests` (unknown name = 500 pre-fix; undefined numeric = 201 pre-fix — both
+  400 `REQ-001` after) + `RequestEnumTests` (4 contract facts). Functional 98/98, Arch 190/190.

@@ -40,7 +40,7 @@ public sealed class TrainingController(ISender sender) : ControllerBase
     public async Task<IActionResult> DefineCourse(DefineCourseRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new DefineCourseCommand(
-            request.Title, Enum.Parse<TrainingCategory>(request.Category, ignoreCase: true), request.Description,
+            request.Title, RequestEnum.Parse<TrainingCategory>(request.Category), request.Description,
             request.DurationHours, request.ValidityMonths, request.PassMark), ct);
         return CreatedAtAction(nameof(GetCourse), new { id }, new { id });
     }
@@ -50,7 +50,7 @@ public sealed class TrainingController(ISender sender) : ControllerBase
     public async Task<IActionResult> UpdateCourse(Guid id, UpdateCourseRequest request, CancellationToken ct)
     {
         await sender.Send(new UpdateCourseCommand(
-            id, request.Title, Enum.Parse<TrainingCategory>(request.Category, ignoreCase: true), request.Description,
+            id, request.Title, RequestEnum.Parse<TrainingCategory>(request.Category), request.Description,
             request.DurationHours, request.ValidityMonths, request.PassMark), ct);
         return NoContent();
     }

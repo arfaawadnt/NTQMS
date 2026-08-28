@@ -41,7 +41,7 @@ public sealed class InfectionControlController(ISender sender) : ControllerBase
     public async Task<IActionResult> ReportCase(ReportHaiCaseRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new ReportHaiCaseCommand(
-            Enum.Parse<HaiType>(request.Type, ignoreCase: true), request.PatientRef, request.Unit,
+            RequestEnum.Parse<HaiType>(request.Type), request.PatientRef, request.Unit,
             request.OnsetDateUtc, request.Organism, request.Description, request.DepartmentId), ct);
         return CreatedAtAction(nameof(GetCase), new { id }, new { id });
     }
@@ -73,7 +73,7 @@ public sealed class InfectionControlController(ISender sender) : ControllerBase
     public async Task<IActionResult> RecordDevice(RecordDeviceExposureRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new RecordDeviceExposureCommand(
-            request.PatientRef, request.Unit, Enum.Parse<DeviceType>(request.DeviceType, ignoreCase: true),
+            request.PatientRef, request.Unit, RequestEnum.Parse<DeviceType>(request.DeviceType),
             request.InsertedAtUtc, request.DepartmentId), ct);
         return CreatedAtAction(nameof(ListDevices), new { }, new { id });
     }
