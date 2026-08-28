@@ -16,13 +16,21 @@ public class ModuleBoundaryTests
 {
     private static readonly Assembly Domain = typeof(NT.QAMS.Domain.Tenancy.Tenant).Assembly;
 
-    /// <summary>The bounded contexts under NT.QAMS.Domain.</summary>
-    private static readonly string[] Modules =
+    /// <summary>
+    /// The bounded contexts under NT.QAMS.Domain — laboratory originals plus the
+    /// HQMS hospital contexts. <see cref="ModuleListExhaustivenessTests"/> fails
+    /// the build if a context exists in the assembly but not here.
+    /// </summary>
+    internal static readonly string[] Modules =
     [
         "AnalyticalQuality", "AuditManagement", "Competency", "ComplianceLedger",
         "DocumentControl", "Equipment", "Facility", "Files", "IdentityAccess",
         "Improvement", "Notifications", "Organization", "Records", "Reporting",
         "RiskGovernance", "Sla", "SupplierQuality", "Tenancy",
+        // HQMS hospital contexts (feature/hqms-hospital-modules)
+        "Accreditation", "Committees", "Credentialing", "EnvironmentOfCare",
+        "IncidentReporting", "InfectionControl", "Integration", "MortalityReview",
+        "PatientExperience", "PatientSafety", "QualityIndicators", "TrainingManagement",
     ];
 
     public static TheoryData<string> ModuleNames()
