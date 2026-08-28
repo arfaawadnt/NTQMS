@@ -305,6 +305,12 @@ public sealed class ApproveChangeHandler(
                 "CHG-012", "A change cannot be approved without a linked risk assessment.");
         }
 
+        if (change.ImpactLevel == ChangeImpactLevel.High && actor == change.ProposedBy)
+        {
+            throw new DomainException(
+                "CHG-016", "A high-impact change must be approved by someone other than its proposer.");
+        }
+
         var subjectRef = $"CHG:{change.Id:N}";
         await signatures.SignAsync(
             actor, c.Password, c.Pin, $"Approved change {change.ChangeRef}", subjectRef,
@@ -364,6 +370,12 @@ public sealed class RatifyChangeHandler(
         {
             throw new DomainException(
                 "CHG-031", "An emergency change cannot be ratified without a retrospective risk assessment.");
+        }
+
+        if (actor == change.ProposedBy)
+        {
+            throw new DomainException(
+                "CHG-032", "An emergency change must be ratified by someone other than its proposer.");
         }
 
         var subjectRef = $"CHG:{change.Id:N}";
