@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterOutlet } from '@angular/router';
 import { TrainingFacade } from './training.facade';
 import { I18nService } from '../../core/i18n.service';
+import { PermissionsService } from '../../core/permissions.service';
 import { COURSE_STATUSES, TRAINING_CATEGORIES, TrainingCategory } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
@@ -19,7 +20,9 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
     imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent],
     template: `
     <qams-page-header [title]="i18n.t('trn.title')">
-      <button (click)="form.reset(defaults); showForm.set(true)">{{ i18n.t('trn.defineCourse') }}</button>
+      @if (perms.can('training.create')) {
+        <button (click)="form.reset(defaults); showForm.set(true)">{{ i18n.t('trn.defineCourse') }}</button>
+      }
     </qams-page-header>
 
     <qams-list-stats [stats]="stats()" />
@@ -98,6 +101,7 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
 export class TrainingListComponent implements OnInit {
   readonly facade = inject(TrainingFacade);
   readonly i18n = inject(I18nService);
+  readonly perms = inject(PermissionsService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
 

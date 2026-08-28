@@ -4,6 +4,7 @@ import { DatePipe } from '@angular/common';
 import { Router, RouterOutlet } from '@angular/router';
 import { PatientSafetyFacade } from './patient-safety.facade';
 import { I18nService } from '../../core/i18n.service';
+import { PermissionsService } from '../../core/permissions.service';
 import {
   HARM_LEVELS, HarmLevel, INJURY_ORIGINS, InjuryOrigin, PRESSURE_INJURY_STAGES, PressureInjuryStage,
   SAFETY_EVENT_STATUSES, SAFETY_EVENT_TYPES, SafetyEventType,
@@ -23,8 +24,10 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
     imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent],
     template: `
     <qams-page-header [title]="i18n.t('psf.title')">
-      <button (click)="openForm('Fall')">{{ i18n.t('psf.reportFall') }}</button>
-      <button class="secondary" (click)="openForm('PressureInjury')">{{ i18n.t('psf.reportPi') }}</button>
+      @if (perms.can('patient-safety.create')) {
+        <button (click)="openForm('Fall')">{{ i18n.t('psf.reportFall') }}</button>
+        <button class="secondary" (click)="openForm('PressureInjury')">{{ i18n.t('psf.reportPi') }}</button>
+      }
     </qams-page-header>
 
     <qams-list-stats [stats]="stats()" />
@@ -105,6 +108,7 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
 export class PatientSafetyListComponent implements OnInit {
   readonly facade = inject(PatientSafetyFacade);
   readonly i18n = inject(I18nService);
+  readonly perms = inject(PermissionsService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
 

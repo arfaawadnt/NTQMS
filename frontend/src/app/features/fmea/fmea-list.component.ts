@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterOutlet } from '@angular/router';
 import { FmeaFacade } from './fmea.facade';
 import { I18nService } from '../../core/i18n.service';
+import { PermissionsService } from '../../core/permissions.service';
 import { FMEA_TYPES, FmeaType } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
@@ -19,7 +20,9 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
     imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent],
     template: `
     <qams-page-header [title]="i18n.t('fme.title')">
-      <button (click)="showForm.set(true)">{{ i18n.t('fme.new') }}</button>
+      @if (perms.can('risks.create')) {
+        <button (click)="showForm.set(true)">{{ i18n.t('fme.new') }}</button>
+      }
     </qams-page-header>
 
     <qams-list-stats [stats]="stats()" ratioFromFirst />
@@ -87,6 +90,7 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
 export class FmeaListComponent implements OnInit {
   readonly facade = inject(FmeaFacade);
   readonly i18n = inject(I18nService);
+  readonly perms = inject(PermissionsService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
 

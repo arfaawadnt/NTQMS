@@ -4,6 +4,7 @@ import { DecimalPipe } from '@angular/common';
 import { Router, RouterOutlet } from '@angular/router';
 import { AuditProgramsFacade } from './audit-programs.facade';
 import { I18nService } from '../../core/i18n.service';
+import { PermissionsService } from '../../core/permissions.service';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
@@ -19,7 +20,9 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
     imports: [ReactiveFormsModule, DecimalPipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent],
     template: `
     <qams-page-header [title]="i18n.t('apg.title')">
-      <button (click)="showForm.set(true)">{{ i18n.t('apg.new') }}</button>
+      @if (perms.can('audits.create')) {
+        <button (click)="showForm.set(true)">{{ i18n.t('apg.new') }}</button>
+      }
     </qams-page-header>
 
     <qams-list-stats [stats]="stats()" ratioFromFirst />
@@ -87,6 +90,7 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
 export class AuditProgramsListComponent implements OnInit {
   readonly facade = inject(AuditProgramsFacade);
   readonly i18n = inject(I18nService);
+  readonly perms = inject(PermissionsService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
 

@@ -76,7 +76,7 @@ import { SignatureManifestComponent } from '../../shared/ui/signature-manifest.c
 
           @switch (n.status) {
             @case ('Reported') {
-              @if (perms.canAny('incidents.approve', 'incidents.void')) {
+              @if (perms.can('incidents.approve')) {
                 <form [formGroup]="triageForm" (ngSubmit)="facade.triage(n.id, triageForm.getRawValue())">
                   <label>{{ i18n.t('inc.assignee') }}</label>
                   <qams-user-select formControlName="assigneeId" />
@@ -84,12 +84,17 @@ import { SignatureManifestComponent } from '../../shared/ui/signature-manifest.c
                   <select formControlName="category">@for (c of categories; track c) { <option [value]="c">{{ i18n.t('inc.cat.' + c) }}</option> }</select>
                   <button type="submit" [disabled]="triageForm.invalid">{{ i18n.t('inc.triage') }}</button>
                 </form>
+              }
+              @if (perms.can('incidents.void')) {
                 <form [formGroup]="rejectForm" (ngSubmit)="facade.reject(n.id, rejectForm.getRawValue())">
                   <label>{{ i18n.t('inc.rejectReason') }}</label>
                   <input formControlName="reason" />
                   <button type="submit" class="secondary" [disabled]="rejectForm.invalid">{{ i18n.t('inc.reject') }}</button>
                 </form>
-              } @else { <p class="muted">{{ i18n.t('inc.awaitTriage') }}</p> }
+              }
+              @if (!perms.canAny('incidents.approve', 'incidents.void')) {
+                <p class="muted">{{ i18n.t('inc.awaitTriage') }}</p>
+              }
             }
             @case ('Triaged') {
               @if (perms.can('incidents.approve')) {
@@ -125,6 +130,9 @@ import { SignatureManifestComponent } from '../../shared/ui/signature-manifest.c
               @if (perms.can('incidents.approve')) {
                 <button (click)="facade.submitForReview(n.id)" [disabled]="!n.investigationSummary">{{ i18n.t('inc.submitReview') }}</button>
                 @if (!n.investigationSummary) { <p class="muted">{{ i18n.t('inc.summaryFirst') }}</p> }
+              }
+              @if (!perms.canAny('incidents.edit', 'incidents.approve')) {
+                <p class="muted">{{ i18n.t('inc.awaitInvestigation') }}</p>
               }
             }
             @case ('PendingReview') {

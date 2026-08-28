@@ -4,6 +4,7 @@ import { DatePipe } from '@angular/common';
 import { Router, RouterOutlet } from '@angular/router';
 import { MortalityReviewFacade } from './mortality-review.facade';
 import { I18nService } from '../../core/i18n.service';
+import { PermissionsService } from '../../core/permissions.service';
 import {
   COMPLICATION_SEVERITIES, COMPLICATION_TYPES, ComplicationListItem, ComplicationSeverity, ComplicationType,
   DEATH_CLASSIFICATIONS, MORTALITY_STATUSES,
@@ -25,8 +26,10 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
     imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent],
     template: `
     <qams-page-header [title]="i18n.t('mm.title')">
-      <button (click)="deathForm.reset(deathDefaults); showDeath.set(true)">{{ i18n.t('mm.reportDeath') }}</button>
-      <button class="secondary" (click)="compForm.reset(compDefaults); showComp.set(true)">{{ i18n.t('mm.reportComplication') }}</button>
+      @if (perms.can('mortality-review.create')) {
+        <button (click)="deathForm.reset(deathDefaults); showDeath.set(true)">{{ i18n.t('mm.reportDeath') }}</button>
+        <button class="secondary" (click)="compForm.reset(compDefaults); showComp.set(true)">{{ i18n.t('mm.reportComplication') }}</button>
+      }
     </qams-page-header>
 
     <qams-list-stats [stats]="stats()" />
@@ -172,6 +175,7 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
 export class MortalityReviewListComponent implements OnInit {
   readonly facade = inject(MortalityReviewFacade);
   readonly i18n = inject(I18nService);
+  readonly perms = inject(PermissionsService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
 

@@ -4,6 +4,7 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import { Router, RouterOutlet } from '@angular/router';
 import { IndicatorsFacade } from './indicators.facade';
 import { I18nService } from '../../core/i18n.service';
+import { PermissionsService } from '../../core/permissions.service';
 import {
   INDICATOR_DIRECTIONS, INDICATOR_FREQUENCIES, INDICATOR_STATUSES, IndicatorDirection, IndicatorFrequency,
 } from '../../core/models';
@@ -23,7 +24,9 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
     imports: [ReactiveFormsModule, DatePipe, DecimalPipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent, LoadMoreComponent],
     template: `
     <qams-page-header [title]="i18n.t('qi.title')">
-      <button (click)="showForm.set(true)">{{ i18n.t('qi.new') }}</button>
+      @if (perms.can('indicators.create')) {
+        <button (click)="showForm.set(true)">{{ i18n.t('qi.new') }}</button>
+      }
     </qams-page-header>
 
     <qams-list-stats [stats]="stats()" ratioFromFirst />
@@ -145,6 +148,7 @@ import { LoadMoreComponent } from '../../shared/ui/load-more.component';
 export class IndicatorsListComponent implements OnInit {
   readonly facade = inject(IndicatorsFacade);
   readonly i18n = inject(I18nService);
+  readonly perms = inject(PermissionsService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
 

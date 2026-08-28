@@ -4,6 +4,7 @@ import { DatePipe } from '@angular/common';
 import { Router, RouterOutlet } from '@angular/router';
 import { CredentialingFacade } from './credentialing.facade';
 import { I18nService } from '../../core/i18n.service';
+import { PermissionsService } from '../../core/permissions.service';
 import { PRACTITIONER_STATUSES } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
@@ -21,7 +22,9 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
     imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent],
     template: `
     <qams-page-header [title]="i18n.t('crd.title')">
-      <button (click)="form.reset({ fullName: '', specialty: '' }); showForm.set(true)">{{ i18n.t('crd.register') }}</button>
+      @if (perms.can('credentialing.create')) {
+        <button (click)="form.reset({ fullName: '', specialty: '' }); showForm.set(true)">{{ i18n.t('crd.register') }}</button>
+      }
     </qams-page-header>
 
     <qams-list-stats [stats]="stats()" />
@@ -123,6 +126,7 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
 export class CredentialingListComponent implements OnInit {
   readonly facade = inject(CredentialingFacade);
   readonly i18n = inject(I18nService);
+  readonly perms = inject(PermissionsService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
 

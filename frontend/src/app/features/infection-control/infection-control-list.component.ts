@@ -4,6 +4,7 @@ import { DatePipe } from '@angular/common';
 import { Router, RouterOutlet } from '@angular/router';
 import { InfectionControlFacade } from './infection-control.facade';
 import { I18nService } from '../../core/i18n.service';
+import { PermissionsService } from '../../core/permissions.service';
 import {
   DEVICE_TYPES, DeviceType, HAI_STATUSES, HAI_TYPES, HaiType,
 } from '../../core/models';
@@ -23,8 +24,10 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
     imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent],
     template: `
     <qams-page-header [title]="i18n.t('ipc.title')">
-      <button (click)="caseForm.reset(caseDefaults); showCase.set(true)">{{ i18n.t('ipc.reportCase') }}</button>
-      <button class="secondary" (click)="deviceForm.reset(deviceDefaults); showDevice.set(true)">{{ i18n.t('ipc.recordDevice') }}</button>
+      @if (perms.can('infection-control.create')) {
+        <button (click)="caseForm.reset(caseDefaults); showCase.set(true)">{{ i18n.t('ipc.reportCase') }}</button>
+        <button class="secondary" (click)="deviceForm.reset(deviceDefaults); showDevice.set(true)">{{ i18n.t('ipc.recordDevice') }}</button>
+      }
     </qams-page-header>
 
     <qams-list-stats [stats]="stats()" />
@@ -151,6 +154,7 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
 export class InfectionControlListComponent implements OnInit {
   readonly facade = inject(InfectionControlFacade);
   readonly i18n = inject(I18nService);
+  readonly perms = inject(PermissionsService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
 

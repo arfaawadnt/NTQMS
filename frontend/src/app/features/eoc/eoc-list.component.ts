@@ -4,6 +4,7 @@ import { DatePipe } from '@angular/common';
 import { Router, RouterOutlet } from '@angular/router';
 import { EocFacade } from './eoc.facade';
 import { I18nService } from '../../core/i18n.service';
+import { PermissionsService } from '../../core/permissions.service';
 import { DRILL_TYPES, DrillType, ROUND_TYPES, RoundType } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
@@ -21,8 +22,10 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
     imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent],
     template: `
     <qams-page-header [title]="i18n.t('eoc.title')">
-      <button (click)="roundForm.reset(roundDefaults); showRound.set(true)">{{ i18n.t('eoc.scheduleRound') }}</button>
-      <button class="secondary" (click)="drillForm.reset(drillDefaults); showDrill.set(true)">{{ i18n.t('eoc.scheduleDrill') }}</button>
+      @if (perms.can('environment-of-care.create')) {
+        <button (click)="roundForm.reset(roundDefaults); showRound.set(true)">{{ i18n.t('eoc.scheduleRound') }}</button>
+        <button class="secondary" (click)="drillForm.reset(drillDefaults); showDrill.set(true)">{{ i18n.t('eoc.scheduleDrill') }}</button>
+      }
     </qams-page-header>
 
     <qams-list-stats [stats]="stats()" />
@@ -129,6 +132,7 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
 export class EocListComponent implements OnInit {
   readonly facade = inject(EocFacade);
   readonly i18n = inject(I18nService);
+  readonly perms = inject(PermissionsService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
 

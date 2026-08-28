@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterOutlet } from '@angular/router';
 import { CommitteesFacade } from './committees.facade';
 import { I18nService } from '../../core/i18n.service';
+import { PermissionsService } from '../../core/permissions.service';
 import { COMMITTEE_FREQUENCIES, CommitteeFrequency } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
@@ -16,7 +17,9 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
     imports: [ReactiveFormsModule, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent],
     template: `
     <qams-page-header [title]="i18n.t('cte.title')">
-      <button (click)="showForm.set(true)">{{ i18n.t('cte.new') }}</button>
+      @if (perms.can('committees.create')) {
+        <button (click)="showForm.set(true)">{{ i18n.t('cte.new') }}</button>
+      }
     </qams-page-header>
 
     <qams-list-stats [stats]="stats()" ratioFromFirst />
@@ -82,6 +85,7 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
 export class CommitteesListComponent implements OnInit {
   readonly facade = inject(CommitteesFacade);
   readonly i18n = inject(I18nService);
+  readonly perms = inject(PermissionsService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
 

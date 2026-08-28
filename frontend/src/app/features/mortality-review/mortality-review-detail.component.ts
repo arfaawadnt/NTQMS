@@ -83,6 +83,8 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
               } @else if (perms.can('mortality-review.void')) {
                 <p class="muted">{{ i18n.t('mm.expectedCloseHint') }}</p>
                 <button (click)="facade.closeReview(m.id)" [disabled]="facade.loading()">{{ i18n.t('mm.close') }}</button>
+              } @else {
+                <p class="muted">{{ i18n.t('mm.awaitClose') }}</p>
               }
             }
             @case ('SecondReviewed') {
