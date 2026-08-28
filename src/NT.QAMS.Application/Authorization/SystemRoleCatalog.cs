@@ -113,6 +113,9 @@ public static class SystemRoleCatalog
                 // Branch/department/test/list upkeep was QM work; deactivating
                 // org units (Manage) stays tenant-admin.
                 PermissionCatalog.Organization => action is not PermissionAction.Manage,
+                // HQMS hospital modules (M-07): the QM runs hospital-wide
+                // quality — full reach over the clinical registries, committee
+                // governance and the ADT interface monitor is deliberate.
                 _ => true,
             }));
 
@@ -144,7 +147,26 @@ public static class SystemRoleCatalog
                 (PermissionCatalog.ProficiencyTesting, [PermissionAction.View, PermissionAction.Create, PermissionAction.Edit, PermissionAction.Export]),
                 (PermissionCatalog.Tasks, [PermissionAction.View, PermissionAction.Create, PermissionAction.Edit]),
                 (PermissionCatalog.Notifications, [PermissionAction.View]),
-                (PermissionCatalog.Reports, [PermissionAction.View, PermissionAction.Export])));
+                (PermissionCatalog.Reports, [PermissionAction.View, PermissionAction.Export]),
+                // HQMS hospital modules (M-07): a department head runs their
+                // unit's patient-safety work — manages occurrences (no sign-off,
+                // which stays QM+), records HAI and mortality/complication
+                // cases, conducts environment-of-care rounds, enters survey
+                // responses (response entry shares surveys.create) and checks a
+                // practitioner's privileges at the point of care. Committee,
+                // indicator and accreditation governance stays QM+; credential
+                // decisions stay with the medical staff office (QM/admin); the
+                // ADT interface monitor is an administrative surface, excluded.
+                (PermissionCatalog.Incidents, [PermissionAction.View, PermissionAction.Create, PermissionAction.Edit, PermissionAction.Export]),
+                (PermissionCatalog.PatientSafety, [PermissionAction.View, PermissionAction.Create, PermissionAction.Export]),
+                (PermissionCatalog.InfectionControl, [PermissionAction.View, PermissionAction.Create, PermissionAction.Export]),
+                (PermissionCatalog.MortalityReview, [PermissionAction.View, PermissionAction.Create, PermissionAction.Export]),
+                (PermissionCatalog.EnvironmentOfCare, [PermissionAction.View, PermissionAction.Create, PermissionAction.Edit, PermissionAction.Export]),
+                (PermissionCatalog.Credentialing, [PermissionAction.View, PermissionAction.Export]),
+                (PermissionCatalog.Indicators, [PermissionAction.View, PermissionAction.Export]),
+                (PermissionCatalog.Standards, [PermissionAction.View, PermissionAction.Export]),
+                (PermissionCatalog.Committees, [PermissionAction.View, PermissionAction.Export]),
+                (PermissionCatalog.Surveys, [PermissionAction.View, PermissionAction.Create, PermissionAction.Export])));
 
         yield return (
             Analyst,
@@ -174,7 +196,24 @@ public static class SystemRoleCatalog
                 (PermissionCatalog.ProficiencyTesting, [PermissionAction.View, PermissionAction.Export]),
                 (PermissionCatalog.Tasks, [PermissionAction.View, PermissionAction.Edit]),
                 (PermissionCatalog.Notifications, [PermissionAction.View]),
-                (PermissionCatalog.Reports, [PermissionAction.View, PermissionAction.Export])));
+                (PermissionCatalog.Reports, [PermissionAction.View, PermissionAction.Export]),
+                // HQMS hospital modules (M-07): front-line staff report
+                // occurrences and record HAI and mortality/complication cases,
+                // capture survey responses (response entry shares
+                // surveys.create), read rounds and reference registers, and
+                // verify a practitioner's privileges at the point of care
+                // (credentialing.view — a bedside safety check). No edit or
+                // governance rights; the ADT interface monitor is excluded.
+                (PermissionCatalog.Incidents, [PermissionAction.View, PermissionAction.Create, PermissionAction.Export]),
+                (PermissionCatalog.PatientSafety, [PermissionAction.View, PermissionAction.Create, PermissionAction.Export]),
+                (PermissionCatalog.InfectionControl, [PermissionAction.View, PermissionAction.Create, PermissionAction.Export]),
+                (PermissionCatalog.MortalityReview, [PermissionAction.View, PermissionAction.Create, PermissionAction.Export]),
+                (PermissionCatalog.EnvironmentOfCare, [PermissionAction.View, PermissionAction.Export]),
+                (PermissionCatalog.Credentialing, [PermissionAction.View]),
+                (PermissionCatalog.Indicators, [PermissionAction.View, PermissionAction.Export]),
+                (PermissionCatalog.Standards, [PermissionAction.View]),
+                (PermissionCatalog.Committees, [PermissionAction.View]),
+                (PermissionCatalog.Surveys, [PermissionAction.View, PermissionAction.Create])));
 
         yield return (
             ExternalAuditor,
@@ -186,6 +225,19 @@ public static class SystemRoleCatalog
                 // Not part of the auditable quality record surface the fixed
                 // tier could reach.
                 PermissionCatalog.QualityPolicy or PermissionCatalog.AccessReviews => false,
+                // HQMS hospital modules (M-07): the external auditor audits the
+                // quality SYSTEM, not patients. The clinical registries
+                // (patient-safety events, HAI cases, mortality/complication
+                // reviews), practitioner credential files and the ADT census
+                // hold patient- and practitioner-adjacent detail the seeded
+                // read-only role must not reach. Quality-record surfaces
+                // (incidents, indicators, standards, committees, surveys,
+                // environment-of-care) stay auditor-readable. A tenant hosting
+                // a clinical surveyor grants these keys to a custom role, on
+                // the record.
+                PermissionCatalog.PatientSafety or PermissionCatalog.InfectionControl
+                    or PermissionCatalog.MortalityReview or PermissionCatalog.Credentialing
+                    or PermissionCatalog.Integration => false,
                 // Review packs were exportable by QM/admin only.
                 PermissionCatalog.ManagementReviews => action is PermissionAction.View,
                 PermissionCatalog.Tasks or PermissionCatalog.Notifications => action is PermissionAction.View,

@@ -78,6 +78,19 @@ public sealed class RolePrivilegeFlowTests(QamsWebAppFactory factory)
         catalog.EnsureSuccessStatusCode();
         using var doc = JsonDocument.Parse(await catalog.Content.ReadAsStringAsync());
         doc.RootElement.GetProperty("modules").GetArrayLength().Should().BeGreaterThan(25);
+
+        // M-07: the HQMS grant decisions are visible over HTTP exactly as seeded.
+        var deptHeadId = roles.Single(r => r.name == "Department Head").id;
+        var deptHead = (await admin.GetFromJsonAsync<RoleDetail>($"/api/roles/{deptHeadId}"))!;
+        deptHead.permissionKeys.Should().Contain("patient-safety.create")
+            .And.Contain("credentialing.view")
+            .And.NotContain("integration.view");
+
+        var auditorId = roles.Single(r => r.name == "External Auditor").id;
+        var auditorRole = (await admin.GetFromJsonAsync<RoleDetail>($"/api/roles/{auditorId}"))!;
+        auditorRole.permissionKeys.Should().Contain("incidents.view")
+            .And.NotContain("patient-safety.view")
+            .And.NotContain("integration.view");
     }
 
     [Fact]

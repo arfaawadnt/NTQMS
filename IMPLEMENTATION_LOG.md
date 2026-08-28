@@ -947,3 +947,30 @@ PostgreSQL; both new migrations round-trip; `ApiSurface.approved.txt` updated fo
 - **Group A remediation (approved 2026-08-28, one atomic commit per finding, each with a test red before the fix):**
   `45ebd7b` M-01 SoD pre-checks before the ceremony signature (Ratify/Approve) · `f6d0a20` M-15 evidence links verified in-tenant + UI record picker · `889d2cb` M-03 one canonical windowed accrual (`SharedKernel.WindowedDays`) + future-date guard on ADT ingest · `c313e6e` M-09 command policies mirror endpoints; M14/M16 endpoints gated (arch suite 173→190) · `78c0c25` M-21 emergency-pathway rollback fails fast on live data (proven by executed Down/Up on a seeded throwaway DB) · `bba06e8` M-23 server-side register filters + anonymous-report tracking UI (Karma 133) · `2d25019` N-02 HttpParams across all 14 new API services · `92b38a2` N-01 create affordances permission-gated on 12 registers + denial explanations · `62bd116` N-03 real `--nt-surface-alt` token, tint-based tier pills, HQMS status-pill tones · law docs + this entry = M-13.
 - **Still open (do not report as closed):** B-01 anonymity vs audit stamping (decision), B-02 validation/CSV delta (widens DOC-001), M-02 org-scope decision, M-04 cross-module-read ADR, M-05/M-06/M-07/M-08/M-10/M-11/M-12/M-14/M-16/M-17/M-18/M-19/M-20/M-22 + minors per the register. Release posture unchanged — **Pre-production**; DOC-001 + SEC-001 remain the open blockers. Baseline tag `verify/baseline-20260827` stays until the Blockers and M-01/M-07-class items clear a re-run of the pack.
+
+## 2026-08-28 — Audit remediation, approved batch 2 (B-01 → M-07 → Group B → B-02)
+
+One atomic commit per finding; each carries a test that failed before the fix.
+
+- **B-01 (Blocker, closed `04a92ef`)** — the anonymity promise is now enforced at persistence:
+  `IIdentitySuppressed` marker (SharedKernel), `Incident.IdentitySuppressed => IsAnonymous`;
+  `AuditStampInterceptor` stamps CREATION as `anonymous`/null-id and `FieldChangeInterceptor`
+  suppresses the actor on the "Created" row only — later transitions stay fully attributed.
+  Deliberate consequence recorded on the marker: preparer-based SoD cannot apply to an anonymous
+  creation. Tests: `AnonymousSuppressionTests` (3; two red pre-fix). App 129 / Domain 437 / Arch 190.
+- **M-07 (Major, closed)** — the 65 new HQMS permission keys are now deliberate per-role decisions
+  in `SystemRoleCatalog`, not fall-through: Department Head and Analyst gained explicit clinical
+  grant rows (occurrence intake, HAI/mortality recording, EOC rounds, survey response entry,
+  point-of-care `credentialing.view`); the **External Auditor is excluded** from `patient-safety`,
+  `infection-control`, `mortality-review`, `credentialing` and `integration` (incl. the ADT census)
+  by an explicit deny arm; the QM catch-all is annotated as deliberate. Release note
+  `deploy/RELEASE-NOTE-HQMS-ROLE-GRANTS.md` (grant matrix for existing tenants + re-used-key
+  disclosure: `risks.*`→FMEA, `audits.*`→audit programs/tracers, `training.*`→hospital training).
+  Tests red-first: `SystemRoleCatalogTests.The_hqms_clinical_grants_are_explicit_per_role_decisions`,
+  `AuditorDenyMatrixTests.The_auditor_is_excluded_from_clinical_registries_and_the_census`,
+  3 HQMS rows in `RoleEndpointMatrixTests`, seeded-grant assertions in `RolePrivilegeFlowTests`
+  (1 unit + 3 functional failures pre-fix; all green post-fix).
+  **NOT RUN this cycle:** the 4 real-PostgreSQL functional tests (credential access blocked in the
+  session) — risk bounded statically: `role_permission.permission_key` is varchar(60), longest new
+  key is 26 chars, and Tenant Administrator's AllKeys grant already persisted all 65 keys on real
+  PG in the 2026-08-28 green run; the new grants are same-shape subsets.

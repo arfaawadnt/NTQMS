@@ -124,4 +124,33 @@ public sealed class AuditorDenyMatrixTests(QamsWebAppFactory factory)
             body.RootElement.GetProperty("code").GetString().Should().StartWith("AUTHZ-");
         }
     }
+
+    [Fact]
+    public async Task The_auditor_is_excluded_from_clinical_registries_and_the_census()
+    {
+        var auditor = await AuditorClientAsync();
+
+        // Quality-system records remain the auditor's legitimate surface.
+        (await auditor.GetAsync("/api/incidents")).StatusCode.Should().Be(HttpStatusCode.OK);
+        (await auditor.GetAsync("/api/standards")).StatusCode.Should().Be(HttpStatusCode.OK);
+
+        // M-07: the patient-adjacent registries and the ADT census are not part
+        // of the seeded external-audit surface. A tenant that hosts a clinical
+        // surveyor grants those keys to a custom role, on the record.
+        foreach (var path in new[]
+        {
+            "/api/patient-safety/events",
+            "/api/infection-control/cases",
+            "/api/mortality-review/reviews",
+            "/api/credentialing/practitioners",
+            "/api/integration/census",
+        })
+        {
+            var response = await auditor.GetAsync(path);
+            response.StatusCode.Should().Be(HttpStatusCode.Forbidden,
+                $"M-07: the seeded auditor must not reach '{path}'");
+            using var body = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+            body.RootElement.GetProperty("code").GetString().Should().StartWith("AUTHZ-");
+        }
+    }
 }

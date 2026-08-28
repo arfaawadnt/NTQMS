@@ -136,6 +136,65 @@ public class SystemRoleCatalogTests
     }
 
     [Fact]
+    public async Task The_hqms_clinical_grants_are_explicit_per_role_decisions()
+    {
+        await using var db = NewContext();
+        var roles = await SeedAsync(db, Guid.CreateVersion7());
+        var auditor = roles[SystemRoleCatalog.ExternalAuditor];
+        var deptHead = roles[SystemRoleCatalog.DepartmentHead];
+        var analyst = roles[SystemRoleCatalog.Analyst];
+        var qm = roles[SystemRoleCatalog.QualityManager];
+
+        // The external auditor audits the quality SYSTEM, not patients: the
+        // clinical registries and the ADT census are excluded from the seeded
+        // role (M-07). A tenant that hosts a clinical surveyor grants those
+        // keys to a custom role, on the record.
+        foreach (var clinical in new[]
+        {
+            PermissionCatalog.PatientSafety, PermissionCatalog.InfectionControl,
+            PermissionCatalog.MortalityReview, PermissionCatalog.Credentialing,
+            PermissionCatalog.Integration,
+        })
+        {
+            auditor.PermissionKeys.Should().NotContain(
+                k => k.StartsWith(clinical + ".", StringComparison.Ordinal),
+                $"the seeded auditor must not reach '{clinical}'");
+        }
+
+        // Quality-record surfaces stay auditor-readable.
+        auditor.Grants(PermissionCatalog.Key(PermissionCatalog.Incidents, PermissionAction.View)).Should().BeTrue();
+        auditor.Grants(PermissionCatalog.Key(PermissionCatalog.Standards, PermissionAction.View)).Should().BeTrue();
+        auditor.Grants(PermissionCatalog.Key(PermissionCatalog.EnvironmentOfCare, PermissionAction.View)).Should().BeTrue();
+
+        // A department head runs their unit's patient-safety work: manages
+        // occurrences, records HAI/mortality cases, conducts rounds, and checks
+        // privileges at the point of care...
+        deptHead.Grants(PermissionCatalog.Key(PermissionCatalog.Incidents, PermissionAction.Edit)).Should().BeTrue();
+        deptHead.Grants(PermissionCatalog.Key(PermissionCatalog.PatientSafety, PermissionAction.Create)).Should().BeTrue();
+        deptHead.Grants(PermissionCatalog.Key(PermissionCatalog.EnvironmentOfCare, PermissionAction.Edit)).Should().BeTrue();
+        deptHead.Grants(PermissionCatalog.Key(PermissionCatalog.Credentialing, PermissionAction.View)).Should().BeTrue();
+        // ...but incident sign-off and credential decisions stay above them,
+        // and the interface monitor is an administrative surface.
+        deptHead.Grants(PermissionCatalog.Key(PermissionCatalog.Incidents, PermissionAction.Sign)).Should().BeFalse();
+        deptHead.Grants(PermissionCatalog.Key(PermissionCatalog.Credentialing, PermissionAction.Approve)).Should().BeFalse();
+        deptHead.PermissionKeys.Should().NotContain(
+            k => k.StartsWith(PermissionCatalog.Integration + ".", StringComparison.Ordinal));
+
+        // Front-line staff report and record; they change nothing after intake.
+        analyst.Grants(PermissionCatalog.Key(PermissionCatalog.Incidents, PermissionAction.Create)).Should().BeTrue();
+        analyst.Grants(PermissionCatalog.Key(PermissionCatalog.MortalityReview, PermissionAction.Create)).Should().BeTrue();
+        analyst.Grants(PermissionCatalog.Key(PermissionCatalog.Surveys, PermissionAction.Create)).Should().BeTrue();
+        analyst.Grants(PermissionCatalog.Key(PermissionCatalog.Credentialing, PermissionAction.View)).Should().BeTrue();
+        analyst.Grants(PermissionCatalog.Key(PermissionCatalog.Incidents, PermissionAction.Edit)).Should().BeFalse();
+        analyst.PermissionKeys.Should().NotContain(
+            k => k.StartsWith(PermissionCatalog.Integration + ".", StringComparison.Ordinal));
+
+        // The QM catch-all deliberately includes the hospital modules.
+        qm.Grants(PermissionCatalog.Key(PermissionCatalog.Incidents, PermissionAction.Sign)).Should().BeTrue();
+        qm.Grants(PermissionCatalog.Key(PermissionCatalog.Integration, PermissionAction.Manage)).Should().BeTrue();
+    }
+
+    [Fact]
     public void Every_fixed_tier_maps_to_a_seeded_role_name()
     {
         foreach (var tier in Enum.GetValues<UserRole>())

@@ -43,6 +43,12 @@ public sealed class RoleEndpointMatrixTests(QamsWebAppFactory factory)
         new("/api/exports/audit-trail.xlsx", "GET", "QmAdminAuditor", ["TenantAdmin", "QualityManager", "ExternalAuditor"]),
         new("/api/documents/00000000-0000-0000-0000-000000000000/controlled-copies", "GET", "QmDeptAdmin-read?", ["TenantAdmin", "QualityManager", "DepartmentHead", "Analyst", "ExternalAuditor"]),
         new("/api/nonconformances", "GET", "AnyAuthenticated", ["TenantAdmin", "QualityManager", "DepartmentHead", "Analyst", "ExternalAuditor"]),
+        // HQMS clinical surface (M-07): department heads and front-line staff
+        // work these registries; the seeded external auditor does not reach
+        // them, and the ADT interface monitor is QM/admin-only.
+        new("/api/patient-safety/events", "GET", "patient-safety.view", ["TenantAdmin", "QualityManager", "DepartmentHead", "Analyst"]),
+        new("/api/credentialing/practitioners", "GET", "credentialing.view", ["TenantAdmin", "QualityManager", "DepartmentHead", "Analyst"]),
+        new("/api/integration/census", "GET", "integration.view", ["TenantAdmin", "QualityManager"]),
     ];
 
     private async Task<Dictionary<string, HttpClient>> BuildRoleClientsAsync()
