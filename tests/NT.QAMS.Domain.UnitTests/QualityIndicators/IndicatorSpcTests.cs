@@ -25,6 +25,21 @@ public class IndicatorSpcTests
     }
 
     [Fact]
+    public void R2_flags_the_second_of_two_opening_points_beyond_two_sigma()
+    {
+        // M-17: the R2 window skipped the series opening (end < 2), so a
+        // Beyond, Beyond, In-control start was never flagged even though two
+        // of the first "three" points sit past 2σ.
+        var values = new[] { 64m, 65m, 50m, 50m, 51m, 49m, 50m, 50m, 49m, 51m, 50m, 50m };
+        var a = IndicatorSpc.Analyze(values);
+
+        a.Points[0].Value.Should().BeGreaterThan(a.Upper2Sigma, "precondition: the opening pair sits past 2σ");
+        a.Points[1].Value.Should().BeGreaterThan(a.Upper2Sigma, "precondition: the opening pair sits past 2σ");
+        a.Points[1].Rules.Should().Contain("R2");
+        a.Points[1].SpecialCause.Should().BeTrue();
+    }
+
+    [Fact]
     public void R1_flags_a_point_beyond_three_sigma()
     {
         // Many tight points so one outlier does not inflate its own limits out of reach.

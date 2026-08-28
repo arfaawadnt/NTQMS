@@ -115,7 +115,11 @@ interface ChartGeom {
             <h3>{{ i18n.t('qi.recordMeasurement') }}</h3>
             <form [formGroup]="measureForm" (ngSubmit)="record(n.id)">
               <label>{{ i18n.t('qi.period') }}</label>
-              <input type="date" formControlName="period" />
+              @if (n.frequency === 'Monthly') {
+                <input type="month" formControlName="period" />
+              } @else {
+                <input type="date" formControlName="period" />
+              }
               <div class="trio">
                 <div><label>{{ i18n.t('qi.numeratorValue') }}</label><input type="number" formControlName="numerator" /></div>
                 <div><label>{{ i18n.t('qi.denominatorValue') }}</label><input type="number" formControlName="denominator" /></div>
@@ -258,7 +262,16 @@ export class IndicatorsDetailComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    void this.facade.loadDetail(this.id());
+    void this.facade.loadDetail(this.id()).then(() => {
+      const n = this.indicator();
+      if (n) {
+        // M-17: seed the form from the record — saving untouched fields used
+        // to null the thresholds and silently kill breach grading.
+        this.targetForm.patchValue({
+          target: n.target, warningThreshold: n.warningThreshold, actionThreshold: n.actionThreshold,
+        });
+      }
+    });
   }
 
   async saveTargets(id: string): Promise<void> {
@@ -271,8 +284,11 @@ export class IndicatorsDetailComponent implements OnInit {
   async record(id: string): Promise<void> {
     if (this.measureForm.invalid) { return; }
     const raw = this.measureForm.getRawValue();
+    // A month input yields "YYYY-MM"; the API takes the period's first day
+    // (the server normalizes by frequency either way — M-17).
+    const period = raw.period.length === 7 ? `${raw.period}-01` : raw.period;
     await this.facade.recordMeasurement(id, {
-      period: raw.period, numerator: raw.numerator, denominator: raw.denominator, note: raw.note || null,
+      period, numerator: raw.numerator, denominator: raw.denominator, note: raw.note || null,
     });
     if (this.facade.error() === '') { this.measureForm.reset({ period: '', numerator: 0, denominator: 1, note: '' }); }
   }

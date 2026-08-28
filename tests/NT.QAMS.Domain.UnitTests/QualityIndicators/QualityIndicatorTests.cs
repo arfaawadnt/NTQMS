@@ -35,6 +35,38 @@ public class QualityIndicatorTests
     }
 
     [Fact]
+    public void A_monthly_indicator_normalizes_periods_and_rejects_a_second_in_the_same_month()
+    {
+        // M-17: raw-date equality let one month carry two governed numbers,
+        // two SPC points and two breach tasks.
+        var indicator = HigherIsBetter();
+        indicator.RecordMeasurement(new DateOnly(2026, 9, 3), 90m, 100m, Actor, Now);
+
+        var act = () => indicator.RecordMeasurement(new DateOnly(2026, 9, 17), 80m, 100m, Actor, Now);
+
+        act.Should().Throw<DomainException>().Which.Code.Should().Be("IND-016");
+        indicator.Measurements.Should().ContainSingle()
+            .Which.Period.Should().Be(new DateOnly(2026, 9, 1),
+                "the stored period is the canonical first day of the month");
+    }
+
+    [Fact]
+    public void Quarterly_and_annual_periods_normalize_to_their_period_start()
+    {
+        var quarterly = QualityIndicator.Define(
+            "IND-2026-0003", "Q-1", "Quarterly probe", null, "n", "d", "u", 100m,
+            IndicatorFrequency.Quarterly, IndicatorDirection.HigherIsBetter);
+        quarterly.RecordMeasurement(new DateOnly(2026, 5, 20), 1m, 2m, Actor, Now);
+        quarterly.Measurements.Single().Period.Should().Be(new DateOnly(2026, 4, 1));
+
+        var annual = QualityIndicator.Define(
+            "IND-2026-0004", "A-1", "Annual probe", null, "n", "d", "u", 100m,
+            IndicatorFrequency.Annually, IndicatorDirection.HigherIsBetter);
+        annual.RecordMeasurement(new DateOnly(2026, 7, 9), 1m, 2m, Actor, Now);
+        annual.Measurements.Single().Period.Should().Be(new DateOnly(2026, 1, 1));
+    }
+
+    [Fact]
     public void Denominator_must_be_positive()
     {
         var act = () => HigherIsBetter().RecordMeasurement(Period(1), 5m, 0m, Actor, Now);

@@ -73,6 +73,24 @@ public sealed record UpdateIndicatorDefinitionCommand(
     string? Inclusions, string? Exclusions, string? DataSource)
     : ICommand;
 
+// M-17: the update path carried none of Define's bounds — free text was
+// unbounded and a zero rate factor would zero every future rate.
+public sealed class UpdateIndicatorDefinitionValidator : AbstractValidator<UpdateIndicatorDefinitionCommand>
+{
+    public UpdateIndicatorDefinitionValidator()
+    {
+        RuleFor(x => x.Name).NotEmpty().MaximumLength(300);
+        RuleFor(x => x.Description).MaximumLength(2000);
+        RuleFor(x => x.Numerator).NotEmpty().MaximumLength(1000);
+        RuleFor(x => x.Denominator).NotEmpty().MaximumLength(1000);
+        RuleFor(x => x.Unit).NotEmpty().MaximumLength(50);
+        RuleFor(x => x.RateFactor).GreaterThan(0m);
+        RuleFor(x => x.Inclusions).MaximumLength(2000);
+        RuleFor(x => x.Exclusions).MaximumLength(2000);
+        RuleFor(x => x.DataSource).MaximumLength(1000);
+    }
+}
+
 [RequirePermissionPolicy(PermissionCatalog.Indicators, PermissionAction.Edit)]
 public sealed record SetIndicatorTargetsCommand(
     Guid IndicatorId, decimal? Target, decimal? WarningThreshold, decimal? ActionThreshold) : ICommand;

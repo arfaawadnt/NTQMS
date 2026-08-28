@@ -49,7 +49,6 @@ NT.QAMS.Application.Organization.CreateTestCommand
 NT.QAMS.Application.Organization.ReviseContextIssueCommand
 NT.QAMS.Application.Organization.ReviseInterestedPartyCommand
 NT.QAMS.Application.PatientExperience.SubmitSurveyResponseCommand
-NT.QAMS.Application.QualityIndicators.Commands.UpdateIndicatorDefinitionCommand
 NT.QAMS.Application.RiskGovernance.AddDecisionCommand
 NT.QAMS.Application.RiskGovernance.AddMitigationCommand
 NT.QAMS.Application.RiskGovernance.ApproveChangeCommand

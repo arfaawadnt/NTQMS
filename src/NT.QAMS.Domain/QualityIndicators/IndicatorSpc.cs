@@ -103,14 +103,16 @@ public static class IndicatorSpc
     private static bool TwoOfThreeBeyond2Sigma(
         IReadOnlyList<decimal> values, int end, decimal mean, decimal upper2, decimal lower2)
     {
-        if (end < 2)
+        // M-17: the window is "up to three" — at index 1 a Beyond, Beyond
+        // opening already satisfies two-of-three and must flag.
+        if (end < 1)
         {
             return false;
         }
 
         var upper = 0;
         var lower = 0;
-        for (var i = end - 2; i <= end; i++)
+        for (var i = Math.Max(0, end - 2); i <= end; i++)
         {
             if (values[i] > upper2) { upper++; }
             else if (values[i] < lower2) { lower++; }

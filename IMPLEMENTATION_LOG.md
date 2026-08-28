@@ -1052,3 +1052,13 @@ One atomic commit per finding; each carries a test that failed before the fix.
   M-16 product decision. Tests red-first: 1 domain + 3 application (handler) + 1 integration
   (duplicate-row 23505 probes) — all failed pre-fix. Executed index proof: Up→2 ux, Down→0 ux +
   2 ix restored, re-Up. Domain 439 · App 136 · Integration 29+9 · Arch 190 · Functional 102.
+- **M-17 (Major, closed)** — the indicator loop: `QualityIndicator.NormalizePeriod` maps every
+  recorded period to its frequency's canonical start day before the IND-016 duplicate check (a
+  Monthly indicator could carry two governed numbers, two SPC points and two breach tasks in one
+  month); `UpdateIndicatorDefinitionValidator` added (update path was unbounded; snapshot row
+  removed, shrink-only); SPC R2 window now admits the series opening (`end == 1` — a
+  Beyond,Beyond start flags); the SPA seeds `targetForm` from the loaded record (saving untouched
+  fields used to null the thresholds and silently kill breach grading) and Monthly indicators get
+  a month picker (server normalizes regardless). Release-note disclosure for the correct-ward
+  rejection of misaligned dates. Tests red-first: 2 domain normalization facts + 1 SPC fact + the
+  arch snapshot shrink — all red pre-fix. Domain 442 · App 136 · Arch 190 · Karma 133 · prod build clean.

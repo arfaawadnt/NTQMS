@@ -140,3 +140,10 @@ signal should treat `REQ-001` as a permanent request error.
 Audit register: `E:\QMS\NT_QAMS_HQMS_Audit_Register_2026-08-28.md`, findings **M-07**, **M-11**.
 Catalog source of truth: `src/NT.QAMS.Application/Authorization/SystemRoleCatalog.cs`.
 Change log: `IMPLEMENTATION_LOG.md` (M-07 entry).
+
+## Also in this line — indicator period normalization (M-17)
+
+A measurement's period is now normalized to its frequency's canonical start day (Monday /
+1st of month / first day of quarter / 1 January) before the one-per-period check. Two periods in
+the same month can no longer coexist on a Monthly indicator. Dates that previously slipped through
+misaligned are rejected with `IND-016`; the SPA's Monthly picker now captures a month directly.

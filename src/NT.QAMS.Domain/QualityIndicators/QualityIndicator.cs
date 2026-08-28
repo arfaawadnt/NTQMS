@@ -219,7 +219,9 @@ public sealed class QualityIndicator : AggregateRoot, ITenantScoped
     /// <summary>
     /// Records a period's value from its numerator and denominator, computes the rate,
     /// grades it against the thresholds, and — on an action breach — raises the event
-    /// that opens the analysis task. One measurement per period.
+    /// that opens the analysis task. One measurement per period, where the period is
+    /// normalized to the frequency's canonical start day (M-17): raw-date equality let
+    /// one month carry two governed numbers, two SPC points and two breach tasks.
     /// </summary>
     public Guid RecordMeasurement(
         DateOnly period, decimal numerator, decimal denominator, Guid enteredBy,
@@ -237,6 +239,7 @@ public sealed class QualityIndicator : AggregateRoot, ITenantScoped
             throw new DomainException("IND-015", "The numerator cannot be negative.");
         }
 
+        period = NormalizePeriod(period);
         if (_measurements.Any(m => m.Period == period))
         {
             throw new DomainException("IND-016", $"A measurement for {period:yyyy-MM-dd} already exists.");
@@ -257,6 +260,20 @@ public sealed class QualityIndicator : AggregateRoot, ITenantScoped
 
         return measurement.Id;
     }
+
+    /// <summary>
+    /// The canonical first day of the period containing <paramref name="date"/> for this
+    /// indicator's frequency — Monday for Weekly, the 1st for Monthly, the quarter's first
+    /// day for Quarterly, 1 January for Annually.
+    /// </summary>
+    public DateOnly NormalizePeriod(DateOnly date) => Frequency switch
+    {
+        IndicatorFrequency.Weekly => date.AddDays(-(((int)date.DayOfWeek + 6) % 7)),
+        IndicatorFrequency.Monthly => new DateOnly(date.Year, date.Month, 1),
+        IndicatorFrequency.Quarterly => new DateOnly(date.Year, (((date.Month - 1) / 3) * 3) + 1, 1),
+        IndicatorFrequency.Annually => new DateOnly(date.Year, 1, 1),
+        _ => date,
+    };
 
     /// <summary>Retires the indicator; history is kept but no new measurements are accepted.</summary>
     public void Retire()
