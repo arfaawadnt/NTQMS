@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.MortalityReview;
 using NT.QAMS.Domain.Authorization;
-using NT.QAMS.Domain.Integration;
 using NT.QAMS.Domain.MortalityReview;
 using NT.QAMS.SharedKernel.Abstractions;
 using NT.QAMS.SharedKernel.Primitives;
@@ -290,15 +289,7 @@ public sealed class GetMortalityRatesHandler(IAppDbContext db, IClock clock) : I
             .Where(s => s.DischargedAtUtc == null || s.DischargedAtUtc >= from)
             .Select(s => new { s.AdmittedAtUtc, s.DischargedAtUtc })
             .ToListAsync(ct);
-        var patientDays = stays.Sum(s =>
-        {
-            var start = s.AdmittedAtUtc > from ? s.AdmittedAtUtc : from;
-            var end = s.DischargedAtUtc ?? now;
-            if (end > now) { end = now; }
-            if (end <= start) { return 0; }
-            var days = (int)Math.Floor((end - start).TotalDays);
-            return days < 1 ? 1 : days;
-        });
+        var patientDays = stays.Sum(s => WindowedDays.Clipped(s.AdmittedAtUtc, s.DischargedAtUtc, from, now));
 
         var deaths = await db.MortalityReviews.AsNoTracking()
             .Where(m => m.DeathDateUtc >= from && m.DeathDateUtc <= now)

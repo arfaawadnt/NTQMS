@@ -171,14 +171,7 @@ public sealed class GetSafetyRatesHandler(IAppDbContext db, IClock clock) : IQue
         var stays = await db.PatientStays.AsNoTracking()
             .Where(s => s.DischargedAtUtc == null || s.DischargedAtUtc >= from)
             .ToListAsync(ct);
-        var patientDays = stays.Sum(s =>
-        {
-            var start = s.AdmittedAtUtc > from ? s.AdmittedAtUtc : from;
-            var end = s.DischargedAtUtc ?? now;
-            if (end <= start) { return 0; }
-            var days = (int)Math.Floor((end - start).TotalDays);
-            return days < 1 ? 1 : days;
-        });
+        var patientDays = stays.Sum(s => s.PatientDaysInWindow(from, now));
 
         var events = await db.PatientSafetyEvents.AsNoTracking()
             .Where(e => e.OccurredAtUtc >= from && e.OccurredAtUtc <= now)

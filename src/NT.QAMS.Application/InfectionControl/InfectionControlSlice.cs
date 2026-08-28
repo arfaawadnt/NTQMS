@@ -208,7 +208,7 @@ public sealed class GetHaiRatesHandler(IAppDbContext db, IClock clock) : IQueryH
             .Where(s => s.DischargedAtUtc == null || s.DischargedAtUtc >= from)
             .Select(s => new { s.AdmittedAtUtc, s.DischargedAtUtc })
             .ToListAsync(ct);
-        var patientDays = stays.Sum(s => ClippedDays(s.AdmittedAtUtc, s.DischargedAtUtc, from, now));
+        var patientDays = stays.Sum(s => WindowedDays.Clipped(s.AdmittedAtUtc, s.DischargedAtUtc, from, now));
 
         // Device-days denominator: this module's device-exposure register, clipped to the window.
         var exposures = await db.DeviceExposures.AsNoTracking()
@@ -217,7 +217,7 @@ public sealed class GetHaiRatesHandler(IAppDbContext db, IClock clock) : IQueryH
             .ToListAsync(ct);
 
         int DeviceDays(DeviceType t) =>
-            exposures.Where(e => e.DeviceType == t).Sum(e => ClippedDays(e.InsertedAtUtc, e.RemovedAtUtc, from, now));
+            exposures.Where(e => e.DeviceType == t).Sum(e => WindowedDays.Clipped(e.InsertedAtUtc, e.RemovedAtUtc, from, now));
 
         var cases = await db.HaiCases.AsNoTracking()
             .Where(e => e.OnsetDateUtc >= from && e.OnsetDateUtc <= now)
@@ -239,17 +239,6 @@ public sealed class GetHaiRatesHandler(IAppDbContext db, IClock clock) : IQueryH
             Build(HaiType.Cauti, DeviceType.UrinaryCatheter),
             Build(HaiType.Vap, DeviceType.Ventilator),
             cases.Count(t => t == HaiType.Ssi));
-    }
-
-    /// <summary>Whole days a span overlaps [from, now], counting a same-day span as one day.</summary>
-    private static int ClippedDays(DateTimeOffset start, DateTimeOffset? end, DateTimeOffset from, DateTimeOffset now)
-    {
-        var clippedStart = start > from ? start : from;
-        var clippedEnd = end ?? now;
-        if (clippedEnd > now) { clippedEnd = now; }
-        if (clippedEnd <= clippedStart) { return 0; }
-        var days = (int)Math.Floor((clippedEnd - clippedStart).TotalDays);
-        return days < 1 ? 1 : days;
     }
 
     private static decimal Rate(int count, int deviceDays) =>

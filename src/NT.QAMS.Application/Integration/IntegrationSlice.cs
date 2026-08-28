@@ -69,13 +69,18 @@ public sealed record IngestAdtEventCommand(
 
 public sealed class IngestAdtEventValidator : AbstractValidator<IngestAdtEventCommand>
 {
-    public IngestAdtEventValidator()
+    public IngestAdtEventValidator(IClock clock)
     {
         RuleFor(x => x.DedupKey).NotEmpty().MaximumLength(200);
         RuleFor(x => x.MessageType).MaximumLength(40);
         RuleFor(x => x.PatientRef).NotEmpty().MaximumLength(100);
         RuleFor(x => x.EncounterRef).NotEmpty().MaximumLength(100);
         RuleFor(x => x.Unit).MaximumLength(100);
+        // A future event time poisons every windowed rate denominator (M-03); the
+        // 5-minute tolerance mirrors INC-005's clock-skew allowance.
+        RuleFor(x => x.EventAtUtc)
+            .Must(t => t <= clock.UtcNow.AddMinutes(5))
+            .WithMessage("The event time cannot be in the future.");
     }
 }
 
@@ -261,15 +266,8 @@ public sealed class GetPatientCensusHandler(IAppDbContext db, IClock clock) : IQ
             .ToListAsync(ct);
 
         var active = stays.Count(s => s.Status == StayStatus.Admitted);
-        // Patient-days within the window: clip each stay to [from, now].
-        var patientDays = stays.Sum(s =>
-        {
-            var start = s.AdmittedAtUtc > from ? s.AdmittedAtUtc : from;
-            var end = s.DischargedAtUtc ?? now;
-            if (end <= start) { return 0; }
-            var days = (int)Math.Floor((end - start).TotalDays);
-            return days < 1 ? 1 : days;
-        });
+        // Patient-days within the window — the canonical clamped accrual (M-03).
+        var patientDays = stays.Sum(s => s.PatientDaysInWindow(from, now));
 
         return new PatientCensusDto(active, patientDays, now, from);
     }

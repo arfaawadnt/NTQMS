@@ -82,15 +82,13 @@ public sealed class DeviceExposure : AggregateRoot, ITenantScoped
     /// Device-days accrued up to <paramref name="asOf"/> (or removal, if earlier). A device in
     /// place on the day of insertion counts as at least one device-day, mirroring patient-days.
     /// </summary>
-    public int DeviceDays(DateTimeOffset asOf)
-    {
-        var end = RemovedAtUtc ?? asOf;
-        if (end < InsertedAtUtc)
-        {
-            return 0;
-        }
+    public int DeviceDays(DateTimeOffset asOf) =>
+        WindowedDays.Clipped(InsertedAtUtc, RemovedAtUtc, InsertedAtUtc, asOf);
 
-        var days = (int)Math.Floor((end - InsertedAtUtc).TotalDays);
-        return days < 1 ? 1 : days;
-    }
+    /// <summary>
+    /// Device-days this exposure contributes to the window [<paramref name="from"/>,
+    /// <paramref name="asOf"/>] — the canonical rate denominator every module shares.
+    /// </summary>
+    public int DeviceDaysInWindow(DateTimeOffset from, DateTimeOffset asOf) =>
+        WindowedDays.Clipped(InsertedAtUtc, RemovedAtUtc, from, asOf);
 }

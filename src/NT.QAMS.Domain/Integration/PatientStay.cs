@@ -102,15 +102,13 @@ public sealed class PatientStay : AggregateRoot, ITenantScoped
     /// Patient-days accrued up to <paramref name="asOf"/> (or discharge, if earlier). A stay
     /// on the day of admission counts as at least one patient-day.
     /// </summary>
-    public int PatientDays(DateTimeOffset asOf)
-    {
-        var end = DischargedAtUtc ?? asOf;
-        if (end < AdmittedAtUtc)
-        {
-            return 0;
-        }
+    public int PatientDays(DateTimeOffset asOf) =>
+        WindowedDays.Clipped(AdmittedAtUtc, DischargedAtUtc, AdmittedAtUtc, asOf);
 
-        var days = (int)Math.Floor((end - AdmittedAtUtc).TotalDays);
-        return days < 1 ? 1 : days;
-    }
+    /// <summary>
+    /// Patient-days this stay contributes to the window [<paramref name="from"/>,
+    /// <paramref name="asOf"/>] — the canonical rate denominator every module shares.
+    /// </summary>
+    public int PatientDaysInWindow(DateTimeOffset from, DateTimeOffset asOf) =>
+        WindowedDays.Clipped(AdmittedAtUtc, DischargedAtUtc, from, asOf);
 }
