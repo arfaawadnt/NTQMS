@@ -524,3 +524,19 @@ Why this project multiplies well: 222 handlers in ~6 repeating shapes, a table-b
 *Designed 2026-07-21 from the Product Inventory, Domain Model, and Database Architecture. Next phases (implementation): physical schema & EF Core mapping conventions, API contract specification (OpenAPI), and the blob-store data-migration plan.*
 
 
+
+---
+
+# PHASE 7 — HQMS HOSPITAL EXTENSION, AS-BUILT ADDENDUM (2026-08)
+
+Twelve new Application slices joined the solution (`IncidentReporting`, `QualityIndicators`, `Accreditation`, `AuditManagement/AuditProgramSlice`, `PatientExperience`, `Committees`, `Integration`, `PatientSafety`, `InfectionControl`, `TrainingManagement`, `MortalityReview`, `Credentialing`, `EnvironmentOfCare`) plus extension slices for Equipment (M14), SupplierQuality (M16), RiskGovernance change-control (M18) and DocumentControl R&U (M01). All follow the slice shape of §Phase-1 (commands/queries + validators + handlers over `IAppDbContext`). Open items below cite the 2026-08-28 audit register.
+
+**Authorization.** Seven new permission modules were minted (`incidents`, `indicators`, `standards`, `surveys`, `committees`, `integration`, `patient-safety`, `infection-control`, `mortality-review`, `credentialing`, `environment-of-care`) and three modules were reused (`risks`→FMEA, `audits`→programmes, `training`→M12 catalogue). Every controller action is `[RequirePermission]`-gated or a recorded entry in the shrink-only `tests/NT.QAMS.Architecture.Tests/UngatedActions.approved.txt` snapshot (the as-built decision record for the pre-auth surface, the deliberately open incident intake, and the legacy read endpoints). Command-tier policies mirror the endpoints for the incident workflow and the M14/M16 additions (remediated M-09; `WorkflowCommandPolicyTests` pins the mirrors). **[open: M-07 — SystemRoleCatalog grants, upgrade release note, and the four role-matrix suites still owe the 11 new modules; XC-05's remaining legacy-attribute commands in RiskGovernance are untouched pending the same decision].**
+
+**Ceremonies.** Part 11 signing ceremonies exist for incident close/sentinel (M02), change approve/ratify (M18 — SoD pre-checks precede `SignAsync` since M-01's remediation), and supplier approve. Committee minutes approval, credentialing decisions and CAR effectiveness close are permission-gated but unsigned **[open: M-16/PPL-22 — the signed-gate list needs one product ruling]**.
+
+**Cross-module reads.** The Phase-2 rule ("never touch another module's Domain types or tables") is contradicted as-built by M08/M09/M10 reading `db.PatientStays` for rate denominators; the shared accrual arithmetic now lives in `SharedKernel.WindowedDays` (M-03), but the read itself awaits an ADR **[open: M-04]**. No Application-layer boundary test exists yet — `ModuleBoundaryTests` guards the Domain assembly only.
+
+**Events & notifications.** Six of the new contexts raise no domain events, two declared events are never raised, and the incident escalation/sentinel notifications documented in the aggregate have no `INotificationHandler` subscribers **[open: M-06]** — the outbox/ledger sees only what §Phase-4's interceptors capture for those records.
+
+*Addendum recorded 2026-08-28; the audit register is the source of truth for open items.*

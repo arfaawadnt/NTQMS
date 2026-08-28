@@ -895,3 +895,15 @@ erDiagram
 *Designed 2026-07-21 from `NT_QAMS_Domain_Model.md` and `NT_QAMS_Product_Inventory.md`. Next phases: physical schema & EF Core mapping conventions · blob-store data migration plan · API contract design.*
 
 
+
+---
+
+# PHASE 6 — HQMS HOSPITAL EXTENSION, AS-BUILT ADDENDUM (2026-08)
+
+The HQMS train added **19 migrations** (60 → 79), taking the from-zero build to **144 tables** across `qams/saas/audit/read`, **134 of them FORCE-RLS** with zero NOT-NULL-tenant tables unprotected (verified from an empty database by both the EF path and the idempotent `deploy/migrations.sql`, table-parity 144 = 144; 2026-08-27 evidence in the conformance report). Every new table follows the hardened conventions: tenant-first composite PK, owned-child shadow `tenant_id` + composite ownership FK, enum-derived CHECK domains, the in-migration FORCE-RLS recipe, reversible `Down()`.
+
+**Recorded debts (audit register, open):** cross-aggregate reference columns carry **no FK** (`integration_message.endpoint_id`, `meeting.committee_id`, `survey_response.survey_id/department_id`, `survey_answer.question_id`, `evidence_link.standard_set_id/element_id`, `planned_audit.scheduled_audit_id`) — M-08; **five FK constraint names were silently EF-truncated at 62 chars** (indicator_measurement, equipment_safety_notice, document_audience_department, practitioner_privilege, training_session_attendance) — M-14, pin via the §CLAUDE.md abbreviation map before any sibling FK collides; ~24 free-text `varchar(≥1000)` columns re-entered the schema against hardening 1.2 — N-05; FMEA rating/RPN and a few other numeric domains lack CHECKs — N-05; `incident`, `meeting`, `survey_response` are not yet registered with `frozen_immutability` despite frozen states — M-05.
+
+**Rollback note:** `20260826210742_ChangeControlEmergencyPathway.Down()` now fails fast with an actionable message when any `change_request` row is `ImplementedPendingRatification` (M-21 remediated; proven by an executed Down/Up round-trip on a seeded throwaway database).
+
+*Addendum recorded 2026-08-28; the audit register is the source of truth for open items.*

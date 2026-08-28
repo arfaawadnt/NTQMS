@@ -718,3 +718,31 @@ Privileges remain `OBJECT.ACTION` codes granted to roles (G1); roles are tenant-
 ---
 
 *Designed 2026-07-21 from `NT_QAMS_Product_Inventory.md` (reverse-engineering of QMS.zip v1.5.0). Companion phases: target architecture, persistence & API design, migration roadmap.*
+
+---
+
+## 12. HQMS Hospital Extension — As-Built Addendum (2026-08)
+
+The `feature/hqms-hospital-modules` train (baseline v1.54.0 → `d5cf5a4`+) added **12 bounded contexts** and extended four existing aggregates, taking the domain from 18 to **30 contexts**. `ModuleBoundaryTests` now covers all 30 pairwise plus an exhaustiveness gate (an unlisted context fails the build). This addendum records the as-built state; items marked **[open: X]** are unresolved findings from the 2026-08-28 conformance audit (`E:\QMS\NT_QAMS_HQMS_Audit_Register_2026-08-28.md`) and are the audit register's truth, not this document's aspiration.
+
+| Context | Aggregates (owned children) | Key rules & codes | Domain events |
+|---|---|---|---|
+| IncidentReporting (M02) | `Incident` (+ContributingFactor, +IncidentTimelineEntry) | 6-state machine Reported→…→Closed/Rejected; SOD-INC-001 reporter≠closer; Part 11 ceremonies on Close/DeclareSentinel; anonymous intake stores a SHA-256 follow-up-reference hash only — **[open: B-01 — audit stamping currently re-attaches the reporter identity]** | 6 raised; escalation/sentinel notification handlers **[open: M-06 — none subscribed]** |
+| QualityIndicators (M06) | `QualityIndicator` (+IndicatorMeasurement); `IndicatorSpc` (pure) | one measurement per period (IND-016) **[open: M-17 — period not normalised to frequency]**; direction-aware grading; Nelson R1–R4 | IndicatorMeasured, IndicatorBreached |
+| Accreditation (M07) | `StandardSet` (+StandardElement); `EvidenceLink` | weighted readiness (N/A excluded); typed evidence must reference a real in-tenant record (EVD-003/EVD-004 — remediated M-15); `Other` = external evidence, no id | EvidenceLinked **[open: M-06 — declared, never raised]** |
+| AuditManagement (M05 adds) | `AuditProgram` (+PlannedAudit) | coverage %, quarter plan; reuses `audits` permission module | AuditProgramActivated/Closed |
+| PatientExperience (M11) | `SatisfactionSurvey` (+SurveyQuestion); `SurveyResponse` (+SurveyAnswer) | Likert 1–5 in domain + CHECK; survey Open gate | SurveyOpened/Closed; SurveyResponseSubmitted **[open: M-06 — never raised]** |
+| Committees (M17) | `Committee` (+CommitteeMember); `Meeting` (+AgendaItem, +MeetingAttendance, +MeetingDecision) | quorum gate at Hold **[open: M-16 — attendance not validated against membership; disbanded committee can still meet; minutes approval unsigned]** | CommitteeCreated…, MeetingHeld, MinutesApproved |
+| Integration (M24) | `IntegrationEndpoint`; `IntegrationMessage` (inbox, tenant+endpoint dedup); `PatientStay` (ADT projection) | endpoint health w/ InterfaceUnhealthy at 3 failures; **windowed day accrual is canonical in `SharedKernel.WindowedDays`** (M-03 remediated — clamped to asOf, shared by M08/M09/M10/M24) **[open: M-12 — inbox is not store-first; RawPayload retention/PHI stance pending ADR]** | InterfaceUnhealthy |
+| PatientSafety (M08) | `PatientSafetyEvent` | falls / pressure injuries; HAPI = PI ∧ HospitalAcquired | SafetyEventReviewed (Close silent **[open: M-06]**) |
+| InfectionControl (M09) | `HaiCase`; `DeviceExposure` | HaiType→device mapping; device-days accrual (canonical) **[open: M-18 — no reject/void transition; rates count unreviewed cases]** | HaiCaseReviewed |
+| TrainingManagement (M12) | `TrainingCourse`; `TrainingSession` (+SessionAttendance) | pass-mark grading at record **[open: M-20 — ValidityMonths not computed; sessions schedulable against Draft/Retired courses]** | — **[open: M-06]** |
+| MortalityReview (M10) | `MortalityReview`; `ComplicationCase` | classification-driven path; SoD second reviewer (MRT-014) **[open: M-18/N-06 — no reject path; dissent has no consequence; code not `SOD-*`]** | — **[open: M-06]** |
+| Credentialing (M13) | `Practitioner` (+LicenceCredential, +Privilege) | evidence gate (verified licence + granted privilege); point-of-care `HasActivePrivilege` **[open: M-19 — PSV independence unimplemented; evidence currency unchecked; appointment lapse ignored; `PrivilegeStatus.Expired` unreachable]** | — **[open: M-06]** |
+| EnvironmentOfCare (M15) | `SafetyRound` (+RoundFinding); `Drill` | round lifecycle; drill score 0–100 with effectiveness tiers ≥85/≥60 **[open: M-22 — no findings→CAPA hand-off]** | — **[open: M-06]** |
+
+**Extensions of existing aggregates:** `EquipmentItem` += DowntimeEvent (one open at a time, availability calc) + SafetyNotice recall register (M14) · `Supplier` += SupplierContract (SLA register) + SupplierCar loop + outsourced-clinical-service flags (M16) · `ChangeRequest` += emergency pathway (`ImplementedPendingRatification`, `Ratify` with SoD CHG-032, impact routing with CHG-016 — **SoD pre-checks now run before the signature is minted**, M-01 remediated) (M18) · `ControlledDocument` += Read-and-Understand audience scope (M01).
+
+**Boundary note:** M08/M09/M10 Application queries read `PatientStays` (Integration's projection) directly for rate denominators. This contradicts §Phase-2's cross-module rule and awaits an ADR **[open: M-04]** — until decided, treat it as a recorded exception, not a precedent. The org-scope columns (`BranchId`/`DepartmentId`) on eight HQMS aggregates do not implement `IAllocatable` **[open: M-02 — decision pending: tenant-wide by design vs omission]**.
+
+*Addendum recorded 2026-08-28 during the HQMS conformance audit; source of truth for open items is the audit register.*

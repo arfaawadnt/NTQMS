@@ -366,3 +366,16 @@ Missing vs spec: investigator assignment/RCA stages, audit→NCR auto-generation
 ---
 
 *Report generated 2026-07-21 by reverse-engineering the QMS.zip snapshot (backend 145 C# files; frontend 24,966-line tenant portal + 1,603-line admin portal; SRS/product docs/diagrams; migrations; tests; CI/devops). No code was modified.*
+
+---
+
+## 13. HQMS Hospital Extension — Inventory Addendum (2026-08)
+
+The `feature/hqms-hospital-modules` train extends the product beyond the laboratory inventory above with the hospital-QMS module set (spec HQMS-MSP-001; gap analysis `E:\QMS\NT_QAMS_HQMS_Gap_Analysis_Implementation_Plan_2026-08-25.html`):
+
+- **New modules (12):** M02 Incident & Occurrence Reporting · M04 FMEA/HFMEA (within Risk) · M05 Annual Audit Programme · M06 Quality Indicators + SPC · M07 Accreditation & Standards · M08 Patient Safety (falls/pressure injuries) · M09 Infection Prevention & Control · M10 Mortality, Morbidity & Peer Review · M11 Patient-Satisfaction Surveys · M12 Training Management · M13 Credentialing & Privileging · M15 Environment of Care & Emergency Preparedness · M17 Committees & Governance · M24 Integration Hub foundation (ADT census projection).
+- **Completed modules (4):** M01 Document Control Read-and-Understand · M14 Equipment downtime/recalls · M16 Supplier contracts/CARs/outsourced oversight · M18 Change Control emergency pathway.
+- **Surface delta vs v1.54.0:** OpenAPI operations 710 → **1,062** (+352, none removed or changed); `ApiSurface.approved.txt` 1,062 lines at 531/531 versioned parity; **16 new SPA pages** under a new "Clinical Governance" navigation group; i18n dictionary at **2,479 trilingual (EN/AR/FR) entries** covering all new enum families; 63 help topics with full route↔help parity.
+- **Verification posture:** conformance report + annexes + findings register in `E:\QMS\NT_QAMS_HQMS_Conformance_*_2026-08-28.md` / `NT_QAMS_HQMS_Audit_Register_2026-08-28.md`; architecture suite 33 → 190 tests + 3 shrink-only decision snapshots. Validation/CSV delta for the train is **not yet authored** (register B-02; folds under DOC-001).
+
+*Addendum recorded 2026-08-28.*
