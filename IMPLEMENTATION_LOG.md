@@ -1029,3 +1029,16 @@ One atomic commit per finding; each carries a test that failed before the fix.
   `No_free_text_column_is_a_bounded_varchar_of_1000_or_more` (model scan) and
   `Postgres_rejects_out_of_range_hqms_numerics` (8 savepoint-isolated corruption probes, all
   23514) both failed pre-fix. App 133 · Integration 27+9 · Arch 190.
+- **M-08 (Major, closed)** — the 8 bare cross-aggregate reference columns in the HQMS train are
+  now tenant-composite foreign keys (Hardening4 idiom, `NOT VALID`→`VALIDATE`, RESTRICT):
+  `meeting→committee`, `survey_response→satisfaction_survey`, `survey_response→department`,
+  `survey_answer→survey_question`, `evidence_link→standard_set`, `evidence_link→standard_element`,
+  `planned_audit→audit`, `integration_message→integration_endpoint`. Declared in SQL (migration
+  `20260828221537_HqmsCrossAggregateForeignKeys`) because two targets are EF owned children that
+  `HasOne` cannot address. Executed proof: Up→8 FKs, Down→0, re-Up→8. Probe
+  `CrossAggregateReferenceTests` red-first (all 8 dangling references persisted pre-fix; all
+  23503 after — the survey probes are dangling INSERTs since M-05 freezes those rows against
+  UPDATE). Two M-05-era test seeds gained real parents (the new FKs correctly rejected their
+  dangling committee/survey ids — EF batching also cannot order SQL-declared FK inserts, so
+  probe seeds save parents first; production flows always persist the parent in an earlier
+  command). Functional 102/102 (incl. real-PG four) · Integration 28+9 · App 133 · Arch 190.

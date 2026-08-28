@@ -89,9 +89,24 @@ public sealed class SignedRecordImmutabilityTests(RealPostgresFixture fx)
         incident.Close("Probe closure.", Guid.CreateVersion7());
         db.Incidents.Add(incident);
 
+        // Real parents first (M-08 made dangling cross-aggregate references
+        // structurally impossible), in their own save so the batch order can't
+        // put a child before its parent.
+        var committee = NT.QAMS.Domain.Committees.Committee.Create(
+            "Immutability probe committee", "terms",
+            NT.QAMS.Domain.Committees.CommitteeFrequency.Monthly, 1);
+        ((ITenantScoped)committee).TenantId = tenant;
+        db.Committees.Add(committee);
+
+        var survey = NT.QAMS.Domain.PatientExperience.SatisfactionSurvey.Create("Immutability probe survey", null);
+        ((ITenantScoped)survey).TenantId = tenant;
+        var questionId = survey.AddQuestion("How was the stay?", "overall");
+        db.SatisfactionSurveys.Add(survey);
+        await db.SaveChangesAsync();
+
         // A meeting with APPROVED minutes.
         var attendee = Guid.CreateVersion7();
-        var meeting = NT.QAMS.Domain.Committees.Meeting.Schedule(Guid.CreateVersion7(), "MTG-ITEST-0001", At);
+        var meeting = NT.QAMS.Domain.Committees.Meeting.Schedule(committee.Id, "MTG-ITEST-0001", At);
         ((ITenantScoped)meeting).TenantId = tenant;
         meeting.RecordAttendance(attendee, present: true);
         meeting.Hold(committeeQuorum: 1);
@@ -101,7 +116,7 @@ public sealed class SignedRecordImmutabilityTests(RealPostgresFixture fx)
 
         // A survey response — immutable from capture.
         var response = NT.QAMS.Domain.PatientExperience.SurveyResponse.Submit(
-            Guid.CreateVersion7(), null, null, [(Guid.CreateVersion7(), 4)], At);
+            survey.Id, null, null, [(questionId, 4)], At);
         ((ITenantScoped)response).TenantId = tenant;
         db.SurveyResponses.Add(response);
 
