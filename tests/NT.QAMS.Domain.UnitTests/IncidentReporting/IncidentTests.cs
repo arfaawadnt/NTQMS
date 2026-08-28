@@ -95,6 +95,20 @@ public class IncidentTests
     }
 
     [Fact]
+    public void A_closed_incident_cannot_gain_a_corrective_action_link()
+    {
+        // M-05: the closure signature binds the record's content hash — a
+        // post-closure CAPA back-link would mutate the signed record. Raise a
+        // new finding instead.
+        var incident = PendingReview();
+        incident.Close("Corrective actions raised; family informed.", Manager);
+
+        var act = () => incident.LinkCorrectiveAction(Guid.CreateVersion7());
+
+        act.Should().Throw<InvalidStateTransitionException>().Which.Code.Should().Be("INC-032");
+    }
+
+    [Fact]
     public void Full_happy_path_reaches_closed()
     {
         var incident = Reported();

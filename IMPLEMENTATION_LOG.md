@@ -982,3 +982,22 @@ One atomic commit per finding; each carries a test that failed before the fix.
   stay as recorded out-of-scope observations, now backstopped by the handler arm. Tests red-first:
   `MalformedEnumRequestTests` (unknown name = 500 pre-fix; undefined numeric = 201 pre-fix — both
   400 `REQ-001` after) + `RequestEnumTests` (4 contract facts). Functional 98/98, Arch 190/190.
+- **Verification environment note (2026-08-29):** session-scoped credential access was blocked, so a
+  dedicated throwaway PostgreSQL 17.2 instance was initialised at `E:\pg-verify` (port 55432, trust
+  auth, non-superuser owner `vowner`, database `qams_verify`, full 80-migration chain applied —
+  144-table parity with Gate 1). Production (`ntqams`, port 5432) untouched. The 4 real-PG
+  functional tests skipped during M-07 were re-run here: **4/4 green** (provisioning now exercises
+  the enlarged seeded grants against real constraints) — the M-07 caveat above is closed.
+  `E:\pg-verify` is disposable evidence infrastructure: stop the server and delete after the batch.
+- **M-05 (Major, closed)** — the three HQMS frozen-record types are now database-immutable:
+  migration `20260828213425_HqmsFrozenRecordImmutability` registers `incident` (frozen at
+  `Closed`) and `meeting` (frozen at `MinutesApproved`) with `qams.reject_frozen_mutation`, and
+  adds `qams.reject_any_mutation()` for `survey_response`/`survey_answer` (create-only aggregates,
+  immutable from capture). Meeting DECISIONS deliberately stay live (post-approval action-item
+  tracking; own table). Domain: `Incident.LinkCorrectiveAction` now refuses Closed (INC-032) —
+  the closure signature binds the content hash. Executed proof on the throwaway: Up applied,
+  Down removed all 4 triggers + function, re-Up restored (counts 4→0→4). Tests red-first:
+  `IncidentTests.A_closed_incident_cannot_gain_a_corrective_action_link` (guard) and
+  `SignedRecordImmutabilityTests.Hqms_frozen_records_reject_raw_update_and_delete` (7 tamper
+  probes, savepoint-isolated, all 23514) — both failed pre-fix. Domain 438 · App 130 · Arch 190 ·
+  Integration 26+9 skips.

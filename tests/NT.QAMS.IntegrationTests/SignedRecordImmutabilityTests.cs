@@ -65,6 +65,74 @@ public sealed class SignedRecordImmutabilityTests(RealPostgresFixture fx)
         await tx.RollbackAsync();
     }
 
+    [SkippableFact]
+    public async Task Hqms_frozen_records_reject_raw_update_and_delete()
+    {
+        Skip.IfNot(fx.Available, fx.Unavailable ?? "PostgreSQL unavailable");
+
+        using var db = fx.CreateContext(out var ctx);
+        var tenant = Guid.CreateVersion7();
+        ctx.Set(tenant);
+        await using var tx = await db.Database.BeginTransactionAsync();
+
+        // A CLOSED (signed) incident.
+        var incident = NT.QAMS.Domain.IncidentReporting.Incident.Report(
+            "INC-ITEST-0001", "Frozen probe", "Immutability probe incident",
+            NT.QAMS.Domain.IncidentReporting.IncidentCategory.Other,
+            NT.QAMS.Domain.IncidentReporting.HarmGrade.NoHarm,
+            NT.QAMS.Domain.IncidentReporting.IntakeChannel.Web, At, Guid.CreateVersion7());
+        incident.TenantId = tenant;
+        incident.Triage(Guid.CreateVersion7(), NT.QAMS.Domain.IncidentReporting.IncidentCategory.Other);
+        incident.StartInvestigation(Guid.CreateVersion7());
+        incident.RecordInvestigationSummary("Probe summary.");
+        incident.SubmitForReview();
+        incident.Close("Probe closure.", Guid.CreateVersion7());
+        db.Incidents.Add(incident);
+
+        // A meeting with APPROVED minutes.
+        var attendee = Guid.CreateVersion7();
+        var meeting = NT.QAMS.Domain.Committees.Meeting.Schedule(Guid.CreateVersion7(), "MTG-ITEST-0001", At);
+        ((ITenantScoped)meeting).TenantId = tenant;
+        meeting.RecordAttendance(attendee, present: true);
+        meeting.Hold(committeeQuorum: 1);
+        meeting.RecordMinutes("Probe minutes.");
+        meeting.ApproveMinutes(attendee);
+        db.Meetings.Add(meeting);
+
+        // A survey response — immutable from capture.
+        var response = NT.QAMS.Domain.PatientExperience.SurveyResponse.Submit(
+            Guid.CreateVersion7(), null, null, [(Guid.CreateVersion7(), 4)], At);
+        ((ITenantScoped)response).TenantId = tenant;
+        db.SurveyResponses.Add(response);
+
+        await db.SaveChangesAsync();
+
+        // M-05: all three HQMS frozen-record types are database-immutable.
+        var tampers = new (string Name, string Sql, object Id)[]
+        {
+            ("closed incident update", "UPDATE qams.incident SET title = 'TAMPERED' WHERE id = {0}", incident.Id),
+            ("closed incident delete", "DELETE FROM qams.incident WHERE id = {0}", incident.Id),
+            ("approved minutes update", "UPDATE qams.meeting SET minutes = 'TAMPERED' WHERE id = {0}", meeting.Id),
+            ("approved minutes delete", "DELETE FROM qams.meeting WHERE id = {0}", meeting.Id),
+            ("survey response update", "UPDATE qams.survey_response SET service_line = 'TAMPERED' WHERE id = {0}", response.Id),
+            ("survey response delete", "DELETE FROM qams.survey_response WHERE id = {0}", response.Id),
+            ("survey answer update", "UPDATE qams.survey_answer SET score = 1 WHERE survey_response_id = {0}", response.Id),
+        };
+
+        foreach (var (name, sql, id) in tampers)
+        {
+            // Savepoint per probe: a rejected statement aborts the enclosing
+            // transaction, and the next probe would otherwise die with 25P02.
+            await tx.CreateSavepointAsync("tamper");
+            var tamper = async () => await db.Database.ExecuteSqlRawAsync(sql, id);
+            (await tamper.Should().ThrowAsync<PostgresException>($"'{name}' must be rejected"))
+                .Which.SqlState.Should().Be("23514", $"'{name}' trips the immutability trigger");
+            await tx.RollbackToSavepointAsync("tamper");
+        }
+
+        await tx.RollbackAsync();
+    }
+
     /// <summary>Create → enter points → calculate → sign off, all persisted in the current transaction.</summary>
     private static async Task<OutlierScreening> SeedSignedScreeningAsync(AppDbContext db, Guid tenant)
     {

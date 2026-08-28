@@ -471,7 +471,9 @@ public sealed class Incident : AggregateRoot, ITenantScoped, IIdentitySuppressed
     /// Back-links the corrective-action record (Nonconformance/CAPA) raised from this
     /// incident. Idempotent (first link wins), so a retried escalation cannot open a
     /// second parallel loop. Not permitted on a rejected incident — a rejected report
-    /// is not a finding.
+    /// is not a finding — nor on a closed one: the closure signature binds the
+    /// record's content hash, and the database freezes the row (M-05), so the CAPA
+    /// must be linked before close-out or raised as a new finding.
     /// </summary>
     public void LinkCorrectiveAction(Guid ncId)
     {
@@ -479,6 +481,12 @@ public sealed class Incident : AggregateRoot, ITenantScoped, IIdentitySuppressed
         {
             throw new InvalidStateTransitionException(
                 "INC-030", "Cannot raise a corrective action from a rejected incident.");
+        }
+
+        if (Status == IncidentStatus.Closed)
+        {
+            throw new InvalidStateTransitionException(
+                "INC-032", "The incident is closed and signed; raise a new finding instead of amending the closed record.");
         }
 
         if (ncId == Guid.Empty)
