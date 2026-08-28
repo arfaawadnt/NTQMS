@@ -417,6 +417,7 @@ export class I18nService {
     'trn.stat.courses': { en: 'Courses', ar: 'الدورات', fr: 'Cours' },
     'trn.stat.active': { en: 'Active', ar: 'نشطة', fr: 'Actifs' },
     'trn.stat.passRate': { en: 'Mean pass rate %', ar: 'متوسط معدل النجاح %', fr: 'Taux de réussite moyen %' },
+    'trn.stat.lapsed': { en: 'Lapsed trainings', ar: 'تدريبات منتهية الصلاحية', fr: 'Formations expirées' },
 
     // ── Mortality, Morbidity & Peer Review (HQMS M10) ────────────────────────
     'mm.title': { en: 'Mortality & Morbidity', ar: 'الوفيات والمراضة', fr: 'Mortalité et morbidité' },

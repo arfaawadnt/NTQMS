@@ -19,8 +19,8 @@ public class TrainingSessionTests
     {
         var s = Scheduled();
         s.RegisterAttendee(Trainee);
-        s.Hold();
-        s.RecordAttendance(Trainee, attended: true, preScore: 40, postScore: 90, passMark: 80);
+        s.Hold(80);
+        s.RecordAttendance(Trainee, attended: true, preScore: 40, postScore: 90);
 
         var line = s.Attendance.Single();
         line.ScoreGain.Should().Be(50);
@@ -33,8 +33,8 @@ public class TrainingSessionTests
     {
         var s = Scheduled();
         s.RegisterAttendee(Trainee);
-        s.Hold();
-        s.RecordAttendance(Trainee, attended: true, preScore: 40, postScore: 70, passMark: 80);
+        s.Hold(80);
+        s.RecordAttendance(Trainee, attended: true, preScore: 40, postScore: 70);
         s.Attendance.Single().Passed.Should().BeFalse();
     }
 
@@ -43,8 +43,8 @@ public class TrainingSessionTests
     {
         var s = Scheduled();
         s.RegisterAttendee(Trainee);
-        s.Hold();
-        s.RecordAttendance(Trainee, attended: false, preScore: null, postScore: 95, passMark: 80);
+        s.Hold(80);
+        s.RecordAttendance(Trainee, attended: false, preScore: null, postScore: 95);
         s.Attendance.Single().Passed.Should().BeFalse();
     }
 
@@ -62,7 +62,7 @@ public class TrainingSessionTests
     {
         var s = Scheduled();
         s.RegisterAttendee(Trainee);
-        var early = () => s.RecordAttendance(Trainee, true, 40, 90, 80);
+        var early = () => s.RecordAttendance(Trainee, true, 40, 90);
         early.Should().Throw<InvalidStateTransitionException>().Which.Code.Should().Be("SES-013");
     }
 
@@ -70,8 +70,8 @@ public class TrainingSessionTests
     public void Recording_an_unregistered_trainee_is_rejected()
     {
         var s = Scheduled();
-        s.Hold();
-        var act = () => s.RecordAttendance(Trainee, true, 40, 90, 80);
+        s.Hold(80);
+        var act = () => s.RecordAttendance(Trainee, true, 40, 90);
         act.Should().Throw<DomainException>().Which.Code.Should().Be("SES-015");
     }
 
@@ -79,7 +79,7 @@ public class TrainingSessionTests
     public void Scheduled_to_held_to_closed_is_the_happy_path()
     {
         var s = Scheduled();
-        s.Hold();
+        s.Hold(80);
         s.Close();
         s.Status.Should().Be(SessionStatus.Closed);
 

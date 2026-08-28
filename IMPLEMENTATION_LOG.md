@@ -1088,3 +1088,16 @@ One atomic commit per finding; each carries a test that failed before the fix.
   signatures. Tests red-first: lapsed-appointment and silent-re-verify facts failed pre-fix
   (runnable red); SOD/renewal/stale-evidence facts ride the signature change. Executed migration
   Down/Up. Domain 450 · App 138 · Arch 192 · Integration 30+9 · Functional 102.
+- **M-20 (Major, closed)** — training delivery integrity: sessions can be scheduled and held only
+  for an **Active** course (CRS-013 — Draft is still editable, Retired is history);
+  `TrainingSession.PassMarkAtHold` freezes the pass threshold at Hold (migration
+  `SessionPassMarkSnapshot`) and every recording is judged by that snapshot — the recording
+  handler no longer reads the course, so "Passed" is reproducible on the session record alone
+  (with the Active-only guard, live-mark drift is also structurally closed: `UpdateDetails` is
+  Draft-only). The compliance dashboard now computes its stated basis — CURRENCY: per course,
+  passes stay current for `ValidityMonths` from the session date (latest pass wins; null never
+  lapses; pattern `CompetencyRecord.ExpiresAt`); DTO gains `CurrentTrainees/LapsedTrainees`
+  (additive) and the SPA training page shows a "Lapsed trainings" stat. Tests red-first: the
+  Draft-schedule fact and the snapshot fact both failed pre-fix; a stale-pass-lapses fact pins
+  the currency math. Executed migration Down/Up. Domain 450 · App 141 · Integration 30+9 ·
+  Functional 102 · Arch 192 · Karma 133.

@@ -44,4 +44,5 @@ public sealed record SessionDetailDto(
 
 public sealed record TrainingComplianceRowDto(
     Guid CourseId, string CourseRef, string Title, string Category, int SessionsHeld,
-    int DistinctTrainees, int PassedTrainees, decimal PassRate, decimal? MeanPostScore);
+    int DistinctTrainees, int PassedTrainees, decimal PassRate, decimal? MeanPostScore,
+    int CurrentTrainees, int LapsedTrainees);

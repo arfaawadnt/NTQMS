@@ -36,6 +36,10 @@ export class TrainingFacade {
   private lastStatus?: string;
 
   readonly activeCourses = computed(() => this._courses().filter((c) => c.status === 'Active').length);
+  /** M-20: total lapsed (validity-expired) passes across active courses — the currency signal. */
+  readonly lapsedTrainees = computed(() =>
+    this._compliance().reduce((s, r) => s + r.lapsedTrainees, 0));
+
   readonly meanPassRate = computed(() => {
     const rows = this._compliance().filter((r) => r.distinctTrainees > 0);
     if (rows.length === 0) { return 0; }

@@ -117,6 +117,7 @@ export class TrainingListComponent implements OnInit {
     { label: this.i18n.t('trn.stat.courses'), value: this.facade.courses().length, tone: 'slate' },
     { label: this.i18n.t('trn.stat.active'), value: this.facade.activeCourses(), tone: 'teal' },
     { label: this.i18n.t('trn.stat.passRate'), value: this.facade.meanPassRate(), tone: 'green' },
+    { label: this.i18n.t('trn.stat.lapsed'), value: this.facade.lapsedTrainees(), tone: 'red' },
   ]);
 
   readonly defaults = { title: '', category: 'Mandatory' as TrainingCategory, durationHours: 1, validityMonths: null as number | null, passMark: 80, description: '' };

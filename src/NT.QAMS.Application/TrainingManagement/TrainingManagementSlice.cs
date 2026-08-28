@@ -107,7 +107,13 @@ public sealed class ScheduleSessionHandler(IAppDbContext db, ICurrentTenant tena
     public async Task<Guid> Handle(ScheduleSessionCommand c, CancellationToken ct)
     {
         var tenantId = tenant.TenantId ?? throw new DomainException("TENANT-000", "A tenant context is required.");
-        _ = await UpdateCourseHandler.LoadCourse(db, c.CourseId, ct); // ensure the course exists in-tenant
+        var course = await UpdateCourseHandler.LoadCourse(db, c.CourseId, ct);
+        if (course.Status != CourseStatus.Active)
+        {
+            // M-20: a Draft course is still editable and a Retired one is history.
+            throw new DomainException("CRS-013", "Only an active course can be delivered.");
+        }
+
         var sessionRef = await refs.NextAsync(tenantId, "SES", ct);
         var session = TrainingSession.Schedule(c.CourseId, sessionRef, c.ScheduledAtUtc, c.Location, c.TrainerName);
         db.TrainingSessions.Add(session);
@@ -140,7 +146,15 @@ public sealed class HoldSessionHandler(IAppDbContext db) : ICommandHandler<HoldS
 {
     public async Task Handle(HoldSessionCommand c, CancellationToken ct)
     {
-        (await RegisterAttendeeHandler.LoadSession(db, c.SessionId, ct)).Hold();
+        var session = await RegisterAttendeeHandler.LoadSession(db, c.SessionId, ct);
+        var course = await UpdateCourseHandler.LoadCourse(db, session.CourseId, ct);
+        if (course.Status != CourseStatus.Active)
+        {
+            throw new DomainException("CRS-013", "Only an active course can be delivered.");
+        }
+
+        // M-20: freeze the pass threshold this delivery is judged against.
+        session.Hold(course.PassMark);
         await db.SaveChangesAsync(ct);
     }
 }
@@ -154,9 +168,8 @@ public sealed class RecordAttendanceHandler(IAppDbContext db) : ICommandHandler<
     public async Task Handle(RecordAttendanceCommand c, CancellationToken ct)
     {
         var session = await RegisterAttendeeHandler.LoadSession(db, c.SessionId, ct);
-        // The pass mark lives on the course aggregate — load it and pass it in.
-        var course = await UpdateCourseHandler.LoadCourse(db, session.CourseId, ct);
-        session.RecordAttendance(c.TraineeId, c.Attended, c.PreScore, c.PostScore, course.PassMark);
+        // M-20: judged against the pass mark frozen at Hold, not the live course.
+        session.RecordAttendance(c.TraineeId, c.Attended, c.PreScore, c.PostScore);
         await db.SaveChangesAsync(ct);
     }
 }
@@ -308,7 +321,7 @@ public sealed class GetSessionByIdHandler(IAppDbContext db) : IQueryHandler<GetS
 /// </summary>
 public sealed record GetTrainingComplianceQuery : IQuery<IReadOnlyList<TrainingComplianceRowDto>>;
 
-public sealed class GetTrainingComplianceHandler(IAppDbContext db)
+public sealed class GetTrainingComplianceHandler(IAppDbContext db, IClock clock)
     : IQueryHandler<GetTrainingComplianceQuery, IReadOnlyList<TrainingComplianceRowDto>>
 {
     public async Task<IReadOnlyList<TrainingComplianceRowDto>> Handle(GetTrainingComplianceQuery q, CancellationToken ct)
@@ -324,6 +337,7 @@ public sealed class GetTrainingComplianceHandler(IAppDbContext db)
             .ToListAsync(ct);
 
         var byCourse = sessions.ToLookup(s => s.CourseId);
+        var today = DateOnly.FromDateTime(clock.UtcNow.UtcDateTime);
 
         return courses.Select(c =>
         {
@@ -333,11 +347,33 @@ public sealed class GetTrainingComplianceHandler(IAppDbContext db)
             var passedTrainees = attended.Where(a => a.Passed).Select(a => a.TraineeId).Distinct().Count();
             var post = attended.Where(a => a.PostScore.HasValue).Select(a => a.PostScore!.Value).ToList();
 
+            // M-20: currency — the dashboard's stated basis. A pass stays
+            // current for ValidityMonths from its session date (latest pass
+            // wins); a null validity never lapses (pattern:
+            // CompetencyRecord.ExpiresAt).
+            var current = 0;
+            var lapsed = 0;
+            foreach (var trainee in courseSessions
+                         .SelectMany(s => s.Attendance.Where(a => a.Attended && a.Passed)
+                             .Select(a => new { a.TraineeId, s.ScheduledAtUtc }))
+                         .GroupBy(x => x.TraineeId))
+            {
+                if (c.ValidityMonths is not { } months)
+                {
+                    current++;
+                    continue;
+                }
+
+                var latest = DateOnly.FromDateTime(trainee.Max(x => x.ScheduledAtUtc).UtcDateTime);
+                if (latest.AddMonths(months) >= today) { current++; } else { lapsed++; }
+            }
+
             return new TrainingComplianceRowDto(
                 c.Id, c.CourseRef, c.Title, c.Category.ToString(), courseSessions.Count,
                 distinct, passedTrainees,
                 distinct == 0 ? 0m : decimal.Round(passedTrainees * 100m / distinct, 1),
-                post.Count == 0 ? null : decimal.Round((decimal)post.Average(), 1));
+                post.Count == 0 ? null : decimal.Round((decimal)post.Average(), 1),
+                current, lapsed);
         }).ToList();
     }
 }

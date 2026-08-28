@@ -109,25 +109,37 @@ public sealed class TrainingSession : AggregateRoot, ITenantScoped
         return line.Id;
     }
 
-    public void Hold()
+    /// <summary>
+    /// The pass threshold this session was delivered against, frozen at Hold (M-20):
+    /// editing the course afterwards must not change what "Passed" meant here.
+    /// </summary>
+    public int? PassMarkAtHold { get; private set; }
+
+    public void Hold(int passMark)
     {
         if (Status != SessionStatus.Scheduled)
         {
             throw new InvalidStateTransitionException("SES-012", "Only a scheduled session can be held.");
         }
 
+        PassMarkAtHold = passMark;
         Status = SessionStatus.Held;
     }
 
     /// <summary>
-    /// Records a registered trainee's attendance and pre/post scores. The pass mark is supplied by the
-    /// course aggregate (SES cannot read another aggregate's state directly).
+    /// Records a registered trainee's attendance and pre/post scores against the pass mark
+    /// snapshotted at Hold — every attendee of one session is judged by the SAME threshold.
     /// </summary>
-    public void RecordAttendance(Guid traineeId, bool attended, int? preScore, int? postScore, int passMark)
+    public void RecordAttendance(Guid traineeId, bool attended, int? preScore, int? postScore)
     {
         if (Status != SessionStatus.Held)
         {
             throw new InvalidStateTransitionException("SES-013", "Attendance can only be recorded for a held session.");
+        }
+
+        if (PassMarkAtHold is not { } passMark)
+        {
+            throw new DomainException("SES-018", "The session carries no held pass mark.");
         }
 
         if (preScore is < 0 or > 100 || postScore is < 0 or > 100)

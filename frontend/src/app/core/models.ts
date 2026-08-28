@@ -747,6 +747,7 @@ export interface SessionDetail {
 export interface TrainingComplianceRow {
   courseId: string; courseRef: string; title: string; category: string; sessionsHeld: number;
   distinctTrainees: number; passedTrainees: number; passRate: number; meanPostScore: number | null;
+  currentTrainees: number; lapsedTrainees: number;
 }
 
 export interface DefineCourseRequest {
