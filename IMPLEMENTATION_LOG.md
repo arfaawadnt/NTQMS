@@ -1224,3 +1224,11 @@ Four deferred decisions approved (recommended options). Executed ascending blast
   CAPA, credentialing and analytical-quality gates already follow), and the message/docstring match
   the real code. Test updated. (The other HQMS SoD gates — incident close SOD-INC-001, credentialing
   SOD-CRD-001, CAPA SOD-CAPA-00x — already comply.) Domain 464.
+- **N-09 (survey fabrication closed; remaining display items noted)** — the survey response form
+  pre-selected "3" and submitted a fabricated midpoint for every unanswered question — inventing
+  patient-experience data. The score selects now default to a "— not answered —" option, only
+  scored questions are submitted (never a fabricated value), and Submit is disabled until at least
+  one question is answered. Karma 133, prod build clean. **Remaining N-09 display-only items (not
+  data-integrity, deferred):** all-N/A accreditation chapter rendering 0% red vs neutral, a
+  hardcoded year literal in one chart axis, the 200-row evidence-picker cap, and SPC-chart refresh
+  after a threshold save — cosmetic, tracked for a UX pass.

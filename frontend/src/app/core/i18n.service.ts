@@ -2031,6 +2031,7 @@ export class I18nService {
     'svy.recordResponse': { en: 'Record a response', ar: 'تسجيل رد', fr: 'Saisir une réponse' },
     'svy.department': { en: 'Department', ar: 'القسم', fr: 'Département' },
     'svy.submitResponse': { en: 'Submit response', ar: 'إرسال الرد', fr: 'Envoyer la réponse' },
+    'svy.notAnswered': { en: '— not answered —', ar: '— لم تتم الإجابة —', fr: '— sans réponse —' },
     'cmpl.title': { en: 'Complaints Registry', ar: 'سجل الشكاوى', fr: 'Registre des réclamations' },
     'cmpl.subtitle': { en: 'A justified complaint automatically opens a nonconformance.', ar: 'الشكوى المبررة تفتح حالة عدم مطابقة تلقائيًا.', fr: 'Une réclamation justifiée ouvre automatiquement une non-conformité.' },
     'cmpl.new': { en: 'Log Complaint', ar: 'تسجيل شكوى', fr: 'Enregistrer une réclamation' },

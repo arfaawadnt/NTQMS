@@ -92,11 +92,12 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
             <div class="resp-q">
               <span>{{ q.text }}</span>
               <select (change)="setScore(q.id, $event)">
-                @for (n of [1,2,3,4,5]; track n) { <option [value]="n" [selected]="n === 3">{{ n }}</option> }
+                <option value="" selected>{{ i18n.t('svy.notAnswered') }}</option>
+                @for (n of [1,2,3,4,5]; track n) { <option [value]="n">{{ n }}</option> }
               </select>
             </div>
           }
-          <button (click)="submitResponse(s.id, deptSel.value)">{{ i18n.t('svy.submitResponse') }}</button>
+          <button (click)="submitResponse(s.id, deptSel.value)" [disabled]="answeredCount() === 0">{{ i18n.t('svy.submitResponse') }}</button>
         </section>
       }
 
@@ -156,13 +157,26 @@ export class SurveysDetailComponent implements OnInit {
   }
 
   setScore(questionId: string, event: Event): void {
-    const score = Number((event.target as HTMLSelectElement).value);
-    this.scores.update((m) => ({ ...m, [questionId]: score }));
+    const raw = (event.target as HTMLSelectElement).value;
+    this.scores.update((m) => {
+      const next = { ...m };
+      if (raw === '') { delete next[questionId]; } else { next[questionId] = Number(raw); }
+      return next;
+    });
   }
+
+  /** Questions the respondent has actually scored (N-09: no fabricated answers). */
+  readonly answeredCount = computed(() =>
+    (this.facade.selected()?.questions ?? []).filter((q) => this.scores()[q.id] != null).length);
 
   async submitResponse(id: string, departmentId: string): Promise<void> {
     const questions = this.facade.selected()?.questions ?? [];
-    const answers = questions.map((q) => ({ questionId: q.id, score: this.scores()[q.id] ?? 3 }));
+    // N-09: submit only the questions the respondent actually scored — never a
+    // fabricated midpoint for the ones they left blank.
+    const answers = questions
+      .filter((q) => this.scores()[q.id] != null)
+      .map((q) => ({ questionId: q.id, score: this.scores()[q.id] }));
+    if (answers.length === 0) { return; }
     await this.facade.submitResponse(id, {
       departmentId: departmentId || null, serviceLine: null, answers,
     });
