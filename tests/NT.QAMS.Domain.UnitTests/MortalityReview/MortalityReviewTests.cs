@@ -42,7 +42,7 @@ public class MortalityReviewTests
         m.Classify(R1, DeathClassification.Unexpected, "Sudden deterioration.");
 
         var sameReviewer = () => m.RecordSecondReview(R1, "Concur.", concurs: true);
-        sameReviewer.Should().Throw<DomainException>().Which.Code.Should().Be("MRT-014");
+        sameReviewer.Should().Throw<DomainException>().Which.Code.Should().Be("SOD-MRT-001");
 
         m.RecordSecondReview(R2, "Independent review — concur.", concurs: true);
         m.Status.Should().Be(MortalityStatus.SecondReviewed);

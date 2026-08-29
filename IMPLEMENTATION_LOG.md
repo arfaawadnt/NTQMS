@@ -1218,3 +1218,9 @@ Four deferred decisions approved (recommended options). Executed ascending blast
   `OutboxPayloadShapeTests`: a domain event round-trips losslessly through the exact serializer
   options the OutboxInterceptor/OutboxProcessor use, and the serialized JSON is asserted camelCase
   so a PascalCase regression that would orphan historical ledger rows fails the build. App 147.
+- **N-06 (closed)** — SoD code convention: a sweep of the HQMS SoD gates found the mortality
+  second-review guard throwing a module code (`MRT-014`) while its own message referenced a phantom
+  `SoD-MRT-001` that nothing threw. It now throws `SOD-MRT-001` (the `SOD-*` convention the incident,
+  CAPA, credentialing and analytical-quality gates already follow), and the message/docstring match
+  the real code. Test updated. (The other HQMS SoD gates — incident close SOD-INC-001, credentialing
+  SOD-CRD-001, CAPA SOD-CAPA-00x — already comply.) Domain 464.

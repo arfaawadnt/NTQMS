@@ -118,7 +118,7 @@ public sealed class MortalityReview : AggregateRoot, ITenantScoped, IAllocatable
 
         if (reviewerId == FirstReviewerId)
         {
-            throw new DomainException("MRT-014", "The second review must be performed by a different reviewer (SoD-MRT-001).");
+            throw new DomainException("SOD-MRT-001", "Segregation of duties: the second review must be performed by a different reviewer.");
         }
 
         if (string.IsNullOrWhiteSpace(notes))
