@@ -1141,3 +1141,18 @@ One atomic commit per finding; each carries a test that failed before the fix.
   tamper probes included. FRA (doc 02) gained nine HQMS area-risk rows (four HIGH). One
   verification-log row records the 2026-08-29 basis run (`abcc881`, 920/0 + Karma 133). All
   documents describe the POST-remediation behavior, per the approved sequencing.
+
+## 2026-08-29 — Group C decisions (owner-approved): M-04, M-16-ceremony, M-12-ADR, M-02
+
+Four deferred decisions approved (recommended options). Executed ascending blast radius.
+
+- **M-04 (cross-module reads — ADR + enforcement)** — ADR-0010 accepts cross-module reads on the
+  QUERY side and forbids new cross-module WRITES on the command side, documenting the as-built
+  truth: shared cross-cutting modules (ComplianceLedger signing/audit, Files, Authorization,
+  IdentityAccess) are free; six command handlers hold verified read-guards (LinkEvidence,
+  ContextIssue, Login, ChangePassword, SetUserScope, GrantTestAuthorization); and the incident→CAPA
+  convergence (`RaiseCapaFromIncidentHandler`) is the single sanctioned cross-module write (creates
+  a Nonconformance from an incident in one transaction — corrected from the earlier "travels by
+  event" claim after reading the handler). Enforced by `CommandHandlerScopeTests` (Mono.Cecil via
+  NetArchTest; scans async state-machine bodies + generic type args; shrink-only approved map) —
+  proven red with an emptied map. Arch 192→193.
