@@ -115,7 +115,7 @@ public sealed class CredentialingController(ISender sender) : ControllerBase
     }
 
     [HttpPost("practitioners/{id:guid}/reinstate")]
-    [RequirePermission(PermissionCatalog.Credentialing, PermissionAction.Edit)]
+    [RequirePermission(PermissionCatalog.Credentialing, PermissionAction.Void)]
     public async Task<IActionResult> Reinstate(Guid id, CancellationToken ct)
     {
         await sender.Send(new ReinstatePractitionerCommand(id), ct);

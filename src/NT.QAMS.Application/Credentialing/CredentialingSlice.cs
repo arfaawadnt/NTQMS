@@ -176,7 +176,9 @@ public sealed class SuspendPractitionerHandler(IAppDbContext db) : ICommandHandl
     }
 }
 
-[RequirePermissionPolicy(PermissionCatalog.Credentialing, PermissionAction.Edit)]
+// N-14: reinstating a practitioner to clinical practice is a governance act
+// equal to suspending — gated with the same Void authority, not the lower Edit.
+[RequirePermissionPolicy(PermissionCatalog.Credentialing, PermissionAction.Void)]
 public sealed record ReinstatePractitionerCommand(Guid PractitionerId) : ICommand;
 
 public sealed class ReinstatePractitionerHandler(IAppDbContext db) : ICommandHandler<ReinstatePractitionerCommand>
