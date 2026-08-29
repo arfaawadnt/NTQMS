@@ -180,8 +180,7 @@ whose patient differs from the stored encounter is refused (`STAY-023`) instead 
 refreshing the census. **Permission split**: endpoint registration/suspend/resume now require
 `integration.manage` (previously `create`/`edit`); the adapter-facing ingest keeps
 `integration.create` — grant a machine identity only `integration.create` and it can deliver
-messages but never reconfigure the wire. Retention/PHI handling of `rawPayload` remains an open
-ADR (audit register M-12, Group C).
+messages but never reconfigure the wire. Patient identifiers in `rawPayload` are masked at store time and the stored payload is purged after a retention window (default 90 days, `Integration:PayloadRetentionDays`) — ADR-0011.
 
 ## Also in this line — clinical registers page (M-10)
 

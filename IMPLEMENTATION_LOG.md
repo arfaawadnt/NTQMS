@@ -1166,3 +1166,13 @@ Four deferred decisions approved (recommended options). Executed ascending blast
   `Approving_minutes_is_a_signing_ceremony_that_mints_exactly_one_signature` and
   `…mints_no_signature` when minutes absent. App 142→144, Arch 193, Functional 102 (+4 real-PG skips
   — throwaway instance retired at batch close).
+- **M-12 retention/PHI ADR (Group C, closed)** — ADR-0011 decides retention + masking. Masking at
+  capture: `Hl7Redaction.MaskPatientIdentifiers` masks the PID direct-identifier fields
+  (MRN/name/DOB/address/phone/SSN) while preserving message structure; `IntegrationMessage.Receive`
+  applies it so no un-masked payload is ever stored. Retention purge:
+  `IntegrationPayloadRetentionService` (leader-elected, 6-hourly) tombstones the payload of settled
+  messages older than `Integration:PayloadRetentionDays` (default 90, clamp 1–3650) to «purged»,
+  keeping the row as the health record; `PurgeOlderThanAsync` is the testable core (ExecuteUpdate).
+  Tests: `Hl7RedactionTests` (5, domain — mask PHI, preserve structure, malformed-safe) and
+  `IntegrationPayloadRetentionTests` (real-PG SkippableFact — settled+old purged, recent + Received
+  kept). Domain 455 · App 144 · Integration 31+9 · Functional 106 · Arch 193.

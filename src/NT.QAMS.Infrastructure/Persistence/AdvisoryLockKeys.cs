@@ -26,4 +26,10 @@ public static class AdvisoryLockKeys
     /// exactly one instance upserts a snapshot round at a time.
     /// </summary>
     public const long KpiSnapshot = 0x4E54514D_5303;
+
+    /// <summary>
+    /// Transaction-scoped leader election for the ADT payload-retention purge
+    /// (M-12 / ADR-0011) — exactly one instance purges a round at a time.
+    /// </summary>
+    public const long IntegrationPayloadRetention = 0x4E54514D_5304;
 }

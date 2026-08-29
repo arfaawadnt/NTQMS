@@ -119,6 +119,8 @@ public static class DependencyInjection
         services.AddHostedService<OutboxProcessor>();
         services.AddHostedService<Jobs.ScheduledSweepService>();
         services.AddHostedService<Jobs.KpiSnapshotService>();
+        // M-12 / ADR-0011: purge ADT raw payloads past their retention window.
+        services.AddHostedService<Jobs.IntegrationPayloadRetentionService>();
         // OPS-002: single-replica topology sentinel — warns when a second
         // instance runs against the same database (see ADR-0001).
         services.AddHostedService<Jobs.SingleReplicaGuardService>();

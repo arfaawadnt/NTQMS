@@ -54,11 +54,20 @@ public sealed class IntegrationMessage : AggregateRoot, ITenantScoped
             EndpointId = endpointId,
             DedupKey = dedupKey.Trim(),
             MessageType = string.IsNullOrWhiteSpace(messageType) ? "UNKNOWN" : messageType.Trim(),
-            RawPayload = rawPayload ?? string.Empty,
+            // M-12 / ADR-0011: patient identifiers are masked at store time — the
+            // stored payload is for interface troubleshooting, not a PHI copy.
+            RawPayload = Hl7Redaction.MaskPatientIdentifiers(rawPayload),
             Status = MessageStatus.Received,
             ReceivedAtUtc = at,
         };
     }
+
+    /// <summary>
+    /// Retention purge (M-12 / ADR-0011): drops the stored payload once the
+    /// message is past its retention window, leaving the row (status, error,
+    /// timings) as the durable interface-health record.
+    /// </summary>
+    public void PurgePayload() => RawPayload = "«purged»";
 
     public void MarkProcessed(DateTimeOffset at)
     {
