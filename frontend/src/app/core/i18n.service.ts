@@ -1919,6 +1919,8 @@ export class I18nService {
     'acr.evidenceDesc': { en: 'Description (optional)', ar: 'الوصف (اختياري)', fr: 'Description (facultatif)' },
     'acr.linkEvidence': { en: 'Link', ar: 'ربط', fr: 'Lier' },
     'acr.cs.NotAssessed': { en: 'Not assessed', ar: 'لم يُقيَّم', fr: 'Non évalué' },
+    'acr.notAssessedYet': { en: 'Not assessed', ar: 'لم يُقيَّم بعد', fr: 'Pas encore évalué' },
+    'acr.pickerCapped': { en: 'Showing the first 200 — refine in the source register if the record is not listed.', ar: 'يتم عرض أول 200 — ابحث في سجل المصدر إذا لم يظهر السجل.', fr: 'Affichage des 200 premiers — affinez dans le registre source si l’enregistrement n’apparaît pas.' },
     'acr.cs.Compliant': { en: 'Compliant', ar: 'مطابق', fr: 'Conforme' },
     'acr.cs.PartiallyCompliant': { en: 'Partially compliant', ar: 'مطابق جزئيًا', fr: 'Partiellement conforme' },
     'acr.cs.NonCompliant': { en: 'Non-compliant', ar: 'غير مطابق', fr: 'Non conforme' },

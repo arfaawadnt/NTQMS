@@ -1232,3 +1232,10 @@ Four deferred decisions approved (recommended options). Executed ascending blast
   data-integrity, deferred):** all-N/A accreditation chapter rendering 0% red vs neutral, a
   hardcoded year literal in one chart axis, the 200-row evidence-picker cap, and SPC-chart refresh
   after a threshold save — cosmetic, tracked for a UX pass.
+- **N-09 display polish (closed; owner-approved 2026-08-30)** — the remaining data-honesty display
+  items: the audit-program year defaults to the current year (was a frozen `2026` literal); the
+  indicators facade now refreshes the SPC chart on every mutation (a threshold save moved the
+  target/action lines but the chart stayed stale); an accreditation chapter with nothing assessed
+  renders neutral "Not assessed" instead of a red 0% failure; and the evidence source-picker shows
+  a "first 200 — refine in the source register" hint instead of silently truncating. Karma 133,
+  prod build clean.

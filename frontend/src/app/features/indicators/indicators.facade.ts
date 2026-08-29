@@ -79,16 +79,18 @@ export class IndicatorsFacade {
   async setTargets(id: string, r: SetIndicatorTargetsRequest): Promise<void> { await this.mutate(id, () => this.api.setTargets(id, r)); }
   async retire(id: string): Promise<void> { await this.mutate(id, () => this.api.retire(id)); }
 
-  /** Records a period measurement, then refreshes both the record and the SPC chart. */
   async recordMeasurement(id: string, r: RecordMeasurementRequest): Promise<void> {
     await this.mutate(id, () => this.api.recordMeasurement(id, r));
-    if (this._error() === '') { this._chart.set(await firstValueFrom(this.api.controlChart(id))); }
   }
 
+  // N-09: every mutation refreshes BOTH the record and the SPC chart — a
+  // threshold change moves the target/action lines, so a stale chart would
+  // otherwise keep showing the old limits after saving targets.
   private async mutate<T>(id: string, call: () => Observable<T>): Promise<void> {
     await this.run(async () => {
       await firstValueFrom(call());
       this._selected.set(await firstValueFrom(this.api.getById(id)));
+      this._chart.set(await firstValueFrom(this.api.controlChart(id)));
     });
   }
 

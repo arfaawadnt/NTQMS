@@ -92,6 +92,8 @@ export class AuditProgramsListComponent implements OnInit {
   readonly i18n = inject(I18nService);
   readonly perms = inject(PermissionsService);
   private readonly fb = inject(FormBuilder);
+  // N-09: default to the current year, not a frozen literal.
+  private readonly currentYear = new Date().getFullYear();
   private readonly router = inject(Router);
 
   readonly showForm = signal(false);
@@ -107,7 +109,7 @@ export class AuditProgramsListComponent implements OnInit {
   });
 
   readonly form = this.fb.nonNullable.group({
-    year: [2026, [Validators.required, Validators.min(2000), Validators.max(2100)]],
+    year: [this.currentYear, [Validators.required, Validators.min(2000), Validators.max(2100)]],
     title: ['', [Validators.required, Validators.maxLength(200)]],
   });
 
@@ -120,7 +122,7 @@ export class AuditProgramsListComponent implements OnInit {
     const id = await this.facade.create(this.form.getRawValue());
     if (id) {
       this.showForm.set(false);
-      this.form.reset({ year: 2026 });
+      this.form.reset({ year: this.currentYear });
       void this.router.navigate(['/audit-programs', id]);
     }
   }

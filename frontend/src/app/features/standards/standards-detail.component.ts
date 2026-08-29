@@ -15,7 +15,8 @@ import { CommitteesApiService } from '../../core/api/committees-api.service';
 import { I18nService } from '../../core/i18n.service';
 import { PermissionsService } from '../../core/permissions.service';
 import {
-  COMPLIANCE_STATUSES, ComplianceStatus, EVIDENCE_SOURCE_TYPES, EvidenceLink, EvidenceSourceType, StandardElement,
+  COMPLIANCE_STATUSES, ComplianceStatus, EVIDENCE_SOURCE_TYPES, EvidenceLink, EvidenceSourceType,
+  ReadinessScore, StandardElement,
 } from '../../core/models';
 import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
@@ -77,9 +78,15 @@ const SOURCE_PICKER_PAGE = 200;
             @for (c of r.chapters; track c.chapterCode) {
               <div class="chapter-row">
                 <span class="cname">{{ c.chapterCode }} {{ c.chapterTitle }}</span>
-                <div class="bar"><span [style.width.%]="c.compliancePercent"
-                  [class.ok]="c.compliancePercent >= 90" [class.warn]="c.compliancePercent < 90 && c.compliancePercent >= 60" [class.bad]="c.compliancePercent < 60"></span></div>
-                <span class="pct">{{ c.compliancePercent | number:'1.0-0' }}%</span>
+                @if (assessed(c)) {
+                  <div class="bar"><span [style.width.%]="c.compliancePercent"
+                    [class.ok]="c.compliancePercent >= 90" [class.warn]="c.compliancePercent < 90 && c.compliancePercent >= 60" [class.bad]="c.compliancePercent < 60"></span></div>
+                  <span class="pct">{{ c.compliancePercent | number:'1.0-0' }}%</span>
+                } @else {
+                  <!-- N-09: nothing assessed yet reads neutral, not a red 0% failure. -->
+                  <div class="bar"></div>
+                  <span class="pct muted">{{ i18n.t('acr.notAssessedYet') }}</span>
+                }
               </div>
             }
           </div>
@@ -165,6 +172,10 @@ const SOURCE_PICKER_PAGE = 200;
                             <option value="">{{ sourceOptionsLoading() ? i18n.t('common.loading') : i18n.t('acr.pickSource') }}</option>
                             @for (o of sourceOptions(); track o.id) { <option [value]="o.id">{{ o.label }}</option> }
                           </select>
+                          <!-- N-09: the picker shows at most the first page; say so rather than silently truncating. -->
+                          @if (sourceOptions().length >= pickerCap) {
+                            <span class="muted picker-cap">{{ i18n.t('acr.pickerCapped') }}</span>
+                          }
                         }
                         <input formControlName="description" [placeholder]="i18n.t('acr.evidenceDesc')" />
                         <button type="submit" [disabled]="evidenceForm.invalid">{{ i18n.t('acr.linkEvidence') }}</button>
@@ -215,6 +226,11 @@ export class StandardsDetailComponent implements OnInit {
   readonly facade = inject(StandardsFacade);
   readonly i18n = inject(I18nService);
   readonly perms = inject(PermissionsService);
+
+  /** N-09: a chapter with at least one assessed applicable element — else its 0% reads neutral, not a red failure. */
+  assessed(c: ReadinessScore): boolean {
+    return c.applicableCount > 0 && c.notAssessedCount < c.applicableCount;
+  }
   private readonly fb = inject(FormBuilder);
   private readonly api = inject(StandardsApiService);
   private readonly documentsApi = inject(DocumentsApiService);
@@ -263,6 +279,7 @@ export class StandardsDetailComponent implements OnInit {
   });
 
   /** Linkable records for the selected typed source; 'Other' takes a free-text reference instead. */
+  readonly pickerCap = SOURCE_PICKER_PAGE;
   readonly sourceOptions = signal<SourceOption[]>([]);
   readonly sourceOptionsLoading = signal(false);
 
