@@ -2652,6 +2652,7 @@ export class I18nService {
     'roles.reasonTitle': { en: 'Reason for privilege change', ar: 'سبب تغيير الصلاحيات', fr: 'Motif du changement de privilèges' },
     'roles.reasonLabel': { en: 'This change is recorded in the audit trail. Why is it being made?', ar: 'يُسجل هذا التغيير في سجل التدقيق. ما سبب إجرائه؟', fr: 'Ce changement est consigné dans la piste d’audit. Pourquoi est-il effectué ?' },
     'perm.group.quality': { en: 'Quality & Improvement', ar: 'الجودة والتحسين', fr: 'Qualité et amélioration' },
+    'perm.group.clinical': { en: 'Clinical Governance', ar: 'الحوكمة السريرية', fr: 'Gouvernance clinique' },
     'perm.group.documents': { en: 'Documents & Records', ar: 'الوثائق والسجلات', fr: 'Documents et enregistrements' },
     'perm.group.risk': { en: 'Risk & Governance', ar: 'المخاطر والحوكمة', fr: 'Risques et gouvernance' },
     'perm.group.resources': { en: 'Resources', ar: 'الموارد', fr: 'Ressources' },

@@ -132,13 +132,17 @@ export const routes: Routes = [
             ],
           },
           {
-            path: 'training-catalogue/sessions/:id',
-            loadComponent: () => import('./features/training/session-detail.component').then((m) => m.SessionDetailComponent),
-          },
-          {
             path: 'training-catalogue',
             loadComponent: () => import('./features/training/training-list.component').then((m) => m.TrainingListComponent),
             children: [
+              // N-10: session detail nests under its list (keeps the list mounted,
+              // matching the eoc/surveys/committees convention). The URL is unchanged
+              // — 'sessions/:id' is two segments, so it never collides with the
+              // single-segment ':id' course-detail child.
+              {
+                path: 'sessions/:id',
+                loadComponent: () => import('./features/training/session-detail.component').then((m) => m.SessionDetailComponent),
+              },
               {
                 path: ':id',
                 loadComponent: () => import('./features/training/course-detail.component').then((m) => m.CourseDetailComponent),

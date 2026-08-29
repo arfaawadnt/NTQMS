@@ -76,6 +76,9 @@ public static class PermissionCatalog
     // ── Groups (match the shell navigation so the matrix reads like the app) ──
     public const string GroupQuality = "quality";
     public const string GroupDocuments = "documents";
+    // N-10: the hospital clinical-governance modules group as their own section,
+    // matching the shell navigation so the privilege matrix reads like the app.
+    public const string GroupClinical = "clinical";
     public const string GroupRisk = "risk";
     public const string GroupResources = "resources";
     public const string GroupPeople = "people";
@@ -156,9 +159,9 @@ public static class PermissionCatalog
         new(Nonconformances, GroupQuality, "perm.mod.nc", SignedRecordLifecycle),
         new(Incidents, GroupQuality, "perm.mod.incidents", SignedRecordLifecycle),
         new(Indicators, GroupQuality, "perm.mod.indicators", FullRecordLifecycle),
-        new(PatientSafety, GroupQuality, "perm.mod.patientSafety", FullRecordLifecycle),
-        new(InfectionControl, GroupQuality, "perm.mod.infectionControl", FullRecordLifecycle),
-        new(MortalityReview, GroupQuality, "perm.mod.mortalityReview", FullRecordLifecycle),
+        new(PatientSafety, GroupClinical, "perm.mod.patientSafety", FullRecordLifecycle),
+        new(InfectionControl, GroupClinical, "perm.mod.infectionControl", FullRecordLifecycle),
+        new(MortalityReview, GroupClinical, "perm.mod.mortalityReview", FullRecordLifecycle),
         new(Complaints, GroupQuality, "perm.mod.complaints", FullRecordLifecycle),
         new(Feedback, GroupQuality, "perm.mod.feedback", FullRecordLifecycle),
         new(Surveys, GroupQuality, "perm.mod.surveys", FullRecordLifecycle),
@@ -192,7 +195,7 @@ public static class PermissionCatalog
 
         // ── People & competence ──────────────────────────────────────────────
         new(Competencies, GroupPeople, "perm.mod.competencies", SignedRecordLifecycle),
-        new(Credentialing, GroupPeople, "perm.mod.credentialing", FullRecordLifecycle),
+        new(Credentialing, GroupClinical, "perm.mod.credentialing", FullRecordLifecycle),
         new(Training, GroupPeople, "perm.mod.training", FullRecordLifecycle),
         new(TestAuthorizations, GroupPeople, "perm.mod.testAuthorizations", SignedRecordLifecycle),
         new(Users, GroupPeople, "perm.mod.users", ConfigurationModule),
@@ -208,7 +211,7 @@ public static class PermissionCatalog
         new(Notifications, GroupOperations, "perm.mod.notifications", [PermissionAction.View, PermissionAction.Manage]),
         new(Integration, GroupOperations, "perm.mod.integration",
             [PermissionAction.View, PermissionAction.Create, PermissionAction.Edit, PermissionAction.Manage]),
-        new(EnvironmentOfCare, GroupOperations, "perm.mod.environmentOfCare", FullRecordLifecycle),
+        new(EnvironmentOfCare, GroupClinical, "perm.mod.environmentOfCare", FullRecordLifecycle),
         // Reporting carries Manage in addition to the read-only pair: the composite
         // Quality Health Score is a governance figure, so tuning its category
         // weighting is a privileged act distinct from reading the analytics.
