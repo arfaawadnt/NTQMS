@@ -24,7 +24,7 @@ public enum SafetyEventStatus { Reported, Reviewed, Closed }
 /// vs present-on-admission classification (the HAPI distinction that drives the reportable
 /// rate). Reported → Reviewed → Closed; the event feeds the per-1,000-patient-day rate.
 /// </summary>
-public sealed class PatientSafetyEvent : AggregateRoot, ITenantScoped
+public sealed class PatientSafetyEvent : AggregateRoot, ITenantScoped, IAllocatable
 {
     private PatientSafetyEvent()
     {

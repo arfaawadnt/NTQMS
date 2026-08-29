@@ -18,7 +18,7 @@ public enum HaiStatus { Reported, Reviewed, Closed, Rejected }
 /// reported, reviewed by infection control, then closed. Device-associated cases feed the
 /// per-1,000-device-day rate; the causative organism is captured for the antibiogram/surveillance.
 /// </summary>
-public sealed class HaiCase : AggregateRoot, ITenantScoped
+public sealed class HaiCase : AggregateRoot, ITenantScoped, IAllocatable
 {
     private HaiCase()
     {
@@ -30,7 +30,7 @@ public sealed class HaiCase : AggregateRoot, ITenantScoped
 
     public Guid TenantId { get; set; }
     public Guid? BranchId { get; set; }
-    public Guid? DepartmentId { get; private set; }
+    public Guid? DepartmentId { get; set; }
     public string CaseRef { get; private set; }
     public HaiType Type { get; private set; }
     public string PatientRef { get; private set; }

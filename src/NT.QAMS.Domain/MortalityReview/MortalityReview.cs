@@ -22,7 +22,7 @@ public enum MortalityStatus { Reported, Classified, SecondReviewed, CommitteeDis
 /// SoD-MRT-001) and committee discussion before closure. Deaths feed the mortality rate against the
 /// M24 patient-day denominator.
 /// </summary>
-public sealed class MortalityReview : AggregateRoot, ITenantScoped
+public sealed class MortalityReview : AggregateRoot, ITenantScoped, IAllocatable
 {
     private MortalityReview()
     {
@@ -33,7 +33,7 @@ public sealed class MortalityReview : AggregateRoot, ITenantScoped
 
     public Guid TenantId { get; set; }
     public Guid? BranchId { get; set; }
-    public Guid? DepartmentId { get; private set; }
+    public Guid? DepartmentId { get; set; }
     public string ReviewRef { get; private set; }
     public string PatientRef { get; private set; }
     public string Unit { get; private set; }

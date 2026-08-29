@@ -1176,3 +1176,13 @@ Four deferred decisions approved (recommended options). Executed ascending blast
   Tests: `Hl7RedactionTests` (5, domain — mask PHI, preserve structure, malformed-safe) and
   `IntegrationPayloadRetentionTests` (real-PG SkippableFact — settled+old purged, recent + Received
   kept). Domain 455 · App 144 · Integration 31+9 · Functional 106 · Arch 193.
+- **M-02 org-scope (Group C, closed)** — the five patient-level clinical registers (Incident,
+  PatientSafetyEvent, HaiCase, MortalityReview, ComplicationCase) now implement `IAllocatable`, so
+  the composed tenant+working-scope query filter and the `OrgScopeGuardInterceptor` apply to them
+  automatically (three `DepartmentId` setters widened; no schema change — the org columns were
+  already mapped). Branch-restricted users now see only their branch's + unattributed clinical
+  records and cannot write out of scope; unrestricted actors/jobs are unaffected (null-object
+  privileges). Governance/config registers (committees, credentialing, standards, indicators,
+  integration) stay tenant-wide by design. Red-first: `ClinicalWorkingScopeTests` (functional) —
+  proven red by removing `IAllocatable` from Incident (branch B's incident leaked), green restored.
+  Domain 455 · App 144 · Arch 193 · Integration 31+9 · Functional 107.

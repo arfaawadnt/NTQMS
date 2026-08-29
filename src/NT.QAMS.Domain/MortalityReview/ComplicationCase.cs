@@ -17,7 +17,7 @@ public enum ComplicationStatus { Reported, Reviewed, Closed, Rejected }
 /// unplanned return to theatre, unplanned ICU admission or readmission. Reported, peer-reviewed
 /// (with a preventability judgement), then closed.
 /// </summary>
-public sealed class ComplicationCase : AggregateRoot, ITenantScoped
+public sealed class ComplicationCase : AggregateRoot, ITenantScoped, IAllocatable
 {
     private ComplicationCase()
     {
@@ -29,7 +29,7 @@ public sealed class ComplicationCase : AggregateRoot, ITenantScoped
 
     public Guid TenantId { get; set; }
     public Guid? BranchId { get; set; }
-    public Guid? DepartmentId { get; private set; }
+    public Guid? DepartmentId { get; set; }
     public string CaseRef { get; private set; }
     public string PatientRef { get; private set; }
     public string Unit { get; private set; }

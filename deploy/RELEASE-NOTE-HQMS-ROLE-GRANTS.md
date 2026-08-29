@@ -200,3 +200,13 @@ signature PIN), consistent with every other regulated sign-off. The `committees`
 roles that approve minutes (Quality Manager and Tenant Administrator hold it via their catch-all/all-keys
 grants; grant it to any custom role that chairs committees). A wrong PIN returns 422 SIG-001 and mints
 nothing; the approval is refused if minutes were never recorded or the committee is disbanded.
+
+## Also in this line — clinical registers join the working-scope filter (M-02)
+
+The patient-level clinical registers — incidents, patient-safety events, HAI cases, mortality
+reviews and complication cases — now implement `IAllocatable`, so the per-user **working scope**
+(branch/department) applies to them exactly as it does to the laboratory registers: a
+branch-restricted user sees their branch's records and unattributed records, never another
+branch's, and cannot write into a branch outside their scope. No schema change (the org columns
+already existed); the behavior change is that branch-restricted users now see a **narrower** clinical
+register than before. Unrestricted roles (Quality Manager, Tenant Administrator) are unaffected.

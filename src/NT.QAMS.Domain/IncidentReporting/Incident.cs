@@ -137,7 +137,7 @@ public sealed class IncidentTimelineEntry : Entity
 /// ceremonies handled at the application boundary — declaring a sentinel event and
 /// closing the record — and the aggregate re-checks their preconditions.
 /// </summary>
-public sealed class Incident : AggregateRoot, ITenantScoped, IIdentitySuppressed
+public sealed class Incident : AggregateRoot, ITenantScoped, IIdentitySuppressed, IAllocatable
 {
     private readonly List<ContributingFactor> _contributingFactors = [];
     private readonly List<IncidentTimelineEntry> _timeline = [];
