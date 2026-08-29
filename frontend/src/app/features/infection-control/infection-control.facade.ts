@@ -17,14 +17,24 @@ export class InfectionControlFacade {
   private readonly api = inject(InfectionControlApiService);
 
   private readonly _cases = signal<HaiCaseListItem[]>([]);
+  private readonly _casesTotal = signal(0);
+  private readonly _casesHasMore = signal(false);
+  private readonly _casesPage = signal(1);
   private readonly _devices = signal<DeviceExposureListItem[]>([]);
+  private readonly _devicesTotal = signal(0);
+  private readonly _devicesHasMore = signal(false);
+  private readonly _devicesPage = signal(1);
   private readonly _rates = signal<HaiRates | null>(null);
   private readonly _selected = signal<HaiCaseDetail | null>(null);
   private readonly _loading = signal(false);
   private readonly _error = signal('');
 
   readonly cases = this._cases.asReadonly();
+  readonly casesTotal = this._casesTotal.asReadonly();
+  readonly casesHasMore = this._casesHasMore.asReadonly();
   readonly devices = this._devices.asReadonly();
+  readonly devicesTotal = this._devicesTotal.asReadonly();
+  readonly devicesHasMore = this._devicesHasMore.asReadonly();
   readonly rates = this._rates.asReadonly();
   readonly selected = this._selected.asReadonly();
   readonly loading = this._loading.asReadonly();
@@ -39,9 +49,45 @@ export class InfectionControlFacade {
     this.lastType = type;
     this.lastStatus = status;
     await this.run(async () => {
-      this._cases.set(await firstValueFrom(this.api.listCases(type, status)));
-      this._devices.set(await firstValueFrom(this.api.listDevices()));
+      const cases = await firstValueFrom(this.api.listCases(type, status));
+      this._casesPage.set(1);
+      this._cases.set(cases.items);
+      this._casesTotal.set(cases.total);
+      this._casesHasMore.set(cases.hasMore);
+
+      const devices = await firstValueFrom(this.api.listDevices());
+      this._devicesPage.set(1);
+      this._devices.set(devices.items);
+      this._devicesTotal.set(devices.total);
+      this._devicesHasMore.set(devices.hasMore);
+
       this._rates.set(await firstValueFrom(this.api.rates(30)));
+    });
+  }
+
+  /** Appends the next page of cases under the current filters (M-10). */
+  async loadMoreCases(): Promise<void> {
+    if (this._loading() || !this._casesHasMore()) { return; }
+    await this.run(async () => {
+      const next = this._casesPage() + 1;
+      const page = await firstValueFrom(this.api.listCases(this.lastType, this.lastStatus, next));
+      this._casesPage.set(next);
+      this._cases.update((items) => [...items, ...page.items]);
+      this._casesTotal.set(page.total);
+      this._casesHasMore.set(page.hasMore);
+    });
+  }
+
+  /** Appends the next page of device exposures (M-10). */
+  async loadMoreDevices(): Promise<void> {
+    if (this._loading() || !this._devicesHasMore()) { return; }
+    await this.run(async () => {
+      const next = this._devicesPage() + 1;
+      const page = await firstValueFrom(this.api.listDevices(undefined, undefined, next));
+      this._devicesPage.set(next);
+      this._devices.update((items) => [...items, ...page.items]);
+      this._devicesTotal.set(page.total);
+      this._devicesHasMore.set(page.hasMore);
     });
   }
 

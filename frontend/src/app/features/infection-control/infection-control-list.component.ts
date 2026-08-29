@@ -12,6 +12,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
+import { LoadMoreComponent } from '../../shared/ui/load-more.component';
 
 /**
  * Infection Prevention & Control register (HQMS M09): device-associated infection rates per
@@ -21,7 +22,7 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
 @Component({
     selector: 'qams-infection-control-list',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent],
+    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent, LoadMoreComponent],
     template: `
     <qams-page-header [title]="i18n.t('ipc.title')">
       @if (perms.can('infection-control.create')) {
@@ -106,6 +107,8 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
             }
           </tbody>
         </table>
+        <qams-load-more [shown]="facade.cases().length" [total]="facade.casesTotal()" [hasMore]="facade.casesHasMore()"
+                        [loading]="facade.loading()" (more)="facade.loadMoreCases()" />
       </div>
     }
 
@@ -134,6 +137,8 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
             }
           </tbody>
         </table>
+        <qams-load-more [shown]="facade.devices().length" [total]="facade.devicesTotal()" [hasMore]="facade.devicesHasMore()"
+                        [loading]="facade.loading()" (more)="facade.loadMoreDevices()" />
       </div>
     }
 

@@ -204,17 +204,15 @@ public sealed class GetMeetingsHandler(IAppDbContext db) : IQueryHandler<GetMeet
 {
     public async Task<IReadOnlyList<MeetingListItemDto>> Handle(GetMeetingsQuery q, CancellationToken ct)
     {
-        var meetings = await db.Meetings.AsNoTracking()
-            .Include(m => m.Attendance).Include(m => m.Decisions)
+        // M-10: server-side projection — the list needs two counts per row,
+        // not the agenda, attendance and decision graphs materialized.
+        return await db.Meetings.AsNoTracking()
             .Where(m => m.CommitteeId == q.CommitteeId)
             .OrderByDescending(m => m.ScheduledAtUtc)
-            .ToListAsync(ct);
-
-        return meetings
             .Select(m => new MeetingListItemDto(
                 m.Id, m.CommitteeId, m.MeetingRef, m.ScheduledAtUtc, m.Status.ToString(),
                 m.Attendance.Count(a => a.Present), m.Decisions.Count(d => d.Status == DecisionStatus.Open)))
-            .ToList();
+            .ToListAsync(ct);
     }
 }
 

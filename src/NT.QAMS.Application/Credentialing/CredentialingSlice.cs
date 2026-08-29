@@ -198,7 +198,9 @@ public sealed class GetPractitionersHandler(IAppDbContext db)
 {
     public async Task<IReadOnlyList<PractitionerListItemDto>> Handle(GetPractitionersQuery q, CancellationToken ct)
     {
-        var query = db.Practitioners.AsNoTracking().Include(p => p.Licences).Include(p => p.Privileges).AsQueryable();
+        // M-10: server-side projection — the register needs two counts per
+        // practitioner, not every licence and privilege materialized.
+        var query = db.Practitioners.AsNoTracking().AsQueryable();
         if (!string.IsNullOrWhiteSpace(q.Specialty))
         {
             query = query.Where(p => p.Specialty == q.Specialty);
@@ -209,11 +211,12 @@ public sealed class GetPractitionersHandler(IAppDbContext db)
             query = query.Where(p => p.Status.ToString() == q.Status);
         }
 
-        var practitioners = await query.OrderBy(p => p.FullName).ToListAsync(ct);
-        return practitioners.Select(p => new PractitionerListItemDto(
-            p.Id, p.PractitionerRef, p.FullName, p.Specialty, p.Status.ToString(), p.AppointedUntil,
-            p.Privileges.Count(x => x.Status == PrivilegeStatus.Granted),
-            p.Licences.Count(l => l.VerificationStatus == VerificationStatus.Verified))).ToList();
+        return await query.OrderBy(p => p.FullName)
+            .Select(p => new PractitionerListItemDto(
+                p.Id, p.PractitionerRef, p.FullName, p.Specialty, p.Status.ToString(), p.AppointedUntil,
+                p.Privileges.Count(x => x.Status == PrivilegeStatus.Granted),
+                p.Licences.Count(l => l.VerificationStatus == VerificationStatus.Verified)))
+            .ToListAsync(ct);
     }
 }
 
@@ -253,20 +256,28 @@ public sealed class GetExpiringCredentialsHandler(IAppDbContext db, IClock clock
         var today = DateOnly.FromDateTime(clock.UtcNow.UtcDateTime);
         var cutoff = today.AddDays(Math.Clamp(q.WithinDays, 1, 730));
 
-        var practitioners = await db.Practitioners.AsNoTracking().Include(p => p.Licences).ToListAsync(ct);
+        // M-10: filter and flatten server-side — only the expiring rows travel,
+        // not every practitioner with every licence.
+        var expiring = await db.Practitioners.AsNoTracking()
+            .SelectMany(p => p.Licences
+                .Where(l => l.ExpiresOn <= cutoff)
+                .Select(l => new
+                {
+                    p.Id, p.PractitionerRef, p.FullName,
+                    LicenceId = l.Id, l.Type, l.Identifier, l.ExpiresOn,
+                }))
+            .OrderBy(x => x.ExpiresOn)
+            .ToListAsync(ct);
 
-        return practitioners
-            .SelectMany(p => p.Licences.Select(l => new { p, l }))
-            .Where(x => x.l.ExpiresOn <= cutoff)
+        return expiring
             .Select(x =>
             {
-                var days = x.l.ExpiresOn.DayNumber - today.DayNumber;
+                var days = x.ExpiresOn.DayNumber - today.DayNumber;
                 var tier = days < 0 ? "Expired" : days <= 30 ? "Critical" : days <= 90 ? "Warning" : "Ok";
                 return new ExpiringCredentialDto(
-                    x.p.Id, x.p.PractitionerRef, x.p.FullName, x.l.Id, x.l.Type.ToString(),
-                    x.l.Identifier, x.l.ExpiresOn, days, tier);
+                    x.Id, x.PractitionerRef, x.FullName, x.LicenceId, x.Type.ToString(),
+                    x.Identifier, x.ExpiresOn, days, tier);
             })
-            .OrderBy(x => x.DaysToExpiry)
             .ToList();
     }
 }

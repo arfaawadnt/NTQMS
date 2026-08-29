@@ -141,13 +141,16 @@ public sealed class RemoveDeviceHandler(IAppDbContext db) : ICommandHandler<Remo
 
 // ── Queries ──────────────────────────────────────────────────────────────────
 
-public sealed record GetHaiCasesQuery(string? Type = null, string? Status = null)
-    : IQuery<IReadOnlyList<HaiCaseListItemDto>>;
+// M-10: register-scale — a hospital tenant's lifetime of cases pages.
+public sealed record GetHaiCasesQuery(
+    string? Type = null, string? Status = null,
+    int Page = 1, int PageSize = PageRequest.DefaultPageSize)
+    : IQuery<Contracts.Common.PagedResponse<HaiCaseListItemDto>>;
 
 public sealed class GetHaiCasesHandler(IAppDbContext db)
-    : IQueryHandler<GetHaiCasesQuery, IReadOnlyList<HaiCaseListItemDto>>
+    : IQueryHandler<GetHaiCasesQuery, Contracts.Common.PagedResponse<HaiCaseListItemDto>>
 {
-    public async Task<IReadOnlyList<HaiCaseListItemDto>> Handle(GetHaiCasesQuery q, CancellationToken ct)
+    public async Task<Contracts.Common.PagedResponse<HaiCaseListItemDto>> Handle(GetHaiCasesQuery q, CancellationToken ct)
     {
         var query = db.HaiCases.AsNoTracking().AsQueryable();
         if (!string.IsNullOrWhiteSpace(q.Type))
@@ -164,7 +167,7 @@ public sealed class GetHaiCasesHandler(IAppDbContext db)
             .OrderByDescending(e => e.OnsetDateUtc)
             .Select(e => new HaiCaseListItemDto(
                 e.Id, e.CaseRef, e.Type.ToString(), e.PatientRef, e.Unit, e.OnsetDateUtc, e.Organism, e.Status.ToString()))
-            .ToListAsync(ct);
+            .ToPagedAsync(PageRequest.Normalized(q.Page, q.PageSize), ct);
     }
 }
 
@@ -183,13 +186,15 @@ public sealed class GetHaiCaseByIdHandler(IAppDbContext db) : IQueryHandler<GetH
     }
 }
 
-public sealed record GetDeviceExposuresQuery(string? DeviceType = null, string? Status = null)
-    : IQuery<IReadOnlyList<DeviceExposureListItemDto>>;
+public sealed record GetDeviceExposuresQuery(
+    string? DeviceType = null, string? Status = null,
+    int Page = 1, int PageSize = PageRequest.DefaultPageSize)
+    : IQuery<Contracts.Common.PagedResponse<DeviceExposureListItemDto>>;
 
 public sealed class GetDeviceExposuresHandler(IAppDbContext db)
-    : IQueryHandler<GetDeviceExposuresQuery, IReadOnlyList<DeviceExposureListItemDto>>
+    : IQueryHandler<GetDeviceExposuresQuery, Contracts.Common.PagedResponse<DeviceExposureListItemDto>>
 {
-    public async Task<IReadOnlyList<DeviceExposureListItemDto>> Handle(GetDeviceExposuresQuery q, CancellationToken ct)
+    public async Task<Contracts.Common.PagedResponse<DeviceExposureListItemDto>> Handle(GetDeviceExposuresQuery q, CancellationToken ct)
     {
         var query = db.DeviceExposures.AsNoTracking().AsQueryable();
         if (!string.IsNullOrWhiteSpace(q.DeviceType))
@@ -206,7 +211,7 @@ public sealed class GetDeviceExposuresHandler(IAppDbContext db)
             .OrderByDescending(e => e.InsertedAtUtc)
             .Select(e => new DeviceExposureListItemDto(
                 e.Id, e.PatientRef, e.Unit, e.DeviceType.ToString(), e.InsertedAtUtc, e.RemovedAtUtc, e.Status.ToString()))
-            .ToListAsync(ct);
+            .ToPagedAsync(PageRequest.Normalized(q.Page, q.PageSize), ct);
     }
 }
 

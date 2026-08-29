@@ -42,9 +42,11 @@ describe('InfectionControlFacade', () => {
   it('loads cases, device exposures and the live rates together', async () => {
     const done = facade.loadAll();
 
-    http.expectOne(`${base}/cases`).flush([]);
+    http.expectOne(`${base}/cases?page=1&pageSize=50`)
+      .flush({ items: [], total: 0, page: 1, pageSize: 50, hasMore: false });
     await new Promise((r) => setTimeout(r));
-    http.expectOne(`${base}/devices`).flush([]);
+    http.expectOne(`${base}/devices?page=1&pageSize=50`)
+      .flush({ items: [], total: 0, page: 1, pageSize: 50, hasMore: false });
     await new Promise((r) => setTimeout(r));
     http.expectOne(`${base}/rates?windowDays=30`).flush(rates);
     await done;

@@ -181,3 +181,12 @@ refreshing the census. **Permission split**: endpoint registration/suspend/resum
 `integration.create` — grant a machine identity only `integration.create` and it can deliver
 messages but never reconfigure the wire. Retention/PHI handling of `rawPayload` remains an open
 ADR (audit register M-12, Group C).
+
+## Also in this line — clinical registers page (M-10)
+
+`GET /api/patient-safety/events`, `/api/infection-control/cases` and
+`/api/infection-control/devices` now return the standard paging envelope
+(`items`/`total`/`page`/`pageSize`/`hasMore`, `page`/`pageSize` query parameters, clamped at 200)
+instead of a bare array — a hospital tenant's lifetime of events cannot travel as one response.
+Dashboards and roll-ups across the HQMS modules now aggregate in the database (grouped counts and
+projections); response contents are unchanged.

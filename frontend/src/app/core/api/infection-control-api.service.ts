@@ -3,8 +3,9 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
-  CreatedResource, DeviceExposureListItem, HaiCaseDetail, HaiCaseListItem, HaiRates,
-  RecordDeviceExposureRequest, RemoveDeviceRequest, ReportHaiCaseRequest, ReviewHaiCaseRequest,
+  CreatedResource, DEFAULT_PAGE_SIZE, DeviceExposureListItem, HaiCaseDetail, HaiCaseListItem,
+  HaiRates, Paged, RecordDeviceExposureRequest, RemoveDeviceRequest, ReportHaiCaseRequest,
+  ReviewHaiCaseRequest,
 } from '../models';
 
 /** Typed client for the Infection Prevention & Control API (HQMS M09). */
@@ -13,11 +14,11 @@ export class InfectionControlApiService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiBaseUrl}/infection-control`;
 
-  listCases(type?: string, status?: string): Observable<HaiCaseListItem[]> {
-    let params = new HttpParams();
+  listCases(type?: string, status?: string, page = 1, pageSize = DEFAULT_PAGE_SIZE): Observable<Paged<HaiCaseListItem>> {
+    let params = new HttpParams().set('page', page).set('pageSize', pageSize);
     if (type) { params = params.set('type', type); }
     if (status) { params = params.set('status', status); }
-    return this.http.get<HaiCaseListItem[]>(`${this.base}/cases`, { params });
+    return this.http.get<Paged<HaiCaseListItem>>(`${this.base}/cases`, { params });
   }
 
   getCase(id: string): Observable<HaiCaseDetail> { return this.http.get<HaiCaseDetail>(`${this.base}/cases/${id}`); }
@@ -29,11 +30,11 @@ export class InfectionControlApiService {
   closeCase(id: string): Observable<void> { return this.http.post<void>(`${this.base}/cases/${id}/close`, {}); }
   rejectCase(id: string, body: { reason: string }): Observable<void> { return this.http.post<void>(`${this.base}/cases/${id}/reject`, body); }
 
-  listDevices(deviceType?: string, status?: string): Observable<DeviceExposureListItem[]> {
-    let params = new HttpParams();
+  listDevices(deviceType?: string, status?: string, page = 1, pageSize = DEFAULT_PAGE_SIZE): Observable<Paged<DeviceExposureListItem>> {
+    let params = new HttpParams().set('page', page).set('pageSize', pageSize);
     if (deviceType) { params = params.set('deviceType', deviceType); }
     if (status) { params = params.set('status', status); }
-    return this.http.get<DeviceExposureListItem[]>(`${this.base}/devices`, { params });
+    return this.http.get<Paged<DeviceExposureListItem>>(`${this.base}/devices`, { params });
   }
 
   recordDevice(body: RecordDeviceExposureRequest): Observable<CreatedResource> { return this.http.post<CreatedResource>(`${this.base}/devices`, body); }

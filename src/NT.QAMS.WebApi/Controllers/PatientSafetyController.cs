@@ -21,8 +21,10 @@ public sealed class PatientSafetyController(ISender sender) : ControllerBase
 {
     [HttpGet("events")]
     [RequirePermission(PermissionCatalog.PatientSafety, PermissionAction.View)]
-    public async Task<IActionResult> List([FromQuery] string? type, [FromQuery] string? status, CancellationToken ct) =>
-        Ok(await sender.Send(new GetSafetyEventsQuery(type, status), ct));
+    public async Task<IActionResult> List(
+        [FromQuery] string? type, [FromQuery] string? status,
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 50, CancellationToken ct = default) =>
+        Ok(await sender.Send(new GetSafetyEventsQuery(type, status, page, pageSize), ct));
 
     [HttpGet("events/{id:guid}")]
     [RequirePermission(PermissionCatalog.PatientSafety, PermissionAction.View)]

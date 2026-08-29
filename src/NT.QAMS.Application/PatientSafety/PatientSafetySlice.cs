@@ -109,13 +109,17 @@ public sealed class CloseSafetyEventHandler(IAppDbContext db) : ICommandHandler<
 
 // ── Queries ──────────────────────────────────────────────────────────────────
 
-public sealed record GetSafetyEventsQuery(string? Type = null, string? Status = null)
-    : IQuery<IReadOnlyList<SafetyEventListItemDto>>;
+// M-10: register-scale — a hospital tenant's lifetime of events pages.
+public sealed record GetSafetyEventsQuery(
+    string? Type = null, string? Status = null,
+    int Page = 1, int PageSize = PageRequest.DefaultPageSize)
+    : IQuery<Contracts.Common.PagedResponse<SafetyEventListItemDto>>;
 
 public sealed class GetSafetyEventsHandler(IAppDbContext db)
-    : IQueryHandler<GetSafetyEventsQuery, IReadOnlyList<SafetyEventListItemDto>>
+    : IQueryHandler<GetSafetyEventsQuery, Contracts.Common.PagedResponse<SafetyEventListItemDto>>
 {
-    public async Task<IReadOnlyList<SafetyEventListItemDto>> Handle(GetSafetyEventsQuery q, CancellationToken ct)
+    public async Task<Contracts.Common.PagedResponse<SafetyEventListItemDto>> Handle(
+        GetSafetyEventsQuery q, CancellationToken ct)
     {
         var query = db.PatientSafetyEvents.AsNoTracking().AsQueryable();
         if (!string.IsNullOrWhiteSpace(q.Type))
@@ -134,7 +138,7 @@ public sealed class GetSafetyEventsHandler(IAppDbContext db)
                 e.Id, e.EventRef, e.Type.ToString(), e.PatientRef, e.Unit, e.OccurredAtUtc,
                 e.HarmLevel.ToString(), e.Origin.ToString(),
                 e.Stage != null ? e.Stage.ToString() : null, e.Status.ToString()))
-            .ToListAsync(ct);
+            .ToPagedAsync(PageRequest.Normalized(q.Page, q.PageSize), ct);
     }
 }
 

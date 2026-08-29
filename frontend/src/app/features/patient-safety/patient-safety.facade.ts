@@ -16,12 +16,17 @@ export class PatientSafetyFacade {
   private readonly api = inject(PatientSafetyApiService);
 
   private readonly _list = signal<SafetyEventListItem[]>([]);
+  private readonly _total = signal(0);
+  private readonly _hasMore = signal(false);
+  private readonly _page = signal(1);
   private readonly _rates = signal<SafetyRates | null>(null);
   private readonly _selected = signal<SafetyEventDetail | null>(null);
   private readonly _loading = signal(false);
   private readonly _error = signal('');
 
   readonly list = this._list.asReadonly();
+  readonly total = this._total.asReadonly();
+  readonly hasMore = this._hasMore.asReadonly();
   readonly rates = this._rates.asReadonly();
   readonly selected = this._selected.asReadonly();
   readonly loading = this._loading.asReadonly();
@@ -29,10 +34,32 @@ export class PatientSafetyFacade {
 
   readonly openCount = computed(() => this._list().filter((e) => e.status !== 'Closed').length);
 
+  private lastType?: string;
+  private lastStatus?: string;
+
   async loadList(type?: string, status?: string): Promise<void> {
+    this.lastType = type;
+    this.lastStatus = status;
     await this.run(async () => {
-      this._list.set(await firstValueFrom(this.api.list(type, status)));
+      const page = await firstValueFrom(this.api.list(type, status));
+      this._page.set(1);
+      this._list.set(page.items);
+      this._total.set(page.total);
+      this._hasMore.set(page.hasMore);
       this._rates.set(await firstValueFrom(this.api.rates(30)));
+    });
+  }
+
+  /** Appends the next page under the current filters (M-10). */
+  async loadMore(): Promise<void> {
+    if (this._loading() || !this._hasMore()) { return; }
+    await this.run(async () => {
+      const next = this._page() + 1;
+      const page = await firstValueFrom(this.api.list(this.lastType, this.lastStatus, next));
+      this._page.set(next);
+      this._list.update((items) => [...items, ...page.items]);
+      this._total.set(page.total);
+      this._hasMore.set(page.hasMore);
     });
   }
 

@@ -13,6 +13,7 @@ import { PageHeaderComponent } from '../../shared/ui/page-header.component';
 import { DrawerComponent } from '../../shared/ui/drawer.component';
 import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
+import { LoadMoreComponent } from '../../shared/ui/load-more.component';
 
 /**
  * Patient-safety register (HQMS M08): falls and pressure injuries with rates per 1,000
@@ -21,7 +22,7 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
 @Component({
     selector: 'qams-patient-safety-list',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent],
+    imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DrawerComponent, RouterOutlet, StatusPillComponent, ListStatsComponent, LoadMoreComponent],
     template: `
     <qams-page-header [title]="i18n.t('psf.title')">
       @if (perms.can('patient-safety.create')) {
@@ -90,6 +91,8 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
             }
           </tbody>
         </table>
+        <qams-load-more [shown]="facade.list().length" [total]="facade.total()" [hasMore]="facade.hasMore()"
+                        [loading]="facade.loading()" (more)="facade.loadMore()" />
       </div>
     }
 

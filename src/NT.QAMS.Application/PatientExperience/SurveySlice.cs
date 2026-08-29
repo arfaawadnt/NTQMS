@@ -124,30 +124,36 @@ public sealed class GetSurveysHandler(IAppDbContext db) : IQueryHandler<GetSurve
 {
     public async Task<IReadOnlyList<SurveyListItemDto>> Handle(GetSurveysQuery q, CancellationToken ct)
     {
-        var query = db.SatisfactionSurveys.AsNoTracking().Include(s => s.Questions).AsQueryable();
+        // M-10: the list needs counts and a mean per survey — grouped in the
+        // database, never every response's scores materialized.
+        var query = db.SatisfactionSurveys.AsNoTracking().AsQueryable();
         if (!string.IsNullOrWhiteSpace(q.Status))
         {
             query = query.Where(s => s.Status.ToString() == q.Status);
         }
 
-        var surveys = await query.OrderByDescending(s => s.CreatedAtUtc).ToListAsync(ct);
+        var surveys = await query.OrderByDescending(s => s.CreatedAtUtc)
+            .Select(s => new { s.Id, s.Title, s.Status, QuestionCount = s.Questions.Count })
+            .ToListAsync(ct);
         var ids = surveys.Select(s => s.Id).ToList();
 
-        // Response counts and mean scores, computed from the answers of each survey's responses.
-        var responseData = await db.SurveyResponses.AsNoTracking()
-            .Where(r => ids.Contains(r.SurveyId))
-            .Select(r => new { r.SurveyId, Scores = r.Answers.Select(a => a.Score).ToList() })
-            .ToListAsync(ct);
-
-        var bySurvey = responseData.GroupBy(r => r.SurveyId).ToDictionary(
-            g => g.Key,
-            g => (Count: g.Count(), Mean: MeanOrNull(g.SelectMany(x => x.Scores))));
+        var stats = (await db.SurveyResponses.AsNoTracking()
+                .Where(r => ids.Contains(r.SurveyId))
+                .GroupBy(r => r.SurveyId)
+                .Select(g => new
+                {
+                    SurveyId = g.Key,
+                    Count = g.Count(),
+                    Mean = g.SelectMany(r => r.Answers).Average(a => (decimal?)a.Score),
+                })
+                .ToListAsync(ct))
+            .ToDictionary(x => x.SurveyId);
 
         return surveys
             .Select(s => new SurveyListItemDto(
-                s.Id, s.Title, s.Status.ToString(), s.Questions.Count,
-                bySurvey.TryGetValue(s.Id, out var d) ? d.Count : 0,
-                bySurvey.TryGetValue(s.Id, out var d2) ? d2.Mean : null))
+                s.Id, s.Title, s.Status.ToString(), s.QuestionCount,
+                stats.TryGetValue(s.Id, out var d) ? d.Count : 0,
+                stats.TryGetValue(s.Id, out var d2) && d2.Mean is { } mean ? decimal.Round(mean, 2) : null))
             .ToList();
     }
 
@@ -189,43 +195,61 @@ public sealed class GetSurveyResultsHandler(IAppDbContext db) : IQueryHandler<Ge
             .SingleOrDefaultAsync(s => s.Id == q.SurveyId, ct)
             ?? throw new DomainException("SVY-404", "Survey not found.");
 
-        var responses = await db.SurveyResponses.AsNoTracking()
+        // M-10: sums and counts are grouped in the database — one row per
+        // question and one per department, never every answer materialized.
+        // Every mean below derives exactly from those sums.
+        var questionStats = (await db.SurveyResponses.AsNoTracking()
+                .Where(r => r.SurveyId == q.SurveyId)
+                .SelectMany(r => r.Answers)
+                .GroupBy(a => a.QuestionId)
+                .Select(g => new { QuestionId = g.Key, Sum = g.Sum(a => a.Score), Count = g.Count() })
+                .ToListAsync(ct))
+            .ToDictionary(x => x.QuestionId);
+
+        var departmentStats = await db.SurveyResponses.AsNoTracking()
             .Where(r => r.SurveyId == q.SurveyId)
-            .Select(r => new
+            .GroupBy(r => r.DepartmentId)
+            .Select(g => new
             {
-                r.DepartmentId,
-                Answers = r.Answers.Select(a => new { a.QuestionId, a.Score }).ToList(),
+                DepartmentId = g.Key,
+                Responses = g.Count(),
+                Sum = g.SelectMany(r => r.Answers).Sum(a => (int?)a.Score) ?? 0,
+                Answers = g.SelectMany(r => r.Answers).Count(),
             })
             .ToListAsync(ct);
 
-        var domainByQuestion = survey.Questions.ToDictionary(x => x.Id, x => x.Domain);
-        var allAnswers = responses.SelectMany(r => r.Answers).ToList();
+        static decimal? Mean(int sum, int count) =>
+            count == 0 ? null : decimal.Round((decimal)sum / count, 2);
 
         var byQuestion = survey.Questions
             .OrderBy(x => x.DisplayOrder)
             .Select(x =>
             {
-                var scores = allAnswers.Where(a => a.QuestionId == x.Id).Select(a => a.Score).ToList();
-                return new QuestionScoreDto(x.Id, x.Text, x.Domain, GetSurveysHandler.MeanOrNull(scores) ?? 0m, scores.Count);
+                questionStats.TryGetValue(x.Id, out var s);
+                return new QuestionScoreDto(x.Id, x.Text, x.Domain, Mean(s?.Sum ?? 0, s?.Count ?? 0) ?? 0m, s?.Count ?? 0);
             })
             .ToList();
 
-        var byDomain = allAnswers
-            .GroupBy(a => domainByQuestion.TryGetValue(a.QuestionId, out var d) ? d : "General")
+        var domainByQuestion = survey.Questions.ToDictionary(x => x.Id, x => x.Domain);
+        var byDomain = questionStats.Values
+            .GroupBy(s => domainByQuestion.TryGetValue(s.QuestionId, out var d) ? d : "General")
             .OrderBy(g => g.Key)
-            .Select(g => new DomainScoreDto(g.Key, GetSurveysHandler.MeanOrNull(g.Select(a => a.Score)) ?? 0m, g.Count()))
+            .Select(g => new DomainScoreDto(
+                g.Key, Mean(g.Sum(s => s.Sum), g.Sum(s => s.Count)) ?? 0m, g.Sum(s => s.Count)))
             .ToList();
 
-        var byDepartment = responses
-            .GroupBy(r => r.DepartmentId)
-            .Select(g => new DepartmentScoreDto(
-                g.Key, GetSurveysHandler.MeanOrNull(g.SelectMany(r => r.Answers).Select(a => a.Score)) ?? 0m, g.Count()))
+        var byDepartment = departmentStats
+            .Select(d => new DepartmentScoreDto(d.DepartmentId, Mean(d.Sum, d.Answers) ?? 0m, d.Responses))
             .OrderByDescending(d => d.MeanScore)
             .ToList();
 
+        var totalResponses = departmentStats.Sum(d => d.Responses);
+        var totalSum = departmentStats.Sum(d => d.Sum);
+        var totalAnswers = departmentStats.Sum(d => d.Answers);
+
         return new SurveyResultsDto(
-            survey.Id, survey.Title, survey.Status.ToString(), responses.Count,
-            GetSurveysHandler.MeanOrNull(allAnswers.Select(a => a.Score)),
+            survey.Id, survey.Title, survey.Status.ToString(), totalResponses,
+            Mean(totalSum, totalAnswers),
             byQuestion, byDomain, byDepartment);
     }
 }

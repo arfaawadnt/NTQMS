@@ -273,7 +273,9 @@ public sealed class GetSessionsHandler(IAppDbContext db) : IQueryHandler<GetSess
 {
     public async Task<IReadOnlyList<SessionListItemDto>> Handle(GetSessionsQuery q, CancellationToken ct)
     {
-        var query = db.TrainingSessions.AsNoTracking().Include(s => s.Attendance).AsQueryable();
+        // M-10: server-side projection — two counts per session, and only the
+        // titles of the courses that actually appear, not every course.
+        var query = db.TrainingSessions.AsNoTracking().AsQueryable();
         if (q.CourseId is { } courseId)
         {
             query = query.Where(s => s.CourseId == courseId);
@@ -284,13 +286,23 @@ public sealed class GetSessionsHandler(IAppDbContext db) : IQueryHandler<GetSess
             query = query.Where(s => s.Status.ToString() == q.Status);
         }
 
-        var sessions = await query.OrderByDescending(s => s.ScheduledAtUtc).ToListAsync(ct);
+        var sessions = await query.OrderByDescending(s => s.ScheduledAtUtc)
+            .Select(s => new
+            {
+                s.Id, s.CourseId, s.SessionRef, s.ScheduledAtUtc, s.Location, s.TrainerName, s.Status,
+                Registered = s.Attendance.Count,
+                Attended = s.Attendance.Count(a => a.Attended),
+            })
+            .ToListAsync(ct);
+
+        var courseIds = sessions.Select(s => s.CourseId).Distinct().ToList();
         var titles = await db.TrainingCourses.AsNoTracking()
+            .Where(c => courseIds.Contains(c.Id))
             .ToDictionaryAsync(c => c.Id, c => c.Title, ct);
 
         return sessions.Select(s => new SessionListItemDto(
             s.Id, s.CourseId, titles.GetValueOrDefault(s.CourseId, "—"), s.SessionRef, s.ScheduledAtUtc,
-            s.Location, s.TrainerName, s.Status.ToString(), s.Attendance.Count, s.AttendedCount)).ToList();
+            s.Location, s.TrainerName, s.Status.ToString(), s.Registered, s.Attended)).ToList();
     }
 }
 
@@ -331,9 +343,19 @@ public sealed class GetTrainingComplianceHandler(IAppDbContext db, IClock clock)
             .OrderBy(c => c.Title)
             .ToListAsync(ct);
 
+        // M-10: project only the columns the roll-up needs — never the full
+        // session/attendance graphs.
         var sessions = await db.TrainingSessions.AsNoTracking()
             .Where(s => s.Status == SessionStatus.Held || s.Status == SessionStatus.Closed)
-            .Include(s => s.Attendance)
+            .Select(s => new
+            {
+                s.CourseId,
+                s.ScheduledAtUtc,
+                Attendance = s.Attendance
+                    .Where(a => a.Attended)
+                    .Select(a => new { a.TraineeId, a.Passed, a.PostScore })
+                    .ToList(),
+            })
             .ToListAsync(ct);
 
         var byCourse = sessions.ToLookup(s => s.CourseId);
@@ -342,7 +364,7 @@ public sealed class GetTrainingComplianceHandler(IAppDbContext db, IClock clock)
         return courses.Select(c =>
         {
             var courseSessions = byCourse[c.Id].ToList();
-            var attended = courseSessions.SelectMany(s => s.Attendance).Where(a => a.Attended).ToList();
+            var attended = courseSessions.SelectMany(s => s.Attendance).ToList();
             var distinct = attended.Select(a => a.TraineeId).Distinct().Count();
             var passedTrainees = attended.Where(a => a.Passed).Select(a => a.TraineeId).Distinct().Count();
             var post = attended.Where(a => a.PostScore.HasValue).Select(a => a.PostScore!.Value).ToList();
@@ -354,7 +376,7 @@ public sealed class GetTrainingComplianceHandler(IAppDbContext db, IClock clock)
             var current = 0;
             var lapsed = 0;
             foreach (var trainee in courseSessions
-                         .SelectMany(s => s.Attendance.Where(a => a.Attended && a.Passed)
+                         .SelectMany(s => s.Attendance.Where(a => a.Passed)
                              .Select(a => new { a.TraineeId, s.ScheduledAtUtc }))
                          .GroupBy(x => x.TraineeId))
             {

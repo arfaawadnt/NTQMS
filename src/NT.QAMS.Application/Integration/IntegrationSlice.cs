@@ -236,25 +236,21 @@ public sealed class GetEndpointsHandler(IAppDbContext db) : IQueryHandler<GetEnd
     {
         var endpoints = await db.IntegrationEndpoints.AsNoTracking().OrderBy(e => e.Name).ToListAsync(ct);
 
+        // M-10: the counts are grouped in the database — one row per
+        // (endpoint, status), never the message table itself.
         var counts = (await db.IntegrationMessages.AsNoTracking()
-                .Select(m => new { m.EndpointId, m.Status })
+                .GroupBy(m => new { m.EndpointId, m.Status })
+                .Select(g => new { g.Key.EndpointId, g.Key.Status, Count = g.Count() })
                 .ToListAsync(ct))
-            .GroupBy(m => m.EndpointId)
-            .ToDictionary(
-                g => g.Key,
-                g => (
-                    Received: g.Count(x => x.Status == MessageStatus.Received),
-                    Processed: g.Count(x => x.Status == MessageStatus.Processed),
-                    Failed: g.Count(x => x.Status == MessageStatus.Failed)));
+            .ToDictionary(x => (x.EndpointId, x.Status), x => x.Count);
+
+        int Of(Guid endpointId, MessageStatus status) => counts.GetValueOrDefault((endpointId, status));
 
         return endpoints
-            .Select(e =>
-            {
-                counts.TryGetValue(e.Id, out var c);
-                return new EndpointListItemDto(
-                    e.Id, e.Name, e.System.ToString(), e.Protocol.ToString(), e.Status.ToString(), e.IsHealthy,
-                    e.LastMessageAtUtc, e.LastErrorAtUtc, e.ConsecutiveFailures, c.Received, c.Processed, c.Failed);
-            })
+            .Select(e => new EndpointListItemDto(
+                e.Id, e.Name, e.System.ToString(), e.Protocol.ToString(), e.Status.ToString(), e.IsHealthy,
+                e.LastMessageAtUtc, e.LastErrorAtUtc, e.ConsecutiveFailures,
+                Of(e.Id, MessageStatus.Received), Of(e.Id, MessageStatus.Processed), Of(e.Id, MessageStatus.Failed)))
             .ToList();
     }
 }
@@ -292,19 +288,22 @@ public sealed class GetReconciliationHandler(IAppDbContext db) : IQueryHandler<G
     {
         var endpoints = await db.IntegrationEndpoints.AsNoTracking()
             .Select(e => new { e.Id, e.Name }).ToListAsync(ct);
-        var messages = await db.IntegrationMessages.AsNoTracking()
-            .Select(m => new { m.EndpointId, m.Status }).ToListAsync(ct);
+
+        // M-10: grouped in the database — one row per (endpoint, status).
+        var counts = (await db.IntegrationMessages.AsNoTracking()
+                .GroupBy(m => new { m.EndpointId, m.Status })
+                .Select(g => new { g.Key.EndpointId, g.Key.Status, Count = g.Count() })
+                .ToListAsync(ct))
+            .ToDictionary(x => (x.EndpointId, x.Status), x => x.Count);
+
+        int Of(Guid endpointId, MessageStatus status) => counts.GetValueOrDefault((endpointId, status));
 
         return endpoints
-            .Select(e =>
-            {
-                var mine = messages.Where(m => m.EndpointId == e.Id).ToList();
-                return new ReconciliationDto(
-                    e.Id, e.Name,
-                    mine.Count(m => m.Status == MessageStatus.Received),
-                    mine.Count(m => m.Status == MessageStatus.Processed),
-                    mine.Count(m => m.Status == MessageStatus.Failed));
-            })
+            .Select(e => new ReconciliationDto(
+                e.Id, e.Name,
+                Of(e.Id, MessageStatus.Received),
+                Of(e.Id, MessageStatus.Processed),
+                Of(e.Id, MessageStatus.Failed)))
             .ToList();
     }
 }

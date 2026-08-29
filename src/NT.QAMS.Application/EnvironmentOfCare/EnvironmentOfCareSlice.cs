@@ -163,7 +163,10 @@ public sealed class GetSafetyRoundsHandler(IAppDbContext db)
 {
     public async Task<IReadOnlyList<RoundListItemDto>> Handle(GetSafetyRoundsQuery q, CancellationToken ct)
     {
-        var query = db.SafetyRounds.AsNoTracking().Include(r => r.Findings).AsQueryable();
+        // M-10: server-side projection — the register needs two counts per
+        // round, not every finding materialized (OpenFindingCount is an
+        // EF-ignored domain property that used to force client evaluation).
+        var query = db.SafetyRounds.AsNoTracking().AsQueryable();
         if (!string.IsNullOrWhiteSpace(q.Type))
         {
             query = query.Where(r => r.Type.ToString() == q.Type);
@@ -174,10 +177,11 @@ public sealed class GetSafetyRoundsHandler(IAppDbContext db)
             query = query.Where(r => r.Status.ToString() == q.Status);
         }
 
-        var rounds = await query.OrderByDescending(r => r.ScheduledDate).ToListAsync(ct);
-        return rounds.Select(r => new RoundListItemDto(
-            r.Id, r.RoundRef, r.Area, r.Type.ToString(), r.ScheduledDate, r.Status.ToString(),
-            r.OpenFindingCount, r.Findings.Count)).ToList();
+        return await query.OrderByDescending(r => r.ScheduledDate)
+            .Select(r => new RoundListItemDto(
+                r.Id, r.RoundRef, r.Area, r.Type.ToString(), r.ScheduledDate, r.Status.ToString(),
+                r.Findings.Count(f => f.Status == FindingStatus.Open), r.Findings.Count))
+            .ToListAsync(ct);
     }
 }
 
@@ -247,18 +251,27 @@ public sealed class GetEocSummaryHandler(IAppDbContext db) : IQueryHandler<GetEo
 {
     public async Task<EocSummaryDto> Handle(GetEocSummaryQuery q, CancellationToken ct)
     {
-        var rounds = await db.SafetyRounds.AsNoTracking().Include(r => r.Findings).ToListAsync(ct);
-        var drills = await db.Drills.AsNoTracking().ToListAsync(ct);
-
-        var openFindings = rounds.SelectMany(r => r.Findings).Where(f => f.Status == FindingStatus.Open).ToList();
-        var evaluated = drills.Where(d => d.EvaluationScore.HasValue).Select(d => d.EvaluationScore!.Value).ToList();
+        // M-10: the dashboard is seven aggregates — computed in the database,
+        // never by materializing every round, finding and drill.
+        var scheduledRounds = await db.SafetyRounds.AsNoTracking()
+            .CountAsync(r => r.Status == RoundStatus.Scheduled, ct);
+        var completedRounds = await db.SafetyRounds.AsNoTracking()
+            .CountAsync(r => r.Status == RoundStatus.Completed, ct);
+        var openFindings = await db.SafetyRounds.AsNoTracking()
+            .SelectMany(r => r.Findings)
+            .CountAsync(f => f.Status == FindingStatus.Open, ct);
+        var criticalOpenFindings = await db.SafetyRounds.AsNoTracking()
+            .SelectMany(r => r.Findings)
+            .CountAsync(f => f.Status == FindingStatus.Open && f.Severity == FindingSeverity.Critical, ct);
+        var scheduledDrills = await db.Drills.AsNoTracking()
+            .CountAsync(d => d.Status == DrillStatus.Scheduled, ct);
+        var evaluated = await db.Drills.AsNoTracking()
+            .Where(d => d.EvaluationScore != null)
+            .Select(d => d.EvaluationScore!.Value)
+            .ToListAsync(ct);
 
         return new EocSummaryDto(
-            rounds.Count(r => r.Status == RoundStatus.Scheduled),
-            rounds.Count(r => r.Status == RoundStatus.Completed),
-            openFindings.Count,
-            openFindings.Count(f => f.Severity == FindingSeverity.Critical),
-            drills.Count(d => d.Status == DrillStatus.Scheduled),
+            scheduledRounds, completedRounds, openFindings, criticalOpenFindings, scheduledDrills,
             evaluated.Count,
             evaluated.Count == 0 ? null : decimal.Round((decimal)evaluated.Average(), 1));
     }

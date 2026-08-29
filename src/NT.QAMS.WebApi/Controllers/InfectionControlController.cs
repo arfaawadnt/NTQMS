@@ -22,8 +22,10 @@ public sealed class InfectionControlController(ISender sender) : ControllerBase
     // ── HAI cases ─────────────────────────────────────────────────────────────
     [HttpGet("cases")]
     [RequirePermission(PermissionCatalog.InfectionControl, PermissionAction.View)]
-    public async Task<IActionResult> ListCases([FromQuery] string? type, [FromQuery] string? status, CancellationToken ct) =>
-        Ok(await sender.Send(new GetHaiCasesQuery(type, status), ct));
+    public async Task<IActionResult> ListCases(
+        [FromQuery] string? type, [FromQuery] string? status,
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 50, CancellationToken ct = default) =>
+        Ok(await sender.Send(new GetHaiCasesQuery(type, status, page, pageSize), ct));
 
     [HttpGet("cases/{id:guid}")]
     [RequirePermission(PermissionCatalog.InfectionControl, PermissionAction.View)]
@@ -73,8 +75,10 @@ public sealed class InfectionControlController(ISender sender) : ControllerBase
     // ── Device exposures (the device-day denominator) ──────────────────────────
     [HttpGet("devices")]
     [RequirePermission(PermissionCatalog.InfectionControl, PermissionAction.View)]
-    public async Task<IActionResult> ListDevices([FromQuery] string? deviceType, [FromQuery] string? status, CancellationToken ct) =>
-        Ok(await sender.Send(new GetDeviceExposuresQuery(deviceType, status), ct));
+    public async Task<IActionResult> ListDevices(
+        [FromQuery] string? deviceType, [FromQuery] string? status,
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 50, CancellationToken ct = default) =>
+        Ok(await sender.Send(new GetDeviceExposuresQuery(deviceType, status, page, pageSize), ct));
 
     [HttpPost("devices")]
     [RequirePermission(PermissionCatalog.InfectionControl, PermissionAction.Create)]

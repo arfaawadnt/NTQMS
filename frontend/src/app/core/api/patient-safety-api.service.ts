@@ -3,8 +3,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
-  CreatedResource, ReportFallRequest, ReportPressureInjuryRequest, ReviewSafetyEventRequest,
-  SafetyEventDetail, SafetyEventListItem, SafetyRates,
+  CreatedResource, DEFAULT_PAGE_SIZE, Paged, ReportFallRequest, ReportPressureInjuryRequest,
+  ReviewSafetyEventRequest, SafetyEventDetail, SafetyEventListItem, SafetyRates,
 } from '../models';
 
 /** Typed client for the Patient Safety API (HQMS M08). */
@@ -13,11 +13,11 @@ export class PatientSafetyApiService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiBaseUrl}/patient-safety`;
 
-  list(type?: string, status?: string): Observable<SafetyEventListItem[]> {
-    let params = new HttpParams();
+  list(type?: string, status?: string, page = 1, pageSize = DEFAULT_PAGE_SIZE): Observable<Paged<SafetyEventListItem>> {
+    let params = new HttpParams().set('page', page).set('pageSize', pageSize);
     if (type) { params = params.set('type', type); }
     if (status) { params = params.set('status', status); }
-    return this.http.get<SafetyEventListItem[]>(`${this.base}/events`, { params });
+    return this.http.get<Paged<SafetyEventListItem>>(`${this.base}/events`, { params });
   }
 
   getById(id: string): Observable<SafetyEventDetail> { return this.http.get<SafetyEventDetail>(`${this.base}/events/${id}`); }

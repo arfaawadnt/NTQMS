@@ -1114,3 +1114,17 @@ One atomic commit per finding; each carries a test that failed before the fix.
   gates. Tests red-first: the malformed-type functional fact (was 400/no row) and the
   patient-mismatch app fact (was silent merge) both failed pre-fix. Domain 450 · App 142 ·
   Integration 30+9 · Functional 103 · Arch 192 · Karma 133 · prod build clean.
+- **M-10 (Major, closed)** — reads project and page: the three register-scale clinical endpoints
+  (patient-safety events, HAI cases, device exposures) return the house paging envelope
+  (`ToPagedAsync`, clamped `PageRequest`; SPA facades gained load-more per the incidents idiom,
+  spec expectations updated to the paged contract); whole-aggregate loads replaced by server-side
+  projections/grouping in: meetings list, practitioner register, expiring-credentials sweep
+  (server-side `SelectMany`+filter), integration endpoint/reconciliation dashboards (grouped
+  counts per (endpoint,status)), EOC rounds list (the EF-ignored `OpenFindingCount` no longer
+  forces client evaluation) and EOC summary (seven database aggregates), survey list/results
+  (per-question Sum/Count grouped in the database; domain/department means derived exactly from
+  the sums), training sessions list + compliance loader (column projections; course titles fetched
+  only for courses that appear), and the R&U dashboard's per-document acknowledgement N+1 folded
+  into one query. Tests red-first: the 3-row paging-envelope functional theory failed pre-fix
+  (bare arrays); the projection refactors are contract-preserving and ride the full suites.
+  Functional 106 · App 142 · Arch 192 · Integration 30+9 · Karma 133 · prod build clean.

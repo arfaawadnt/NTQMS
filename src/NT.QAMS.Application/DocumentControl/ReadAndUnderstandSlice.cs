@@ -127,6 +127,17 @@ public sealed class GetReadAndUnderstandDashboardHandler(IAppDbContext db, ICurr
         // Resolve the two possible audiences once; per-department docs are filtered in memory.
         var allActive = await ReadAndUnderstandAudience.ActiveUsersAsync(db, tenantId, ct);
 
+        // M-10: ONE acknowledgement query for the whole document set — the
+        // per-document query in the loop was a textbook N+1.
+        var docIds = docs.Select(d => d.Id).ToList();
+        var acksByDocVersion = (await db.DocumentAcknowledgements.AsNoTracking()
+                .Where(a => docIds.Contains(a.DocumentId))
+                .Select(a => new { a.DocumentId, a.VersionLabel, a.UserId })
+                .Distinct()
+                .ToListAsync(ct))
+            .GroupBy(a => (a.DocumentId, a.VersionLabel))
+            .ToDictionary(g => g.Key, g => g.Select(x => x.UserId).ToHashSet());
+
         var rows = new List<ReadAndUnderstandDashboardRowDto>(docs.Count);
         foreach (var doc in docs)
         {
@@ -137,12 +148,8 @@ public sealed class GetReadAndUnderstandDashboardHandler(IAppDbContext db, ICurr
                 : allActive.Where(u => u.DepartmentIds.Any(targets.Contains)).ToList();
 
             var ackedUsers = publishedLabel is null
-                ? new HashSet<Guid>()
-                : (await db.DocumentAcknowledgements.AsNoTracking()
-                    .Where(a => a.DocumentId == doc.Id && a.VersionLabel == publishedLabel)
-                    .Select(a => a.UserId)
-                    .Distinct()
-                    .ToListAsync(ct)).ToHashSet();
+                ? []
+                : acksByDocVersion.GetValueOrDefault((doc.Id, publishedLabel)) ?? new HashSet<Guid>();
 
             var audienceCount = audience.Count;
             var acknowledged = audience.Count(u => ackedUsers.Contains(u.Id));
