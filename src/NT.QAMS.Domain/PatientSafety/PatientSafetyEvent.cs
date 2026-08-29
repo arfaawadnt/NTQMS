@@ -132,6 +132,8 @@ public sealed class PatientSafetyEvent : AggregateRoot, ITenantScoped, IAllocata
         }
 
         Status = SafetyEventStatus.Closed;
+        // M-06: closure of a patient-safety event is a regulated fact.
+        Raise(new SafetyEventClosed(Id, EventRef, Type.ToString()));
     }
 
     /// <summary>True for a hospital-acquired pressure injury (a HAPI — the reportable subset).</summary>
@@ -140,3 +142,5 @@ public sealed class PatientSafetyEvent : AggregateRoot, ITenantScoped, IAllocata
 }
 
 public sealed record SafetyEventReviewed(Guid SafetyEventId, string EventRef, string Type) : DomainEvent;
+
+public sealed record SafetyEventClosed(Guid SafetyEventId, string EventRef, string Type) : DomainEvent;

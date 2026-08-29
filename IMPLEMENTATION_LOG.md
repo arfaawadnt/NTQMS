@@ -1186,3 +1186,16 @@ Four deferred decisions approved (recommended options). Executed ascending blast
   integration) stay tenant-wide by design. Red-first: `ClinicalWorkingScopeTests` (functional) —
   proven red by removing `IAllocatable` from Incident (branch B's incident leaked), green restored.
   Domain 455 · App 144 · Arch 193 · Integration 31+9 · Functional 107.
+
+## 2026-08-29 — Remaining open findings (post Group C)
+
+- **M-06 (ledger half, closed; notification-recipient wiring remains a product decision)** — the
+  regulated decision facts of the hospital modules now raise domain events, which the
+  OutboxInterceptor drains to the hash-chained audit ledger for every aggregate: `MortalityClassified`
+  + `MortalityReviewClosed`, `DrillEvaluated`, `RoundCompleted`, `PrivilegeGranted` +
+  `PractitionerCredentialed` + `PractitionerSuspended`, `SafetyEventClosed`. Standing enforcement:
+  `DomainEventsAreRaisedTests` (Mono.Cecil) fails the build if any declared `DomainEvent` is never
+  instantiated — the register's earlier dead-declaration observations are clean under it. Tests:
+  `HqmsDecisionEventTests` (5, red-first — each event asserted at its decision point). WHO is
+  *notified* of these facts (recipients/rules) stays the deferred product decision; the ledger
+  gap — the compliance-material half — is closed. Domain 460 · App 144 · Arch 202 · Functional 103 (+4 real-PG skips).

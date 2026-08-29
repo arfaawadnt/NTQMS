@@ -95,6 +95,9 @@ public sealed class MortalityReview : AggregateRoot, ITenantScoped, IAllocatable
         Classification = classification;
         ClassificationFindings = findings.Trim();
         Status = MortalityStatus.Classified;
+        // M-06: the preventability classification is a committee-grade regulated
+        // fact — it reaches the hash-chained ledger via the outbox.
+        Raise(new MortalityClassified(Id, ReviewRef, classification.ToString(), reviewerId));
     }
 
     /// <summary>
@@ -163,5 +166,10 @@ public sealed class MortalityReview : AggregateRoot, ITenantScoped, IAllocatable
         }
 
         Status = MortalityStatus.Closed;
+        Raise(new MortalityReviewClosed(Id, ReviewRef));
     }
 }
+
+public sealed record MortalityClassified(Guid MortalityReviewId, string ReviewRef, string Classification, Guid ReviewerId) : DomainEvent;
+
+public sealed record MortalityReviewClosed(Guid MortalityReviewId, string ReviewRef) : DomainEvent;

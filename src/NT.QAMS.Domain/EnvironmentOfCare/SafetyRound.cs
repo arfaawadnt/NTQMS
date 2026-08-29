@@ -141,5 +141,9 @@ public sealed class SafetyRound : AggregateRoot, ITenantScoped
         }
 
         Status = RoundStatus.Completed;
+        // M-06: round completion is a regulated environment-of-care fact.
+        Raise(new RoundCompleted(Id, RoundRef, OpenFindingCount));
     }
 }
+
+public sealed record RoundCompleted(Guid SafetyRoundId, string RoundRef, int OpenFindingCount) : DomainEvent;

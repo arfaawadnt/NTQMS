@@ -92,5 +92,9 @@ public sealed class Drill : AggregateRoot, ITenantScoped
         EvaluationScore = score;
         ImprovementNotes = string.IsNullOrWhiteSpace(improvementNotes) ? null : improvementNotes.Trim();
         Status = DrillStatus.Evaluated;
+        // M-06: the drill evaluation is a regulated readiness fact.
+        Raise(new DrillEvaluated(Id, DrillRef, score));
     }
 }
+
+public sealed record DrillEvaluated(Guid DrillId, string DrillRef, int Score) : DomainEvent;

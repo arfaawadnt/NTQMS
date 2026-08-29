@@ -206,6 +206,8 @@ public sealed class Practitioner : AggregateRoot, ITenantScoped
     {
         var privilege = LoadRequested(privilegeId);
         privilege.Grant(grantedUntil);
+        // M-06: a clinical-privilege grant is a regulated credentialing fact.
+        Raise(new PrivilegeGranted(Id, PractitionerRef, privilege.Name));
     }
 
     public void DenyPrivilege(Guid privilegeId, string reason)
@@ -244,6 +246,7 @@ public sealed class Practitioner : AggregateRoot, ITenantScoped
         RequireEvidence(asOf);
         AppointedUntil = appointedUntil;
         Status = PractitionerStatus.Credentialed;
+        Raise(new PractitionerCredentialed(Id, PractitionerRef, appointedUntil));
     }
 
     /// <summary>Reappointment cycle (Credentialed ⇒ Credentialed with a new appointment end).</summary>
@@ -287,6 +290,7 @@ public sealed class Practitioner : AggregateRoot, ITenantScoped
 
         SuspensionReason = reason.Trim();
         Status = PractitionerStatus.Suspended;
+        Raise(new PractitionerSuspended(Id, PractitionerRef));
     }
 
     public void Reinstate()
@@ -310,3 +314,9 @@ public sealed class Practitioner : AggregateRoot, ITenantScoped
         && (AppointedUntil is null || AppointedUntil >= asOf)
         && _privileges.Any(p => p.Name.Equals(name.Trim(), StringComparison.OrdinalIgnoreCase) && p.IsActive(asOf));
 }
+
+public sealed record PrivilegeGranted(Guid PractitionerId, string PractitionerRef, string PrivilegeName) : DomainEvent;
+
+public sealed record PractitionerCredentialed(Guid PractitionerId, string PractitionerRef, DateOnly AppointedUntil) : DomainEvent;
+
+public sealed record PractitionerSuspended(Guid PractitionerId, string PractitionerRef) : DomainEvent;
