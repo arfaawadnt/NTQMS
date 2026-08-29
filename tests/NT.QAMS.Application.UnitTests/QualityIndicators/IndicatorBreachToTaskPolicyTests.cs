@@ -85,4 +85,23 @@ public class IndicatorBreachToTaskPolicyTests
 
         (await db.WorkTasks.CountAsync()).Should().Be(1);
     }
+
+    [Fact]
+    public async Task A_completed_analysis_task_is_not_reopened_by_a_redelivered_breach()
+    {
+        // N-07: dedup must count a COMPLETED task too — a redelivered event must
+        // never re-open an analysis that was already worked and closed.
+        var (db, tenant, evt) = await SeedAsync();
+        var policy = Policy(db, tenant);
+        var notification = new DomainEventNotification<IndicatorBreached>(evt);
+
+        await policy.Handle(notification, CancellationToken.None);
+        var task = await db.WorkTasks.SingleAsync();
+        task.Complete(Now.AddDays(1));
+        await db.SaveChangesAsync();
+
+        await policy.Handle(notification, CancellationToken.None);
+
+        (await db.WorkTasks.CountAsync()).Should().Be(1, "the completed analysis is not reopened");
+    }
 }

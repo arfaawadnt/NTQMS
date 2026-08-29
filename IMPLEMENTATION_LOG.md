@@ -1209,3 +1209,8 @@ Four deferred decisions approved (recommended options). Executed ascending blast
   prior one (EQP-035 — overlap double-counted in the availability sum; contiguous starts allowed);
   a supplier CAR response cannot predate the CAR being raised (SUP-CAR-010); a safety notice cannot
   be actioned before it was received (EQP-SN-010). Red-first: 3 domain tests. Domain 464.
+- **N-07 (closed)** — the indicator-breach analysis-task policy deduped only against Pending tasks,
+  so a redelivered `IndicatorBreached` re-opened an analysis that had already been completed; and
+  the SubjectRef date key was culture-dependent. Dedup now counts ANY task for the breach period
+  (one breach → one task, ever), and the key formats the period with `InvariantCulture`. Red-first:
+  `A_completed_analysis_task_is_not_reopened_by_a_redelivered_breach`. App 145.

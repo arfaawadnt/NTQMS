@@ -33,10 +33,15 @@ public sealed partial class IndicatorBreachToTaskPolicy(
             .SingleAsync(ct);
         tenantSetter.Set(tenantId);
 
-        var subjectRef = $"INDBREACH:{e.Code}:{e.Period:yyyy-MM-dd}";
-        var alreadyOpen = await db.WorkTasks.IgnoreQueryFilters().AnyAsync(
-            t => t.TenantId == tenantId && t.SubjectRef == subjectRef && t.Status == WorkTaskStatus.Pending, ct);
-        if (alreadyOpen)
+        // N-07: culture-invariant key so the dedup is stable across locales.
+        var subjectRef = $"INDBREACH:{e.Code}:{e.Period.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}";
+
+        // N-07: dedup against ANY task for this breach (not only Pending) — a
+        // redelivered event must never re-open an analysis that was already
+        // completed. One breach period yields exactly one task, ever.
+        var alreadyHandled = await db.WorkTasks.IgnoreQueryFilters().AnyAsync(
+            t => t.TenantId == tenantId && t.SubjectRef == subjectRef, ct);
+        if (alreadyHandled)
         {
             return;
         }
