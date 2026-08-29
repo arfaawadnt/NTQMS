@@ -90,4 +90,30 @@ public class EquipmentDowntimeAndSafetyTests
         var act = () => e.LogSafetyNotice(SafetyNoticeType.HazardAlert, " ", "Maker", SafetyNoticeSeverity.Low, Today, null);
         act.Should().Throw<DomainException>().Which.Code.Should().Be("EQP-040");
     }
+
+    [Fact]
+    public void A_new_downtime_period_cannot_overlap_a_prior_one()
+    {
+        // N-13: overlapping periods double-count in the availability sum.
+        var e = Item();
+        var first = e.StartDowntime(T0, DowntimeCategory.Breakdown, "x");
+        e.EndDowntime(first, T0.AddHours(6));
+
+        var overlapping = () => e.StartDowntime(T0.AddHours(3), DowntimeCategory.Other, "y");
+        overlapping.Should().Throw<DomainException>().Which.Code.Should().Be("EQP-035");
+
+        // Contiguous (starting exactly when the prior ended) is allowed.
+        var ok = () => e.StartDowntime(T0.AddHours(6), DowntimeCategory.Other, "z");
+        ok.Should().NotThrow();
+    }
+
+    [Fact]
+    public void A_safety_notice_cannot_be_actioned_before_it_was_received()
+    {
+        // N-13: temporal-order guard.
+        var e = Item();
+        var id = e.LogSafetyNotice(SafetyNoticeType.Recall, "FSN-1", "Acme", SafetyNoticeSeverity.High, Today, Today.AddDays(7));
+        var act = () => e.ActionSafetyNotice(id, "patched", Today.AddDays(-1));
+        act.Should().Throw<DomainException>().Which.Code.Should().Be("EQP-SN-010");
+    }
 }

@@ -86,4 +86,14 @@ public class SupplierContractsAndCarsTests
         var act = () => s.CloseCar(id, true, "note");
         act.Should().Throw<InvalidStateTransitionException>().Which.Code.Should().Be("SUP-044");
     }
+
+    [Fact]
+    public void A_car_response_cannot_predate_the_car_being_raised()
+    {
+        // N-13: temporal-order guard.
+        var s = Ref();
+        var id = s.RaiseCar("Delayed result", Today, Today.AddDays(14));
+        var act = () => s.RecordCarResponse(id, "backdated", Today.AddDays(-1));
+        act.Should().Throw<DomainException>().Which.Code.Should().Be("SUP-CAR-010");
+    }
 }

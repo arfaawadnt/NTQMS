@@ -148,7 +148,19 @@ public sealed class SafetyNotice : Entity
 
     public bool IsOverdue(DateOnly asOf) => Status == SafetyNoticeStatus.Open && RequiredActionBy is { } by && asOf > by;
 
-    internal void Action(string note, DateOnly on) { Status = SafetyNoticeStatus.Actioned; ActionNote = note; ActionedOn = on; }
+    internal void Action(string note, DateOnly on)
+    {
+        // N-13: a notice cannot be actioned before it was received.
+        if (on < ReceivedOn)
+        {
+            throw new DomainException("EQP-SN-010", "A safety notice cannot be actioned before it was received.");
+        }
+
+        Status = SafetyNoticeStatus.Actioned;
+        ActionNote = note;
+        ActionedOn = on;
+    }
+
     internal void Close() => Status = SafetyNoticeStatus.Closed;
 }
 
@@ -341,6 +353,13 @@ public sealed class EquipmentItem : AggregateRoot, ITenantScoped, IAllocatable
         if (_downtime.Any(d => d.IsOpen))
         {
             throw new DomainException("EQP-031", "An open downtime period already exists; end it before starting another.");
+        }
+
+        // N-13: a new period must not overlap a prior one, or the availability sum
+        // double-counts the shared hours. It may start exactly when a prior ended.
+        if (_downtime.Any(d => d.EndedAtUtc == null || d.EndedAtUtc > startedAtUtc))
+        {
+            throw new DomainException("EQP-035", "Downtime cannot overlap an existing period.");
         }
 
         var evt = new DowntimeEvent(startedAtUtc, category, string.IsNullOrWhiteSpace(reason) ? "Unspecified" : reason.Trim());

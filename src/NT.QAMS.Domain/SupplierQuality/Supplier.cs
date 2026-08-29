@@ -87,7 +87,18 @@ public sealed class SupplierCar : Entity
 
     public bool IsOverdue(DateOnly asOf) => Status != SupplierCarStatus.Closed && DueDate is { } due && asOf > due;
 
-    internal void RecordResponse(string note, DateOnly on) { Status = SupplierCarStatus.ResponseReceived; ResponseNote = note; ResponseOn = on; }
+    internal void RecordResponse(string note, DateOnly on)
+    {
+        // N-13: a response cannot predate the CAR being raised.
+        if (on < RaisedOn)
+        {
+            throw new DomainException("SUP-CAR-010", "The response date cannot precede the date the CAR was raised.");
+        }
+
+        Status = SupplierCarStatus.ResponseReceived;
+        ResponseNote = note;
+        ResponseOn = on;
+    }
     internal void Close(bool effective, string closureNote) { Status = SupplierCarStatus.Closed; Effective = effective; ClosureNote = closureNote; }
 }
 

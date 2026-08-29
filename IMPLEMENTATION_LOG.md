@@ -1205,3 +1205,7 @@ Four deferred decisions approved (recommended options). Executed ascending blast
   (FME-020). Red-first: `FmeaStudyTests.Cannot_record_residual_before_a_recommended_action`. The
   drill/finding→CAPA hand-off (new `NcSourceType` + CHECK-widening migration) stays the deferred
   product decision. Domain 461.
+- **N-13 (closed)** — temporal-integrity guards: a new equipment downtime period cannot overlap a
+  prior one (EQP-035 — overlap double-counted in the availability sum; contiguous starts allowed);
+  a supplier CAR response cannot predate the CAR being raised (SUP-CAR-010); a safety notice cannot
+  be actioned before it was received (EQP-SN-010). Red-first: 3 domain tests. Domain 464.
