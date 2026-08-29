@@ -61,6 +61,15 @@ public sealed record PermissionModule(
 /// Keys are <c>{module}.{action}</c> in lower case (e.g. <c>nc.approve</c>) and are
 /// persisted verbatim, so they must be treated as a stable contract.
 /// </para>
+/// <para>
+/// Not every action of every module is wired to an endpoint yet — a module gets
+/// its full lifecycle action set so the privilege matrix is complete and a future
+/// endpoint inherits an already-governed meaning rather than shipping ungoverned.
+/// Such currently-unused keys are <b>intentionally reserved</b>, not dead (audit
+/// finding N-08, owner decision 2026-08-30: keep-as-reserved). Because keys are a
+/// persisted contract, they are never removed to "tidy up" — removing one would
+/// orphan any tenant role that was granted it.
+/// </para>
 /// </summary>
 public static class PermissionCatalog
 {
