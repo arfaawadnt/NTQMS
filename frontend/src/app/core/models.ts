@@ -3164,6 +3164,7 @@ export interface RoundListItem {
 }
 export interface RoundFinding {
   id: string; description: string; severity: string; status: string; correctiveNote: string | null; resolvedAtUtc: string | null;
+  raisedNcRef: string | null;
 }
 export interface RoundDetail {
   id: string; roundRef: string; area: string; type: string; scheduledDate: string; status: string;

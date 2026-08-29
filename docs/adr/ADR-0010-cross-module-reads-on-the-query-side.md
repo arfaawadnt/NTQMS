@@ -1,7 +1,7 @@
 # ADR-0010 — Cross-module reads are allowed on the query side only
 
-- **Status:** Accepted (2026-08-29)
-- **Finding:** HQMS conformance audit M-04 (`E:\QMS\NT_QAMS_HQMS_Audit_Register_2026-08-28.md`)
+- **Status:** Accepted (2026-08-29; amended 2026-08-30 to admit the M-22 EOC→CAPA convergence)
+- **Finding:** HQMS conformance audit M-04, extended by M-22 (`E:\QMS\NT_QAMS_HQMS_Audit_Register_2026-08-28.md`)
 - **Related:** ADR-0008 (persistence port = EF DbSet), ADR-0006 (outbox), `ModuleBoundaryTests` (domain boundary), `WorkflowCommandPolicyTests`
 
 ## Context
@@ -41,10 +41,18 @@ CQRS-legitimate read to bless.
    (`Files`), and the permission/actor vocabulary (`Authorization`,
    `IdentityAccess`).
 
-3. **One cross-module write is sanctioned and singular:** the incident→CAPA
-   convergence (`RaiseCapaFromIncidentHandler`, HQMS M03) creates a
-   `Nonconformance` (Improvement) from an incident and links it back in one
-   transaction. This is a deliberate, documented exception — not the pattern.
+3. **Cross-module writes are sanctioned only for CAPA convergence** — the
+   "one loop, many sources" hand-off, where a significant event in a source
+   module converges into the single corrective-action pipeline by creating a
+   `Nonconformance` (Improvement) in one transaction:
+   - incident→CAPA (`RaiseCapaFromIncidentHandler`, HQMS M03) — creates the NC
+     and links it back onto the incident;
+   - environment-of-care finding→CAPA (`RaiseNcFromRoundFindingHandler`, HQMS
+     M22) — a **manual, suggested** hand-off from a safety-round finding; once
+     raised the NC follows the ordinary lifecycle, keyed by its EOC source ref
+     for idempotency.
+
+   These share one rationale and are the *only* sanctioned convergence writes.
    Any *new* cross-module command write must be a conscious decision recorded
    here, or refactored to the event/outbox path (ADR-0006).
 
@@ -58,7 +66,7 @@ CQRS-legitimate read to bless.
 implementation — **including its async state-machine bodies** — for references to
 another business module's domain namespace, and fails the build on any not in the
 approved map. The shared cross-cutting modules are excluded; every other entry is
-annotated as a read-guard or, for the single convergence, an accepted write. A new
+annotated as a read-guard or, for the convergence hand-offs, an accepted write. A new
 cross-module command dependency fails the suite until the author confirms its
 nature and records it (SHRINK-ONLY: entries are removed when a handler stops
 reaching across, never relaxed). Query handlers are unrestricted.

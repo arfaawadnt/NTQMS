@@ -62,11 +62,15 @@ public class CommandHandlerScopeTests
             ["SetUserScopeHandler"] = ["Organization"],
             ["GrantTestAuthorizationHandler"] = ["Organization"],
 
-            // ── The one sanctioned cross-module WRITE (ADR-0010, as-built). ──
-            // The incident→CAPA convergence (HQMS M03) creates a Nonconformance
-            // (Improvement) from an incident and links it back, in one
-            // transaction — the deliberate exception, singular and documented.
+            // ── The sanctioned cross-module WRITES (ADR-0010, as-built). ──
+            // CAPA convergence ("one loop, many sources"): a significant event in
+            // a source module creates a Nonconformance (Improvement) in one
+            // transaction. These are the only accepted write exceptions.
+            //   • incident→CAPA (HQMS M03): creates the NC and links it back.
+            //   • environment-of-care finding→CAPA (HQMS M22): a manual, suggested
+            //     hand-off from a safety-round finding into the normal NC lifecycle.
             ["RaiseCapaFromIncidentHandler"] = ["Improvement"],
+            ["RaiseNcFromRoundFindingHandler"] = ["Improvement"],
         };
 
     [Fact]

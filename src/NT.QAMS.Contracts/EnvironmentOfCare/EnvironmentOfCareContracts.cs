@@ -12,7 +12,9 @@ public sealed record RoundListItemDto(
     Guid Id, string RoundRef, string Area, string Type, DateOnly ScheduledDate, string Status,
     int OpenFindings, int TotalFindings);
 
-public sealed record RoundFindingDto(Guid Id, string Description, string Severity, string Status, string? CorrectiveNote, DateTimeOffset? ResolvedAtUtc);
+public sealed record RoundFindingDto(
+    Guid Id, string Description, string Severity, string Status, string? CorrectiveNote, DateTimeOffset? ResolvedAtUtc,
+    string? RaisedNcRef);
 
 public sealed record RoundDetailDto(
     Guid Id, string RoundRef, string Area, string Type, DateOnly ScheduledDate, string Status,

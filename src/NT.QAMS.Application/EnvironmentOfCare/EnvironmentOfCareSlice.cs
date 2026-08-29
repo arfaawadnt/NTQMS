@@ -4,6 +4,7 @@ using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.EnvironmentOfCare;
 using NT.QAMS.Domain.Authorization;
 using NT.QAMS.Domain.EnvironmentOfCare;
+using NT.QAMS.Domain.Improvement;
 using NT.QAMS.SharedKernel.Abstractions;
 using NT.QAMS.SharedKernel.Primitives;
 
@@ -100,6 +101,81 @@ public sealed class CompleteRoundHandler(IAppDbContext db) : ICommandHandler<Com
     }
 }
 
+// ── M-22: environment-of-care → CAPA hand-off ────────────────────────────────────
+
+/// <summary>The nonconformance <c>SourceRef</c> convention for a safety-round finding.</summary>
+internal static class EnvironmentOfCareNcSource
+{
+    public static string RoundPrefix(string roundRef) => $"EOC:{roundRef}:";
+
+    public static string FindingRef(string roundRef, Guid findingId) => $"EOC:{roundRef}:{findingId}";
+}
+
+/// <summary>
+/// Raises a nonconformance / CAPA from a safety-round finding. This is a
+/// <b>manual, suggested</b> hand-off (owner decision, 2026-08-30): the round
+/// screen prompts to raise an NC for a significant finding, but a human decides;
+/// once raised, the record follows the ordinary NC lifecycle. The finding's
+/// severity seeds the initial risk assessment, refined during RCA. Creating a
+/// CAPA is an NC.create act, so the actor needs that privilege. Idempotent: a
+/// second call for the same finding returns the NC already raised.
+/// </summary>
+[RequirePermissionPolicy(PermissionCatalog.Nonconformances, PermissionAction.Create)]
+public sealed record RaiseNcFromRoundFindingCommand(Guid RoundId, Guid FindingId) : ICommand<Guid>;
+
+public sealed class RaiseNcFromRoundFindingHandler(
+    IAppDbContext db, ICurrentTenant tenant, ICurrentUser user, IReferenceNumberGenerator refs)
+    : ICommandHandler<RaiseNcFromRoundFindingCommand, Guid>
+{
+    public async Task<Guid> Handle(RaiseNcFromRoundFindingCommand c, CancellationToken ct)
+    {
+        var tenantId = tenant.TenantId ?? throw new DomainException("TENANT-000", "A tenant context is required.");
+        var actor = user.UserId ?? throw new DomainException("AUTH-003", "An authenticated user is required.");
+
+        var round = await StartRoundHandler.LoadRound(db, c.RoundId, ct);
+        var finding = round.Findings.FirstOrDefault(f => f.Id == c.FindingId)
+            ?? throw new DomainException("EOC-014", "Finding not found.");
+
+        var sourceRef = EnvironmentOfCareNcSource.FindingRef(round.RoundRef, finding.Id);
+
+        // Idempotency: a finding already handed off returns its existing NC.
+        var existing = await db.Nonconformances.FirstOrDefaultAsync(n => n.SourceRef == sourceRef, ct);
+        if (existing is not null)
+        {
+            return existing.Id;
+        }
+
+        var (severity, likelihood) = SeverityToRisk(finding.Severity);
+        var ncRef = await refs.NextAsync(tenantId, "NC", ct);
+        var nc = Nonconformance.Raise(
+            ncRef,
+            $"Safety round {round.RoundRef} ({round.Area}): {finding.Description}",
+            finding.Description,
+            severity, likelihood,
+            NcSourceType.EnvironmentOfCare, actor, sourceRef);
+        nc.TenantId = tenantId;
+        nc.BranchId = round.BranchId;
+        nc.Submit();
+
+        db.Nonconformances.Add(nc);
+        await db.SaveChangesAsync(ct);
+        return nc.Id;
+    }
+
+    /// <summary>
+    /// Seeds the CAPA's initial risk from the finding's severity so the corrective
+    /// action inherits a proportionate priority (the RPN is refined during RCA).
+    /// </summary>
+    private static (int Severity, int Likelihood) SeverityToRisk(FindingSeverity severity) => severity switch
+    {
+        FindingSeverity.Low => (2, 2),
+        FindingSeverity.Medium => (3, 2),
+        FindingSeverity.High => (4, 3),
+        FindingSeverity.Critical => (5, 4),
+        _ => (3, 3),
+    };
+}
+
 // ── Drill commands ──────────────────────────────────────────────────────────────
 
 [RequirePermissionPolicy(PermissionCatalog.EnvironmentOfCare, PermissionAction.Create)]
@@ -194,11 +270,23 @@ public sealed class GetSafetyRoundByIdHandler(IAppDbContext db) : IQueryHandler<
         var r = await db.SafetyRounds.AsNoTracking().Include(x => x.Findings).SingleOrDefaultAsync(x => x.Id == q.RoundId, ct)
             ?? throw new DomainException("EOC-404", "Safety round not found.");
 
+        // M-22: a finding may have been handed off to a nonconformance. Resolve the
+        // origin links for this round in one query (keyed by the EOC source ref) so
+        // the detail view can show which findings already carry a CAPA.
+        var sourcePrefix = EnvironmentOfCareNcSource.RoundPrefix(r.RoundRef);
+        var links = (await db.Nonconformances.AsNoTracking()
+                .Where(n => n.SourceType == NcSourceType.EnvironmentOfCare
+                    && n.SourceRef != null && n.SourceRef.StartsWith(sourcePrefix))
+                .Select(n => new { n.SourceRef, n.NcRef })
+                .ToListAsync(ct))
+            .ToDictionary(x => x.SourceRef!, x => x.NcRef);
+
         return new RoundDetailDto(
             r.Id, r.RoundRef, r.Area, r.Type.ToString(), r.ScheduledDate, r.Status.ToString(),
             r.ConductedBy, r.CompletedAtUtc,
             r.Findings.Select(f => new RoundFindingDto(
-                f.Id, f.Description, f.Severity.ToString(), f.Status.ToString(), f.CorrectiveNote, f.ResolvedAtUtc)).ToList());
+                f.Id, f.Description, f.Severity.ToString(), f.Status.ToString(), f.CorrectiveNote, f.ResolvedAtUtc,
+                links.GetValueOrDefault(EnvironmentOfCareNcSource.FindingRef(r.RoundRef, f.Id)))).ToList());
     }
 }
 

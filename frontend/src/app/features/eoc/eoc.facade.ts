@@ -60,6 +60,17 @@ export class EocFacade {
   async resolveFinding(id: string, findingId: string, r: ResolveFindingRequest): Promise<void> { await this.roundMutate(id, () => this.api.resolveFinding(id, findingId, r)); }
   async completeRound(id: string): Promise<void> { await this.roundMutate(id, () => this.api.completeRound(id)); }
 
+  /** M-22: hand a finding off to a nonconformance; returns the NC id, or null on failure. */
+  async raiseNcFromFinding(id: string, findingId: string): Promise<string | null> {
+    const ncId = await this.run(async () => {
+      const created = await firstValueFrom(this.api.raiseNcFromFinding(id, findingId));
+      this._round.set(await firstValueFrom(this.api.getRound(id)));
+      return created.id;
+    });
+    if (this._error() === '') { await this.refreshLists(); }
+    return ncId;
+  }
+
   async executeDrill(id: string, r: ExecuteDrillRequest): Promise<void> { await this.drillMutate(id, () => this.api.executeDrill(id, r)); }
   async evaluateDrill(id: string, r: EvaluateDrillRequest): Promise<void> { await this.drillMutate(id, () => this.api.evaluateDrill(id, r)); }
 

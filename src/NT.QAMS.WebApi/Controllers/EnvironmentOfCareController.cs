@@ -68,6 +68,17 @@ public sealed class EnvironmentOfCareController(ISender sender) : ControllerBase
         return NoContent();
     }
 
+    // M-22: hand a safety-round finding off into the corrective-action pipeline.
+    // Gated on NC.create — creating a CAPA is a nonconformance act — mirroring the
+    // command policy, so the HTTP and application tiers agree.
+    [HttpPost("rounds/{id:guid}/findings/{findingId:guid}/raise-nc")]
+    [RequirePermission(PermissionCatalog.Nonconformances, PermissionAction.Create)]
+    public async Task<IActionResult> RaiseNcFromFinding(Guid id, Guid findingId, CancellationToken ct)
+    {
+        var ncId = await sender.Send(new RaiseNcFromRoundFindingCommand(id, findingId), ct);
+        return Ok(new { id = ncId });
+    }
+
     [HttpPost("rounds/{id:guid}/complete")]
     [RequirePermission(PermissionCatalog.EnvironmentOfCare, PermissionAction.Void)]
     public async Task<IActionResult> CompleteRound(Guid id, CancellationToken ct)

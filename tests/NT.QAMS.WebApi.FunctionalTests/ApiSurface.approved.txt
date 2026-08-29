@@ -500,6 +500,7 @@ POST /api/eoc/drills/{id}/execute
 POST /api/eoc/rounds
 POST /api/eoc/rounds/{id}/complete
 POST /api/eoc/rounds/{id}/findings
+POST /api/eoc/rounds/{id}/findings/{findingId}/raise-nc
 POST /api/eoc/rounds/{id}/findings/{findingId}/resolve
 POST /api/eoc/rounds/{id}/start
 POST /api/equipment
@@ -813,6 +814,7 @@ POST /api/v{version}/eoc/drills/{id}/execute
 POST /api/v{version}/eoc/rounds
 POST /api/v{version}/eoc/rounds/{id}/complete
 POST /api/v{version}/eoc/rounds/{id}/findings
+POST /api/v{version}/eoc/rounds/{id}/findings/{findingId}/raise-nc
 POST /api/v{version}/eoc/rounds/{id}/findings/{findingId}/resolve
 POST /api/v{version}/eoc/rounds/{id}/start
 POST /api/v{version}/equipment

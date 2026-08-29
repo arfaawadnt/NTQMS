@@ -44,7 +44,7 @@ import { WorkflowStepperComponent } from '../../shared/ui/workflow-stepper.compo
                 {{ f.description }}
                 @if (f.correctiveNote) { <div class="muted small">✓ {{ f.correctiveNote }}</div> }
               </div>
-              <div>
+              <div class="finding-actions">
                 @if (f.status === 'Open') {
                   @if (perms.can('environment-of-care.edit')) {
                     @if (resolving() === f.id) {
@@ -55,6 +55,16 @@ import { WorkflowStepperComponent } from '../../shared/ui/workflow-stepper.compo
                     } @else { <button class="link" (click)="startResolve(f.id)">{{ i18n.t('eoc.resolve') }}</button> }
                   } @else { <span class="muted">{{ i18n.t('eoc.open') }}</span> }
                 } @else { <span class="resolved">✓ {{ i18n.t('eoc.resolved') }}</span> }
+
+                <!-- M-22: manual, suggested hand-off to the CAPA pipeline. -->
+                @if (f.raisedNcRef) {
+                  <span class="nc-linked" [title]="i18n.t('eoc.ncRaisedHint')">↳ {{ i18n.t('eoc.ncRaised') }} {{ f.raisedNcRef }}</span>
+                } @else if (perms.can('nc.create')) {
+                  <button class="link raise-nc" [class.suggested]="isSignificant(f.severity)"
+                          [disabled]="facade.loading() || raising() === f.id" (click)="raiseNc(r.id, f.id)">
+                    {{ i18n.t('eoc.raiseNc') }}@if (isSignificant(f.severity)) { <span class="hint">· {{ i18n.t('eoc.raiseNcSuggested') }}</span> }
+                  </button>
+                }
               </div>
             </div>
           }
@@ -99,6 +109,10 @@ import { WorkflowStepperComponent } from '../../shared/ui/workflow-stepper.compo
     .actions form { border-top: 1px solid var(--nt-border); padding-top: .75rem; margin-top: .75rem; }
     .actions button { margin-top: .5rem; margin-inline-end: .5rem; width: auto; }
     button.link { background: none; border: none; color: var(--nt-blue); cursor: pointer; padding: 0; text-decoration: underline; }
+    .finding-actions { display: flex; flex-direction: column; align-items: flex-end; gap: .35rem; }
+    button.raise-nc.suggested { font-weight: 700; }
+    button.raise-nc .hint { font-weight: 400; font-size: .72rem; opacity: .8; }
+    .nc-linked { color: var(--nt-ink-ok); font-size: .78rem; font-weight: 600; }
     .small { font-size: .72rem; } .resolved { color: var(--nt-ink-ok); font-weight: 700; }
     .sev { padding: 1px 7px; border-radius: 999px; font-size: 11px; font-weight: 700; margin-inline-end: 6px; }
     .sev.low { background: color-mix(in srgb, var(--nt-slate) 18%, transparent); color: var(--nt-slate); }
@@ -123,6 +137,7 @@ export class RoundDetailComponent implements OnInit {
   readonly steps = ['Scheduled', 'InProgress', 'Completed'] as const;
 
   readonly resolving = signal<string | null>(null);
+  readonly raising = signal<string | null>(null);
 
   readonly findingForm = this.fb.nonNullable.group({
     severity: ['Medium' as FindingSeverity, [Validators.required]],
@@ -146,5 +161,18 @@ export class RoundDetailComponent implements OnInit {
     if (this.resolveForm.invalid) { return; }
     await this.facade.resolveFinding(id, findingId, this.resolveForm.getRawValue());
     if (this.facade.error() === '') { this.resolving.set(null); }
+  }
+
+  /** High/Critical findings are the ones the round screen suggests raising an NC for. */
+  isSignificant(severity: string): boolean { return severity === 'High' || severity === 'Critical'; }
+
+  async raiseNc(id: string, findingId: string): Promise<void> {
+    if (this.raising() !== null) { return; }
+    this.raising.set(findingId);
+    try {
+      await this.facade.raiseNcFromFinding(id, findingId);
+    } finally {
+      this.raising.set(null);
+    }
   }
 }

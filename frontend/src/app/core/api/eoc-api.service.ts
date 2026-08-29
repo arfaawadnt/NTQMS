@@ -27,6 +27,7 @@ export class EocApiService {
   startRound(id: string): Observable<void> { return this.http.post<void>(`${this.base}/rounds/${id}/start`, {}); }
   addFinding(id: string, body: AddFindingRequest): Observable<CreatedResource> { return this.http.post<CreatedResource>(`${this.base}/rounds/${id}/findings`, body); }
   resolveFinding(id: string, findingId: string, body: ResolveFindingRequest): Observable<void> { return this.http.post<void>(`${this.base}/rounds/${id}/findings/${findingId}/resolve`, body); }
+  raiseNcFromFinding(id: string, findingId: string): Observable<CreatedResource> { return this.http.post<CreatedResource>(`${this.base}/rounds/${id}/findings/${findingId}/raise-nc`, {}); }
   completeRound(id: string): Observable<void> { return this.http.post<void>(`${this.base}/rounds/${id}/complete`, {}); }
 
   listDrills(type?: string, status?: string): Observable<DrillListItem[]> {
