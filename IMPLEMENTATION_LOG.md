@@ -1214,3 +1214,7 @@ Four deferred decisions approved (recommended options). Executed ascending blast
   the SubjectRef date key was culture-dependent. Dedup now counts ANY task for the breach period
   (one breach → one task, ever), and the key formats the period with `InvariantCulture`. Red-first:
   `A_completed_analysis_task_is_not_reopened_by_a_redelivered_breach`. App 145.
+- **N-11 (round-trip test added)** — the outbox event payload shape (Web camelCase) is now pinned by
+  `OutboxPayloadShapeTests`: a domain event round-trips losslessly through the exact serializer
+  options the OutboxInterceptor/OutboxProcessor use, and the serialized JSON is asserted camelCase
+  so a PascalCase regression that would orphan historical ledger rows fails the build. App 147.
