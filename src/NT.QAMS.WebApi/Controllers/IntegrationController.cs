@@ -42,7 +42,7 @@ public sealed class IntegrationController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetPatientCensusQuery(windowDays), ct));
 
     [HttpPost("endpoints")]
-    [RequirePermission(PermissionCatalog.Integration, PermissionAction.Create)]
+    [RequirePermission(PermissionCatalog.Integration, PermissionAction.Manage)]
     public async Task<IActionResult> Register(RegisterEndpointRequest request, CancellationToken ct)
     {
         var id = await sender.Send(new RegisterEndpointCommand(
@@ -53,7 +53,7 @@ public sealed class IntegrationController(ISender sender) : ControllerBase
     }
 
     [HttpPost("endpoints/{id:guid}/suspend")]
-    [RequirePermission(PermissionCatalog.Integration, PermissionAction.Edit)]
+    [RequirePermission(PermissionCatalog.Integration, PermissionAction.Manage)]
     public async Task<IActionResult> Suspend(Guid id, CancellationToken ct)
     {
         await sender.Send(new SuspendEndpointCommand(id), ct);
@@ -61,7 +61,7 @@ public sealed class IntegrationController(ISender sender) : ControllerBase
     }
 
     [HttpPost("endpoints/{id:guid}/resume")]
-    [RequirePermission(PermissionCatalog.Integration, PermissionAction.Edit)]
+    [RequirePermission(PermissionCatalog.Integration, PermissionAction.Manage)]
     public async Task<IActionResult> Resume(Guid id, CancellationToken ct)
     {
         await sender.Send(new ResumeEndpointCommand(id), ct);
@@ -75,7 +75,7 @@ public sealed class IntegrationController(ISender sender) : ControllerBase
     {
         var result = await sender.Send(new IngestAdtEventCommand(
             id, request.DedupKey, request.MessageType, request.RawPayload,
-            RequestEnum.Parse<AdtEventType>(request.EventType),
+            request.EventType,
             request.PatientRef, request.EncounterRef, request.Unit, request.DepartmentId, request.EventAtUtc), ct);
         return Ok(result);
     }

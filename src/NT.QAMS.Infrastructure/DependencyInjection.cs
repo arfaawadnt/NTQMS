@@ -31,6 +31,7 @@ public static class DependencyInjection
         services.AddScoped<IPrivilegeResolver, Authorization.PrivilegeResolver>();
 
         services.AddScoped<CurrentChangeReason>();
+        services.AddScoped<IDatabaseErrorClassifier, Services.NpgsqlDatabaseErrorClassifier>();
         services.AddScoped<ICurrentChangeReason>(sp => sp.GetRequiredService<CurrentChangeReason>());
         services.AddScoped<ICurrentChangeReasonSetter>(sp => sp.GetRequiredService<CurrentChangeReason>());
 

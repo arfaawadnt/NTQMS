@@ -20,13 +20,13 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
     imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, StatusPillComponent, ListStatsComponent],
     template: `
     <qams-page-header [title]="i18n.t('intg.title')">
-      @if (perms.can('integration.create')) { <button (click)="showForm.set(!showForm())">{{ i18n.t('intg.register') }}</button> }
+      @if (perms.can('integration.manage')) { <button (click)="showForm.set(!showForm())">{{ i18n.t('intg.register') }}</button> }
     </qams-page-header>
 
     <qams-list-stats [stats]="stats()" ratioFromFirst />
     @if (facade.error()) { <div class="error">{{ facade.error() }}</div> }
 
-    @if (showForm() && perms.can('integration.create')) {
+    @if (showForm() && perms.can('integration.manage')) {
       <section class="card">
         <h3>{{ i18n.t('intg.register') }}</h3>
         <form class="inline" [formGroup]="form" (ngSubmit)="register()">
@@ -61,7 +61,7 @@ import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.compone
                 <td>{{ e.received }} / {{ e.processed }} / <span [class.danger-text]="e.failed > 0">{{ e.failed }}</span></td>
                 <td class="actions">
                   <button class="link" (click)="facade.toggleMessages(e.id)">{{ i18n.t('intg.messages') }}</button>
-                  @if (perms.can('integration.edit')) {
+                  @if (perms.can('integration.manage')) {
                     @if (e.status === 'Active') { <button class="link danger-link" (click)="facade.suspend(e.id)">{{ i18n.t('intg.suspend') }}</button> }
                     @else { <button class="link" (click)="facade.resume(e.id)">{{ i18n.t('intg.resume') }}</button> }
                   }

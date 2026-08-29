@@ -35,10 +35,15 @@ public class IngestAdtEventTests
         return (db, tenant, endpoint.Id);
     }
 
-    private static IngestAdtEventHandler Handler(AppDbContext db) => new(db, new FixedClock(Now));
+    private sealed class NoViolations : NT.QAMS.Application.Abstractions.IDatabaseErrorClassifier
+    {
+        public bool IsUniqueViolation(Exception exception) => false;
+    }
+
+    private static IngestAdtEventHandler Handler(AppDbContext db) => new(db, new FixedClock(Now), new NoViolations());
 
     private static IngestAdtEventCommand Admit(Guid endpointId, string dedup, string enc) =>
-        new(endpointId, dedup, "ADT^A01", "raw", AdtEventType.Admit, "PT-1", enc, "Ward A", null, Now);
+        new(endpointId, dedup, "ADT^A01", "raw", "Admit", "PT-1", enc, "Ward A", null, Now);
 
     [Fact]
     public async Task Admit_creates_a_stay_and_marks_the_message_processed()
@@ -71,7 +76,7 @@ public class IngestAdtEventTests
         var (db, _, endpointId) = await SeedAsync();
 
         var result = await Handler(db).Handle(
-            new IngestAdtEventCommand(endpointId, "M9", "ADT^A03", "raw", AdtEventType.Discharge,
+            new IngestAdtEventCommand(endpointId, "M9", "ADT^A03", "raw", "Discharge",
                 "PT-9", "ENC-UNKNOWN", "Ward A", null, Now),
             CancellationToken.None);
 
@@ -91,12 +96,30 @@ public class IngestAdtEventTests
 
         await handler.Handle(Admit(endpointId, "M1", "ENC-1"), CancellationToken.None);
         await handler.Handle(
-            new IngestAdtEventCommand(endpointId, "M2", "ADT^A03", "raw", AdtEventType.Discharge,
+            new IngestAdtEventCommand(endpointId, "M2", "ADT^A03", "raw", "Discharge",
                 "PT-1", "ENC-1", "Ward A", null, Now.AddDays(4)),
             CancellationToken.None);
 
         var stay = await db.PatientStays.SingleAsync();
         stay.Status.Should().Be(StayStatus.Discharged);
         stay.PatientDays(Now.AddDays(10)).Should().Be(4);
+    }
+
+    [Fact]
+    public async Task An_admit_refresh_with_a_different_patient_is_rejected_not_silently_merged()
+    {
+        // M-12: a repeated admit for the same encounter but ANOTHER patient is
+        // corrupt feed data — silently refreshing the unit would hide it and
+        // quietly misattribute the census.
+        var (db, _, endpointId) = await SeedAsync();
+        await Handler(db).Handle(Admit(endpointId, "M1", "ENC-1"), CancellationToken.None);
+
+        var mismatch = new IngestAdtEventCommand(
+            endpointId, "M2", "ADT^A01", "raw", "Admit", "PT-2", "ENC-1", "Ward B", null, Now);
+        var result = await Handler(db).Handle(mismatch, CancellationToken.None);
+
+        result.Status.Should().Be("Failed", "the same encounter cannot swap patients silently");
+        result.Error.Should().NotBeNullOrEmpty();
+        (await db.PatientStays.SingleAsync()).PatientRef.Should().Be("PT-1", "the stay keeps its original patient");
     }
 }

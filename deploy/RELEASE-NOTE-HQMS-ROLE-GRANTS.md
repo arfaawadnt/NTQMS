@@ -166,3 +166,18 @@ refused (`SOD-CRD-001` — the verifier must differ from whoever keyed the crede
 recorded as `added_by_user_id`); a verified licence cannot be silently re-verified in place
 (`CRD-014`); (re)appointment requires **current** evidence (an expired licence or lapsed grant no
 longer qualifies); and a lapsed privilege grant no longer blocks its own renewal request.
+
+## Also in this line — ADT inbox behavior and permission split (M-12)
+
+The ADT ingest endpoint now behaves as a true inbox: every message is **stored first** (status
+`Received`) in its own transaction, then processed; a malformed event type or any processing
+failure — domain or not — is recorded as a **Failed** message against the endpoint's health and
+returned in the result (previously a malformed type bounced with 400 and left no trace, and a
+mid-processing crash lost the message entirely). Duplicate concurrent deliveries resolve
+idempotently instead of a 500. `rawPayload` is bounded at 100,000 characters. A repeated admit
+whose patient differs from the stored encounter is refused (`STAY-023`) instead of silently
+refreshing the census. **Permission split**: endpoint registration/suspend/resume now require
+`integration.manage` (previously `create`/`edit`); the adapter-facing ingest keeps
+`integration.create` — grant a machine identity only `integration.create` and it can deliver
+messages but never reconfigure the wire. Retention/PHI handling of `rawPayload` remains an open
+ADR (audit register M-12, Group C).

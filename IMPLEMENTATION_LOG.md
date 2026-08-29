@@ -1101,3 +1101,16 @@ One atomic commit per finding; each carries a test that failed before the fix.
   Draft-schedule fact and the snapshot fact both failed pre-fix; a stale-pass-lapses fact pins
   the currency math. Executed migration Down/Up. Domain 450 · App 141 · Integration 30+9 ·
   Functional 102 · Arch 192 · Karma 133.
+- **M-12 code half (Major, code closed; retention/PHI ADR deferred to Group C)** — the ADT inbox
+  is store-first: the `Received` row is persisted in its own save before processing (a crash can
+  no longer lose the record and `Received` is reachable); the event type is a raw string parsed
+  INSIDE the inbox so a malformed type becomes a recorded Failed message (previously bounced 400
+  with no trace); non-domain failures are captured on the record (durably Failed + endpoint
+  health + error in the result — not swallowed); concurrent duplicate deliveries resolve
+  idempotently via the new `IDatabaseErrorClassifier` port (Npgsql 23505 impl in Infrastructure —
+  race branch itself not directly driven, the dedup constraint is probe-verified);
+  `RawPayload` bounded (100k); a patient-mismatched encounter refresh is refused (STAY-023);
+  endpoint config split onto `integration.manage` (ingest keeps `create`) at both tiers + SPA
+  gates. Tests red-first: the malformed-type functional fact (was 400/no row) and the
+  patient-mismatch app fact (was silent merge) both failed pre-fix. Domain 450 · App 142 ·
+  Integration 30+9 · Functional 103 · Arch 192 · Karma 133 · prod build clean.

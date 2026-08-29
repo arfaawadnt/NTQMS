@@ -11,7 +11,10 @@ namespace NT.QAMS.Application.Integration;
 
 // ── Endpoint management ──────────────────────────────────────────────────────
 
-[RequirePermissionPolicy(PermissionCatalog.Integration, PermissionAction.Create)]
+// M-12: endpoint configuration is an administrative surface — split from the
+// adapter-facing ingest key so a machine identity granted integration.create
+// can deliver messages but never reconfigure the wire.
+[RequirePermissionPolicy(PermissionCatalog.Integration, PermissionAction.Manage)]
 public sealed record RegisterEndpointCommand(string Name, InterfaceSystem System, InterfaceProtocol Protocol)
     : ICommand<Guid>;
 
@@ -31,7 +34,7 @@ public sealed class RegisterEndpointHandler(IAppDbContext db) : ICommandHandler<
     }
 }
 
-[RequirePermissionPolicy(PermissionCatalog.Integration, PermissionAction.Edit)]
+[RequirePermissionPolicy(PermissionCatalog.Integration, PermissionAction.Manage)]
 public sealed record SuspendEndpointCommand(Guid EndpointId) : ICommand;
 
 public sealed class SuspendEndpointHandler(IAppDbContext db) : ICommandHandler<SuspendEndpointCommand>
@@ -47,7 +50,7 @@ public sealed class SuspendEndpointHandler(IAppDbContext db) : ICommandHandler<S
         ?? throw new DomainException("INT-404", "Integration endpoint not found.");
 }
 
-[RequirePermissionPolicy(PermissionCatalog.Integration, PermissionAction.Edit)]
+[RequirePermissionPolicy(PermissionCatalog.Integration, PermissionAction.Manage)]
 public sealed record ResumeEndpointCommand(Guid EndpointId) : ICommand;
 
 public sealed class ResumeEndpointHandler(IAppDbContext db) : ICommandHandler<ResumeEndpointCommand>
@@ -61,10 +64,13 @@ public sealed class ResumeEndpointHandler(IAppDbContext db) : ICommandHandler<Re
 
 // ── ADT ingestion (called by the protocol adapter) ───────────────────────────
 
+// M-12: EventType is a raw STRING here, deliberately — a malformed event type
+// must reach the inbox and be recorded as a Failed message against the
+// endpoint's health, not bounce invisibly at the enum boundary.
 [RequirePermissionPolicy(PermissionCatalog.Integration, PermissionAction.Create)]
 public sealed record IngestAdtEventCommand(
     Guid EndpointId, string DedupKey, string MessageType, string RawPayload,
-    AdtEventType EventType, string PatientRef, string EncounterRef, string Unit,
+    string EventType, string PatientRef, string EncounterRef, string Unit,
     Guid? DepartmentId, DateTimeOffset EventAtUtc) : ICommand<IngestResultDto>;
 
 public sealed class IngestAdtEventValidator : AbstractValidator<IngestAdtEventCommand>
@@ -73,6 +79,10 @@ public sealed class IngestAdtEventValidator : AbstractValidator<IngestAdtEventCo
     {
         RuleFor(x => x.DedupKey).NotEmpty().MaximumLength(200);
         RuleFor(x => x.MessageType).MaximumLength(40);
+        RuleFor(x => x.EventType).NotEmpty().MaximumLength(40);
+        // The raw feed is stored verbatim; the bound keeps a runaway payload
+        // from becoming a storage attack (the column is text — hardening 1.2).
+        RuleFor(x => x.RawPayload).MaximumLength(100_000);
         RuleFor(x => x.PatientRef).NotEmpty().MaximumLength(100);
         RuleFor(x => x.EncounterRef).NotEmpty().MaximumLength(100);
         RuleFor(x => x.Unit).MaximumLength(100);
@@ -90,7 +100,7 @@ public sealed class IngestAdtEventValidator : AbstractValidator<IngestAdtEventCo
 /// reprocessed (the retry path). Processing errors are captured on the message (Failed) and
 /// on the endpoint health rather than thrown, so a bad message never loses the record.
 /// </summary>
-public sealed class IngestAdtEventHandler(IAppDbContext db, IClock clock)
+public sealed class IngestAdtEventHandler(IAppDbContext db, IClock clock, IDatabaseErrorClassifier dbErrors)
     : ICommandHandler<IngestAdtEventCommand, IngestResultDto>
 {
     public async Task<IngestResultDto> Handle(IngestAdtEventCommand c, CancellationToken ct)
@@ -114,6 +124,27 @@ public sealed class IngestAdtEventHandler(IAppDbContext db, IClock clock)
         {
             message = IntegrationMessage.Receive(c.EndpointId, dedup, c.MessageType, c.RawPayload, clock.UtcNow);
             db.IntegrationMessages.Add(message);
+
+            // M-12: STORE FIRST, in its own save — a crash or malformed body
+            // during processing can no longer lose the record, and Received is
+            // a reachable state on the wire dashboard.
+            try
+            {
+                await db.SaveChangesAsync(ct);
+            }
+            catch (Exception ex) when (dbErrors.IsUniqueViolation(ex))
+            {
+                // A concurrent duplicate delivery won the insert — fall back to
+                // the winner's row and continue idempotently instead of a 500.
+                // Removing an Added entity detaches it from the tracker.
+                db.IntegrationMessages.Remove(message);
+                message = await db.IntegrationMessages
+                    .FirstAsync(m => m.EndpointId == c.EndpointId && m.DedupKey == dedup, ct);
+                if (message.Status == MessageStatus.Processed)
+                {
+                    return new IngestResultDto(message.Id, message.Status.ToString(), null);
+                }
+            }
         }
 
         try
@@ -131,14 +162,41 @@ public sealed class IngestAdtEventHandler(IAppDbContext db, IClock clock)
             await db.SaveChangesAsync(ct);
             return new IngestResultDto(message.Id, message.Status.ToString(), ex.Message);
         }
+        catch (Exception ex)
+        {
+            // M-12: a NON-domain failure is captured on the record too — not
+            // swallowed: the message is durably Failed, the endpoint health
+            // registers it, and the adapter gets the error in the result. The
+            // idempotent retry path reprocesses Failed messages.
+            message.MarkFailed($"Unexpected {ex.GetType().Name}: {ex.Message}", clock.UtcNow);
+            endpoint.RecordFailure(clock.UtcNow);
+            await db.SaveChangesAsync(ct);
+            return new IngestResultDto(message.Id, message.Status.ToString(), $"Unexpected {ex.GetType().Name}: {ex.Message}");
+        }
     }
 
     private async Task ApplyAsync(IngestAdtEventCommand c, CancellationToken ct)
     {
+        // M-12: parsed HERE, inside the inbox, so an unknown type becomes a
+        // recorded Failed message rather than an invisible request rejection.
+        if (!Enum.TryParse<AdtEventType>(c.EventType, ignoreCase: true, out var eventType)
+            || !Enum.IsDefined(eventType))
+        {
+            throw new DomainException("STAY-022", $"Unsupported ADT event type '{c.EventType}'.");
+        }
+
         var encounter = c.EncounterRef.Trim();
         var stay = await db.PatientStays.FirstOrDefaultAsync(s => s.EncounterRef == encounter, ct);
+        if (stay is not null && !string.Equals(stay.PatientRef, c.PatientRef.Trim(), StringComparison.Ordinal))
+        {
+            // M-12: the same encounter carrying a DIFFERENT patient is corrupt
+            // feed data — reject it loudly instead of silently misattributing
+            // the census.
+            throw new DomainException(
+                "STAY-023", $"Encounter '{encounter}' belongs to another patient; the feed is inconsistent.");
+        }
 
-        switch (c.EventType)
+        switch (eventType)
         {
             case AdtEventType.Admit:
                 if (stay is null)
@@ -163,7 +221,7 @@ public sealed class IngestAdtEventHandler(IAppDbContext db, IClock clock)
                 break;
 
             default:
-                throw new DomainException("STAY-022", "Unsupported ADT event type.");
+                throw new DomainException("STAY-022", $"Unsupported ADT event type '{c.EventType}'.");
         }
     }
 }
