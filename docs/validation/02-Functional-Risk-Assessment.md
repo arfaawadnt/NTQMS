@@ -65,6 +65,14 @@ S/P/D scale: High / Medium / Low.
 | **Records retention & archival** | URS-043,044,045,046 | Med | Med | Med | Medium | OQ; snapshot mandatory, legal hold blocks disposal |
 | **Governance (change/risk/policy/supplier/reviews)** | URS-047,048,049,050,051,052 | Med | Low | Med | Low–Medium | OQ |
 | **Backup / DR** | URS-053,054,055 | High | Low | Med | Medium–High | IQ (config) + periodic restore-drill (PQ-style) |
+| **HQMS: anonymous-report identity suppression** (delta, REVAL-NTQMS-002) | URS-135 | High | Med | Low | **HIGH** | OQ-HQMS-02; DBA-witnessed row/ledger inspection; `AnonymousSuppressionTests` |
+| **HQMS: clinical rate integrity (falls/HAI/mortality)** — rejected-case exclusion, ADT denominator, no fabricated zero | URS-136,137,138,146 | High | Med | Med | **HIGH** | OQ-HQMS-05…07, 15; hand-recomputation (PQ-HQMS-01); rates + denominator suites |
+| **HQMS: point-of-care privilege answer** — lapsed appointment must answer false | URS-143 | High | Low | Low | **HIGH** | OQ-HQMS-12; `PractitionerTests` boundary facts |
+| **HQMS: signed/frozen clinical records** (closed incidents, approved minutes, survey responses) | URS-135,141,142 | High | Low | Low | **HIGH** | IQ-33/34 + DBA-witnessed tamper probes (23514); immutability suites |
+| **HQMS: ADT feed integrity** — store-first inbox, idempotency, patient-mismatch refusal, ingest/config permission split | URS-146 | High | Med | Med | **HIGH** | OQ-HQMS-15; `AdtInboxTests`, `IngestAdtEventTests`; **retention/PHI ADR for raw payloads OPEN (audit M-12) — close before PHI-bearing feeds connect** |
+| **HQMS: committee governance evidence** (member-only quorum, disbanded refusal) | URS-141 | Med | Med | Med | Medium | OQ-HQMS-10; committee suites + unique-index probes |
+| **HQMS: training currency & reproducible pass marks** | URS-145 | Med | Med | Med | Medium | OQ-HQMS-14; training suites |
+| **HQMS: access governance for clinical registries** (explicit seeded grants, External-Auditor exclusion) | URS-148 | High | Med | Med | **HIGH** | OQ-HQMS-04; role-matrix suites; release-note grant review (IQ-35) |
 
 ---
 

@@ -123,8 +123,9 @@ widening the seeded role.
 
 Overall release posture is unchanged — the HQMS line remains **pre-release**; this note concerns
 permission configuration only. The lab-edition v1.53.x/v1.54.x posture and its open blockers
-(DOC-001, SEC-001) are unaffected. The HQMS validation package (URS/FRA/RTM/OQ) is tracked
-separately under audit finding B-02.
+(DOC-001, SEC-001) are unaffected. The HQMS validation package is authored as REVAL-NTQMS-002
+(`docs/validation/20-Revalidation-Delta-HQMS-Hospital-Modules.md` + OQ templates 21–22, DRAFT —
+QA executes and signs; folds under DOC-001).
 
 ## Also in this line — API error-contract change (M-11)
 

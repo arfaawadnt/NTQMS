@@ -1128,3 +1128,16 @@ One atomic commit per finding; each carries a test that failed before the fix.
   into one query. Tests red-first: the 3-row paging-envelope functional theory failed pre-fix
   (bare arrays); the projection refactors are contract-preserving and ride the full suites.
   Functional 106 · App 142 · Arch 192 · Integration 30+9 · Karma 133 · prod build clean.
+- **B-02 (Blocker, package authored as DRAFT — closes the documentation GAP; QA execution still
+  folds under DOC-001)** — the HQMS validation package now exists: **REVAL-NTQMS-002**
+  (`docs/validation/20-Revalidation-Delta-HQMS-Hospital-Modules.md`) carries the URS/RTM delta
+  (URS-135…149 across all hospital modules and the two cross-cutting tiers, every row citing its
+  design elements, evidence-engine suites and OQ case), the IQ delta (IQ-32…35 incl. the
+  role-grant/reused-key review), the OQ evidence-engine table, a PQ addition (PQ-HQMS-01
+  month-boundary rate recomputation), the VSR addendum (920/0 basis, open Group-C decisions named
+  — the RawPayload retention/PHI ADR flagged as pre-PHI-go-live) and the QA execution checklist.
+  OQ execution-record TEMPLATES: doc 21 (clinical: OQ-HQMS-01…07, 15, 17) and doc 22
+  (governance/ops: OQ-HQMS-08…14, 16) — every Actual/P-F cell blank by design, DBA-witnessed
+  tamper probes included. FRA (doc 02) gained nine HQMS area-risk rows (four HIGH). One
+  verification-log row records the 2026-08-29 basis run (`abcc881`, 920/0 + Karma 133). All
+  documents describe the POST-remediation behavior, per the approved sequencing.
