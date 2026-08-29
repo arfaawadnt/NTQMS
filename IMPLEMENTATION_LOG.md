@@ -1156,3 +1156,13 @@ Four deferred decisions approved (recommended options). Executed ascending blast
   event" claim after reading the handler). Enforced by `CommandHandlerScopeTests` (Mono.Cecil via
   NetArchTest; scans async state-machine bodies + generic type args; shrink-only approved map) —
   proven red with an emptied map. Arch 192→193.
+- **M-16 ceremony half (Group C, closed)** — committee minutes approval is a Part 11 signed gate:
+  the `committees` module moves to `SignedRecordLifecycle` (gains `.sign`); `ApproveMinutesCommand`
+  gains Password/Pin with a validator and `[RequirePermissionPolicy(Committees, Sign)]`;
+  `ApproveMinutesHandler` pre-validates (Held + minutes present + active committee) BEFORE
+  `IESignatureService.SignAsync` (append-only ledger — no signature on a failed precondition),
+  binding the hash to meeting ref + committee + minutes text; controller endpoint + `ApproveMinutesRequest`
+  take {password,pin} (same route). Release-noted as a contract + grant change. Tests red-first:
+  `Approving_minutes_is_a_signing_ceremony_that_mints_exactly_one_signature` and
+  `…mints_no_signature` when minutes absent. App 142→144, Arch 193, Functional 102 (+4 real-PG skips
+  — throwaway instance retired at batch close).

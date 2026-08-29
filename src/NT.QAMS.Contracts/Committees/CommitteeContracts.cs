@@ -23,6 +23,7 @@ public sealed record RecordAttendanceRequest(Guid UserId, bool Present);
 public sealed record AddDecisionRequest(string Description, Guid? OwnerId, DateOnly? DueDate);
 public sealed record CloseDecisionRequest(string? Note);
 public sealed record RecordMinutesRequest(string Minutes);
+public sealed record ApproveMinutesRequest(string Password, string Pin);
 
 public sealed record AgendaItemDto(Guid Id, string Title, string? Detail, string? SourceRef, bool CarriedForward);
 public sealed record MeetingAttendanceDto(Guid Id, Guid UserId, bool Present);

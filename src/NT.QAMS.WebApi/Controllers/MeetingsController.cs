@@ -81,10 +81,10 @@ public sealed class MeetingsController(ISender sender) : ControllerBase
     }
 
     [HttpPost("{id:guid}/approve-minutes")]
-    [RequirePermission(PermissionCatalog.Committees, PermissionAction.Approve)]
-    public async Task<IActionResult> ApproveMinutes(Guid id, CancellationToken ct)
+    [RequirePermission(PermissionCatalog.Committees, PermissionAction.Sign)]
+    public async Task<IActionResult> ApproveMinutes(Guid id, ApproveMinutesRequest request, CancellationToken ct)
     {
-        await sender.Send(new ApproveMinutesCommand(id), ct);
+        await sender.Send(new ApproveMinutesCommand(id, request.Password, request.Pin), ct);
         return NoContent();
     }
 }

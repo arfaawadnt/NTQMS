@@ -157,7 +157,8 @@ public static class PermissionCatalog
         new(QualityObjectives, GroupQuality, "perm.mod.objectives", FullRecordLifecycle),
         new(ChangeControl, GroupQuality, "perm.mod.changes", SignedRecordLifecycle),
         new(ManagementReviews, GroupQuality, "perm.mod.reviews", SignedRecordLifecycle),
-        new(Committees, GroupQuality, "perm.mod.committees", FullRecordLifecycle),
+        // Committees carry Sign: minutes approval is a Part 11 signed gate (M-16).
+        new(Committees, GroupQuality, "perm.mod.committees", SignedRecordLifecycle),
 
         // ── Documents & records ──────────────────────────────────────────────
         new(Documents, GroupDocuments, "perm.mod.documents", SignedRecordLifecycle),

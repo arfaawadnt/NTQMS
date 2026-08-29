@@ -191,3 +191,13 @@ ADR (audit register M-12, Group C).
 instead of a bare array — a hospital tenant's lifetime of events cannot travel as one response.
 Dashboards and roll-ups across the HQMS modules now aggregate in the database (grouped counts and
 projections); response contents are unchanged.
+
+## Also in this line — committee minutes approval is now a signed gate (M-16)
+
+Approving meeting minutes is now a **21 CFR Part 11 signing ceremony** (account password +
+signature PIN), consistent with every other regulated sign-off. The `committees` module gains the
+`.sign` action; `POST /api/meetings/{id}/approve-minutes` now takes `{ password, pin }` and requires
+`committees.sign` (previously `committees.approve` with no signature). **Grant `committees.sign`** to
+roles that approve minutes (Quality Manager and Tenant Administrator hold it via their catch-all/all-keys
+grants; grant it to any custom role that chairs committees). A wrong PIN returns 422 SIG-001 and mints
+nothing; the approval is refused if minutes were never recorded or the committee is disbanded.

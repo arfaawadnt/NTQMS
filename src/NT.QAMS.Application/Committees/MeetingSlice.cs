@@ -1,6 +1,7 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
+using NT.QAMS.Application.Compliance;
 using NT.QAMS.Contracts.Committees;
 using NT.QAMS.Domain.Authorization;
 using NT.QAMS.Domain.Committees;
@@ -172,15 +173,41 @@ public sealed class RecordMinutesHandler(IAppDbContext db) : ICommandHandler<Rec
     }
 }
 
-[RequirePermissionPolicy(PermissionCatalog.Committees, PermissionAction.Approve)]
-public sealed record ApproveMinutesCommand(Guid MeetingId) : ICommand;
+[RequirePermissionPolicy(PermissionCatalog.Committees, PermissionAction.Sign)]
+// M-16: minutes approval is the governance record of a meeting — a Part 11
+// signed gate (account password + signature PIN), like the sibling sign-offs.
+public sealed record ApproveMinutesCommand(Guid MeetingId, string Password, string Pin) : ICommand;
 
-public sealed class ApproveMinutesHandler(IAppDbContext db, ICurrentUser user) : ICommandHandler<ApproveMinutesCommand>
+public sealed class ApproveMinutesValidator : AbstractValidator<ApproveMinutesCommand>
+{
+    public ApproveMinutesValidator()
+    {
+        RuleFor(x => x.Password).NotEmpty();
+        RuleFor(x => x.Pin).NotEmpty();
+    }
+}
+
+public sealed class ApproveMinutesHandler(
+    IAppDbContext db, ICurrentUser user, IESignatureService signatures)
+    : ICommandHandler<ApproveMinutesCommand>
 {
     public async Task Handle(ApproveMinutesCommand c, CancellationToken ct)
     {
         var actor = user.UserId ?? throw new DomainException("AUTH-003", "An authenticated user is required.");
         var meeting = await AddAgendaItemHandler.Load(db, c.MeetingId, ct);
+
+        // Pre-validate every precondition BEFORE minting the signature — the
+        // ledger is append-only, so no signature may exist for an approval that
+        // then fails its state or liveness gate (mirrors the NC-verify ceremony).
+        if (meeting.Status != MeetingStatus.Held)
+        {
+            throw new InvalidStateTransitionException("MTG-021", "Only a held meeting's minutes can be approved.");
+        }
+
+        if (string.IsNullOrWhiteSpace(meeting.Minutes))
+        {
+            throw new DomainException("MTG-022", "Minutes must be recorded before approval.");
+        }
 
         // M-16: the approval mints governance evidence — not for a committee
         // that no longer exists.
@@ -190,6 +217,18 @@ public sealed class ApproveMinutesHandler(IAppDbContext db, ICurrentUser user) :
         {
             throw new DomainException("CMT-016", "A disbanded committee cannot conduct meetings.");
         }
+
+        // Bind the signature to the exact record being attested (§11.70): the
+        // meeting identity and the minutes text approved.
+        var contentHash = SignatureContentHash.Compute(
+            ("meeting", meeting.MeetingRef),
+            ("committee", meeting.CommitteeId.ToString("N")),
+            ("minutes", meeting.Minutes));
+
+        await signatures.SignAsync(
+            actor, c.Password, c.Pin,
+            $"Approved the minutes of meeting {meeting.MeetingRef}.",
+            $"Meeting:{meeting.Id:N}", contentHash, ct);
 
         meeting.ApproveMinutes(actor);
         await db.SaveChangesAsync(ct);

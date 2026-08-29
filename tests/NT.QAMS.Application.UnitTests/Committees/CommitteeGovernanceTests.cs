@@ -103,4 +103,75 @@ public class CommitteeGovernanceTests
         var hold = () => new HoldMeetingHandler(db).Handle(new HoldMeetingCommand(meeting.Id), CancellationToken.None);
         (await hold.Should().ThrowAsync<DomainException>()).Which.Code.Should().Be("CMT-016");
     }
+
+    private sealed class CountingSignatureService : NT.QAMS.Application.Abstractions.IESignatureService
+    {
+        public int Calls { get; private set; }
+
+        public Task<NT.QAMS.Domain.ComplianceLedger.SignatureRecord> SignAsync(
+            Guid signerId, string password, string pin, string meaning, string subjectRef, string contentHash,
+            CancellationToken cancellationToken)
+        {
+            Calls++;
+            return Task.FromResult(new NT.QAMS.Domain.ComplianceLedger.SignatureRecord
+            {
+                Id = Guid.CreateVersion7(), SignerId = signerId, SignerDisplay = "fake",
+                Meaning = meaning, SubjectRef = subjectRef, ContentHash = contentHash, SignedAtUtc = When,
+            });
+        }
+    }
+
+    private static async Task<(AppDbContext Db, Guid MeetingId, Guid Approver)> HeldMeetingWithMinutes()
+    {
+        var db = NewContext();
+        var committee = SeedCommittee(db, out var memberId);
+        await db.SaveChangesAsync();
+
+        var meeting = Meeting.Schedule(committee.Id, "MTG-2026-0100", When);
+        meeting.TenantId = TenantId;
+        meeting.RecordAttendance(memberId, present: true);
+        meeting.Hold(committeeQuorum: 1);
+        meeting.RecordMinutes("Agreed the quality plan.");
+        db.Meetings.Add(meeting);
+        await db.SaveChangesAsync();
+        return (db, meeting.Id, memberId);
+    }
+
+    [Fact]
+    public async Task Approving_minutes_is_a_signing_ceremony_that_mints_exactly_one_signature()
+    {
+        // M-16 (Group C decision): minutes approval is a Part 11 signed gate.
+        var (db, meetingId, approver) = await HeldMeetingWithMinutes();
+        var signatures = new CountingSignatureService();
+        var user = new FakeCurrentUser { UserId = approver, DisplayName = "Chair" };
+
+        await new ApproveMinutesHandler(db, user, signatures)
+            .Handle(new ApproveMinutesCommand(meetingId, "pw", "1234"), CancellationToken.None);
+
+        signatures.Calls.Should().Be(1, "approval mints exactly one signature");
+        (await db.Meetings.SingleAsync(m => m.Id == meetingId)).Status
+            .Should().Be(MeetingStatus.MinutesApproved);
+    }
+
+    [Fact]
+    public async Task Approving_minutes_that_were_never_recorded_mints_no_signature()
+    {
+        // Append-only ledger: a failed precondition must not leave a signature.
+        var db = NewContext();
+        var committee = SeedCommittee(db, out var memberId);
+        await db.SaveChangesAsync();
+        var meeting = Meeting.Schedule(committee.Id, "MTG-2026-0101", When);
+        meeting.TenantId = TenantId;
+        meeting.RecordAttendance(memberId, present: true);
+        meeting.Hold(committeeQuorum: 1); // held, but no minutes recorded
+        db.Meetings.Add(meeting);
+        await db.SaveChangesAsync();
+
+        var signatures = new CountingSignatureService();
+        var act = () => new ApproveMinutesHandler(db, new FakeCurrentUser { UserId = memberId }, signatures)
+            .Handle(new ApproveMinutesCommand(meeting.Id, "pw", "1234"), CancellationToken.None);
+
+        (await act.Should().ThrowAsync<DomainException>()).Which.Code.Should().Be("MTG-022");
+        signatures.Calls.Should().Be(0, "no signature is minted when the precondition fails");
+    }
 }
