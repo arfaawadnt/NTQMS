@@ -1199,3 +1199,9 @@ Four deferred decisions approved (recommended options). Executed ascending blast
   `HqmsDecisionEventTests` (5, red-first — each event asserted at its decision point). WHO is
   *notified* of these facts (recipients/rules) stays the deferred product decision; the ledger
   gap — the compliance-material half — is closed. Domain 460 · App 144 · Arch 202 · Functional 103 (+4 real-PG skips).
+- **M-22 (guard half, closed; EOC→CAPA hand-off remains a product decision)** — an FMEA failure
+  mode could flip to `Actioned` via `RecordResidual` with no `RecommendedAction` on record — a false
+  prospective-risk claim. The residual-scoring transition now requires a recorded action first
+  (FME-020). Red-first: `FmeaStudyTests.Cannot_record_residual_before_a_recommended_action`. The
+  drill/finding→CAPA hand-off (new `NcSourceType` + CHECK-widening migration) stays the deferred
+  product decision. Domain 461.

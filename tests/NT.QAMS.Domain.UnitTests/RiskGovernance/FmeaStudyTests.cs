@@ -69,4 +69,18 @@ public class FmeaStudyTests
         fmea.DomainEvents.OfType<FmeaActivated>().Should().ContainSingle()
             .Which.FailureModeCount.Should().Be(1);
     }
+
+    [Fact]
+    public void Cannot_record_residual_before_a_recommended_action()
+    {
+        // M-22: scoring residual risk marks the mode Actioned — that must not be
+        // possible with no recommended action on record.
+        var fmea = DraftWithMode(out var modeId, 8, 6, 5);
+        fmea.Activate();
+
+        var act = () => fmea.RecordResidual(modeId, 8, 2, 2);
+
+        act.Should().Throw<DomainException>().Which.Code.Should().Be("FME-020");
+        fmea.FailureModes.Single().Status.Should().Be(FailureModeStatus.Open);
+    }
 }

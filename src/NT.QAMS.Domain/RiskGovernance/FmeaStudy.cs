@@ -73,6 +73,14 @@ public sealed class FailureMode : Entity
 
     internal void RecordResidual(int severity, int occurrence, int detection)
     {
+        // M-22: a failure mode may only become Actioned once a recommended action
+        // is on record — otherwise "Actioned" is a false prospective-risk claim.
+        if (string.IsNullOrWhiteSpace(RecommendedAction))
+        {
+            throw new DomainException(
+                "FME-020", "A recommended action must be recorded before the residual risk is scored.");
+        }
+
         ResidualSeverity = severity;
         ResidualOccurrence = occurrence;
         ResidualDetection = detection;
