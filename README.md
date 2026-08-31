@@ -110,7 +110,7 @@ is included for container hosts.
 
 ## Increment history
 
-Current version: **v1.54.0** (full detail in [`IMPLEMENTATION_LOG.md`](IMPLEMENTATION_LOG.md);
+Current version: **v1.55.0** (full detail in [`IMPLEMENTATION_LOG.md`](IMPLEMENTATION_LOG.md);
 per-run test history in [`docs/validation/verification-log.md`](docs/validation/verification-log.md)).
 
 ### Stage 1 — Initial vertical-slice build (v0.1 → v1.0, 2026-07-22)
@@ -168,11 +168,17 @@ Every increment a complete UI→API→domain→DB→tests slice:
 | v1.53.1 | Deploy/upgrade-path corrections (apply DDL as `qams_owner`, `SET LOCAL` RLS-bypass so the idempotent script applies from scratch, Windows-service SCM integration, `harden-runtime-role.sql` fixes) — **no application/schema change** |
 | **v1.54.0** | **Product enhancement program** (URS-129…134) — **NC re-open** (reason + e-signature, reuses `nc.sign`); **Quality Analytics report** as branded PDF & Excel (`reports.export`); **User Manual PDF** (cover chart, linked TOC, per-topic progress bars); **My Tasks unified action centre** (live read model over 7 pending-action sources); **Mail Management** — per-tenant mail sender identity (FORCE-RLS `tenant_mail_settings`) + branded HTML e-mail template. No new permission keys; two additive migrations |
 
-> **Note:** the newest git tag is **`v1.54.0`** (@ `dea0d2b`). This work lands on `dev`; `master` is
+### Stage 6 — HQMS hospital extension (v1.55.0)
+| Ver | Delivered |
+|---|---|
+| **v1.55.0** | **HQMS-MSP-001 hospital extension — conformance-complete.** Extends the platform from the lab/QMS core to a hospital quality-and-safety suite: the **Clinical Governance** module set — incident & **sentinel-event** management, patient safety, infection control (HAI surveillance), mortality/M&M review, practitioner **credentialing & privileging**, and environment of care (safety rounds & emergency drills) — plus **quality indicators** with SPC control charts, grouped as their own privilege-matrix section that mirrors the shell navigation. Delivery was followed by a full **conformance-remediation cycle** (independent audit, batches 1–5): every finding closed to an owner decision except one pre-baseline / out-of-scope item, each code fix carrying a pre-fix red test and one atomic commit. Batch 5 closed the final five residuals — reserved permission-key documentation (N-08), display-honesty polish (N-09), the `GroupClinical` privilege group (N-10), incident escalation/sentinel **notifications** routed to the assignee, else the department head(s) + every quality manager (M-06), and the **environment-of-care finding → CAPA hand-off** (M-22 — new `NcSourceType.EnvironmentOfCare` + CHECK-widening migration, manual/suggested, then the normal NC lifecycle). ADR-0010 amended to admit the second sanctioned cross-module convergence write. Gates: **backend 962/0, Karma 133**, production build clean |
+
+> **Note:** the newest git tag is **`v1.55.0`** (@ `08c3eaa`), now on `dev`; `master` / `main` are
 > promoted separately by the dev-team review process. Release posture remains **Pre-production /
 > Approved-with-conditions** — the open blockers are **DOC-001** (signed validation on a qualified
-> environment) and **SEC-001** (independent penetration test); v1.54.0's validation records
-> (URS-129…134) ship as Template/unsigned and fold under DOC-001.
+> environment) and **SEC-001** (independent penetration test). The HQMS conformance-pack re-run
+> against this head is still pending, so the protocol baseline tag (`verify/baseline-20260827`)
+> deliberately stays where it is until that re-run is green.
 
 ## Remaining / open items
 
