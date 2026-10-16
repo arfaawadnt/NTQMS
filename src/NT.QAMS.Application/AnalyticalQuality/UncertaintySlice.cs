@@ -66,6 +66,32 @@ public sealed class AddUncertaintyComponentValidator : AbstractValidator<AddUnce
     }
 }
 
+/// <summary>
+/// Imports a signed-off precision study's within-laboratory CV as the budget's
+/// u(Rw) component, instead of re-typing it (ISO/TS 20914 §6.3).
+/// </summary>
+[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.AnalyticalQuality,
+    NT.QAMS.Domain.Authorization.PermissionAction.Edit)]
+public sealed record AddPrecisionComponentCommand(Guid BudgetId, Guid PrecisionStudyId) : ICommand<Guid>;
+
+public sealed class AddPrecisionComponentHandler(IAppDbContext db)
+    : ICommandHandler<AddPrecisionComponentCommand, Guid>
+{
+    public async Task<Guid> Handle(AddPrecisionComponentCommand c, CancellationToken ct)
+    {
+        var budget = await db.UncertaintyBudgets.Include(b => b.Components)
+            .FirstOrDefaultAsync(b => b.Id == c.BudgetId, ct)
+            ?? throw new DomainException("MU-404", "Uncertainty budget not found.");
+        var study = await db.PrecisionStudies.AsNoTracking()
+            .FirstOrDefaultAsync(s => s.Id == c.PrecisionStudyId, ct)
+            ?? throw new DomainException("PR-404", "Precision study not found.");
+
+        var id = budget.AddPrecisionComponent(study);
+        await db.SaveChangesAsync(ct);
+        return id;
+    }
+}
+
 public sealed class UncertaintyWorkflowHandlers(
     IAppDbContext db, ICurrentUser user, IClock clock, IESignatureService signatures) :
     ICommandHandler<AddUncertaintyComponentCommand, Guid>,
@@ -176,6 +202,7 @@ public sealed class GetUncertaintyBudgetByIdHandler(IAppDbContext db)
             b.CombinedStandardUncertainty, b.ExpandedUncertainty, b.MeetsTarget,
             b.ApprovedBy, b.ApprovedAtUtc,
             b.Components.Select(c => new UncertaintyComponentDto(
-                c.Id, c.Name, c.Type.ToString(), c.RelativeStandardUncertainty, c.Source)).ToList());
+                c.Id, c.Name, c.Type.ToString(), c.RelativeStandardUncertainty, c.Source,
+                c.SourcePrecisionStudyId)).ToList());
     }
 }

@@ -187,6 +187,61 @@ public class ValidationStudyTests
         study.State.Should().Be(ValidationState.DataEntered);
         study.Cv.Should().BeNull("prior results are voided until recalculated");
     }
+
+    [Fact]
+    public void Precision_is_computed_per_level_not_across_levels()
+    {
+        // V-D1: Low {10, 12} and High {100, 102} each scatter by SD √2. Pooled
+        // into one SD the 90-unit gap BETWEEN the levels would read as ~87 % CV.
+        // Per level: CV_low = √2/11 = 12.856 %, CV_high = √2/101 = 1.400 %;
+        // pooled within-level CV = √((12.856² + 1.400²)/2) = 9.144 %.
+        var study = ValidationStudy.Configure("MV-2026-0003", "Glucose", "EP15", totalAllowableError: 25m);
+        study.EnterReplicate("Low", 10m, null);
+        study.EnterReplicate("Low", 12m, null);
+        study.EnterReplicate("High", 100m, null);
+        study.EnterReplicate("High", 102m, null);
+
+        study.CalculateStatistics();
+
+        var levels = study.LevelResults();
+        levels.Should().HaveCount(2);
+        levels.Single(l => l.Level == "Low").Cv.Should().Be(12.856m);
+        levels.Single(l => l.Level == "High").Cv.Should().Be(1.400m);
+        study.Cv.Should().Be(9.144m);
+        // Low: TE = 1.65 · 12.856 = 21.21 % ≤ 25 %; High: 2.31 % → both pass.
+        study.Passed.Should().BeTrue();
+        study.MeanBias.Should().BeNull();
+    }
+
+    [Fact]
+    public void The_study_fails_when_any_single_level_exceeds_TEa()
+    {
+        var study = ValidationStudy.Configure("MV-2026-0004", "Glucose", "EP15", totalAllowableError: 20m);
+        study.EnterReplicate("Low", 10m, 11m);
+        study.EnterReplicate("Low", 12m, 11m);
+        study.EnterReplicate("High", 100m, 101m);
+        study.EnterReplicate("High", 102m, 101m);
+
+        study.CalculateStatistics();
+
+        // Low: TE = |0| + 1.65 · 12.856 = 21.21 % > 20 % fails; High passes.
+        study.LevelResults().Single(l => l.Level == "Low").Passes.Should().BeFalse();
+        study.LevelResults().Single(l => l.Level == "High").Passes.Should().BeTrue();
+        study.Passed.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Every_level_needs_two_replicates()
+    {
+        var study = Configured();
+        study.EnterReplicate("Low", 10m, null);
+        study.EnterReplicate("High", 100m, null);
+        study.EnterReplicate("High", 101m, null);
+
+        study.Invoking(s => s.CalculateStatistics())
+            .Should().Throw<SharedKernel.Primitives.DomainException>().Which.Code.Should().Be("MV-016");
+        study.LevelResults().Should().ContainSingle(l => l.Level == "High", "a read skips a level that cannot be computed yet");
+    }
 }
 
 public class PtEnrollmentTests

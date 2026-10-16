@@ -53,6 +53,7 @@ S/P/D scale: High / Medium / Low.
 | **Electronic signatures (dual component)** | URS-020,021,022,023 | High | Med | Low | **HIGH** | OQ + PQ; positive + negative (bad pw / bad PIN / lockout) |
 | **Signed-record / analytical immutability** | URS-041,042 | High | Low | Low | **HIGH** | IQ (trigger + no-DELETE grant) + OQ; DB-level UPDATE/DELETE rejection |
 | **Separation of duties (NC + analytical + policy)** | URS-031,039,049 | High | Med | Med | **HIGH** | OQ; negative test (self-verify / self-approve rejected) |
+| **Analytical precision statistics & downstream feed (EP05/EP15, MU u(Rw), sigma)** — *added 2026-10-16, REVAL-NTQMS-003* | URS-150…156 | High | Med | Med | **HIGH** | OQ against hand-computed and independently recomputed reference datasets; χ² quantiles pinned to published tables; real-PG CHECK/FK probes; witnessed MU/sigma import with unsigned / foreign-analyte refusals. *Rationale:* a wrong within-lab CV propagates into the uncertainty reported with patient results and into QC-rule selection, and a too-lenient claim verdict would release a method that does not meet its claim. |
 | **Reason for change** | URS-015,037 | High | Med | Med | **HIGH** | OQ; delete-without-reason rejected; QC target reason enforced |
 | **Access control / RBAC** | URS-005,006 | High | Med | Med | **HIGH** | OQ; role matrix positive+negative; live session revocation |
 | **Authentication hardening** | URS-001,002,003,004,007 | High | Med | Med | High | OQ; policy, lockout, MFA |

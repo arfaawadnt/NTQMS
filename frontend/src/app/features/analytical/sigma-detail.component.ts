@@ -50,7 +50,11 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
         <div class="inputs">
           <div><span class="muted">{{ i18n.t('sig.tea') }}</span> <b>{{ s.allowableTotalErrorPct | number:'1.0-2' }}%</b></div>
           <div><span class="muted">{{ i18n.t('sig.bias') }}</span> <b>{{ s.biasPct | number:'1.0-2' }}%</b></div>
-          <div><span class="muted">{{ i18n.t('sig.cv') }}</span> <b>{{ s.cvPct | number:'1.0-2' }}%</b></div>
+          <div><span class="muted">{{ i18n.t('sig.cv') }}</span> <b>{{ s.cvPct | number:'1.0-2' }}%</b>
+            @if (s.sourcePrecisionStudyId) {
+              <span class="source">{{ i18n.t('sig.cvFrom') }} <a [routerLink]="['/precision-studies', s.sourcePrecisionStudyId]">{{ s.sourcePrecisionStudyRef }}</a></span>
+            }
+          </div>
           <div class="formula muted">σ = (TEa − |bias|) / CV</div>
         </div>
       </div>
@@ -72,6 +76,23 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
             </div>
             <button type="submit" class="secondary" [disabled]="form.invalid">{{ i18n.t('sig.recalculate') }}</button>
           </form>
+          <div class="import">
+            <label for="sig-precision">{{ i18n.t('sig.usePrecision') }}</label>
+            @if (facade.precisionCandidates().length === 0) {
+              <p class="muted">{{ i18n.t('mu.noPrecisionStudies') }}</p>
+            } @else {
+              <div class="pick">
+                <select id="sig-precision" [value]="precisionPick()" (change)="precisionPick.set($any($event.target).value)">
+                  <option value="">—</option>
+                  @for (p of facade.precisionCandidates(); track p.id) {
+                    <option [value]="p.id">{{ p.studyRef }} · {{ p.level }} · {{ p.withinLabCvPct | number:'1.1-2' }}%</option>
+                  }
+                </select>
+                <button type="button" class="secondary" [disabled]="!precisionPick()" (click)="usePrecision(s.id)">{{ i18n.t('sig.useWithinLab') }}</button>
+              </div>
+            }
+            <p class="helper">{{ i18n.t('sig.usePrecisionHint') }}</p>
+          </div>
         </section>
       }
 
@@ -127,6 +148,10 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
     .actions { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; }
     .actions button { width: auto; }
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
+    .source { display: block; font-size: .72rem; }
+    .import { border-top: 1px solid var(--nt-border); padding-top: .75rem; margin-top: .75rem; }
+    .pick { display: flex; gap: .5rem; align-items: center; }
+    .pick select, .pick button { width: auto; }
     @media (max-width: 700px) { .trio { grid-template-columns: 1fr; } }
   `]
 })
@@ -165,17 +190,34 @@ export class SigmaDetailComponent implements OnInit {
     return `${x - 5},8 ${x + 5},8 ${x},14`;
   });
 
+  /** The signed-off precision study chosen as the CV source (empty = none). */
+  readonly precisionPick = signal('');
+
   ngOnInit(): void {
-    void this.facade.loadDetail(this.id()).then(() => {
+    void this.facade.loadDetail(this.id()).then(async () => {
       const s = this.item();
       if (s) {
-        this.form.setValue({
-          allowableTotalErrorPct: s.allowableTotalErrorPct,
-          biasPct: s.biasPct,
-          cvPct: s.cvPct,
-        });
+        this.syncForm();
+        await this.facade.loadPrecisionCandidates(s.analyte);
       }
     });
+  }
+
+  async usePrecision(id: string): Promise<void> {
+    if (!this.precisionPick()) { return; }
+    await this.facade.usePrecisionStudy(id, this.precisionPick());
+    if (this.facade.error() === '') {
+      this.precisionPick.set('');
+      this.syncForm();
+    }
+  }
+
+  /** Mirrors the stored inputs into the edit form. */
+  private syncForm(): void {
+    const s = this.item();
+    if (s) {
+      this.form.setValue({ allowableTotalErrorPct: s.allowableTotalErrorPct, biasPct: s.biasPct, cvPct: s.cvPct });
+    }
   }
 
   async save(id: string): Promise<void> {

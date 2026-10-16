@@ -984,14 +984,14 @@ export const HELP_TOPICS: HelpTopic[] = [
   {
     route: '/precision-studies', titleKey: 'nav.prc', groupKey: 'nav.groupAnalytical', icon: 'precision',
     summary: L(
-      'Imprecision study (CLSI EP05): enter run-grouped replicates so nested ANOVA derives repeatability, between-run and within-laboratory precision against your claims.',
-      'دراسة عدم الدقة (CLSI EP05): إدخال مكررات مجمّعة حسب التشغيلة ليشتق تحليل التباين المتداخل التكرارية والدقة بين التشغيلات وداخل المختبر مقابل ادعاءاتك.',
-      'Étude d’imprécision (CLSI EP05) : saisir des réplicats groupés par série pour dériver, par ANOVA emboîtée, la répétabilité et la précision inter-série et intra-laboratoire.'),
+      'Imprecision study (CLSI EP05 / EP15): enter replicates grouped by run and, optionally, by day so nested ANOVA derives repeatability, between-run, between-day and within-laboratory precision with 95 % confidence intervals; claims are verified against the EP15 upper verification limit. Between-laboratory reproducibility comes from PT/EQA, not from this study.',
+      'دراسة عدم الدقة (CLSI EP05 / EP15): إدخال مكررات مجمّعة حسب التشغيلة واختيارياً حسب اليوم ليشتق تحليل التباين المتداخل التكرارية والدقة بين التشغيلات وبين الأيام وداخل المختبر مع فترات ثقة 95 %؛ ويُتحقق من الادعاءات مقابل حد التحقق الأعلى وفق EP15. أما قابلية الاستنساخ بين المختبرات فتأتي من PT/EQA لا من هذه الدراسة.',
+      'Étude d’imprécision (CLSI EP05 / EP15) : saisir des réplicats groupés par série et, en option, par jour pour dériver, par ANOVA emboîtée, la répétabilité et la précision inter-série, inter-jour et intra-laboratoire avec IC 95 % ; les revendications sont vérifiées contre la limite supérieure de vérification EP15. La reproductibilité inter-laboratoires provient du PT/EQA, pas de cette étude.'),
     steps: ANALYTICAL_FLOW,
     usage: analyticalUsage(
-      L('Enter replicates grouped by run label (at least two runs) for one concentration level.',
-        'أدخل مكررات مجمّعة حسب اسم التشغيلة (تشغيلتان على الأقل) لمستوى تركيز واحد.',
-        'Saisissez des réplicats groupés par série (au moins deux séries) pour un niveau de concentration.'),
+      L('Create one study per concentration level (add several levels to create a linked series). Enter replicates by run, add a day label for an EP05 days × runs or EP15 5 × 5 design, and record operator, instrument, lots and date so the coverage shows which factors the within-lab CV spans. Once signed off, import its within-lab CV into measurement uncertainty or sigma.',
+        'أنشئ دراسة لكل مستوى تركيز (أضف عدة مستويات لإنشاء سلسلة مرتبطة). أدخل المكررات حسب التشغيلة، وأضف تسمية يوم لتصميم EP05 أيام × تشغيلات أو EP15 ‏5 × 5، وسجّل المشغّل والجهاز والدفعات والتاريخ ليظهر أي العوامل يغطيها CV داخل المختبر. بعد الاعتماد، استورد CV داخل المختبر إلى عدم اليقين أو sigma.',
+        'Créez une étude par niveau de concentration (ajoutez plusieurs niveaux pour une série liée). Saisissez les réplicats par série, ajoutez un jour pour un plan EP05 jours × séries ou EP15 5 × 5, et notez opérateur, instrument, lots et date pour montrer les facteurs couverts par le CV intra-labo. Une fois signée, importez son CV intra-labo dans l’incertitude ou le sigma.'),
     ),
   },
   {

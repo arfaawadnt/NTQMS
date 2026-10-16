@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
 import { Router, RouterOutlet } from '@angular/router';
 import { PrecisionFacade } from './precision.facade';
@@ -12,7 +12,19 @@ import { StatusPillComponent } from '../../shared/ui/status-pill.component';
 import { ListStat, ListStatsComponent } from '../../shared/ui/list-stats.component';
 import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.component';
 
-/** Imprecision-study register (CLSI EP05): within-run / between-run / within-lab precision. */
+/** One concentration level of a new study, with that level's manufacturer claims. */
+type LevelForm = FormGroup<{
+  level: FormControl<string>;
+  claimedRepeatabilityCvPct: FormControl<number | null>;
+  claimedWithinLabCvPct: FormControl<number | null>;
+}>;
+
+/**
+ * Imprecision-study register (CLSI EP05 / EP15): within-run / between-run /
+ * between-day / within-lab precision. A new study may declare several
+ * concentration levels — the backend then creates one linked study per level
+ * (a series), each its own signed record, verifying claims at α / L.
+ */
 @Component({
     selector: 'qams-precision-list',
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -42,12 +54,23 @@ import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.c
         <input formControlName="analyte" />
         <label>{{ i18n.t('mu.unit') }}</label>
         <input formControlName="unit" [placeholder]="i18n.t('mu.unitHint')" />
-        <label>{{ i18n.t('mu.level') }}</label>
-        <input formControlName="level" [placeholder]="i18n.t('prc.levelHint')" />
-        <label>{{ i18n.t('prc.claimedRep') }}</label>
-        <input type="number" step="any" formControlName="claimedRepeatabilityCvPct" [placeholder]="i18n.t('common.optional')" />
-        <label>{{ i18n.t('prc.claimedWl') }}</label>
-        <input type="number" step="any" formControlName="claimedWithinLabCvPct" [placeholder]="i18n.t('common.optional')" />
+        <fieldset formArrayName="levels">
+          <legend>{{ i18n.t('prc.levels') }}</legend>
+          @for (lv of levels.controls; track lv; let i = $index) {
+            <div class="level" [formGroupName]="i">
+              <input formControlName="level" [placeholder]="i18n.t('prc.levelHint')" [attr.aria-label]="i18n.t('mu.level')" />
+              <input type="number" step="any" formControlName="claimedRepeatabilityCvPct" [placeholder]="i18n.t('prc.claimedRep')" [attr.aria-label]="i18n.t('prc.claimedRep')" />
+              <input type="number" step="any" formControlName="claimedWithinLabCvPct" [placeholder]="i18n.t('prc.claimedWl')" [attr.aria-label]="i18n.t('prc.claimedWl')" />
+              @if (levels.length > 1) {
+                <button type="button" class="link" (click)="removeLevel(i)" [attr.aria-label]="i18n.t('prc.removeLevel')">✕</button>
+              }
+            </div>
+          }
+          @if (levels.length < maxLevels) {
+            <button type="button" class="link" (click)="addLevel()">+ {{ i18n.t('prc.addLevel') }}</button>
+          }
+          <p class="helper">{{ levels.length > 1 ? i18n.t('prc.seriesHint') : i18n.t('prc.singleLevelHint') }}</p>
+        </fieldset>
         <div class="row">
           <button type="submit" [disabled]="form.invalid || facade.loading()">{{ i18n.t('qc.create') }}</button>
           <button type="button" class="secondary" (click)="cancel()">{{ i18n.t('nc.cancel') }}</button>
@@ -71,7 +94,7 @@ import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.c
           <tbody>
             @for (s of filtered(); track s.id) {
               <tr class="clickable" (click)="open(s.id)">
-                <td class="code">{{ s.studyRef }}</td>
+                <td class="code">{{ s.studyRef }}@if (s.seriesRef) { <span class="series">{{ s.seriesRef }}</span> }</td>
                 <td>{{ s.analyte }}</td>
                 <td class="muted">{{ s.level }}</td>
                 <td>{{ s.repeatabilityCvPct !== null ? (s.repeatabilityCvPct | number:'1.1-2') + '%' : '—' }}</td>
@@ -100,6 +123,9 @@ import { ExportColumn, ExportMenuComponent } from '../../shared/ui/export-menu.c
     .row { display: flex; gap: .6rem; margin-top: 1rem; }
     .clickable { cursor: pointer; }
     button, select { width: auto; }
+    fieldset { border: 1px solid var(--nt-border); border-radius: 6px; padding: .5rem .75rem; margin-top: .75rem; }
+    .level { display: grid; grid-template-columns: 1.4fr 1fr 1fr auto; gap: .4rem; margin-bottom: .4rem; align-items: center; }
+    .series { display: block; font-size: .7rem; color: var(--nt-ink-neutral); }
   `]
 })
 export class PrecisionListComponent implements OnInit {
@@ -151,13 +177,28 @@ export class PrecisionListComponent implements OnInit {
     ];
   });
 
+  /** Mirrors the backend series bound (PrecisionStudy.MaximumSeriesLevels). */
+  readonly maxLevels = 10;
+
   readonly form = this.fb.nonNullable.group({
     analyte: ['', [Validators.required, Validators.maxLength(200)]],
     unit: ['', [Validators.maxLength(50)]],
-    level: ['', [Validators.maxLength(100)]],
-    claimedRepeatabilityCvPct: [null as number | null],
-    claimedWithinLabCvPct: [null as number | null],
+    levels: this.fb.array<LevelForm>([this.newLevel()]),
   });
+
+  get levels(): FormArray<LevelForm> { return this.form.controls.levels; }
+
+  addLevel(): void { this.levels.push(this.newLevel()); }
+
+  removeLevel(index: number): void { this.levels.removeAt(index); }
+
+  private newLevel(): LevelForm {
+    return this.fb.nonNullable.group({
+      level: ['', [Validators.maxLength(100)]],
+      claimedRepeatabilityCvPct: this.fb.control<number | null>(null, [Validators.min(0.0001)]),
+      claimedWithinLabCvPct: this.fb.control<number | null>(null, [Validators.min(0.0001)]),
+    });
+  }
 
   ngOnInit(): void { void this.facade.loadList(); }
 
@@ -168,13 +209,19 @@ export class PrecisionListComponent implements OnInit {
 
   async create(): Promise<void> {
     if (this.form.invalid) { return; }
-    const id = await this.facade.create(this.form.getRawValue());
+    const raw = this.form.getRawValue();
+    const levels = raw.levels.map((l) => ({ ...l, level: l.level.trim() }));
+    // One level is a stand-alone study; several become a linked series.
+    const id = levels.length === 1
+      ? await this.facade.create({ analyte: raw.analyte, unit: raw.unit, ...levels[0] })
+      : await this.facade.createSeries({ analyte: raw.analyte, unit: raw.unit, levels });
     if (id) { this.cancel(); void this.router.navigate(['/precision-studies', id]); }
   }
 
   cancel(): void {
     this.showForm.set(false);
     this.form.reset();
+    while (this.levels.length > 1) { this.levels.removeAt(this.levels.length - 1); }
   }
 
   open(id: string): void { void this.router.navigate(['/precision-studies', id]); }

@@ -50,6 +50,29 @@ public sealed record UpdateSigmaInputsCommand(
     NT.QAMS.Domain.Authorization.PermissionAction.Sign)]
 public sealed record SignOffSigmaAssessmentCommand(Guid AssessmentId, string Password, string Pin) : ICommand;
 
+/// <summary>
+/// Takes the σ CV input from a signed-off precision study's within-laboratory
+/// CV and records the study as its source.
+/// </summary>
+[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.AnalyticalQuality,
+    NT.QAMS.Domain.Authorization.PermissionAction.Edit)]
+public sealed record UseSigmaPrecisionStudyCommand(Guid AssessmentId, Guid PrecisionStudyId) : ICommand;
+
+public sealed class UseSigmaPrecisionStudyHandler(IAppDbContext db) : ICommandHandler<UseSigmaPrecisionStudyCommand>
+{
+    public async Task Handle(UseSigmaPrecisionStudyCommand c, CancellationToken ct)
+    {
+        var assessment = await db.SigmaAssessments.FirstOrDefaultAsync(a => a.Id == c.AssessmentId, ct)
+            ?? throw new DomainException("SIG-404", "Sigma assessment not found.");
+        var study = await db.PrecisionStudies.AsNoTracking()
+            .FirstOrDefaultAsync(s => s.Id == c.PrecisionStudyId, ct)
+            ?? throw new DomainException("PR-404", "Precision study not found.");
+
+        assessment.UsePrecisionStudy(study);
+        await db.SaveChangesAsync(ct);
+    }
+}
+
 public sealed class SigmaAssessmentWorkflowHandlers(
     IAppDbContext db, ICurrentUser user, IClock clock, IESignatureService signatures) :
     ICommandHandler<UpdateSigmaInputsCommand>,
@@ -137,6 +160,6 @@ public sealed class GetSigmaAssessmentByIdHandler(IAppDbContext db)
             a.Id, a.AssessmentRef, a.Analyte, a.Unit,
             a.AllowableTotalErrorPct, a.BiasPct, a.CvPct,
             a.SigmaValue, a.Grade.ToString(), a.QcRecommendation, a.State.ToString(),
-            a.SignedOffBy, a.SignedOffAtUtc);
+            a.SignedOffBy, a.SignedOffAtUtc, a.SourcePrecisionStudyId, a.SourcePrecisionStudyRef);
     }
 }

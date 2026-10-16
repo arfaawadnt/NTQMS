@@ -2001,6 +2001,9 @@ export interface SigmaAssessmentDetail {
   state: string;
   signedOffBy: string | null;
   signedOffAtUtc: string | null;
+  /** The signed-off precision study whose within-lab CV is the CV input; null when typed. */
+  sourcePrecisionStudyId: string | null;
+  sourcePrecisionStudyRef: string | null;
 }
 
 export interface CreateSigmaAssessmentRequest {
@@ -2011,15 +2014,38 @@ export interface CreateSigmaAssessmentRequest {
   cvPct: number;
 }
 
-// ── Precision Study (CLSI EP05) ─────────────────────────────────────────────
+// ── Precision Study (CLSI EP05 / EP15) ──────────────────────────────────────
+
+/** How the replicates were laid out — resolved by the backend at Calculate. */
+export type PrecisionDesign = 'RunsOnly' | 'DaysOnly' | 'DaysAndRuns';
 
 export interface PrecisionMeasurement {
   id: string;
   runLabel: string;
   value: number;
+  dayLabel: string | null;
+  operator: string | null;
+  instrument: string | null;
+  reagentLot: string | null;
+  calibratorLot: string | null;
+  /** ISO date (yyyy-MM-dd). */
+  measuredOn: string | null;
+}
+
+/** A replicate as entered or imported; only run label and value are required. */
+export interface AddPrecisionMeasurementRequest {
+  runLabel: string;
+  value: number;
+  dayLabel?: string | null;
+  operator?: string | null;
+  instrument?: string | null;
+  reagentLot?: string | null;
+  calibratorLot?: string | null;
+  measuredOn?: string | null;
 }
 
 export interface PrecisionRun {
+  dayLabel: string | null;
   runLabel: string;
   replicateCount: number;
   mean: number;
@@ -2034,6 +2060,58 @@ export interface PrecisionListItem {
   repeatabilityCvPct: number | null;
   withinLabCvPct: number | null;
   meetsWithinLabClaim: boolean | null;
+  seriesRef: string | null;
+  design: PrecisionDesign | null;
+}
+
+/** Distinct levels of each intermediate-precision factor the replicates span. */
+export interface PrecisionCoverage {
+  days: number;
+  runs: number;
+  operators: number;
+  instruments: number;
+  reagentLots: number;
+  calibratorLots: number;
+  firstMeasuredOn: string | null;
+  lastMeasuredOn: string | null;
+  meetsEp15MinimumDesign: boolean;
+}
+
+export interface PrecisionSeriesMember {
+  id: string;
+  studyRef: string;
+  level: string;
+  state: string;
+  withinLabCvPct: number | null;
+}
+
+/** A PT/EQA result for the analyte — between-laboratory context only. */
+export interface PrecisionPtContext {
+  id: string;
+  ptRef: string;
+  scheme: string;
+  cycle: string;
+  assignedValue: number;
+  standardDeviation: number;
+  schemeCvPct: number | null;
+  zScore: number | null;
+}
+
+export interface PrecisionSeriesLevelRequest {
+  level: string;
+  claimedRepeatabilityCvPct: number | null;
+  claimedWithinLabCvPct: number | null;
+}
+
+export interface CreatePrecisionSeriesRequest {
+  analyte: string;
+  unit: string;
+  levels: PrecisionSeriesLevelRequest[];
+}
+
+export interface PrecisionSeriesCreated {
+  seriesRef: string;
+  studyIds: string[];
 }
 
 export interface PrecisionDetail {
@@ -2058,6 +2136,22 @@ export interface PrecisionDetail {
   signedOffAtUtc: string | null;
   measurements: PrecisionMeasurement[];
   runs: PrecisionRun[];
+  design: PrecisionDesign | null;
+  betweenDaySd: number | null;
+  betweenDayCvPct: number | null;
+  repeatabilityDf: number | null;
+  repeatabilityCvLowerPct: number | null;
+  repeatabilityCvUpperPct: number | null;
+  withinLabDf: number | null;
+  withinLabCvLowerPct: number | null;
+  withinLabCvUpperPct: number | null;
+  repeatabilityVerificationLimitCvPct: number | null;
+  withinLabVerificationLimitCvPct: number | null;
+  seriesRef: string | null;
+  seriesLevelCount: number;
+  coverage: PrecisionCoverage;
+  seriesMembers: PrecisionSeriesMember[];
+  ptContext: PrecisionPtContext[];
 }
 
 export interface CreatePrecisionStudyRequest {
@@ -2729,6 +2823,19 @@ export interface ValidationStudyDetail {
   signedOffBy: string | null;
   signedOffAtUtc: string | null;
   replicates: StudyReplicate[];
+  /** Per-level precision, bias and total-error verdict (V-D1: never pooled across levels). */
+  levels: ValidationLevelResult[];
+}
+
+export interface ValidationLevelResult {
+  level: string;
+  replicates: number;
+  mean: number;
+  sd: number;
+  cv: number;
+  bias: number | null;
+  totalError: number;
+  passes: boolean;
 }
 
 export interface ConfigureStudyRequest { analyte: string; protocol: string; totalAllowableError: number; }
@@ -2945,6 +3052,8 @@ export interface UncertaintyComponent {
   type: string;
   relativeStandardUncertainty: number;
   source: string | null;
+  /** Set when the figure was imported from a signed-off precision study. */
+  sourcePrecisionStudyId: string | null;
 }
 
 export interface UncertaintyBudgetListItem {

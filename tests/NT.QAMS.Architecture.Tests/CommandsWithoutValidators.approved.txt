@@ -7,7 +7,6 @@ NT.QAMS.Application.AnalyticalQuality.AddInterferenceMeasurementCommand
 NT.QAMS.Application.AnalyticalQuality.AddLotPairCommand
 NT.QAMS.Application.AnalyticalQuality.AddMeasurementPairCommand
 NT.QAMS.Application.AnalyticalQuality.AddOutlierPointCommand
-NT.QAMS.Application.AnalyticalQuality.AddPrecisionMeasurementCommand
 NT.QAMS.Application.AnalyticalQuality.AddReferenceSampleCommand
 NT.QAMS.Application.AnalyticalQuality.ApprovePtPlanCommand
 NT.QAMS.Application.AnalyticalQuality.ApproveUncertaintyBudgetCommand

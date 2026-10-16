@@ -29,5 +29,10 @@ export class SigmaApiService {
     return this.http.put<void>(`${this.base}/${id}`, { allowableTotalErrorPct, biasPct, cvPct });
   }
 
+  /** Takes the CV input from a signed-off precision study's within-lab CV. */
+  usePrecisionStudy(id: string, precisionStudyId: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/use-precision-study`, { precisionStudyId });
+  }
+
   signOff(id: string, body: { password: string; pin: string }): Observable<void> { return this.http.post<void>(`${this.base}/${id}/sign-off`, body); }
 }

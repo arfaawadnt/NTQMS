@@ -32,7 +32,7 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
       <div class="meta card">
         <div><span class="muted">{{ i18n.t('nc.status') }}</span><qams-status-pill [status]="s.state" /></div>
         @if (s.meanBias !== null) { <div><span class="muted">{{ i18n.t('val.bias') }}</span> {{ s.meanBias | number:'1.2-4' }}%</div> }
-        @if (s.cv !== null) { <div><span class="muted">CV</span> {{ s.cv | number:'1.2-4' }}%</div> }
+        @if (s.cv !== null) { <div><span class="muted">{{ i18n.t('val.pooledCv') }}</span> {{ s.cv | number:'1.2-4' }}%</div> }
         @if (s.passed !== null) {
           <div><span class="muted">{{ i18n.t('val.verdict') }}</span>
             <qams-status-pill [status]="s.passed ? 'Satisfactory' : 'Failed'" />
@@ -41,6 +41,32 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
         @if (s.signedOffBy) { <div><span class="muted">{{ i18n.t('val.signedOff') }}</span> {{ s.signedOffAtUtc | date:'medium' }}</div> }
       </div>
       @if (facade.error()) { <div class="error">{{ facade.error() }}</div> }
+
+      <!-- V-D1: precision is judged per level; pooling levels would count the gap between them as imprecision. -->
+      @if (s.cv !== null && s.levels.length > 0) {
+        <section class="card">
+          <h3>{{ i18n.t('val.perLevel') }}</h3>
+          <table>
+            <thead><tr>
+              <th>{{ i18n.t('mu.level') }}</th><th>n</th><th>{{ i18n.t('lin.mean') }}</th><th>SD</th><th>CV</th>
+              <th>{{ i18n.t('val.bias') }}</th><th>{{ i18n.t('val.totalError') }}</th><th>{{ i18n.t('val.verdict') }}</th>
+            </tr></thead>
+            <tbody>
+              @for (l of s.levels; track l.level) {
+                <tr>
+                  <td><b>{{ l.level }}</b></td><td>{{ l.replicates }}</td>
+                  <td>{{ l.mean | number:'1.0-4' }}</td><td>{{ l.sd | number:'1.0-4' }}</td>
+                  <td>{{ l.cv | number:'1.2-3' }}%</td>
+                  <td>{{ l.bias !== null ? (l.bias | number:'1.2-3') + '%' : '—' }}</td>
+                  <td>{{ l.totalError | number:'1.2-3' }}% / {{ s.totalAllowableError }}%</td>
+                  <td><qams-status-pill [status]="l.passes ? 'Satisfactory' : 'Failed'" /></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <p class="muted small">{{ i18n.t('val.perLevelNote') }}</p>
+        </section>
+      }
 
       <section class="card">
         <h3>{{ i18n.t('val.replicates') }} ({{ s.replicates.length }})</h3>

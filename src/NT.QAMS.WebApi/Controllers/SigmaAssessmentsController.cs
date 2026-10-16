@@ -45,6 +45,15 @@ public sealed class SigmaAssessmentsController(ISender sender) : ControllerBase
         return NoContent();
     }
 
+    /// <summary>Takes the CV input from a signed-off precision study's within-lab CV.</summary>
+    [HttpPost("{id:guid}/use-precision-study")]
+    [RequirePermission(PermissionCatalog.AnalyticalQuality, PermissionAction.Edit)]
+    public async Task<IActionResult> UsePrecisionStudy(Guid id, UsePrecisionStudyRequest request, CancellationToken ct)
+    {
+        await sender.Send(new UseSigmaPrecisionStudyCommand(id, request.PrecisionStudyId), ct);
+        return NoContent();
+    }
+
     [HttpPost("{id:guid}/sign-off")]
     [RequirePermission(PermissionCatalog.AnalyticalQuality, PermissionAction.Sign)]
     public async Task<IActionResult> SignOff(Guid id, AnalyticalSignOffRequest request, CancellationToken ct)

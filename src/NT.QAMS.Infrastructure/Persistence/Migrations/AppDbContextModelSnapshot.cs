@@ -18,7 +18,7 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.19")
+                .HasAnnotation("ProductVersion", "9.0.21")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -1090,6 +1090,14 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(200)")
                         .HasColumnName("analyte");
 
+                    b.Property<decimal?>("BetweenDayCvPct")
+                        .HasColumnType("numeric")
+                        .HasColumnName("between_day_cv_pct");
+
+                    b.Property<decimal?>("BetweenDaySd")
+                        .HasColumnType("numeric")
+                        .HasColumnName("between_day_sd");
+
                     b.Property<decimal?>("BetweenRunCvPct")
                         .HasColumnType("numeric")
                         .HasColumnName("between_run_cv_pct");
@@ -1118,6 +1126,11 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("created_by_user_id");
 
+                    b.Property<string>("Design")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("design");
+
                     b.Property<decimal?>("GrandMean")
                         .HasColumnType("numeric")
                         .HasColumnName("grand_mean");
@@ -1144,13 +1157,40 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("modified_by");
 
+                    b.Property<decimal?>("RepeatabilityCvLowerPct")
+                        .HasColumnType("numeric")
+                        .HasColumnName("repeatability_cv_lower_pct");
+
                     b.Property<decimal?>("RepeatabilityCvPct")
                         .HasColumnType("numeric")
                         .HasColumnName("repeatability_cv_pct");
 
+                    b.Property<decimal?>("RepeatabilityCvUpperPct")
+                        .HasColumnType("numeric")
+                        .HasColumnName("repeatability_cv_upper_pct");
+
+                    b.Property<decimal?>("RepeatabilityDf")
+                        .HasColumnType("numeric")
+                        .HasColumnName("repeatability_df");
+
                     b.Property<decimal?>("RepeatabilitySd")
                         .HasColumnType("numeric")
                         .HasColumnName("repeatability_sd");
+
+                    b.Property<decimal?>("RepeatabilityVerificationLimitCvPct")
+                        .HasColumnType("numeric")
+                        .HasColumnName("repeatability_verification_limit_cv_pct");
+
+                    b.Property<int>("SeriesLevelCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1)
+                        .HasColumnName("series_level_count");
+
+                    b.Property<string>("SeriesRef")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("series_ref");
 
                     b.Property<DateTimeOffset?>("SignedOffAtUtc")
                         .HasColumnType("timestamp with time zone")
@@ -1178,13 +1218,29 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(50)")
                         .HasColumnName("unit");
 
+                    b.Property<decimal?>("WithinLabCvLowerPct")
+                        .HasColumnType("numeric")
+                        .HasColumnName("within_lab_cv_lower_pct");
+
                     b.Property<decimal?>("WithinLabCvPct")
                         .HasColumnType("numeric")
                         .HasColumnName("within_lab_cv_pct");
 
+                    b.Property<decimal?>("WithinLabCvUpperPct")
+                        .HasColumnType("numeric")
+                        .HasColumnName("within_lab_cv_upper_pct");
+
+                    b.Property<decimal?>("WithinLabDf")
+                        .HasColumnType("numeric")
+                        .HasColumnName("within_lab_df");
+
                     b.Property<decimal?>("WithinLabSd")
                         .HasColumnType("numeric")
                         .HasColumnName("within_lab_sd");
+
+                    b.Property<decimal?>("WithinLabVerificationLimitCvPct")
+                        .HasColumnType("numeric")
+                        .HasColumnName("within_lab_verification_limit_cv_pct");
 
                     b.Property<uint>("xmin")
                         .IsConcurrencyToken()
@@ -1194,6 +1250,9 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
 
                     b.HasKey("TenantId", "Id")
                         .HasName("pk_precision_study");
+
+                    b.HasIndex("TenantId", "SeriesRef")
+                        .HasDatabaseName("ix_precision_study_tenant_id_series_ref");
 
                     b.HasIndex("TenantId", "State")
                         .HasDatabaseName("ix_precision_study_tenant_id_state");
@@ -1740,6 +1799,15 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("signed_off_by");
 
+                    b.Property<Guid?>("SourcePrecisionStudyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("source_precision_study_id");
+
+                    b.Property<string>("SourcePrecisionStudyRef")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("source_precision_study_ref");
+
                     b.Property<string>("State")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -1764,6 +1832,9 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                     b.HasIndex("TenantId", "AssessmentRef")
                         .IsUnique()
                         .HasDatabaseName("ix_sigma_assessment_tenant_id_assessment_ref");
+
+                    b.HasIndex("TenantId", "SourcePrecisionStudyId")
+                        .HasDatabaseName("ix_sigma_assessment_tenant_source_precision_study");
 
                     b.HasIndex("TenantId", "State")
                         .HasDatabaseName("ix_sigma_assessment_tenant_id_state");
@@ -8670,6 +8741,35 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                                 .HasColumnType("uuid")
                                 .HasColumnName("id");
 
+                            b1.Property<string>("CalibratorLot")
+                                .HasMaxLength(60)
+                                .HasColumnType("character varying(60)")
+                                .HasColumnName("calibrator_lot");
+
+                            b1.Property<string>("DayLabel")
+                                .HasMaxLength(60)
+                                .HasColumnType("character varying(60)")
+                                .HasColumnName("day_label");
+
+                            b1.Property<string>("Instrument")
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("instrument");
+
+                            b1.Property<DateOnly?>("MeasuredOn")
+                                .HasColumnType("date")
+                                .HasColumnName("measured_on");
+
+                            b1.Property<string>("Operator")
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("operator");
+
+                            b1.Property<string>("ReagentLot")
+                                .HasMaxLength(60)
+                                .HasColumnType("character varying(60)")
+                                .HasColumnName("reagent_lot");
+
                             b1.Property<string>("RunLabel")
                                 .IsRequired()
                                 .HasMaxLength(60)
@@ -8834,6 +8934,10 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                                 .HasColumnType("character varying(500)")
                                 .HasColumnName("source");
 
+                            b1.Property<Guid?>("SourcePrecisionStudyId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("source_precision_study_id");
+
                             b1.Property<string>("Type")
                                 .IsRequired()
                                 .HasMaxLength(10)
@@ -8846,6 +8950,9 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("TenantId", "Id")
                                 .HasName("pk_uncertainty_component");
+
+                            b1.HasIndex("TenantId", "SourcePrecisionStudyId")
+                                .HasDatabaseName("ix_unc_component_tenant_source_precision_study");
 
                             b1.HasIndex("TenantId", "budget_id")
                                 .HasDatabaseName("ix_uncertainty_component_tenant_id_budget_id");

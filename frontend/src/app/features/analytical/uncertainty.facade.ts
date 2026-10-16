@@ -2,28 +2,44 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, firstValueFrom } from 'rxjs';
 import { UncertaintyApiService } from '../../core/api/uncertainty-api.service';
+import { PrecisionApiService } from '../../core/api/precision-api.service';
 import {
-  AddUncertaintyComponentRequest, CreateUncertaintyBudgetRequest,
+  AddUncertaintyComponentRequest, CreateUncertaintyBudgetRequest, PrecisionListItem,
   UncertaintyBudgetDetail, UncertaintyBudgetListItem,
 } from '../../core/models';
 
 /**
  * Signal store for measurement-uncertainty budgets: component entry →
- * calculate (u_c, U = k·u_c server-side) → QM approval freeze.
+ * calculate (u_c, U = k·u_c server-side) → QM approval freeze. The u(Rw)
+ * component can be imported from a signed-off precision study of the same
+ * analyte (ISO/TS 20914) instead of being re-typed.
  */
 @Injectable({ providedIn: 'root' })
 export class UncertaintyFacade {
   private readonly api = inject(UncertaintyApiService);
+  private readonly precisionApi = inject(PrecisionApiService);
 
   private readonly _list = signal<UncertaintyBudgetListItem[]>([]);
   private readonly _selected = signal<UncertaintyBudgetDetail | null>(null);
+  private readonly _precisionCandidates = signal<PrecisionListItem[]>([]);
   private readonly _loading = signal(false);
   private readonly _error = signal('');
 
   readonly list = this._list.asReadonly();
   readonly selected = this._selected.asReadonly();
+  /** Signed-off precision studies of the budget's analyte — the importable u(Rw) sources. */
+  readonly precisionCandidates = this._precisionCandidates.asReadonly();
   readonly loading = this._loading.asReadonly();
   readonly error = this._error.asReadonly();
+
+  async loadPrecisionCandidates(analyte: string): Promise<void> {
+    await this.run(async () =>
+      this._precisionCandidates.set(await firstValueFrom(this.precisionApi.list('SignedOff', analyte))));
+  }
+
+  async addPrecisionComponent(id: string, precisionStudyId: string): Promise<void> {
+    await this.mutate(id, () => this.api.addPrecisionComponent(id, precisionStudyId));
+  }
 
   async loadList(status?: string): Promise<void> {
     await this.run(async () => this._list.set(await firstValueFrom(this.api.list(status))));

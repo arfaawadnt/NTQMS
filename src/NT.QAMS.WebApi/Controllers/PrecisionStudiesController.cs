@@ -8,15 +8,15 @@ using NT.QAMS.Contracts.AnalyticalQuality;
 
 namespace NT.QAMS.WebApi.Controllers;
 
-/// <summary>Imprecision studies — within-run / between-run / within-lab (CLSI EP05).</summary>
+/// <summary>Imprecision studies — within-run / between-run / between-day / within-lab (CLSI EP05), claims verified per EP15.</summary>
 [ApiController]
 [Route("api/precision-studies")]
 [Authorize]
 public sealed class PrecisionStudiesController(ISender sender) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> List([FromQuery] string? state, CancellationToken ct) =>
-        Ok(await sender.Send(new GetPrecisionStudiesQuery(state), ct));
+    public async Task<IActionResult> List([FromQuery] string? state, [FromQuery] string? analyte, CancellationToken ct) =>
+        Ok(await sender.Send(new GetPrecisionStudiesQuery(state, analyte), ct));
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct) =>
@@ -37,11 +37,19 @@ public sealed class PrecisionStudiesController(ISender sender) : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }
 
+    /// <summary>Creates one linked study per concentration level (a multi-level series).</summary>
+    [HttpPost("series")]
+    [RequirePermission(PermissionCatalog.AnalyticalQuality, PermissionAction.Create)]
+    public async Task<IActionResult> CreateSeries(CreatePrecisionSeriesRequest request, CancellationToken ct) =>
+        Ok(await sender.Send(new CreatePrecisionSeriesCommand(request.Analyte, request.Unit, request.Levels), ct));
+
     [HttpPost("{id:guid}/measurements")]
     public async Task<IActionResult> AddMeasurement(Guid id, AddPrecisionMeasurementRequest request, CancellationToken ct) =>
         Ok(new
         {
-            measurementId = await sender.Send(new AddPrecisionMeasurementCommand(id, request.RunLabel, request.Value), ct),
+            measurementId = await sender.Send(new AddPrecisionMeasurementCommand(
+                id, request.RunLabel, request.Value, request.DayLabel,
+                request.Operator, request.Instrument, request.ReagentLot, request.CalibratorLot, request.MeasuredOn), ct),
         });
 
     [HttpPost("{id:guid}/measurements/import")]

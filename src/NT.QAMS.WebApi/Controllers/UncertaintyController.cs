@@ -43,6 +43,12 @@ public sealed class UncertaintyController(ISender sender) : ControllerBase
         Ok(new { componentId = await sender.Send(new AddUncertaintyComponentCommand(
             id, request.Name, request.Type, request.RelativeStandardUncertainty, request.Source), ct) });
 
+    /// <summary>Imports a signed-off precision study's within-lab CV as the u(Rw) component.</summary>
+    [HttpPost("{id:guid}/components/from-precision-study")]
+    [RequirePermission(PermissionCatalog.AnalyticalQuality, PermissionAction.Edit)]
+    public async Task<IActionResult> AddPrecisionComponent(Guid id, AddPrecisionComponentRequest request, CancellationToken ct) =>
+        Ok(new { componentId = await sender.Send(new AddPrecisionComponentCommand(id, request.PrecisionStudyId), ct) });
+
     [HttpDelete("{id:guid}/components/{componentId:guid}")]
     [RequirePermission(PermissionCatalog.AnalyticalQuality, PermissionAction.Edit)]
     public async Task<IActionResult> RemoveComponent(Guid id, Guid componentId, CancellationToken ct)

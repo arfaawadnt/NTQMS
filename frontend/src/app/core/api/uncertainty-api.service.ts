@@ -31,6 +31,11 @@ export class UncertaintyApiService {
     return this.http.post<{ componentId: string }>(`${this.base}/${id}/components`, body);
   }
 
+  /** Imports a signed-off precision study's within-lab CV as the u(Rw) component. */
+  addPrecisionComponent(id: string, precisionStudyId: string): Observable<{ componentId: string }> {
+    return this.http.post<{ componentId: string }>(`${this.base}/${id}/components/from-precision-study`, { precisionStudyId });
+  }
+
   removeComponent(id: string, componentId: string): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}/components/${componentId}`);
   }

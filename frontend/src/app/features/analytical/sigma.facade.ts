@@ -2,22 +2,42 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, firstValueFrom } from 'rxjs';
 import { SigmaApiService } from '../../core/api/sigma-api.service';
-import { CreateSigmaAssessmentRequest, SigmaAssessmentDetail, SigmaAssessmentListItem } from '../../core/models';
+import { PrecisionApiService } from '../../core/api/precision-api.service';
+import {
+  CreateSigmaAssessmentRequest, PrecisionListItem, SigmaAssessmentDetail, SigmaAssessmentListItem,
+} from '../../core/models';
 
-/** Signal-based facade for Six-Sigma assessments. */
+/**
+ * Signal-based facade for Six-Sigma assessments. The CV input can come from a
+ * signed-off precision study's WITHIN-LAB CV (the repeatability CV would
+ * overstate σ); the backend records the study as the source.
+ */
 @Injectable({ providedIn: 'root' })
 export class SigmaFacade {
   private readonly api = inject(SigmaApiService);
+  private readonly precisionApi = inject(PrecisionApiService);
 
   private readonly _list = signal<SigmaAssessmentListItem[]>([]);
   private readonly _selected = signal<SigmaAssessmentDetail | null>(null);
+  private readonly _precisionCandidates = signal<PrecisionListItem[]>([]);
   private readonly _loading = signal(false);
   private readonly _error = signal('');
 
   readonly list = this._list.asReadonly();
   readonly selected = this._selected.asReadonly();
+  /** Signed-off precision studies of the assessment's analyte. */
+  readonly precisionCandidates = this._precisionCandidates.asReadonly();
   readonly loading = this._loading.asReadonly();
   readonly error = this._error.asReadonly();
+
+  async loadPrecisionCandidates(analyte: string): Promise<void> {
+    await this.run(async () =>
+      this._precisionCandidates.set(await firstValueFrom(this.precisionApi.list('SignedOff', analyte))));
+  }
+
+  async usePrecisionStudy(id: string, precisionStudyId: string): Promise<void> {
+    await this.mutate(id, () => this.api.usePrecisionStudy(id, precisionStudyId));
+  }
 
   async loadList(state?: string): Promise<void> {
     await this.run(async () => this._list.set(await firstValueFrom(this.api.list(state))));

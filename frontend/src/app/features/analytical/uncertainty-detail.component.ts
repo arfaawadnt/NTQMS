@@ -61,7 +61,12 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
                   <td>{{ c.name }}</td>
                   <td>{{ c.type === 'TypeA' ? 'A' : 'B' }}</td>
                   <td>{{ c.relativeStandardUncertainty | number:'1.2-4' }}</td>
-                  <td class="muted">{{ c.source ?? '—' }}</td>
+                  <td class="muted">
+                    {{ c.source ?? '—' }}
+                    @if (c.sourcePrecisionStudyId) {
+                      <a [routerLink]="['/precision-studies', c.sourcePrecisionStudyId]">{{ i18n.t('mu.openStudy') }}</a>
+                    }
+                  </td>
                   <td>
                     @if (editable()) {
                       <button class="link danger-link" type="button" (click)="facade.removeComponent(b.id, c.id)">✕</button>
@@ -87,6 +92,24 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
             </div>
             <button type="submit" [disabled]="componentForm.invalid">{{ i18n.t('mu.addComponent') }}</button>
           </form>
+
+          <div class="import">
+            <label for="mu-precision">{{ i18n.t('mu.importPrecision') }}</label>
+            @if (facade.precisionCandidates().length === 0) {
+              <p class="muted">{{ i18n.t('mu.noPrecisionStudies') }}</p>
+            } @else {
+              <div class="pick">
+                <select id="mu-precision" [value]="precisionPick()" (change)="precisionPick.set($any($event.target).value)">
+                  <option value="">—</option>
+                  @for (p of facade.precisionCandidates(); track p.id) {
+                    <option [value]="p.id">{{ p.studyRef }} · {{ p.level }} · {{ p.withinLabCvPct | number:'1.1-2' }}%</option>
+                  }
+                </select>
+                <button type="button" [disabled]="!precisionPick()" (click)="importPrecision(b.id)">{{ i18n.t('mu.importWithinLab') }}</button>
+              </div>
+            }
+            <p class="helper">{{ i18n.t('mu.importPrecisionHint') }}</p>
+          </div>
         }
       </section>
 
@@ -127,6 +150,9 @@ import { AuditTrailComponent } from '../../shared/ui/audit-trail.component';
     form { border-top: 1px solid var(--nt-border); padding-top: .75rem; margin-top: .75rem; }
     form button { width: auto; margin-top: .5rem; }
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
+    .import { border-top: 1px solid var(--nt-border); padding-top: .75rem; margin-top: .75rem; }
+    .pick { display: flex; gap: .5rem; align-items: center; }
+    .pick select, .pick button { width: auto; }
     @media (max-width: 900px) { .quad { grid-template-columns: 1fr 1fr; } }
   `]
 })
@@ -164,7 +190,23 @@ export class UncertaintyDetailComponent implements OnInit {
     source: [''],
   });
 
-  ngOnInit(): void { void this.facade.loadDetail(this.id()); }
+  /** The signed-off precision study chosen for import (empty = none). */
+  readonly precisionPick = signal('');
+
+  ngOnInit(): void { void this.load(); }
+
+  /** Loads the budget, then the signed-off precision studies of its analyte. */
+  private async load(): Promise<void> {
+    await this.facade.loadDetail(this.id());
+    const analyte = this.item()?.analyte;
+    if (analyte) { await this.facade.loadPrecisionCandidates(analyte); }
+  }
+
+  async importPrecision(id: string): Promise<void> {
+    if (!this.precisionPick()) { return; }
+    await this.facade.addPrecisionComponent(id, this.precisionPick());
+    if (this.facade.error() === '') { this.precisionPick.set(''); }
+  }
 
   async addComponent(id: string): Promise<void> {
     if (this.componentForm.invalid) { return; }

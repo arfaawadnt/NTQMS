@@ -29,6 +29,9 @@ public sealed class ValidationReplicate : Entity
 /// </summary>
 public sealed class ValidationStudy : AggregateRoot, ITenantScoped
 {
+    /// <summary>One-sided 95 % normal quantile used in the total-error estimate.</summary>
+    public const decimal TotalErrorZ = 1.65m;
+
     private readonly List<ValidationReplicate> _replicates = [];
 
     private ValidationStudy()
@@ -100,8 +103,14 @@ public sealed class ValidationStudy : AggregateRoot, ITenantScoped
     }
 
     /// <summary>
-    /// Computes precision (CV%) and, where reference values exist, mean bias%,
-    /// then judges against TEa. Derivable-only: callable any time there is data.
+    /// Computes precision and bias PER LEVEL — imprecision is
+    /// concentration-dependent, so pooling Low/Mid/High into one SD would count
+    /// the spread BETWEEN levels as imprecision (defect V-D1). Each level's
+    /// total error |bias%| + 1.65·CV% is judged against TEa and the study passes
+    /// only when every level does. The stored CV is the df-weighted pooled
+    /// within-level CV √(Σ(nᵢ−1)·CVᵢ² / Σ(nᵢ−1)); the stored mean bias averages
+    /// every replicate that has a reference. Derivable-only: callable any time
+    /// there is data.
     /// </summary>
     public void CalculateStatistics()
     {
@@ -115,29 +124,70 @@ public sealed class ValidationStudy : AggregateRoot, ITenantScoped
             throw new DomainException("MV-013", "At least two replicates are required to compute statistics.");
         }
 
-        var measured = _replicates.Select(r => r.Measured).ToList();
-        var mean = measured.Average();
-        if (mean == 0m)
-        {
-            throw new DomainException("MV-014", "Cannot compute CV against a zero mean.");
-        }
-
-        var variance = measured.Sum(m => (m - mean) * (m - mean)) / (measured.Count - 1);
-        var sd = (decimal)Math.Sqrt((double)variance);
-        Cv = Math.Round(sd / Math.Abs(mean) * 100m, 3);
+        var levels = ComputeLevels(strict: true);
+        var pooledDf = levels.Sum(l => l.Replicates - 1);
+        var pooledCvSquared = levels.Sum(l => (l.Replicates - 1) * l.Cv * l.Cv) / pooledDf;
+        Cv = Math.Round((decimal)Math.Sqrt((double)pooledCvSquared), 3);
 
         var withReference = _replicates.Where(r => r.Reference is > 0m).ToList();
-        if (withReference.Count > 0)
+        MeanBias = withReference.Count > 0
+            ? Math.Round(withReference.Average(r => (r.Measured - r.Reference!.Value) / r.Reference!.Value * 100m), 3)
+            : null;
+
+        Passed = levels.All(l => l.Passes);
+        State = ValidationState.StatsCalculated;
+    }
+
+    /// <summary>
+    /// Per-level statistics for display — derived from the replicates, never
+    /// stored. Levels that cannot yet be computed (fewer than two replicates,
+    /// zero mean) are omitted rather than failing the read.
+    /// </summary>
+    public IReadOnlyList<ValidationLevelResult> LevelResults() => ComputeLevels(strict: false);
+
+    /// <summary>
+    /// Every level needs at least two replicates and a non-zero mean; when
+    /// <paramref name="strict"/> an ineligible level is an error, otherwise it is skipped.
+    /// </summary>
+    private List<ValidationLevelResult> ComputeLevels(bool strict)
+    {
+        var results = new List<ValidationLevelResult>();
+        foreach (var level in _replicates
+                     .GroupBy(r => r.Level, StringComparer.OrdinalIgnoreCase)
+                     .OrderBy(g => g.Key, StringComparer.OrdinalIgnoreCase))
         {
-            var biases = withReference.Select(r => (r.Measured - r.Reference!.Value) / r.Reference!.Value * 100m);
-            MeanBias = Math.Round(biases.Average(), 3);
+            var measured = level.Select(r => r.Measured).ToList();
+            var mean = measured.Average();
+            if (measured.Count < 2 || mean == 0m)
+            {
+                if (!strict)
+                {
+                    continue;
+                }
+
+                throw measured.Count < 2
+                    ? new DomainException(
+                        "MV-016", $"Level '{level.Key}' needs at least two replicates — precision is computed per level.")
+                    : new DomainException("MV-014", $"Cannot compute CV against a zero mean (level '{level.Key}').");
+            }
+
+            var variance = measured.Sum(m => (m - mean) * (m - mean)) / (measured.Count - 1);
+            var sd = (decimal)Math.Sqrt((double)variance);
+            var cv = Math.Round(sd / Math.Abs(mean) * 100m, 3);
+
+            var referenced = level.Where(r => r.Reference is > 0m).ToList();
+            decimal? bias = referenced.Count > 0
+                ? Math.Round(referenced.Average(r => (r.Measured - r.Reference!.Value) / r.Reference!.Value * 100m), 3)
+                : null;
+
+            // Total error estimate: |bias%| + 1.65 · CV% (one-sided 95 %) judged vs TEa%.
+            var totalError = Math.Round(Math.Abs(bias ?? 0m) + TotalErrorZ * cv, 3);
+            results.Add(new ValidationLevelResult(
+                level.Key, measured.Count, Math.Round(mean, 4), Math.Round(sd, 4), cv, bias, totalError,
+                totalError <= TotalAllowableError));
         }
 
-        // Total error estimate: |bias%| + 1.65 * CV% (one-sided 95%) judged vs TEa%.
-        var totalError = (Math.Abs(MeanBias ?? 0m)) + 1.65m * Cv.Value;
-        Passed = totalError <= TotalAllowableError;
-
-        State = ValidationState.StatsCalculated;
+        return results;
     }
 
     public void SignOff(Guid actorId, DateTimeOffset at)
@@ -157,3 +207,8 @@ public sealed class ValidationStudy : AggregateRoot, ITenantScoped
 
 public sealed record ValidationStudySignedOff(
     Guid StudyId, string StudyRef, string Analyte, bool Passed, Guid SignedOffBy, Guid TenantId) : DomainEvent;
+
+/// <summary>One level's precision, bias and total-error verdict within a validation study.</summary>
+public sealed record ValidationLevelResult(
+    string Level, int Replicates, decimal Mean, decimal Sd, decimal Cv, decimal? Bias,
+    decimal TotalError, bool Passes);

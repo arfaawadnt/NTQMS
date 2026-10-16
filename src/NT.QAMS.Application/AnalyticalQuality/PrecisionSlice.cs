@@ -1,14 +1,15 @@
-﻿using FluentValidation;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NT.QAMS.Application.Abstractions;
 using NT.QAMS.Contracts.AnalyticalQuality;
 using NT.QAMS.Domain.AnalyticalQuality;
+using NT.QAMS.Domain.Authorization;
 using NT.QAMS.SharedKernel.Abstractions;
 using NT.QAMS.SharedKernel.Primitives;
 
 namespace NT.QAMS.Application.AnalyticalQuality;
 
-// â”€â”€ Commands â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Commands ────────────────────────────────────────────────────────────────
 
 [RequireInternalActor]
 public sealed record CreatePrecisionStudyCommand(
@@ -33,7 +34,7 @@ public sealed class CreatePrecisionStudyHandler(
     {
         var tenantId = tenant.TenantId
             ?? throw new DomainException("TENANT-000", "A tenant context is required.");
-        var studyRef = await refs.NextAsync(tenantId, "PR", ct);
+        var studyRef = await refs.NextAsync(tenantId, PrecisionRefs.Study, ct);
         var study = PrecisionStudy.Configure(
             studyRef, c.Analyte, c.Unit, c.Level, c.ClaimedRepeatabilityCvPct, c.ClaimedWithinLabCvPct);
         db.PrecisionStudies.Add(study);
@@ -42,15 +43,89 @@ public sealed class CreatePrecisionStudyHandler(
     }
 }
 
+/// <summary>
+/// Creates a multi-level series — one study per concentration level, linked by
+/// a shared series reference, in one transaction. Each level stays its own
+/// signed record (imprecision is level-dependent), and every member splits the
+/// EP15 verification α across the series' level count.
+/// </summary>
+[RequirePermissionPolicy(PermissionCatalog.AnalyticalQuality, PermissionAction.Create)]
+public sealed record CreatePrecisionSeriesCommand(
+    string Analyte, string Unit, IReadOnlyList<PrecisionSeriesLevelRequest> Levels)
+    : ICommand<PrecisionSeriesCreatedDto>;
+
+public sealed class CreatePrecisionSeriesValidator : AbstractValidator<CreatePrecisionSeriesCommand>
+{
+    public CreatePrecisionSeriesValidator()
+    {
+        RuleFor(x => x.Analyte).NotEmpty().MaximumLength(200);
+        RuleFor(x => x.Unit).MaximumLength(50);
+        RuleFor(x => x.Levels).NotNull()
+            .Must(l => l.Count is >= 2 and <= PrecisionStudy.MaximumSeriesLevels)
+            .WithMessage($"A series has 2–{PrecisionStudy.MaximumSeriesLevels} levels.")
+            .Must(l => l.Select(x => x.Level.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).Count() == l.Count)
+            .WithMessage("Each level of a series must be named distinctly.");
+        RuleForEach(x => x.Levels).ChildRules(level =>
+        {
+            level.RuleFor(l => l.Level).NotEmpty().MaximumLength(100);
+            level.RuleFor(l => l.ClaimedRepeatabilityCvPct).GreaterThan(0).When(l => l.ClaimedRepeatabilityCvPct is not null);
+            level.RuleFor(l => l.ClaimedWithinLabCvPct).GreaterThan(0).When(l => l.ClaimedWithinLabCvPct is not null);
+        });
+    }
+}
+
+public sealed class CreatePrecisionSeriesHandler(
+    IAppDbContext db, ICurrentTenant tenant, IReferenceNumberGenerator refs)
+    : ICommandHandler<CreatePrecisionSeriesCommand, PrecisionSeriesCreatedDto>
+{
+    public async Task<PrecisionSeriesCreatedDto> Handle(CreatePrecisionSeriesCommand c, CancellationToken ct)
+    {
+        var tenantId = tenant.TenantId
+            ?? throw new DomainException("TENANT-000", "A tenant context is required.");
+        var seriesRef = await refs.NextAsync(tenantId, PrecisionRefs.Series, ct);
+
+        var ids = new List<Guid>(c.Levels.Count);
+        foreach (var level in c.Levels)
+        {
+            var studyRef = await refs.NextAsync(tenantId, PrecisionRefs.Study, ct);
+            var study = PrecisionStudy.Configure(
+                studyRef, c.Analyte, c.Unit, level.Level,
+                level.ClaimedRepeatabilityCvPct, level.ClaimedWithinLabCvPct,
+                seriesRef, c.Levels.Count);
+            db.PrecisionStudies.Add(study);
+            ids.Add(study.Id);
+        }
+
+        await db.SaveChangesAsync(ct);
+        return new PrecisionSeriesCreatedDto(seriesRef, ids);
+    }
+}
+
 [RequireInternalActor]
-public sealed record AddPrecisionMeasurementCommand(Guid StudyId, string RunLabel, decimal Value) : ICommand<Guid>;
+public sealed record AddPrecisionMeasurementCommand(
+    Guid StudyId, string RunLabel, decimal Value, string? DayLabel = null,
+    string? Operator = null, string? Instrument = null, string? ReagentLot = null,
+    string? CalibratorLot = null, DateOnly? MeasuredOn = null) : ICommand<Guid>;
+
+public sealed class AddPrecisionMeasurementValidator : AbstractValidator<AddPrecisionMeasurementCommand>
+{
+    public AddPrecisionMeasurementValidator()
+    {
+        RuleFor(x => x.RunLabel).NotEmpty().MaximumLength(PrecisionLimits.Label);
+        RuleFor(x => x.DayLabel).MaximumLength(PrecisionLimits.Label);
+        RuleFor(x => x.Operator).MaximumLength(PrecisionLimits.Condition);
+        RuleFor(x => x.Instrument).MaximumLength(PrecisionLimits.Condition);
+        RuleFor(x => x.ReagentLot).MaximumLength(PrecisionLimits.Lot);
+        RuleFor(x => x.CalibratorLot).MaximumLength(PrecisionLimits.Lot);
+    }
+}
+
 [RequireInternalActor]
 public sealed record RemovePrecisionMeasurementCommand(Guid StudyId, Guid MeasurementId) : ICommand;
 [RequireInternalActor]
 public sealed record CalculatePrecisionCommand(Guid StudyId) : ICommand;
 /// <summary>Signing off is a Part 11 signing ceremony (§11.200(a)(1)): it requires the signer's account password + e-signature PIN.</summary>
-[RequirePermissionPolicy(NT.QAMS.Domain.Authorization.PermissionCatalog.AnalyticalQuality,
-    NT.QAMS.Domain.Authorization.PermissionAction.Sign)]
+[RequirePermissionPolicy(PermissionCatalog.AnalyticalQuality, PermissionAction.Sign)]
 public sealed record SignOffPrecisionCommand(Guid StudyId, string Password, string Pin) : ICommand;
 
 public sealed class PrecisionWorkflowHandlers(
@@ -63,7 +138,9 @@ public sealed class PrecisionWorkflowHandlers(
     public async Task<Guid> Handle(AddPrecisionMeasurementCommand c, CancellationToken ct)
     {
         var study = await LoadAsync(c.StudyId, ct);
-        var id = study.AddMeasurement(c.RunLabel, c.Value);
+        var id = study.AddMeasurement(
+            c.RunLabel, c.Value, c.DayLabel,
+            new PrecisionConditions(c.Operator, c.Instrument, c.ReagentLot, c.CalibratorLot, c.MeasuredOn));
         await db.SaveChangesAsync(ct);
         return id;
     }
@@ -121,9 +198,10 @@ public sealed record ImportPrecisionMeasurementsCommand(
     Guid StudyId, IReadOnlyList<AddPrecisionMeasurementRequest> Rows) : ICommand<BulkImportResultDto>;
 
 /// <summary>
-/// Bulk import of run-grouped replicates (analyzer/LIS export). Each row is
-/// validated and added independently â€” a bad row is reported and skipped while
-/// the rest import; the batch commits once.
+/// Bulk import of run-grouped replicates (analyzer/LIS export), optionally with
+/// day labels and measurement conditions. Each row is validated and added
+/// independently — a bad row is reported and skipped while the rest import;
+/// the batch commits once.
 /// </summary>
 public sealed class ImportPrecisionMeasurementsHandler(IAppDbContext db)
     : ICommandHandler<ImportPrecisionMeasurementsCommand, BulkImportResultDto>
@@ -139,9 +217,17 @@ public sealed class ImportPrecisionMeasurementsHandler(IAppDbContext db)
         for (var i = 0; i < c.Rows.Count; i++)
         {
             var row = c.Rows[i];
+            if (PrecisionLimits.Violation(row) is { } violation)
+            {
+                rejected.Add(new BulkRejectDto(i + 1, violation));
+                continue;
+            }
+
             try
             {
-                study.AddMeasurement(row.RunLabel, row.Value);
+                study.AddMeasurement(
+                    row.RunLabel, row.Value, row.DayLabel,
+                    new PrecisionConditions(row.Operator, row.Instrument, row.ReagentLot, row.CalibratorLot, row.MeasuredOn));
                 imported++;
             }
             catch (DomainException ex)
@@ -159,9 +245,35 @@ public sealed class ImportPrecisionMeasurementsHandler(IAppDbContext db)
     }
 }
 
-// â”€â”€ Queries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+/// <summary>Reference-number prefixes for precision studies and their series.</summary>
+internal static class PrecisionRefs
+{
+    public const string Study = "PR";
+    public const string Series = "PRS";
+}
 
-public sealed record GetPrecisionStudiesQuery(string? State)
+/// <summary>Column bounds of a precision replicate — the single source for validators and the CSV import.</summary>
+internal static class PrecisionLimits
+{
+    public const int Label = 60;
+    public const int Condition = 100;
+    public const int Lot = 60;
+
+    /// <summary>The first bound an imported row breaks, or null when it fits.</summary>
+    public static string? Violation(AddPrecisionMeasurementRequest row) =>
+        (row.RunLabel?.Length ?? 0) > Label || (row.DayLabel?.Length ?? 0) > Label
+            ? $"Run and day labels are limited to {Label} characters."
+            : (row.Operator?.Length ?? 0) > Condition || (row.Instrument?.Length ?? 0) > Condition
+                ? $"Operator and instrument are limited to {Condition} characters."
+                : (row.ReagentLot?.Length ?? 0) > Lot || (row.CalibratorLot?.Length ?? 0) > Lot
+                    ? $"Lot numbers are limited to {Lot} characters."
+                    : null;
+}
+
+// ── Queries ─────────────────────────────────────────────────────────────────
+
+/// <summary>The register, optionally narrowed by state and by analyte (case-insensitive exact match).</summary>
+public sealed record GetPrecisionStudiesQuery(string? State, string? Analyte = null)
     : IQuery<IReadOnlyList<PrecisionListItemDto>>;
 
 public sealed class GetPrecisionStudiesHandler(IAppDbContext db)
@@ -177,20 +289,41 @@ public sealed class GetPrecisionStudiesHandler(IAppDbContext db)
             studies = studies.Where(s => s.State == state);
         }
 
-        return await studies
+        if (!string.IsNullOrWhiteSpace(q.Analyte))
+        {
+            var analyte = q.Analyte.Trim().ToLower();
+            studies = studies.Where(s => s.Analyte.ToLower() == analyte);
+        }
+
+        var rows = await studies
             .OrderByDescending(s => s.StudyRef)
-            .Select(s => new PrecisionListItemDto(
-                s.Id, s.StudyRef, s.Analyte, s.Level, s.State.ToString(),
-                s.RepeatabilityCvPct, s.WithinLabCvPct, s.MeetsWithinLabClaim))
+            .Select(s => new
+            {
+                s.Id, s.StudyRef, s.Analyte, s.Level, s.State,
+                s.RepeatabilityCvPct, s.WithinLabCvPct, s.MeetsWithinLabClaim, s.SeriesRef, s.Design,
+            })
             .ToListAsync(ct);
+
+        return rows.Select(s => new PrecisionListItemDto(
+                s.Id, s.StudyRef, s.Analyte, s.Level, s.State.ToString(),
+                s.RepeatabilityCvPct, s.WithinLabCvPct, s.MeetsWithinLabClaim, s.SeriesRef, s.Design?.ToString()))
+            .ToList();
     }
 }
 
 public sealed record GetPrecisionStudyByIdQuery(Guid StudyId) : IQuery<PrecisionDetailDto>;
 
+/// <summary>
+/// The study workspace. Besides the study itself it reads (query-side, same
+/// module) the other levels of its series and the recorded PT/EQA results for
+/// the analyte, whose scheme SD is the between-laboratory context.
+/// </summary>
 public sealed class GetPrecisionStudyByIdHandler(IAppDbContext db)
     : IQueryHandler<GetPrecisionStudyByIdQuery, PrecisionDetailDto>
 {
+    /// <summary>How many recent PT results to show as between-laboratory context.</summary>
+    public const int PtContextLimit = 10;
+
     public async Task<PrecisionDetailDto> Handle(GetPrecisionStudyByIdQuery q, CancellationToken ct)
     {
         var s = await db.PrecisionStudies.AsNoTracking()
@@ -198,14 +331,56 @@ public sealed class GetPrecisionStudyByIdHandler(IAppDbContext db)
             .FirstOrDefaultAsync(x => x.Id == q.StudyId, ct)
             ?? throw new DomainException("PR-404", "Precision study not found.");
 
+        var members = s.SeriesRef is null
+            ? new List<PrecisionSeriesMemberDto>()
+            : (await db.PrecisionStudies.AsNoTracking()
+                    .Where(x => x.SeriesRef == s.SeriesRef && x.Id != s.Id)
+                    .OrderBy(x => x.StudyRef)
+                    .Select(x => new { x.Id, x.StudyRef, x.Level, x.State, x.WithinLabCvPct })
+                    .ToListAsync(ct))
+                .Select(x => new PrecisionSeriesMemberDto(x.Id, x.StudyRef, x.Level, x.State.ToString(), x.WithinLabCvPct))
+                .ToList();
+
+        var analyte = s.Analyte.ToLower();
+        var pt = await db.PtEnrollments.AsNoTracking()
+            .Where(p => p.Analyte.ToLower() == analyte
+                        && p.AssignedValue != null && p.StandardDeviation != null)
+            .OrderByDescending(p => p.PtRef)
+            .Take(PtContextLimit)
+            .Select(p => new { p.Id, p.PtRef, p.Scheme, p.Cycle, p.AssignedValue, p.StandardDeviation, p.ZScore })
+            .ToListAsync(ct);
+
+        var coverage = s.ConditionsCoverage();
         return new PrecisionDetailDto(
             s.Id, s.StudyRef, s.Analyte, s.Unit, s.Level,
             s.ClaimedRepeatabilityCvPct, s.ClaimedWithinLabCvPct, s.State.ToString(),
             s.GrandMean, s.RepeatabilitySd, s.RepeatabilityCvPct, s.BetweenRunSd, s.BetweenRunCvPct,
             s.WithinLabSd, s.WithinLabCvPct, s.MeetsRepeatabilityClaim, s.MeetsWithinLabClaim,
             s.SignedOffBy, s.SignedOffAtUtc,
-            s.Measurements.OrderBy(m => m.RunLabel)
-                .Select(m => new PrecisionMeasurementDto(m.Id, m.RunLabel, m.Value)).ToList(),
-            s.RunSummaries().Select(r => new PrecisionRunDto(r.RunLabel, r.ReplicateCount, r.Mean)).ToList());
+            s.Measurements
+                .OrderBy(m => m.DayLabel, StringComparer.Ordinal)
+                .ThenBy(m => m.RunLabel, StringComparer.Ordinal)
+                .Select(m => new PrecisionMeasurementDto(
+                    m.Id, m.RunLabel, m.Value, m.DayLabel,
+                    m.Operator, m.Instrument, m.ReagentLot, m.CalibratorLot, m.MeasuredOn))
+                .ToList(),
+            s.RunSummaries().Select(r => new PrecisionRunDto(r.DayLabel, r.RunLabel, r.ReplicateCount, r.Mean)).ToList(),
+            s.Design?.ToString(), s.BetweenDaySd, s.BetweenDayCvPct,
+            s.RepeatabilityDf, s.RepeatabilityCvLowerPct, s.RepeatabilityCvUpperPct,
+            s.WithinLabDf, s.WithinLabCvLowerPct, s.WithinLabCvUpperPct,
+            s.RepeatabilityVerificationLimitCvPct, s.WithinLabVerificationLimitCvPct,
+            s.SeriesRef, s.SeriesLevelCount,
+            new PrecisionCoverageDto(
+                coverage.Days, coverage.Runs, coverage.Operators, coverage.Instruments,
+                coverage.ReagentLots, coverage.CalibratorLots,
+                coverage.FirstMeasuredOn, coverage.LastMeasuredOn, coverage.MeetsEp15MinimumDesign),
+            members,
+            pt.Select(p => new PrecisionPtContextDto(
+                    p.Id, p.PtRef, p.Scheme, p.Cycle, p.AssignedValue!.Value, p.StandardDeviation!.Value,
+                    p.AssignedValue!.Value == 0m
+                        ? null
+                        : Math.Round(p.StandardDeviation!.Value / Math.Abs(p.AssignedValue!.Value) * 100m, 2),
+                    p.ZScore))
+                .ToList());
     }
 }

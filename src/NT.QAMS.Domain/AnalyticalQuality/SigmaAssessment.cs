@@ -37,6 +37,10 @@ public sealed class SigmaAssessment : AggregateRoot, ITenantScoped
     public decimal CvPct { get; private set; }
     public SigmaAssessmentState State { get; private set; }
 
+    /// <summary>The signed-off precision study whose within-lab CV is the current CV input; null when the CV was typed.</summary>
+    public Guid? SourcePrecisionStudyId { get; private set; }
+    public string? SourcePrecisionStudyRef { get; private set; }
+
     // Derived.
     public decimal SigmaValue { get; private set; }
     public SigmaGrade Grade { get; private set; }
@@ -82,6 +86,13 @@ public sealed class SigmaAssessment : AggregateRoot, ITenantScoped
             throw new DomainException("SIG-003", "The CV must be a positive percentage — sigma is undefined at zero imprecision.");
         }
 
+        if (cvPct != CvPct)
+        {
+            // A hand-entered CV breaks the link to the precision study it came from.
+            SourcePrecisionStudyId = null;
+            SourcePrecisionStudyRef = null;
+        }
+
         AllowableTotalErrorPct = allowableTotalErrorPct;
         BiasPct = biasPct;
         CvPct = cvPct;
@@ -91,6 +102,31 @@ public sealed class SigmaAssessment : AggregateRoot, ITenantScoped
         var numerator = allowableTotalErrorPct - Math.Abs(biasPct);
         SigmaValue = numerator <= 0m ? 0m : Math.Round(numerator / cvPct, 2);
         Grade = GradeFor(SigmaValue);
+    }
+
+    /// <summary>
+    /// Takes the CV input from a SIGNED-OFF precision study — its
+    /// within-laboratory CV, because σ judges routine performance across days,
+    /// operators and lots; the repeatability CV would overstate σ. TEa and bias
+    /// are kept. The source is recorded so the σ is traceable to its evidence.
+    /// </summary>
+    public void UsePrecisionStudy(PrecisionStudy study)
+    {
+        if (study.State != PrecisionState.SignedOff || study.WithinLabCvPct is not { } withinLabCv)
+        {
+            throw new DomainException(
+                "SIG-006", "Only a signed-off precision study with a within-laboratory CV can supply the sigma CV.");
+        }
+
+        if (!string.Equals(study.Analyte, Analyte, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new DomainException(
+                "SIG-007", $"The precision study measures '{study.Analyte}', not this assessment's analyte '{Analyte}'.");
+        }
+
+        SetInputs(AllowableTotalErrorPct, BiasPct, withinLabCv);
+        SourcePrecisionStudyId = study.Id;
+        SourcePrecisionStudyRef = study.StudyRef;
     }
 
     public void SignOff(Guid actorId, DateTimeOffset at)

@@ -141,7 +141,9 @@ public sealed class GetStudyByIdHandler(IAppDbContext db)
         return new ValidationStudyDetailDto(
             s.Id, s.StudyRef, s.Analyte, s.Protocol, s.TotalAllowableError, s.State.ToString(),
             s.MeanBias, s.Cv, s.Passed, s.SignedOffBy, s.SignedOffAtUtc,
-            s.Replicates.Select(r => new ReplicateDto(r.Id, r.Level, r.Measured, r.Reference)).ToList());
+            s.Replicates.Select(r => new ReplicateDto(r.Id, r.Level, r.Measured, r.Reference)).ToList(),
+            s.LevelResults().Select(l => new ValidationLevelResultDto(
+                l.Level, l.Replicates, l.Mean, l.Sd, l.Cv, l.Bias, l.TotalError, l.Passes)).ToList());
     }
 }
 

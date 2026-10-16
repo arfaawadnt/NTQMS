@@ -30,10 +30,15 @@ public sealed record EnterReplicateRequest(string Level, decimal Measured, decim
 public sealed record ReplicateDto(Guid Id, string Level, decimal Measured, decimal? Reference);
 public sealed record ValidationStudyListItemDto(
     Guid Id, string StudyRef, string Analyte, string Protocol, string State, bool? Passed);
+/// <summary>One level's precision, bias and total-error verdict (derived per level, defect V-D1).</summary>
+public sealed record ValidationLevelResultDto(
+    string Level, int Replicates, decimal Mean, decimal Sd, decimal Cv, decimal? Bias,
+    decimal TotalError, bool Passes);
 public sealed record ValidationStudyDetailDto(
     Guid Id, string StudyRef, string Analyte, string Protocol, decimal TotalAllowableError,
     string State, decimal? MeanBias, decimal? Cv, bool? Passed,
-    Guid? SignedOffBy, DateTimeOffset? SignedOffAtUtc, IReadOnlyList<ReplicateDto> Replicates);
+    Guid? SignedOffBy, DateTimeOffset? SignedOffAtUtc, IReadOnlyList<ReplicateDto> Replicates,
+    IReadOnlyList<ValidationLevelResultDto> Levels);
 
 // ── Proficiency testing ──────────────────────────────────────────────────────
 
@@ -224,23 +229,65 @@ public sealed record SigmaAssessmentDetailDto(
     Guid Id, string AssessmentRef, string Analyte, string Unit,
     decimal AllowableTotalErrorPct, decimal BiasPct, decimal CvPct,
     decimal SigmaValue, string Grade, string QcRecommendation, string State,
-    Guid? SignedOffBy, DateTimeOffset? SignedOffAtUtc);
+    Guid? SignedOffBy, DateTimeOffset? SignedOffAtUtc,
+    Guid? SourcePrecisionStudyId, string? SourcePrecisionStudyRef);
 
-// ── Precision Study (CLSI EP05) ─────────────────────────────────────────────
+/// <summary>Takes the sigma CV input from a signed-off precision study's within-lab CV.</summary>
+public sealed record UsePrecisionStudyRequest(Guid PrecisionStudyId);
+
+// ── Precision Study (CLSI EP05 / EP15) ──────────────────────────────────────
 
 public sealed record CreatePrecisionStudyRequest(
     string Analyte, string Unit, string Level,
     decimal? ClaimedRepeatabilityCvPct, decimal? ClaimedWithinLabCvPct);
 
-public sealed record AddPrecisionMeasurementRequest(string RunLabel, decimal Value);
+/// <summary>One level of a multi-level series, with that level's manufacturer claims.</summary>
+public sealed record PrecisionSeriesLevelRequest(
+    string Level, decimal? ClaimedRepeatabilityCvPct, decimal? ClaimedWithinLabCvPct);
 
-public sealed record PrecisionMeasurementDto(Guid Id, string RunLabel, decimal Value);
+/// <summary>Creates one linked study per concentration level (EP05/EP15 call for ≥ 2 levels).</summary>
+public sealed record CreatePrecisionSeriesRequest(
+    string Analyte, string Unit, IReadOnlyList<PrecisionSeriesLevelRequest> Levels);
 
-public sealed record PrecisionRunDto(string RunLabel, int ReplicateCount, decimal Mean);
+public sealed record PrecisionSeriesCreatedDto(string SeriesRef, IReadOnlyList<Guid> StudyIds);
+
+/// <summary>
+/// A replicate. <c>DayLabel</c> nests the run within a day (EP05 days × runs);
+/// the conditions record which intermediate-precision factors it spans.
+/// </summary>
+public sealed record AddPrecisionMeasurementRequest(
+    string RunLabel, decimal Value, string? DayLabel = null,
+    string? Operator = null, string? Instrument = null, string? ReagentLot = null,
+    string? CalibratorLot = null, DateOnly? MeasuredOn = null);
+
+public sealed record PrecisionMeasurementDto(
+    Guid Id, string RunLabel, decimal Value, string? DayLabel,
+    string? Operator, string? Instrument, string? ReagentLot, string? CalibratorLot, DateOnly? MeasuredOn);
+
+public sealed record PrecisionRunDto(string? DayLabel, string RunLabel, int ReplicateCount, decimal Mean);
 
 public sealed record PrecisionListItemDto(
     Guid Id, string StudyRef, string Analyte, string Level, string State,
-    decimal? RepeatabilityCvPct, decimal? WithinLabCvPct, bool? MeetsWithinLabClaim);
+    decimal? RepeatabilityCvPct, decimal? WithinLabCvPct, bool? MeetsWithinLabClaim,
+    string? SeriesRef, string? Design);
+
+/// <summary>Distinct levels of each intermediate-precision factor the replicates span.</summary>
+public sealed record PrecisionCoverageDto(
+    int Days, int Runs, int Operators, int Instruments, int ReagentLots, int CalibratorLots,
+    DateOnly? FirstMeasuredOn, DateOnly? LastMeasuredOn, bool MeetsEp15MinimumDesign);
+
+/// <summary>Another level of the same series.</summary>
+public sealed record PrecisionSeriesMemberDto(
+    Guid Id, string StudyRef, string Level, string State, decimal? WithinLabCvPct);
+
+/// <summary>
+/// Between-laboratory context for the analyte: a PT/EQA scheme SD expressed as
+/// a CV of the assigned value. Context only — the laboratory does not compute
+/// reproducibility from its own data.
+/// </summary>
+public sealed record PrecisionPtContextDto(
+    Guid Id, string PtRef, string Scheme, string Cycle,
+    decimal AssignedValue, decimal StandardDeviation, decimal? SchemeCvPct, decimal? ZScore);
 
 public sealed record PrecisionDetailDto(
     Guid Id, string StudyRef, string Analyte, string Unit, string Level,
@@ -250,7 +297,15 @@ public sealed record PrecisionDetailDto(
     bool? MeetsRepeatabilityClaim, bool? MeetsWithinLabClaim,
     Guid? SignedOffBy, DateTimeOffset? SignedOffAtUtc,
     IReadOnlyList<PrecisionMeasurementDto> Measurements,
-    IReadOnlyList<PrecisionRunDto> Runs);
+    IReadOnlyList<PrecisionRunDto> Runs,
+    string? Design, decimal? BetweenDaySd, decimal? BetweenDayCvPct,
+    decimal? RepeatabilityDf, decimal? RepeatabilityCvLowerPct, decimal? RepeatabilityCvUpperPct,
+    decimal? WithinLabDf, decimal? WithinLabCvLowerPct, decimal? WithinLabCvUpperPct,
+    decimal? RepeatabilityVerificationLimitCvPct, decimal? WithinLabVerificationLimitCvPct,
+    string? SeriesRef, int SeriesLevelCount,
+    PrecisionCoverageDto Coverage,
+    IReadOnlyList<PrecisionSeriesMemberDto> SeriesMembers,
+    IReadOnlyList<PrecisionPtContextDto> PtContext);
 
 // ── PT/EQA Annual Plan (ISO 17025 §7.7.2) ───────────────────────────────────
 
@@ -282,8 +337,12 @@ public sealed record CreateUncertaintyBudgetRequest(
 public sealed record AddUncertaintyComponentRequest(
     string Name, string Type, decimal RelativeStandardUncertainty, string? Source);
 
+/// <summary>Imports a signed-off precision study's within-lab CV as the u(Rw) component.</summary>
+public sealed record AddPrecisionComponentRequest(Guid PrecisionStudyId);
+
 public sealed record UncertaintyComponentDto(
-    Guid Id, string Name, string Type, decimal RelativeStandardUncertainty, string? Source);
+    Guid Id, string Name, string Type, decimal RelativeStandardUncertainty, string? Source,
+    Guid? SourcePrecisionStudyId);
 
 public sealed record UncertaintyBudgetListItemDto(
     Guid Id, string BudgetRef, string Analyte, string Method, string Level, string Status,

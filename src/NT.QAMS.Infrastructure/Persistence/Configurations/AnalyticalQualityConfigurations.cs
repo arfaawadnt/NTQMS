@@ -120,6 +120,10 @@ public sealed class UncertaintyBudgetConfiguration : IEntityTypeConfiguration<Un
             component.Property(c => c.Name).HasMaxLength(300);
             component.Property(c => c.Type).HasConversion<string>().HasMaxLength(10);
             component.Property(c => c.Source).HasMaxLength(500);
+            // Tenant-composite FK to qams.precision_study lives in the migration
+            // (cross-aggregate reference, M-08 idiom); this index serves it.
+            component.HasIndex("TenantId", nameof(UncertaintyComponent.SourcePrecisionStudyId))
+                .HasDatabaseName("ix_unc_component_tenant_source_precision_study");
         });
     }
 }
@@ -292,6 +296,11 @@ public sealed class SigmaAssessmentConfiguration : IEntityTypeConfiguration<Sigm
         builder.Property(a => a.Grade).HasConversion<string>().HasMaxLength(20);
         builder.HasIndex(a => new { a.TenantId, a.AssessmentRef }).IsUnique();
         builder.HasIndex(a => new { a.TenantId, a.State });
+        builder.Property(a => a.SourcePrecisionStudyRef).HasMaxLength(30);
+        // Tenant-composite FK to qams.precision_study lives in the migration
+        // (cross-aggregate reference, M-08 idiom); this index serves it.
+        builder.HasIndex(a => new { a.TenantId, a.SourcePrecisionStudyId })
+            .HasDatabaseName("ix_sigma_assessment_tenant_source_precision_study");
         builder.Ignore(a => a.QcRecommendation);
         builder.Ignore(a => a.DomainEvents);
     }
@@ -308,8 +317,12 @@ public sealed class PrecisionStudyConfiguration : IEntityTypeConfiguration<Preci
         builder.Property(s => s.Unit).HasMaxLength(50);
         builder.Property(s => s.Level).HasMaxLength(100);
         builder.Property(s => s.State).HasConversion<string>().HasMaxLength(20);
+        builder.Property(s => s.SeriesRef).HasMaxLength(30);
+        builder.Property(s => s.SeriesLevelCount).HasDefaultValue(1);
+        builder.Property(s => s.Design).HasConversion<string>().HasMaxLength(20);
         builder.HasIndex(s => new { s.TenantId, s.StudyRef }).IsUnique();
         builder.HasIndex(s => new { s.TenantId, s.State });
+        builder.HasIndex(s => new { s.TenantId, s.SeriesRef });
 
         builder.OwnsMany(s => s.Measurements, m =>
         {
@@ -321,6 +334,11 @@ public sealed class PrecisionStudyConfiguration : IEntityTypeConfiguration<Preci
             m.WithOwner().HasForeignKey("TenantId", "study_id");
             m.HasKey("TenantId", "Id");
             m.Property(x => x.RunLabel).HasMaxLength(60);
+            m.Property(x => x.DayLabel).HasMaxLength(60);
+            m.Property(x => x.Operator).HasMaxLength(100);
+            m.Property(x => x.Instrument).HasMaxLength(100);
+            m.Property(x => x.ReagentLot).HasMaxLength(60);
+            m.Property(x => x.CalibratorLot).HasMaxLength(60);
         });
 
         builder.Ignore(s => s.DomainEvents);

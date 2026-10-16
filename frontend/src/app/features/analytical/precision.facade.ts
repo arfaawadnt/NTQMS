@@ -2,9 +2,16 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, firstValueFrom } from 'rxjs';
 import { PrecisionApiService } from '../../core/api/precision-api.service';
-import { BulkImportResult, CreatePrecisionStudyRequest, PrecisionDetail, PrecisionListItem } from '../../core/models';
+import {
+  AddPrecisionMeasurementRequest, BulkImportResult, CreatePrecisionSeriesRequest, CreatePrecisionStudyRequest,
+  PrecisionDetail, PrecisionListItem,
+} from '../../core/models';
 
-/** Signal-based facade for imprecision studies (CLSI EP05). */
+/**
+ * Signal-based facade for imprecision studies (CLSI EP05 establishment /
+ * EP15 verification). Every statistic — variance components, CIs, the EP15
+ * verification limits — is computed by the backend; this store only moves data.
+ */
 @Injectable({ providedIn: 'root' })
 export class PrecisionFacade {
   private readonly api = inject(PrecisionApiService);
@@ -33,15 +40,22 @@ export class PrecisionFacade {
     return id;
   }
 
-  async addMeasurement(id: string, runLabel: string, value: number): Promise<void> {
-    await this.mutate(id, () => this.api.addMeasurement(id, runLabel, value));
+  /** Creates one linked study per level; returns the first level's id to open. */
+  async createSeries(request: CreatePrecisionSeriesRequest): Promise<string | null> {
+    const id = await this.run(async () => (await firstValueFrom(this.api.createSeries(request))).studyIds[0] ?? null);
+    if (id) { await this.loadList(); }
+    return id;
+  }
+
+  async addMeasurement(id: string, request: AddPrecisionMeasurementRequest): Promise<void> {
+    await this.mutate(id, () => this.api.addMeasurement(id, request));
   }
 
   async removeMeasurement(id: string, measurementId: string): Promise<void> {
     await this.mutate(id, () => this.api.removeMeasurement(id, measurementId));
   }
 
-  async importMeasurements(id: string, rows: { runLabel: string; value: number }[]): Promise<BulkImportResult | null> {
+  async importMeasurements(id: string, rows: AddPrecisionMeasurementRequest[]): Promise<BulkImportResult | null> {
     const result = await this.run(async () => {
       const r = await firstValueFrom(this.api.importMeasurements(id, rows));
       this._selected.set(await firstValueFrom(this.api.getById(id)));

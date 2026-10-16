@@ -15,12 +15,15 @@ public enum UncertaintyComponentType { TypeA, TypeB }
 /// </summary>
 public sealed class UncertaintyComponent : Entity
 {
-    internal UncertaintyComponent(string name, UncertaintyComponentType type, decimal relativeStandardUncertainty, string? source)
+    internal UncertaintyComponent(
+        string name, UncertaintyComponentType type, decimal relativeStandardUncertainty, string? source,
+        Guid? sourcePrecisionStudyId = null)
     {
         Name = name;
         Type = type;
         RelativeStandardUncertainty = relativeStandardUncertainty;
         Source = source;
+        SourcePrecisionStudyId = sourcePrecisionStudyId;
     }
 
     private UncertaintyComponent() { Name = null!; }
@@ -31,6 +34,8 @@ public sealed class UncertaintyComponent : Entity
     public decimal RelativeStandardUncertainty { get; private set; }
     /// <summary>Where the figure came from (QC lot CV, PT bias study, certificate…).</summary>
     public string? Source { get; private set; }
+    /// <summary>The signed-off precision study the figure was taken from, when it was imported rather than typed.</summary>
+    public Guid? SourcePrecisionStudyId { get; private set; }
 }
 
 /// <summary>
@@ -126,6 +131,49 @@ public sealed class UncertaintyBudget : AggregateRoot, ITenantScoped
         var component = new UncertaintyComponent(name.Trim(), type, relativeStandardUncertainty, source?.Trim());
         _components.Add(component);
         Status = UncertaintyBudgetStatus.Draft; // Any edit invalidates a prior calculation.
+        CombinedStandardUncertainty = null;
+        ExpandedUncertainty = null;
+        MeetsTarget = null;
+        return component.Id;
+    }
+
+    /// <summary>
+    /// Imports the within-laboratory imprecision of a SIGNED-OFF precision study
+    /// as the Type A u(Rw) component (ISO/TS 20914 §6.3: the long-term
+    /// within-lab CV is the imprecision contribution — not the repeatability
+    /// CV, which would understate MU). The component keeps a reference to the
+    /// study so the figure is traceable to its evidence; a study is imported
+    /// at most once per budget.
+    /// </summary>
+    public Guid AddPrecisionComponent(PrecisionStudy study)
+    {
+        RequireMutable();
+        if (study.State != PrecisionState.SignedOff || study.WithinLabCvPct is not { } withinLabCv)
+        {
+            throw new DomainException(
+                "MU-008", "Only a signed-off precision study with a within-laboratory CV can feed an uncertainty budget.");
+        }
+
+        if (!string.Equals(study.Analyte, Analyte, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new DomainException(
+                "MU-009", $"The precision study measures '{study.Analyte}', not this budget's analyte '{Analyte}'.");
+        }
+
+        if (_components.Any(c => c.SourcePrecisionStudyId == study.Id))
+        {
+            throw new DomainException("MU-012", $"Precision study {study.StudyRef} is already in this budget.");
+        }
+
+        var level = string.IsNullOrWhiteSpace(study.Level) ? string.Empty : $", {study.Level}";
+        var component = new UncertaintyComponent(
+            $"Within-laboratory imprecision u(Rw) — {study.StudyRef}",
+            UncertaintyComponentType.TypeA,
+            withinLabCv,
+            $"{study.StudyRef}{level}: CLSI EP05 within-lab CV, signed off",
+            study.Id);
+        _components.Add(component);
+        Status = UncertaintyBudgetStatus.Draft;
         CombinedStandardUncertainty = null;
         ExpandedUncertainty = null;
         MeetsTarget = null;
