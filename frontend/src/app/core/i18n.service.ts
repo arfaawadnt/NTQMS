@@ -1611,6 +1611,8 @@ export class I18nService {
     'prc.empty': { en: 'No imprecision studies yet.', ar: 'لا توجد دراسات عدم دقة.', fr: 'Aucune étude d\u2019imprécision.' },
     'prc.repeatabilityCv': { en: 'Repeatability CV', ar: 'CV التكرارية', fr: 'CV répétabilité' },
     'prc.withinLabCv': { en: 'Within-lab CV', ar: 'CV داخل المختبر', fr: 'CV intra-labo' },
+    'prc.reproducibilityCv': { en: 'Reproducibility CV', ar: 'CV قابلية الاستنساخ', fr: 'CV reproductibilité' },
+    'prc.claimsOptional': { en: 'Manufacturer claims (optional)', ar: 'ادعاءات الشركة المصنّعة (اختياري)', fr: 'Revendications du fabricant (facultatif)' },
     'prc.meetsClaim': { en: 'Meets Claim', ar: 'يحقق الادعاء', fr: 'Conforme' },
     'prc.failsClaim': { en: 'Fails Claim', ar: 'لا يحقق الادعاء', fr: 'Non conforme' },
     'prc.backToList': { en: 'Back to studies', ar: 'العودة إلى الدراسات', fr: 'Retour aux études' },

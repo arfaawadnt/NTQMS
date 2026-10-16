@@ -58,14 +58,27 @@ type LevelForm = FormGroup<{
         <fieldset formArrayName="levels">
           <legend>{{ i18n.t('prc.levels') }}</legend>
           @for (lv of levels.controls; track lv; let i = $index) {
+            <!-- One block per level: a full-width name, then the three optional claims, each with a visible label. -->
             <div class="level" [formGroupName]="i">
-              <input formControlName="level" [placeholder]="i18n.t('prc.levelHint')" [attr.aria-label]="i18n.t('mu.level')" />
-              <input type="number" step="any" formControlName="claimedRepeatabilityCvPct" [placeholder]="i18n.t('prc.claimedRep')" [attr.aria-label]="i18n.t('prc.claimedRep')" />
-              <input type="number" step="any" formControlName="claimedWithinLabCvPct" [placeholder]="i18n.t('prc.claimedWl')" [attr.aria-label]="i18n.t('prc.claimedWl')" />
-              <input type="number" step="any" formControlName="claimedReproducibilityCvPct" [placeholder]="i18n.t('prc.claimedRepro')" [attr.aria-label]="i18n.t('prc.claimedRepro')" />
-              @if (levels.length > 1) {
-                <button type="button" class="link" (click)="removeLevel(i)" [attr.aria-label]="i18n.t('prc.removeLevel')">✕</button>
-              }
+              <div class="level-head">
+                <label [for]="'prc-level-' + i">{{ i18n.t('mu.level') }} {{ i + 1 }}</label>
+                @if (levels.length > 1) {
+                  <button type="button" class="link" (click)="removeLevel(i)" [attr.aria-label]="i18n.t('prc.removeLevel')">✕</button>
+                }
+              </div>
+              <input [id]="'prc-level-' + i" formControlName="level" [placeholder]="i18n.t('prc.levelHint')" />
+              <span class="claims-title">{{ i18n.t('prc.claimsOptional') }}</span>
+              <div class="claims">
+                <label>{{ i18n.t('prc.repeatabilityCv') }} (%)
+                  <input type="number" step="any" min="0" formControlName="claimedRepeatabilityCvPct" placeholder="%" />
+                </label>
+                <label>{{ i18n.t('prc.withinLabCv') }} (%)
+                  <input type="number" step="any" min="0" formControlName="claimedWithinLabCvPct" placeholder="%" />
+                </label>
+                <label>{{ i18n.t('prc.reproducibilityCv') }} (%)
+                  <input type="number" step="any" min="0" formControlName="claimedReproducibilityCvPct" placeholder="%" />
+                </label>
+              </div>
             </div>
           }
           @if (levels.length < maxLevels) {
@@ -126,7 +139,14 @@ type LevelForm = FormGroup<{
     .clickable { cursor: pointer; }
     button, select { width: auto; }
     fieldset { border: 1px solid var(--nt-border); border-radius: 6px; padding: .5rem .75rem; margin-top: .75rem; }
-    .level { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr auto; gap: .4rem; margin-bottom: .4rem; align-items: center; }
+    .level { border: 1px solid var(--nt-border); border-radius: 6px; padding: .5rem .6rem; margin-bottom: .6rem; }
+    .level-head { display: flex; justify-content: space-between; align-items: center; }
+    .level-head label { font-weight: 600; margin: 0; }
+    .claims-title { display: block; font-size: .72rem; color: var(--nt-ink-neutral); margin: .45rem 0 .2rem; }
+    .claims { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; align-items: end; }
+    .claims label { font-size: .75rem; margin: 0; line-height: 1.25; }
+    .claims input { margin-top: .2rem; }
+    @media (max-width: 600px) { .claims { grid-template-columns: 1fr; } }
     .series { display: block; font-size: .7rem; color: var(--nt-ink-neutral); }
   `]
 })
