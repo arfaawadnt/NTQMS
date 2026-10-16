@@ -33,7 +33,7 @@ public sealed class PrecisionStudiesController(ISender sender) : ControllerBase
     {
         var id = await sender.Send(new CreatePrecisionStudyCommand(
             request.Analyte, request.Unit, request.Level,
-            request.ClaimedRepeatabilityCvPct, request.ClaimedWithinLabCvPct), ct);
+            request.ClaimedRepeatabilityCvPct, request.ClaimedWithinLabCvPct, request.ClaimedReproducibilityCvPct), ct);
         return CreatedAtAction(nameof(GetById), new { id }, new { id });
     }
 
@@ -49,7 +49,8 @@ public sealed class PrecisionStudiesController(ISender sender) : ControllerBase
         {
             measurementId = await sender.Send(new AddPrecisionMeasurementCommand(
                 id, request.RunLabel, request.Value, request.DayLabel,
-                request.Operator, request.Instrument, request.ReagentLot, request.CalibratorLot, request.MeasuredOn), ct),
+                request.Operator, request.Instrument, request.ReagentLot, request.CalibratorLot, request.MeasuredOn,
+                request.SiteLabel), ct),
         });
 
     [HttpPost("{id:guid}/measurements/import")]

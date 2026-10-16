@@ -12219,5 +12219,109 @@ BEGIN
     VALUES ('20261016090659_PrecisionEp05Ep15Gaps', '9.0.21');
     END IF;
 END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261016211656_PrecisionReproducibility') THEN
+
+                    ALTER TABLE qams.precision_study DROP CONSTRAINT IF EXISTS ck_precision_study_design_domain;
+                    ALTER TABLE qams.precision_study ADD CONSTRAINT ck_precision_study_design_domain
+                        CHECK (design IS NULL OR design IN ('RunsOnly', 'DaysOnly', 'DaysAndRuns', 'SitesAndRuns', 'SitesAndDays', 'SitesDaysAndRuns')) NOT VALID;
+                    ALTER TABLE qams.precision_study VALIDATE CONSTRAINT ck_precision_study_design_domain;
+                
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261016211656_PrecisionReproducibility') THEN
+    ALTER TABLE qams.precision_study ADD between_site_cv_pct numeric;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261016211656_PrecisionReproducibility') THEN
+    ALTER TABLE qams.precision_study ADD between_site_sd numeric;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261016211656_PrecisionReproducibility') THEN
+    ALTER TABLE qams.precision_study ADD claimed_reproducibility_cv_pct numeric;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261016211656_PrecisionReproducibility') THEN
+    ALTER TABLE qams.precision_study ADD meets_reproducibility_claim boolean;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261016211656_PrecisionReproducibility') THEN
+    ALTER TABLE qams.precision_study ADD reproducibility_cv_lower_pct numeric;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261016211656_PrecisionReproducibility') THEN
+    ALTER TABLE qams.precision_study ADD reproducibility_cv_pct numeric;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261016211656_PrecisionReproducibility') THEN
+    ALTER TABLE qams.precision_study ADD reproducibility_cv_upper_pct numeric;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261016211656_PrecisionReproducibility') THEN
+    ALTER TABLE qams.precision_study ADD reproducibility_df numeric;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261016211656_PrecisionReproducibility') THEN
+    ALTER TABLE qams.precision_study ADD reproducibility_sd numeric;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261016211656_PrecisionReproducibility') THEN
+    ALTER TABLE qams.precision_study ADD reproducibility_verification_limit_cv_pct numeric;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261016211656_PrecisionReproducibility') THEN
+    ALTER TABLE qams.precision_study ADD within_lab_consistent_with_reproducibility_claim boolean;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261016211656_PrecisionReproducibility') THEN
+    ALTER TABLE qams.precision_measurement ADD site_label character varying(60);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "migration_id" = '20261016211656_PrecisionReproducibility') THEN
+    INSERT INTO "__EFMigrationsHistory" (migration_id, product_version)
+    VALUES ('20261016211656_PrecisionReproducibility', '9.0.21');
+    END IF;
+END $EF$;
 COMMIT;
 

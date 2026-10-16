@@ -52,6 +52,25 @@ credentials generated for the throwaway environment only.
 Browser console: only 401s from a deliberate first sign-in attempt on the platform-admin page;
 no API error log entries.
 
+## 5. Rev 1 — reproducibility (URS-157/158), engineering dry run 2026-10-16/17
+
+Same throwaway environment; migration `20261016211656_PrecisionReproducibility` executed Up → Down → Up
+(`site_label` column 1/0/1; widened design CHECK t/f/t).
+
+| Suite | Result (observed) |
+| ----- | ----------------- |
+| Domain unit | 510 passed, 0 failed (+6 multi-site / reproducibility) |
+| Application unit | 165 passed, 0 failed |
+| Architecture | 202 passed, 0 failed |
+| Integration (real PG) | 34 passed, 8 skipped, 0 failed |
+| WebApi functional | 106 passed, 1 failed — the same environmental `StartupSeedingResilienceTests` case (D-1); API surface unchanged (no new routes) |
+| Frontend unit | 142 of 142 SUCCESS; production build clean |
+
+| OQ | Observed |
+| -- | -------- |
+| OQ-AQP-08 | Single-site Glucose study (Main lab, 5 × 5), reproducibility claim 2.6 %: design DaysOnly, within-lab CV 0.8853 %, UVL 3.2988 %, consistent = true. |
+| OQ-AQP-09 | 3 sites × 5 days × 5 replicates imported via the API (75 imported, 0 rejected); Calculate in the UI: design "Sites × days (multi-site EP05)", grand mean 8.0295; repeatability 0.77 % (df 60, CI 0.66–0.94 %, claim 1.2 % / UVL 1.38 % met); between-day 0.43 %; within-lab 0.88 % (df 53.03, claim 1.8 % / UVL 2.08 % met); between-site 1.23 % (SD 0.0987); reproducibility 1.51 % (SD 0.1216, df 4.22, CI 0.92–4.17 %, claim 2.6 % / UVL 3.97 % met); variance shares 26 / 8 / 66 %; "Meets the EP05 multi-site minimum". An independent script (separate balanced nested ANOVA) gave grand 8.0295, S_r 0.0620, S_day 0.0345, S_site 0.0987, S_WL 0.0710, S_R 0.1216, CV_R 1.514 %, ν_R 4.22 — identical. PR-017 partial labelling covered by the automated suite only. |
+
 ## 4. Deviations
 
 | # | Deviation | Disposition |

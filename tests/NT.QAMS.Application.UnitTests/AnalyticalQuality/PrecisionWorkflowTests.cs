@@ -144,6 +144,39 @@ public class PrecisionWorkflowTests
     }
 
     [Fact]
+    public async Task A_multi_site_import_reports_between_site_and_reproducibility_against_the_claim()
+    {
+        await using var db = NewDb();
+        var id = await new CreatePrecisionStudyHandler(db, Tenant(), new FakeRefGenerator()).Handle(
+            new CreatePrecisionStudyCommand("Glucose", "mmol/L", "Level 1", null, null, ClaimedReproducibilityCvPct: 45m),
+            CancellationToken.None);
+
+        var rows = new[]
+        {
+            ("Site A", "D1", 10m), ("Site A", "D1", 12m), ("Site A", "D2", 14m), ("Site A", "D2", 16m),
+            ("Site B", "D1", 20m), ("Site B", "D1", 22m), ("Site B", "D2", 24m), ("Site B", "D2", 26m),
+        }.Select(r => new AddPrecisionMeasurementRequest("R1", r.Item3, r.Item2, SiteLabel: r.Item1)).ToList();
+        var imported = await new ImportPrecisionMeasurementsHandler(db)
+            .Handle(new ImportPrecisionMeasurementsCommand(id, rows), CancellationToken.None);
+        await new PrecisionWorkflowHandlers(db, new FakeCurrentUser(), new FixedClock(Now), null!)
+            .Handle(new CalculatePrecisionCommand(id), CancellationToken.None);
+
+        var detail = await new GetPrecisionStudyByIdHandler(db)
+            .Handle(new GetPrecisionStudyByIdQuery(id), CancellationToken.None);
+
+        imported.Imported.Should().Be(8);
+        detail.Design.Should().Be(nameof(PrecisionDesign.SitesAndDays));
+        detail.Coverage.Sites.Should().Be(2);
+        detail.ClaimedReproducibilityCvPct.Should().Be(45m);
+        detail.BetweenSiteSd.Should().BeApproximately(6.7823m, 0.0005m);
+        detail.ReproducibilityCvPct.Should().BeApproximately(41.2011m, 0.001m);
+        detail.MeetsReproducibilityClaim.Should().BeTrue();
+        detail.WithinLabConsistentWithReproducibilityClaim.Should().BeNull();
+        detail.Measurements.Should().OnlyContain(m => m.SiteLabel != null);
+        detail.Runs.Select(r => r.SiteLabel).Distinct().Should().HaveCount(2);
+    }
+
+    [Fact]
     public async Task Import_rejects_an_oversized_row_and_keeps_the_rest()
     {
         await using var db = NewDb();

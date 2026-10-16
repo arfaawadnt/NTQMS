@@ -43,6 +43,7 @@ type ClaimVerdict = 'met' | 'withinLimit' | 'notVerified';
       <div class="meta card">
         <div><span class="muted">{{ i18n.t('nc.status') }}</span><qams-status-pill [status]="s.state" /></div>
         @if (s.design) { <div><span class="muted">{{ i18n.t('prc.design') }}</span> {{ i18n.t('prc.design.' + s.design) }}</div> }
+        @if (s.coverage.sites > 0) { <div><span class="muted">{{ i18n.t('prc.sites') }}</span> {{ s.coverage.sites }}</div> }
         @if (s.coverage.days > 0) { <div><span class="muted">{{ i18n.t('prc.days') }}</span> {{ s.coverage.days }}</div> }
         <div><span class="muted">{{ i18n.t('prc.runs') }}</span> {{ s.runs.length }}</div>
         <div><span class="muted">{{ i18n.t('prc.replicates') }}</span> {{ s.measurements.length }}</div>
@@ -104,7 +105,36 @@ type ClaimVerdict = 'met' | 'withinLimit' | 'notVerified';
                 {{ i18n.t('prc.verdict.' + verdict(s.withinLabCvPct, s.claimedWithinLabCvPct, s.meetsWithinLabClaim)) }}
               </span>
             }
+            @if (s.withinLabConsistentWithReproducibilityClaim !== null) {
+              <span class="claim" [class]="s.withinLabConsistentWithReproducibilityClaim ? 'met' : 'notVerified'">
+                {{ i18n.t('prc.claimedRepro') }} {{ s.claimedReproducibilityCvPct }}% · UVL {{ s.reproducibilityVerificationLimitCvPct | number:'1.1-2' }}% ·
+                {{ s.withinLabConsistentWithReproducibilityClaim ? i18n.t('prc.reproConsistent') : i18n.t('prc.reproInconsistent') }}
+              </span>
+            }
           </div>
+          @if (s.betweenSiteSd !== null) {
+            <div class="comp card">
+              <span class="muted">{{ i18n.t('prc.betweenSite') }}</span>
+              <b>{{ s.betweenSiteCvPct | number:'1.1-2' }}%</b>
+              <span class="sub">SD {{ s.betweenSiteSd | number:'1.0-4' }} {{ s.unit }}</span>
+            </div>
+          }
+          @if (s.reproducibilitySd !== null) {
+            <div class="comp card highlight repro">
+              <span class="muted">{{ i18n.t('prc.reproducibility') }}</span>
+              <b>{{ s.reproducibilityCvPct | number:'1.1-2' }}%</b>
+              <span class="sub">SD {{ s.reproducibilitySd | number:'1.0-4' }} {{ s.unit }} · df {{ s.reproducibilityDf }}</span>
+              @if (s.reproducibilityCvLowerPct !== null) {
+                <span class="sub">{{ i18n.t('prc.ci95') }} {{ s.reproducibilityCvLowerPct | number:'1.1-2' }}–{{ s.reproducibilityCvUpperPct | number:'1.1-2' }}%</span>
+              }
+              @if (s.claimedReproducibilityCvPct !== null && s.reproducibilityVerificationLimitCvPct !== null) {
+                <span class="claim" [class]="verdict(s.reproducibilityCvPct, s.claimedReproducibilityCvPct, s.meetsReproducibilityClaim)">
+                  {{ i18n.t('prc.claim') }} {{ s.claimedReproducibilityCvPct }}% · UVL {{ s.reproducibilityVerificationLimitCvPct | number:'1.1-2' }}% ·
+                  {{ i18n.t('prc.verdict.' + verdict(s.reproducibilityCvPct, s.claimedReproducibilityCvPct, s.meetsReproducibilityClaim)) }}
+                </span>
+              }
+            </div>
+          }
         </div>
 
         <section class="card">
@@ -128,6 +158,7 @@ type ClaimVerdict = 'met' | 'withinLimit' | 'notVerified';
         <section class="card">
           <h3>{{ i18n.t('prc.coverage') }}</h3>
           <div class="coverage">
+            @if (s.coverage.sites > 0) { <div><b>{{ s.coverage.sites }}</b><span>{{ i18n.t('prc.sites') }}</span></div> }
             <div><b>{{ s.coverage.days }}</b><span>{{ i18n.t('prc.days') }}</span></div>
             <div><b>{{ s.coverage.runs }}</b><span>{{ i18n.t('prc.runs') }}</span></div>
             <div><b>{{ s.coverage.operators }}</b><span>{{ i18n.t('prc.operators') }}</span></div>
@@ -141,6 +172,11 @@ type ClaimVerdict = 'met' | 'withinLimit' | 'notVerified';
           <p class="small" [class.warn]="!s.coverage.meetsEp15MinimumDesign">
             {{ s.coverage.meetsEp15MinimumDesign ? i18n.t('prc.designAdequate') : i18n.t('prc.designBelowMinimum') }}
           </p>
+          @if (s.coverage.sites > 0) {
+            <p class="small" [class.warn]="!s.coverage.meetsMultiSiteMinimumDesign">
+              {{ s.coverage.meetsMultiSiteMinimumDesign ? i18n.t('prc.multiSiteAdequate') : i18n.t('prc.multiSiteBelowMinimum') }}
+            </p>
+          }
         </section>
       }
 
@@ -148,10 +184,10 @@ type ClaimVerdict = 'met' | 'withinLimit' | 'notVerified';
         <section class="card">
           <h3>{{ i18n.t('prc.runMeans') }}</h3>
           <table>
-            <thead><tr><th>{{ i18n.t('prc.day') }}</th><th>{{ i18n.t('prc.run') }}</th><th>n</th><th>{{ i18n.t('lin.mean') }}</th></tr></thead>
+            <thead><tr><th>{{ i18n.t('prc.site') }}</th><th>{{ i18n.t('prc.day') }}</th><th>{{ i18n.t('prc.run') }}</th><th>n</th><th>{{ i18n.t('lin.mean') }}</th></tr></thead>
             <tbody>
-              @for (r of s.runs; track (r.dayLabel ?? '') + '/' + r.runLabel) {
-                <tr><td>{{ r.dayLabel ?? '—' }}</td><td><b>{{ r.runLabel }}</b></td><td>{{ r.replicateCount }}</td><td>{{ r.mean | number:'1.0-4' }} {{ s.unit }}</td></tr>
+              @for (r of s.runs; track (r.siteLabel ?? '') + '/' + (r.dayLabel ?? '') + '/' + r.runLabel) {
+                <tr><td>{{ r.siteLabel ?? '—' }}</td><td>{{ r.dayLabel ?? '—' }}</td><td><b>{{ r.runLabel }}</b></td><td>{{ r.replicateCount }}</td><td>{{ r.mean | number:'1.0-4' }} {{ s.unit }}</td></tr>
               }
             </tbody>
           </table>
@@ -162,7 +198,8 @@ type ClaimVerdict = 'met' | 'withinLimit' | 'notVerified';
         <h3>{{ i18n.t('prc.replicateData') }} ({{ s.measurements.length }})</h3>
         @if (s.state !== 'SignedOff') {
           <form [formGroup]="entryForm" (ngSubmit)="add(s.id)">
-            <div class="triple">
+            <div class="quad">
+              <div><label>{{ i18n.t('prc.site') }}</label><input formControlName="siteLabel" [attr.aria-label]="i18n.t('prc.site')" [placeholder]="i18n.t('prc.siteHint')" /></div>
               <div><label>{{ i18n.t('prc.day') }}</label><input formControlName="dayLabel" [attr.aria-label]="i18n.t('prc.day')" [placeholder]="i18n.t('prc.dayHint')" /></div>
               <div><label>{{ i18n.t('prc.run') }}</label><input formControlName="runLabel" [attr.aria-label]="i18n.t('prc.run')" [placeholder]="i18n.t('prc.runHint')" /></div>
               <div><label>{{ i18n.t('lin.measured') }} ({{ s.unit }})</label><input type="number" step="any" formControlName="value" [attr.aria-label]="i18n.t('lin.measured')" /></div>
@@ -193,12 +230,13 @@ type ClaimVerdict = 'met' | 'withinLimit' | 'notVerified';
         @if (s.measurements.length > 0) {
           <table class="mtable">
             <thead><tr>
-              <th>{{ i18n.t('prc.day') }}</th><th>{{ i18n.t('prc.run') }}</th><th>{{ i18n.t('lin.measured') }}</th>
+              <th>{{ i18n.t('prc.site') }}</th><th>{{ i18n.t('prc.day') }}</th><th>{{ i18n.t('prc.run') }}</th><th>{{ i18n.t('lin.measured') }}</th>
               <th>{{ i18n.t('prc.operator') }}</th><th>{{ i18n.t('prc.reagentLot') }}</th><th>{{ i18n.t('prc.measuredOn') }}</th><th></th>
             </tr></thead>
             <tbody>
               @for (m of s.measurements; track m.id) {
                 <tr>
+                  <td>{{ m.siteLabel ?? '—' }}</td>
                   <td>{{ m.dayLabel ?? '—' }}</td>
                   <td>{{ m.runLabel }}</td>
                   <td>{{ m.value | number:'1.0-4' }}</td>
@@ -220,6 +258,12 @@ type ClaimVerdict = 'met' | 'withinLimit' | 'notVerified';
       <section class="card">
         <h3>{{ i18n.t('prc.ptContext') }}</h3>
         <p class="muted small">{{ i18n.t('prc.ptContextNote') }}</p>
+        @if (s.claimedReproducibilityCvPct !== null) {
+          <p class="small">{{ i18n.t('prc.claimedRepro') }}: <b>{{ s.claimedReproducibilityCvPct }}%</b>
+            · {{ i18n.t('prc.withinLabCv') }}: <b>{{ s.withinLabCvPct !== null ? (s.withinLabCvPct | number:'1.1-2') + '%' : '—' }}</b>
+            @if (s.reproducibilityCvPct !== null) { · {{ i18n.t('prc.reproducibility') }}: <b>{{ s.reproducibilityCvPct | number:'1.1-2' }}%</b> }
+          </p>
+        }
         @if (s.ptContext.length === 0) {
           <p class="muted">{{ i18n.t('prc.ptContextEmpty') }}</p>
         } @else {
@@ -269,11 +313,12 @@ type ClaimVerdict = 'met' | 'withinLimit' | 'notVerified';
     .comp { display: flex; flex-direction: column; gap: 2px; padding: 14px 16px; }
     .comp b { font-size: 1.4rem; color: var(--nt-navy-deep); }
     .comp.highlight { border-inline-start: 4px solid var(--nt-blue); }
+    .comp.repro { border-inline-start-color: var(--nt-navy); }
     .comp .sub { font-size: .72rem; color: var(--nt-grey-m); }
     .claim { font-size: .72rem; margin-top: 4px; font-weight: 600; }
     .claim.met { color: var(--nt-ink-ok); } .claim.withinLimit { color: var(--nt-ink-warn); } .claim.notVerified { color: var(--nt-ink-crit); }
     .stackbar { display: flex; height: 22px; border-radius: 5px; overflow: hidden; background: var(--nt-filter-grey); }
-    .rep { background: var(--nt-teal); } .run { background: var(--nt-blue); } .day { background: var(--nt-navy); }
+    .rep { background: var(--nt-teal); } .run { background: var(--nt-blue); } .day { background: var(--nt-navy); } .site { background: var(--nt-gold); }
     .legend { font-size: 11px; color: var(--nt-grey-m); display: flex; gap: 14px; align-items: center; margin-top: 6px; flex-wrap: wrap; }
     .k { display: inline-block; width: 12px; height: 12px; border-radius: 2px; margin-inline-end: 4px; vertical-align: middle; }
     .coverage { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: .5rem; }
@@ -282,6 +327,7 @@ type ClaimVerdict = 'met' | 'withinLimit' | 'notVerified';
     .small { font-size: .75rem; margin-top: 6px; }
     section { margin-bottom: 1rem; }
     .triple { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+    .quad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
     .mtable { margin-top: 1rem; }
     .danger-link { color: var(--nt-red); }
     .actions { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; }
@@ -289,7 +335,7 @@ type ClaimVerdict = 'met' | 'withinLimit' | 'notVerified';
     form { border-bottom: 1px solid var(--nt-border); padding-bottom: .75rem; }
     form button { width: auto; margin-top: .5rem; }
     .ghost-link { color: var(--nt-blue); text-decoration: none; }
-    @media (max-width: 800px) { .triple { grid-template-columns: 1fr; } }
+    @media (max-width: 800px) { .triple, .quad { grid-template-columns: 1fr; } }
   `]
 })
 export class PrecisionDetailComponent implements OnInit {
@@ -317,6 +363,7 @@ export class PrecisionDetailComponent implements OnInit {
 
   /** Bounds mirror the backend validator (PrecisionLimits). */
   readonly entryForm = this.fb.nonNullable.group({
+    siteLabel: ['', [Validators.maxLength(60)]],
     dayLabel: ['', [Validators.maxLength(60)]],
     runLabel: ['', [Validators.required, Validators.maxLength(60)]],
     value: [null as number | null, [Validators.required]],
@@ -327,11 +374,11 @@ export class PrecisionDetailComponent implements OnInit {
     measuredOn: [''],
   });
 
-  /** Distinct runs (nested within day) — the client mirror of the backend's minimum check. */
+  /** Distinct runs (nested within site and day) — the client mirror of the backend's minimum check. */
   readonly runCount = computed(() =>
-    new Set((this.item()?.measurements ?? []).map((m) => `${m.dayLabel ?? ''}/${m.runLabel}`)).size);
+    new Set((this.item()?.measurements ?? []).map((m) => `${m.siteLabel ?? ''}/${m.dayLabel ?? ''}/${m.runLabel}`)).size);
 
-  /** CSV importer state: run, value, then the optional day and conditions. */
+  /** CSV importer state: run, value, then the optional day, conditions and site (appended last so older files still import). */
   readonly showImport = signal(false);
   readonly importResult = signal<BulkImportResult | null>(null);
   readonly importColumns: CsvColumn[] = [
@@ -343,6 +390,7 @@ export class PrecisionDetailComponent implements OnInit {
     { label: this.i18n.t('prc.reagentLot'), numeric: false, optional: true },
     { label: this.i18n.t('prc.calibratorLot'), numeric: false, optional: true },
     { label: this.i18n.t('prc.measuredOn'), numeric: false, optional: true },
+    { label: this.i18n.t('prc.site'), numeric: false, optional: true },
   ];
 
   async importRows(id: string, rows: string[][]): Promise<void> {
@@ -355,6 +403,7 @@ export class PrecisionDetailComponent implements OnInit {
       reagentLot: this.blankToNull(r[5]),
       calibratorLot: this.blankToNull(r[6]),
       measuredOn: this.blankToNull(r[7]),
+      siteLabel: this.blankToNull(r[8]),
     }));
     this.importResult.set(await this.facade.importMeasurements(id, parsed));
   }
@@ -369,6 +418,7 @@ export class PrecisionDetailComponent implements OnInit {
       { key: 'rep', label: 'prc.repeatability', v: (s?.repeatabilitySd ?? 0) ** 2 },
       { key: 'run', label: 'prc.betweenRun', v: s?.betweenRunSd === null ? -1 : (s?.betweenRunSd ?? 0) ** 2 },
       { key: 'day', label: 'prc.betweenDay', v: s?.betweenDaySd === null ? -1 : (s?.betweenDaySd ?? 0) ** 2 },
+      { key: 'site', label: 'prc.betweenSite', v: s?.betweenSiteSd === null ? -1 : (s?.betweenSiteSd ?? 0) ** 2 },
     ].filter((p) => p.v >= 0);
     const total = parts.reduce((sum, p) => sum + p.v, 0);
     return parts.map((p) => ({ key: p.key, label: p.label, pct: total === 0 ? (p.key === 'rep' ? 100 : 0) : (p.v / total) * 100 }));
@@ -392,6 +442,7 @@ export class PrecisionDetailComponent implements OnInit {
     await this.facade.addMeasurement(id, {
       runLabel: raw.runLabel.trim(),
       value: raw.value!,
+      siteLabel: this.blankToNull(raw.siteLabel),
       dayLabel: this.blankToNull(raw.dayLabel),
       operator: this.blankToNull(raw.operator),
       instrument: this.blankToNull(raw.instrument),
@@ -399,7 +450,7 @@ export class PrecisionDetailComponent implements OnInit {
       calibratorLot: this.blankToNull(raw.calibratorLot),
       measuredOn: this.blankToNull(raw.measuredOn),
     });
-    // Keep the day, run and conditions so replicates of the same run enter quickly.
+    // Keep the site, day, run and conditions so replicates of the same run enter quickly.
     this.entryForm.patchValue({ value: null });
   }
 

@@ -275,4 +275,137 @@ public sealed class PrecisionStudyTests
         var mutate = () => study.AddMeasurement("D", 1m);
         mutate.Should().Throw<InvalidStateTransitionException>().Which.Code.Should().Be("PR-013");
     }
+
+    [Fact]
+    public void Multi_site_design_adds_a_between_site_component_and_the_reproducibility_sd()
+    {
+        // Site A: D1 {10,12}, D2 {14,16} → site mean 13; Site B: D1 {20,22}, D2 {24,26} → 23.
+        // MSE = 2 (df 4), MS_day(site) = 16 (df 2), MS_site = 200 (df 1).
+        // σ²e = 2, σ²day = (16−2)/2 = 7, σ²site = (200−16)/4 = 46.
+        // S²WL = 9 → S_WL = 3, CV 3/18 = 16.667 %; S²R = 55 → S_R = 7.4162, CV 41.201 %.
+        var study = TwoSitesTwoDays(reproducibilityClaim: 10m);
+
+        study.Calculate();
+
+        study.Design.Should().Be(PrecisionDesign.SitesAndDays);
+        study.RepeatabilitySd.Should().BeApproximately(1.4142m, 0.0005m);
+        study.BetweenDaySd.Should().BeApproximately(2.6458m, 0.0005m);
+        study.BetweenRunSd.Should().BeNull();
+        study.BetweenSiteSd.Should().BeApproximately(6.7823m, 0.0005m);
+        study.WithinLabSd.Should().Be(3m);
+        study.WithinLabCvPct.Should().BeApproximately(16.6667m, 0.001m);
+        study.ReproducibilitySd.Should().BeApproximately(7.4162m, 0.0005m);
+        study.ReproducibilityCvPct.Should().BeApproximately(41.2011m, 0.001m);
+        // ν_WL = 9² / ((½·16)²/2 + (½·2)²/4) = 81 / 32.25; ν_R = 55² / (50²/1 + 4²/2 + 1²/4) = 3025 / 2508.25.
+        study.WithinLabDf.Should().Be(2.51m);
+        study.ReproducibilityDf.Should().Be(1.21m);
+        study.ReproducibilityCvLowerPct.Should().BeLessThan(study.ReproducibilityCvPct!.Value);
+        study.ReproducibilityCvUpperPct.Should().BeGreaterThan(study.ReproducibilityCvPct!.Value);
+    }
+
+    [Fact]
+    public void A_reproducibility_claim_is_verified_directly_by_multi_site_data()
+    {
+        var fails = TwoSitesTwoDays(reproducibilityClaim: 10m);
+        fails.Calculate();
+
+        // UVL = 10 · √(χ²(0.95, 1.206) / 1.206) is far below the observed 41.2 %.
+        fails.ReproducibilityVerificationLimitCvPct.Should().BeLessThan(fails.ReproducibilityCvPct!.Value);
+        fails.MeetsReproducibilityClaim.Should().BeFalse();
+        fails.WithinLabConsistentWithReproducibilityClaim.Should().BeNull("multi-site data verifies the claim directly");
+
+        var met = TwoSitesTwoDays(reproducibilityClaim: 45m);
+        met.Calculate();
+        met.MeetsReproducibilityClaim.Should().BeTrue();
+    }
+
+    [Fact]
+    public void A_single_site_study_checks_its_within_lab_cv_against_the_reproducibility_claim()
+    {
+        // Within-lab CV 23.08 % at ν ≈ 1.26; a 5 % reproducibility claim gives
+        // UVL = 5 · √(χ²(0.95, 1.256) / 1.256) ≈ 9.6 % — the lab's own imprecision
+        // is not consistent with the manufacturer's between-laboratory figure.
+        var study = PrecisionStudy.Configure("PR-1", "Glucose", "mmol/L", "L1", null, null, null, 1, 5m);
+        study.AddMeasurement("A", 10m);
+        study.AddMeasurement("A", 12m);
+        study.AddMeasurement("B", 14m);
+        study.AddMeasurement("B", 16m);
+
+        study.Calculate();
+
+        study.ReproducibilitySd.Should().BeNull();
+        study.MeetsReproducibilityClaim.Should().BeNull();
+        study.ReproducibilityVerificationLimitCvPct.Should().BeLessThan(study.WithinLabCvPct!.Value);
+        study.WithinLabConsistentWithReproducibilityClaim.Should().BeFalse();
+    }
+
+    [Fact]
+    public void A_multi_site_study_labels_every_replicate_spans_two_sites_and_is_balanced()
+    {
+        var partly = TwoSitesTwoDays(reproducibilityClaim: null);
+        partly.AddMeasurement("R1", 18m, "D1", PrecisionConditions.None);
+        partly.Invoking(s => s.Calculate()).Should().Throw<DomainException>().Which.Code.Should().Be("PR-017");
+
+        var oneSite = New();
+        foreach (var (day, value) in new[] { ("D1", 10m), ("D1", 12m), ("D2", 14m), ("D2", 16m) })
+        {
+            oneSite.AddMeasurement("R1", value, day, PrecisionConditions.None, "Main lab");
+        }
+
+        oneSite.Invoking(s => s.Calculate()).Should().Throw<DomainException>().Which.Code.Should().Be("PR-018");
+
+        var unbalanced = TwoSitesTwoDays(reproducibilityClaim: null);
+        unbalanced.AddMeasurement("R1", 27m, "D3", PrecisionConditions.None, "Site B");
+        unbalanced.AddMeasurement("R1", 28m, "D3", PrecisionConditions.None, "Site B");
+        unbalanced.Invoking(s => s.Calculate()).Should().Throw<DomainException>().Which.Code.Should().Be("PR-014");
+    }
+
+    [Fact]
+    public void Equal_day_labels_at_different_sites_are_different_days()
+    {
+        var study = TwoSitesTwoDays(reproducibilityClaim: null);
+
+        var coverage = study.ConditionsCoverage();
+
+        coverage.Sites.Should().Be(2);
+        coverage.Days.Should().Be(4);
+        coverage.MeetsMultiSiteMinimumDesign.Should().BeFalse();
+        study.RunSummaries().Select(r => r.SiteLabel).Distinct().Should().BeEquivalentTo(["Site A", "Site B"]);
+    }
+
+    [Fact]
+    public void Three_sites_of_five_by_five_meet_the_EP05_multi_site_minimum()
+    {
+        var study = New();
+        foreach (var site in new[] { "S1", "S2", "S3" })
+        {
+            for (var day = 1; day <= 5; day++)
+            {
+                for (var rep = 1; rep <= 5; rep++)
+                {
+                    study.AddMeasurement("R1", 5m + day * 0.01m + rep * 0.001m, $"D{day}", PrecisionConditions.None, site);
+                }
+            }
+        }
+
+        study.ConditionsCoverage().MeetsMultiSiteMinimumDesign.Should().BeTrue();
+        study.Calculate();
+        study.Design.Should().Be(PrecisionDesign.SitesAndDays);
+        study.ReproducibilityDf.Should().BeGreaterThan(0m);
+    }
+
+    private static PrecisionStudy TwoSitesTwoDays(decimal? reproducibilityClaim)
+    {
+        var study = PrecisionStudy.Configure("PR-2026-0007", "Glucose", "mmol/L", "L1", null, null, null, 1, reproducibilityClaim);
+        foreach (var (site, day, value) in new[]
+                 {
+                     ("Site A", "D1", 10m), ("Site A", "D1", 12m), ("Site A", "D2", 14m), ("Site A", "D2", 16m),
+                     ("Site B", "D1", 20m), ("Site B", "D1", 22m), ("Site B", "D2", 24m), ("Site B", "D2", 26m),
+                 })
+        {
+            study.AddMeasurement("R1", value, day, PrecisionConditions.None, site);
+        }
+
+        return study;
+    }
 }

@@ -34,13 +34,14 @@ describe('PrecisionFacade', () => {
     const done = facade.createSeries({
       analyte: 'Glucose', unit: 'mmol/L',
       levels: [
-        { level: 'Low', claimedRepeatabilityCvPct: 2.5, claimedWithinLabCvPct: 4 },
-        { level: 'High', claimedRepeatabilityCvPct: null, claimedWithinLabCvPct: null },
+        { level: 'Low', claimedRepeatabilityCvPct: 2.5, claimedWithinLabCvPct: 4, claimedReproducibilityCvPct: 6 },
+        { level: 'High', claimedRepeatabilityCvPct: null, claimedWithinLabCvPct: null, claimedReproducibilityCvPct: null },
       ],
     });
 
     const post = http.expectOne(`${base}/series`);
     expect(post.request.body.levels.length).toBe(2);
+    expect(post.request.body.levels[0].claimedReproducibilityCvPct).toBe(6);
     post.flush({ seriesRef: 'PRS-2026-0001', studyIds: ['s1', 's2'] });
 
     await new Promise((r) => setTimeout(r));
@@ -63,6 +64,18 @@ describe('PrecisionFacade', () => {
     await done;
 
     expect(facade.selected()?.seriesRef).toBe('PRS-2026-0001');
+  });
+
+  it('sends the site label of a multi-site replicate', async () => {
+    const done = facade.addMeasurement('s1', { runLabel: 'R1', value: 5.4, dayLabel: 'D01', siteLabel: 'Branch B' });
+
+    const post = http.expectOne(`${base}/s1/measurements`);
+    expect(post.request.body).toEqual(jasmine.objectContaining({ siteLabel: 'Branch B', dayLabel: 'D01' }));
+    post.flush(null);
+
+    await new Promise((r) => setTimeout(r));
+    http.expectOne(`${base}/s1`).flush(detail);
+    await done;
   });
 
   it('surfaces the backend problem title when a design is partly day-labelled', async () => {

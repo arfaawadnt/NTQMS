@@ -64,10 +64,12 @@ public sealed class PrecisionStudyConstraintTests(RealPostgresFixture fx)
             await db.Database.ExecuteSqlRawAsync("ROLLBACK TO SAVEPOINT probe");
         }
 
-        // The legal shapes pass.
+        // The legal shapes pass — including the multi-site designs.
         await db.Database.ExecuteSqlRawAsync(
             "UPDATE qams.precision_study SET design = 'DaysAndRuns', series_ref = 'PRS-2026-0001', series_level_count = 2 WHERE id = {0}",
             study.Id);
+        await db.Database.ExecuteSqlRawAsync(
+            "UPDATE qams.precision_study SET design = 'SitesDaysAndRuns' WHERE id = {0}", study.Id);
 
         await tx.RollbackAsync();
     }

@@ -335,6 +335,7 @@ public sealed class PrecisionStudyConfiguration : IEntityTypeConfiguration<Preci
             m.HasKey("TenantId", "Id");
             m.Property(x => x.RunLabel).HasMaxLength(60);
             m.Property(x => x.DayLabel).HasMaxLength(60);
+            m.Property(x => x.SiteLabel).HasMaxLength(60);
             m.Property(x => x.Operator).HasMaxLength(100);
             m.Property(x => x.Instrument).HasMaxLength(100);
             m.Property(x => x.ReagentLot).HasMaxLength(60);

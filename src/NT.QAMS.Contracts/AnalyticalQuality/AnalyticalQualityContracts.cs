@@ -239,11 +239,13 @@ public sealed record UsePrecisionStudyRequest(Guid PrecisionStudyId);
 
 public sealed record CreatePrecisionStudyRequest(
     string Analyte, string Unit, string Level,
-    decimal? ClaimedRepeatabilityCvPct, decimal? ClaimedWithinLabCvPct);
+    decimal? ClaimedRepeatabilityCvPct, decimal? ClaimedWithinLabCvPct,
+    decimal? ClaimedReproducibilityCvPct = null);
 
 /// <summary>One level of a multi-level series, with that level's manufacturer claims.</summary>
 public sealed record PrecisionSeriesLevelRequest(
-    string Level, decimal? ClaimedRepeatabilityCvPct, decimal? ClaimedWithinLabCvPct);
+    string Level, decimal? ClaimedRepeatabilityCvPct, decimal? ClaimedWithinLabCvPct,
+    decimal? ClaimedReproducibilityCvPct = null);
 
 /// <summary>Creates one linked study per concentration level (EP05/EP15 call for ≥ 2 levels).</summary>
 public sealed record CreatePrecisionSeriesRequest(
@@ -252,19 +254,21 @@ public sealed record CreatePrecisionSeriesRequest(
 public sealed record PrecisionSeriesCreatedDto(string SeriesRef, IReadOnlyList<Guid> StudyIds);
 
 /// <summary>
-/// A replicate. <c>DayLabel</c> nests the run within a day (EP05 days × runs);
-/// the conditions record which intermediate-precision factors it spans.
+/// A replicate. <c>DayLabel</c> nests the run within a day (EP05 days × runs) and
+/// <c>SiteLabel</c> nests the day within a site (EP05 multi-site); the conditions
+/// record which intermediate-precision factors it spans.
 /// </summary>
 public sealed record AddPrecisionMeasurementRequest(
     string RunLabel, decimal Value, string? DayLabel = null,
     string? Operator = null, string? Instrument = null, string? ReagentLot = null,
-    string? CalibratorLot = null, DateOnly? MeasuredOn = null);
+    string? CalibratorLot = null, DateOnly? MeasuredOn = null, string? SiteLabel = null);
 
 public sealed record PrecisionMeasurementDto(
     Guid Id, string RunLabel, decimal Value, string? DayLabel,
-    string? Operator, string? Instrument, string? ReagentLot, string? CalibratorLot, DateOnly? MeasuredOn);
+    string? Operator, string? Instrument, string? ReagentLot, string? CalibratorLot, DateOnly? MeasuredOn,
+    string? SiteLabel);
 
-public sealed record PrecisionRunDto(string? DayLabel, string RunLabel, int ReplicateCount, decimal Mean);
+public sealed record PrecisionRunDto(string? DayLabel, string RunLabel, int ReplicateCount, decimal Mean, string? SiteLabel);
 
 public sealed record PrecisionListItemDto(
     Guid Id, string StudyRef, string Analyte, string Level, string State,
@@ -274,7 +278,8 @@ public sealed record PrecisionListItemDto(
 /// <summary>Distinct levels of each intermediate-precision factor the replicates span.</summary>
 public sealed record PrecisionCoverageDto(
     int Days, int Runs, int Operators, int Instruments, int ReagentLots, int CalibratorLots,
-    DateOnly? FirstMeasuredOn, DateOnly? LastMeasuredOn, bool MeetsEp15MinimumDesign);
+    DateOnly? FirstMeasuredOn, DateOnly? LastMeasuredOn, bool MeetsEp15MinimumDesign,
+    int Sites, bool MeetsMultiSiteMinimumDesign);
 
 /// <summary>Another level of the same series.</summary>
 public sealed record PrecisionSeriesMemberDto(
@@ -305,7 +310,13 @@ public sealed record PrecisionDetailDto(
     string? SeriesRef, int SeriesLevelCount,
     PrecisionCoverageDto Coverage,
     IReadOnlyList<PrecisionSeriesMemberDto> SeriesMembers,
-    IReadOnlyList<PrecisionPtContextDto> PtContext);
+    IReadOnlyList<PrecisionPtContextDto> PtContext,
+    decimal? ClaimedReproducibilityCvPct,
+    decimal? BetweenSiteSd, decimal? BetweenSiteCvPct,
+    decimal? ReproducibilitySd, decimal? ReproducibilityCvPct, decimal? ReproducibilityDf,
+    decimal? ReproducibilityCvLowerPct, decimal? ReproducibilityCvUpperPct,
+    decimal? ReproducibilityVerificationLimitCvPct,
+    bool? MeetsReproducibilityClaim, bool? WithinLabConsistentWithReproducibilityClaim);
 
 // ── PT/EQA Annual Plan (ISO 17025 §7.7.2) ───────────────────────────────────
 

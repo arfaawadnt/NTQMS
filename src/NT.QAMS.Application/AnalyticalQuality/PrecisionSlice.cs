@@ -14,7 +14,8 @@ namespace NT.QAMS.Application.AnalyticalQuality;
 [RequireInternalActor]
 public sealed record CreatePrecisionStudyCommand(
     string Analyte, string Unit, string Level,
-    decimal? ClaimedRepeatabilityCvPct, decimal? ClaimedWithinLabCvPct) : ICommand<Guid>;
+    decimal? ClaimedRepeatabilityCvPct, decimal? ClaimedWithinLabCvPct,
+    decimal? ClaimedReproducibilityCvPct = null) : ICommand<Guid>;
 
 public sealed class CreatePrecisionStudyValidator : AbstractValidator<CreatePrecisionStudyCommand>
 {
@@ -36,7 +37,8 @@ public sealed class CreatePrecisionStudyHandler(
             ?? throw new DomainException("TENANT-000", "A tenant context is required.");
         var studyRef = await refs.NextAsync(tenantId, PrecisionRefs.Study, ct);
         var study = PrecisionStudy.Configure(
-            studyRef, c.Analyte, c.Unit, c.Level, c.ClaimedRepeatabilityCvPct, c.ClaimedWithinLabCvPct);
+            studyRef, c.Analyte, c.Unit, c.Level, c.ClaimedRepeatabilityCvPct, c.ClaimedWithinLabCvPct,
+            null, 1, c.ClaimedReproducibilityCvPct);
         db.PrecisionStudies.Add(study);
         await db.SaveChangesAsync(ct);
         return study.Id;
@@ -70,6 +72,7 @@ public sealed class CreatePrecisionSeriesValidator : AbstractValidator<CreatePre
             level.RuleFor(l => l.Level).NotEmpty().MaximumLength(100);
             level.RuleFor(l => l.ClaimedRepeatabilityCvPct).GreaterThan(0).When(l => l.ClaimedRepeatabilityCvPct is not null);
             level.RuleFor(l => l.ClaimedWithinLabCvPct).GreaterThan(0).When(l => l.ClaimedWithinLabCvPct is not null);
+            level.RuleFor(l => l.ClaimedReproducibilityCvPct).GreaterThan(0).When(l => l.ClaimedReproducibilityCvPct is not null);
         });
     }
 }
@@ -91,7 +94,7 @@ public sealed class CreatePrecisionSeriesHandler(
             var study = PrecisionStudy.Configure(
                 studyRef, c.Analyte, c.Unit, level.Level,
                 level.ClaimedRepeatabilityCvPct, level.ClaimedWithinLabCvPct,
-                seriesRef, c.Levels.Count);
+                seriesRef, c.Levels.Count, level.ClaimedReproducibilityCvPct);
             db.PrecisionStudies.Add(study);
             ids.Add(study.Id);
         }
@@ -105,7 +108,7 @@ public sealed class CreatePrecisionSeriesHandler(
 public sealed record AddPrecisionMeasurementCommand(
     Guid StudyId, string RunLabel, decimal Value, string? DayLabel = null,
     string? Operator = null, string? Instrument = null, string? ReagentLot = null,
-    string? CalibratorLot = null, DateOnly? MeasuredOn = null) : ICommand<Guid>;
+    string? CalibratorLot = null, DateOnly? MeasuredOn = null, string? SiteLabel = null) : ICommand<Guid>;
 
 public sealed class AddPrecisionMeasurementValidator : AbstractValidator<AddPrecisionMeasurementCommand>
 {
@@ -113,6 +116,7 @@ public sealed class AddPrecisionMeasurementValidator : AbstractValidator<AddPrec
     {
         RuleFor(x => x.RunLabel).NotEmpty().MaximumLength(PrecisionLimits.Label);
         RuleFor(x => x.DayLabel).MaximumLength(PrecisionLimits.Label);
+        RuleFor(x => x.SiteLabel).MaximumLength(PrecisionLimits.Label);
         RuleFor(x => x.Operator).MaximumLength(PrecisionLimits.Condition);
         RuleFor(x => x.Instrument).MaximumLength(PrecisionLimits.Condition);
         RuleFor(x => x.ReagentLot).MaximumLength(PrecisionLimits.Lot);
@@ -140,7 +144,8 @@ public sealed class PrecisionWorkflowHandlers(
         var study = await LoadAsync(c.StudyId, ct);
         var id = study.AddMeasurement(
             c.RunLabel, c.Value, c.DayLabel,
-            new PrecisionConditions(c.Operator, c.Instrument, c.ReagentLot, c.CalibratorLot, c.MeasuredOn));
+            new PrecisionConditions(c.Operator, c.Instrument, c.ReagentLot, c.CalibratorLot, c.MeasuredOn),
+            c.SiteLabel);
         await db.SaveChangesAsync(ct);
         return id;
     }
@@ -227,7 +232,8 @@ public sealed class ImportPrecisionMeasurementsHandler(IAppDbContext db)
             {
                 study.AddMeasurement(
                     row.RunLabel, row.Value, row.DayLabel,
-                    new PrecisionConditions(row.Operator, row.Instrument, row.ReagentLot, row.CalibratorLot, row.MeasuredOn));
+                    new PrecisionConditions(row.Operator, row.Instrument, row.ReagentLot, row.CalibratorLot, row.MeasuredOn),
+                    row.SiteLabel);
                 imported++;
             }
             catch (DomainException ex)
@@ -261,8 +267,8 @@ internal static class PrecisionLimits
 
     /// <summary>The first bound an imported row breaks, or null when it fits.</summary>
     public static string? Violation(AddPrecisionMeasurementRequest row) =>
-        (row.RunLabel?.Length ?? 0) > Label || (row.DayLabel?.Length ?? 0) > Label
-            ? $"Run and day labels are limited to {Label} characters."
+        (row.RunLabel?.Length ?? 0) > Label || (row.DayLabel?.Length ?? 0) > Label || (row.SiteLabel?.Length ?? 0) > Label
+            ? $"Site, day and run labels are limited to {Label} characters."
             : (row.Operator?.Length ?? 0) > Condition || (row.Instrument?.Length ?? 0) > Condition
                 ? $"Operator and instrument are limited to {Condition} characters."
                 : (row.ReagentLot?.Length ?? 0) > Lot || (row.CalibratorLot?.Length ?? 0) > Lot
@@ -358,13 +364,14 @@ public sealed class GetPrecisionStudyByIdHandler(IAppDbContext db)
             s.WithinLabSd, s.WithinLabCvPct, s.MeetsRepeatabilityClaim, s.MeetsWithinLabClaim,
             s.SignedOffBy, s.SignedOffAtUtc,
             s.Measurements
-                .OrderBy(m => m.DayLabel, StringComparer.Ordinal)
+                .OrderBy(m => m.SiteLabel, StringComparer.Ordinal)
+                .ThenBy(m => m.DayLabel, StringComparer.Ordinal)
                 .ThenBy(m => m.RunLabel, StringComparer.Ordinal)
                 .Select(m => new PrecisionMeasurementDto(
                     m.Id, m.RunLabel, m.Value, m.DayLabel,
-                    m.Operator, m.Instrument, m.ReagentLot, m.CalibratorLot, m.MeasuredOn))
+                    m.Operator, m.Instrument, m.ReagentLot, m.CalibratorLot, m.MeasuredOn, m.SiteLabel))
                 .ToList(),
-            s.RunSummaries().Select(r => new PrecisionRunDto(r.DayLabel, r.RunLabel, r.ReplicateCount, r.Mean)).ToList(),
+            s.RunSummaries().Select(r => new PrecisionRunDto(r.DayLabel, r.RunLabel, r.ReplicateCount, r.Mean, r.SiteLabel)).ToList(),
             s.Design?.ToString(), s.BetweenDaySd, s.BetweenDayCvPct,
             s.RepeatabilityDf, s.RepeatabilityCvLowerPct, s.RepeatabilityCvUpperPct,
             s.WithinLabDf, s.WithinLabCvLowerPct, s.WithinLabCvUpperPct,
@@ -373,7 +380,8 @@ public sealed class GetPrecisionStudyByIdHandler(IAppDbContext db)
             new PrecisionCoverageDto(
                 coverage.Days, coverage.Runs, coverage.Operators, coverage.Instruments,
                 coverage.ReagentLots, coverage.CalibratorLots,
-                coverage.FirstMeasuredOn, coverage.LastMeasuredOn, coverage.MeetsEp15MinimumDesign),
+                coverage.FirstMeasuredOn, coverage.LastMeasuredOn, coverage.MeetsEp15MinimumDesign,
+                coverage.Sites, coverage.MeetsMultiSiteMinimumDesign),
             members,
             pt.Select(p => new PrecisionPtContextDto(
                     p.Id, p.PtRef, p.Scheme, p.Cycle, p.AssignedValue!.Value, p.StandardDeviation!.Value,
@@ -381,6 +389,12 @@ public sealed class GetPrecisionStudyByIdHandler(IAppDbContext db)
                         ? null
                         : Math.Round(p.StandardDeviation!.Value / Math.Abs(p.AssignedValue!.Value) * 100m, 2),
                     p.ZScore))
-                .ToList());
+                .ToList(),
+            s.ClaimedReproducibilityCvPct,
+            s.BetweenSiteSd, s.BetweenSiteCvPct,
+            s.ReproducibilitySd, s.ReproducibilityCvPct, s.ReproducibilityDf,
+            s.ReproducibilityCvLowerPct, s.ReproducibilityCvUpperPct,
+            s.ReproducibilityVerificationLimitCvPct,
+            s.MeetsReproducibilityClaim, s.WithinLabConsistentWithReproducibilityClaim);
     }
 }

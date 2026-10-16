@@ -2017,7 +2017,8 @@ export interface CreateSigmaAssessmentRequest {
 // ── Precision Study (CLSI EP05 / EP15) ──────────────────────────────────────
 
 /** How the replicates were laid out — resolved by the backend at Calculate. */
-export type PrecisionDesign = 'RunsOnly' | 'DaysOnly' | 'DaysAndRuns';
+export type PrecisionDesign =
+  'RunsOnly' | 'DaysOnly' | 'DaysAndRuns' | 'SitesAndRuns' | 'SitesAndDays' | 'SitesDaysAndRuns';
 
 export interface PrecisionMeasurement {
   id: string;
@@ -2030,6 +2031,8 @@ export interface PrecisionMeasurement {
   calibratorLot: string | null;
   /** ISO date (yyyy-MM-dd). */
   measuredOn: string | null;
+  /** The site (laboratory) of a multi-site study; null for a single site. */
+  siteLabel: string | null;
 }
 
 /** A replicate as entered or imported; only run label and value are required. */
@@ -2042,9 +2045,11 @@ export interface AddPrecisionMeasurementRequest {
   reagentLot?: string | null;
   calibratorLot?: string | null;
   measuredOn?: string | null;
+  siteLabel?: string | null;
 }
 
 export interface PrecisionRun {
+  siteLabel: string | null;
   dayLabel: string | null;
   runLabel: string;
   replicateCount: number;
@@ -2075,6 +2080,9 @@ export interface PrecisionCoverage {
   firstMeasuredOn: string | null;
   lastMeasuredOn: string | null;
   meetsEp15MinimumDesign: boolean;
+  sites: number;
+  /** EP05-A3 multi-site minimum: ≥ 3 sites, each ≥ 5 days or runs and ≥ 25 results. */
+  meetsMultiSiteMinimumDesign: boolean;
 }
 
 export interface PrecisionSeriesMember {
@@ -2101,6 +2109,7 @@ export interface PrecisionSeriesLevelRequest {
   level: string;
   claimedRepeatabilityCvPct: number | null;
   claimedWithinLabCvPct: number | null;
+  claimedReproducibilityCvPct: number | null;
 }
 
 export interface CreatePrecisionSeriesRequest {
@@ -2152,6 +2161,22 @@ export interface PrecisionDetail {
   coverage: PrecisionCoverage;
   seriesMembers: PrecisionSeriesMember[];
   ptContext: PrecisionPtContext[];
+  /** Manufacturer reproducibility claim (between-laboratory CV%). */
+  claimedReproducibilityCvPct: number | null;
+  /** Between-site component — multi-site studies only. */
+  betweenSiteSd: number | null;
+  betweenSiteCvPct: number | null;
+  /** Reproducibility S_R = within-lab + between-site — multi-site studies only. */
+  reproducibilitySd: number | null;
+  reproducibilityCvPct: number | null;
+  reproducibilityDf: number | null;
+  reproducibilityCvLowerPct: number | null;
+  reproducibilityCvUpperPct: number | null;
+  reproducibilityVerificationLimitCvPct: number | null;
+  /** Multi-site: reproducibility CV within the claim's UVL. */
+  meetsReproducibilityClaim: boolean | null;
+  /** Single site: within-lab CV within the reproducibility claim's UVL. */
+  withinLabConsistentWithReproducibilityClaim: boolean | null;
 }
 
 export interface CreatePrecisionStudyRequest {
@@ -2160,6 +2185,7 @@ export interface CreatePrecisionStudyRequest {
   level: string;
   claimedRepeatabilityCvPct: number | null;
   claimedWithinLabCvPct: number | null;
+  claimedReproducibilityCvPct: number | null;
 }
 
 // ── Outlier Detection & Normalisation (Tukey + modified-z) ──────────────────

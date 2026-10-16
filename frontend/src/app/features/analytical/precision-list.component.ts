@@ -17,6 +17,7 @@ type LevelForm = FormGroup<{
   level: FormControl<string>;
   claimedRepeatabilityCvPct: FormControl<number | null>;
   claimedWithinLabCvPct: FormControl<number | null>;
+  claimedReproducibilityCvPct: FormControl<number | null>;
 }>;
 
 /**
@@ -61,6 +62,7 @@ type LevelForm = FormGroup<{
               <input formControlName="level" [placeholder]="i18n.t('prc.levelHint')" [attr.aria-label]="i18n.t('mu.level')" />
               <input type="number" step="any" formControlName="claimedRepeatabilityCvPct" [placeholder]="i18n.t('prc.claimedRep')" [attr.aria-label]="i18n.t('prc.claimedRep')" />
               <input type="number" step="any" formControlName="claimedWithinLabCvPct" [placeholder]="i18n.t('prc.claimedWl')" [attr.aria-label]="i18n.t('prc.claimedWl')" />
+              <input type="number" step="any" formControlName="claimedReproducibilityCvPct" [placeholder]="i18n.t('prc.claimedRepro')" [attr.aria-label]="i18n.t('prc.claimedRepro')" />
               @if (levels.length > 1) {
                 <button type="button" class="link" (click)="removeLevel(i)" [attr.aria-label]="i18n.t('prc.removeLevel')">✕</button>
               }
@@ -124,7 +126,7 @@ type LevelForm = FormGroup<{
     .clickable { cursor: pointer; }
     button, select { width: auto; }
     fieldset { border: 1px solid var(--nt-border); border-radius: 6px; padding: .5rem .75rem; margin-top: .75rem; }
-    .level { display: grid; grid-template-columns: 1.4fr 1fr 1fr auto; gap: .4rem; margin-bottom: .4rem; align-items: center; }
+    .level { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr auto; gap: .4rem; margin-bottom: .4rem; align-items: center; }
     .series { display: block; font-size: .7rem; color: var(--nt-ink-neutral); }
   `]
 })
@@ -197,6 +199,7 @@ export class PrecisionListComponent implements OnInit {
       level: ['', [Validators.maxLength(100)]],
       claimedRepeatabilityCvPct: this.fb.control<number | null>(null, [Validators.min(0.0001)]),
       claimedWithinLabCvPct: this.fb.control<number | null>(null, [Validators.min(0.0001)]),
+      claimedReproducibilityCvPct: this.fb.control<number | null>(null, [Validators.min(0.0001)]),
     });
   }
 

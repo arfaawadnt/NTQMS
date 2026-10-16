@@ -1106,9 +1106,21 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                         .HasColumnType("numeric")
                         .HasColumnName("between_run_sd");
 
+                    b.Property<decimal?>("BetweenSiteCvPct")
+                        .HasColumnType("numeric")
+                        .HasColumnName("between_site_cv_pct");
+
+                    b.Property<decimal?>("BetweenSiteSd")
+                        .HasColumnType("numeric")
+                        .HasColumnName("between_site_sd");
+
                     b.Property<decimal?>("ClaimedRepeatabilityCvPct")
                         .HasColumnType("numeric")
                         .HasColumnName("claimed_repeatability_cv_pct");
+
+                    b.Property<decimal?>("ClaimedReproducibilityCvPct")
+                        .HasColumnType("numeric")
+                        .HasColumnName("claimed_reproducibility_cv_pct");
 
                     b.Property<decimal?>("ClaimedWithinLabCvPct")
                         .HasColumnType("numeric")
@@ -1144,6 +1156,10 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                     b.Property<bool?>("MeetsRepeatabilityClaim")
                         .HasColumnType("boolean")
                         .HasColumnName("meets_repeatability_claim");
+
+                    b.Property<bool?>("MeetsReproducibilityClaim")
+                        .HasColumnType("boolean")
+                        .HasColumnName("meets_reproducibility_claim");
 
                     b.Property<bool?>("MeetsWithinLabClaim")
                         .HasColumnType("boolean")
@@ -1181,6 +1197,30 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                         .HasColumnType("numeric")
                         .HasColumnName("repeatability_verification_limit_cv_pct");
 
+                    b.Property<decimal?>("ReproducibilityCvLowerPct")
+                        .HasColumnType("numeric")
+                        .HasColumnName("reproducibility_cv_lower_pct");
+
+                    b.Property<decimal?>("ReproducibilityCvPct")
+                        .HasColumnType("numeric")
+                        .HasColumnName("reproducibility_cv_pct");
+
+                    b.Property<decimal?>("ReproducibilityCvUpperPct")
+                        .HasColumnType("numeric")
+                        .HasColumnName("reproducibility_cv_upper_pct");
+
+                    b.Property<decimal?>("ReproducibilityDf")
+                        .HasColumnType("numeric")
+                        .HasColumnName("reproducibility_df");
+
+                    b.Property<decimal?>("ReproducibilitySd")
+                        .HasColumnType("numeric")
+                        .HasColumnName("reproducibility_sd");
+
+                    b.Property<decimal?>("ReproducibilityVerificationLimitCvPct")
+                        .HasColumnType("numeric")
+                        .HasColumnName("reproducibility_verification_limit_cv_pct");
+
                     b.Property<int>("SeriesLevelCount")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
@@ -1217,6 +1257,10 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)")
                         .HasColumnName("unit");
+
+                    b.Property<bool?>("WithinLabConsistentWithReproducibilityClaim")
+                        .HasColumnType("boolean")
+                        .HasColumnName("within_lab_consistent_with_reproducibility_claim");
 
                     b.Property<decimal?>("WithinLabCvLowerPct")
                         .HasColumnType("numeric")
@@ -8775,6 +8819,11 @@ namespace NT.QAMS.Infrastructure.Persistence.Migrations
                                 .HasMaxLength(60)
                                 .HasColumnType("character varying(60)")
                                 .HasColumnName("run_label");
+
+                            b1.Property<string>("SiteLabel")
+                                .HasMaxLength(60)
+                                .HasColumnType("character varying(60)")
+                                .HasColumnName("site_label");
 
                             b1.Property<decimal>("Value")
                                 .HasColumnType("numeric")
